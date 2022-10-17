@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:one_piece_battles_flutter/home_page.dart';
 import 'package:one_piece_battles_flutter/login_page.dart';
 import 'package:one_piece_battles_flutter/register_page.dart';
 
@@ -8,6 +9,7 @@ class RoutingConfig extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      initialRoute: '/login',
       onGenerateRoute: (settings) {
         if (settings.name == '/login') {
           return MaterialPageRoute(
@@ -16,6 +18,10 @@ class RoutingConfig extends StatelessWidget {
         if (settings.name == '/register') {
           return MaterialPageRoute(
               settings: settings, builder: (context) => const RegisterPage());
+        }
+        if (settings.name == '/') {
+          return MaterialPageRoute(
+              settings: settings, builder: (context) => const HomePage());
         }
         return MaterialPageRoute(
             settings: settings, builder: (context) => const LoginPage());

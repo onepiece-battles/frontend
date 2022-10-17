@@ -11,15 +11,15 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[300],
       appBar: AppBar(
         leading: IconButton(
           onPressed: () {
             Navigator.pop(context);
           },
-          icon: const Icon(Icons.arrow_back_ios),
+          icon: const Icon(Icons.arrow_back),
         ),
       ),
-      backgroundColor: Colors.blue,
     );
   }
 }
