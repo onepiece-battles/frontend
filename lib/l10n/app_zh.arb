@@ -1,0 +1,11 @@
+{
+  "helloWorld": "你好， 世界！",
+  "noAccount": "没有账户？",
+  "passWordHint": "请输入密码",
+  "passwordLable": "密码",
+  "registerAccount": "现在注册！",
+  "signIn": "登录",
+  "userNameHint": "用户名或邮箱",
+  "userNameLable": "用户名",
+  "welcome": "欢迎光临海贼王！"
+}

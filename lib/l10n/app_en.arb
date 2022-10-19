@@ -1,0 +1,11 @@
+{
+  "helloWorld": "Hello World!",
+  "noAccount": "Don't have an account?",
+  "passWordHint": "Your password",
+  "passwordLable": "Password",
+  "registerAccount": "Register Now！",
+  "signIn": "Sign In",
+  "userNameHint": "Username or Email",
+  "userNameLable": "Username",
+  "welcome": "Welcome to OnePiece!"
+}
