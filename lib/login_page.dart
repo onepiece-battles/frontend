@@ -15,13 +15,14 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   var _tabTextIndexSelected = 1;
+  bool _isHidden = true;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.grey[300],
-        body: SafeArea(
-            child: Column(
+      backgroundColor: Colors.grey[300],
+      body: SafeArea(
+        child: Column(
           children: [
             Align(
               alignment: Alignment.topRight,
@@ -69,12 +70,15 @@ class _LoginPageState extends State<LoginPage> {
               image: AssetImage(Constants.loginLuffyImage),
             ),
             const SizedBox(height: 12),
-            Text(
-              AppLocalizations.of(context)!.welcome,
-              style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 24,
-                  color: Colors.blue),
+            SizedBox(
+              height: 40,
+              child: Text(
+                AppLocalizations.of(context)!.welcome,
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 24,
+                    color: Colors.blue),
+              ),
             ),
             const SizedBox(height: 120),
             SizedBox(
@@ -89,12 +93,24 @@ class _LoginPageState extends State<LoginPage> {
             ),
             SizedBox(
               width: 300,
-              child: TextField(
-                autofocus: true,
+              child: TextFormField(
+                keyboardType: TextInputType.text,
+                obscureText: _isHidden,
                 decoration: InputDecoration(
                     labelText: AppLocalizations.of(context)?.passwordLable,
                     hintText: AppLocalizations.of(context)?.passWordHint,
-                    prefixIcon: const Icon(Icons.lock)),
+                    prefixIcon: const Icon(Icons.lock),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _isHidden ? Icons.visibility_off : Icons.visibility,
+                        color: Theme.of(context).primaryColorDark,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _isHidden = !_isHidden;
+                        });
+                      },
+                    )),
               ),
             ),
             const SizedBox(height: 10),
@@ -122,19 +138,22 @@ class _LoginPageState extends State<LoginPage> {
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 TextButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/register');
-                    },
-                    child: Text(
-                      AppLocalizations.of(context)!.registerAccount,
-                      style: const TextStyle(
-                          color: Colors.blue,
-                          fontWeight: FontWeight.bold,
-                          fontStyle: FontStyle.italic),
-                    ))
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/register');
+                  },
+                  child: Text(
+                    AppLocalizations.of(context)!.registerAccount,
+                    style: const TextStyle(
+                        color: Colors.blue,
+                        fontWeight: FontWeight.bold,
+                        fontStyle: FontStyle.italic),
+                  ),
+                )
               ],
             )
           ],
-        )));
+        ),
+      ),
+    );
   }
 }
