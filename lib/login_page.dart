@@ -129,13 +129,14 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
             ),
-            const SizedBox(height: 25),
+            const SizedBox(height: 5),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
                   AppLocalizations.of(context)!.noAccount,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 12, fontWeight: FontWeight.bold),
                 ),
                 TextButton(
                   onPressed: () {
@@ -145,6 +146,7 @@ class _LoginPageState extends State<LoginPage> {
                     AppLocalizations.of(context)!.registerAccount,
                     style: const TextStyle(
                         color: Colors.blue,
+                        fontSize: 12,
                         fontWeight: FontWeight.bold,
                         fontStyle: FontStyle.italic),
                   ),

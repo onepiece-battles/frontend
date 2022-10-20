@@ -1,10 +1,17 @@
 {
+  "accountCheck": "Already have an account?",
+  "backToRegister": "Back to register page",
   "helloWorld": "Hello World!",
   "noAccount": "Don't have an account?",
   "passWordHint": "Your password",
   "passwordLable": "Password",
   "registerAccount": "Register Now！",
+  "registerPasswordHint": "New password",
+  "registerPasswordHint2": "Your password again",
+  "registerUserNameHint": "Please choose your nick name",
   "signIn": "Sign In",
+  "signUp": "Sign up",
+  "signUpHeadLine": "Create a free account right now!",
   "userNameHint": "Username or Email",
   "userNameLable": "Username",
   "welcome": "Welcome to OnePiece!"

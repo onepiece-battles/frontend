@@ -12,6 +12,7 @@ class Constants extends InheritedWidget {
 
   // PATH
   static const String loginLuffyImage = 'images/luffy-flag/luffy-flag-2.png';
+  static const String registerLuffyImagePath = 'images/luffy-head/luffy.png';
 
   static Constants? of(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<Constants>();

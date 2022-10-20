@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:one_piece_battles_flutter/constants.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -8,18 +10,135 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
+  bool _isPasswordHidden = true;
+  bool _isConfirmedPasswordHidden = true;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[300],
-      appBar: AppBar(
-        leading: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          icon: const Icon(Icons.arrow_back),
-        ),
-      ),
+      backgroundColor: Colors.blue,
+      body: SafeArea(
+          child: Padding(
+              padding: const EdgeInsets.fromLTRB(130, 150, 130, 60),
+              child: ColoredBox(
+                color: const Color.fromARGB(255, 163, 207, 243),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const SizedBox(
+                      height: 100,
+                    ),
+                    Text(
+                      AppLocalizations.of(context)!.signUpHeadLine,
+                      style: const TextStyle(
+                          color: Colors.blue,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(
+                      height: 100,
+                    ),
+                    SizedBox(
+                      width: 300,
+                      child: TextField(
+                        autofocus: true,
+                        decoration: InputDecoration(
+                          hintText: AppLocalizations.of(context)?.userNameHint,
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 300,
+                      child: TextFormField(
+                        keyboardType: TextInputType.text,
+                        obscureText: _isPasswordHidden,
+                        decoration: InputDecoration(
+                            hintText: AppLocalizations.of(context)
+                                ?.registerPasswordHint,
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _isPasswordHidden
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                                color: Theme.of(context).primaryColorDark,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _isPasswordHidden = !_isPasswordHidden;
+                                });
+                              },
+                            )),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 300,
+                      child: TextFormField(
+                        keyboardType: TextInputType.text,
+                        obscureText: _isConfirmedPasswordHidden,
+                        decoration: InputDecoration(
+                            hintText: AppLocalizations.of(context)
+                                ?.registerPasswordHint2,
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _isConfirmedPasswordHidden
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                                color: Theme.of(context).primaryColorDark,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _isConfirmedPasswordHidden =
+                                      !_isConfirmedPasswordHidden;
+                                });
+                              },
+                            )),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    SizedBox(
+                      width: 300,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/');
+                        },
+                        child: Text(
+                          AppLocalizations.of(context)!.signUp,
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 17),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          AppLocalizations.of(context)!.accountCheck,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 12),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/login');
+                          },
+                          child: Text(
+                            AppLocalizations.of(context)!.backToRegister,
+                            style: const TextStyle(
+                                color: Colors.blue,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                fontStyle: FontStyle.italic),
+                          ),
+                        )
+                      ],
+                    ),
+                    const SizedBox(height: 30),
+                  ],
+                ),
+              ))),
     );
   }
 }
