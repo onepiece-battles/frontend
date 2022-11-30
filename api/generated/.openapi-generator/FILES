@@ -20,6 +20,7 @@ doc/Fruit.md
 doc/FruitApi.md
 doc/FruitInCharacter.md
 doc/FruitType.md
+doc/I18nText.md
 doc/ListCharacterRequest.md
 doc/ListCharacterResponse.md
 doc/ListFruitRequest.md
@@ -62,6 +63,7 @@ lib/src/model/eat_fruit_response.dart
 lib/src/model/fruit.dart
 lib/src/model/fruit_in_character.dart
 lib/src/model/fruit_type.dart
+lib/src/model/i18n_text.dart
 lib/src/model/list_character_request.dart
 lib/src/model/list_character_response.dart
 lib/src/model/list_fruit_request.dart
@@ -96,6 +98,7 @@ test/fruit_api_test.dart
 test/fruit_in_character_test.dart
 test/fruit_test.dart
 test/fruit_type_test.dart
+test/i18n_text_test.dart
 test/list_character_request_test.dart
 test/list_character_response_test.dart
 test/list_fruit_request_test.dart

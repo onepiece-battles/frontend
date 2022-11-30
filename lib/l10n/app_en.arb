@@ -1,8 +1,11 @@
 {
   "accountCheck": "Already have an account?",
   "backToRegister": "Back to register page",
+  "emailAddress": "Your email address ",
   "helloWorld": "Hello World!",
   "noAccount": "Don't have an account?",
+  "onButton": "OK",
+  "organization": "Your organization",
   "passWordHint": "Your password",
   "passwordLable": "Password",
   "registerAccount": "Register Now！",
@@ -12,7 +15,7 @@
   "signIn": "Sign In",
   "signUp": "Sign up",
   "signUpHeadLine": "Create a free account right now!",
-  "userNameHint": "Username or Email",
+  "userNameHint": "Username",
   "userNameLable": "Username",
   "welcome": "Welcome to OnePiece!"
 }

@@ -13,8 +13,7 @@ void main() {
       // TODO
     });
 
-    // OK if successfully registered, otherwise explain why register failed.
-    // String verification
+    // I18nText verification
     test('to test the property `verification`', () async {
       // TODO
     });

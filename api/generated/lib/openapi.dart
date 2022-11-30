@@ -28,6 +28,7 @@ export 'package:openapi/src/model/eat_fruit_response.dart';
 export 'package:openapi/src/model/fruit.dart';
 export 'package:openapi/src/model/fruit_in_character.dart';
 export 'package:openapi/src/model/fruit_type.dart';
+export 'package:openapi/src/model/i18n_text.dart';
 export 'package:openapi/src/model/list_character_request.dart';
 export 'package:openapi/src/model/list_character_response.dart';
 export 'package:openapi/src/model/list_fruit_request.dart';

@@ -2,6 +2,7 @@
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
 
+import 'package:openapi/src/model/i18n_text.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
 
@@ -11,15 +12,14 @@ part 'register_response.g.dart';
 ///
 /// Properties:
 /// * [registerResult] - Whether user has successfully registered into system.
-/// * [verification] - OK if successfully registered, otherwise explain why register failed.
+/// * [verification] 
 abstract class RegisterResponse implements Built<RegisterResponse, RegisterResponseBuilder> {
     /// Whether user has successfully registered into system.
     @BuiltValueField(wireName: r'register_result')
     bool get registerResult;
 
-    /// OK if successfully registered, otherwise explain why register failed.
     @BuiltValueField(wireName: r'verification')
-    String get verification;
+    I18nText? get verification;
 
     RegisterResponse._();
 
@@ -47,10 +47,12 @@ class _$RegisterResponseSerializer implements StructuredSerializer<RegisterRespo
             ..add(r'register_result')
             ..add(serializers.serialize(object.registerResult,
                 specifiedType: const FullType(bool)));
-        result
-            ..add(r'verification')
-            ..add(serializers.serialize(object.verification,
-                specifiedType: const FullType(String)));
+        if (object.verification != null) {
+            result
+                ..add(r'verification')
+                ..add(serializers.serialize(object.verification,
+                    specifiedType: const FullType(I18nText)));
+        }
         return result;
     }
 
@@ -73,8 +75,8 @@ class _$RegisterResponseSerializer implements StructuredSerializer<RegisterRespo
                     break;
                 case r'verification':
                     final valueDes = serializers.deserialize(value,
-                        specifiedType: const FullType(String)) as String;
-                    result.verification = valueDes;
+                        specifiedType: const FullType(I18nText)) as I18nText;
+                    result.verification.replace(valueDes);
                     break;
             }
         }

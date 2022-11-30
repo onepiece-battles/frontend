@@ -12,7 +12,7 @@ void main() {
       // TODO
     });
 
-    // String verification
+    // I18nText verification
     test('to test the property `verification`', () async {
       // TODO
     });

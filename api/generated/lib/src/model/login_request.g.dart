@@ -10,7 +10,7 @@ class _$LoginRequest extends LoginRequest {
   @override
   final String userName;
   @override
-  final String? email;
+  final String email;
   @override
   final String? organization;
   @override
@@ -21,11 +21,12 @@ class _$LoginRequest extends LoginRequest {
 
   _$LoginRequest._(
       {required this.userName,
-      this.email,
+      required this.email,
       this.organization,
       required this.password})
       : super._() {
     BuiltValueNullFieldError.checkNotNull(userName, 'LoginRequest', 'userName');
+    BuiltValueNullFieldError.checkNotNull(email, 'LoginRequest', 'email');
     BuiltValueNullFieldError.checkNotNull(password, 'LoginRequest', 'password');
   }
 
@@ -118,7 +119,8 @@ class LoginRequestBuilder
         new _$LoginRequest._(
             userName: BuiltValueNullFieldError.checkNotNull(
                 userName, 'LoginRequest', 'userName'),
-            email: email,
+            email: BuiltValueNullFieldError.checkNotNull(
+                email, 'LoginRequest', 'email'),
             organization: organization,
             password: BuiltValueNullFieldError.checkNotNull(
                 password, 'LoginRequest', 'password'));

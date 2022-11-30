@@ -95,6 +95,7 @@ Class | Method | HTTP request | Description
  - [Fruit](doc\Fruit.md)
  - [FruitInCharacter](doc\FruitInCharacter.md)
  - [FruitType](doc\FruitType.md)
+ - [I18nText](doc\I18nText.md)
  - [ListCharacterRequest](doc\ListCharacterRequest.md)
  - [ListCharacterResponse](doc\ListCharacterResponse.md)
  - [ListFruitRequest](doc\ListFruitRequest.md)

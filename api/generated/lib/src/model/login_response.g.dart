@@ -10,7 +10,7 @@ class _$LoginResponse extends LoginResponse {
   @override
   final UserInfo? userInfo;
   @override
-  final String? verification;
+  final I18nText? verification;
 
   factory _$LoginResponse([void Function(LoginResponseBuilder)? updates]) =>
       (new LoginResponseBuilder()..update(updates)).build();
@@ -54,9 +54,11 @@ class LoginResponseBuilder
   UserInfoBuilder get userInfo => _$this._userInfo ??= new UserInfoBuilder();
   set userInfo(UserInfoBuilder? userInfo) => _$this._userInfo = userInfo;
 
-  String? _verification;
-  String? get verification => _$this._verification;
-  set verification(String? verification) => _$this._verification = verification;
+  I18nTextBuilder? _verification;
+  I18nTextBuilder get verification =>
+      _$this._verification ??= new I18nTextBuilder();
+  set verification(I18nTextBuilder? verification) =>
+      _$this._verification = verification;
 
   LoginResponseBuilder() {
     LoginResponse._defaults(this);
@@ -66,7 +68,7 @@ class LoginResponseBuilder
     final $v = _$v;
     if ($v != null) {
       _userInfo = $v.userInfo?.toBuilder();
-      _verification = $v.verification;
+      _verification = $v.verification?.toBuilder();
       _$v = null;
     }
     return this;
@@ -89,12 +91,15 @@ class LoginResponseBuilder
     try {
       _$result = _$v ??
           new _$LoginResponse._(
-              userInfo: _userInfo?.build(), verification: verification);
+              userInfo: _userInfo?.build(),
+              verification: _verification?.build());
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'userInfo';
         _userInfo?.build();
+        _$failedField = 'verification';
+        _verification?.build();
       } catch (e) {
         throw new BuiltValueNestedFieldError(
             'LoginResponse', _$failedField, e.toString());

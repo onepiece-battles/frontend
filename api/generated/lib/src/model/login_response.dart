@@ -2,6 +2,7 @@
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
 
+import 'package:openapi/src/model/i18n_text.dart';
 import 'package:openapi/src/model/user_info.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
@@ -18,7 +19,7 @@ abstract class LoginResponse implements Built<LoginResponse, LoginResponseBuilde
     UserInfo? get userInfo;
 
     @BuiltValueField(wireName: r'verification')
-    String? get verification;
+    I18nText? get verification;
 
     LoginResponse._();
 
@@ -52,7 +53,7 @@ class _$LoginResponseSerializer implements StructuredSerializer<LoginResponse> {
             result
                 ..add(r'verification')
                 ..add(serializers.serialize(object.verification,
-                    specifiedType: const FullType(String)));
+                    specifiedType: const FullType(I18nText)));
         }
         return result;
     }
@@ -76,8 +77,8 @@ class _$LoginResponseSerializer implements StructuredSerializer<LoginResponse> {
                     break;
                 case r'verification':
                     final valueDes = serializers.deserialize(value,
-                        specifiedType: const FullType(String)) as String;
-                    result.verification = valueDes;
+                        specifiedType: const FullType(I18nText)) as I18nText;
+                    result.verification.replace(valueDes);
                     break;
             }
         }

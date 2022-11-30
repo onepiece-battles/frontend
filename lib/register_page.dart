@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:one_piece_battles_flutter/constants.dart';
+import 'package:one_piece_battles_flutter/main.dart';
+import 'package:one_piece_battles_flutter/repository/account_repository.dart';
+import 'package:one_piece_battles_flutter/utils/I18n_helper.dart';
+import 'package:openapi/openapi.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -10,8 +13,17 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
+  AccountRepository accountRepository = AccountRepository();
   bool _isPasswordHidden = true;
   bool _isConfirmedPasswordHidden = true;
+  bool _bottonEnabled = false;
+  String verificationMessage = "";
+  TextEditingController userNameController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  TextEditingController confirmedPasswordController = TextEditingController();
+  TextEditingController orgnizationController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,12 +46,23 @@ class _RegisterPageState extends State<RegisterPage> {
                           fontSize: 20,
                           fontWeight: FontWeight.bold),
                     ),
-                    const SizedBox(
-                      height: 100,
-                    ),
                     SizedBox(
                       width: 300,
                       child: TextField(
+                        onChanged: (value) {
+                          setState(() {
+                            if (userNameController.text != "" &&
+                                emailController.text != "" &&
+                                passwordController.text != "" &&
+                                confirmedPasswordController.text != "" &&
+                                orgnizationController.text != "") {
+                              _bottonEnabled = true;
+                            } else {
+                              _bottonEnabled = false;
+                            }
+                          });
+                        },
+                        controller: userNameController,
                         autofocus: true,
                         decoration: InputDecoration(
                           hintText: AppLocalizations.of(context)?.userNameHint,
@@ -48,7 +71,67 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                     SizedBox(
                       width: 300,
+                      child: TextField(
+                        onChanged: (value) {
+                          setState(() {
+                            if (userNameController.text != "" &&
+                                emailController.text != "" &&
+                                passwordController.text != "" &&
+                                confirmedPasswordController.text != "" &&
+                                orgnizationController.text != "") {
+                              _bottonEnabled = true;
+                            } else {
+                              _bottonEnabled = false;
+                            }
+                          });
+                        },
+                        autofocus: true,
+                        controller: emailController,
+                        decoration: InputDecoration(
+                          hintText: AppLocalizations.of(context)?.emailAddress,
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 300,
+                      child: TextField(
+                        onChanged: (value) {
+                          setState(() {
+                            if (userNameController.text != "" &&
+                                emailController.text != "" &&
+                                passwordController.text != "" &&
+                                confirmedPasswordController.text != "" &&
+                                orgnizationController.text != "") {
+                              _bottonEnabled = true;
+                            } else {
+                              _bottonEnabled = false;
+                            }
+                          });
+                        },
+                        autofocus: true,
+                        controller: orgnizationController,
+                        decoration: InputDecoration(
+                          hintText: AppLocalizations.of(context)?.organization,
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 300,
                       child: TextFormField(
+                        onChanged: (value) {
+                          setState(() {
+                            if (userNameController.text != "" &&
+                                emailController.text != "" &&
+                                passwordController.text != "" &&
+                                confirmedPasswordController.text != "" &&
+                                orgnizationController.text != "") {
+                              _bottonEnabled = true;
+                            } else {
+                              _bottonEnabled = false;
+                            }
+                          });
+                        },
+                        controller: passwordController,
                         keyboardType: TextInputType.text,
                         obscureText: _isPasswordHidden,
                         decoration: InputDecoration(
@@ -72,6 +155,20 @@ class _RegisterPageState extends State<RegisterPage> {
                     SizedBox(
                       width: 300,
                       child: TextFormField(
+                        onChanged: (value) {
+                          setState(() {
+                            if (userNameController.text != "" &&
+                                emailController.text != "" &&
+                                passwordController.text != "" &&
+                                confirmedPasswordController.text != "" &&
+                                orgnizationController.text != "") {
+                              _bottonEnabled = true;
+                            } else {
+                              _bottonEnabled = false;
+                            }
+                          });
+                        },
+                        controller: confirmedPasswordController,
                         keyboardType: TextInputType.text,
                         obscureText: _isConfirmedPasswordHidden,
                         decoration: InputDecoration(
@@ -93,15 +190,46 @@ class _RegisterPageState extends State<RegisterPage> {
                             )),
                       ),
                     ),
+                    Text(
+                      verificationMessage,
+                      style: const TextStyle(color: Colors.red, fontSize: 10),
+                    ),
                     const SizedBox(
                       height: 10,
                     ),
                     SizedBox(
                       width: 300,
                       child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.pushNamed(context, '/');
-                        },
+                        onPressed: !_bottonEnabled
+                            ? null
+                            : () {
+                                RegisterRequest request = RegisterRequest(
+                                    (builder) => builder
+                                      ..userName = userNameController.text
+                                      ..email = emailController.text
+                                      ..organization =
+                                          orgnizationController.text
+                                      ..password = passwordController.text
+                                      ..confirmedPassword =
+                                          confirmedPasswordController.text);
+                                Future<RegisterResponse> response =
+                                    accountRepository.register(request);
+                                response.then((value) => {
+                                      if (value.registerResult)
+                                        {Navigator.pushNamed(context, '/')}
+                                      else
+                                        {
+                                          setState(() {
+                                            Locale myLocale =
+                                                Localizations.localeOf(context);
+                                            verificationMessage =
+                                                I18nHelper.getI18nByLocale(
+                                                    value.verification,
+                                                    myLocale);
+                                          })
+                                        }
+                                    });
+                              },
                         child: Text(
                           AppLocalizations.of(context)!.signUp,
                           style: const TextStyle(

@@ -26,6 +26,7 @@ import 'package:openapi/src/model/eat_fruit_response.dart';
 import 'package:openapi/src/model/fruit.dart';
 import 'package:openapi/src/model/fruit_in_character.dart';
 import 'package:openapi/src/model/fruit_type.dart';
+import 'package:openapi/src/model/i18n_text.dart';
 import 'package:openapi/src/model/list_character_request.dart';
 import 'package:openapi/src/model/list_character_response.dart';
 import 'package:openapi/src/model/list_fruit_request.dart';
@@ -58,6 +59,7 @@ part 'serializers.g.dart';
   Fruit,
   FruitInCharacter,
   FruitType,
+  I18nText,
   ListCharacterRequest,
   ListCharacterResponse,
   ListFruitRequest,

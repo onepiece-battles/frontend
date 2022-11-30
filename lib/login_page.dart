@@ -3,6 +3,9 @@ import 'package:one_piece_battles_flutter/constants.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_toggle_tab/flutter_toggle_tab.dart';
 import 'package:one_piece_battles_flutter/main.dart';
+import 'package:one_piece_battles_flutter/repository/account_repository.dart';
+import 'package:one_piece_battles_flutter/utils/I18n_helper.dart';
+import 'package:openapi/openapi.dart';
 
 const locales = [Locale('en', 'US'), Locale('zh', 'CN')];
 
@@ -16,6 +19,13 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   var _tabTextIndexSelected = 1;
   bool _isHidden = true;
+  bool _bottonEnabled = false;
+  String verificationMessage = "";
+  I18nText? verificationI18n = I18nText();
+  AccountRepository accountRepository = AccountRepository();
+  TextEditingController userNameController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -47,6 +57,8 @@ class _LoginPageState extends State<LoginPage> {
                         locale = locales.last;
                       }
                       MyApp.setLocale(context, locale);
+                      verificationMessage =
+                          I18nHelper.getI18nByLocale(verificationI18n, locale);
                     });
                   },
                   selectedTextStyle: const TextStyle(
@@ -80,10 +92,22 @@ class _LoginPageState extends State<LoginPage> {
                     color: Colors.blue),
               ),
             ),
-            const SizedBox(height: 120),
+            const SizedBox(height: 90),
             SizedBox(
               width: 300,
               child: TextField(
+                onChanged: (value) {
+                  setState(() {
+                    if (userNameController.text != "" &&
+                        emailController.text != "" &&
+                        passwordController.text != "") {
+                      _bottonEnabled = true;
+                    } else {
+                      _bottonEnabled = false;
+                    }
+                  });
+                },
+                controller: userNameController,
                 autofocus: true,
                 decoration: InputDecoration(
                     labelText: AppLocalizations.of(context)?.userNameLable,
@@ -93,7 +117,41 @@ class _LoginPageState extends State<LoginPage> {
             ),
             SizedBox(
               width: 300,
+              child: TextField(
+                onChanged: (value) {
+                  setState(() {
+                    if (userNameController.text != "" &&
+                        emailController.text != "" &&
+                        passwordController.text != "") {
+                      _bottonEnabled = true;
+                    } else {
+                      _bottonEnabled = false;
+                    }
+                  });
+                },
+                controller: emailController,
+                autofocus: true,
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)?.emailAddress,
+                    hintText: AppLocalizations.of(context)?.emailAddress,
+                    prefixIcon: const Icon(Icons.email)),
+              ),
+            ),
+            SizedBox(
+              width: 300,
               child: TextFormField(
+                onChanged: (value) {
+                  setState(() {
+                    if (userNameController.text != "" &&
+                        emailController.text != "" &&
+                        passwordController.text != "") {
+                      _bottonEnabled = true;
+                    } else {
+                      _bottonEnabled = false;
+                    }
+                  });
+                },
+                controller: passwordController,
                 keyboardType: TextInputType.text,
                 obscureText: _isHidden,
                 decoration: InputDecoration(
@@ -113,13 +171,43 @@ class _LoginPageState extends State<LoginPage> {
                     )),
               ),
             ),
+            Text(
+              verificationMessage,
+              style: const TextStyle(color: Colors.red, fontSize: 10),
+            ),
             const SizedBox(height: 10),
             SizedBox(
               width: 300,
               child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/');
-                },
+                onPressed: !_bottonEnabled
+                    ? null
+                    : () {
+                        LoginRequest loginRequest = LoginRequest((builder) => {
+                              builder
+                                ..userName = userNameController.text
+                                ..email = emailController.text
+                                ..password = passwordController.text
+                            });
+
+                        Future<LoginResponse> loginResponse =
+                            accountRepository.login(loginRequest);
+
+                        loginResponse.then((value) => {
+                              if (value.verification == null)
+                                {Navigator.pushNamed(context, '/')}
+                              else
+                                {
+                                  setState(() {
+                                    verificationI18n = value.verification;
+                                    Locale myLocale =
+                                        Localizations.localeOf(context);
+                                    verificationMessage =
+                                        I18nHelper.getI18nByLocale(
+                                            verificationI18n, myLocale);
+                                  })
+                                }
+                            });
+                      },
                 child: Text(
                   AppLocalizations.of(context)!.signIn,
                   style: const TextStyle(

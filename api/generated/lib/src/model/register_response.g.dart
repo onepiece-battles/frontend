@@ -10,19 +10,16 @@ class _$RegisterResponse extends RegisterResponse {
   @override
   final bool registerResult;
   @override
-  final String verification;
+  final I18nText? verification;
 
   factory _$RegisterResponse(
           [void Function(RegisterResponseBuilder)? updates]) =>
       (new RegisterResponseBuilder()..update(updates)).build();
 
-  _$RegisterResponse._(
-      {required this.registerResult, required this.verification})
+  _$RegisterResponse._({required this.registerResult, this.verification})
       : super._() {
     BuiltValueNullFieldError.checkNotNull(
         registerResult, 'RegisterResponse', 'registerResult');
-    BuiltValueNullFieldError.checkNotNull(
-        verification, 'RegisterResponse', 'verification');
   }
 
   @override
@@ -64,9 +61,11 @@ class RegisterResponseBuilder
   set registerResult(bool? registerResult) =>
       _$this._registerResult = registerResult;
 
-  String? _verification;
-  String? get verification => _$this._verification;
-  set verification(String? verification) => _$this._verification = verification;
+  I18nTextBuilder? _verification;
+  I18nTextBuilder get verification =>
+      _$this._verification ??= new I18nTextBuilder();
+  set verification(I18nTextBuilder? verification) =>
+      _$this._verification = verification;
 
   RegisterResponseBuilder() {
     RegisterResponse._defaults(this);
@@ -76,7 +75,7 @@ class RegisterResponseBuilder
     final $v = _$v;
     if ($v != null) {
       _registerResult = $v.registerResult;
-      _verification = $v.verification;
+      _verification = $v.verification?.toBuilder();
       _$v = null;
     }
     return this;
@@ -95,12 +94,24 @@ class RegisterResponseBuilder
 
   @override
   _$RegisterResponse build() {
-    final _$result = _$v ??
-        new _$RegisterResponse._(
-            registerResult: BuiltValueNullFieldError.checkNotNull(
-                registerResult, 'RegisterResponse', 'registerResult'),
-            verification: BuiltValueNullFieldError.checkNotNull(
-                verification, 'RegisterResponse', 'verification'));
+    _$RegisterResponse _$result;
+    try {
+      _$result = _$v ??
+          new _$RegisterResponse._(
+              registerResult: BuiltValueNullFieldError.checkNotNull(
+                  registerResult, 'RegisterResponse', 'registerResult'),
+              verification: _verification?.build());
+    } catch (_) {
+      late String _$failedField;
+      try {
+        _$failedField = 'verification';
+        _verification?.build();
+      } catch (e) {
+        throw new BuiltValueNestedFieldError(
+            'RegisterResponse', _$failedField, e.toString());
+      }
+      rethrow;
+    }
     replace(_$result);
     return _$result;
   }

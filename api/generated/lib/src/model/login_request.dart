@@ -19,7 +19,7 @@ abstract class LoginRequest implements Built<LoginRequest, LoginRequestBuilder> 
     String get userName;
 
     @BuiltValueField(wireName: r'email')
-    String? get email;
+    String get email;
 
     @BuiltValueField(wireName: r'organization')
     String? get organization;
@@ -53,12 +53,10 @@ class _$LoginRequestSerializer implements StructuredSerializer<LoginRequest> {
             ..add(r'user_name')
             ..add(serializers.serialize(object.userName,
                 specifiedType: const FullType(String)));
-        if (object.email != null) {
-            result
-                ..add(r'email')
-                ..add(serializers.serialize(object.email,
-                    specifiedType: const FullType(String)));
-        }
+        result
+            ..add(r'email')
+            ..add(serializers.serialize(object.email,
+                specifiedType: const FullType(String)));
         if (object.organization != null) {
             result
                 ..add(r'organization')
