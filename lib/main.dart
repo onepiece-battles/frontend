@@ -17,11 +17,6 @@ class MyApp extends StatefulWidget {
     _MyAppState? state = context.findAncestorStateOfType<_MyAppState>();
     state?.setLocale(locale);
   }
-
-  static Locale? getLocale(BuildContext context) {
-    _MyAppState? state = context.findAncestorStateOfType<_MyAppState>();
-    return state?.getLocale();
-  }
 }
 
 class _MyAppState extends State<MyApp> {
@@ -31,10 +26,6 @@ class _MyAppState extends State<MyApp> {
     setState(() {
       _locale = locale;
     });
-  }
-
-  Locale? getLocale() {
-    return _locale;
   }
 
   @override
@@ -49,7 +40,7 @@ class _MyAppState extends State<MyApp> {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: const [Locale('en', 'US'), Locale('zh', 'CN')],
-      initialRoute: '/login',
+      initialRoute: '/',
       onGenerateRoute: MyRouter.generateRoute,
     );
   }
