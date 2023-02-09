@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:one_piece_battles_flutter/constants.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_toggle_tab/flutter_toggle_tab.dart';
+import 'package:one_piece_battles_flutter/constants/path_constants.dart';
 import 'package:one_piece_battles_flutter/main.dart';
 import 'package:one_piece_battles_flutter/repository/account_repository.dart';
 import 'package:one_piece_battles_flutter/utils/I18n_helper.dart';
@@ -79,7 +79,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
             const SizedBox(height: 50),
             const Image(
-              image: AssetImage(Constants.loginLuffyImage),
+              image: AssetImage(PathConstants.loginLuffyImage),
             ),
             const SizedBox(height: 12),
             SizedBox(
