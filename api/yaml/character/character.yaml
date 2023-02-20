@@ -169,31 +169,36 @@ schemas:
       fruit_limit:
         description: Maximum number of fruit this character can eat.
         type: integer
-        default: 1
         minimum: 1
+        maximum: 2
       group_gain:
         type: integer
         minimum: 1
         maximum: 5
-        default: 1.5
       attack:
         type: integer
-        minimum: 1
+        minimum: 10
+        maximum: 1000
       defense:
         type: integer
-        minimum: 1
+        minimum: 10
+        maximum: 1000
       intelligence:
         type: integer
-        minimum: 100
+        minimum: 70
+        maximum: 260
       blood:
         type: integer
-        minimum: 10
+        minimum: 100
+        maximum: 10000
       speed:
         type: integer
         minimum: 10
+        maximum: 200
       magic:
         type: integer
         minimum: 10
+        maximum: 50
 
   CharacterType:
     description: types that defines how character fight in battles.
@@ -203,8 +208,6 @@ schemas:
       - Foot
       - Shooter
       - Body
-      # shills are typically from fruits
-      - Skill
 
   CharacterTypeInfo:
     description: List of CharacterType above can not be serialize in Response body. Use a class to wrap it.
@@ -227,6 +230,7 @@ schemas:
       - blood
       - speed
       - magic
+      - character_types
     properties:
       character_types:
         description: type of fighting skills
@@ -241,31 +245,36 @@ schemas:
       fruit_limit:
         description: Maximum number of fruit this character can eat.
         type: integer
-        default: 1
         minimum: 1
+        maximum: 2
       group_gain:
         type: integer
         minimum: 1
         maximum: 5
-        default: 1.5
       attack:
         type: integer
-        minimum: 1
+        minimum: 10
+        maximum: 1000
       defense:
         type: integer
-        minimum: 1
+        minimum: 10
+        maximum: 1000
       intelligence:
         type: integer
-        minimum: 100
+        minimum: 70
+        maximum: 260
       blood:
         type: integer
-        minimum: 10
+        minimum: 100
+        maximum: 10000
       speed:
         type: integer
         minimum: 10
+        maximum: 200
       magic:
         type: integer
         minimum: 10
+        maximum: 50
 
   AddProfileResponse:
     type: object

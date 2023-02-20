@@ -77,8 +77,7 @@ abstract class Character implements Built<Character, CharacterBuilder> {
     Character._();
 
     @BuiltValueHook(initializeBuilder: true)
-    static void _defaults(CharacterBuilder b) => b
-        ..fruitLimit = 1;
+    static void _defaults(CharacterBuilder b) => b;
 
     factory Character([void updates(CharacterBuilder b)]) = _$Character;
 

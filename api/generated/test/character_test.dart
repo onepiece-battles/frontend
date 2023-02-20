@@ -41,7 +41,7 @@ void main() {
     });
 
     // Maximum number of fruit this character can eat.
-    // int fruitLimit (default value: 1)
+    // int fruitLimit
     test('to test the property `fruitLimit`', () async {
       // TODO
     });

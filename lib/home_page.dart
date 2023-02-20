@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:one_piece_battles_flutter/components/side_menu.dart';
 import 'package:one_piece_battles_flutter/utils/onepiece_colors.dart';
 
 class HomePage extends StatefulWidget {

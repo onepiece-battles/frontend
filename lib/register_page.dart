@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:one_piece_battles_flutter/main.dart';
 import 'package:one_piece_battles_flutter/repository/account_repository.dart';
 import 'package:one_piece_battles_flutter/utils/I18n_helper.dart';
 import 'package:openapi/openapi.dart';

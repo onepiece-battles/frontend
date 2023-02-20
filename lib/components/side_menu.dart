@@ -120,7 +120,7 @@ class _SideMenuState extends State<SideMenu> {
   }
 
   void route(int selectedIndex) {
-    if (DeviceType.DESKTOP != widget.deviceType) {
+    if (DeviceType.desktop != widget.deviceType) {
       Navigator.pop(context);
     }
     if (widget.pageController != null) {

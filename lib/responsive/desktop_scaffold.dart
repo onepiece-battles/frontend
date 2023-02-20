@@ -23,7 +23,7 @@ class _DesktopScaffoldState extends BaseView<DesktopScaffold> {
           SizedBox(
             width: 200,
             child: SideMenu(
-              deviceType: DeviceType.DESKTOP,
+              deviceType: DeviceType.desktop,
               pageController: pageController,
             ),
           ),
@@ -31,7 +31,7 @@ class _DesktopScaffoldState extends BaseView<DesktopScaffold> {
             child: PageView(
               controller: pageController,
               children: [
-                CharacterView(),
+                const CharacterView(),
                 Container(
                   color: Colors.blue,
                 ),
