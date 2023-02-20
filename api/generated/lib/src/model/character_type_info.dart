@@ -16,7 +16,7 @@ part 'character_type_info.g.dart';
 abstract class CharacterTypeInfo implements Built<CharacterTypeInfo, CharacterTypeInfoBuilder> {
     @BuiltValueField(wireName: r'type')
     CharacterType? get type;
-    // enum typeEnum {  Katana,  Fist,  Foot,  Shooter,  Body,  Skill,  };
+    // enum typeEnum {  Katana,  Fist,  Foot,  Shooter,  Body,  };
 
     @BuiltValueField(wireName: r'index')
     int? get index;

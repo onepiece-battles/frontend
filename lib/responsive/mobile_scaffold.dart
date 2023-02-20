@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:one_piece_battles_flutter/constants/component_constants.dart';
 import 'package:one_piece_battles_flutter/constants/device_type.dart';
 import 'package:one_piece_battles_flutter/responsive/base_view.dart';
@@ -20,7 +19,7 @@ class _MobileScaffoldState extends BaseView<MobileScaffold> {
     return Scaffold(
       appBar: myAppBar,
       drawer: MyDrawer(
-        deviceType: DeviceType.MOBILE,
+        deviceType: DeviceType.mobile,
         pageController: pageController,
       ),
       backgroundColor: OnepieceColors.backgroudColor,

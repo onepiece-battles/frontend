@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:one_piece_battles_flutter/login_page.dart';
 
 import '../utils/image_helper.dart';
 import '../utils/onepiece_colors.dart';

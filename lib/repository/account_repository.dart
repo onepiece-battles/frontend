@@ -1,5 +1,5 @@
-import 'package:dio/dio.dart';
 import 'package:openapi/openapi.dart';
+import 'package:dio/dio.dart';
 
 class AccountRepository {
   final AccountApi accountApi = Openapi().getAccountApi();

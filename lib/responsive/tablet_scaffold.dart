@@ -19,7 +19,7 @@ class _TabletScaffoldState extends BaseView<TabletScaffold> {
     return Scaffold(
       appBar: myAppBar,
       drawer: MyDrawer(
-        deviceType: DeviceType.TABLET,
+        deviceType: DeviceType.tablet,
         pageController: pageController,
       ),
       backgroundColor: OnepieceColors.backgroudColor,

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:one_piece_battles_flutter/home_page.dart';
 import 'package:one_piece_battles_flutter/register_page.dart';
 import 'package:one_piece_battles_flutter/responsive/desktop_scaffold.dart';
 import 'package:one_piece_battles_flutter/responsive/mobile_scaffold.dart';
@@ -13,10 +12,10 @@ class MyRouter {
       case '/':
         return MaterialPageRoute(
             settings: settings,
-            builder: (context) => ResponsiveLayout(
-                desktopScaffold: const DesktopScaffold(),
-                mobileScaffold: const MobileScaffold(),
-                tabletScaffold: const TabletScaffold()));
+            builder: (context) => const ResponsiveLayout(
+                desktopScaffold: DesktopScaffold(),
+                mobileScaffold: MobileScaffold(),
+                tabletScaffold: TabletScaffold()));
       case '/login':
         return MaterialPageRoute(
             settings: settings, builder: (context) => const LoginPage());

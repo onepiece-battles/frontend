@@ -26,7 +26,7 @@ part 'add_character_request.g.dart';
 abstract class AddCharacterRequest implements Built<AddCharacterRequest, AddCharacterRequestBuilder> {
     /// type of fighting skills
     @BuiltValueField(wireName: r'character_types')
-    BuiltList<CharacterTypeInfo>? get characterTypes;
+    BuiltList<CharacterTypeInfo> get characterTypes;
 
     @BuiltValueField(wireName: r'name')
     String get name;
@@ -63,8 +63,7 @@ abstract class AddCharacterRequest implements Built<AddCharacterRequest, AddChar
     AddCharacterRequest._();
 
     @BuiltValueHook(initializeBuilder: true)
-    static void _defaults(AddCharacterRequestBuilder b) => b
-        ..fruitLimit = 1;
+    static void _defaults(AddCharacterRequestBuilder b) => b;
 
     factory AddCharacterRequest([void updates(AddCharacterRequestBuilder b)]) = _$AddCharacterRequest;
 
@@ -83,12 +82,10 @@ class _$AddCharacterRequestSerializer implements StructuredSerializer<AddCharact
     Iterable<Object?> serialize(Serializers serializers, AddCharacterRequest object,
         {FullType specifiedType = FullType.unspecified}) {
         final result = <Object?>[];
-        if (object.characterTypes != null) {
-            result
-                ..add(r'character_types')
-                ..add(serializers.serialize(object.characterTypes,
-                    specifiedType: const FullType(BuiltList, [FullType(CharacterTypeInfo)])));
-        }
+        result
+            ..add(r'character_types')
+            ..add(serializers.serialize(object.characterTypes,
+                specifiedType: const FullType(BuiltList, [FullType(CharacterTypeInfo)])));
         result
             ..add(r'name')
             ..add(serializers.serialize(object.name,

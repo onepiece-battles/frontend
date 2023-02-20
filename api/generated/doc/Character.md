@@ -14,7 +14,7 @@ Name | Type | Description | Notes
 **groupOid** | **String** | Which group this character is in. | [optional] 
 **hasFruits** | **bool** | Whether this character has eaten fruit | 
 **fruits** | [**BuiltList&lt;FruitInCharacter&gt;**](FruitInCharacter.md) |  | [optional] 
-**fruitLimit** | **int** | Maximum number of fruit this character can eat. | [default to 1]
+**fruitLimit** | **int** | Maximum number of fruit this character can eat. | 
 **groupGain** | **int** |  | 
 **attack** | **int** |  | 
 **defense** | **int** |  | 

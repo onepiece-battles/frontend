@@ -8,7 +8,7 @@ part of 'add_character_request.dart';
 
 class _$AddCharacterRequest extends AddCharacterRequest {
   @override
-  final BuiltList<CharacterTypeInfo>? characterTypes;
+  final BuiltList<CharacterTypeInfo> characterTypes;
   @override
   final String name;
   @override
@@ -35,7 +35,7 @@ class _$AddCharacterRequest extends AddCharacterRequest {
       (new AddCharacterRequestBuilder()..update(updates)).build();
 
   _$AddCharacterRequest._(
-      {this.characterTypes,
+      {required this.characterTypes,
       required this.name,
       this.groupOid,
       required this.fruitLimit,
@@ -47,6 +47,8 @@ class _$AddCharacterRequest extends AddCharacterRequest {
       required this.speed,
       required this.magic})
       : super._() {
+    BuiltValueNullFieldError.checkNotNull(
+        characterTypes, 'AddCharacterRequest', 'characterTypes');
     BuiltValueNullFieldError.checkNotNull(name, 'AddCharacterRequest', 'name');
     BuiltValueNullFieldError.checkNotNull(
         fruitLimit, 'AddCharacterRequest', 'fruitLimit');
@@ -191,7 +193,7 @@ class AddCharacterRequestBuilder
   AddCharacterRequestBuilder get _$this {
     final $v = _$v;
     if ($v != null) {
-      _characterTypes = $v.characterTypes?.toBuilder();
+      _characterTypes = $v.characterTypes.toBuilder();
       _name = $v.name;
       _groupOid = $v.groupOid;
       _fruitLimit = $v.fruitLimit;
@@ -224,7 +226,7 @@ class AddCharacterRequestBuilder
     try {
       _$result = _$v ??
           new _$AddCharacterRequest._(
-              characterTypes: _characterTypes?.build(),
+              characterTypes: characterTypes.build(),
               name: BuiltValueNullFieldError.checkNotNull(
                   name, 'AddCharacterRequest', 'name'),
               groupOid: groupOid,
@@ -248,7 +250,7 @@ class AddCharacterRequestBuilder
       late String _$failedField;
       try {
         _$failedField = 'characterTypes';
-        _characterTypes?.build();
+        characterTypes.build();
       } catch (e) {
         throw new BuiltValueNestedFieldError(
             'AddCharacterRequest', _$failedField, e.toString());
