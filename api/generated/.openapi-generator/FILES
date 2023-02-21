@@ -13,7 +13,6 @@ doc/BattleType.md
 doc/Character.md
 doc/CharacterApi.md
 doc/CharacterType.md
-doc/CharacterTypeInfo.md
 doc/EatFruitRequest.md
 doc/EatFruitResponse.md
 doc/Fruit.md
@@ -56,7 +55,6 @@ lib/src/model/battle_result.dart
 lib/src/model/battle_type.dart
 lib/src/model/character.dart
 lib/src/model/character_type.dart
-lib/src/model/character_type_info.dart
 lib/src/model/date.dart
 lib/src/model/eat_fruit_request.dart
 lib/src/model/eat_fruit_response.dart
@@ -90,7 +88,6 @@ test/battle_test.dart
 test/battle_type_test.dart
 test/character_api_test.dart
 test/character_test.dart
-test/character_type_info_test.dart
 test/character_type_test.dart
 test/eat_fruit_request_test.dart
 test/eat_fruit_response_test.dart

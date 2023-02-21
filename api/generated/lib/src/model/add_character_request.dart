@@ -2,8 +2,7 @@
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
 
-import 'package:built_collection/built_collection.dart';
-import 'package:openapi/src/model/character_type_info.dart';
+import 'package:openapi/src/model/character_type.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
 
@@ -12,7 +11,7 @@ part 'add_character_request.g.dart';
 /// AddCharacterRequest
 ///
 /// Properties:
-/// * [characterTypes] - type of fighting skills
+/// * [characterType] 
 /// * [name] 
 /// * [groupOid] - Which group this character is in.
 /// * [fruitLimit] - Maximum number of fruit this character can eat.
@@ -24,9 +23,9 @@ part 'add_character_request.g.dart';
 /// * [speed] 
 /// * [magic] 
 abstract class AddCharacterRequest implements Built<AddCharacterRequest, AddCharacterRequestBuilder> {
-    /// type of fighting skills
-    @BuiltValueField(wireName: r'character_types')
-    BuiltList<CharacterTypeInfo> get characterTypes;
+    @BuiltValueField(wireName: r'character_type')
+    CharacterType get characterType;
+    // enum characterTypeEnum {  Katana,  Fist,  Foot,  Shooter,  Body,  Science,  };
 
     @BuiltValueField(wireName: r'name')
     String get name;
@@ -83,9 +82,9 @@ class _$AddCharacterRequestSerializer implements StructuredSerializer<AddCharact
         {FullType specifiedType = FullType.unspecified}) {
         final result = <Object?>[];
         result
-            ..add(r'character_types')
-            ..add(serializers.serialize(object.characterTypes,
-                specifiedType: const FullType(BuiltList, [FullType(CharacterTypeInfo)])));
+            ..add(r'character_type')
+            ..add(serializers.serialize(object.characterType,
+                specifiedType: const FullType(CharacterType)));
         result
             ..add(r'name')
             ..add(serializers.serialize(object.name,
@@ -143,10 +142,10 @@ class _$AddCharacterRequestSerializer implements StructuredSerializer<AddCharact
             final Object? value = iterator.current;
             
             switch (key) {
-                case r'character_types':
+                case r'character_type':
                     final valueDes = serializers.deserialize(value,
-                        specifiedType: const FullType(BuiltList, [FullType(CharacterTypeInfo)])) as BuiltList<CharacterTypeInfo>;
-                    result.characterTypes.replace(valueDes);
+                        specifiedType: const FullType(CharacterType)) as CharacterType;
+                    result.characterType = valueDes;
                     break;
                 case r'name':
                     final valueDes = serializers.deserialize(value,

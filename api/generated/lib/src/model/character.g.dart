@@ -10,7 +10,7 @@ class _$Character extends Character {
   @override
   final String id;
   @override
-  final BuiltList<CharacterTypeInfo>? characterTypes;
+  final CharacterType characterType;
   @override
   final String name;
   @override
@@ -41,7 +41,7 @@ class _$Character extends Character {
 
   _$Character._(
       {required this.id,
-      this.characterTypes,
+      required this.characterType,
       required this.name,
       this.groupOid,
       required this.hasFruits,
@@ -56,6 +56,8 @@ class _$Character extends Character {
       required this.magic})
       : super._() {
     BuiltValueNullFieldError.checkNotNull(id, 'Character', 'id');
+    BuiltValueNullFieldError.checkNotNull(
+        characterType, 'Character', 'characterType');
     BuiltValueNullFieldError.checkNotNull(name, 'Character', 'name');
     BuiltValueNullFieldError.checkNotNull(hasFruits, 'Character', 'hasFruits');
     BuiltValueNullFieldError.checkNotNull(
@@ -82,7 +84,7 @@ class _$Character extends Character {
     if (identical(other, this)) return true;
     return other is Character &&
         id == other.id &&
-        characterTypes == other.characterTypes &&
+        characterType == other.characterType &&
         name == other.name &&
         groupOid == other.groupOid &&
         hasFruits == other.hasFruits &&
@@ -111,10 +113,8 @@ class _$Character extends Character {
                                         $jc(
                                             $jc(
                                                 $jc(
-                                                    $jc(
-                                                        $jc(0, id.hashCode),
-                                                        characterTypes
-                                                            .hashCode),
+                                                    $jc($jc(0, id.hashCode),
+                                                        characterType.hashCode),
                                                     name.hashCode),
                                                 groupOid.hashCode),
                                             hasFruits.hashCode),
@@ -133,7 +133,7 @@ class _$Character extends Character {
   String toString() {
     return (newBuiltValueToStringHelper('Character')
           ..add('id', id)
-          ..add('characterTypes', characterTypes)
+          ..add('characterType', characterType)
           ..add('name', name)
           ..add('groupOid', groupOid)
           ..add('hasFruits', hasFruits)
@@ -157,11 +157,10 @@ class CharacterBuilder implements Builder<Character, CharacterBuilder> {
   String? get id => _$this._id;
   set id(String? id) => _$this._id = id;
 
-  ListBuilder<CharacterTypeInfo>? _characterTypes;
-  ListBuilder<CharacterTypeInfo> get characterTypes =>
-      _$this._characterTypes ??= new ListBuilder<CharacterTypeInfo>();
-  set characterTypes(ListBuilder<CharacterTypeInfo>? characterTypes) =>
-      _$this._characterTypes = characterTypes;
+  CharacterType? _characterType;
+  CharacterType? get characterType => _$this._characterType;
+  set characterType(CharacterType? characterType) =>
+      _$this._characterType = characterType;
 
   String? _name;
   String? get name => _$this._name;
@@ -220,7 +219,7 @@ class CharacterBuilder implements Builder<Character, CharacterBuilder> {
     final $v = _$v;
     if ($v != null) {
       _id = $v.id;
-      _characterTypes = $v.characterTypes?.toBuilder();
+      _characterType = $v.characterType;
       _name = $v.name;
       _groupOid = $v.groupOid;
       _hasFruits = $v.hasFruits;
@@ -256,7 +255,8 @@ class CharacterBuilder implements Builder<Character, CharacterBuilder> {
       _$result = _$v ??
           new _$Character._(
               id: BuiltValueNullFieldError.checkNotNull(id, 'Character', 'id'),
-              characterTypes: _characterTypes?.build(),
+              characterType: BuiltValueNullFieldError.checkNotNull(
+                  characterType, 'Character', 'characterType'),
               name: BuiltValueNullFieldError.checkNotNull(
                   name, 'Character', 'name'),
               groupOid: groupOid,
@@ -277,14 +277,10 @@ class CharacterBuilder implements Builder<Character, CharacterBuilder> {
                   blood, 'Character', 'blood'),
               speed: BuiltValueNullFieldError.checkNotNull(
                   speed, 'Character', 'speed'),
-              magic: BuiltValueNullFieldError.checkNotNull(
-                  magic, 'Character', 'magic'));
+              magic: BuiltValueNullFieldError.checkNotNull(magic, 'Character', 'magic'));
     } catch (_) {
       late String _$failedField;
       try {
-        _$failedField = 'characterTypes';
-        _characterTypes?.build();
-
         _$failedField = 'fruits';
         _fruits?.build();
       } catch (e) {

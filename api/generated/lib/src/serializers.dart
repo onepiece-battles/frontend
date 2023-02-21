@@ -20,7 +20,6 @@ import 'package:openapi/src/model/battle_result.dart';
 import 'package:openapi/src/model/battle_type.dart';
 import 'package:openapi/src/model/character.dart';
 import 'package:openapi/src/model/character_type.dart';
-import 'package:openapi/src/model/character_type_info.dart';
 import 'package:openapi/src/model/eat_fruit_request.dart';
 import 'package:openapi/src/model/eat_fruit_response.dart';
 import 'package:openapi/src/model/fruit.dart';
@@ -53,7 +52,6 @@ part 'serializers.g.dart';
   BattleType,
   Character,
   CharacterType,
-  CharacterTypeInfo,
   EatFruitRequest,
   EatFruitResponse,
   Fruit,

@@ -22,7 +22,6 @@ export 'package:openapi/src/model/battle_result.dart';
 export 'package:openapi/src/model/battle_type.dart';
 export 'package:openapi/src/model/character.dart';
 export 'package:openapi/src/model/character_type.dart';
-export 'package:openapi/src/model/character_type_info.dart';
 export 'package:openapi/src/model/eat_fruit_request.dart';
 export 'package:openapi/src/model/eat_fruit_response.dart';
 export 'package:openapi/src/model/fruit.dart';

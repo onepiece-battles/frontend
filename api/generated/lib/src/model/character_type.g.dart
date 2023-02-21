@@ -11,6 +11,7 @@ const CharacterType _$fist = const CharacterType._('fist');
 const CharacterType _$foot = const CharacterType._('foot');
 const CharacterType _$shooter = const CharacterType._('shooter');
 const CharacterType _$body = const CharacterType._('body');
+const CharacterType _$science = const CharacterType._('science');
 
 CharacterType _$valueOf(String name) {
   switch (name) {
@@ -24,6 +25,8 @@ CharacterType _$valueOf(String name) {
       return _$shooter;
     case 'body':
       return _$body;
+    case 'science':
+      return _$science;
     default:
       throw new ArgumentError(name);
   }
@@ -36,6 +39,7 @@ final BuiltSet<CharacterType> _$values =
   _$foot,
   _$shooter,
   _$body,
+  _$science,
 ]);
 
 class _$CharacterTypeMeta {
@@ -45,6 +49,7 @@ class _$CharacterTypeMeta {
   CharacterType get foot => _$foot;
   CharacterType get shooter => _$shooter;
   CharacterType get body => _$body;
+  CharacterType get science => _$science;
   CharacterType valueOf(String name) => _$valueOf(name);
   BuiltSet<CharacterType> get values => _$values;
 }
@@ -64,6 +69,7 @@ class _$CharacterTypeSerializer implements PrimitiveSerializer<CharacterType> {
     'foot': 'Foot',
     'shooter': 'Shooter',
     'body': 'Body',
+    'science': 'Science',
   };
   static const Map<Object, String> _fromWire = const <Object, String>{
     'Katana': 'katana',
@@ -71,6 +77,7 @@ class _$CharacterTypeSerializer implements PrimitiveSerializer<CharacterType> {
     'Foot': 'foot',
     'Shooter': 'shooter',
     'Body': 'body',
+    'Science': 'science',
   };
 
   @override

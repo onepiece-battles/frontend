@@ -25,6 +25,9 @@ class CharacterType extends EnumClass {
   /// types that defines how character fight in battles.
   @BuiltValueEnumConst(wireName: r'Body')
   static const CharacterType body = _$body;
+  /// types that defines how character fight in battles.
+  @BuiltValueEnumConst(wireName: r'Science')
+  static const CharacterType science = _$science;
 
   static Serializer<CharacterType> get serializer => _$characterTypeSerializer;
 

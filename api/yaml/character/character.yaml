@@ -136,6 +136,7 @@ schemas:
     required:
       - id
       - name
+      - character_type
       - has_fruits
       - fruit_limit
       - group_gain
@@ -149,11 +150,8 @@ schemas:
       id:
         type: string
         format: uuid
-      character_types:
-        description: type of fighting skills
-        type: array
-        items:
-          $ref: "#/schemas/CharacterTypeInfo"
+      character_type:
+        $ref: "#/schemas/CharacterType"
       name:
         type: string
       group_oid:
@@ -208,15 +206,7 @@ schemas:
       - Foot
       - Shooter
       - Body
-
-  CharacterTypeInfo:
-    description: List of CharacterType above can not be serialize in Response body. Use a class to wrap it.
-    type: object
-    properties:
-      type:
-        $ref: "#/schemas/CharacterType"
-      index:
-        type: integer
+      - Science
 
   AddCharacterRequest:
     type: object
@@ -230,13 +220,10 @@ schemas:
       - blood
       - speed
       - magic
-      - character_types
+      - character_type
     properties:
-      character_types:
-        description: type of fighting skills
-        type: array
-        items:
-          $ref: "#/schemas/CharacterTypeInfo"
+      character_type:
+        $ref: "#/schemas/CharacterType"
       name:
         type: string
       group_oid:

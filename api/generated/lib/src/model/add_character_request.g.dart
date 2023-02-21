@@ -8,7 +8,7 @@ part of 'add_character_request.dart';
 
 class _$AddCharacterRequest extends AddCharacterRequest {
   @override
-  final BuiltList<CharacterTypeInfo> characterTypes;
+  final CharacterType characterType;
   @override
   final String name;
   @override
@@ -35,7 +35,7 @@ class _$AddCharacterRequest extends AddCharacterRequest {
       (new AddCharacterRequestBuilder()..update(updates)).build();
 
   _$AddCharacterRequest._(
-      {required this.characterTypes,
+      {required this.characterType,
       required this.name,
       this.groupOid,
       required this.fruitLimit,
@@ -48,7 +48,7 @@ class _$AddCharacterRequest extends AddCharacterRequest {
       required this.magic})
       : super._() {
     BuiltValueNullFieldError.checkNotNull(
-        characterTypes, 'AddCharacterRequest', 'characterTypes');
+        characterType, 'AddCharacterRequest', 'characterType');
     BuiltValueNullFieldError.checkNotNull(name, 'AddCharacterRequest', 'name');
     BuiltValueNullFieldError.checkNotNull(
         fruitLimit, 'AddCharacterRequest', 'fruitLimit');
@@ -81,7 +81,7 @@ class _$AddCharacterRequest extends AddCharacterRequest {
   bool operator ==(Object other) {
     if (identical(other, this)) return true;
     return other is AddCharacterRequest &&
-        characterTypes == other.characterTypes &&
+        characterType == other.characterType &&
         name == other.name &&
         groupOid == other.groupOid &&
         fruitLimit == other.fruitLimit &&
@@ -105,7 +105,7 @@ class _$AddCharacterRequest extends AddCharacterRequest {
                             $jc(
                                 $jc(
                                     $jc(
-                                        $jc($jc(0, characterTypes.hashCode),
+                                        $jc($jc(0, characterType.hashCode),
                                             name.hashCode),
                                         groupOid.hashCode),
                                     fruitLimit.hashCode),
@@ -121,7 +121,7 @@ class _$AddCharacterRequest extends AddCharacterRequest {
   @override
   String toString() {
     return (newBuiltValueToStringHelper('AddCharacterRequest')
-          ..add('characterTypes', characterTypes)
+          ..add('characterType', characterType)
           ..add('name', name)
           ..add('groupOid', groupOid)
           ..add('fruitLimit', fruitLimit)
@@ -140,11 +140,10 @@ class AddCharacterRequestBuilder
     implements Builder<AddCharacterRequest, AddCharacterRequestBuilder> {
   _$AddCharacterRequest? _$v;
 
-  ListBuilder<CharacterTypeInfo>? _characterTypes;
-  ListBuilder<CharacterTypeInfo> get characterTypes =>
-      _$this._characterTypes ??= new ListBuilder<CharacterTypeInfo>();
-  set characterTypes(ListBuilder<CharacterTypeInfo>? characterTypes) =>
-      _$this._characterTypes = characterTypes;
+  CharacterType? _characterType;
+  CharacterType? get characterType => _$this._characterType;
+  set characterType(CharacterType? characterType) =>
+      _$this._characterType = characterType;
 
   String? _name;
   String? get name => _$this._name;
@@ -193,7 +192,7 @@ class AddCharacterRequestBuilder
   AddCharacterRequestBuilder get _$this {
     final $v = _$v;
     if ($v != null) {
-      _characterTypes = $v.characterTypes.toBuilder();
+      _characterType = $v.characterType;
       _name = $v.name;
       _groupOid = $v.groupOid;
       _fruitLimit = $v.fruitLimit;
@@ -222,41 +221,28 @@ class AddCharacterRequestBuilder
 
   @override
   _$AddCharacterRequest build() {
-    _$AddCharacterRequest _$result;
-    try {
-      _$result = _$v ??
-          new _$AddCharacterRequest._(
-              characterTypes: characterTypes.build(),
-              name: BuiltValueNullFieldError.checkNotNull(
-                  name, 'AddCharacterRequest', 'name'),
-              groupOid: groupOid,
-              fruitLimit: BuiltValueNullFieldError.checkNotNull(
-                  fruitLimit, 'AddCharacterRequest', 'fruitLimit'),
-              groupGain: BuiltValueNullFieldError.checkNotNull(
-                  groupGain, 'AddCharacterRequest', 'groupGain'),
-              attack: BuiltValueNullFieldError.checkNotNull(
-                  attack, 'AddCharacterRequest', 'attack'),
-              defense: BuiltValueNullFieldError.checkNotNull(
-                  defense, 'AddCharacterRequest', 'defense'),
-              intelligence: BuiltValueNullFieldError.checkNotNull(
-                  intelligence, 'AddCharacterRequest', 'intelligence'),
-              blood: BuiltValueNullFieldError.checkNotNull(
-                  blood, 'AddCharacterRequest', 'blood'),
-              speed: BuiltValueNullFieldError.checkNotNull(
-                  speed, 'AddCharacterRequest', 'speed'),
-              magic:
-                  BuiltValueNullFieldError.checkNotNull(magic, 'AddCharacterRequest', 'magic'));
-    } catch (_) {
-      late String _$failedField;
-      try {
-        _$failedField = 'characterTypes';
-        characterTypes.build();
-      } catch (e) {
-        throw new BuiltValueNestedFieldError(
-            'AddCharacterRequest', _$failedField, e.toString());
-      }
-      rethrow;
-    }
+    final _$result = _$v ??
+        new _$AddCharacterRequest._(
+            characterType: BuiltValueNullFieldError.checkNotNull(
+                characterType, 'AddCharacterRequest', 'characterType'),
+            name: BuiltValueNullFieldError.checkNotNull(
+                name, 'AddCharacterRequest', 'name'),
+            groupOid: groupOid,
+            fruitLimit: BuiltValueNullFieldError.checkNotNull(
+                fruitLimit, 'AddCharacterRequest', 'fruitLimit'),
+            groupGain: BuiltValueNullFieldError.checkNotNull(
+                groupGain, 'AddCharacterRequest', 'groupGain'),
+            attack: BuiltValueNullFieldError.checkNotNull(
+                attack, 'AddCharacterRequest', 'attack'),
+            defense: BuiltValueNullFieldError.checkNotNull(
+                defense, 'AddCharacterRequest', 'defense'),
+            intelligence: BuiltValueNullFieldError.checkNotNull(
+                intelligence, 'AddCharacterRequest', 'intelligence'),
+            blood: BuiltValueNullFieldError.checkNotNull(
+                blood, 'AddCharacterRequest', 'blood'),
+            speed:
+                BuiltValueNullFieldError.checkNotNull(speed, 'AddCharacterRequest', 'speed'),
+            magic: BuiltValueNullFieldError.checkNotNull(magic, 'AddCharacterRequest', 'magic'));
     replace(_$result);
     return _$result;
   }

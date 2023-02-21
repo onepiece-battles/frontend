@@ -7,9 +7,8 @@ void main() {
   // TODO add properties to the builder and call build()
 
   group(AddCharacterRequest, () {
-    // type of fighting skills
-    // BuiltList<CharacterTypeInfo> characterTypes
-    test('to test the property `characterTypes`', () async {
+    // CharacterType characterType
+    test('to test the property `characterType`', () async {
       // TODO
     });
 

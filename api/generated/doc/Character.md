@@ -9,7 +9,7 @@ import 'package:openapi/api.dart';
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **id** | **String** |  | 
-**characterTypes** | [**BuiltList&lt;CharacterTypeInfo&gt;**](CharacterTypeInfo.md) | type of fighting skills | [optional] 
+**characterType** | [**CharacterType**](CharacterType.md) |  | 
 **name** | **String** |  | 
 **groupOid** | **String** | Which group this character is in. | [optional] 
 **hasFruits** | **bool** | Whether this character has eaten fruit | 
