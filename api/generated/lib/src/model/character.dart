@@ -2,9 +2,9 @@
 // AUTO-GENERATED FILE, DO NOT MODIFY!
 //
 
+import 'package:openapi/src/model/character_type.dart';
 import 'package:openapi/src/model/fruit_in_character.dart';
 import 'package:built_collection/built_collection.dart';
-import 'package:openapi/src/model/character_type_info.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
 
@@ -14,7 +14,7 @@ part 'character.g.dart';
 ///
 /// Properties:
 /// * [id] 
-/// * [characterTypes] - type of fighting skills
+/// * [characterType] 
 /// * [name] 
 /// * [groupOid] - Which group this character is in.
 /// * [hasFruits] - Whether this character has eaten fruit
@@ -31,9 +31,9 @@ abstract class Character implements Built<Character, CharacterBuilder> {
     @BuiltValueField(wireName: r'id')
     String get id;
 
-    /// type of fighting skills
-    @BuiltValueField(wireName: r'character_types')
-    BuiltList<CharacterTypeInfo>? get characterTypes;
+    @BuiltValueField(wireName: r'character_type')
+    CharacterType get characterType;
+    // enum characterTypeEnum {  Katana,  Fist,  Foot,  Shooter,  Body,  Science,  };
 
     @BuiltValueField(wireName: r'name')
     String get name;
@@ -100,12 +100,10 @@ class _$CharacterSerializer implements StructuredSerializer<Character> {
             ..add(r'id')
             ..add(serializers.serialize(object.id,
                 specifiedType: const FullType(String)));
-        if (object.characterTypes != null) {
-            result
-                ..add(r'character_types')
-                ..add(serializers.serialize(object.characterTypes,
-                    specifiedType: const FullType(BuiltList, [FullType(CharacterTypeInfo)])));
-        }
+        result
+            ..add(r'character_type')
+            ..add(serializers.serialize(object.characterType,
+                specifiedType: const FullType(CharacterType)));
         result
             ..add(r'name')
             ..add(serializers.serialize(object.name,
@@ -178,10 +176,10 @@ class _$CharacterSerializer implements StructuredSerializer<Character> {
                         specifiedType: const FullType(String)) as String;
                     result.id = valueDes;
                     break;
-                case r'character_types':
+                case r'character_type':
                     final valueDes = serializers.deserialize(value,
-                        specifiedType: const FullType(BuiltList, [FullType(CharacterTypeInfo)])) as BuiltList<CharacterTypeInfo>;
-                    result.characterTypes.replace(valueDes);
+                        specifiedType: const FullType(CharacterType)) as CharacterType;
+                    result.characterType = valueDes;
                     break;
                 case r'name':
                     final valueDes = serializers.deserialize(value,

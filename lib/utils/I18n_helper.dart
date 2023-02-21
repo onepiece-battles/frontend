@@ -1,8 +1,11 @@
 // ignore: file_names
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 import 'package:openapi/openapi.dart';
 
 class I18nHelper {
+  final Map<Character, I18nText> characterTypeMap = HashMap();
   static String getI18nByLocale(I18nText? i18nText, Locale locale) {
     if (i18nText == null) {
       return "";
@@ -13,4 +16,11 @@ class I18nHelper {
       return i18nText.zhCN ?? "";
     }
   }
+
+  // static String getCharacterTypeI18nByEnum(CharacterType type) {
+  //   CharacterType.values.map((type) => {
+
+  //   });
+  //   return characterTypeMap.
+  // }
 }

@@ -8,7 +8,7 @@ import 'package:openapi/api.dart';
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**characterTypes** | [**BuiltList&lt;CharacterTypeInfo&gt;**](CharacterTypeInfo.md) | type of fighting skills | 
+**characterType** | [**CharacterType**](CharacterType.md) |  | 
 **name** | **String** |  | 
 **groupOid** | **String** | Which group this character is in. | [optional] 
 **fruitLimit** | **int** | Maximum number of fruit this character can eat. | 

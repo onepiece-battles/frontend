@@ -89,7 +89,6 @@ Class | Method | HTTP request | Description
  - [BattleType](doc\BattleType.md)
  - [Character](doc\Character.md)
  - [CharacterType](doc\CharacterType.md)
- - [CharacterTypeInfo](doc\CharacterTypeInfo.md)
  - [EatFruitRequest](doc\EatFruitRequest.md)
  - [EatFruitResponse](doc\EatFruitResponse.md)
  - [Fruit](doc\Fruit.md)

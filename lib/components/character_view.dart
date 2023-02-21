@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:multiselect/multiselect.dart';
 import 'package:one_piece_battles_flutter/constants/path_constants.dart';
 import 'package:one_piece_battles_flutter/repository/character_repository.dart';
 import 'package:one_piece_battles_flutter/utils/data_converter.dart';
 import 'package:one_piece_battles_flutter/utils/string_extensions.dart';
 import 'package:openapi/openapi.dart';
+import 'package:dropdown_search/dropdown_search.dart';
 
 class CharacterView extends StatefulWidget {
   const CharacterView({super.key});
@@ -43,15 +43,34 @@ class _CharacterViewState extends State<CharacterView> {
     ];
   }
 
-  List<String> characterTypes = CharacterType.values
-      .map((characterType) => characterType.toString())
-      .toList();
-
   final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
-    var selectedValues = <String>[];
+    List<String> characterTypes = CharacterType.values
+        .map((characterType) => characterType.toString())
+        .toList();
+
+    List<String> displayCharacterTypes = [
+      AppLocalizations.of(context)!.body,
+      AppLocalizations.of(context)!.science,
+      AppLocalizations.of(context)!.katana,
+      AppLocalizations.of(context)!.shoot,
+      AppLocalizations.of(context)!.fist,
+      AppLocalizations.of(context)!.leg
+    ];
+
+    Map<String, CharacterType> displayValueToEnumValue =
+        <String, CharacterType>{
+      AppLocalizations.of(context)!.body: CharacterType.body,
+      AppLocalizations.of(context)!.leg: CharacterType.foot,
+      AppLocalizations.of(context)!.science: CharacterType.science,
+      AppLocalizations.of(context)!.fist: CharacterType.fist,
+      AppLocalizations.of(context)!.katana: CharacterType.katana,
+      AppLocalizations.of(context)!.shoot: CharacterType.shooter,
+    };
+    String selectedItem = "";
+
     return Column(
       children: [
         const SizedBox(
@@ -105,14 +124,21 @@ class _CharacterViewState extends State<CharacterView> {
                                           image: AssetImage(
                                               PathConstants.loginLuffyImage),
                                         ),
-                                        DropDownMultiSelect(
-                                          options: characterTypes,
-                                          selectedValues: selectedValues,
+                                        DropdownSearch<String>(
+                                          items: displayCharacterTypes,
+                                          selectedItem: selectedItem,
                                           onChanged: (value) {
-                                            setState(() {
-                                              selectedValues = value;
-                                            });
+                                            selectedItem = value!;
                                           },
+                                          dropdownDecoratorProps: DropDownDecoratorProps(
+                                              dropdownSearchDecoration:
+                                                  InputDecoration(
+                                                      labelText: AppLocalizations
+                                                              .of(context)!
+                                                          .characterTypeLable,
+                                                      hintText: AppLocalizations
+                                                              .of(context)!
+                                                          .characterTypeHint)),
                                         )
                                       ],
                                     ),
@@ -418,7 +444,9 @@ class _CharacterViewState extends State<CharacterView> {
                                                 DataConverter.stringToInt(
                                                     characterAttackController
                                                         .text)
-                                            ..characterTypes
+                                            ..characterType =
+                                                displayValueToEnumValue[
+                                                    selectedItem]
                                             ..speed = DataConverter.stringToInt(
                                                 characterSpeedController.text)
                                             ..blood = DataConverter.stringToInt(
