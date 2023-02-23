@@ -47,10 +47,6 @@ class _CharacterViewState extends State<CharacterView> {
 
   @override
   Widget build(BuildContext context) {
-    List<String> characterTypes = CharacterType.values
-        .map((characterType) => characterType.toString())
-        .toList();
-
     List<String> displayCharacterTypes = [
       AppLocalizations.of(context)!.body,
       AppLocalizations.of(context)!.science,
@@ -118,11 +114,16 @@ class _CharacterViewState extends State<CharacterView> {
                                     fit: FlexFit.tight,
                                     child: Column(
                                       children: [
-                                        const Image(
-                                          width: 100,
-                                          height: 100,
-                                          image: AssetImage(
+                                        IconButton(
+                                          onPressed: () {},
+                                          iconSize: 100,
+                                          splashRadius: 10,
+                                          splashColor: Colors.red,
+                                          icon: Image.asset(
                                               PathConstants.loginLuffyImage),
+                                        ),
+                                        const SizedBox(
+                                          height: 40,
                                         ),
                                         DropdownSearch<String>(
                                           items: displayCharacterTypes,
@@ -130,16 +131,20 @@ class _CharacterViewState extends State<CharacterView> {
                                           onChanged: (value) {
                                             selectedItem = value!;
                                           },
-                                          dropdownDecoratorProps: DropDownDecoratorProps(
-                                              dropdownSearchDecoration:
-                                                  InputDecoration(
-                                                      labelText: AppLocalizations
-                                                              .of(context)!
-                                                          .characterTypeLable,
-                                                      hintText: AppLocalizations
-                                                              .of(context)!
-                                                          .characterTypeHint)),
-                                        )
+                                          dropdownDecoratorProps:
+                                              DropDownDecoratorProps(
+                                            dropdownSearchDecoration:
+                                                InputDecoration(
+                                                    labelText:
+                                                        AppLocalizations.of(
+                                                                context)!
+                                                            .characterTypeLable,
+                                                    hintText:
+                                                        AppLocalizations.of(
+                                                                context)!
+                                                            .characterTypeHint),
+                                          ),
+                                        ),
                                       ],
                                     ),
                                   ),
@@ -155,6 +160,14 @@ class _CharacterViewState extends State<CharacterView> {
                                         children: [
                                           TextFormField(
                                             controller: characterNameController,
+                                            validator: (value) {
+                                              if (value!.isWhiteSpace()) {
+                                                return AppLocalizations.of(
+                                                        context)!
+                                                    .requiredField;
+                                              }
+                                              return null;
+                                            },
                                             maxLength: 10,
                                             maxLengthEnforcement:
                                                 MaxLengthEnforcement.enforced,
@@ -179,6 +192,13 @@ class _CharacterViewState extends State<CharacterView> {
                                                 return AppLocalizations.of(
                                                         context)!
                                                     .fieldMustBeInt;
+                                              }
+                                              int valueInt = int.parse(value);
+                                              if (valueInt < 1 ||
+                                                  valueInt > 3) {
+                                                return AppLocalizations.of(
+                                                        context)!
+                                                    .valueExceedsLimit;
                                               }
                                               return null;
                                             },
@@ -206,6 +226,13 @@ class _CharacterViewState extends State<CharacterView> {
                                                 return AppLocalizations.of(
                                                         context)!
                                                     .fieldMustBeInt;
+                                              }
+                                              int valueInt = int.parse(value);
+                                              if (valueInt < 1 ||
+                                                  valueInt > 5) {
+                                                return AppLocalizations.of(
+                                                        context)!
+                                                    .valueExceedsLimit;
                                               }
                                               return null;
                                             },
@@ -247,6 +274,13 @@ class _CharacterViewState extends State<CharacterView> {
                                                         context)!
                                                     .fieldMustBeInt;
                                               }
+                                              int valueInt = int.parse(value);
+                                              if (valueInt < 10 ||
+                                                  valueInt > 1000) {
+                                                return AppLocalizations.of(
+                                                        context)!
+                                                    .valueExceedsLimit;
+                                              }
                                               return null;
                                             },
                                             decoration: InputDecoration(
@@ -275,6 +309,13 @@ class _CharacterViewState extends State<CharacterView> {
                                                         context)!
                                                     .fieldMustBeInt;
                                               }
+                                              int valueInt = int.parse(value);
+                                              if (valueInt < 10 ||
+                                                  valueInt > 1000) {
+                                                return AppLocalizations.of(
+                                                        context)!
+                                                    .valueExceedsLimit;
+                                              }
                                               return null;
                                             },
                                             decoration: InputDecoration(
@@ -302,6 +343,13 @@ class _CharacterViewState extends State<CharacterView> {
                                                 return AppLocalizations.of(
                                                         context)!
                                                     .fieldMustBeInt;
+                                              }
+                                              int valueInt = int.parse(value);
+                                              if (valueInt < 70 ||
+                                                  valueInt > 260) {
+                                                return AppLocalizations.of(
+                                                        context)!
+                                                    .valueExceedsLimit;
                                               }
                                               return null;
                                             },
@@ -340,6 +388,13 @@ class _CharacterViewState extends State<CharacterView> {
                                                         context)!
                                                     .fieldMustBeInt;
                                               }
+                                              int valueInt = int.parse(value);
+                                              if (valueInt < 100 ||
+                                                  valueInt > 10000) {
+                                                return AppLocalizations.of(
+                                                        context)!
+                                                    .valueExceedsLimit;
+                                              }
                                               return null;
                                             },
                                             decoration: InputDecoration(
@@ -367,6 +422,13 @@ class _CharacterViewState extends State<CharacterView> {
                                                         context)!
                                                     .fieldMustBeInt;
                                               }
+                                              int valueInt = int.parse(value);
+                                              if (valueInt < 10 ||
+                                                  valueInt > 200) {
+                                                return AppLocalizations.of(
+                                                        context)!
+                                                    .valueExceedsLimit;
+                                              }
                                               return null;
                                             },
                                             decoration: InputDecoration(
@@ -393,6 +455,13 @@ class _CharacterViewState extends State<CharacterView> {
                                                 return AppLocalizations.of(
                                                         context)!
                                                     .fieldMustBeInt;
+                                              }
+                                              int valueInt = int.parse(value);
+                                              if (valueInt < 10 ||
+                                                  valueInt > 50) {
+                                                return AppLocalizations.of(
+                                                        context)!
+                                                    .valueExceedsLimit;
                                               }
                                               return null;
                                             },
