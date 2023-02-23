@@ -241,7 +241,7 @@ packages:
   openapi:
     dependency: "direct main"
     description:
-      path: "api/generated"
+      path: generated
       relative: true
     source: path
     version: "1.0.0"
