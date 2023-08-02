@@ -4,7 +4,7 @@ import 'package:flutter_toggle_tab/flutter_toggle_tab.dart';
 import 'package:one_piece_battles_flutter/constants/path_constants.dart';
 import 'package:one_piece_battles_flutter/main.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
-import 'package:one_piece_battles_flutter/utils/I18n_helper.dart';
+import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
 
 const locales = [Locale('en', 'US'), Locale('zh', 'CN')];
