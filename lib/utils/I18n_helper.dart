@@ -2,7 +2,7 @@
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
-import 'package:openapi/openapi.dart';
+import 'package:openapi/api.dart';
 
 class I18nHelper {
   final Map<Character, I18nText> characterTypeMap = HashMap();
@@ -16,11 +16,4 @@ class I18nHelper {
       return i18nText.zhCN ?? "";
     }
   }
-
-  // static String getCharacterTypeI18nByEnum(CharacterType type) {
-  //   CharacterType.values.map((type) => {
-
-  //   });
-  //   return characterTypeMap.
-  // }
 }

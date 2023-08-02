@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:one_piece_battles_flutter/constants/path_constants.dart';
-import 'package:one_piece_battles_flutter/repository/character_repository.dart';
+import 'package:one_piece_battles_flutter/repository/character_dao.dart';
 import 'package:one_piece_battles_flutter/utils/data_converter.dart';
 import 'package:one_piece_battles_flutter/utils/string_extensions.dart';
-import 'package:openapi/openapi.dart';
+import 'package:openapi/api.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 
 class CharacterView extends StatefulWidget {
@@ -506,42 +506,26 @@ class _CharacterViewState extends State<CharacterView> {
                             onPressed: () {
                               final isValid = _formKey.currentState!.validate();
                               if (isValid) {
-                                AddCharacterRequest addCharacterRequest =
-                                    AddCharacterRequest((builder) => {
-                                          builder
-                                            ..attack =
-                                                DataConverter.stringToInt(
-                                                    characterAttackController
-                                                        .text)
-                                            ..characterType =
-                                                displayValueToEnumValue[
-                                                    selectedItem]
-                                            ..speed = DataConverter.stringToInt(
-                                                characterSpeedController.text)
-                                            ..blood = DataConverter.stringToInt(
-                                                characterBloodController.text)
-                                            ..defense =
-                                                DataConverter.stringToInt(
-                                                    characterDefenseController
-                                                        .text)
-                                            ..fruitLimit =
-                                                DataConverter.stringToInt(
-                                                    characterFruitLimitController
-                                                        .text)
-                                            ..groupGain =
-                                                DataConverter.stringToInt(
-                                                    characterGroupGainController
-                                                        .text)
-                                            ..intelligence =
-                                                DataConverter.stringToInt(
-                                                    characterIntelligenceController
-                                                        .text)
-                                            ..magic = DataConverter.stringToInt(
-                                                characterEnergyController.text)
-                                            ..name =
-                                                characterNameController.text
-                                        });
-
+                                AddCharacterRequest addCharacterRequest = AddCharacterRequest(
+                                    characterType:
+                                        displayValueToEnumValue[selectedItem] ??
+                                            CharacterType.body,
+                                    name: characterNameController.text,
+                                    fruitLimit: DataConverter.stringToInt(
+                                        characterFruitLimitController.text),
+                                    groupGain: DataConverter.stringToInt(
+                                        characterGroupGainController.text),
+                                    attack: DataConverter.stringToInt(
+                                        characterAttackController.text),
+                                    defense: DataConverter.stringToInt(
+                                        characterDefenseController.text),
+                                    intelligence: DataConverter.stringToInt(
+                                        characterIntelligenceController.text),
+                                    blood: DataConverter.stringToInt(
+                                        characterBloodController.text),
+                                    speed:
+                                        DataConverter.stringToInt(characterSpeedController.text),
+                                    magic: DataConverter.stringToInt(characterEnergyController.text));
                                 characterRepository
                                     .addCharacter(addCharacterRequest);
                               } else {
