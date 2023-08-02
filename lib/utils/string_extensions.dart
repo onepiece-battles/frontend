@@ -5,7 +5,7 @@ extension StringExtensions on String {
         .hasMatch(this);
   }
 
-  bool isWhiteSpace() => this.trim().isEmpty;
+  bool isWhiteSpace() => trim().isEmpty;
 
   bool isValidDouble() => double.tryParse(this) != null;
 

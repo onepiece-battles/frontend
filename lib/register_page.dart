@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:one_piece_battles_flutter/repository/account_repository.dart';
+import 'package:one_piece_battles_flutter/repository/user_dao.dart';
 import 'package:one_piece_battles_flutter/utils/I18n_helper.dart';
-import 'package:openapi/openapi.dart';
+import 'package:openapi/api.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -12,7 +12,7 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  AccountRepository accountRepository = AccountRepository();
+  UserDao userDao = UserDao();
   bool _isPasswordHidden = true;
   bool _isConfirmedPasswordHidden = true;
   bool _bottonEnabled = false;
@@ -203,18 +203,16 @@ class _RegisterPageState extends State<RegisterPage> {
                             ? null
                             : () {
                                 RegisterRequest request = RegisterRequest(
-                                    (builder) => builder
-                                      ..userName = userNameController.text
-                                      ..email = emailController.text
-                                      ..organization =
-                                          orgnizationController.text
-                                      ..password = passwordController.text
-                                      ..confirmedPassword =
-                                          confirmedPasswordController.text);
-                                Future<RegisterResponse> response =
-                                    accountRepository.register(request);
+                                    userName: userNameController.text,
+                                    email: emailController.text,
+                                    organization: orgnizationController.text,
+                                    password: passwordController.text,
+                                    confirmedPassword:
+                                        confirmedPasswordController.text);
+                                Future<RegisterResponse?> response =
+                                    userDao.register(request);
                                 response.then((value) => {
-                                      if (value.registerResult)
+                                      if (value!.registerResult)
                                         {Navigator.pushNamed(context, '/')}
                                       else
                                         {

@@ -7,13 +7,13 @@ class MyInputTheme {
 
   OutlineInputBorder _buildBorder(Color color) {
     return OutlineInputBorder(
-      borderRadius: BorderRadius.all(Radius.circular(10)),
+      borderRadius: const BorderRadius.all(Radius.circular(10)),
       borderSide: BorderSide(color: color, width: 1.0),
     );
   }
 
   InputDecorationTheme theme() => InputDecorationTheme(
-        contentPadding: EdgeInsets.all(16),
+        contentPadding: const EdgeInsets.all(16),
         floatingLabelBehavior: FloatingLabelBehavior.always,
 
         // borders

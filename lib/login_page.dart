@@ -3,9 +3,9 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_toggle_tab/flutter_toggle_tab.dart';
 import 'package:one_piece_battles_flutter/constants/path_constants.dart';
 import 'package:one_piece_battles_flutter/main.dart';
-import 'package:one_piece_battles_flutter/repository/account_repository.dart';
+import 'package:one_piece_battles_flutter/repository/user_dao.dart';
 import 'package:one_piece_battles_flutter/utils/I18n_helper.dart';
-import 'package:openapi/openapi.dart';
+import 'package:openapi/api.dart';
 
 const locales = [Locale('en', 'US'), Locale('zh', 'CN')];
 
@@ -22,7 +22,7 @@ class _LoginPageState extends State<LoginPage> {
   bool _bottonEnabled = false;
   String verificationMessage = "";
   I18nText? verificationI18n = I18nText();
-  AccountRepository accountRepository = AccountRepository();
+  UserDao userDao = UserDao();
   TextEditingController userNameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
@@ -182,18 +182,16 @@ class _LoginPageState extends State<LoginPage> {
                 onPressed: !_bottonEnabled
                     ? null
                     : () {
-                        LoginRequest loginRequest = LoginRequest((builder) => {
-                              builder
-                                ..userName = userNameController.text
-                                ..email = emailController.text
-                                ..password = passwordController.text
-                            });
+                        LoginRequest loginRequest = LoginRequest(
+                            userName: userNameController.text,
+                            email: emailController.text,
+                            password: passwordController.text);
 
-                        Future<LoginResponse> loginResponse =
-                            accountRepository.login(loginRequest);
+                        Future<LoginResponse?> loginResponse =
+                            userDao.login(loginRequest);
 
                         loginResponse.then((value) => {
-                              if (value.verification == null)
+                              if (value!.verification == null)
                                 {Navigator.pushNamed(context, '/')}
                               else
                                 {
