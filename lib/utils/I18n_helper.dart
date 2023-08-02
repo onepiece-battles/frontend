@@ -1,6 +1,4 @@
-// ignore: file_names
 import 'dart:collection';
-
 import 'package:flutter/material.dart';
 import 'package:openapi/api.dart';
 
