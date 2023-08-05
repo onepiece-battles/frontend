@@ -4,6 +4,7 @@ import 'package:flutter_toggle_tab/flutter_toggle_tab.dart';
 import 'package:one_piece_battles_flutter/constants/path_constants.dart';
 import 'package:one_piece_battles_flutter/main.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
+import 'package:one_piece_battles_flutter/secure_storage.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
 
@@ -191,8 +192,11 @@ class _LoginPageState extends State<LoginPage> {
                             userDao.login(loginRequest);
 
                         loginResponse.then((value) => {
-                              if (value!.verification == null)
-                                {Navigator.pushNamed(context, '/')}
+                              if (value!.verification == null){
+                                SecureStorage.writeAccessToken(value.accessToken!),
+
+                                Navigator.pushNamed(context, '/')
+                              }
                               else
                                 {
                                   setState(() {
