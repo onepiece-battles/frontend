@@ -15,3 +15,4 @@ class I18nHelper {
     }
   }
 }
+//--dart-define=http_proxy=http://127.0.0.1:59527 --dart-define=https_proxy=https://127.0.0.1:59527

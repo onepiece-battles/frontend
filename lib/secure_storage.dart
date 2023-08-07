@@ -11,23 +11,23 @@ class SecureStorage {
     _writeSecureData(CommonConstants.refreshToken, refreshToken);
   }
 
-  static readAccessToken() async {
-    _readSecureData(CommonConstants.accessToken);
+  static Future<String?> readAccessToken() async {
+    return _readSecureData(CommonConstants.accessToken);
   }
 
-  static readRefreshToken() async {
-    _readSecureData(CommonConstants.refreshToken);
+  static Future<String?> readRefreshToken() async {
+    return _readSecureData(CommonConstants.refreshToken);
   }
 
   static _writeSecureData(String key, String value) async {
     await storage.write(key: key, value: value);
   }
 
-  static _readSecureData(String key) async {
+  static Future<String?> _readSecureData(String key)  async{
     return await storage.read(key: key);
   }
 
-  static _deleteSecureData(String key) async {
+  static void _deleteSecureData(String key) async {
     return await storage.delete(key: key);
   }
 }
