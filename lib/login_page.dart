@@ -20,7 +20,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   var _tabTextIndexSelected = 1;
   bool _isHidden = true;
-  bool _bottonEnabled = false;
+  bool _buttonEnabled = false;
   String verificationMessage = "";
   I18nText? verificationI18n = I18nText();
   UserDao userDao = UserDao();
@@ -102,9 +102,9 @@ class _LoginPageState extends State<LoginPage> {
                     if (userNameController.text != "" &&
                         emailController.text != "" &&
                         passwordController.text != "") {
-                      _bottonEnabled = true;
+                      _buttonEnabled = true;
                     } else {
-                      _bottonEnabled = false;
+                      _buttonEnabled = false;
                     }
                   });
                 },
@@ -124,9 +124,9 @@ class _LoginPageState extends State<LoginPage> {
                     if (userNameController.text != "" &&
                         emailController.text != "" &&
                         passwordController.text != "") {
-                      _bottonEnabled = true;
+                      _buttonEnabled = true;
                     } else {
-                      _bottonEnabled = false;
+                      _buttonEnabled = false;
                     }
                   });
                 },
@@ -146,9 +146,9 @@ class _LoginPageState extends State<LoginPage> {
                     if (userNameController.text != "" &&
                         emailController.text != "" &&
                         passwordController.text != "") {
-                      _bottonEnabled = true;
+                      _buttonEnabled = true;
                     } else {
-                      _bottonEnabled = false;
+                      _buttonEnabled = false;
                     }
                   });
                 },
@@ -180,7 +180,7 @@ class _LoginPageState extends State<LoginPage> {
             SizedBox(
               width: 300,
               child: ElevatedButton(
-                onPressed: !_bottonEnabled
+                onPressed: !_buttonEnabled
                     ? null
                     : () {
                         LoginRequest loginRequest = LoginRequest(
@@ -192,7 +192,7 @@ class _LoginPageState extends State<LoginPage> {
                             userDao.login(loginRequest);
 
                         loginResponse.then((value) => {
-                              if (value!.verification == null){
+                              if (value!.verification == null) {
                                 SecureStorage.writeAccessToken(value.accessToken!),
 
                                 Navigator.pushNamed(context, '/')

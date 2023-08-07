@@ -526,7 +526,7 @@ class _CharacterViewState extends State<CharacterView> {
                                     speed:
                                         DataConverter.stringToInt(characterSpeedController.text),
                                     magic: DataConverter.stringToInt(characterEnergyController.text));
-                                characterRepository
+                                Future<Character?> character =characterRepository
                                     .addCharacter(addCharacterRequest);
                               } else {
                                 print("Form is valid: $isValid");

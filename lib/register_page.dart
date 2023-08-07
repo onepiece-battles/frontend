@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
+import 'package:one_piece_battles_flutter/secure_storage.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
 
@@ -21,7 +22,7 @@ class _RegisterPageState extends State<RegisterPage> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   TextEditingController confirmedPasswordController = TextEditingController();
-  TextEditingController orgnizationController = TextEditingController();
+  TextEditingController organizationController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +55,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 emailController.text != "" &&
                                 passwordController.text != "" &&
                                 confirmedPasswordController.text != "" &&
-                                orgnizationController.text != "") {
+                                organizationController.text != "") {
                               _bottonEnabled = true;
                             } else {
                               _bottonEnabled = false;
@@ -77,7 +78,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 emailController.text != "" &&
                                 passwordController.text != "" &&
                                 confirmedPasswordController.text != "" &&
-                                orgnizationController.text != "") {
+                                organizationController.text != "") {
                               _bottonEnabled = true;
                             } else {
                               _bottonEnabled = false;
@@ -100,7 +101,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 emailController.text != "" &&
                                 passwordController.text != "" &&
                                 confirmedPasswordController.text != "" &&
-                                orgnizationController.text != "") {
+                                organizationController.text != "") {
                               _bottonEnabled = true;
                             } else {
                               _bottonEnabled = false;
@@ -108,7 +109,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           });
                         },
                         autofocus: true,
-                        controller: orgnizationController,
+                        controller: organizationController,
                         decoration: InputDecoration(
                           hintText: AppLocalizations.of(context)?.organization,
                         ),
@@ -123,7 +124,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 emailController.text != "" &&
                                 passwordController.text != "" &&
                                 confirmedPasswordController.text != "" &&
-                                orgnizationController.text != "") {
+                                organizationController.text != "") {
                               _bottonEnabled = true;
                             } else {
                               _bottonEnabled = false;
@@ -160,7 +161,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 emailController.text != "" &&
                                 passwordController.text != "" &&
                                 confirmedPasswordController.text != "" &&
-                                orgnizationController.text != "") {
+                                organizationController.text != "") {
                               _bottonEnabled = true;
                             } else {
                               _bottonEnabled = false;
@@ -205,7 +206,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 RegisterRequest request = RegisterRequest(
                                     userName: userNameController.text,
                                     email: emailController.text,
-                                    organization: orgnizationController.text,
+                                    organization: organizationController.text,
                                     password: passwordController.text,
                                     confirmedPassword:
                                         confirmedPasswordController.text);
@@ -213,7 +214,9 @@ class _RegisterPageState extends State<RegisterPage> {
                                     userDao.register(request);
                                 response.then((value) => {
                                       if (value!.registerResult)
-                                        {Navigator.pushNamed(context, '/')}
+                                        {
+                                          handleRegisterSuccess()
+                                        }
                                       else
                                         {
                                           setState(() {
@@ -226,6 +229,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                           })
                                         }
                                     });
+
                               },
                         child: Text(
                           AppLocalizations.of(context)!.signUp,
@@ -265,5 +269,20 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
               ))),
     );
+  }
+  void handleRegisterSuccess () {
+    LoginRequest loginRequest = LoginRequest(
+        userName: userNameController.text,
+        email: emailController.text,
+        password: passwordController.text);
+    Future<LoginResponse?> loginResponse = userDao.login(loginRequest);
+    loginResponse.then((value) => assignTokenValue(value));
+    Navigator.pushNamed(context, '/');
+  }
+
+  void assignTokenValue(LoginResponse? value) {
+    LoginResponse loginResponseValue = value!;
+    SecureStorage.writeAccessToken(loginResponseValue.accessToken!);
+    SecureStorage.writeRefreshToken(loginResponseValue.refreshToken!);
   }
 }
