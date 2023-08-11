@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_toggle_tab/flutter_toggle_tab.dart';
+import 'package:logging/logging.dart';
 import 'package:one_piece_battles_flutter/constants/path_constants.dart';
 import 'package:one_piece_battles_flutter/main.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
 import 'package:one_piece_battles_flutter/secure_storage.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
+
+import 'authentication_holder.dart';
 
 const locales = [Locale('en', 'US'), Locale('zh', 'CN')];
 
@@ -24,9 +27,10 @@ class _LoginPageState extends State<LoginPage> {
   String verificationMessage = "";
   I18nText? verificationI18n = I18nText();
   UserDao userDao = UserDao();
-  TextEditingController userNameController = TextEditingController();
-  TextEditingController emailController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
+  TextEditingController userNameController = TextEditingController(text: 'abc');
+  TextEditingController emailController = TextEditingController(text: 'abc@gmail.com');
+  TextEditingController passwordController = TextEditingController(text: 'abc');
+  Logger logger = Logger('_LoginPageState');
 
   @override
   Widget build(BuildContext context) {
@@ -190,12 +194,9 @@ class _LoginPageState extends State<LoginPage> {
 
                         Future<LoginResponse?> loginResponse =
                             userDao.login(loginRequest);
-
                         loginResponse.then((value) => {
                               if (value!.verification == null) {
-                                SecureStorage.writeAccessToken(value.accessToken!),
-
-                                Navigator.pushNamed(context, '/')
+                                route(value.accessToken!)
                               }
                               else
                                 {
@@ -247,5 +248,10 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
     );
+  }
+  void route(String token) {
+    debugPrint("write access token $token");
+    AuthenticationHolder.setAuthentication(token);
+    Navigator.pushNamed(context, '/');
   }
 }

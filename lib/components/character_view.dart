@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:logging/logging.dart';
 import 'package:one_piece_battles_flutter/constants/path_constants.dart';
 import 'package:one_piece_battles_flutter/repository/character_dao.dart';
 import 'package:one_piece_battles_flutter/utils/data_converter.dart';
+import 'package:one_piece_battles_flutter/utils/random_string_generator.dart';
 import 'package:one_piece_battles_flutter/utils/string_extensions.dart';
 import 'package:openapi/api.dart';
 import 'package:dropdown_search/dropdown_search.dart';
@@ -16,16 +18,17 @@ class CharacterView extends StatefulWidget {
 }
 
 class _CharacterViewState extends State<CharacterView> {
-  TextEditingController characterNameController = TextEditingController();
-  TextEditingController characterFruitLimitController = TextEditingController();
-  TextEditingController characterGroupGainController = TextEditingController();
-  TextEditingController characterAttackController = TextEditingController();
-  TextEditingController characterDefenseController = TextEditingController();
+  Logger logger = Logger('_CharacterViewState');
+  TextEditingController characterNameController = TextEditingController(text: RandomStringGenerator.generateRandomString(8));
+  TextEditingController characterFruitLimitController = TextEditingController(text: '1');
+  TextEditingController characterGroupGainController = TextEditingController(text: '5');
+  TextEditingController characterAttackController = TextEditingController(text: '500');
+  TextEditingController characterDefenseController = TextEditingController(text: '500');
   TextEditingController characterIntelligenceController =
-      TextEditingController();
-  TextEditingController characterBloodController = TextEditingController();
-  TextEditingController characterSpeedController = TextEditingController();
-  TextEditingController characterEnergyController = TextEditingController();
+      TextEditingController(text: '155');
+  TextEditingController characterBloodController = TextEditingController(text: '5000');
+  TextEditingController characterSpeedController = TextEditingController(text: '50');
+  TextEditingController characterEnergyController = TextEditingController(text: '50');
   CharacterRepository characterRepository = CharacterRepository();
 
   List<TextEditingController> getCharacterControllerList() {
@@ -65,7 +68,7 @@ class _CharacterViewState extends State<CharacterView> {
       AppLocalizations.of(context)!.katana: CharacterType.katana,
       AppLocalizations.of(context)!.shoot: CharacterType.shooter,
     };
-    String selectedItem = "";
+    String selectedItem = displayCharacterTypes.first;
 
     return Column(
       children: [
@@ -229,7 +232,7 @@ class _CharacterViewState extends State<CharacterView> {
                                               }
                                               int valueInt = int.parse(value);
                                               if (valueInt < 1 ||
-                                                  valueInt > 5) {
+                                                  valueInt > 10) {
                                                 return AppLocalizations.of(
                                                         context)!
                                                     .valueExceedsLimit;
@@ -506,6 +509,7 @@ class _CharacterViewState extends State<CharacterView> {
                             onPressed: () {
                               final isValid = _formKey.currentState!.validate();
                               if (isValid) {
+                                debugPrint("start creating request");
                                 AddCharacterRequest addCharacterRequest = AddCharacterRequest(
                                     characterType:
                                         displayValueToEnumValue[selectedItem] ??
