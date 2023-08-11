@@ -43,7 +43,7 @@ class _MyAppState extends State<MyApp> {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: const [Locale('en', 'US'), Locale('zh', 'CN')],
-      initialRoute: '/',
+      initialRoute: '/login',
       onGenerateRoute: MyRouter.generateRoute,
     );
   }

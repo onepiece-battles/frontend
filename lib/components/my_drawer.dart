@@ -5,7 +5,7 @@ import 'package:one_piece_battles_flutter/constants/device_type.dart';
 import '../utils/image_helper.dart';
 import '../utils/onepiece_colors.dart';
 
-int seletedIndex = 0;
+int selectedIndex = 0;
 
 class MyDrawer extends StatefulWidget {
   final DeviceType deviceType;
@@ -28,12 +28,12 @@ class _MyDrawerState extends State<MyDrawer> {
               child: Icon(Icons.add_alarm, color: OnepieceColors.themeColor)),
           ListTile(
             leading: const Icon(Icons.people, color: OnepieceColors.themeColor),
-            selected: seletedIndex == 0,
+            selected: selectedIndex == 0,
             selectedTileColor: Colors.white,
             onTap: () {
               setState(() {
-                seletedIndex = 0;
-                route(seletedIndex);
+                selectedIndex = 0;
+                route(selectedIndex);
               });
             },
             title: Text(
@@ -49,12 +49,12 @@ class _MyDrawerState extends State<MyDrawer> {
               25,
               25,
             ),
-            selected: seletedIndex == 1,
+            selected: selectedIndex == 1,
             selectedTileColor: Colors.white,
             onTap: () {
               setState(() {
-                seletedIndex = 1;
-                route(seletedIndex);
+                selectedIndex = 1;
+                route(selectedIndex);
               });
             },
             title: Text(
@@ -68,12 +68,12 @@ class _MyDrawerState extends State<MyDrawer> {
               Icons.local_fire_department,
               color: OnepieceColors.themeColor,
             ),
-            selected: seletedIndex == 2,
+            selected: selectedIndex == 2,
             selectedTileColor: Colors.white,
             onTap: () {
               setState(() {
-                seletedIndex = 2;
-                route(seletedIndex);
+                selectedIndex = 2;
+                route(selectedIndex);
               });
             },
             title: Text(
@@ -85,12 +85,12 @@ class _MyDrawerState extends State<MyDrawer> {
           ListTile(
             leading:
                 const Icon(Icons.settings, color: OnepieceColors.themeColor),
-            selected: seletedIndex == 3,
+            selected: selectedIndex == 3,
             selectedTileColor: Colors.white,
             onTap: () {
               setState(() {
-                seletedIndex = 3;
-                route(seletedIndex);
+                selectedIndex = 3;
+                route(selectedIndex);
               });
             },
             title: Text(
@@ -101,12 +101,12 @@ class _MyDrawerState extends State<MyDrawer> {
           ),
           ListTile(
             leading: const Icon(Icons.logout, color: OnepieceColors.themeColor),
-            selected: seletedIndex == 4,
+            selected: selectedIndex == 4,
             selectedTileColor: Colors.white,
             onTap: () {
               setState(() {
-                seletedIndex = 4;
-                route(seletedIndex);
+                selectedIndex = 4;
+                route(selectedIndex);
               });
             },
             title: Text(
@@ -125,7 +125,7 @@ class _MyDrawerState extends State<MyDrawer> {
       Navigator.pop(context);
     }
     if (widget.pageController != null) {
-      widget.pageController!.jumpToPage(seletedIndex);
+      widget.pageController!.jumpToPage(selectedIndex);
     }
   }
 }
