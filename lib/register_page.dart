@@ -13,10 +13,10 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  UserDao userDao = UserDao();
+  UserDao userDao =  UserDao.empty();
   bool _isPasswordHidden = true;
   bool _isConfirmedPasswordHidden = true;
-  bool _bottonEnabled = false;
+  bool _buttonEnabled = false;
   String verificationMessage = "";
   TextEditingController userNameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
@@ -56,9 +56,9 @@ class _RegisterPageState extends State<RegisterPage> {
                                 passwordController.text != "" &&
                                 confirmedPasswordController.text != "" &&
                                 organizationController.text != "") {
-                              _bottonEnabled = true;
+                              _buttonEnabled = true;
                             } else {
-                              _bottonEnabled = false;
+                              _buttonEnabled = false;
                             }
                           });
                         },
@@ -79,9 +79,9 @@ class _RegisterPageState extends State<RegisterPage> {
                                 passwordController.text != "" &&
                                 confirmedPasswordController.text != "" &&
                                 organizationController.text != "") {
-                              _bottonEnabled = true;
+                              _buttonEnabled = true;
                             } else {
-                              _bottonEnabled = false;
+                              _buttonEnabled = false;
                             }
                           });
                         },
@@ -102,9 +102,9 @@ class _RegisterPageState extends State<RegisterPage> {
                                 passwordController.text != "" &&
                                 confirmedPasswordController.text != "" &&
                                 organizationController.text != "") {
-                              _bottonEnabled = true;
+                              _buttonEnabled = true;
                             } else {
-                              _bottonEnabled = false;
+                              _buttonEnabled = false;
                             }
                           });
                         },
@@ -125,9 +125,9 @@ class _RegisterPageState extends State<RegisterPage> {
                                 passwordController.text != "" &&
                                 confirmedPasswordController.text != "" &&
                                 organizationController.text != "") {
-                              _bottonEnabled = true;
+                              _buttonEnabled = true;
                             } else {
-                              _bottonEnabled = false;
+                              _buttonEnabled = false;
                             }
                           });
                         },
@@ -162,9 +162,9 @@ class _RegisterPageState extends State<RegisterPage> {
                                 passwordController.text != "" &&
                                 confirmedPasswordController.text != "" &&
                                 organizationController.text != "") {
-                              _bottonEnabled = true;
+                              _buttonEnabled = true;
                             } else {
-                              _bottonEnabled = false;
+                              _buttonEnabled = false;
                             }
                           });
                         },
@@ -200,7 +200,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     SizedBox(
                       width: 300,
                       child: ElevatedButton(
-                        onPressed: !_bottonEnabled
+                        onPressed: !_buttonEnabled
                             ? null
                             : () {
                                 RegisterRequest request = RegisterRequest(

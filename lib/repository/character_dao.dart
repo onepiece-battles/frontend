@@ -1,10 +1,10 @@
-import 'package:flutter/widgets.dart';
-import 'package:one_piece_battles_flutter/authentication_holder.dart';
 import 'package:openapi/api.dart';
 
-class CharacterRepository {
-  ApiClient apiClient = ApiClient();
+class CharacterDao {
   CharacterApi characterApi = CharacterApi();
+  CharacterDao(ApiClient apiClient){
+    characterApi = CharacterApi(apiClient);
+  }
 
   Future<ListCharacterResponse?> listCharacter(
       ListCharacterRequest listCharacterRequest) async {
@@ -13,10 +13,6 @@ class CharacterRepository {
 
   Future<Character?> addCharacter(
       AddCharacterRequest addCharacterRequest) async {
-    var authentication = AuthenticationHolder.getAuthentication();
-    var accessToken = authentication.accessToken;
-    debugPrint('access token in character api: $accessToken');
-    characterApi = CharacterApi(ApiClient(authentication: AuthenticationHolder.getAuthentication()));
     return await characterApi.addCharacter(addCharacterRequest);
   }
 

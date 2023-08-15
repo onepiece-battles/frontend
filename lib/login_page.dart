@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_toggle_tab/flutter_toggle_tab.dart';
+import 'package:get_it/get_it.dart';
 import 'package:logging/logging.dart';
+import 'package:one_piece_battles_flutter/api_initializer.dart';
 import 'package:one_piece_battles_flutter/constants/path_constants.dart';
 import 'package:one_piece_battles_flutter/main.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
-import 'package:one_piece_battles_flutter/secure_storage.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
 
-import 'authentication_holder.dart';
-
+GetIt getIt = GetIt.instance;
 const locales = [Locale('en', 'US'), Locale('zh', 'CN')];
 
 class LoginPage extends StatefulWidget {
@@ -26,7 +26,6 @@ class _LoginPageState extends State<LoginPage> {
   bool _buttonEnabled = false;
   String verificationMessage = "";
   I18nText? verificationI18n = I18nText();
-  UserDao userDao = UserDao();
   TextEditingController userNameController = TextEditingController(text: 'abc');
   TextEditingController emailController = TextEditingController(text: 'abc@gmail.com');
   TextEditingController passwordController = TextEditingController(text: 'abc');
@@ -192,8 +191,7 @@ class _LoginPageState extends State<LoginPage> {
                             email: emailController.text,
                             password: passwordController.text);
 
-                        Future<LoginResponse?> loginResponse =
-                            userDao.login(loginRequest);
+                        Future<LoginResponse?> loginResponse = getIt<UserDao>().login(loginRequest);
                         loginResponse.then((value) => {
                               if (value!.verification == null) {
                                 route(value.accessToken!)
@@ -250,8 +248,8 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
   void route(String token) {
-    debugPrint("write access token $token");
-    AuthenticationHolder.setAuthentication(token);
+    // init apis with tokens
+    ApiInitializer.initApis(token);
     Navigator.pushNamed(context, '/');
   }
 }
