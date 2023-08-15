@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:get_it/get_it.dart';
 import 'package:logging/logging.dart';
 import 'package:one_piece_battles_flutter/constants/path_constants.dart';
 import 'package:one_piece_battles_flutter/repository/character_dao.dart';
@@ -9,6 +10,8 @@ import 'package:one_piece_battles_flutter/utils/random_string_generator.dart';
 import 'package:one_piece_battles_flutter/utils/string_extensions.dart';
 import 'package:openapi/api.dart';
 import 'package:dropdown_search/dropdown_search.dart';
+
+GetIt getIt = GetIt.instance;
 
 class CharacterView extends StatefulWidget {
   const CharacterView({super.key});
@@ -29,7 +32,7 @@ class _CharacterViewState extends State<CharacterView> {
   TextEditingController characterBloodController = TextEditingController(text: '5000');
   TextEditingController characterSpeedController = TextEditingController(text: '50');
   TextEditingController characterEnergyController = TextEditingController(text: '50');
-  CharacterRepository characterRepository = CharacterRepository();
+  List<Character> currentCharacterList = [];
 
   List<TextEditingController> getCharacterControllerList() {
     return [
@@ -47,6 +50,14 @@ class _CharacterViewState extends State<CharacterView> {
   }
 
   final _formKey = GlobalKey<FormState>();
+
+  @override
+  void initState()  {
+    super.initState();
+    ListCharacterRequest listCharacterRequest = ListCharacterRequest(pageSize: 10, pageIndex: 1);
+    Future<ListCharacterResponse?> listCharacterResponse =  getIt<CharacterDao>().listCharacter(listCharacterRequest);
+    listCharacterResponse.then((value) => currentCharacterList = value!.characters);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -530,7 +541,7 @@ class _CharacterViewState extends State<CharacterView> {
                                     speed:
                                         DataConverter.stringToInt(characterSpeedController.text),
                                     magic: DataConverter.stringToInt(characterEnergyController.text));
-                                Future<Character?> character =characterRepository
+                                Future<Character?> character =getIt<CharacterDao>()
                                     .addCharacter(addCharacterRequest);
                               } else {
                                 print("Form is valid: $isValid");
@@ -576,32 +587,58 @@ class _CharacterViewState extends State<CharacterView> {
               DataColumn(
                   label: Text(AppLocalizations.of(context)!.characterFruits)),
             ],
-            rows: const [
-              DataRow(
-                cells: [
-                  DataCell(
-                    Padding(
-                      padding:
-                          EdgeInsets.only(top: 8.0, bottom: 8.0, right: 6.0),
-                      child: Image(
-                        image: AssetImage(PathConstants.loginLuffyImage),
-                        width: 30,
-                      ),
-                      // child: Text("aa"),
-                    ),
-                  ),
-                  DataCell(Text("aa")),
-                  DataCell(Text("aa")),
-                  DataCell(Text("aa")),
-                  DataCell(Text("aa")),
-                  DataCell(Text("aa")),
-                  DataCell(Text("aa")),
-                  DataCell(Text("aa")),
-                  DataCell(Text("aa")),
-                  DataCell(Text("aa"))
-                ],
-              ),
-            ],
+            rows: [
+              for (var character in currentCharacterList)
+    const DataRow(
+        cells: [
+          DataCell(
+            Text("aa")
+            // Padding(
+            //   padding:
+            //       EdgeInsets.only(top: 8.0, bottom: 8.0, right: 6.0),
+            //   child: Image.memory(Uint8List.fromList(character.)),
+            //   // child: Text("aa"),
+            // ),
+          ),
+          DataCell(Text("")),
+          DataCell(Text("aa")),
+          DataCell(Text("aa")),
+          DataCell(Text("aa")),
+          DataCell(Text("aa")),
+          DataCell(Text("aa")),
+          DataCell(Text("aa")),
+          DataCell(Text("aa")),
+          DataCell(Text("aa"))
+        ],
+      ),
+
+              ]
+            // const [
+            //   DataRow(
+            //     cells: [
+            //       DataCell(
+            //         Padding(
+            //           padding:
+            //               EdgeInsets.only(top: 8.0, bottom: 8.0, right: 6.0),
+            //           child: Image(
+            //             image: AssetImage(PathConstants.loginLuffyImage),
+            //             width: 30,
+            //           ),
+            //           // child: Text("aa"),
+            //         ),
+            //       ),
+            //       DataCell(Text("aa")),
+            //       DataCell(Text("aa")),
+            //       DataCell(Text("aa")),
+            //       DataCell(Text("aa")),
+            //       DataCell(Text("aa")),
+            //       DataCell(Text("aa")),
+            //       DataCell(Text("aa")),
+            //       DataCell(Text("aa")),
+            //       DataCell(Text("aa"))
+            //     ],
+            //   ),
+            // ],
           ),
         ),
         // PaginatedDataTable(columns: [
