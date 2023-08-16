@@ -26,16 +26,21 @@ class _CharacterViewState extends State<CharacterView> {
         ListCharacterRequest(pageSize: 10, pageIndex: 1);
     Future<ListCharacterResponse?> listCharacterResponse =
         getIt<CharacterDao>().listCharacter(listCharacterRequest);
-    listCharacterResponse
-        .then((value) => currentCharacterList = value!.characters);
+
+    listCharacterResponse.then((value) {
+      setState(() {
+        currentCharacterList = value!.characters;
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const SizedBox(
+        SizedBox(
           height: 20,
+          child: Text(currentCharacterList.toString()),
         ),
         Padding(
           padding: const EdgeInsets.only(left: 20, right: 20),
