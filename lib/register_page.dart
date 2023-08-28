@@ -5,6 +5,8 @@ import 'package:one_piece_battles_flutter/secure_storage.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
 
+import 'api_initializer.dart';
+
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
 
@@ -282,6 +284,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
   void assignTokenValue(LoginResponse? value) {
     LoginResponse loginResponseValue = value!;
+    ApiInitializer.initApis(loginResponseValue.accessToken!);
     SecureStorage.writeAccessToken(loginResponseValue.accessToken!);
     SecureStorage.writeRefreshToken(loginResponseValue.refreshToken!);
   }
