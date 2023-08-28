@@ -1,3 +1,4 @@
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
@@ -19,20 +20,16 @@ class CharacterView extends StatefulWidget {
 class _CharacterViewState extends State<CharacterView> {
   Logger logger = Logger('_CharacterViewState');
   List<Character> currentCharacterList = [];
+  int selectedPageIndex = 1;
+  int pageSize = 10;
+  List<CharacterSortableField> sortKeys = [];
+  CharacterFilter characterFilter = CharacterFilter();
+  TextEditingController searchNameController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    ListCharacterRequest listCharacterRequest =
-        ListCharacterRequest(pageSize: 10, pageIndex: 1);
-    Future<ListCharacterResponse?> listCharacterResponse =
-        getIt<CharacterDao>().listCharacter(listCharacterRequest);
-
-    listCharacterResponse.then((value) {
-      setState(() {
-        currentCharacterList = value!.characters;
-      });
-    });
+    _doSearch();
   }
 
   @override
@@ -77,8 +74,8 @@ class _CharacterViewState extends State<CharacterView> {
   DataTable _createDataTable() {
     return DataTable(
       columns: _createColumns(),
-      rows: _createRows(),
-      columnSpacing: 30,
+      rows: _createRows(context),
+      columnSpacing: 0,
     );
   }
 
@@ -86,6 +83,7 @@ class _CharacterViewState extends State<CharacterView> {
     return [
       const DataColumn(label: Text('')),
       DataColumn(label: Text(AppLocalizations.of(context)!.characterName)),
+      DataColumn(label: Text(AppLocalizations.of(context)!.characterTypeLable)),
       DataColumn(label: Text(AppLocalizations.of(context)!.fruitLimit)),
       DataColumn(label: Text(AppLocalizations.of(context)!.groupGain)),
       DataColumn(label: Text(AppLocalizations.of(context)!.characterAttack)),
@@ -98,12 +96,129 @@ class _CharacterViewState extends State<CharacterView> {
     ];
   }
 
-  List<DataRow> _createRows() {
-    return currentCharacterList
+  DataRow _createSearchFilterRow(BuildContext context) {
+    List<String> displayCharacterTypes = [
+      AppLocalizations.of(context)!.body,
+      AppLocalizations.of(context)!.science,
+      AppLocalizations.of(context)!.katana,
+      AppLocalizations.of(context)!.shoot,
+      AppLocalizations.of(context)!.fist,
+      AppLocalizations.of(context)!.leg
+    ];
+    Map<String, CharacterType> displayValueToEnumValue =
+        <String, CharacterType>{
+      AppLocalizations.of(context)!.body: CharacterType.body,
+      AppLocalizations.of(context)!.leg: CharacterType.foot,
+      AppLocalizations.of(context)!.science: CharacterType.science,
+      AppLocalizations.of(context)!.fist: CharacterType.fist,
+      AppLocalizations.of(context)!.katana: CharacterType.katana,
+      AppLocalizations.of(context)!.shoot: CharacterType.shooter,
+    };
+    List<String> selectedItems = [];
+    return DataRow(cells: [
+      const DataCell(Text("")),
+      DataCell(Padding(
+          padding: const EdgeInsets.all(3),
+              child: TextField(
+            controller: searchNameController,
+            decoration: InputDecoration(
+              prefixIcon: IconButton(
+                  onPressed: () {
+                    characterFilter.name = searchNameController.text;
+                    _doSearch();
+                  },
+                  icon: const Icon(Icons.search)),
+              hintText: AppLocalizations.of(context)!.search,
+              suffixIcon: IconButton(
+                icon: const Icon(Icons.clear),
+                onPressed: () {
+                  searchNameController.clear();
+                  characterFilter.name = null;
+                  _doSearch();
+                },
+              ),
+            ),
+          ))),
+      DataCell(Padding(
+        padding: const EdgeInsets.all(3),
+        child: DropdownSearch<String>.multiSelection(
+          items: displayCharacterTypes,
+          selectedItems: selectedItems,
+          onChanged: (value) {
+            selectedItems = value;
+            characterFilter.characterTypes = selectedItems.map((element) {
+              return displayValueToEnumValue[element]!;
+            }).toList();
+            _doSearch();
+          },
+          onSaved: (value) {
+            if (value == null) {
+              selectedItems = [];
+            } else {
+              selectedItems = value;
+            }
+            characterFilter.characterTypes = selectedItems.map((element) {
+              return displayValueToEnumValue[element]!;
+            }).toList();
+            _doSearch();
+          },
+          dropdownDecoratorProps: DropDownDecoratorProps(
+            dropdownSearchDecoration: InputDecoration(
+                hintText: AppLocalizations.of(context)!.characterTypeHint),
+          ),
+        ),
+      )),
+      DataCell(IconButton(
+        icon: const Icon(Icons.arrow_upward),
+        onPressed: () {},
+      )),
+      DataCell(IconButton(
+        icon: const Icon(Icons.arrow_upward),
+        onPressed: () {},
+      )),
+      DataCell(IconButton(
+        icon: const Icon(Icons.arrow_upward),
+        onPressed: () {},
+      )),
+      DataCell(IconButton(
+        icon: const Icon(Icons.arrow_upward),
+        onPressed: () {},
+      )),
+      DataCell(IconButton(
+        icon: const Icon(Icons.arrow_upward),
+        onPressed: () {},
+      )),
+      DataCell(IconButton(
+        icon: const Icon(Icons.arrow_upward),
+        onPressed: () {},
+      )),
+      DataCell(IconButton(
+        icon: const Icon(Icons.arrow_upward),
+        onPressed: () {},
+      )),
+      DataCell(IconButton(
+        icon: const Icon(Icons.arrow_upward),
+        onPressed: () {},
+      ))
+    ]);
+  }
+
+  List<DataRow> _createRows(BuildContext context) {
+    var searchRow = _createSearchFilterRow(context);
+    List<DataRow> result = [];
+    result.add(searchRow);
+    var dataList = currentCharacterList
         .map((character) => DataRow(cells: [
-              DataCell(
-                  Image.memory(Base64Helper.decode(character.profileImage!))),
+              DataCell(Padding(
+                  padding: const EdgeInsets.fromLTRB(0,3,30,3),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 30),
+                    child: Image.memory(
+                        Base64Helper.decode(character.profileImage!)),
+                  ))),
+              // DataCell(Text("aaa")),
               DataCell(Text(character.name.toString())),
+              DataCell(Text(character.characterType.toString())),
               DataCell(Text(character.fruitLimit.toString())),
               DataCell(Text(character.groupGain.toString())),
               DataCell(Text(character.attack.toString())),
@@ -111,8 +226,28 @@ class _CharacterViewState extends State<CharacterView> {
               DataCell(Text(character.intelligence.toString())),
               DataCell(Text(character.blood.toString())),
               DataCell(Text(character.speed.toString())),
-              DataCell(Text(character.fruits.toString())),
+              DataCell(Text(
+                  character.fruits.isEmpty ? "" : character.fruits.toString())),
             ]))
         .toList();
+    result.addAll(dataList);
+    return result;
+  }
+
+  void _doSearch() {
+    ListCharacterRequest listCharacterRequest = ListCharacterRequest(
+        pageSize: pageSize,
+        pageIndex: selectedPageIndex,
+        sortKeys: sortKeys,
+        characterFilter: characterFilter);
+    debugPrint(listCharacterRequest.toString());
+    Future<ListCharacterResponse?> listCharacterResponse =
+        getIt<CharacterDao>().listCharacter(listCharacterRequest);
+
+    listCharacterResponse.then((value) {
+      setState(() {
+        currentCharacterList = value!.characters;
+      });
+    });
   }
 }

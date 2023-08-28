@@ -2,9 +2,10 @@ import 'package:openapi/api.dart';
 
 class CharacterDao {
   CharacterApi characterApi = CharacterApi();
-  CharacterDao(ApiClient apiClient){
+  CharacterDao(ApiClient apiClient) {
     characterApi = CharacterApi(apiClient);
   }
+  CharacterDao.empty();
 
   Future<ListCharacterResponse?> listCharacter(
       ListCharacterRequest listCharacterRequest) async {
