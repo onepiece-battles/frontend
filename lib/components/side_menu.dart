@@ -5,7 +5,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../constants/device_type.dart';
 
-int seletedIndex = 0;
+int selectedIndex = 0;
 
 class SideMenu extends StatefulWidget {
   final DeviceType deviceType;
@@ -27,12 +27,12 @@ class _SideMenuState extends State<SideMenu> {
               child: Icon(Icons.add_alarm, color: OnepieceColors.themeColor)),
           ListTile(
             leading: const Icon(Icons.people, color: OnepieceColors.themeColor),
-            selected: seletedIndex == 0,
+            selected: selectedIndex == 0,
             selectedTileColor: Colors.white,
             onTap: () {
               setState(() {
-                seletedIndex = 0;
-                route(seletedIndex);
+                selectedIndex = 0;
+                route(selectedIndex);
               });
             },
             title: Text(
@@ -48,12 +48,12 @@ class _SideMenuState extends State<SideMenu> {
               25,
               25,
             ),
-            selected: seletedIndex == 1,
+            selected: selectedIndex == 1,
             selectedTileColor: Colors.white,
             onTap: () {
               setState(() {
-                seletedIndex = 1;
-                route(seletedIndex);
+                selectedIndex = 1;
+                route(selectedIndex);
               });
             },
             title: Text(
@@ -67,12 +67,12 @@ class _SideMenuState extends State<SideMenu> {
               Icons.local_fire_department,
               color: OnepieceColors.themeColor,
             ),
-            selected: seletedIndex == 2,
+            selected: selectedIndex == 2,
             selectedTileColor: Colors.white,
             onTap: () {
               setState(() {
-                seletedIndex = 2;
-                route(seletedIndex);
+                selectedIndex = 2;
+                route(selectedIndex);
               });
             },
             title: Text(
@@ -84,12 +84,12 @@ class _SideMenuState extends State<SideMenu> {
           ListTile(
             leading:
                 const Icon(Icons.settings, color: OnepieceColors.themeColor),
-            selected: seletedIndex == 3,
+            selected: selectedIndex == 3,
             selectedTileColor: Colors.white,
             onTap: () {
               setState(() {
-                seletedIndex = 3;
-                route(seletedIndex);
+                selectedIndex = 3;
+                route(selectedIndex);
               });
             },
             title: Text(
@@ -100,16 +100,32 @@ class _SideMenuState extends State<SideMenu> {
           ),
           ListTile(
             leading: const Icon(Icons.logout, color: OnepieceColors.themeColor),
-            selected: seletedIndex == 4,
+            selected: selectedIndex == 4,
             selectedTileColor: Colors.white,
             onTap: () {
               setState(() {
-                seletedIndex = 4;
-                route(seletedIndex);
+                selectedIndex = 4;
+                route(selectedIndex);
               });
             },
             title: Text(
               AppLocalizations.of(context)!.logout,
+              textAlign: TextAlign.left,
+              style: const TextStyle(fontSize: 17, fontStyle: FontStyle.italic),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.settings, color: OnepieceColors.themeColor),
+            selected: selectedIndex == 5,
+            selectedTileColor: Colors.white,
+            onTap: () {
+              setState(() {
+                selectedIndex = 5;
+                route(selectedIndex);
+              });
+            },
+            title: Text(
+              AppLocalizations.of(context)!.settings,
               textAlign: TextAlign.left,
               style: const TextStyle(fontSize: 17, fontStyle: FontStyle.italic),
             ),
@@ -124,7 +140,7 @@ class _SideMenuState extends State<SideMenu> {
       Navigator.pop(context);
     }
     if (widget.pageController != null) {
-      widget.pageController!.jumpToPage(seletedIndex);
+      widget.pageController!.jumpToPage(selectedIndex);
     }
   }
 }
