@@ -3,7 +3,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:one_piece_battles_flutter/constants/device_type.dart';
 
 import '../utils/image_helper.dart';
-import '../utils/onepiece_colors.dart';
+import '../constants/onepiece_colors.dart';
 
 int selectedIndex = 0;
 

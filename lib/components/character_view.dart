@@ -4,6 +4,8 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:logging/logging.dart';
 import 'package:one_piece_battles_flutter/components/add_character_view.dart';
+import 'package:one_piece_battles_flutter/constants/font_constants.dart';
+import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:one_piece_battles_flutter/repository/character_dao.dart';
 import 'package:one_piece_battles_flutter/utils/base64_helper.dart';
 import 'package:openapi/api.dart';
@@ -36,43 +38,28 @@ class _CharacterViewState extends State<CharacterView> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const SizedBox(height: 20),
         Padding(
-          padding: const EdgeInsets.only(left: 20, right: 20),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(
-                width: 250,
-              ),
-              ElevatedButton(
-                child: Text(AppLocalizations.of(context)!.createCharacter,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 24,
-                        color: Colors.white)),
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: ((context) {
-                      return const AddCharacterView();
-                    }),
-                  );
-                },
-              ),
-            ],
-          ),
-        ),
+            padding: const EdgeInsets.all(15),
+            child: Text(
+              AppLocalizations.of(context)!.character,
+              style: FontConstant.headerStyle,
+            )),
         const SizedBox(
           height: 20,
         ),
-        _createDataTable()
+        Padding(
+          padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
+          child: _createDataTable(),
+        )
       ],
     );
   }
 
   DataTable _createDataTable() {
     return DataTable(
+      border: const TableBorder(
+          top: BorderSide(color: OnepieceColors.themeColor),
+          bottom: BorderSide(color: OnepieceColors.themeColor)),
       columns: _createColumns(),
       rows: _createRows(context),
       columnSpacing: 0,
@@ -81,18 +68,86 @@ class _CharacterViewState extends State<CharacterView> {
 
   List<DataColumn> _createColumns() {
     return [
-      const DataColumn(label: Text('')),
-      DataColumn(label: Text(AppLocalizations.of(context)!.characterName)),
-      DataColumn(label: Text(AppLocalizations.of(context)!.characterTypeLable)),
-      DataColumn(label: Text(AppLocalizations.of(context)!.fruitLimit)),
-      DataColumn(label: Text(AppLocalizations.of(context)!.groupGain)),
-      DataColumn(label: Text(AppLocalizations.of(context)!.characterAttack)),
-      DataColumn(label: Text(AppLocalizations.of(context)!.characterDefense)),
       DataColumn(
-          label: Text(AppLocalizations.of(context)!.characterIntelligence)),
-      DataColumn(label: Text(AppLocalizations.of(context)!.characterBlood)),
-      DataColumn(label: Text(AppLocalizations.of(context)!.characterSpeed)),
-      DataColumn(label: Text(AppLocalizations.of(context)!.characterFruits)),
+          label: IconButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: ((context) {
+                    return const AddCharacterView();
+                  }),
+                );
+              },
+              icon: const Icon(Icons.add))),
+      DataColumn(
+          label: Text(
+        AppLocalizations.of(context)!.characterName,
+        style: FontConstant.tableHeaderStyle,
+      )),
+      DataColumn(
+          label: Padding(
+        padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
+        child: Text(
+          AppLocalizations.of(context)!.characterTypeLable,
+          style: FontConstant.tableHeaderStyle,
+        ),
+      )),
+      DataColumn(
+          label: Padding(
+        padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
+        child: Text(
+          AppLocalizations.of(context)!.fruitLimit,
+          style: FontConstant.tableHeaderStyle,
+        ),
+      )),
+      DataColumn(
+          label: Padding(
+        padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
+        child: Text(
+          AppLocalizations.of(context)!.groupGain,
+          style: FontConstant.tableHeaderStyle,
+        ),
+      )),
+      DataColumn(
+          label: Padding(
+        padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
+        child: Text(
+          AppLocalizations.of(context)!.characterAttack,
+          style: FontConstant.tableHeaderStyle,
+        ),
+      )),
+      DataColumn(
+          label: Padding(
+        padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
+        child: Text(
+          AppLocalizations.of(context)!.characterDefense,
+          style: FontConstant.tableHeaderStyle,
+        ),
+      )),
+      DataColumn(
+          label: Padding(
+        padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
+        child: Text(
+          AppLocalizations.of(context)!.characterIntelligence,
+          style: FontConstant.tableHeaderStyle,
+        ),
+      )),
+      DataColumn(
+          label: Text(
+        AppLocalizations.of(context)!.characterBlood,
+        style: FontConstant.tableHeaderStyle,
+      )),
+      DataColumn(
+        label: Text(
+          AppLocalizations.of(context)!.characterSpeed,
+          style: FontConstant.tableHeaderStyle,
+        ),
+      ),
+      DataColumn(
+          label: Text(
+        AppLocalizations.of(context)!.characterFruits,
+        style: FontConstant.tableHeaderStyle,
+      )),
     ];
   }
 
@@ -116,10 +171,15 @@ class _CharacterViewState extends State<CharacterView> {
     };
     List<String> selectedItems = [];
     return DataRow(cells: [
-      const DataCell(Text("")),
       DataCell(Padding(
-          padding: const EdgeInsets.all(3),
-              child: TextField(
+        padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
+        child: ElevatedButton(
+            onPressed: () {},
+            child: Text(AppLocalizations.of(context)!.clearAll)),
+      )),
+      DataCell(Padding(
+          padding: const EdgeInsets.fromLTRB(0, 6, 20, 6),
+          child: TextField(
             controller: searchNameController,
             decoration: InputDecoration(
               prefixIcon: IconButton(
@@ -140,7 +200,7 @@ class _CharacterViewState extends State<CharacterView> {
             ),
           ))),
       DataCell(Padding(
-        padding: const EdgeInsets.all(3),
+        padding: const EdgeInsets.fromLTRB(0, 6, 20, 6),
         child: DropdownSearch<String>.multiSelection(
           items: displayCharacterTypes,
           selectedItems: selectedItems,
@@ -168,37 +228,61 @@ class _CharacterViewState extends State<CharacterView> {
           ),
         ),
       )),
-      DataCell(IconButton(
-        icon: const Icon(Icons.arrow_upward),
-        onPressed: () {},
+      DataCell(Padding(
+        padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
+        child: ElevatedButton(
+          child: const Icon(Icons.arrow_upward),
+          onPressed: () {},
+        ),
       )),
-      DataCell(IconButton(
-        icon: const Icon(Icons.arrow_upward),
-        onPressed: () {},
+      DataCell(Padding(
+        padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
+        child: ElevatedButton(
+          child: const Icon(Icons.arrow_upward),
+          onPressed: () {},
+        ),
       )),
-      DataCell(IconButton(
-        icon: const Icon(Icons.arrow_upward),
-        onPressed: () {},
+      DataCell(Padding(
+        padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
+        child: ElevatedButton(
+          child: const Icon(Icons.arrow_upward),
+          onPressed: () {},
+        ),
       )),
-      DataCell(IconButton(
-        icon: const Icon(Icons.arrow_upward),
-        onPressed: () {},
+      DataCell(Padding(
+        padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
+        child: ElevatedButton(
+          child: const Icon(Icons.arrow_upward),
+          onPressed: () {},
+        ),
       )),
-      DataCell(IconButton(
-        icon: const Icon(Icons.arrow_upward),
-        onPressed: () {},
+      DataCell(Padding(
+        padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
+        child: ElevatedButton(
+          child: const Icon(Icons.arrow_upward),
+          onPressed: () {},
+        ),
       )),
-      DataCell(IconButton(
-        icon: const Icon(Icons.arrow_upward),
-        onPressed: () {},
+      DataCell(Padding(
+        padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
+        child: ElevatedButton(
+          child: const Icon(Icons.arrow_upward),
+          onPressed: () {},
+        ),
       )),
-      DataCell(IconButton(
-        icon: const Icon(Icons.arrow_upward),
-        onPressed: () {},
+      DataCell(Padding(
+        padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
+        child: ElevatedButton(
+          child: const Icon(Icons.arrow_upward),
+          onPressed: () {},
+        ),
       )),
-      DataCell(IconButton(
-        icon: const Icon(Icons.arrow_upward),
-        onPressed: () {},
+      DataCell(Padding(
+        padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
+        child: ElevatedButton(
+          child: const Icon(Icons.arrow_upward),
+          onPressed: () {},
+        ),
       ))
     ]);
   }
@@ -210,7 +294,7 @@ class _CharacterViewState extends State<CharacterView> {
     var dataList = currentCharacterList
         .map((character) => DataRow(cells: [
               DataCell(Padding(
-                  padding: const EdgeInsets.fromLTRB(0,3,30,3),
+                  padding: const EdgeInsets.fromLTRB(0, 3, 30, 3),
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 30),
                     child: Image.memory(
