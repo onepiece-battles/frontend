@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:one_piece_battles_flutter/components/character_view.dart';
+import 'package:one_piece_battles_flutter/components/settings_view.dart';
 import 'package:one_piece_battles_flutter/components/side_menu.dart';
 import 'package:one_piece_battles_flutter/responsive/base_view.dart';
 
@@ -43,7 +44,8 @@ class _DesktopScaffoldState extends BaseView<DesktopScaffold> {
                 ),
                 Container(
                   color: Colors.yellow,
-                )
+                ),
+                SettingsView()
               ],
             ),
           ),

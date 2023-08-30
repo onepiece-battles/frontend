@@ -23,7 +23,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   var _tabTextIndexSelected = 1;
   bool _isHidden = true;
-  bool _buttonEnabled = false;
+  bool _buttonEnabled = true;
   String verificationMessage = "";
   I18nText? verificationI18n = I18nText();
   TextEditingController userNameController = TextEditingController(text: 'abc');
@@ -119,6 +119,7 @@ class _LoginPageState extends State<LoginPage> {
                     prefixIcon: const Icon(Icons.person)),
               ),
             ),
+            const SizedBox(height: 20,),
             SizedBox(
               width: 300,
               child: TextField(
@@ -141,6 +142,7 @@ class _LoginPageState extends State<LoginPage> {
                     prefixIcon: const Icon(Icons.email)),
               ),
             ),
+            const SizedBox(height: 20,),
             SizedBox(
               width: 300,
               child: TextFormField(
