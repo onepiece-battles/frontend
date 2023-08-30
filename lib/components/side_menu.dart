@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:one_piece_battles_flutter/utils/image_helper.dart';
-import 'package:one_piece_battles_flutter/utils/onepiece_colors.dart';
+import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../constants/device_type.dart';

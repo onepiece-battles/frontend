@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../utils/image_helper.dart';
-import '../utils/onepiece_colors.dart';
+import 'onepiece_colors.dart';
 
 var myAppBar = AppBar(
   backgroundColor: Colors.grey[300],

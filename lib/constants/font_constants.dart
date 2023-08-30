@@ -16,4 +16,10 @@ class FontConstant {
       color: FontConstant.headerFontColor,
       fontSize: FontConstant.headerFontSize,
       fontWeight: FontConstant.headerFontWeight);
+
+  static const TextStyle tableHeaderStyle = TextStyle(
+      color: FontConstant.contentFontColor,
+      fontSize: FontConstant.contentFontSize,
+      fontWeight: FontConstant.headerFontWeight
+  );
 }

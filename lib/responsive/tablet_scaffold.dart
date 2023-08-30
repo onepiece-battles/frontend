@@ -4,7 +4,7 @@ import 'package:one_piece_battles_flutter/responsive/base_view.dart';
 
 import '../components/my_drawer.dart';
 import '../constants/component_constants.dart';
-import '../utils/onepiece_colors.dart';
+import '../constants/onepiece_colors.dart';
 
 class TabletScaffold extends StatefulWidget {
   const TabletScaffold({super.key});
@@ -22,7 +22,7 @@ class _TabletScaffoldState extends BaseView<TabletScaffold> {
         deviceType: DeviceType.tablet,
         pageController: pageController,
       ),
-      backgroundColor: OnepieceColors.backgroudColor,
+      backgroundColor: OnepieceColors.backgroundColor,
       body: PageView(
         controller: pageController,
         children: [
