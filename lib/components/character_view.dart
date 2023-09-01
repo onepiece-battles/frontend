@@ -8,6 +8,7 @@ import 'package:one_piece_battles_flutter/constants/font_constants.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:one_piece_battles_flutter/repository/character_dao.dart';
 import 'package:one_piece_battles_flutter/utils/base64_helper.dart';
+import 'package:one_piece_battles_flutter/utils/data_validator.dart';
 import 'package:openapi/api.dart';
 
 GetIt getIt = GetIt.instance;
@@ -27,6 +28,12 @@ class _CharacterViewState extends State<CharacterView> {
   List<CharacterSortableField> sortKeys = [];
   CharacterFilter characterFilter = CharacterFilter();
   TextEditingController searchNameController = TextEditingController();
+  TextEditingController pageNumberController = TextEditingController();
+  int totalSize = 0;
+  bool preButtonEnabled = false;
+  bool nextButtonEnabled = false;
+  bool confirmButtonEnabled = false;
+  int pageNum = 1;
 
   @override
   void initState() {
@@ -49,7 +56,11 @@ class _CharacterViewState extends State<CharacterView> {
         ),
         Padding(
           padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
-          child: _createDataTable(),
+          child: Container(width: double.infinity, child: _createDataTable()),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(15, 15, 15, 0),
+          child: _getPageFoot(),
         )
       ],
     );
@@ -180,6 +191,7 @@ class _CharacterViewState extends State<CharacterView> {
       DataCell(Padding(
           padding: const EdgeInsets.fromLTRB(0, 6, 20, 6),
           child: TextField(
+            textAlign: TextAlign.center,
             controller: searchNameController,
             decoration: InputDecoration(
               prefixIcon: IconButton(
@@ -224,7 +236,8 @@ class _CharacterViewState extends State<CharacterView> {
           },
           dropdownDecoratorProps: DropDownDecoratorProps(
             dropdownSearchDecoration: InputDecoration(
-                hintText: AppLocalizations.of(context)!.characterTypeHint),
+                hintText: AppLocalizations.of(context)!.characterTypeHint,
+                alignLabelWithHint: true),
           ),
         ),
       )),
@@ -331,7 +344,87 @@ class _CharacterViewState extends State<CharacterView> {
     listCharacterResponse.then((value) {
       setState(() {
         currentCharacterList = value!.characters;
+        totalSize = value.totalSize!;
+        pageNum = (totalSize / 10).ceil();
+        if (selectedPageIndex <= 1) {
+          preButtonEnabled = false;
+        } else {
+          preButtonEnabled = true;
+        }
+        if (selectedPageIndex >= pageNum) {
+          debugPrint("selected index $selectedPageIndex");
+          debugPrint("page num $pageNum");
+          nextButtonEnabled = false;
+        } else {
+          debugPrint("selected index $selectedPageIndex");
+          debugPrint("page num $pageNum");
+          nextButtonEnabled = true;
+        }
       });
     });
+  }
+
+  ConstrainedBox _getPageFoot() {
+    List<Widget> widgetList = [];
+    ElevatedButton prePage = ElevatedButton(
+        onPressed: !preButtonEnabled
+            ? null
+            : () {
+                selectedPageIndex = selectedPageIndex - 1;
+                _doSearch();
+              },
+        child: const Text("<<"));
+    ElevatedButton nextPage = ElevatedButton(
+        onPressed: !nextButtonEnabled
+            ? null
+            : () {
+                selectedPageIndex = selectedPageIndex + 1;
+                _doSearch();
+              },
+        child: const Text(">>"));
+    Widget pageNumber = SizedBox(
+      width: 60,
+      height: 30,
+      child: TextField(
+        // textAlign: TextAlign.center,
+        textAlignVertical: TextAlignVertical.center,
+        controller: pageNumberController,
+        onChanged: (value) {
+          setState(() {
+            if (!DataValidator.isInt(pageNumberController.text.trim())) {
+              confirmButtonEnabled = false;
+            } else {
+              int currentTypedPage = int.parse(pageNumberController.text.trim());
+              if (currentTypedPage < 1 ||
+                  currentTypedPage > pageNum ||
+                  currentTypedPage == selectedPageIndex) {
+                confirmButtonEnabled = false;
+              } else {
+                confirmButtonEnabled = true;
+              }
+            }
+          });
+        },
+        decoration: InputDecoration(
+          hintText: "$selectedPageIndex/$pageNum",
+        ),
+      ),
+    );
+    ElevatedButton confirmPage = ElevatedButton(
+        onPressed: !confirmButtonEnabled
+            ? null
+            : () {
+                selectedPageIndex = int.parse(pageNumberController.text);
+                _doSearch();
+              },
+        child: const Text("go"));
+    widgetList.add(prePage);
+    widgetList.add(pageNumber);
+    widgetList.add(confirmPage);
+    widgetList.add(nextPage);
+    return ConstrainedBox(constraints: const BoxConstraints(maxHeight: double.infinity), child: Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: widgetList,
+    ),);
   }
 }
