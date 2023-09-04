@@ -27,7 +27,8 @@ class _LoginPageState extends State<LoginPage> {
   String verificationMessage = "";
   I18nText? verificationI18n = I18nText();
   TextEditingController userNameController = TextEditingController(text: 'abc');
-  TextEditingController emailController = TextEditingController(text: 'abc@gmail.com');
+  TextEditingController emailController =
+      TextEditingController(text: 'abc@gmail.com');
   TextEditingController passwordController = TextEditingController(text: 'abc');
   Logger logger = Logger('_LoginPageState');
 
@@ -119,7 +120,9 @@ class _LoginPageState extends State<LoginPage> {
                     prefixIcon: const Icon(Icons.person)),
               ),
             ),
-            const SizedBox(height: 20,),
+            const SizedBox(
+              height: 20,
+            ),
             SizedBox(
               width: 300,
               child: TextField(
@@ -142,7 +145,9 @@ class _LoginPageState extends State<LoginPage> {
                     prefixIcon: const Icon(Icons.email)),
               ),
             ),
-            const SizedBox(height: 20,),
+            const SizedBox(
+              height: 20,
+            ),
             SizedBox(
               width: 300,
               child: TextFormField(
@@ -161,20 +166,21 @@ class _LoginPageState extends State<LoginPage> {
                 keyboardType: TextInputType.text,
                 obscureText: _isHidden,
                 decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)?.passwordLable,
-                    hintText: AppLocalizations.of(context)?.passWordHint,
-                    prefixIcon: const Icon(Icons.lock),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _isHidden ? Icons.visibility_off : Icons.visibility,
-                        color: Theme.of(context).primaryColorDark,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _isHidden = !_isHidden;
-                        });
-                      },
-                    )),
+                  labelText: AppLocalizations.of(context)?.passwordLable,
+                  hintText: AppLocalizations.of(context)?.passWordHint,
+                  prefixIcon: const Icon(Icons.lock),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _isHidden ? Icons.visibility_off : Icons.visibility,
+                      color: Theme.of(context).primaryColorDark,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _isHidden = !_isHidden;
+                      });
+                    },
+                  ),
+                ),
               ),
             ),
             Text(
@@ -192,12 +198,11 @@ class _LoginPageState extends State<LoginPage> {
                             userName: userNameController.text,
                             email: emailController.text,
                             password: passwordController.text);
-
-                        Future<LoginResponse?> loginResponse = getIt<UserDao>().login(loginRequest);
+                        Future<LoginResponse?> loginResponse =
+                            getIt<UserDao>().login(loginRequest);
                         loginResponse.then((value) => {
-                              if (value!.verification == null) {
-                                route(value.accessToken!)
-                              }
+                              if (value!.verification == null)
+                                {route(value.accessToken!)}
                               else
                                 {
                                   setState(() {

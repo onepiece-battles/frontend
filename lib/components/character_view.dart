@@ -56,7 +56,7 @@ class _CharacterViewState extends State<CharacterView> {
         ),
         Padding(
           padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
-          child: Container(width: double.infinity, child: _createDataTable()),
+          child: SizedBox(width: double.infinity, child: _createDataTable()),
         ),
         Padding(
           padding: const EdgeInsets.fromLTRB(15, 15, 15, 0),
@@ -194,6 +194,7 @@ class _CharacterViewState extends State<CharacterView> {
             textAlign: TextAlign.center,
             controller: searchNameController,
             decoration: InputDecoration(
+              contentPadding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
               prefixIcon: IconButton(
                   onPressed: () {
                     characterFilter.name = searchNameController.text;
@@ -236,6 +237,7 @@ class _CharacterViewState extends State<CharacterView> {
           },
           dropdownDecoratorProps: DropDownDecoratorProps(
             dropdownSearchDecoration: InputDecoration(
+                contentPadding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
                 hintText: AppLocalizations.of(context)!.characterTypeHint,
                 alignLabelWithHint: true),
           ),
@@ -352,19 +354,15 @@ class _CharacterViewState extends State<CharacterView> {
           preButtonEnabled = true;
         }
         if (selectedPageIndex >= pageNum) {
-          debugPrint("selected index $selectedPageIndex");
-          debugPrint("page num $pageNum");
           nextButtonEnabled = false;
         } else {
-          debugPrint("selected index $selectedPageIndex");
-          debugPrint("page num $pageNum");
           nextButtonEnabled = true;
         }
       });
     });
   }
 
-  ConstrainedBox _getPageFoot() {
+  Row _getPageFoot() {
     List<Widget> widgetList = [];
     ElevatedButton prePage = ElevatedButton(
         onPressed: !preButtonEnabled
@@ -386,7 +384,7 @@ class _CharacterViewState extends State<CharacterView> {
       width: 60,
       height: 30,
       child: TextField(
-        // textAlign: TextAlign.center,
+        textAlign: TextAlign.start,
         textAlignVertical: TextAlignVertical.center,
         controller: pageNumberController,
         onChanged: (value) {
@@ -406,7 +404,9 @@ class _CharacterViewState extends State<CharacterView> {
           });
         },
         decoration: InputDecoration(
-          hintText: "$selectedPageIndex/$pageNum",
+            hintText: "$selectedPageIndex",
+            floatingLabelBehavior: FloatingLabelBehavior.auto,
+          contentPadding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
         ),
       ),
     );
@@ -417,14 +417,26 @@ class _CharacterViewState extends State<CharacterView> {
                 selectedPageIndex = int.parse(pageNumberController.text);
                 _doSearch();
               },
-        child: const Text("go"));
-    widgetList.add(prePage);
-    widgetList.add(pageNumber);
-    widgetList.add(confirmPage);
-    widgetList.add(nextPage);
-    return ConstrainedBox(constraints: const BoxConstraints(maxHeight: double.infinity), child: Row(
+        child: Text("/$pageNum ${AppLocalizations.of(context)!.jumpToPage}", textAlign: TextAlign.left,));
+    widgetList.add(Padding(
+      padding: const EdgeInsets.fromLTRB(8.0,0,0,0),
+      child: prePage,
+    ));
+    widgetList.add(Padding(
+      padding: const EdgeInsets.fromLTRB(8.0,0,0,0),
+      child: pageNumber,
+    ));
+    widgetList.add(Padding(
+      padding: const EdgeInsets.fromLTRB(0,0,0,0),
+      child: confirmPage,
+    ));
+    widgetList.add(Padding(
+      padding: const EdgeInsets.fromLTRB(8.0,0,0,0),
+      child: nextPage,
+    ));
+    return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: widgetList,
-    ),);
+    );
   }
 }
