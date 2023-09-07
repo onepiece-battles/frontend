@@ -10,6 +10,7 @@ import 'package:one_piece_battles_flutter/repository/character_dao.dart';
 import 'package:one_piece_battles_flutter/utils/base64_helper.dart';
 import 'package:one_piece_battles_flutter/utils/data_validator.dart';
 import 'package:openapi/api.dart';
+import '../utils/image_helper.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -22,18 +23,48 @@ class CharacterView extends StatefulWidget {
 
 class _CharacterViewState extends State<CharacterView> {
   Logger logger = Logger('_CharacterViewState');
-  List<Character> currentCharacterList = [];
-  int selectedPageIndex = 1;
-  int pageSize = 10;
-  List<CharacterSortableField> sortKeys = [];
-  CharacterFilter characterFilter = CharacterFilter();
+  String solidPath = 'images/svgs/sort-solid.svg';
+  String upSolidPath = 'images/svgs/sort-up-solid.svg';
+  String downSolidPath = 'images/svgs/sort-down-solid.svg';
   TextEditingController searchNameController = TextEditingController();
   TextEditingController pageNumberController = TextEditingController();
+  CharacterFilter characterFilter = CharacterFilter();
+  List<Character> currentCharacterList = [];
+  List<CharacterSortableField> sortKeys = [];
+  Map<int, SortOrder?> columnIndexToSortOrderMap = {
+    1: null,
+    3: null,
+    4: null,
+    5: null,
+    6: null,
+    7: null,
+    8: null,
+    9: null,
+  };
+  Map<SortOrder?, String> sortOrderToPath = const {
+    null: 'images/svgs/sort-solid.svg',
+    SortOrder.ASC: 'images/svgs/sort-up-solid.svg',
+    SortOrder.DESC: 'images/svgs/sort-down-solid.svg'
+  };
+  Map<int, CharacterSortableFieldsEnum> columnIndexToSortableFieldMap = {
+    1: CharacterSortableFieldsEnum.name,
+    3: CharacterSortableFieldsEnum.fruitLimit,
+    4: CharacterSortableFieldsEnum.groupGain,
+    5: CharacterSortableFieldsEnum.attack,
+    6: CharacterSortableFieldsEnum.defense,
+    7: CharacterSortableFieldsEnum.intelligence,
+    8: CharacterSortableFieldsEnum.blood,
+    9: CharacterSortableFieldsEnum.speed
+  };
+  List<String> selectedItems = [];
+
+  int selectedPageIndex = 1;
+  int pageNum = 1;
+  int pageSize = 10;
   int totalSize = 0;
   bool preButtonEnabled = false;
   bool nextButtonEnabled = false;
   bool confirmButtonEnabled = false;
-  int pageNum = 1;
 
   @override
   void initState() {
@@ -90,76 +121,71 @@ class _CharacterViewState extends State<CharacterView> {
                 );
               },
               icon: const Icon(Icons.add))),
+      _createSingleColumn(AppLocalizations.of(context)!.characterName, 1),
       DataColumn(
           label: Text(
-        AppLocalizations.of(context)!.characterName,
+        AppLocalizations.of(context)!.characterTypeLable,
         style: FontConstant.tableHeaderStyle,
       )),
-      DataColumn(
-          label: Padding(
-        padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
-        child: Text(
-          AppLocalizations.of(context)!.characterTypeLable,
-          style: FontConstant.tableHeaderStyle,
-        ),
-      )),
-      DataColumn(
-          label: Padding(
-        padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
-        child: Text(
-          AppLocalizations.of(context)!.fruitLimit,
-          style: FontConstant.tableHeaderStyle,
-        ),
-      )),
-      DataColumn(
-          label: Padding(
-        padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
-        child: Text(
-          AppLocalizations.of(context)!.groupGain,
-          style: FontConstant.tableHeaderStyle,
-        ),
-      )),
-      DataColumn(
-          label: Padding(
-        padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
-        child: Text(
-          AppLocalizations.of(context)!.characterAttack,
-          style: FontConstant.tableHeaderStyle,
-        ),
-      )),
-      DataColumn(
-          label: Padding(
-        padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
-        child: Text(
-          AppLocalizations.of(context)!.characterDefense,
-          style: FontConstant.tableHeaderStyle,
-        ),
-      )),
-      DataColumn(
-          label: Padding(
-        padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
-        child: Text(
-          AppLocalizations.of(context)!.characterIntelligence,
-          style: FontConstant.tableHeaderStyle,
-        ),
-      )),
-      DataColumn(
-          label: Text(
-        AppLocalizations.of(context)!.characterBlood,
-        style: FontConstant.tableHeaderStyle,
-      )),
-      DataColumn(
-        label: Text(
-          AppLocalizations.of(context)!.characterSpeed,
-          style: FontConstant.tableHeaderStyle,
-        ),
-      ),
+      _createSingleColumn(AppLocalizations.of(context)!.fruitLimit, 3),
+      _createSingleColumn(AppLocalizations.of(context)!.groupGain, 4),
+      _createSingleColumn(AppLocalizations.of(context)!.characterAttack, 5),
+      _createSingleColumn(AppLocalizations.of(context)!.characterDefense, 6),
+      _createSingleColumn(
+          AppLocalizations.of(context)!.characterIntelligence, 7),
+      _createSingleColumn(AppLocalizations.of(context)!.characterBlood, 8),
+      _createSingleColumn(AppLocalizations.of(context)!.characterSpeed, 9),
       DataColumn(
           label: Text(
         AppLocalizations.of(context)!.characterFruits,
         style: FontConstant.tableHeaderStyle,
       )),
     ];
+  }
+
+  DataColumn _createSingleColumn(String name, int index) {
+    return DataColumn(
+      label: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Text(
+            name,
+            style: FontConstant.tableHeaderStyle,
+          ),
+          IconButton(
+            splashRadius: 0.1,
+            onPressed: () {
+              setState(() {
+                var sortOrder = columnIndexToSortOrderMap[index];
+                var sortKey = columnIndexToSortableFieldMap[index]!;
+                if (sortOrder == null) {
+                  sortOrder = SortOrder.ASC;
+                } else if (sortOrder == SortOrder.ASC) {
+                  sortOrder = SortOrder.DESC;
+                } else {
+                  sortOrder = null;
+                }
+                columnIndexToSortOrderMap[index] = sortOrder;
+                sortKeys.removeWhere((element) => element.sortKey == sortKey);
+                if (sortOrder != null) {
+                  sortKeys.insert(
+                      0,
+                      CharacterSortableField(
+                          sortKey: sortKey, sortOrder: sortOrder));
+                }
+                _doSearch();
+              });
+            },
+            icon: ImageHelper.getSvgIcon(
+              sortOrderToPath[columnIndexToSortOrderMap[index]]!,
+              OnepieceColors.themeColor,
+              15,
+              15,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   DataRow _createSearchFilterRow(BuildContext context) {
@@ -180,12 +206,27 @@ class _CharacterViewState extends State<CharacterView> {
       AppLocalizations.of(context)!.katana: CharacterType.katana,
       AppLocalizations.of(context)!.shoot: CharacterType.shooter,
     };
-    List<String> selectedItems = [];
     return DataRow(cells: [
       DataCell(Padding(
         padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
         child: ElevatedButton(
-            onPressed: () {},
+            onPressed: () {
+              characterFilter = CharacterFilter();
+              selectedItems = [];
+              sortKeys = [];
+              searchNameController.text = '';
+              columnIndexToSortOrderMap = {
+                1: null,
+                3: null,
+                4: null,
+                5: null,
+                6: null,
+                7: null,
+                8: null,
+                9: null,
+              };
+              _doSearch();
+            },
             child: Text(AppLocalizations.of(context)!.clearAll)),
       )),
       DataCell(Padding(
@@ -243,62 +284,14 @@ class _CharacterViewState extends State<CharacterView> {
           ),
         ),
       )),
-      DataCell(Padding(
-        padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
-        child: ElevatedButton(
-          child: const Icon(Icons.arrow_upward),
-          onPressed: () {},
-        ),
-      )),
-      DataCell(Padding(
-        padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
-        child: ElevatedButton(
-          child: const Icon(Icons.arrow_upward),
-          onPressed: () {},
-        ),
-      )),
-      DataCell(Padding(
-        padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
-        child: ElevatedButton(
-          child: const Icon(Icons.arrow_upward),
-          onPressed: () {},
-        ),
-      )),
-      DataCell(Padding(
-        padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
-        child: ElevatedButton(
-          child: const Icon(Icons.arrow_upward),
-          onPressed: () {},
-        ),
-      )),
-      DataCell(Padding(
-        padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
-        child: ElevatedButton(
-          child: const Icon(Icons.arrow_upward),
-          onPressed: () {},
-        ),
-      )),
-      DataCell(Padding(
-        padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
-        child: ElevatedButton(
-          child: const Icon(Icons.arrow_upward),
-          onPressed: () {},
-        ),
-      )),
-      DataCell(Padding(
-        padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
-        child: ElevatedButton(
-          child: const Icon(Icons.arrow_upward),
-          onPressed: () {},
-        ),
-      )),
-      DataCell(Padding(
-        padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
-        child: ElevatedButton(
-          child: const Icon(Icons.arrow_upward),
-          onPressed: () {},
-        ),
-      ))
+      DataCell.empty,
+      DataCell.empty,
+      DataCell.empty,
+      DataCell.empty,
+      DataCell.empty,
+      DataCell.empty,
+      DataCell.empty,
+      DataCell.empty,
     ]);
   }
 
@@ -392,7 +385,8 @@ class _CharacterViewState extends State<CharacterView> {
             if (!DataValidator.isInt(pageNumberController.text.trim())) {
               confirmButtonEnabled = false;
             } else {
-              int currentTypedPage = int.parse(pageNumberController.text.trim());
+              int currentTypedPage =
+                  int.parse(pageNumberController.text.trim());
               if (currentTypedPage < 1 ||
                   currentTypedPage > pageNum ||
                   currentTypedPage == selectedPageIndex) {
@@ -404,8 +398,8 @@ class _CharacterViewState extends State<CharacterView> {
           });
         },
         decoration: InputDecoration(
-            hintText: "$selectedPageIndex",
-            floatingLabelBehavior: FloatingLabelBehavior.auto,
+          hintText: "$selectedPageIndex",
+          floatingLabelBehavior: FloatingLabelBehavior.auto,
           contentPadding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
         ),
       ),
@@ -417,21 +411,24 @@ class _CharacterViewState extends State<CharacterView> {
                 selectedPageIndex = int.parse(pageNumberController.text);
                 _doSearch();
               },
-        child: Text("/$pageNum ${AppLocalizations.of(context)!.jumpToPage}", textAlign: TextAlign.left,));
+        child: Text(
+          "/$pageNum ${AppLocalizations.of(context)!.jumpToPage}",
+          textAlign: TextAlign.left,
+        ));
     widgetList.add(Padding(
-      padding: const EdgeInsets.fromLTRB(8.0,0,0,0),
+      padding: const EdgeInsets.fromLTRB(8.0, 0, 0, 0),
       child: prePage,
     ));
     widgetList.add(Padding(
-      padding: const EdgeInsets.fromLTRB(8.0,0,0,0),
+      padding: const EdgeInsets.fromLTRB(8.0, 0, 0, 0),
       child: pageNumber,
     ));
     widgetList.add(Padding(
-      padding: const EdgeInsets.fromLTRB(0,0,0,0),
+      padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
       child: confirmPage,
     ));
     widgetList.add(Padding(
-      padding: const EdgeInsets.fromLTRB(8.0,0,0,0),
+      padding: const EdgeInsets.fromLTRB(8.0, 0, 0, 0),
       child: nextPage,
     ));
     return Row(
