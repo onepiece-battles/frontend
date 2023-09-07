@@ -69,10 +69,10 @@ packages:
     dependency: transitive
     description:
       name: build_resolvers
-      sha256: "6c4dd11d05d056e76320b828a1db0fc01ccd376922526f8e9d6c796a5adbac20"
+      sha256: a7417cc44d9edb3f2c8760000270c99dba8c72ff66d0146772b8326565780745
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.1"
+    version: "2.3.1"
   build_runner:
     dependency: "direct dev"
     description:
@@ -173,10 +173,10 @@ packages:
     dependency: "direct main"
     description:
       name: cupertino_icons
-      sha256: e35129dc44c9118cee2a5603506d823bab99c68393879edb440e0090d07586be
+      sha256: d57953e10f9f8327ce64a508a355f0b1ec902193f66288e8cb5070e7c47eeb2d
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.5"
+    version: "1.0.6"
   dart_style:
     dependency: transitive
     description:
@@ -361,10 +361,10 @@ packages:
     dependency: "direct main"
     description:
       name: get_it
-      sha256: "529de303c739fca98cd7ece5fca500d8ff89649f1bb4b4e94fb20954abcd7468"
+      sha256: f79870884de16d689cf9a7d15eedf31ed61d750e813c538a6efb92660fea83c3
       url: "https://pub.dev"
     source: hosted
-    version: "7.6.0"
+    version: "7.6.4"
   glob:
     dependency: transitive
     description:
@@ -576,26 +576,26 @@ packages:
     dependency: "direct dev"
     description:
       name: openapi_generator
-      sha256: "0b9dd470125426791cc57e94197c0edb51a79f394532f3ea7965b14ea0faa60d"
+      sha256: "77d150d227677d9099f26b20dd2cf70f84265de952e9eec345bd201540964aaf"
       url: "https://pub.dev"
     source: hosted
-    version: "4.12.1"
+    version: "4.13.1"
   openapi_generator_annotations:
     dependency: "direct main"
     description:
       name: openapi_generator_annotations
-      sha256: "0f65ba55fc23d40b579f49033790360391d3a2d4556b00a30f9cf6a8863755e0"
+      sha256: "46f1fb675029d78e19ce9143e70ce414d738b0f6c45c49c004b4b3afdb405a5c"
       url: "https://pub.dev"
     source: hosted
-    version: "4.12.0"
+    version: "4.13.1"
   openapi_generator_cli:
     dependency: transitive
     description:
       name: openapi_generator_cli
-      sha256: "70dc879bb6aaca3a87a28c1e16986ad27daca212ccfb11b6e9670486500776cd"
+      sha256: e16968c99f7fbc02cfc06494a2eb93b68f95073b1b53010dc0709f8759657654
       url: "https://pub.dev"
     source: hosted
-    version: "4.12.0"
+    version: "4.13.1"
   package_config:
     dependency: transitive
     description:
@@ -632,10 +632,10 @@ packages:
     dependency: transitive
     description:
       name: plugin_platform_interface
-      sha256: "43798d895c929056255600343db8f049921cbec94d31ec87f1dc5c16c01935dd"
+      sha256: da3fdfeccc4d4ff2da8f8c556704c08f912542c5fb3cf2233ed75372384a034d
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.5"
+    version: "2.1.6"
   pool:
     dependency: transitive
     description:
