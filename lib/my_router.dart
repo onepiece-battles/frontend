@@ -7,6 +7,9 @@ import 'package:one_piece_battles_flutter/responsive/tablet_scaffold.dart';
 import 'login_page.dart';
 
 class MyRouter {
+  static String homePage = '/';
+  static String loginPage = '/login';
+  static String registerPage = '/register';
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
       case '/':

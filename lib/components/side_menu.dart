@@ -23,8 +23,8 @@ class _SideMenuState extends State<SideMenu> {
       color: Colors.grey[300],
       child: Column(
         children: <Widget>[
-          const DrawerHeader(
-              child: Icon(Icons.add_alarm, color: OnepieceColors.themeColor)),
+          DrawerHeader(
+              child: _getDrawerHeader(context)),
           ListTile(
             leading: const Icon(Icons.people, color: OnepieceColors.themeColor),
             selected: selectedIndex == 0,
@@ -82,29 +82,12 @@ class _SideMenuState extends State<SideMenu> {
             ),
           ),
           ListTile(
-            leading:
-                const Icon(Icons.settings, color: OnepieceColors.themeColor),
+            leading: const Icon(Icons.logout, color: OnepieceColors.themeColor),
             selected: selectedIndex == 3,
             selectedTileColor: Colors.white,
             onTap: () {
               setState(() {
                 selectedIndex = 3;
-                route(selectedIndex);
-              });
-            },
-            title: Text(
-              AppLocalizations.of(context)!.settings,
-              textAlign: TextAlign.left,
-              style: const TextStyle(fontSize: 17, fontStyle: FontStyle.italic),
-            ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.logout, color: OnepieceColors.themeColor),
-            selected: selectedIndex == 4,
-            selectedTileColor: Colors.white,
-            onTap: () {
-              setState(() {
-                selectedIndex = 4;
                 route(selectedIndex);
               });
             },
@@ -116,11 +99,11 @@ class _SideMenuState extends State<SideMenu> {
           ),
           ListTile(
             leading: const Icon(Icons.settings, color: OnepieceColors.themeColor),
-            selected: selectedIndex == 5,
+            selected: selectedIndex == 4,
             selectedTileColor: Colors.white,
             onTap: () {
               setState(() {
-                selectedIndex = 5;
+                selectedIndex = 4;
                 route(selectedIndex);
               });
             },
@@ -133,6 +116,10 @@ class _SideMenuState extends State<SideMenu> {
         ],
       ),
     );
+  }
+
+  Widget _getDrawerHeader(BuildContext context) {
+    return Container();
   }
 
   void route(int selectedIndex) {
