@@ -45,13 +45,13 @@ class _LoginPageState extends State<LoginPage> {
                 padding: const EdgeInsets.all(30),
                 child: FlutterToggleTab(
                   width: 5,
-                  height: 17,
+                  height: 25,
                   borderRadius: 30,
                   selectedBackgroundColors: const [
                     Color.fromARGB(255, 38, 151, 243),
                     Colors.blueAccent
                   ],
-                  labels: const ["A", "文"],
+                  labels: const ["EN", "中"],
                   selectedLabelIndex: (index) {
                     setState(() {
                       _tabTextIndexSelected = index;
@@ -254,6 +254,7 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );
   }
+
   void route(String token) {
     // init apis with tokens
     ApiInitializer.initApis(token);
