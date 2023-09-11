@@ -23,9 +23,6 @@ class CharacterView extends StatefulWidget {
 
 class _CharacterViewState extends State<CharacterView> {
   Logger logger = Logger('_CharacterViewState');
-  String solidPath = 'images/svgs/sort-solid.svg';
-  String upSolidPath = 'images/svgs/sort-up-solid.svg';
-  String downSolidPath = 'images/svgs/sort-down-solid.svg';
   TextEditingController searchNameController = TextEditingController();
   TextEditingController pageNumberController = TextEditingController();
   CharacterFilter characterFilter = CharacterFilter();
@@ -234,6 +231,10 @@ class _CharacterViewState extends State<CharacterView> {
           child: TextField(
             textAlign: TextAlign.center,
             controller: searchNameController,
+            onChanged: (value) {
+              characterFilter.name = value;
+              _doSearch();
+            },
             decoration: InputDecoration(
               contentPadding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
               prefixIcon: IconButton(
