@@ -9,24 +9,26 @@ import 'login_info.dart';
 import 'login_page.dart';
 
 class AppRouter{
-  static final LoginInfo loginInfo = LoginInfo();
   static final GlobalKey<NavigatorState> _rootNavigatorState = GlobalKey<NavigatorState>();
-  static late final router = GoRouter(
+  static String loginPath = '/login';
+  static String homePath = '/home';
+  static String registerPath = '/register';
+  static final router = GoRouter(
     navigatorKey: _rootNavigatorState,
-    initialLocation: '/login',
+    initialLocation: loginPath,
     routes: [
       GoRoute(
-          path: '/home',
+          path: homePath,
           builder: (context, state) => const ResponsiveLayout(
               desktopScaffold: DesktopScaffold(),
               mobileScaffold: MobileScaffold(),
               tabletScaffold: TabletScaffold())),
       GoRoute(
-        path: '/login',
+        path: loginPath,
         builder: (context, state) => const LoginPage(),
       ),
       GoRoute(
-          path: '/register', builder: (context, state) => const RegisterPage()),
+          path: registerPath, builder: (context, state) => const RegisterPage()),
     ],
     // redirect: (context, state) {
     //   // if the user is not logged in, they need to login

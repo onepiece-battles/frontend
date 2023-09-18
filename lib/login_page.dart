@@ -5,9 +5,9 @@ import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
 import 'package:one_piece_battles_flutter/api_initializer.dart';
+import 'package:one_piece_battles_flutter/app_router.dart';
 import 'package:one_piece_battles_flutter/constants/path_constants.dart';
 import 'package:one_piece_battles_flutter/main.dart';
-import 'package:one_piece_battles_flutter/my_router.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
@@ -238,7 +238,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 TextButton(
                   onPressed: () {
-                    Navigator.pushNamed(context, '/register');
+                    context.go(AppRouter.registerPath);
                   },
                   child: Text(
                     AppLocalizations.of(context)!.registerAccount,
@@ -265,6 +265,6 @@ class _LoginPageState extends State<LoginPage> {
   void route(String token, BuildContext context) {
     // init apis with tokens
     ApiInitializer.initApis(token);
-    context.go('/home');
+    context.go(AppRouter.homePath);
   }
 }

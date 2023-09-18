@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_toggle_tab/flutter_toggle_tab.dart';
 import 'package:go_router/go_router.dart';
-import 'package:one_piece_battles_flutter/my_router.dart';
+import 'package:one_piece_battles_flutter/app_router.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
 import 'package:one_piece_battles_flutter/secure_storage.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
@@ -316,7 +316,7 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               TextButton(
                 onPressed: () {
-                  Navigator.pushNamed(context, '/login');
+                  context.go(AppRouter.loginPath);
                 },
                 child: Text(
                   AppLocalizations.of(context)!.backToRegister,
@@ -343,9 +343,7 @@ class _RegisterPageState extends State<RegisterPage> {
     Future<LoginResponse?> loginResponse = userDao.login(loginRequest);
     loginResponse.then((value) {
       assignTokenValue(value);
-      // Navigator.pushNamed(context, MyRouter.homePage,
-      //     arguments: value!.user!.loginRoleResources);
-      context.go('/home');
+      context.go(AppRouter.homePath);
     });
   }
 
