@@ -4,25 +4,30 @@ import 'package:one_piece_battles_flutter/responsive/desktop_scaffold.dart';
 import 'package:one_piece_battles_flutter/responsive/mobile_scaffold.dart';
 import 'package:one_piece_battles_flutter/responsive/responsive_layout.dart';
 import 'package:one_piece_battles_flutter/responsive/tablet_scaffold.dart';
+import 'package:openapi/api.dart';
 import 'login_page.dart';
 
 class MyRouter {
-  static String homePage = '/';
-  static String loginPage = '/login';
-  static String registerPage = '/register';
+  static const String homePage = '/home';
+  static const String loginPage = '/login';
+  static const String registerPage = '/register';
   static Route<dynamic> generateRoute(RouteSettings settings) {
+    List<ResourceType> currentArguments = [];
+    if (settings.arguments != null) {
+      currentArguments = settings.arguments as List<ResourceType>;
+    }
     switch (settings.name) {
-      case '/':
+      case homePage:
         return MaterialPageRoute(
             settings: settings,
             builder: (context) => const ResponsiveLayout(
                 desktopScaffold: DesktopScaffold(),
                 mobileScaffold: MobileScaffold(),
                 tabletScaffold: TabletScaffold()));
-      case '/login':
+      case loginPage:
         return MaterialPageRoute(
             settings: settings, builder: (context) => const LoginPage());
-      case '/register':
+      case registerPage:
         return MaterialPageRoute(
             settings: settings, builder: (context) => const RegisterPage());
       default:

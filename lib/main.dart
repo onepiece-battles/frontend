@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:one_piece_battles_flutter/my_router.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:one_piece_battles_flutter/repository/character_dao.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
+import 'app_router.dart';
 import 'my_input_theme.dart';
 
 GetIt getIt = GetIt.instance;
 
-
 void main() {
   getIt.allowReassignment = true;
-  getIt.registerLazySingleton<UserDao>(()=>UserDao.empty());
-  getIt.registerLazySingleton<CharacterDao>(()=>CharacterDao.empty());
+  getIt.registerLazySingleton<UserDao>(() => UserDao.empty());
+  getIt.registerLazySingleton<CharacterDao>(() => CharacterDao.empty());
   runApp(const MyApp());
 }
 
@@ -40,7 +39,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       locale: _locale,
       theme: ThemeData(inputDecorationTheme: MyInputTheme().theme()),
       debugShowCheckedModeBanner: false,
@@ -51,8 +50,7 @@ class _MyAppState extends State<MyApp> {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: const [Locale('en', 'US'), Locale('zh', 'CN')],
-      initialRoute: MyRouter.loginPage,
-      onGenerateRoute: MyRouter.generateRoute,
+      routerConfig: AppRouter.router,
     );
   }
 }
