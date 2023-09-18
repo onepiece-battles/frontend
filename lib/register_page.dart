@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_toggle_tab/flutter_toggle_tab.dart';
+import 'package:go_router/go_router.dart';
+import 'package:one_piece_battles_flutter/my_router.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
 import 'package:one_piece_battles_flutter/secure_storage.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
@@ -281,7 +283,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           userDao.register(request);
                       response.then((value) => {
                             if (value!.registerResult)
-                              {handleRegisterSuccess()}
+                              {handleRegisterSuccess(context)}
                             else
                               {
                                 setState(() {
@@ -333,14 +335,18 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  void handleRegisterSuccess() {
+  void handleRegisterSuccess(BuildContext context) {
     LoginRequest loginRequest = LoginRequest(
         userName: userNameController.text,
         email: emailController.text,
         password: passwordController.text);
     Future<LoginResponse?> loginResponse = userDao.login(loginRequest);
-    loginResponse.then((value) => assignTokenValue(value));
-    Navigator.pushNamed(context, '/');
+    loginResponse.then((value) {
+      assignTokenValue(value);
+      // Navigator.pushNamed(context, MyRouter.homePage,
+      //     arguments: value!.user!.loginRoleResources);
+      context.go('/home');
+    });
   }
 
   void assignTokenValue(LoginResponse? value) {

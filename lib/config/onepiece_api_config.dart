@@ -7,4 +7,4 @@ import 'package:openapi_generator_annotations/openapi_generator_annotations.dart
   generatorName: Generator.dart,
   outputDirectory: 'generated',
 )
-class OnepieceApiConfig extends OpenapiGeneratorConfig {}
+class OnepieceApiConfig {}
