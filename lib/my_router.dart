@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:one_piece_battles_flutter/components/character_view.dart';
 import 'package:one_piece_battles_flutter/register_page.dart';
 import 'package:one_piece_battles_flutter/responsive/desktop_scaffold.dart';
 import 'package:one_piece_battles_flutter/responsive/mobile_scaffold.dart';
@@ -21,7 +22,7 @@ class MyRouter {
         return MaterialPageRoute(
             settings: settings,
             builder: (context) => const ResponsiveLayout(
-                desktopScaffold: DesktopScaffold(),
+                desktopScaffold: DesktopScaffold(mainScreen: CharacterView()),
                 mobileScaffold: MobileScaffold(),
                 tabletScaffold: TabletScaffold()));
       case loginPage:
