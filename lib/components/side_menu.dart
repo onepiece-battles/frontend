@@ -35,7 +35,9 @@ class _SideMenuState extends State<SideMenu> {
   Widget _getDrawerHeader(BuildContext context) {
     return const SizedBox(
       height: 100,
-      child: Text("this is the header"),
+      child: Column(
+        children: [Row()],
+      ),
     );
   }
 
@@ -84,6 +86,8 @@ class _SideMenuState extends State<SideMenu> {
               },
             );
           },
+          focusColor: Colors.lightBlue,
+          hoverColor: Colors.lightBlue,
           title: Text(
             resourceToDisplayTextMap[resourceType]!,
             textAlign: TextAlign.left,
