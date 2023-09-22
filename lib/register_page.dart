@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_toggle_tab/flutter_toggle_tab.dart';
 import 'package:go_router/go_router.dart';
-import 'package:one_piece_battles_flutter/app_router.dart';
+import 'package:one_piece_battles_flutter/route/app_router.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
-import 'package:one_piece_battles_flutter/secure_storage.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
 import 'api_initializer.dart';
@@ -342,15 +341,8 @@ class _RegisterPageState extends State<RegisterPage> {
         password: passwordController.text);
     Future<LoginResponse?> loginResponse = userDao.login(loginRequest);
     loginResponse.then((value) {
-      assignTokenValue(value);
+      ApiInitializer.initAuthInfo(value!.user!, value.accessToken!);
       context.go(AppRouter.homePath);
     });
-  }
-
-  void assignTokenValue(LoginResponse? value) {
-    LoginResponse loginResponseValue = value!;
-    ApiInitializer.initApis(loginResponseValue.accessToken!);
-    SecureStorage.writeAccessToken(loginResponseValue.accessToken!);
-    SecureStorage.writeRefreshToken(loginResponseValue.refreshToken!);
   }
 }

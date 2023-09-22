@@ -5,7 +5,7 @@ import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
 import 'package:one_piece_battles_flutter/api_initializer.dart';
-import 'package:one_piece_battles_flutter/app_router.dart';
+import 'package:one_piece_battles_flutter/route/app_router.dart';
 import 'package:one_piece_battles_flutter/constants/path_constants.dart';
 import 'package:one_piece_battles_flutter/main.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
@@ -202,21 +202,18 @@ class _LoginPageState extends State<LoginPage> {
                             password: passwordController.text);
                         Future<LoginResponse?> loginResponse =
                             getIt<UserDao>().login(loginRequest);
-                        loginResponse.then((value) => {
-                              if (value!.verification == null)
-                                {route(value.accessToken!, context)}
-                              else
-                                {
-                                  setState(() {
-                                    verificationI18n = value.verification;
-                                    Locale myLocale =
-                                        Localizations.localeOf(context);
-                                    verificationMessage =
-                                        I18nHelper.getI18nByLocale(
-                                            verificationI18n, myLocale);
-                                  })
-                                }
+                        loginResponse.then((value) {
+                          if (value!.verification == null) {
+                            _route(value.user!, value.accessToken!, context);
+                          } else {
+                            setState(() {
+                              verificationI18n = value.verification;
+                              Locale myLocale = Localizations.localeOf(context);
+                              verificationMessage = I18nHelper.getI18nByLocale(
+                                  verificationI18n, myLocale);
                             });
+                          }
+                        });
                       },
                 child: Text(
                   AppLocalizations.of(context)!.signIn,
@@ -257,14 +254,9 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  // void route(String token, List<ResourceType> loginRoleResources) {
-  //   // init apis with tokens
-  //   ApiInitializer.initApis(token);
-  //   Navigator.pushNamed(context, MyRouter.homePage, arguments: loginRoleResources);
-  // }
-  void route(String token, BuildContext context) {
+  void _route(User user, String token, BuildContext context) {
     // init apis with tokens
-    ApiInitializer.initApis(token);
+    ApiInitializer.initAuthInfo(user, token);
     context.go(AppRouter.homePath);
   }
 }

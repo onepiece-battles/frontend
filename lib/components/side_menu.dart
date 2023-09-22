@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+import 'package:go_router/go_router.dart';
+import 'package:one_piece_battles_flutter/route/app_router.dart';
 import 'package:one_piece_battles_flutter/utils/image_helper.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:openapi/api.dart';
 import '../constants/device_type.dart';
 
-int selectedIndexGlobal = 0;
+String selectedResource = ResourceType.CHARACTER.toString();
+GetIt getIt = GetIt.instance;
 
 class SideMenu extends StatefulWidget {
   final DeviceType deviceType;
-  final PageController? pageController;
-  final List<ResourceType> resourceTypes;
-  const SideMenu(
-      {super.key,
-      required this.deviceType,
-      this.pageController,
-      required this.resourceTypes});
+  const SideMenu({
+    super.key,
+    required this.deviceType,
+  });
 
   @override
   State<SideMenu> createState() => _SideMenuState();
@@ -27,14 +28,15 @@ class _SideMenuState extends State<SideMenu> {
     return Container(
       color: Colors.grey[300],
       child: ListView(
-
-        children: _getListTitle(context, widget.resourceTypes)
-      ),
+          children: _getListTitle(context, getIt<User>().loginRoleResources)),
     );
   }
 
   Widget _getDrawerHeader(BuildContext context) {
-    return Container();
+    return const SizedBox(
+      height: 100,
+      child: Text("this is the header"),
+    );
   }
 
   List<Widget> _getListTitle(
@@ -53,6 +55,13 @@ class _SideMenuState extends State<SideMenu> {
       ResourceType.CHARACTER:
           const Icon(Icons.face, color: OnepieceColors.themeColor)
     };
+
+    Map<ResourceType, String> resourceToLocationMap = {
+      ResourceType.FRUIT: AppRouter.fruitPath,
+      ResourceType.USER: AppRouter.userPath,
+      ResourceType.BATTLE: AppRouter.battlePath,
+      ResourceType.CHARACTER: AppRouter.characterPath
+    };
     Map<ResourceType, String> resourceToDisplayTextMap = {
       ResourceType.FRUIT: AppLocalizations.of(context)!.devilFruit,
       ResourceType.USER: AppLocalizations.of(context)!.userManagement,
@@ -61,19 +70,17 @@ class _SideMenuState extends State<SideMenu> {
     };
     List<Widget> listTitles = [];
     listTitles.add(_getDrawerHeader(context));
-    int selectedIndex = 0;
     for (ResourceType resourceType in resourceTypes) {
       listTitles.add(
         ListTile(
           leading: resourceToIconMap[resourceType],
-          selected: selectedIndexGlobal == selectedIndex ,
+          selected: selectedResource == resourceType.toString(),
           selectedTileColor: Colors.white,
           onTap: () {
-            int localSelectedIndex = selectedIndex;
+            selectedResource = resourceType.toString();
             setState(
               () {
-                selectedIndexGlobal = localSelectedIndex;
-                route(selectedIndexGlobal);
+                GoRouter.of(context).go(resourceToLocationMap[resourceType]!);
               },
             );
           },
@@ -84,18 +91,16 @@ class _SideMenuState extends State<SideMenu> {
           ),
         ),
       );
-      selectedIndex++;
     }
     listTitles.add(
       ListTile(
         leading: const Icon(Icons.settings, color: OnepieceColors.themeColor),
-        selected: selectedIndexGlobal == selectedIndex,
+        selected: selectedResource == "setting",
         selectedTileColor: Colors.white,
         onTap: () {
-          int localSelectedIndex = selectedIndex;
+          selectedResource = "setting";
           setState(() {
-            selectedIndexGlobal = localSelectedIndex;
-            route(selectedIndexGlobal);
+            GoRouter.of(context).go(AppRouter.settingPath);
           });
         },
         title: Text(
@@ -106,14 +111,5 @@ class _SideMenuState extends State<SideMenu> {
       ),
     );
     return listTitles;
-  }
-
-  void route(int selectedIndex) {
-    if (DeviceType.desktop != widget.deviceType) {
-      Navigator.pop(context);
-    }
-    if (widget.pageController != null) {
-      widget.pageController!.jumpToPage(selectedIndex);
-    }
   }
 }

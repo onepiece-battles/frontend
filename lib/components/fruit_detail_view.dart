@@ -1,0 +1,15 @@
+import 'package:flutter/material.dart';
+
+class FruitDetailView extends StatefulWidget {
+  const FruitDetailView({super.key});
+
+  @override
+  State<FruitDetailView> createState() => _FruitDetailViewState();
+}
+
+class _FruitDetailViewState extends State<FruitDetailView> {
+  @override
+  Widget build(BuildContext context) {
+    return  Container(color: Colors.yellow,child: const Text("this is fruit detail"),);
+  }
+}
