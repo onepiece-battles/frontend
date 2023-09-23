@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:one_piece_battles_flutter/route/app_router.dart';
 import 'package:one_piece_battles_flutter/utils/image_helper.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
@@ -26,7 +27,7 @@ class _SideMenuState extends State<SideMenu> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.grey[300],
+      color: OnepieceColors.menuBackgroundColor,
       child: ListView(
           children: _getListTitle(context, getIt<User>().loginRoleResources)),
     );
@@ -46,16 +47,16 @@ class _SideMenuState extends State<SideMenu> {
     Map<ResourceType, Widget> resourceToIconMap = {
       ResourceType.FRUIT: ImageHelper.getSvgIcon(
         'images/svgs/fruit.svg',
-        OnepieceColors.themeColor,
+        OnepieceColors.menuIconColor,
         25,
         25,
       ),
-      ResourceType.USER:
-          const Icon(Icons.manage_accounts, color: OnepieceColors.themeColor),
+      ResourceType.USER: const Icon(Icons.manage_accounts,
+          color: OnepieceColors.menuIconColor),
       ResourceType.BATTLE: const Icon(Icons.sports_mma_outlined,
-          color: OnepieceColors.themeColor),
+          color: OnepieceColors.menuIconColor),
       ResourceType.CHARACTER:
-          const Icon(Icons.face, color: OnepieceColors.themeColor)
+          const Icon(Icons.face, color: OnepieceColors.menuIconColor)
     };
 
     Map<ResourceType, String> resourceToLocationMap = {
@@ -74,43 +75,66 @@ class _SideMenuState extends State<SideMenu> {
     listTitles.add(_getDrawerHeader(context));
     for (ResourceType resourceType in resourceTypes) {
       listTitles.add(
-        ListTile(
-          leading: resourceToIconMap[resourceType],
-          selected: selectedResource == resourceType.toString(),
-          selectedTileColor: Colors.white,
-          onTap: () {
-            selectedResource = resourceType.toString();
-            setState(
-              () {
-                GoRouter.of(context).go(resourceToLocationMap[resourceType]!);
+        Padding(
+          padding: const EdgeInsets.fromLTRB(8, 1, 8, 1),
+          child: Material(
+            type: MaterialType.transparency,
+            child: ListTile(
+              minLeadingWidth: 10,
+              minVerticalPadding: 1,
+              leading: resourceToIconMap[resourceType],
+              selected: selectedResource == resourceType.toString(),
+              selectedTileColor: OnepieceColors.menuSelectedTileColor,
+              onTap: () {
+                selectedResource = resourceType.toString();
+                setState(
+                  () {
+                    GoRouter.of(context)
+                        .go(resourceToLocationMap[resourceType]!);
+                  },
+                );
               },
-            );
-          },
-          focusColor: Colors.lightBlue,
-          hoverColor: Colors.lightBlue,
-          title: Text(
-            resourceToDisplayTextMap[resourceType]!,
-            textAlign: TextAlign.left,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w400),
+              hoverColor: OnepieceColors.menuHoverColor,
+              title: Text(
+                resourceToDisplayTextMap[resourceType]!,
+                textAlign: TextAlign.left,
+                style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: OnepieceFonts.sideMenuFontWeight,
+                    color: OnepieceColors.menuTextColor),
+              ),
+            ),
           ),
         ),
       );
     }
     listTitles.add(
-      ListTile(
-        leading: const Icon(Icons.settings, color: OnepieceColors.themeColor),
-        selected: selectedResource == "setting",
-        selectedTileColor: Colors.white,
-        onTap: () {
-          selectedResource = "setting";
-          setState(() {
-            GoRouter.of(context).go(AppRouter.settingPath);
-          });
-        },
-        title: Text(
-          AppLocalizations.of(context)!.settings,
-          textAlign: TextAlign.left,
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w400),
+      Padding(
+        padding: const EdgeInsets.fromLTRB(8, 1, 8, 1),
+        child: Material(
+          type: MaterialType.transparency,
+          child: ListTile(
+            leading: const Icon(Icons.settings,
+                color: OnepieceColors.menuIconColor, size: 20),
+            minLeadingWidth: 10,
+            selected: selectedResource == "setting",
+            selectedTileColor: OnepieceColors.menuSelectedTileColor,
+            onTap: () {
+              selectedResource = "setting";
+              setState(() {
+                GoRouter.of(context).go(AppRouter.settingPath);
+              });
+            },
+            hoverColor: OnepieceColors.menuHoverColor,
+            title: Text(
+              AppLocalizations.of(context)!.settings,
+              textAlign: TextAlign.left,
+              style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: OnepieceFonts.sideMenuFontWeight,
+                  color: OnepieceColors.menuTextColor),
+            ),
+          ),
         ),
       ),
     );

@@ -4,7 +4,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:logging/logging.dart';
 import 'package:one_piece_battles_flutter/components/add_character_view.dart';
-import 'package:one_piece_battles_flutter/constants/font_constants.dart';
+import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:one_piece_battles_flutter/repository/character_dao.dart';
 import 'package:one_piece_battles_flutter/utils/base64_helper.dart';
@@ -77,7 +77,7 @@ class _CharacterViewState extends State<CharacterView> {
             padding: const EdgeInsets.all(15),
             child: Text(
               AppLocalizations.of(context)!.character,
-              style: FontConstant.headerStyle,
+              style: OnepieceFonts.headerStyle,
             )),
         const SizedBox(
           height: 20,
@@ -122,7 +122,7 @@ class _CharacterViewState extends State<CharacterView> {
       DataColumn(
           label: Text(
         AppLocalizations.of(context)!.characterTypeLable,
-        style: FontConstant.tableHeaderStyle,
+        style: OnepieceFonts.tableHeaderStyle,
       )),
       _createSingleColumn(AppLocalizations.of(context)!.fruitLimit, 3),
       _createSingleColumn(AppLocalizations.of(context)!.groupGain, 4),
@@ -135,7 +135,7 @@ class _CharacterViewState extends State<CharacterView> {
       DataColumn(
           label: Text(
         AppLocalizations.of(context)!.characterFruits,
-        style: FontConstant.tableHeaderStyle,
+        style: OnepieceFonts.tableHeaderStyle,
       )),
     ];
   }
@@ -147,7 +147,7 @@ class _CharacterViewState extends State<CharacterView> {
         children: [
           Text(
             name,
-            style: FontConstant.tableHeaderStyle,
+            style: OnepieceFonts.tableHeaderStyle,
           ),
           IconButton(
             splashRadius: 0.1,
