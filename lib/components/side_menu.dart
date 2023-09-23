@@ -34,12 +34,17 @@ class _SideMenuState extends State<SideMenu> {
   }
 
   Widget _getDrawerHeader(BuildContext context) {
-    return const SizedBox(
-      height: 100,
-      child: Column(
-        children: [Row()],
-      ),
-    );
+    return
+      Container(
+        height: 150,
+        color: OnepieceColors.secondaryThemeColor,
+        child: Column(
+          children: [Row(children: [
+
+          ],), Row()],
+        ),
+      );
+
   }
 
   List<Widget> _getListTitle(
@@ -48,15 +53,15 @@ class _SideMenuState extends State<SideMenu> {
       ResourceType.FRUIT: ImageHelper.getSvgIcon(
         'images/svgs/fruit.svg',
         OnepieceColors.menuIconColor,
-        25,
-        25,
+        20,
+        20,
       ),
       ResourceType.USER: const Icon(Icons.manage_accounts,
-          color: OnepieceColors.menuIconColor),
+          color: OnepieceColors.menuIconColor,size: 20),
       ResourceType.BATTLE: const Icon(Icons.sports_mma_outlined,
-          color: OnepieceColors.menuIconColor),
+          color: OnepieceColors.menuIconColor ,size: 20),
       ResourceType.CHARACTER:
-          const Icon(Icons.face, color: OnepieceColors.menuIconColor)
+          const Icon(Icons.face, color: OnepieceColors.menuIconColor,size: 20)
     };
 
     Map<ResourceType, String> resourceToLocationMap = {
@@ -81,7 +86,10 @@ class _SideMenuState extends State<SideMenu> {
             type: MaterialType.transparency,
             child: ListTile(
               minLeadingWidth: 10,
-              minVerticalPadding: 1,
+              contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5),
+              ),
               leading: resourceToIconMap[resourceType],
               selected: selectedResource == resourceType.toString(),
               selectedTileColor: OnepieceColors.menuSelectedTileColor,
@@ -99,7 +107,7 @@ class _SideMenuState extends State<SideMenu> {
                 resourceToDisplayTextMap[resourceType]!,
                 textAlign: TextAlign.left,
                 style: const TextStyle(
-                    fontSize: 20,
+                    fontSize: 18,
                     fontWeight: OnepieceFonts.sideMenuFontWeight,
                     color: OnepieceColors.menuTextColor),
               ),
@@ -116,7 +124,11 @@ class _SideMenuState extends State<SideMenu> {
           child: ListTile(
             leading: const Icon(Icons.settings,
                 color: OnepieceColors.menuIconColor, size: 20),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(5),
+            ),
             minLeadingWidth: 10,
+            contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
             selected: selectedResource == "setting",
             selectedTileColor: OnepieceColors.menuSelectedTileColor,
             onTap: () {
@@ -130,7 +142,7 @@ class _SideMenuState extends State<SideMenu> {
               AppLocalizations.of(context)!.settings,
               textAlign: TextAlign.left,
               style: const TextStyle(
-                  fontSize: 20,
+                  fontSize: 18,
                   fontWeight: OnepieceFonts.sideMenuFontWeight,
                   color: OnepieceColors.menuTextColor),
             ),
