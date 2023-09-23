@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
 
-import '../constants/font_constants.dart';
+import '../constants/onepiece_fonts.dart';
 import '../constants/path_constants.dart';
 
 GetIt getIt = GetIt.instance;
@@ -41,14 +41,14 @@ class _SettingsViewState extends State<SettingsView> {
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(
             AppLocalizations.of(context)!.avatarHeader,
-            style: FontConstant.headerStyle,
+            style: OnepieceFonts.headerStyle,
           ),
           const SizedBox(
             height: 10,
           ),
           Text(
             AppLocalizations.of(context)!.avatarHeaderDescription,
-            style: FontConstant.contentStyle,
+            style: OnepieceFonts.contentStyle,
           ),
           const SizedBox(
             height: 10,
@@ -72,9 +72,9 @@ class _SettingsViewState extends State<SettingsView> {
                   Text(
                     AppLocalizations.of(context)!.uploadNewAvatar,
                     style: const TextStyle(
-                        color: FontConstant.headerFontColor,
-                        fontSize: FontConstant.contentFontSize,
-                        fontWeight: FontConstant.headerFontWeight),
+                        color: OnepieceFonts.headerFontColor,
+                        fontSize: OnepieceFonts.contentFontSize,
+                        fontWeight: OnepieceFonts.headerFontWeight),
                   ),
                   const SizedBox(height: 10,),
                   Row(
@@ -86,11 +86,11 @@ class _SettingsViewState extends State<SettingsView> {
                       const SizedBox(
                         width: 10,
                       ),
-                      Text(AppLocalizations.of(context)!.noFileChosen, style: FontConstant.contentStyle,)
+                      Text(AppLocalizations.of(context)!.noFileChosen, style: OnepieceFonts.contentStyle,)
                     ],
                   ),
                   const SizedBox(height: 10,),
-                  Text(AppLocalizations.of(context)!.maxFileSizeDescription,style: FontConstant.contentStyle,)
+                  Text(AppLocalizations.of(context)!.maxFileSizeDescription,style: OnepieceFonts.contentStyle,)
                 ],
               )
             ],
@@ -109,9 +109,9 @@ class _SettingsViewState extends State<SettingsView> {
     return Container(child: Padding(
       padding: const EdgeInsets.all(15.0),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start,children: [
-        Text(AppLocalizations.of(context)!.localizationHeader,style:  FontConstant.headerStyle,),
+        Text(AppLocalizations.of(context)!.localizationHeader,style:  OnepieceFonts.headerStyle,),
         const SizedBox(height: 10,),
-        Text(AppLocalizations.of(context)!.localizationDescription,style:  FontConstant.contentStyle,),
+        Text(AppLocalizations.of(context)!.localizationDescription,style:  OnepieceFonts.contentStyle,),
         const SizedBox(height: 10,),
         DropdownSearch<String>(
           items: displayCharacterTypes,
