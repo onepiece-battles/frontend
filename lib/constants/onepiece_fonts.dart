@@ -24,4 +24,11 @@ class OnepieceFonts {
       fontSize: OnepieceFonts.contentFontSize,
       fontWeight: OnepieceFonts.headerFontWeight
   );
+
+  static const TextStyle emailFont = TextStyle(
+    color: contentFontColor,
+    fontSize: 14,
+    fontWeight: FontWeight.bold,
+    fontStyle: FontStyle.italic
+  );
 }
