@@ -89,10 +89,15 @@ class AppRouter {
           builder: (context, state) => const RegisterPage()),
     ],
     redirect: (context, state) {
+
       // if the user is not logged in, they need to login
       final loggedIn = getIt<User>().name != '';
       final loggingIn = state.matchedLocation == AppRouter.loginPath;
+      final registering = state.matchedLocation == AppRouter.registerPath;
 
+      if (registering) {
+        return AppRouter.registerPath;
+      }
       if (!loggedIn && !loggingIn) {
         return AppRouter.loginPath;
       }

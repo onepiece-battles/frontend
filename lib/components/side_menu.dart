@@ -8,8 +8,9 @@ import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:openapi/api.dart';
 import '../constants/device_type.dart';
+import '../constants/path_constants.dart';
+import '../utils/base64_helper.dart';
 
-String selectedResource = ResourceType.CHARACTER.toString();
 GetIt getIt = GetIt.instance;
 
 class SideMenu extends StatefulWidget {
@@ -24,6 +25,7 @@ class SideMenu extends StatefulWidget {
 }
 
 class _SideMenuState extends State<SideMenu> {
+  String selectedResource = ResourceType.CHARACTER.toString();
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -34,17 +36,28 @@ class _SideMenuState extends State<SideMenu> {
   }
 
   Widget _getDrawerHeader(BuildContext context) {
-    return
-      Container(
+    return Container(
         height: 150,
         color: OnepieceColors.secondaryThemeColor,
         child: Column(
-          children: [Row(children: [
-
-          ],), Row()],
-        ),
-      );
-
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 60,
+              height: 60,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(60),
+                child: Image.memory(
+                  Base64Helper.decode(getIt<User>().profileImage!),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(getIt<User>().email!,style: OnepieceFonts.emailFont,),
+            )
+          ],
+        ));
   }
 
   List<Widget> _getListTitle(
@@ -57,11 +70,11 @@ class _SideMenuState extends State<SideMenu> {
         20,
       ),
       ResourceType.USER: const Icon(Icons.manage_accounts,
-          color: OnepieceColors.menuIconColor,size: 20),
+          color: OnepieceColors.menuIconColor, size: 20),
       ResourceType.BATTLE: const Icon(Icons.sports_mma_outlined,
-          color: OnepieceColors.menuIconColor ,size: 20),
+          color: OnepieceColors.menuIconColor, size: 20),
       ResourceType.CHARACTER:
-          const Icon(Icons.face, color: OnepieceColors.menuIconColor,size: 20)
+          const Icon(Icons.face, color: OnepieceColors.menuIconColor, size: 20)
     };
 
     Map<ResourceType, String> resourceToLocationMap = {
@@ -78,6 +91,10 @@ class _SideMenuState extends State<SideMenu> {
     };
     List<Widget> listTitles = [];
     listTitles.add(_getDrawerHeader(context));
+    listTitles.add(Padding(
+      padding: const EdgeInsets.fromLTRB(18.0, 10,0,10),
+      child: Text(AppLocalizations.of(context)!.route, style: TextStyle(fontSize: 18, fontWeight:  FontWeight.w800)),
+    ));
     for (ResourceType resourceType in resourceTypes) {
       listTitles.add(
         Padding(
@@ -94,14 +111,24 @@ class _SideMenuState extends State<SideMenu> {
               selected: selectedResource == resourceType.toString(),
               selectedTileColor: OnepieceColors.menuSelectedTileColor,
               onTap: () {
-                selectedResource = resourceType.toString();
                 setState(
                   () {
+                    selectedResource = resourceType.toString();
                     GoRouter.of(context)
                         .go(resourceToLocationMap[resourceType]!);
                   },
                 );
               },
+              trailing: Padding(
+                padding: const EdgeInsets.fromLTRB(0, 0, 3, 0),
+                child: Container(
+                  width: 3,
+                  height: 30,
+                  decoration: BoxDecoration(
+                      color: OnepieceColors.menuBackgroundColor,
+                      borderRadius: BorderRadius.circular(3)),
+                ),
+              ),
               hoverColor: OnepieceColors.menuHoverColor,
               title: Text(
                 resourceToDisplayTextMap[resourceType]!,
@@ -132,8 +159,8 @@ class _SideMenuState extends State<SideMenu> {
             selected: selectedResource == "setting",
             selectedTileColor: OnepieceColors.menuSelectedTileColor,
             onTap: () {
-              selectedResource = "setting";
               setState(() {
+                selectedResource = "setting";
                 GoRouter.of(context).go(AppRouter.settingPath);
               });
             },
@@ -145,6 +172,16 @@ class _SideMenuState extends State<SideMenu> {
                   fontSize: 18,
                   fontWeight: OnepieceFonts.sideMenuFontWeight,
                   color: OnepieceColors.menuTextColor),
+            ),
+            trailing: Padding(
+              padding: const EdgeInsets.fromLTRB(0, 0, 3, 0),
+              child: Container(
+                width: 3,
+                height: 30,
+                decoration: BoxDecoration(
+                    color: OnepieceColors.menuBackgroundColor,
+                    borderRadius: BorderRadius.circular(3)),
+              ),
             ),
           ),
         ),
