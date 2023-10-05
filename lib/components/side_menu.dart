@@ -8,7 +8,6 @@ import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:openapi/api.dart';
 import '../constants/device_type.dart';
-import '../constants/path_constants.dart';
 import '../utils/base64_helper.dart';
 
 GetIt getIt = GetIt.instance;
@@ -54,7 +53,11 @@ class _SideMenuState extends State<SideMenu> {
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Text(getIt<User>().email!,style: OnepieceFonts.emailFont,),
+              //Text(,style: ,
+              child: RichText( text: TextSpan(children: [
+                 const WidgetSpan(child: Icon(Icons.email, color: Colors.grey, size: 17,)),
+                TextSpan(text: " ${getIt<User>().email!}",style: OnepieceFonts.emailFont)
+              ]),),
             )
           ],
         ));
@@ -92,8 +95,8 @@ class _SideMenuState extends State<SideMenu> {
     List<Widget> listTitles = [];
     listTitles.add(_getDrawerHeader(context));
     listTitles.add(Padding(
-      padding: const EdgeInsets.fromLTRB(18.0, 10,0,10),
-      child: Text(AppLocalizations.of(context)!.route, style: TextStyle(fontSize: 18, fontWeight:  FontWeight.w800)),
+      padding: const EdgeInsets.fromLTRB(18, 10,0,10),
+      child: Text(AppLocalizations.of(context)!.route, style: const TextStyle(fontSize: 18, fontWeight:  FontWeight.w800)),
     ));
     for (ResourceType resourceType in resourceTypes) {
       listTitles.add(
