@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:one_piece_battles_flutter/components/side_menu.dart';
-import 'package:one_piece_battles_flutter/responsive/base_view.dart';
-import '../constants/device_type.dart';
+import 'constants/device_type.dart';
 
-class DesktopScaffold extends StatefulWidget {
+class HomePage extends StatefulWidget {
   final Widget mainScreen;
-  const DesktopScaffold({super.key, required this.mainScreen});
+  const HomePage({super.key, required this.mainScreen});
 
   @override
-  State<DesktopScaffold> createState() => _DesktopScaffoldState();
+  State<HomePage> createState() => _HomePageState();
 }
 
-class _DesktopScaffoldState extends BaseView<DesktopScaffold> with TickerProviderStateMixin{
-
+class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -24,11 +22,11 @@ class _DesktopScaffoldState extends BaseView<DesktopScaffold> with TickerProvide
               deviceType: DeviceType.desktop,
             ),
           ),
-          Expanded(child: widget.mainScreen,)
+          Expanded(
+            child: widget.mainScreen,
+          )
         ],
       ),
     );
   }
-
-
 }

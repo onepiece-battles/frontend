@@ -5,8 +5,8 @@ import 'package:get_it/get_it.dart';
 import 'package:one_piece_battles_flutter/repository/character_dao.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
 import 'package:openapi/api.dart';
-import 'route/app_router.dart';
-import 'my_input_theme.dart';
+import 'config/app_router.dart';
+import 'config/my_input_theme.dart';
 
 GetIt getIt = GetIt.instance;
 

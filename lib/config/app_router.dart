@@ -8,7 +8,7 @@ import 'package:one_piece_battles_flutter/views/settings_view.dart';
 import 'package:one_piece_battles_flutter/views/user_view.dart';
 import 'package:one_piece_battles_flutter/register_page.dart';
 import 'package:one_piece_battles_flutter/login_page.dart';
-import 'package:one_piece_battles_flutter/responsive/desktop_scaffold.dart';
+import 'package:one_piece_battles_flutter/home_page.dart';
 import 'package:openapi/api.dart';
 
 GetIt getIt = GetIt.instance;
@@ -38,7 +38,7 @@ class AppRouter {
           navigatorKey: _homeNavigatorState,
           pageBuilder: (context, state, child) {
             return NoTransitionPage(
-              child: DesktopScaffold(
+              child: HomePage(
                 mainScreen: child,
               ),
             );
