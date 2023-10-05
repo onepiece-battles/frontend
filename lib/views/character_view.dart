@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:logging/logging.dart';
-import 'package:one_piece_battles_flutter/components/add_character_view.dart';
+import 'package:one_piece_battles_flutter/views/add_character_view.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:one_piece_battles_flutter/repository/character_dao.dart';
@@ -24,7 +24,7 @@ class CharacterView extends StatefulWidget {
 class _CharacterViewState extends State<CharacterView> {
   Logger logger = Logger('_CharacterViewState');
   TextEditingController searchNameController = TextEditingController();
-  TextEditingController pageNumberController = TextEditingController();
+  TextEditingController pageNumberController = TextEditingController(text: "1");
   CharacterFilter characterFilter = CharacterFilter();
   List<Character> currentCharacterList = [];
   List<CharacterSortableField> sortKeys = [];
@@ -84,6 +84,10 @@ class _CharacterViewState extends State<CharacterView> {
         ),
         Padding(
           padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
+          child: _createSearchFilterRow(context),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
           child: SizedBox(width: double.infinity, child: _createDataTable()),
         ),
         Padding(
@@ -108,16 +112,24 @@ class _CharacterViewState extends State<CharacterView> {
   List<DataColumn> _createColumns() {
     return [
       DataColumn(
-          label: IconButton(
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: ((context) {
-                    return const AddCharacterView();
-                  }),
-                );
-              },
-              icon: const Icon(Icons.add))),
+        label: ElevatedButton(
+            onPressed: () {
+              characterFilter = CharacterFilter();
+              sortKeys = [];
+              columnIndexToSortOrderMap = {
+                1: null,
+                3: null,
+                4: null,
+                5: null,
+                6: null,
+                7: null,
+                8: null,
+                9: null,
+              };
+              _doSearch();
+            },
+            child: Text(AppLocalizations.of(context)!.resetSort)),
+      ),
       _createSingleColumn(AppLocalizations.of(context)!.characterName, 1),
       DataColumn(
           label: Text(
@@ -185,7 +197,7 @@ class _CharacterViewState extends State<CharacterView> {
     );
   }
 
-  DataRow _createSearchFilterRow(BuildContext context) {
+  Row _createSearchFilterRow(BuildContext context) {
     List<String> displayCharacterTypes = [
       AppLocalizations.of(context)!.body,
       AppLocalizations.of(context)!.science,
@@ -203,103 +215,97 @@ class _CharacterViewState extends State<CharacterView> {
       AppLocalizations.of(context)!.katana: CharacterType.katana,
       AppLocalizations.of(context)!.shoot: CharacterType.shooter,
     };
-    return DataRow(cells: [
-      DataCell(Padding(
-        padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
+    return Row(children: [
+      Padding(
+        padding: const EdgeInsets.fromLTRB(0, 0, 8, 6),
         child: ElevatedButton(
             onPressed: () {
-              characterFilter = CharacterFilter();
-              selectedItems = [];
-              sortKeys = [];
-              searchNameController.text = '';
-              columnIndexToSortOrderMap = {
-                1: null,
-                3: null,
-                4: null,
-                5: null,
-                6: null,
-                7: null,
-                8: null,
-                9: null,
-              };
-              _doSearch();
+              showDialog(
+                context: context,
+                builder: ((context) {
+                  return const AddCharacterView();
+                }),
+              );
             },
-            child: Text(AppLocalizations.of(context)!.clearAll)),
-      )),
-      DataCell(Padding(
-          padding: const EdgeInsets.fromLTRB(0, 6, 20, 6),
-          child: TextField(
-            textAlign: TextAlign.center,
-            controller: searchNameController,
-            onChanged: (value) {
-              characterFilter.name = value;
-              _doSearch();
-            },
-            decoration: InputDecoration(
-              contentPadding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-              prefixIcon: IconButton(
+            child: Text(AppLocalizations.of(context)!.createCharacter)),
+      ),
+      Padding(
+          padding: const EdgeInsets.fromLTRB(0, 0, 8, 6),
+          child: SizedBox(
+            width: 200,
+            height: 40,
+            child: TextField(
+              textAlign: TextAlign.center,
+              controller: searchNameController,
+              onChanged: (value) {
+                characterFilter.name = value;
+                _doSearch();
+              },
+              decoration: InputDecoration(
+                contentPadding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                prefixIcon: IconButton(
+                    onPressed: () {
+                      characterFilter.name = searchNameController.text;
+                      _doSearch();
+                    },
+                    icon: const Icon(Icons.search)),
+                hintText: AppLocalizations.of(context)!.searchCharacterName,
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.clear),
                   onPressed: () {
-                    characterFilter.name = searchNameController.text;
+                    searchNameController.clear();
+                    characterFilter.name = null;
                     _doSearch();
                   },
-                  icon: const Icon(Icons.search)),
-              hintText: AppLocalizations.of(context)!.search,
-              suffixIcon: IconButton(
-                icon: const Icon(Icons.clear),
-                onPressed: () {
-                  searchNameController.clear();
-                  characterFilter.name = null;
-                  _doSearch();
-                },
+                ),
               ),
             ),
-          ))),
-      DataCell(Padding(
-        padding: const EdgeInsets.fromLTRB(0, 6, 20, 6),
-        child: DropdownSearch<String>.multiSelection(
-          items: displayCharacterTypes,
-          selectedItems: selectedItems,
-          onChanged: (value) {
-            selectedItems = value;
-            characterFilter.characterTypes = selectedItems.map((element) {
-              return displayValueToEnumValue[element]!;
-            }).toList();
-            _doSearch();
-          },
-          onSaved: (value) {
-            if (value == null) {
-              selectedItems = [];
-            } else {
+          )),
+      Padding(
+        padding: const EdgeInsets.fromLTRB(0, 0, 0, 6),
+        child: SizedBox(
+          height: 30,
+          width: 200,
+          child: DropdownSearch<String>.multiSelection(
+            items: displayCharacterTypes,
+            selectedItems: selectedItems,
+            clearButtonProps: const ClearButtonProps(isVisible: true),
+            onChanged: (value) {
               selectedItems = value;
-            }
-            characterFilter.characterTypes = selectedItems.map((element) {
-              return displayValueToEnumValue[element]!;
-            }).toList();
-            _doSearch();
-          },
-          dropdownDecoratorProps: DropDownDecoratorProps(
-            dropdownSearchDecoration: InputDecoration(
-                contentPadding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-                hintText: AppLocalizations.of(context)!.characterTypeHint,
-                alignLabelWithHint: true),
+              characterFilter.characterTypes = selectedItems.map((element) {
+                return displayValueToEnumValue[element]!;
+              }).toList();
+              _doSearch();
+            },
+            onSaved: (value) {
+              if (value == null) {
+                selectedItems = [];
+              } else {
+                selectedItems = value;
+              }
+              characterFilter.characterTypes = selectedItems.map((element) {
+                return displayValueToEnumValue[element]!;
+              }).toList();
+              _doSearch();
+            },
+            dropdownDecoratorProps: DropDownDecoratorProps(
+              dropdownSearchDecoration: InputDecoration(
+                  contentPadding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                  hintText: AppLocalizations.of(context)!.characterTypeHint,
+                  border: const UnderlineInputBorder(),
+                  focusedBorder: const UnderlineInputBorder(),
+                  enabledBorder: const UnderlineInputBorder(),
+                  disabledBorder: const UnderlineInputBorder(),
+                  alignLabelWithHint: true),
+            ),
           ),
         ),
-      )),
-      DataCell.empty,
-      DataCell.empty,
-      DataCell.empty,
-      DataCell.empty,
-      DataCell.empty,
-      DataCell.empty,
-      DataCell.empty,
-      DataCell.empty,
+      ),
     ]);
   }
 
   List<DataRow> _createRows(BuildContext context) {
-    var searchRow = _createSearchFilterRow(context);
     List<DataRow> result = [];
-    result.add(searchRow);
     var dataList = currentCharacterList
         .map((character) => DataRow(cells: [
               DataCell(Padding(
@@ -342,6 +348,7 @@ class _CharacterViewState extends State<CharacterView> {
         currentCharacterList = value!.characters;
         totalSize = value.totalSize!;
         pageNum = (totalSize / 10).ceil();
+        pageNumberController.text = selectedPageIndex.toString();
         if (selectedPageIndex <= 1) {
           preButtonEnabled = false;
         } else {
@@ -365,7 +372,7 @@ class _CharacterViewState extends State<CharacterView> {
                 selectedPageIndex = selectedPageIndex - 1;
                 _doSearch();
               },
-        child: const Text("<<"));
+        child: const Icon(Icons.arrow_back));
     ElevatedButton nextPage = ElevatedButton(
         onPressed: !nextButtonEnabled
             ? null
@@ -373,37 +380,37 @@ class _CharacterViewState extends State<CharacterView> {
                 selectedPageIndex = selectedPageIndex + 1;
                 _doSearch();
               },
-        child: const Text(">>"));
+        child: const Icon(Icons.arrow_forward));
     Widget pageNumber = SizedBox(
-      width: 60,
-      height: 30,
-      child: TextField(
-        textAlign: TextAlign.start,
-        textAlignVertical: TextAlignVertical.center,
-        controller: pageNumberController,
-        onChanged: (value) {
-          setState(() {
-            if (!DataValidator.isInt(pageNumberController.text.trim())) {
-              confirmButtonEnabled = false;
-            } else {
-              int currentTypedPage =
-                  int.parse(pageNumberController.text.trim());
-              if (currentTypedPage < 1 ||
-                  currentTypedPage > pageNum ||
-                  currentTypedPage == selectedPageIndex) {
+      width: 35,
+      height: 28,
+      child: TextFormField(
+          textAlign: TextAlign.center,
+          textAlignVertical: TextAlignVertical.center,
+          decoration: const InputDecoration(
+            contentPadding: EdgeInsets.fromLTRB(0, 17, 0, 17),
+            enabledBorder: UnderlineInputBorder(),
+            focusedBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: OnepieceColors.themeColor)),
+          ),
+          controller: pageNumberController,
+          onChanged: (value) {
+            setState(() {
+              if (!DataValidator.isInt(pageNumberController.text.trim())) {
                 confirmButtonEnabled = false;
               } else {
-                confirmButtonEnabled = true;
+                int currentTypedPage =
+                    int.parse(pageNumberController.text.trim());
+                if (currentTypedPage < 1 ||
+                    currentTypedPage > pageNum ||
+                    currentTypedPage == selectedPageIndex) {
+                  confirmButtonEnabled = false;
+                } else {
+                  confirmButtonEnabled = true;
+                }
               }
-            }
-          });
-        },
-        decoration: InputDecoration(
-          hintText: "$selectedPageIndex",
-          floatingLabelBehavior: FloatingLabelBehavior.auto,
-          contentPadding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-        ),
-      ),
+            });
+          }),
     );
     ElevatedButton confirmPage = ElevatedButton(
         onPressed: !confirmButtonEnabled
@@ -413,19 +420,31 @@ class _CharacterViewState extends State<CharacterView> {
                 _doSearch();
               },
         child: Text(
-          "/$pageNum ${AppLocalizations.of(context)!.jumpToPage}",
+          AppLocalizations.of(context)!.jumpToPage,
           textAlign: TextAlign.left,
         ));
     widgetList.add(Padding(
-      padding: const EdgeInsets.fromLTRB(8.0, 0, 0, 0),
+      padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
       child: prePage,
     ));
+    widgetList.add(pageNumber);
+    var totalPageCount = ClipRRect(
+      borderRadius: BorderRadius.circular(3),
+      child: Container(
+          height: 28,
+          color: OnepieceColors.menuBackgroundColor,
+          alignment: AlignmentDirectional.center,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(3, 0, 3, 3),
+            child: Text(
+              "$pageNum",
+              style: OnepieceFonts.contentStyle,
+            ),
+          )),
+    );
+    widgetList.add(totalPageCount);
     widgetList.add(Padding(
-      padding: const EdgeInsets.fromLTRB(8.0, 0, 0, 0),
-      child: pageNumber,
-    ));
-    widgetList.add(Padding(
-      padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+      padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
       child: confirmPage,
     ));
     widgetList.add(Padding(
