@@ -13,6 +13,10 @@ class OnepieceFonts {
   static const TextStyle contentStyle =TextStyle(
   color: OnepieceFonts.contentFontColor,
   fontSize: OnepieceFonts.contentFontSize);
+  static const TextStyle contentStyleBold =TextStyle(
+      color: OnepieceFonts.contentFontColor,
+      fontSize: OnepieceFonts.contentFontSize,
+  fontWeight: FontWeight.w600);
 
   static const TextStyle headerStyle =   TextStyle(
       color: OnepieceFonts.headerFontColor,
@@ -30,5 +34,11 @@ class OnepieceFonts {
     fontSize: 14,
     fontWeight: FontWeight.bold,
     fontStyle: FontStyle.italic
+  );
+
+  static const TextStyle navigationTopBarStyle = TextStyle(
+    color: contentFontColor,
+    fontSize: 16,
+    fontWeight: FontWeight.w500
   );
 }
