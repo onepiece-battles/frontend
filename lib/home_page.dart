@@ -109,6 +109,9 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _getMiddleArrow() {
-    return const Text(" > ");
+    return const Text(
+      ">",
+      style: OnepieceFonts.navigationTopBarStyle,
+    );
   }
 }
