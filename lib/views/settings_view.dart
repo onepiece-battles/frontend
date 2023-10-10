@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:one_piece_battles_flutter/repository/image_dao.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
@@ -28,7 +29,6 @@ class _SettingsViewState extends State<SettingsView> {
   String locale = Intl.getCurrentLocale();
   String chosenImageName = "";
   Uint8List profileImage = Base64Helper.decode(getIt<User>().profileImage!);
-  // Character character;
   @override
   void initState() {
     super.initState();
@@ -98,10 +98,16 @@ class _SettingsViewState extends State<SettingsView> {
                   children: [
                     ElevatedButton(
                       onPressed: () {
-                        setState(() {
-                          OnepieceImagePicker.pickWebImage()
-                              .then((value) => profileImage = value!);
-                          _footButtonEnabled = isModified(locale, profileImage);
+                        OnepieceImagePicker.pickWebImage().then((value) {
+                          XFile image = value!;
+                          setState(() {
+                            chosenImageName = image.name;
+                            image
+                                .readAsBytes()
+                                .then((value) => profileImage = value);
+                            _footButtonEnabled =
+                                isModified(locale, profileImage);
+                          });
                         });
                       },
                       child: Text(AppLocalizations.of(context)!.chooseFile),
@@ -188,16 +194,14 @@ class _SettingsViewState extends State<SettingsView> {
             onPressed: !_footButtonEnabled
                 ? null
                 : () {
-                    var multipartImage =
-                        MultipartFile.fromBytes("document", profileImage);
-                    debugPrint("new image is:");
-                    debugPrint(multipartImage.length.toString());
+                    var encodedImage = Base64Helper.encode(profileImage);
                     getIt<ImageDao>()
                         .addImage(
-                            getIt<User>().id, ResourceType.USER, multipartImage)
+                            getIt<User>().id, ResourceType.USER, encodedImage)
                         .then((value) {
                       setState(() {
                         settingOriginalData.setProfileImage(profileImage);
+                        isModified(locale, profileImage);
                       });
                     });
                     // todo(yichi): update user locale here
