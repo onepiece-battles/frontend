@@ -3,12 +3,10 @@ import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:one_piece_battles_flutter/config/app_router.dart';
-import 'package:one_piece_battles_flutter/home_page.dart';
 import 'package:one_piece_battles_flutter/utils/image_helper.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:openapi/api.dart';
-import 'package:provider/provider.dart';
 import '../constants/device_type.dart';
 import '../utils/base64_helper.dart';
 
@@ -26,7 +24,6 @@ class SideMenu extends StatefulWidget {
 }
 
 class _SideMenuState extends State<SideMenu> {
-  // String selectedResource = ResourceType.CHARACTER.toString();
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -55,11 +52,19 @@ class _SideMenuState extends State<SideMenu> {
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              //Text(,style: ,
-              child: RichText( text: TextSpan(children: [
-                 const WidgetSpan(child: Icon(Icons.email, color: Colors.grey, size: 17,)),
-                TextSpan(text: " ${getIt<User>().email!}",style: OnepieceFonts.emailFont)
-              ]),),
+              child: RichText(
+                text: TextSpan(children: [
+                  const WidgetSpan(
+                      child: Icon(
+                    Icons.email,
+                    color: Colors.grey,
+                    size: 17,
+                  )),
+                  TextSpan(
+                      text: " ${getIt<User>().email!}",
+                      style: OnepieceFonts.emailFont)
+                ]),
+              ),
             )
           ],
         ));
@@ -67,9 +72,6 @@ class _SideMenuState extends State<SideMenu> {
 
   List<Widget> _getListTitle(
       BuildContext context, List<ResourceType> resourceTypes) {
-    String selectedResource = GoRouterState.of(context)
-        .fullPath!
-        .split("/")[1];
     Map<ResourceType, Widget> resourceToIconMap = {
       ResourceType.FRUIT: ImageHelper.getSvgIcon(
         'images/svgs/fruit.svg',
@@ -100,8 +102,9 @@ class _SideMenuState extends State<SideMenu> {
     List<Widget> listTitles = [];
     listTitles.add(_getDrawerHeader(context));
     listTitles.add(Padding(
-      padding: const EdgeInsets.fromLTRB(18, 10,0,10),
-      child: Text(AppLocalizations.of(context)!.route, style: const TextStyle(fontSize: 18, fontWeight:  FontWeight.w800)),
+      padding: const EdgeInsets.fromLTRB(18, 10, 0, 10),
+      child: Text(AppLocalizations.of(context)!.route,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
     ));
     for (ResourceType resourceType in resourceTypes) {
       listTitles.add(
@@ -117,8 +120,10 @@ class _SideMenuState extends State<SideMenu> {
               ),
               leading: resourceToIconMap[resourceType],
               selected: GoRouterState.of(context)
-                  .fullPath!
-                  .split("/")[2].toUpperCase() == resourceType.toString(),
+                      .fullPath!
+                      .split("/")[2]
+                      .toUpperCase() ==
+                  resourceType.toString(),
               selectedTileColor: OnepieceColors.menuSelectedTileColor,
               onTap: () {
                 setState(
@@ -165,9 +170,8 @@ class _SideMenuState extends State<SideMenu> {
             ),
             minLeadingWidth: 10,
             contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-            selected: GoRouterState.of(context)
-                .fullPath!
-                .split("/")[2] == "setting",
+            selected:
+                GoRouterState.of(context).fullPath!.split("/")[2] == "setting",
             selectedTileColor: OnepieceColors.menuSelectedTileColor,
             onTap: () {
               setState(() {
