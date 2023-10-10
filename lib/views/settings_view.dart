@@ -188,9 +188,13 @@ class _SettingsViewState extends State<SettingsView> {
             onPressed: !_footButtonEnabled
                 ? null
                 : () {
+                    var multipartImage =
+                        MultipartFile.fromBytes("document", profileImage);
+                    debugPrint("new image is:");
+                    debugPrint(multipartImage.length.toString());
                     getIt<ImageDao>()
-                        .addImage(getIt<User>().id, ResourceType.USER,
-                            MultipartFile.fromBytes("document", profileImage))
+                        .addImage(
+                            getIt<User>().id, ResourceType.USER, multipartImage)
                         .then((value) {
                       setState(() {
                         settingOriginalData.setProfileImage(profileImage);
