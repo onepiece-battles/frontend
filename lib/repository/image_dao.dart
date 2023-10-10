@@ -7,7 +7,7 @@ class ImageDao {
   }
   ImageDao.empty();
 
-  Future<MultipartFile?> addImage(String id, ResourceType resourceType, MultipartFile multipartFile) {
-    return imageApi.addImage(id:id, type:resourceType, image: multipartFile);
+  Future<String?> addImage(String id, ResourceType resourceType, String image) {
+    return imageApi.addImage(id:id, type:resourceType, image: image);
   }
 }
