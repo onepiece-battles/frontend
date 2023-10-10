@@ -110,7 +110,9 @@ class _SettingsViewState extends State<SettingsView> {
                       width: 10,
                     ),
                     Text(
-                      chosenImageName !=""? chosenImageName: AppLocalizations.of(context)!.noFileChosen,
+                      chosenImageName != ""
+                          ? chosenImageName
+                          : AppLocalizations.of(context)!.noFileChosen,
                       style: OnepieceFonts.contentStyle,
                     )
                   ],
@@ -168,28 +170,42 @@ class _SettingsViewState extends State<SettingsView> {
   }
 
   Row _getFootButtons(BuildContext context) {
-    return Row(crossAxisAlignment: CrossAxisAlignment.end,
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-      ElevatedButton(onPressed: !_footButtonEnabled ? null : () {
-        setState(() {
-          locale = settingOriginalData.locale;
-          profileImage = settingOriginalData.profileImage;
-        });
-      }, child: Text(AppLocalizations.of(context)!.cancelPopUp),
-      ),
-      ElevatedButton(onPressed: !_footButtonEnabled ? null : () {
-        getIt<ImageDao>().addImage(getIt<User>().id, ResourceType.USER, MultipartFile.fromBytes("document", profileImage)).then((value) {
-          setState(() {
-            settingOriginalData.setProfileImage(profileImage);
-          });
-        });
-        // todo(yichi): update user locale here
-      }, child: Text(AppLocalizations.of(context)!.submitForm)),
-    ],);
+        ElevatedButton(
+          onPressed: !_footButtonEnabled
+              ? null
+              : () {
+                  setState(() {
+                    locale = settingOriginalData.locale;
+                    profileImage = settingOriginalData.profileImage;
+                  });
+                },
+          child: Text(AppLocalizations.of(context)!.cancelPopUp),
+        ),
+        ElevatedButton(
+            onPressed: !_footButtonEnabled
+                ? null
+                : () {
+                    getIt<ImageDao>()
+                        .addImage(getIt<User>().id, ResourceType.USER,
+                            MultipartFile.fromBytes("document", profileImage))
+                        .then((value) {
+                      setState(() {
+                        settingOriginalData.setProfileImage(profileImage);
+                      });
+                    });
+                    // todo(yichi): update user locale here
+                  },
+            child: Text(AppLocalizations.of(context)!.submitForm)),
+      ],
+    );
   }
 
   bool isModified(String locale, Uint8List image) {
-    return settingOriginalData.locale != locale || settingOriginalData.profileImage != image;
+    return settingOriginalData.locale != locale ||
+        settingOriginalData.profileImage != image;
   }
 }
 
