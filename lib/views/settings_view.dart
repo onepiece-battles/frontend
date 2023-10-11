@@ -4,13 +4,13 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
-import 'package:http/http.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:one_piece_battles_flutter/repository/image_dao.dart';
-import 'package:one_piece_battles_flutter/repository/user_dao.dart';
 import 'package:openapi/api.dart';
 import '../constants/onepiece_fonts.dart';
+import '../main.dart';
+import '../repository/user_dao.dart';
 import '../utils/base64_helper.dart';
 import '../utils/onepiece_image_picker.dart';
 
@@ -27,8 +27,8 @@ class _SettingsViewState extends State<SettingsView> {
   bool _footButtonEnabled = false;
   SettingOriginalData settingOriginalData = SettingOriginalData();
   String locale = Intl.getCurrentLocale();
-  String chosenImageName = "";
   Uint8List profileImage = Base64Helper.decode(getIt<User>().profileImage!);
+  String chosenImageName = "";
   @override
   void initState() {
     super.initState();
@@ -46,7 +46,14 @@ class _SettingsViewState extends State<SettingsView> {
           thickness: 1,
         ),
         _getLocalization(context),
-        _getFootButtons(context)
+        const Divider(
+          height: 10,
+          thickness: 1,
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: _getFootButtons(context),
+        )
       ],
     );
   }
@@ -139,11 +146,15 @@ class _SettingsViewState extends State<SettingsView> {
   }
 
   Widget _getLocalization(BuildContext context) {
-    List<String> displayCharacterTypes = [
-      AppLocalizations.of(context)!.chinese,
-      AppLocalizations.of(context)!.english,
-    ];
-    String selectedItem = displayCharacterTypes.first;
+    Map<String, String> localeToDisplayNameMap = {
+      "zh_CN": AppLocalizations.of(context)!.chinese,
+      "en_US": AppLocalizations.of(context)!.english
+    };
+    Map<String, Locale> localeMap = {
+      "en_US": const Locale('en', 'US'),
+      "zh_CN": const Locale('zh', 'CN')
+    };
+    String selectedItem = localeToDisplayNameMap[Intl.getCurrentLocale()]!;
     return Padding(
       padding: const EdgeInsets.all(15.0),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -162,11 +173,17 @@ class _SettingsViewState extends State<SettingsView> {
           height: 10,
         ),
         DropdownSearch<String>(
-          items: displayCharacterTypes,
+          items: localeToDisplayNameMap.values.toList(),
           selectedItem: selectedItem,
           onChanged: (value) {
-            selectedItem = value!;
             setState(() {
+              selectedItem = value!;
+              String key = localeToDisplayNameMap.entries
+                  .where((element) => element.value == selectedItem)
+                  .first
+                  .key;
+              MyApp.setLocale(context, localeMap[key]!);
+              locale = Intl.getCurrentLocale();
               _footButtonEnabled = isModified(locale, profileImage);
             });
           },
@@ -177,7 +194,7 @@ class _SettingsViewState extends State<SettingsView> {
 
   Row _getFootButtons(BuildContext context) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
         ElevatedButton(
           onPressed: !_footButtonEnabled
@@ -190,23 +207,37 @@ class _SettingsViewState extends State<SettingsView> {
                 },
           child: Text(AppLocalizations.of(context)!.cancelPopUp),
         ),
-        ElevatedButton(
-            onPressed: !_footButtonEnabled
-                ? null
-                : () {
-                    var encodedImage = Base64Helper.encode(profileImage);
-                    getIt<ImageDao>()
-                        .addImage(
-                            getIt<User>().id, ResourceType.USER, encodedImage)
-                        .then((value) {
-                      setState(() {
-                        settingOriginalData.setProfileImage(profileImage);
-                        isModified(locale, profileImage);
+        Padding(
+          padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+          child: ElevatedButton(
+              onPressed: !_footButtonEnabled
+                  ? null
+                  : () {
+                      var encodedImage = Base64Helper.encode(profileImage);
+                      UploadImageRequest uploadImageRequest = UploadImageRequest(
+                          resourceId: getIt<User>().id,
+                          image: encodedImage,
+                          type: ResourceType.USER);
+                      getIt<ImageDao>()
+                          .addImage(uploadImageRequest)
+                          .then((imageResponse) {
+                        setState(() {
+                          // update user in memory
+                          getIt<UserDao>()
+                              .get(GetUserRequest(userId: getIt<User>().id))
+                              .then((value) {
+                            getIt.registerLazySingleton<User>(() => value!);
+                          });
+                          settingOriginalData.setProfileImage(
+                              Base64Helper.decode(imageResponse!.image));
+                          chosenImageName = "";
+                          _footButtonEnabled = false;
+                        });
                       });
-                    });
-                    // todo(yichi): update user locale here
-                  },
-            child: Text(AppLocalizations.of(context)!.submitForm)),
+                      // todo(yichi): update user locale here
+                    },
+              child: Text(AppLocalizations.of(context)!.submitForm)),
+        ),
       ],
     );
   }
