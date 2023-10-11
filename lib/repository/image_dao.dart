@@ -1,5 +1,5 @@
 import 'package:openapi/api.dart';
-import 'package:http/http.dart';
+
 class ImageDao {
   ImageApi imageApi  = ImageApi();
   ImageDao(ApiClient apiClient) {
@@ -7,7 +7,7 @@ class ImageDao {
   }
   ImageDao.empty();
 
-  Future<String?> addImage(String id, ResourceType resourceType, String image) {
-    return imageApi.addImage(id:id, type:resourceType, image: image);
+  Future<UploadImageResponse?> addImage(UploadImageRequest uploadImageRequest) {
+    return imageApi.uploadImage(uploadImageRequest);
   }
 }

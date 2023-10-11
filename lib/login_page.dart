@@ -23,7 +23,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  var _tabTextIndexSelected = 1;
+  var _tabTextIndexSelected = 0;
   bool _isHidden = true;
   bool _buttonEnabled = true;
   String verificationMessage = "";
@@ -33,7 +33,6 @@ class _LoginPageState extends State<LoginPage> {
       TextEditingController(text: 'abc@gmail.com');
   TextEditingController passwordController = TextEditingController(text: 'abc');
   Logger logger = Logger('_LoginPageState');
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
