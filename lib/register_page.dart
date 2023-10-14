@@ -2,14 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_toggle_tab/flutter_toggle_tab.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:one_piece_battles_flutter/config/app_router.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
 import 'config/api_initializer.dart';
 import 'constants/path_constants.dart';
-import 'login_page.dart';
 import 'main.dart';
+
+const Map<String, Locale> localesMap = {
+  'zh_CN': Locale('zh', 'CN'),
+  'en_US': Locale('en', 'US')
+};
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -19,7 +24,7 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  var _tabTextIndexSelected = 1;
+  var _tabTextIndexSelected = 0;
   I18nText? verificationI18n = I18nText();
   UserDao userDao = UserDao.empty();
   bool _isPasswordHidden = true;
@@ -46,21 +51,21 @@ class _RegisterPageState extends State<RegisterPage> {
               padding: const EdgeInsets.all(30),
               child: FlutterToggleTab(
                 width: 5,
-                height: 25,
+                height: 27,
                 borderRadius: 30,
                 selectedBackgroundColors: const [
                   Color.fromARGB(255, 38, 151, 243),
                   Colors.blueAccent
                 ],
-                labels: const ["EN", "中"],
+                labels: const ["文", "EN"],
                 selectedLabelIndex: (index) {
                   setState(() {
                     _tabTextIndexSelected = index;
                     Locale locale;
                     if (index == 0) {
-                      locale = locales.first;
+                      locale = localesMap.values.first;
                     } else {
-                      locale = locales.last;
+                      locale = localesMap.values.last;
                     }
                     MyApp.setLocale(context, locale);
                     verificationMessage =

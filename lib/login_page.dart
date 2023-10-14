@@ -33,6 +33,7 @@ class _LoginPageState extends State<LoginPage> {
       TextEditingController(text: 'abc@gmail.com');
   TextEditingController passwordController = TextEditingController(text: 'abc');
   Logger logger = Logger('_LoginPageState');
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,13 +47,13 @@ class _LoginPageState extends State<LoginPage> {
                 padding: const EdgeInsets.all(30),
                 child: FlutterToggleTab(
                   width: 5,
-                  height: 25,
+                  height: 27,
                   borderRadius: 30,
                   selectedBackgroundColors: const [
                     Color.fromARGB(255, 38, 151, 243),
                     Colors.blueAccent
                   ],
-                  labels: const ["EN", "中"],
+                  labels: const ["文", "EN"],
                   selectedLabelIndex: (index) {
                     setState(() {
                       _tabTextIndexSelected = index;
