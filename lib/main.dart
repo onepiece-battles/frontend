@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
+import 'package:intl/intl.dart';
 import 'package:one_piece_battles_flutter/repository/character_dao.dart';
 import 'package:one_piece_battles_flutter/repository/image_dao.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
@@ -29,11 +30,12 @@ class MyApp extends StatefulWidget {
   static void setLocale(BuildContext context, Locale locale) {
     _MyAppState? state = context.findAncestorStateOfType<_MyAppState>();
     state?.setLocale(locale);
+    getIt.registerLazySingleton<Locale>(() => locale);
   }
 }
 
 class _MyAppState extends State<MyApp> {
-  Locale? _locale;
+  Locale _locale = const Locale('zh', 'CN');
 
   setLocale(Locale locale) {
     setState(() {
@@ -43,6 +45,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    getIt.registerLazySingleton<Locale>(() => _locale);
     return MaterialApp.router(
       locale: _locale,
       theme: ThemeData(inputDecorationTheme: MyInputTheme().theme()),

@@ -5,13 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
 import 'package:one_piece_battles_flutter/repository/image_dao.dart';
 import 'package:openapi/api.dart';
+import '../constants/onepiece_colors.dart';
 import '../constants/onepiece_fonts.dart';
 import '../main.dart';
 import '../repository/user_dao.dart';
 import '../utils/base64_helper.dart';
+import '../utils/compare_uint8list.dart';
 import '../utils/onepiece_image_picker.dart';
 
 GetIt getIt = GetIt.instance;
@@ -24,16 +25,24 @@ class SettingsView extends StatefulWidget {
 }
 
 class _SettingsViewState extends State<SettingsView> {
+  final TextEditingController _emailSettingController =
+      TextEditingController(text: getIt<User>().email);
+  bool _emailSettingEnabled = false;
+  final SettingPageModel _originalData = SettingPageModel();
+  final SettingPageModel _realtimeData = SettingPageModel();
   bool _footButtonEnabled = false;
-  SettingOriginalData settingOriginalData = SettingOriginalData();
-  String locale = Intl.getCurrentLocale();
-  Uint8List profileImage = Base64Helper.decode(getIt<User>().profileImage!);
-  String chosenImageName = "";
+  String _chosenImageName = "";
   @override
   void initState() {
     super.initState();
-    settingOriginalData.setCurrentLocale(locale);
-    settingOriginalData.setProfileImage(profileImage);
+    _originalData.setCurrentLocale(getIt<Locale>());
+    _originalData
+        .setProfileImage(Base64Helper.decode(getIt<User>().profileImage!));
+    _originalData.setEmail(getIt<User>().email!);
+    _realtimeData.setCurrentLocale(getIt<Locale>());
+    _realtimeData
+        .setProfileImage(Base64Helper.decode(getIt<User>().profileImage!));
+    _realtimeData.setEmail(getIt<User>().email!);
   }
 
   @override
@@ -41,6 +50,11 @@ class _SettingsViewState extends State<SettingsView> {
     return Column(
       children: [
         _getAvatar(context),
+        const Divider(
+          height: 10,
+          thickness: 1,
+        ),
+        _getEmail(context),
         const Divider(
           height: 10,
           thickness: 1,
@@ -83,7 +97,7 @@ class _SettingsViewState extends State<SettingsView> {
               iconSize: 100,
               splashRadius: 10,
               splashColor: Colors.red,
-              icon: Image.memory(profileImage),
+              icon: Image.memory(_realtimeData.profileImage),
             ),
             const SizedBox(
               width: 10,
@@ -104,18 +118,14 @@ class _SettingsViewState extends State<SettingsView> {
                 Row(
                   children: [
                     ElevatedButton(
-                      onPressed: () {
-                        OnepieceImagePicker.pickWebImage().then((value) {
-                          XFile image = value!;
-                          setState(() {
-                            chosenImageName = image.name;
-                            image
-                                .readAsBytes()
-                                .then((value) => profileImage = value);
-                            _footButtonEnabled =
-                                isModified(locale, profileImage);
-                          });
-                        });
+                      onPressed: () async {
+                        XFile? pickedImage =
+                            await OnepieceImagePicker.pickWebImage();
+                        _chosenImageName = pickedImage!.name;
+                        Uint8List imageInByte = await pickedImage.readAsBytes();
+                        _realtimeData.setProfileImage(imageInByte);
+                        _footButtonEnabled = isModified();
+                        setState(() {});
                       },
                       child: Text(AppLocalizations.of(context)!.chooseFile),
                     ),
@@ -123,8 +133,8 @@ class _SettingsViewState extends State<SettingsView> {
                       width: 10,
                     ),
                     Text(
-                      chosenImageName != ""
-                          ? chosenImageName
+                      _chosenImageName != ""
+                          ? _chosenImageName
                           : AppLocalizations.of(context)!.noFileChosen,
                       style: OnepieceFonts.contentStyle,
                     )
@@ -145,16 +155,88 @@ class _SettingsViewState extends State<SettingsView> {
     );
   }
 
+  Widget _getEmail(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(15.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(0, 0, 0, 15),
+            child: Text(
+              AppLocalizations.of(context)!.emailSetting,
+              style: OnepieceFonts.headerStyle,
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Flexible(
+                flex: 15,
+                child: TextField(
+                  onChanged: (value) {
+                    setState(() {
+                      _emailSettingEnabled = !(_originalData.email == value);
+                    });
+                  },
+                  enabled: _emailSettingEnabled,
+                  controller: _emailSettingController,
+                  decoration: const InputDecoration(
+                    contentPadding: EdgeInsets.fromLTRB(10, 2, 10, 2),
+                    enabledBorder: UnderlineInputBorder(),
+                    disabledBorder: UnderlineInputBorder(),
+                    focusedBorder: UnderlineInputBorder(
+                        borderSide:
+                            BorderSide(color: OnepieceColors.themeColor)),
+                  ),
+                ),
+              ),
+              Flexible(
+                flex: 1,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(8.0, 0, 0, 0),
+                  child: SizedBox(
+                    height: 40,
+                    child: Tooltip(
+                      message: _emailSettingEnabled
+                          ? AppLocalizations.of(context)!.confirmHint
+                          : AppLocalizations.of(context)!.editHint,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            if (_emailSettingEnabled) {
+                              _realtimeData
+                                  .setEmail(_emailSettingController.text);
+                            }
+                            _emailSettingEnabled = !_emailSettingEnabled;
+                            isModified();
+                          });
+                        },
+                        child: _emailSettingEnabled
+                            ? const Icon(Icons.check)
+                            : const Icon(Icons.edit),
+                      ),
+                    ),
+                  ),
+                ),
+              )
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _getLocalization(BuildContext context) {
-    Map<String, String> localeToDisplayNameMap = {
-      "zh_CN": AppLocalizations.of(context)!.chinese,
-      "en_US": AppLocalizations.of(context)!.english
+    Map<String, Locale> nameToLocale = {
+      AppLocalizations.of(context)!.chinese: const Locale('zh', 'CN') ,
+      AppLocalizations.of(context)!.english: const Locale('en', 'US')
     };
-    Map<String, Locale> localeMap = {
-      "en_US": const Locale('en', 'US'),
-      "zh_CN": const Locale('zh', 'CN')
+    Map< Locale, String> localeToName = {
+      const Locale('zh', 'CN'): AppLocalizations.of(context)!.chinese  ,
+      const Locale('en', 'US'): AppLocalizations.of(context)!.english
     };
-    String selectedItem = localeToDisplayNameMap[Intl.getCurrentLocale()]!;
+    String selectedItem = localeToName[getIt<Locale>()]!;
     return Padding(
       padding: const EdgeInsets.all(15.0),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -173,18 +255,13 @@ class _SettingsViewState extends State<SettingsView> {
           height: 10,
         ),
         DropdownSearch<String>(
-          items: localeToDisplayNameMap.values.toList(),
+          items: nameToLocale.keys.toList(),
           selectedItem: selectedItem,
           onChanged: (value) {
             setState(() {
-              selectedItem = value!;
-              String key = localeToDisplayNameMap.entries
-                  .where((element) => element.value == selectedItem)
-                  .first
-                  .key;
-              MyApp.setLocale(context, localeMap[key]!);
-              locale = Intl.getCurrentLocale();
-              _footButtonEnabled = isModified(locale, profileImage);
+              Locale locale = nameToLocale[value]!;
+              _realtimeData.setCurrentLocale(locale);
+              _footButtonEnabled = isModified();
             });
           },
         ),
@@ -201,8 +278,10 @@ class _SettingsViewState extends State<SettingsView> {
               ? null
               : () {
                   setState(() {
-                    locale = settingOriginalData.locale;
-                    profileImage = settingOriginalData.profileImage;
+                    _realtimeData.setCurrentLocale(_originalData.locale);
+                    _realtimeData.setProfileImage(_originalData.profileImage);
+                    _realtimeData.setEmail(_originalData.email);
+                    _footButtonEnabled = isModified();
                   });
                 },
           child: Text(AppLocalizations.of(context)!.cancelPopUp),
@@ -212,29 +291,29 @@ class _SettingsViewState extends State<SettingsView> {
           child: ElevatedButton(
               onPressed: !_footButtonEnabled
                   ? null
-                  : () {
-                      var encodedImage = Base64Helper.encode(profileImage);
-                      UploadImageRequest uploadImageRequest = UploadImageRequest(
-                          resourceId: getIt<User>().id,
-                          image: encodedImage,
-                          type: ResourceType.USER);
-                      getIt<ImageDao>()
-                          .addImage(uploadImageRequest)
-                          .then((imageResponse) {
-                        setState(() {
-                          // update user in memory
-                          getIt<UserDao>()
-                              .get(GetUserRequest(userId: getIt<User>().id))
-                              .then((value) {
-                            getIt.registerLazySingleton<User>(() => value!);
-                          });
-                          settingOriginalData.setProfileImage(
-                              Base64Helper.decode(imageResponse!.image));
-                          chosenImageName = "";
-                          _footButtonEnabled = false;
-                        });
+                  : () async {
+                      var encodedImage =
+                          Base64Helper.encode(_realtimeData.profileImage);
+                      UploadImageRequest uploadImageRequest =
+                          UploadImageRequest(
+                              resourceId: getIt<User>().id,
+                              image: encodedImage,
+                              type: ResourceType.USER);
+                      var getImageResponse = await getIt<ImageDao>()
+                          .addImage(uploadImageRequest);
+                      // var updateUserResponse = await getIt<UserDao>().
+                      _originalData.setProfileImage(
+                          Base64Helper.decode(getImageResponse!.image));
+                      getIt<UserDao>()
+                          .get(GetUserRequest(userId: getIt<User>().id))
+                          .then((value) {
+                        getIt.registerLazySingleton<User>(() => value!);
                       });
+                      _chosenImageName = "";
+                      _footButtonEnabled = isModified();
                       // todo(yichi): update user locale here
+                      MyApp.setLocale(
+                          context, _realtimeData._locale);
                     },
               child: Text(AppLocalizations.of(context)!.submitForm)),
         ),
@@ -242,24 +321,50 @@ class _SettingsViewState extends State<SettingsView> {
     );
   }
 
-  bool isModified(String locale, Uint8List image) {
-    return settingOriginalData.locale != locale ||
-        settingOriginalData.profileImage != image;
+  bool isModified() {
+    return _originalData != _realtimeData;
   }
 }
 
-class SettingOriginalData {
+class SettingPageModel {
   late Uint8List _profileImage;
-  late String _currentLocale;
+  late Locale _locale;
+  late String _email;
 
   void setProfileImage(Uint8List profileImage) {
     _profileImage = profileImage;
   }
 
-  void setCurrentLocale(String locale) {
-    _currentLocale = locale;
+  void setCurrentLocale(Locale locale) {
+    _locale = locale;
   }
 
-  String get locale => _currentLocale;
+  void setEmail(String email) {
+    _email = email;
+  }
+
+  Locale get locale => _locale;
   Uint8List get profileImage => _profileImage;
+  String get email => _email;
+
+  @override
+  bool operator ==(Object other) {
+    debugPrint("start debug");
+    if (other is! SettingPageModel) {
+      return false;
+    }
+    if (locale != other.locale) {
+      return false;
+    }
+    if (email != other.email) {
+      return false;
+    }
+    if (!CompareUint8List.equals(profileImage, other.profileImage)) {
+      return false;
+    }
+    return true;
+  }
+
+  @override
+  int get hashCode => locale.hashCode + profileImage.hashCode + email.hashCode;
 }
