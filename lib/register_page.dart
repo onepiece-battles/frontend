@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_toggle_tab/flutter_toggle_tab.dart';
+import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:one_piece_battles_flutter/config/app_router.dart';
@@ -11,6 +12,7 @@ import 'config/api_initializer.dart';
 import 'constants/path_constants.dart';
 import 'main.dart';
 
+GetIt getIt = GetIt.instance;
 const Map<String, Locale> localesMap = {
   'zh_CN': Locale('zh', 'CN'),
   'en_US': Locale('en', 'US')
@@ -282,7 +284,8 @@ class _RegisterPageState extends State<RegisterPage> {
                           email: emailController.text,
                           organization: organizationController.text,
                           password: passwordController.text,
-                          confirmedPassword: confirmedPasswordController.text);
+                          confirmedPassword: confirmedPasswordController.text,
+                      locale: convertToOnepieceLocale(getIt<Locale>()));
                       Future<RegisterResponse?> response =
                           userDao.register(request);
                       response.then((value) => {
@@ -349,5 +352,12 @@ class _RegisterPageState extends State<RegisterPage> {
       ApiInitializer.initAuthInfo(value!.user!, value.accessToken!);
       context.go(AppRouter.homePath);
     });
+  }
+
+  OnepieceLocale convertToOnepieceLocale(Locale locale) {
+    if (locale.toString() == const Locale('en', 'US').toString()) {
+      return OnepieceLocale.enUS;
+    }
+    return OnepieceLocale.zhCN;
   }
 }

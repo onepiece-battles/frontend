@@ -43,6 +43,7 @@
   "localizationHeader": "本地化",
   "logout": "登出",
   "maxFileSizeDescription": "允许最大文件大小为200KB。",
+  "nickname": "昵称",
   "noAccount": "没有账户？",
   "noFileChosen": "未选择文件。",
   "onButton": "确定",
