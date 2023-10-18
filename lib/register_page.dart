@@ -326,7 +326,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   context.go(AppRouter.loginPath);
                 },
                 child: Text(
-                  AppLocalizations.of(context)!.backToRegister,
+                  AppLocalizations.of(context)!.backToLoginPage,
                   style: const TextStyle(
                       color: Colors.blue,
                       fontSize: 12,
