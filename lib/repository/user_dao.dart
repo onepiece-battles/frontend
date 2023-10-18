@@ -19,4 +19,8 @@ class UserDao {
   Future<User?> get(GetUserRequest getUserRequest) async {
     return await userApi.getUser(getUserRequest: getUserRequest);
   }
+
+  Future<UpdateUserResponse?> updateUser(UpdateUserRequest request) async {
+    return await userApi.updateUser(updateUserRequest: request);
+  }
 }

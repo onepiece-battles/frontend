@@ -12,12 +12,11 @@ import 'package:one_piece_battles_flutter/home_page.dart';
 import 'package:openapi/api.dart';
 
 GetIt getIt = GetIt.instance;
-
+ GlobalKey<NavigatorState> _rootNavigatorState =
+GlobalKey<NavigatorState>();
+ GlobalKey<NavigatorState> _homeNavigatorState =
+GlobalKey<NavigatorState>();
 class AppRouter {
-  static final GlobalKey<NavigatorState> _rootNavigatorState =
-      GlobalKey<NavigatorState>();
-  static final GlobalKey<NavigatorState> _homeNavigatorState =
-      GlobalKey<NavigatorState>();
   // main paths
   static const loginPath = '/login';
   static const homePath = '/home/character';
@@ -33,7 +32,7 @@ class AppRouter {
   static final router = GoRouter(
     navigatorKey: _rootNavigatorState,
     initialLocation: loginPath,
-    routes: [
+    routes: <RouteBase>[
       ShellRoute(
           navigatorKey: _homeNavigatorState,
           pageBuilder: (context, state, child) {
@@ -43,9 +42,10 @@ class AppRouter {
               ),
             );
           },
-          routes: [
+          routes: <RouteBase>[
             GoRoute(
               path: characterPath,
+              name: "character",
               parentNavigatorKey: _homeNavigatorState,
               pageBuilder: (context, state) {
                 return const NoTransitionPage(child: CharacterView());
@@ -53,6 +53,7 @@ class AppRouter {
             ),
             GoRoute(
               path: fruitPath,
+              name: "fruit",
               parentNavigatorKey: _homeNavigatorState,
               pageBuilder: (context, state) {
                 return const NoTransitionPage(child: FruitView());
@@ -60,6 +61,7 @@ class AppRouter {
             ),
             GoRoute(
               path: battlePath,
+              name: "battle",
               parentNavigatorKey: _homeNavigatorState,
               pageBuilder: (context, state) {
                 return const NoTransitionPage(child: BattleView());
@@ -67,6 +69,7 @@ class AppRouter {
             ),
             GoRoute(
               path: userPath,
+              name: "user",
               parentNavigatorKey: _homeNavigatorState,
               pageBuilder: (context, state) {
                 return const NoTransitionPage(child: UserView());
@@ -74,6 +77,7 @@ class AppRouter {
             ),
             GoRoute(
               path: settingPath,
+              name: "setting",
               parentNavigatorKey: _homeNavigatorState,
               pageBuilder: (context, state) {
                 return const NoTransitionPage(child: SettingsView());
@@ -90,10 +94,15 @@ class AppRouter {
     ],
     redirect: (context, state) {
       // if the user is not logged in, they need to login
+      debugPrint('start debug rout');
+      var matchedLocation = state.matchedLocation;
+      debugPrint("$matchedLocation");
+      var username = getIt<User>().name;
+      debugPrint("$username");
       final loggedIn = getIt<User>().name != '';
       final loggingIn = state.matchedLocation == AppRouter.loginPath;
       final registering = state.matchedLocation == AppRouter.registerPath;
-      final goingHome = state.matchedLocation=='home';
+      final goingHome = state.matchedLocation == 'home';
 
       if (registering) {
         return AppRouter.registerPath;
@@ -102,11 +111,11 @@ class AppRouter {
         return AppRouter.loginPath;
       }
 
-      if (loggingIn && loggedIn) {
-        return AppRouter.homePath;
+      if (loggedIn) {
+        return state.matchedLocation;
       }
 
-      if(goingHome) {
+      if (goingHome) {
         return AppRouter.homePath;
       }
       return null;

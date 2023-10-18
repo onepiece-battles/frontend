@@ -43,6 +43,7 @@
   "localizationHeader": "Localization",
   "logout": "Logout",
   "maxFileSizeDescription": "The maximum file size allowed is 200 kb",
+  "nickname": "Nick name",
   "noAccount": "Don't have an account?",
   "noFileChosen": "No file chosen",
   "onButton": "OK",

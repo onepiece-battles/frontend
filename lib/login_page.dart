@@ -13,7 +13,7 @@ import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
 
 GetIt getIt = GetIt.instance;
-const locales = [Locale('en', 'US'), Locale('zh', 'CN')];
+const locales = [Locale('zh', 'CN'), Locale('en', 'US')];
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
