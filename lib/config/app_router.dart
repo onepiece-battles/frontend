@@ -94,11 +94,6 @@ class AppRouter {
     ],
     redirect: (context, state) {
       // if the user is not logged in, they need to login
-      debugPrint('start debug rout');
-      var matchedLocation = state.matchedLocation;
-      debugPrint("$matchedLocation");
-      var username = getIt<User>().name;
-      debugPrint("$username");
       final loggedIn = getIt<User>().name != '';
       final loggingIn = state.matchedLocation == AppRouter.loginPath;
       final registering = state.matchedLocation == AppRouter.registerPath;
@@ -110,11 +105,9 @@ class AppRouter {
       if (!loggedIn && !loggingIn) {
         return AppRouter.loginPath;
       }
-
       if (loggedIn) {
         return state.matchedLocation;
       }
-
       if (goingHome) {
         return AppRouter.homePath;
       }

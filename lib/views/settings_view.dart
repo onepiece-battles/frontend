@@ -9,7 +9,6 @@ import 'package:one_piece_battles_flutter/repository/image_dao.dart';
 import 'package:openapi/api.dart';
 import '../constants/onepiece_colors.dart';
 import '../constants/onepiece_fonts.dart';
-import '../main.dart';
 import '../repository/user_dao.dart';
 import '../utils/base64_helper.dart';
 import '../utils/compare_uint8list.dart';
@@ -391,42 +390,19 @@ class _SettingsViewState extends State<SettingsView> {
               onPressed: !_footButtonEnabled
                   ? null
                   : () async {
-                      // when this button is clicked, there are several things should be done:
-                      // 1. update user profile image if necessary.
-                      // 2. update user basic information: locale, email, name information if necessary.
-                      var encodedImage =
-                          Base64Helper.encode(_realtimeData.profileImage);
-                      UploadImageRequest uploadImageRequest =
-                          UploadImageRequest(
-                              resourceId: getIt<User>().id,
-                              image: encodedImage,
-                              type: ResourceType.USER);
-                      var getImageResponse =
-                          await getIt<ImageDao>().addImage(uploadImageRequest);
-                      _originalData.setProfileImage(
-                          Base64Helper.decode(getImageResponse!.image));
-                      UpdateUserRequest updateUserRequest = UpdateUserRequest(
-                          locale: _realtimeData.locale.languageCode == 'en'
-                              ? OnepieceLocale.enUS
-                              : OnepieceLocale.zhCN,
-                          name: _realtimeData.name,
-                          email: _realtimeData.email,
-                          id: getIt<User>().id);
-                      var updateUserResponse =
-                          await getIt<UserDao>().updateUser(updateUserRequest);
-                      getIt.registerLazySingleton<User>(
-                          () => updateUserResponse!.user!);
-                      setState(() {
-                        _chosenImageName = "";
-                        _emailSettingEnabled = false;
-                        _nameSettingEnabled = false;
-                        _footButtonEnabled = false;
-                        MyApp.setLocale(context, _realtimeData._locale);
-                        _originalData.copy(_realtimeData);
+                      _submitSettingForm().then((value) {
+                        setState(() {
+                          _chosenImageName = "";
+                          _emailSettingEnabled = false;
+                          _nameSettingEnabled = false;
+                          _footButtonEnabled = false;
+                          _originalData.copy(_realtimeData);
+                          getIt.registerLazySingleton<User>(() => value);
+                        });
                       });
                     },
               child: Text(AppLocalizations.of(context)!.submitForm)),
-        ),
+        )
       ],
     );
   }
@@ -435,6 +411,29 @@ class _SettingsViewState extends State<SettingsView> {
     return _originalData != _realtimeData &&
         !_emailSettingEnabled &&
         !_nameSettingEnabled;
+  }
+
+  Future<User> _submitSettingForm() async {
+    // when this button is clicked, there are several things should be done:
+    // 1. update user profile image if necessary.
+    // 2. update user basic information: locale, email, name information if necessary.
+    var encodedImage = Base64Helper.encode(_realtimeData.profileImage);
+    UploadImageRequest uploadImageRequest = UploadImageRequest(
+        resourceId: getIt<User>().id,
+        image: encodedImage,
+        type: ResourceType.USER);
+    var getImageResponse = await getIt<ImageDao>().addImage(uploadImageRequest);
+    _originalData.setProfileImage(Base64Helper.decode(getImageResponse!.image));
+    UpdateUserRequest updateUserRequest = UpdateUserRequest(
+        locale: _realtimeData.locale.languageCode == 'en'
+            ? OnepieceLocale.enUS
+            : OnepieceLocale.zhCN,
+        name: _realtimeData.name,
+        email: _realtimeData.email,
+        id: getIt<User>().id);
+    var updateUserResponse =
+        await getIt<UserDao>().updateUser(updateUserRequest);
+    return updateUserResponse!.user!;
   }
 }
 
