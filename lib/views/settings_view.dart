@@ -9,6 +9,7 @@ import 'package:one_piece_battles_flutter/repository/image_dao.dart';
 import 'package:openapi/api.dart';
 import '../constants/onepiece_colors.dart';
 import '../constants/onepiece_fonts.dart';
+import '../main.dart';
 import '../repository/user_dao.dart';
 import '../utils/base64_helper.dart';
 import '../utils/compare_uint8list.dart';
@@ -397,6 +398,7 @@ class _SettingsViewState extends State<SettingsView> {
                           _nameSettingEnabled = false;
                           _footButtonEnabled = false;
                           _originalData.copy(_realtimeData);
+                          MyApp.setLocale(context, _realtimeData.locale);
                           getIt.registerLazySingleton<User>(() => value);
                         });
                       });
