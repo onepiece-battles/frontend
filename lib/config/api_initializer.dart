@@ -6,10 +6,12 @@ import 'package:openapi/api.dart';
 
 class ApiInitializer {
   static const Map<ResourceType, int> resourceOrderMap = {
-    ResourceType.CHARACTER:1,
-    ResourceType.FRUIT:2,
-    ResourceType.BATTLE:3,
-    ResourceType.USER:4
+    ResourceType.CHARACTER: 1,
+    ResourceType.FRUIT: 2,
+    ResourceType.BATTLE: 3,
+    ResourceType.USER: 4,
+    ResourceType.ISSUE: 5,
+    ResourceType.ROLE: 6
   };
   static GetIt getIt = GetIt.instance;
   static initAuthInfo(User user, String token) {
@@ -18,7 +20,8 @@ class ApiInitializer {
     bearAuth.accessToken = token;
     var apiClient = ApiClient(authentication: bearAuth);
     // sort resource type value, the display order is dependent on this order map
-    user.loginRoleResources.sort((a,b) => resourceOrderMap[a]!.compareTo(resourceOrderMap[b]!));
+    user.loginRoleResources
+        .sort((a, b) => resourceOrderMap[a]!.compareTo(resourceOrderMap[b]!));
     // init dao apis with new api client
     getIt.registerLazySingleton<UserDao>(() => UserDao(apiClient));
     getIt.registerLazySingleton<CharacterDao>(() => CharacterDao(apiClient));

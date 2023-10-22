@@ -11,6 +11,7 @@ import '../constants/device_type.dart';
 import '../utils/base64_helper.dart';
 
 GetIt getIt = GetIt.instance;
+List<ResourceType> notShownResources = [ResourceType.ROLE];
 
 class SideMenu extends StatefulWidget {
   final DeviceType deviceType;
@@ -29,7 +30,12 @@ class _SideMenuState extends State<SideMenu> {
     return Container(
       color: OnepieceColors.menuBackgroundColor,
       child: ListView(
-          children: _getListTitle(context, getIt<User>().loginRoleResources)),
+          children: _getListTitle(
+              context,
+              getIt<User>()
+                  .loginRoleResources
+                  .where((element) => !notShownResources.contains(element))
+                  .toSet())),
     );
   }
 
@@ -71,34 +77,7 @@ class _SideMenuState extends State<SideMenu> {
   }
 
   List<Widget> _getListTitle(
-      BuildContext context, List<ResourceType> resourceTypes) {
-    Map<ResourceType, Widget> resourceToIconMap = {
-      ResourceType.FRUIT: ImageHelper.getSvgIcon(
-        'images/svgs/fruit.svg',
-        OnepieceColors.menuIconColor,
-        20,
-        20,
-      ),
-      ResourceType.USER: const Icon(Icons.manage_accounts,
-          color: OnepieceColors.menuIconColor, size: 20),
-      ResourceType.BATTLE: const Icon(Icons.sports_mma_outlined,
-          color: OnepieceColors.menuIconColor, size: 20),
-      ResourceType.CHARACTER:
-          const Icon(Icons.face, color: OnepieceColors.menuIconColor, size: 20)
-    };
-
-    Map<ResourceType, String> resourceToLocationMap = {
-      ResourceType.FRUIT: AppRouter.fruitPath,
-      ResourceType.USER: AppRouter.userPath,
-      ResourceType.BATTLE: AppRouter.battlePath,
-      ResourceType.CHARACTER: AppRouter.characterPath
-    };
-    Map<ResourceType, String> resourceToDisplayTextMap = {
-      ResourceType.FRUIT: AppLocalizations.of(context)!.devilFruit,
-      ResourceType.USER: AppLocalizations.of(context)!.userManagement,
-      ResourceType.BATTLE: AppLocalizations.of(context)!.battle,
-      ResourceType.CHARACTER: AppLocalizations.of(context)!.character
-    };
+      BuildContext context, Set<ResourceType> resourceTypes) {
     List<Widget> listTitles = [];
     listTitles.add(_getDrawerHeader(context));
     listTitles.add(Padding(
@@ -111,49 +90,8 @@ class _SideMenuState extends State<SideMenu> {
         Padding(
           padding: const EdgeInsets.fromLTRB(8, 1, 8, 1),
           child: Material(
-            type: MaterialType.transparency,
-            child: ListTile(
-              minLeadingWidth: 10,
-              contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(5),
-              ),
-              leading: resourceToIconMap[resourceType],
-              selected: GoRouterState.of(context)
-                      .fullPath!
-                      .split("/")[2]
-                      .toUpperCase() ==
-                  resourceType.toString(),
-              selectedTileColor: OnepieceColors.menuSelectedTileColor,
-              onTap: () {
-                setState(
-                  () {
-                    GoRouter.of(context)
-                        .go(resourceToLocationMap[resourceType]!);
-                  },
-                );
-              },
-              trailing: Padding(
-                padding: const EdgeInsets.fromLTRB(0, 0, 3, 0),
-                child: Container(
-                  width: 3,
-                  height: 30,
-                  decoration: BoxDecoration(
-                      color: OnepieceColors.menuBackgroundColor,
-                      borderRadius: BorderRadius.circular(3)),
-                ),
-              ),
-              hoverColor: OnepieceColors.menuHoverColor,
-              title: Text(
-                resourceToDisplayTextMap[resourceType]!,
-                textAlign: TextAlign.left,
-                style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: OnepieceFonts.sideMenuFontWeight,
-                    color: OnepieceColors.menuTextColor),
-              ),
-            ),
-          ),
+              type: MaterialType.transparency,
+              child: _getListTile(context, resourceType)),
         ),
       );
     }
@@ -161,46 +99,84 @@ class _SideMenuState extends State<SideMenu> {
       Padding(
         padding: const EdgeInsets.fromLTRB(8, 1, 8, 1),
         child: Material(
-          type: MaterialType.transparency,
-          child: ListTile(
-            leading: const Icon(Icons.settings,
-                color: OnepieceColors.menuIconColor, size: 20),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(5),
-            ),
-            minLeadingWidth: 10,
-            contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-            selected:
-                GoRouterState.of(context).fullPath!.split("/")[2] == "setting",
-            selectedTileColor: OnepieceColors.menuSelectedTileColor,
-            onTap: () {
-              setState(() {
-                GoRouter.of(context).go(AppRouter.settingPath);
-              });
-            },
-            hoverColor: OnepieceColors.menuHoverColor,
-            title: Text(
-              AppLocalizations.of(context)!.settings,
-              textAlign: TextAlign.left,
-              style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: OnepieceFonts.sideMenuFontWeight,
-                  color: OnepieceColors.menuTextColor),
-            ),
-            trailing: Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 3, 0),
-              child: Container(
-                width: 3,
-                height: 30,
-                decoration: BoxDecoration(
-                    color: OnepieceColors.menuBackgroundColor,
-                    borderRadius: BorderRadius.circular(3)),
-              ),
-            ),
-          ),
-        ),
+            type: MaterialType.transparency,
+            child: _getListTile(context, null)),
       ),
     );
     return listTitles;
+  }
+
+  Widget _getListTile(BuildContext context, ResourceType? resourceType) {
+    Map<ResourceType, Widget> resourceToIconMap = {
+      ResourceType.FRUIT: ImageHelper.getSvgIcon(
+        'images/svgs/fruit.svg',
+        OnepieceColors.menuIconColor,
+        20,
+        20,
+      ),
+      ResourceType.USER: const Icon(Icons.manage_accounts,
+          color: OnepieceColors.menuIconColor, size: 20),
+      ResourceType.BATTLE: const Icon(Icons.sports_mma_outlined,
+          color: OnepieceColors.menuIconColor, size: 20),
+      ResourceType.CHARACTER:
+          const Icon(Icons.face, color: OnepieceColors.menuIconColor, size: 20),
+      ResourceType.ISSUE: const Icon(Icons.report_problem,
+          color: OnepieceColors.menuIconColor, size: 20)
+    };
+
+    Map<ResourceType, String> resourceToLocationMap = {
+      ResourceType.FRUIT: AppRouter.fruitPath,
+      ResourceType.USER: AppRouter.userPath,
+      ResourceType.BATTLE: AppRouter.battlePath,
+      ResourceType.CHARACTER: AppRouter.characterPath,
+      ResourceType.ISSUE: AppRouter.issuePath
+    };
+    Map<ResourceType, String> resourceToDisplayTextMap = {
+      ResourceType.FRUIT: AppLocalizations.of(context)!.devilFruit,
+      ResourceType.USER: AppLocalizations.of(context)!.userManagement,
+      ResourceType.BATTLE: AppLocalizations.of(context)!.battle,
+      ResourceType.CHARACTER: AppLocalizations.of(context)!.character,
+      ResourceType.ISSUE: AppLocalizations.of(context)!.issue,
+    };
+    return ListTile(
+      minLeadingWidth: 10,
+      contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(5),
+      ),
+      leading: resourceToIconMap[resourceType] ?? const Icon(Icons.settings),
+      selected:
+          GoRouterState.of(context).fullPath!.split("/")[2].toUpperCase() ==
+              (resourceType ?? "setting"),
+      selectedTileColor: OnepieceColors.menuSelectedTileColor,
+      onTap: () {
+        setState(
+          () {
+            GoRouter.of(context).go(
+                resourceToLocationMap[resourceType] ?? AppRouter.settingPath);
+          },
+        );
+      },
+      trailing: Padding(
+        padding: const EdgeInsets.fromLTRB(0, 0, 3, 0),
+        child: Container(
+          width: 3,
+          height: 30,
+          decoration: BoxDecoration(
+              color: OnepieceColors.menuBackgroundColor,
+              borderRadius: BorderRadius.circular(3)),
+        ),
+      ),
+      hoverColor: OnepieceColors.menuHoverColor,
+      title: Text(
+        resourceToDisplayTextMap[resourceType] ??
+            AppLocalizations.of(context)!.settings,
+        textAlign: TextAlign.left,
+        style: const TextStyle(
+            fontSize: 18,
+            fontWeight: OnepieceFonts.sideMenuFontWeight,
+            color: OnepieceColors.menuTextColor),
+      ),
+    );
   }
 }
