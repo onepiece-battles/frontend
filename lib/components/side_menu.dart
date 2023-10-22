@@ -29,13 +29,31 @@ class _SideMenuState extends State<SideMenu> {
   Widget build(BuildContext context) {
     return Container(
       color: OnepieceColors.menuBackgroundColor,
-      child: ListView(
-          children: _getListTitle(
-              context,
-              getIt<User>()
-                  .loginRoleResources
-                  .where((element) => !notShownResources.contains(element))
-                  .toSet())),
+      child: Stack(
+        children: [
+          ListView(
+              scrollDirection: Axis.vertical,
+              shrinkWrap: true,
+              children: _getSideMenuList(
+                  context,
+                  getIt<User>()
+                      .loginRoleResources
+                      .where((element) => !notShownResources.contains(element))
+                      .toSet())),
+          Align(
+            alignment: Alignment.bottomLeft,
+            child: IconButton(
+                onPressed: () {},
+                tooltip: AppLocalizations.of(context)!.feedback,
+                icon: ImageHelper.getSvgIcon(
+                  'images/svgs/menu_question.svg',
+                  OnepieceColors.menuIconColor,
+                  50,
+                  50,
+                )),
+          )
+        ],
+      ),
     );
   }
 
@@ -76,17 +94,17 @@ class _SideMenuState extends State<SideMenu> {
         ));
   }
 
-  List<Widget> _getListTitle(
+  List<Widget> _getSideMenuList(
       BuildContext context, Set<ResourceType> resourceTypes) {
-    List<Widget> listTitles = [];
-    listTitles.add(_getDrawerHeader(context));
-    listTitles.add(Padding(
+    List<Widget> sideMenuList = [];
+    sideMenuList.add(_getDrawerHeader(context));
+    sideMenuList.add(Padding(
       padding: const EdgeInsets.fromLTRB(18, 10, 0, 10),
       child: Text(AppLocalizations.of(context)!.route,
           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
     ));
     for (ResourceType resourceType in resourceTypes) {
-      listTitles.add(
+      sideMenuList.add(
         Padding(
           padding: const EdgeInsets.fromLTRB(8, 1, 8, 1),
           child: Material(
@@ -95,7 +113,7 @@ class _SideMenuState extends State<SideMenu> {
         ),
       );
     }
-    listTitles.add(
+    sideMenuList.add(
       Padding(
         padding: const EdgeInsets.fromLTRB(8, 1, 8, 1),
         child: Material(
@@ -103,7 +121,7 @@ class _SideMenuState extends State<SideMenu> {
             child: _getListTile(context, null)),
       ),
     );
-    return listTitles;
+    return sideMenuList;
   }
 
   Widget _getListTile(BuildContext context, ResourceType? resourceType) {

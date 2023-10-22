@@ -203,7 +203,6 @@ class _LoginPageState extends State<LoginPage> {
                         Future<LoginResponse?> loginResponse =
                             getIt<UserDao>().login(loginRequest);
                         loginResponse.then((value) {
-                          debugPrint(value.toString());
                           if (value!.verification == null) {
                             _route(value.user!, value.accessToken!, context);
                           } else {
