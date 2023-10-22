@@ -6,6 +6,7 @@ import 'package:one_piece_battles_flutter/config/app_router.dart';
 import 'package:one_piece_battles_flutter/utils/image_helper.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:one_piece_battles_flutter/views/create_feedback_view.dart';
 import 'package:openapi/api.dart';
 import '../constants/device_type.dart';
 import '../utils/base64_helper.dart';
@@ -40,17 +41,27 @@ class _SideMenuState extends State<SideMenu> {
                       .loginRoleResources
                       .where((element) => !notShownResources.contains(element))
                       .toSet())),
-          Align(
-            alignment: Alignment.bottomLeft,
-            child: IconButton(
-                onPressed: () {},
-                tooltip: AppLocalizations.of(context)!.feedback,
-                icon: ImageHelper.getSvgIcon(
-                  'images/svgs/menu_question.svg',
-                  OnepieceColors.menuIconColor,
-                  50,
-                  50,
-                )),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Align(
+              alignment: Alignment.bottomLeft,
+              child: IconButton(
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: ((context) {
+                        return const CreateFeedbackView();
+                      }),
+                    );
+                  },
+                  tooltip: AppLocalizations.of(context)!.feedback,
+                  icon: ImageHelper.getSvgIcon(
+                    'images/svgs/menu_question.svg',
+                    OnepieceColors.menuIconColor,
+                    50,
+                    50,
+                  )),
+            ),
           )
         ],
       ),
