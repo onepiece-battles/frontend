@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/views/battle_view.dart';
 import 'package:one_piece_battles_flutter/views/character_view.dart';
 import 'package:one_piece_battles_flutter/views/fruit_view.dart';
+import 'package:one_piece_battles_flutter/views/issue_view.dart';
 import 'package:one_piece_battles_flutter/views/settings_view.dart';
 import 'package:one_piece_battles_flutter/views/user_view.dart';
 import 'package:one_piece_battles_flutter/register_page.dart';
@@ -12,10 +13,9 @@ import 'package:one_piece_battles_flutter/home_page.dart';
 import 'package:openapi/api.dart';
 
 GetIt getIt = GetIt.instance;
- GlobalKey<NavigatorState> _rootNavigatorState =
-GlobalKey<NavigatorState>();
- GlobalKey<NavigatorState> _homeNavigatorState =
-GlobalKey<NavigatorState>();
+GlobalKey<NavigatorState> _rootNavigatorState = GlobalKey<NavigatorState>();
+GlobalKey<NavigatorState> _homeNavigatorState = GlobalKey<NavigatorState>();
+
 class AppRouter {
   // main paths
   static const loginPath = '/login';
@@ -28,6 +28,7 @@ class AppRouter {
   static const battlePath = '/home/battle';
   static const userPath = '/home/user';
   static const settingPath = '/home/setting';
+  static const issuePath = '/home/issue';
 
   static final router = GoRouter(
     navigatorKey: _rootNavigatorState,
@@ -81,6 +82,14 @@ class AppRouter {
               parentNavigatorKey: _homeNavigatorState,
               pageBuilder: (context, state) {
                 return const NoTransitionPage(child: SettingsView());
+              },
+            ),
+            GoRoute(
+              path: issuePath,
+              name: "issue",
+              parentNavigatorKey: _homeNavigatorState,
+              pageBuilder: (context, state) {
+                return const NoTransitionPage(child: IssueView());
               },
             ),
           ]),

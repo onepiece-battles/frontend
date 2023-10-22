@@ -6,11 +6,13 @@ import 'package:one_piece_battles_flutter/config/app_router.dart';
 import 'package:one_piece_battles_flutter/utils/image_helper.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:one_piece_battles_flutter/views/create_feedback_view.dart';
 import 'package:openapi/api.dart';
 import '../constants/device_type.dart';
 import '../utils/base64_helper.dart';
 
 GetIt getIt = GetIt.instance;
+List<ResourceType> notShownResources = [ResourceType.ROLE];
 
 class SideMenu extends StatefulWidget {
   final DeviceType deviceType;
@@ -28,8 +30,41 @@ class _SideMenuState extends State<SideMenu> {
   Widget build(BuildContext context) {
     return Container(
       color: OnepieceColors.menuBackgroundColor,
-      child: ListView(
-          children: _getListTitle(context, getIt<User>().loginRoleResources)),
+      child: Stack(
+        children: [
+          ListView(
+              scrollDirection: Axis.vertical,
+              shrinkWrap: true,
+              children: _getSideMenuList(
+                  context,
+                  getIt<User>()
+                      .loginRoleResources
+                      .where((element) => !notShownResources.contains(element))
+                      .toSet())),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Align(
+              alignment: Alignment.bottomLeft,
+              child: IconButton(
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: ((context) {
+                        return const CreateFeedbackView();
+                      }),
+                    );
+                  },
+                  tooltip: AppLocalizations.of(context)!.feedback,
+                  icon: ImageHelper.getSvgIcon(
+                    'images/svgs/menu_question.svg',
+                    OnepieceColors.menuIconColor,
+                    50,
+                    50,
+                  )),
+            ),
+          )
+        ],
+      ),
     );
   }
 
@@ -70,8 +105,37 @@ class _SideMenuState extends State<SideMenu> {
         ));
   }
 
-  List<Widget> _getListTitle(
-      BuildContext context, List<ResourceType> resourceTypes) {
+  List<Widget> _getSideMenuList(
+      BuildContext context, Set<ResourceType> resourceTypes) {
+    List<Widget> sideMenuList = [];
+    sideMenuList.add(_getDrawerHeader(context));
+    sideMenuList.add(Padding(
+      padding: const EdgeInsets.fromLTRB(18, 10, 0, 10),
+      child: Text(AppLocalizations.of(context)!.route,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+    ));
+    for (ResourceType resourceType in resourceTypes) {
+      sideMenuList.add(
+        Padding(
+          padding: const EdgeInsets.fromLTRB(8, 1, 8, 1),
+          child: Material(
+              type: MaterialType.transparency,
+              child: _getListTile(context, resourceType)),
+        ),
+      );
+    }
+    sideMenuList.add(
+      Padding(
+        padding: const EdgeInsets.fromLTRB(8, 1, 8, 1),
+        child: Material(
+            type: MaterialType.transparency,
+            child: _getListTile(context, null)),
+      ),
+    );
+    return sideMenuList;
+  }
+
+  Widget _getListTile(BuildContext context, ResourceType? resourceType) {
     Map<ResourceType, Widget> resourceToIconMap = {
       ResourceType.FRUIT: ImageHelper.getSvgIcon(
         'images/svgs/fruit.svg',
@@ -84,123 +148,64 @@ class _SideMenuState extends State<SideMenu> {
       ResourceType.BATTLE: const Icon(Icons.sports_mma_outlined,
           color: OnepieceColors.menuIconColor, size: 20),
       ResourceType.CHARACTER:
-          const Icon(Icons.face, color: OnepieceColors.menuIconColor, size: 20)
+          const Icon(Icons.face, color: OnepieceColors.menuIconColor, size: 20),
+      ResourceType.ISSUE: const Icon(Icons.report_problem,
+          color: OnepieceColors.menuIconColor, size: 20)
     };
 
     Map<ResourceType, String> resourceToLocationMap = {
       ResourceType.FRUIT: AppRouter.fruitPath,
       ResourceType.USER: AppRouter.userPath,
       ResourceType.BATTLE: AppRouter.battlePath,
-      ResourceType.CHARACTER: AppRouter.characterPath
+      ResourceType.CHARACTER: AppRouter.characterPath,
+      ResourceType.ISSUE: AppRouter.issuePath
     };
     Map<ResourceType, String> resourceToDisplayTextMap = {
       ResourceType.FRUIT: AppLocalizations.of(context)!.devilFruit,
       ResourceType.USER: AppLocalizations.of(context)!.userManagement,
       ResourceType.BATTLE: AppLocalizations.of(context)!.battle,
-      ResourceType.CHARACTER: AppLocalizations.of(context)!.character
+      ResourceType.CHARACTER: AppLocalizations.of(context)!.character,
+      ResourceType.ISSUE: AppLocalizations.of(context)!.issue,
     };
-    List<Widget> listTitles = [];
-    listTitles.add(_getDrawerHeader(context));
-    listTitles.add(Padding(
-      padding: const EdgeInsets.fromLTRB(18, 10, 0, 10),
-      child: Text(AppLocalizations.of(context)!.route,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
-    ));
-    for (ResourceType resourceType in resourceTypes) {
-      listTitles.add(
-        Padding(
-          padding: const EdgeInsets.fromLTRB(8, 1, 8, 1),
-          child: Material(
-            type: MaterialType.transparency,
-            child: ListTile(
-              minLeadingWidth: 10,
-              contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(5),
-              ),
-              leading: resourceToIconMap[resourceType],
-              selected: GoRouterState.of(context)
-                      .fullPath!
-                      .split("/")[2]
-                      .toUpperCase() ==
-                  resourceType.toString(),
-              selectedTileColor: OnepieceColors.menuSelectedTileColor,
-              onTap: () {
-                setState(
-                  () {
-                    GoRouter.of(context)
-                        .go(resourceToLocationMap[resourceType]!);
-                  },
-                );
-              },
-              trailing: Padding(
-                padding: const EdgeInsets.fromLTRB(0, 0, 3, 0),
-                child: Container(
-                  width: 3,
-                  height: 30,
-                  decoration: BoxDecoration(
-                      color: OnepieceColors.menuBackgroundColor,
-                      borderRadius: BorderRadius.circular(3)),
-                ),
-              ),
-              hoverColor: OnepieceColors.menuHoverColor,
-              title: Text(
-                resourceToDisplayTextMap[resourceType]!,
-                textAlign: TextAlign.left,
-                style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: OnepieceFonts.sideMenuFontWeight,
-                    color: OnepieceColors.menuTextColor),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-    listTitles.add(
-      Padding(
-        padding: const EdgeInsets.fromLTRB(8, 1, 8, 1),
-        child: Material(
-          type: MaterialType.transparency,
-          child: ListTile(
-            leading: const Icon(Icons.settings,
-                color: OnepieceColors.menuIconColor, size: 20),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(5),
-            ),
-            minLeadingWidth: 10,
-            contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-            selected:
-                GoRouterState.of(context).fullPath!.split("/")[2] == "setting",
-            selectedTileColor: OnepieceColors.menuSelectedTileColor,
-            onTap: () {
-              setState(() {
-                GoRouter.of(context).go(AppRouter.settingPath);
-              });
-            },
-            hoverColor: OnepieceColors.menuHoverColor,
-            title: Text(
-              AppLocalizations.of(context)!.settings,
-              textAlign: TextAlign.left,
-              style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: OnepieceFonts.sideMenuFontWeight,
-                  color: OnepieceColors.menuTextColor),
-            ),
-            trailing: Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 3, 0),
-              child: Container(
-                width: 3,
-                height: 30,
-                decoration: BoxDecoration(
-                    color: OnepieceColors.menuBackgroundColor,
-                    borderRadius: BorderRadius.circular(3)),
-              ),
-            ),
-          ),
+    return ListTile(
+      minLeadingWidth: 10,
+      contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(5),
+      ),
+      leading: resourceToIconMap[resourceType] ?? const Icon(Icons.settings),
+      selected:
+          GoRouterState.of(context).fullPath!.split("/")[2].toUpperCase() ==
+              (resourceType ?? "setting"),
+      selectedTileColor: OnepieceColors.menuSelectedTileColor,
+      onTap: () {
+        setState(
+          () {
+            GoRouter.of(context).go(
+                resourceToLocationMap[resourceType] ?? AppRouter.settingPath);
+          },
+        );
+      },
+      trailing: Padding(
+        padding: const EdgeInsets.fromLTRB(0, 0, 3, 0),
+        child: Container(
+          width: 3,
+          height: 30,
+          decoration: BoxDecoration(
+              color: OnepieceColors.menuBackgroundColor,
+              borderRadius: BorderRadius.circular(3)),
         ),
       ),
+      hoverColor: OnepieceColors.menuHoverColor,
+      title: Text(
+        resourceToDisplayTextMap[resourceType] ??
+            AppLocalizations.of(context)!.settings,
+        textAlign: TextAlign.left,
+        style: const TextStyle(
+            fontSize: 18,
+            fontWeight: OnepieceFonts.sideMenuFontWeight,
+            color: OnepieceColors.menuTextColor),
+      ),
     );
-    return listTitles;
   }
 }

@@ -66,6 +66,7 @@ class _HomePageState extends State<HomePage> {
       'user': AppLocalizations.of(context)!.userManagement,
       'battle': AppLocalizations.of(context)!.battle,
       'setting': AppLocalizations.of(context)!.settings,
+      'issue': AppLocalizations.of(context)!.issue
     };
     bool isFirst = true;
     String currentRoutePath = "";
