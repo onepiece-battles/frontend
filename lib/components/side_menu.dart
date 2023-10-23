@@ -45,22 +45,49 @@ class _SideMenuState extends State<SideMenu> {
             padding: const EdgeInsets.all(8.0),
             child: Align(
               alignment: Alignment.bottomLeft,
-              child: IconButton(
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: ((context) {
-                        return const CreateFeedbackView();
-                      }),
-                    );
-                  },
-                  tooltip: AppLocalizations.of(context)!.feedback,
-                  icon: ImageHelper.getSvgIcon(
-                    'images/svgs/menu_question.svg',
-                    OnepieceColors.menuIconColor,
-                    50,
-                    50,
-                  )),
+              child: SizedBox(
+                width: 110,
+                child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: OnepieceColors.menuBackgroundColor,
+                        foregroundColor: OnepieceColors.menuIconColor,
+                        elevation: 0.0,
+                        shadowColor: Colors.transparent,
+                        textStyle: const TextStyle(
+                            fontSize: 19, fontWeight: FontWeight.w400)),
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: ((context) {
+                          return const AlertDialog(
+                            alignment: AlignmentDirectional.bottomStart,
+                            content: CreateFeedbackView(),
+                          );
+                        }),
+                      );
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          ImageHelper.getSvgIcon(
+                            'images/svgs/menu_question.svg',
+                            OnepieceColors.menuIconColor,
+                            25,
+                            25,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            AppLocalizations.of(context)!.feedback,
+                            style: const TextStyle(
+                              color: OnepieceColors.menuTextColor,
+                            ),
+                          )
+                        ],
+                      ),
+                    )),
+              ),
             ),
           )
         ],
