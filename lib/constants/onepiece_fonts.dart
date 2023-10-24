@@ -28,6 +28,10 @@ class OnepieceFonts {
       fontSize: OnepieceFonts.contentFontSize,
       fontWeight: OnepieceFonts.headerFontWeight
   );
+  static const TextStyle dropDownItemStyle = TextStyle(
+      color: OnepieceFonts.contentFontColor,
+      fontSize: OnepieceFonts.contentFontSize
+  );
 
   static const TextStyle emailFont = TextStyle(
     color: contentFontColor,
