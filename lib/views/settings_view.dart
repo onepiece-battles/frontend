@@ -6,6 +6,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:one_piece_battles_flutter/repository/image_dao.dart';
+import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
 import '../constants/onepiece_colors.dart';
 import '../constants/onepiece_fonts.dart';
@@ -31,6 +32,7 @@ class _SettingsViewState extends State<SettingsView> {
   final TextEditingController _nameController =
       TextEditingController(text: getIt<User>().name);
   bool _nameSettingEnabled = false;
+  bool _emailVerified = getIt<User>().emailVerified!;
   final SettingPageModel _originalData = SettingPageModel();
   final SettingPageModel _realtimeData = SettingPageModel();
   bool _footButtonEnabled = false;
@@ -266,7 +268,7 @@ class _SettingsViewState extends State<SettingsView> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               Flexible(
-                flex: 15,
+                flex: 14,
                 child: TextField(
                   onChanged: (value) {
                     setState(() {
@@ -314,6 +316,51 @@ class _SettingsViewState extends State<SettingsView> {
                             ? const Icon(Icons.check)
                             : const Icon(Icons.edit),
                       ),
+                    ),
+                  ),
+                ),
+              ),
+              Flexible(
+                flex: 1,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(8.0, 0, 0, 0),
+                  child: SizedBox(
+                    height: 40,
+                    child: Tooltip(
+                      // todo(yichi): need to be changed to verify email.
+                      message: _emailSettingEnabled
+                          ? AppLocalizations.of(context)!.confirmHint
+                          : AppLocalizations.of(context)!.editHint,
+                      child: ElevatedButton(
+                          onPressed: () {
+                            setState(
+                              () {
+                                if (!_emailVerified) {
+                                  VerifyEmailRequest request =
+                                      VerifyEmailRequest(
+                                          id: getIt<User>().id,
+                                          email: getIt<User>().email);
+                                  getIt<UserDao>().verifyEmail(request).then(
+                                    (value) {
+                                      String notification =
+                                          I18nHelper.getI18nByLocale(
+                                              value!.emailNotification,
+                                              _realtimeData.locale);
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) => AlertDialog(
+                                          content: Text(notification),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                }
+                              },
+                            );
+                          },
+                          child: _emailVerified
+                              ? const Icon(Icons.check_circle_outline)
+                              : const Icon(Icons.warning_amber_outlined)),
                     ),
                   ),
                 ),
