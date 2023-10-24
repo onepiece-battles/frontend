@@ -133,7 +133,8 @@ class _AddCharacterViewState extends State<AddCharacterView> {
                             },
                             icon: const Icon(Icons.cancel),
                             splashRadius: 0.1,
-                          )),
+                          ),
+                      ),
                     ),
                   ),
                   const SizedBox(
