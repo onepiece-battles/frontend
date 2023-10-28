@@ -2,6 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:openapi/api.dart';
 
@@ -16,8 +17,17 @@ class _CreateFeedbackViewState extends State<CreateFeedbackView> {
   IssueType selectedIssueType = IssueType.BUG_REPORT;
   TextEditingController headerController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
+  bool _submitButtonEnabled = false;
+  bool _clearButtonEnabled = false;
   @override
   Widget build(BuildContext context) {
+    Map<IssueType, String> issueToDisplayNameMap = {
+      IssueType.BUG_REPORT: AppLocalizations.of(context)!.bugReport,
+      IssueType.FEATURE_SUGGESTION:
+          AppLocalizations.of(context)!.featureSuggestion,
+      IssueType.OTHER: AppLocalizations.of(context)!.otherType
+    };
+
     return SizedBox(
       width: 400,
       height: 400,
@@ -25,40 +35,49 @@ class _CreateFeedbackViewState extends State<CreateFeedbackView> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(3,3,3,10),
+            padding: const EdgeInsets.fromLTRB(3, 3, 3, 10),
             child: Row(
               children: [
-                const Text(
-                  "issue type",
-                  style: OnepieceFonts.dropDownItemStyle,
-                ),
-                DropdownButton2(
-                  isExpanded: true,
-                  value: selectedIssueType,
-                  onChanged: (IssueType? value) {
-                    setState(() {
-                      selectedIssueType = value!;
-                    });
-                  },
-                  buttonStyleData: const ButtonStyleData(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    height: 40,
-                    width: 240,
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
+                  child: Text(
+                    AppLocalizations.of(context)!.issueType,
+                    style: OnepieceFonts.dropDownItemStyle,
                   ),
-                  menuItemStyleData: const MenuItemStyleData(
-                    height: 40,
-                  ),
-                  items: IssueType.values
-                      .toList()
-                      .map((IssueType issueType) => DropdownMenuItem<IssueType>(
-                            value: issueType,
-                            child: Text(
-                              issueType.toString(),
-                              style: OnepieceFonts.dropDownItemStyle,
-                            ),
-                          ))
-                      .toList(),
                 ),
+                DropdownButtonHideUnderline(
+                  child: DropdownButton2(
+                    isExpanded: true,
+                    value: selectedIssueType,
+                    onChanged: (IssueType? value) {
+                      setState(() {
+                        selectedIssueType = value!;
+                      });
+                    },
+                    buttonStyleData: ButtonStyleData(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(3),
+                          color: OnepieceColors.menuBackgroundColor),
+                      height: 40,
+                      width: 240,
+                    ),
+                    menuItemStyleData: const MenuItemStyleData(
+                      height: 40,
+                    ),
+                    items: IssueType.values
+                        .toList()
+                        .map((IssueType issueType) =>
+                            DropdownMenuItem<IssueType>(
+                              value: issueType,
+                              child: Text(
+                                issueToDisplayNameMap[issueType]!,
+                                style: OnepieceFonts.dropDownItemStyle,
+                              ),
+                            ))
+                        .toList(),
+                  ),
+                )
               ],
             ),
           ),
@@ -70,12 +89,17 @@ class _CreateFeedbackViewState extends State<CreateFeedbackView> {
               autovalidateMode: AutovalidateMode.onUserInteraction,
               maxLength: 10,
               maxLengthEnforcement: MaxLengthEnforcement.enforced,
+              onChanged: (value) {
+                  _calculateButtonCondition();
+
+              },
               decoration: InputDecoration(
-                labelText: "title",
-                hintText: "please type in title",
+                labelText: AppLocalizations.of(context)!.feedbackTitle,
+                hintText: AppLocalizations.of(context)!.feedbackTitleHint,
                 suffixIcon: IconButton(
                   onPressed: () {
                     headerController.text = '';
+                    _calculateButtonCondition();
                   },
                   icon: const Icon(Icons.cancel),
                   splashRadius: 0.1,
@@ -88,14 +112,19 @@ class _CreateFeedbackViewState extends State<CreateFeedbackView> {
             child: TextFormField(
               maxLines: 10,
               controller: descriptionController,
-              decoration: const InputDecoration(
-                labelText: "content",
-                hintText: "please describe this issue",
+              onChanged: (value) {
+
+                  _calculateButtonCondition();
+
+              },
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context)!.feedbackContent,
+                hintText: AppLocalizations.of(context)!.feedbackContentHint,
               ),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(3, 10,3,3),
+            padding: const EdgeInsets.fromLTRB(3, 10, 3, 3),
             child: Row(
               children: [
                 Padding(
@@ -106,8 +135,20 @@ class _CreateFeedbackViewState extends State<CreateFeedbackView> {
                       },
                       child: Text(AppLocalizations.of(context)!.cancelPopUp)),
                 ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 0, 3, 0),
+                  child: ElevatedButton(
+                      onPressed: !_clearButtonEnabled? null: () {
+                        headerController.text = '';
+                        descriptionController.text = '';
+                        _calculateButtonCondition();
+                      },
+                      child: Text(AppLocalizations.of(context)!.clearAll)),
+                ),
                 ElevatedButton(
-                    onPressed: () {},
+                    onPressed: !_submitButtonEnabled? null:  () {
+                      Navigator.pop(context);
+                    },
                     child: Text(AppLocalizations.of(context)!.submitForm))
               ],
             ),
@@ -115,5 +156,21 @@ class _CreateFeedbackViewState extends State<CreateFeedbackView> {
         ],
       ),
     );
+
+  }
+
+  void _calculateButtonCondition() {
+    if (headerController.text.isNotEmpty  && descriptionController.text.isNotEmpty) {
+      _submitButtonEnabled = true;
+    } else {
+      _submitButtonEnabled = false;
+    }
+    if (headerController.text.isNotEmpty  || descriptionController.text.isNotEmpty) {
+      _clearButtonEnabled = true;
+    } else {
+      _clearButtonEnabled = false;
+    }
+
+    setState(() {});
   }
 }
