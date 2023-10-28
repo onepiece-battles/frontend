@@ -3,6 +3,7 @@ import 'package:one_piece_battles_flutter/repository/character_dao.dart';
 import 'package:one_piece_battles_flutter/repository/image_dao.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
 import 'package:openapi/api.dart';
+import '../repository/issue_dao.dart';
 
 class ApiInitializer {
   static const Map<ResourceType, int> resourceOrderMap = {
@@ -26,6 +27,7 @@ class ApiInitializer {
     getIt.registerLazySingleton<UserDao>(() => UserDao(apiClient));
     getIt.registerLazySingleton<CharacterDao>(() => CharacterDao(apiClient));
     getIt.registerLazySingleton<ImageDao>(() => ImageDao(apiClient));
+    getIt.registerLazySingleton<IssueDao>(() => IssueDao(apiClient));
     getIt.registerLazySingleton<User>(() => user);
   }
 }
