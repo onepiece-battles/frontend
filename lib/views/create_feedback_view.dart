@@ -2,9 +2,16 @@ import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:get_it/get_it.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
+import 'package:one_piece_battles_flutter/popup/onepiece_alert.dart';
 import 'package:openapi/api.dart';
+
+import '../repository/issue_dao.dart';
+import '../utils/i18n_helper.dart';
+
+GetIt getIt = GetIt.instance;
 
 class CreateFeedbackView extends StatefulWidget {
   const CreateFeedbackView({super.key});
@@ -30,20 +37,27 @@ class _CreateFeedbackViewState extends State<CreateFeedbackView> {
 
     return SizedBox(
       width: 400,
-      height: 400,
+      height: 430,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(3, 3, 3, 10),
+            padding: const EdgeInsets.fromLTRB(3, 3, 3, 25),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Padding(
                   padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
-                  child: Text(
-                    AppLocalizations.of(context)!.issueType,
-                    style: OnepieceFonts.dropDownItemStyle,
-                  ),
+                  child: SizedBox(
+                      height: 40,
+                      width: 100,
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: Text(
+                          AppLocalizations.of(context)!.issueType,
+                          style: OnepieceFonts.contentStyle,
+                        ),
+                      )),
                 ),
                 DropdownButtonHideUnderline(
                   child: DropdownButton2(
@@ -90,8 +104,7 @@ class _CreateFeedbackViewState extends State<CreateFeedbackView> {
               maxLength: 10,
               maxLengthEnforcement: MaxLengthEnforcement.enforced,
               onChanged: (value) {
-                  _calculateButtonCondition();
-
+                _calculateButtonCondition();
               },
               decoration: InputDecoration(
                 labelText: AppLocalizations.of(context)!.feedbackTitle,
@@ -113,9 +126,7 @@ class _CreateFeedbackViewState extends State<CreateFeedbackView> {
               maxLines: 10,
               controller: descriptionController,
               onChanged: (value) {
-
-                  _calculateButtonCondition();
-
+                _calculateButtonCondition();
               },
               decoration: InputDecoration(
                 labelText: AppLocalizations.of(context)!.feedbackContent,
@@ -126,6 +137,7 @@ class _CreateFeedbackViewState extends State<CreateFeedbackView> {
           Padding(
             padding: const EdgeInsets.fromLTRB(3, 10, 3, 3),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Padding(
                   padding: const EdgeInsets.fromLTRB(0, 0, 3, 0),
@@ -135,42 +147,70 @@ class _CreateFeedbackViewState extends State<CreateFeedbackView> {
                       },
                       child: Text(AppLocalizations.of(context)!.cancelPopUp)),
                 ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 0, 3, 0),
-                  child: ElevatedButton(
-                      onPressed: !_clearButtonEnabled? null: () {
-                        headerController.text = '';
-                        descriptionController.text = '';
-                        _calculateButtonCondition();
-                      },
-                      child: Text(AppLocalizations.of(context)!.clearAll)),
-                ),
-                ElevatedButton(
-                    onPressed: !_submitButtonEnabled? null:  () {
-                      Navigator.pop(context);
-                    },
-                    child: Text(AppLocalizations.of(context)!.submitForm))
+                Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 0, 3, 0),
+                      child: ElevatedButton(
+                          onPressed: !_clearButtonEnabled
+                              ? null
+                              : () {
+                                  headerController.text = '';
+                                  descriptionController.text = '';
+                                  _calculateButtonCondition();
+                                },
+                          child: Text(AppLocalizations.of(context)!.clearAll)),
+                    ),
+                    ElevatedButton(
+                      onPressed: !_submitButtonEnabled
+                          ? null
+                          : () {
+                              CreateIssueRequest createIssueRequest =
+                                  CreateIssueRequest(
+                                      issueHeader: headerController.text,
+                                      issueDescription:
+                                          descriptionController.text,
+                                      issueStatus: IssueStatus.CREATED,
+                                      issueType: selectedIssueType);
+                              getIt<IssueDao>()
+                                  .createIssue(createIssueRequest)
+                                  .then((value) {
+                                OnepieceAlert.getBasicAlertDialogFunc(
+                                    context,
+                                    AppLocalizations.of(context)!.hint,
+                                    I18nHelper.getI18nByLocale2(
+                                        value!.issueCreationResult));
+                              });
+                              headerController.text = '';
+                              descriptionController.text = '';
+                              _calculateButtonCondition();
+                              Navigator.pop(context);
+                            },
+                      child: Text(AppLocalizations.of(context)!.submitForm),
+                    )
+                  ],
+                )
               ],
             ),
           )
         ],
       ),
     );
-
   }
 
   void _calculateButtonCondition() {
-    if (headerController.text.isNotEmpty  && descriptionController.text.isNotEmpty) {
+    if (headerController.text.isNotEmpty &&
+        descriptionController.text.isNotEmpty) {
       _submitButtonEnabled = true;
     } else {
       _submitButtonEnabled = false;
     }
-    if (headerController.text.isNotEmpty  || descriptionController.text.isNotEmpty) {
+    if (headerController.text.isNotEmpty ||
+        descriptionController.text.isNotEmpty) {
       _clearButtonEnabled = true;
     } else {
       _clearButtonEnabled = false;
     }
-
     setState(() {});
   }
 }
