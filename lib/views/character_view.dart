@@ -1,5 +1,4 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
-import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
@@ -54,7 +53,7 @@ class _CharacterViewState extends State<CharacterView> {
     8: CharacterSortableFieldsEnum.blood,
     9: CharacterSortableFieldsEnum.speed
   };
-  List<String> selectedItems = [];
+  List<CharacterType> selectedItems = [];
 
   int selectedPageIndex = 1;
   int pageNum = 1;
@@ -200,42 +199,37 @@ class _CharacterViewState extends State<CharacterView> {
   }
 
   Row _createSearchFilterRow(BuildContext context) {
-    List<String> displayCharacterTypes = [
-      AppLocalizations.of(context)!.body,
-      AppLocalizations.of(context)!.science,
-      AppLocalizations.of(context)!.katana,
-      AppLocalizations.of(context)!.shoot,
-      AppLocalizations.of(context)!.fist,
-      AppLocalizations.of(context)!.leg
-    ];
-    Map<String, CharacterType> displayValueToEnumValue =
-        <String, CharacterType>{
-      AppLocalizations.of(context)!.body: CharacterType.body,
-      AppLocalizations.of(context)!.leg: CharacterType.foot,
-      AppLocalizations.of(context)!.science: CharacterType.science,
-      AppLocalizations.of(context)!.fist: CharacterType.fist,
-      AppLocalizations.of(context)!.katana: CharacterType.katana,
-      AppLocalizations.of(context)!.shoot: CharacterType.shooter,
+    Map<CharacterType, String> enumValueToDisplayValue =
+        <CharacterType, String>{
+      CharacterType.body: AppLocalizations.of(context)!.body,
+      CharacterType.foot: AppLocalizations.of(context)!.leg,
+      CharacterType.science: AppLocalizations.of(context)!.science,
+      CharacterType.fist: AppLocalizations.of(context)!.fist,
+      CharacterType.katana: AppLocalizations.of(context)!.katana,
+      CharacterType.shooter: AppLocalizations.of(context)!.shoot
     };
     return Row(children: [
       Padding(
         padding: const EdgeInsets.fromLTRB(0, 0, 8, 6),
-        child: ElevatedButton(
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: ((context) {
-                  return const AddCharacterView();
-                }),
-              );
-            },
-            child: Text(AppLocalizations.of(context)!.createCharacter)),
+        child: SizedBox(
+          height: 35,
+          child: ElevatedButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: ((context) {
+                    return const AddCharacterView();
+                  }),
+                );
+              },
+              child: Text(AppLocalizations.of(context)!.createCharacter)),
+        ),
       ),
       Padding(
           padding: const EdgeInsets.fromLTRB(0, 0, 8, 6),
           child: SizedBox(
             width: 200,
-            height: 40,
+            height: 35,
             child: TextField(
               textAlign: TextAlign.center,
               controller: searchNameController,
@@ -265,134 +259,96 @@ class _CharacterViewState extends State<CharacterView> {
           )),
       Padding(
         padding: const EdgeInsets.fromLTRB(0, 0, 0, 6),
-        child: SizedBox(
-            height: 30,
-            width: 200,
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton2(
-                isExpanded: true,
-                value: selectedItems.isEmpty ? null : selectedItems.first,
-                hint: Text(
-                  AppLocalizations.of(context)!.characterTypeHint,
-                  style: OnepieceFonts.dropDownItemStyle,
-                ),
-                onChanged: (value) {
-                  setState(() {
-                    _doSearch();
-                  });
-                },
-                selectedItemBuilder: (context) {
-                  return selectedItems.map(
-                    (item) {
-                      return Container(
-                        alignment: AlignmentDirectional.center,
-                        child: Text(
-                          selectedItems.join(', '),
-                          style: const TextStyle(
-                            fontSize: 14,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          maxLines: 1,
-                        ),
-                      );
-                    },
-                  ).toList();
-                },
-                buttonStyleData: const ButtonStyleData(
-                  padding: EdgeInsets.symmetric(horizontal: 16),
-                  height: 40,
-                  width: 240,
-                ),
-                menuItemStyleData: const MenuItemStyleData(
-                  height: 40,
-                ),
-                items: displayCharacterTypes.map((String characterType) {
-                  return DropdownMenuItem<String>(
-                    value: characterType,
-                    enabled: false,
-                    child: StatefulBuilder(
-                      builder: (context, menuSetState) {
-                        final isSelected =
-                            selectedItems.contains(characterType);
-                        return InkWell(
-                          onTap: () {
-                            isSelected
-                                ? selectedItems.remove(characterType)
-                                : selectedItems.add(characterType);
-                            characterFilter.characterTypes =
-                                selectedItems.map((element) {
-                              return displayValueToEnumValue[element]!;
-                            }).toList();
-                            _doSearch();
-                            //This rebuilds the StatefulWidget to update the button's text
-                            setState(() {});
-                            //This rebuilds the dropdownMenu Widget to update the check mark
-                            menuSetState(() {});
-                          },
-                          child: Container(
-                            height: double.infinity,
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 16.0),
-                            child: Row(
-                              children: [
-                                if (isSelected)
-                                  const Icon(Icons.check_box_outlined)
-                                else
-                                  const Icon(Icons.check_box_outline_blank),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: Text(
-                                    characterType,
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton2(
+            isExpanded: true,
+            value: selectedItems.isEmpty ? null : selectedItems.last,
+            hint: Text(
+              AppLocalizations.of(context)!.characterTypeHint,
+              style: OnepieceFonts.dropDownItemStyle,
+            ),
+            onChanged: (value) {},
+            selectedItemBuilder: (context) {
+              return CharacterType.values.map(
+                (item) {
+                  return Container(
+                    alignment: AlignmentDirectional.center,
+                    child: Text(
+                      selectedItems
+                          .map((selectedType) {
+                            return enumValueToDisplayValue[selectedType];
+                          })
+                          .toSet()
+                          .join(', '),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      maxLines: 1,
                     ),
                   );
-                }).toList(),
-              ),
-            )
-            //
-            // DropdownSearch<String>.multiSelection(
-            //   items: displayCharacterTypes,
-            //   selectedItems: selectedItems,
-            //   clearButtonProps: const ClearButtonProps(isVisible: true),
-            //   onChanged: (value) {
-            //     selectedItems = value;
-            //     characterFilter.characterTypes = selectedItems.map((element) {
-            //       return displayValueToEnumValue[element]!;
-            //     }).toList();
-            //     _doSearch();
-            //   },
-            //   onSaved: (value) {
-            //     if (value == null) {
-            //       selectedItems = [];
-            //     } else {
-            //       selectedItems = value;
-            //     }
-            //     characterFilter.characterTypes = selectedItems.map((element) {
-            //       return displayValueToEnumValue[element]!;
-            //     }).toList();
-            //     _doSearch();
-            //   },
-            //   dropdownDecoratorProps: DropDownDecoratorProps(
-            //     dropdownSearchDecoration: InputDecoration(
-            //         contentPadding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-            //         hintText: AppLocalizations.of(context)!.characterTypeHint,
-            //         border: const UnderlineInputBorder(),
-            //         focusedBorder: const UnderlineInputBorder(),
-            //         enabledBorder: const UnderlineInputBorder(),
-            //         disabledBorder: const UnderlineInputBorder(),
-            //         alignLabelWithHint: true),
-            //   ),
-            // ),
+                },
+              ).toList();
+            },
+            buttonStyleData: ButtonStyleData(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                height: 35,
+                width: 240,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(3),
+                  color: OnepieceColors.menuBackgroundColor,
+                )),
+            menuItemStyleData: const MenuItemStyleData(
+              height: 35,
             ),
+            items: CharacterType.values.map((CharacterType characterType) {
+              return DropdownMenuItem<CharacterType>(
+                value: characterType,
+                enabled: false,
+                child: StatefulBuilder(
+                  builder: (context, menuSetState) {
+                    final isSelected = selectedItems.contains(characterType);
+                    return InkWell(
+                      onTap: () {
+                        isSelected
+                            ? selectedItems.remove(characterType)
+                            : selectedItems.add(characterType);
+                        characterFilter.characterTypes = selectedItems;
+
+                        // //This rebuilds the StatefulWidget to update the button's text
+                        setState(() {});
+                        //This rebuilds the dropdownMenu Widget to update the check mark
+                        menuSetState(() {});
+                        _doSearch();
+                      },
+                      child: Container(
+                        height: double.infinity,
+                        padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                        child: Row(
+                          children: [
+                            if (isSelected)
+                              const Icon(Icons.check_box_outlined)
+                            else
+                              const Icon(Icons.check_box_outline_blank),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                enumValueToDisplayValue[characterType]!,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              );
+            }).toList(),
+          ),
+        ),
       ),
     ]);
   }
