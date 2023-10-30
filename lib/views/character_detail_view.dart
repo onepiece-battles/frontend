@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:openapi/api.dart';
 
 class CharacterDetail extends StatefulWidget {
-  const CharacterDetail({super.key});
+  final Character character;
+  const CharacterDetail({super.key,
+    required this.character
+  });
 
   @override
   State<CharacterDetail> createState() => _CharacterDetailState();
