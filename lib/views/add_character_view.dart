@@ -3,12 +3,17 @@ import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:get_it/get_it.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:one_piece_battles_flutter/utils/random_string_generator.dart';
 import 'package:one_piece_battles_flutter/utils/string_extensions.dart';
 import 'package:openapi/api.dart';
 import '../constants/path_constants.dart';
+import '../popup/onepiece_alert.dart';
 import '../repository/character_dao.dart';
+import '../repository/image_dao.dart';
+import '../utils/base64_helper.dart';
 import '../utils/data_converter.dart';
+import '../utils/onepiece_image_picker.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -53,6 +58,9 @@ class _AddCharacterViewState extends State<AddCharacterView> {
     ];
   }
 
+  Uint8List _pickedImage = Uint8List(0);
+  bool _newImagePicked = false;
+
   final _formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
@@ -94,13 +102,21 @@ class _AddCharacterViewState extends State<AddCharacterView> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   IconButton(
-                    onPressed: () {
-                      debugPrint('icon pressed');
+                    onPressed: () async {
+                      XFile? pickedImage =
+                          await OnepieceImagePicker.pickWebImage();
+                      Uint8List imageInByte = await pickedImage!.readAsBytes();
+                      _pickedImage = imageInByte;
+                      setState(() {
+                        _newImagePicked = true;
+                      });
                     },
                     iconSize: 100,
                     splashRadius: 10,
                     splashColor: Colors.red,
-                    icon: Image.asset(PathConstants.loginLuffyImage),
+                    icon: _pickedImage.isEmpty
+                        ? Image.asset(PathConstants.loginLuffyImage)
+                        : Image.memory(_pickedImage),
                   ),
                 ],
               ),
@@ -124,16 +140,15 @@ class _AddCharacterViewState extends State<AddCharacterView> {
                       maxLength: 10,
                       maxLengthEnforcement: MaxLengthEnforcement.enforced,
                       decoration: InputDecoration(
-                          labelText:
-                              AppLocalizations.of(context)!.characterName,
-                          prefixIcon: const Icon(Icons.people),
-                          suffixIcon: IconButton(
-                            onPressed: () {
-                              characterNameController.text = '';
-                            },
-                            icon: const Icon(Icons.cancel),
-                            splashRadius: 0.1,
-                          ),
+                        labelText: AppLocalizations.of(context)!.characterName,
+                        prefixIcon: const Icon(Icons.people),
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            characterNameController.text = '';
+                          },
+                          icon: const Icon(Icons.cancel),
+                          splashRadius: 0.1,
+                        ),
                       ),
                     ),
                   ),
@@ -425,8 +440,12 @@ class _AddCharacterViewState extends State<AddCharacterView> {
         ElevatedButton(
           child: Text(AppLocalizations.of(context)!.clearForm),
           onPressed: () {
-            characterControllerList().forEach((element) {
-              element.clear();
+            setState(() {
+              characterControllerList().forEach((element) {
+                element.clear();
+              });
+              _pickedImage = Uint8List(0);
+              _newImagePicked = false;
             });
           },
         ),
@@ -434,8 +453,14 @@ class _AddCharacterViewState extends State<AddCharacterView> {
           child: Text(AppLocalizations.of(context)!.submitForm),
           onPressed: () {
             final isValid = _formKey.currentState!.validate();
+            if (!_newImagePicked) {
+              OnepieceAlert.getBasicAlertDialogFunc(
+                  context,
+                  AppLocalizations.of(context)!.hint,
+                  'please upload character image');
+              return;
+            }
             if (isValid) {
-              debugPrint("start creating request");
               AddCharacterRequest addCharacterRequest = AddCharacterRequest(
                   characterType: displayValueToEnumValue[selectedItem] ??
                       CharacterType.body,
@@ -456,10 +481,22 @@ class _AddCharacterViewState extends State<AddCharacterView> {
                       DataConverter.stringToInt(characterSpeedController.text),
                   magic: DataConverter.stringToInt(
                       characterEnergyController.text));
-              getIt<CharacterDao>().addCharacter(addCharacterRequest);
-              Navigator.of(context).pop();
+              getIt<CharacterDao>()
+                  .addCharacter(addCharacterRequest)
+                  .then((value) {
+                var encodedImage = Base64Helper.encode(_pickedImage);
+                UploadImageRequest uploadImageRequest = UploadImageRequest(
+                    resourceId: value!.id,
+                    image: encodedImage,
+                    type: ResourceType.CHARACTER);
+                getIt<ImageDao>().addImage(uploadImageRequest);
+                Navigator.of(context).pop();
+              });
             } else {
-              debugPrint("form is not valid");
+              OnepieceAlert.getBasicAlertDialogFunc(
+                  context,
+                  AppLocalizations.of(context)!.hint,
+                  'form is invalid please check again');
             }
           },
         ),
