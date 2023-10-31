@@ -29,8 +29,10 @@ class _HomePageState extends State<HomePage> {
   var _tabTextIndexSelected = 0;
   String selectedRole = getIt<User>().loginRole!;
   Map<String, String> userRoleToDisplayNameMap = {};
+
   @override
   Widget build(BuildContext context) {
+    debugPrint('print user roles: ${getIt<User>().userRoles.toString()}');
     return Scaffold(
       body: Row(
         children: [
@@ -49,7 +51,7 @@ class _HomePageState extends State<HomePage> {
                     padding: const EdgeInsets.all(5.0),
                     child: _getHeader(
                         GoRouterState.of(context)
-                            .fullPath!
+                            .matchedLocation
                             .split("/")
                             .where((element) => element != '')
                             .toList(),
@@ -86,14 +88,13 @@ class _HomePageState extends State<HomePage> {
     String currentRoutePath = "";
     return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
       Row(
-        children: routes.expand<Widget>((route) {
-          currentRoutePath = "$currentRoutePath/$route";
-          var result = _getTextButton(
-              routePathToDisplayName[route]!, currentRoutePath, isFirst);
-          isFirst = false;
-          return result;
-        }).toList(),
-      ),
+          children: routes.expand<Widget>((route) {
+        currentRoutePath = "$currentRoutePath/$route";
+        var result = _getTextButton(
+            routePathToDisplayName[route] ?? route, currentRoutePath, isFirst);
+        isFirst = false;
+        return result;
+      }).toList()),
       _getRightControlPanel(context)
     ]);
   }
@@ -106,9 +107,9 @@ class _HomePageState extends State<HomePage> {
           Padding(
             padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
             child: FlutterToggleTab(
-              width: 5,
-              height: 27,
-              borderRadius: 30,
+              width: 4,
+              height: 50,
+              borderRadius: 20,
               selectedBackgroundColors: const [
                 Color.fromARGB(255, 38, 151, 243),
                 Colors.blueAccent
@@ -139,44 +140,48 @@ class _HomePageState extends State<HomePage> {
               ],
               selectedIndex: _tabTextIndexSelected,
               isScroll: false,
+              marginSelected: const EdgeInsets.all(3),
             ),
           ),
-          DropdownButtonHideUnderline(
-            child: DropdownButton2(
-              isExpanded: true,
-              value: selectedRole,
-              onChanged: (String? value) {
-                setState(() {
-                  selectedRole = value!;
-                  UpdateLoginRoleRequest request =
-                      UpdateLoginRoleRequest(role: selectedRole);
-                  getIt<UserDao>().updateLoginRole(request).then((value) {
-                    var currentUser = getIt<User>();
-                    //todo(yichi): refresh user information.
+          SizedBox(
+            width: 150,
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton2(
+                isExpanded: true,
+                value: selectedRole,
+                onChanged: (String? value) {
+                  setState(() {
+                    selectedRole = value!;
+                    UpdateLoginRoleRequest request =
+                        UpdateLoginRoleRequest(role: selectedRole);
+                    getIt<UserDao>().updateLoginRole(request).then((value) {
+                      var currentUser = getIt<User>();
+                      //todo(yichi): refresh user information.
+                    });
                   });
-                });
-              },
-              buttonStyleData: ButtonStyleData(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: OnepieceColors.menuBackgroundColor),
-                height: 40,
-                width: 240,
+                },
+                buttonStyleData: ButtonStyleData(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: OnepieceColors.menuBackgroundColor),
+                  height: 40,
+                  width: 240,
+                ),
+                menuItemStyleData: const MenuItemStyleData(
+                  height: 40,
+                ),
+                items: getIt<User>()
+                    .userRoles
+                    .map((String userRole) => DropdownMenuItem<String>(
+                          value: userRole,
+                          child: Text(
+                            userRoleToDisplayNameMap[userRole]!,
+                            style: OnepieceFonts.dropDownItemStyle,
+                          ),
+                        ))
+                    .toList(),
               ),
-              menuItemStyleData: const MenuItemStyleData(
-                height: 40,
-              ),
-              items: getIt<User>()
-                  .userRoles
-                  .map((String issueType) => DropdownMenuItem<String>(
-                        value: issueType,
-                        child: Text(
-                          userRoleToDisplayNameMap[issueType]!,
-                          style: OnepieceFonts.dropDownItemStyle,
-                        ),
-                      ))
-                  .toList(),
             ),
           )
         ],

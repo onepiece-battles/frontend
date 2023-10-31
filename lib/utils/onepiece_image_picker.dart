@@ -1,4 +1,4 @@
-import 'dart:typed_data';
+import 'package:flutter/cupertino.dart';
 import 'package:image_picker/image_picker.dart';
 
 class OnepieceImagePicker {
@@ -6,10 +6,11 @@ class OnepieceImagePicker {
     final imagePicker = ImagePicker();
     XFile? image = await imagePicker.pickImage(source: ImageSource.gallery);
     if (image!=null) {
-      print('new image is picked');
+      debugPrint('new image is picked');
       return image;
     } else {
-      print('no image is picked');
+      debugPrint('no image is picked');
     }
+    return null;
   }
 }

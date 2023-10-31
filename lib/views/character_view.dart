@@ -2,6 +2,7 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
+import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
 import 'package:one_piece_battles_flutter/views/add_character_view.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
@@ -101,6 +102,8 @@ class _CharacterViewState extends State<CharacterView> {
 
   DataTable _createDataTable() {
     return DataTable(
+      showCheckboxColumn: false,
+      showBottomBorder: true,
       border: const TableBorder(
           top: BorderSide(color: OnepieceColors.themeColor),
           bottom: BorderSide(color: OnepieceColors.themeColor)),
@@ -356,7 +359,13 @@ class _CharacterViewState extends State<CharacterView> {
   List<DataRow> _createRows(BuildContext context) {
     List<DataRow> result = [];
     var dataList = currentCharacterList
-        .map((character) => DataRow(cells: [
+        .map(
+          (character) => DataRow(
+            onSelectChanged: (value) {
+              context.goNamed('characterDetails',
+                  extra: character.id, pathParameters: {'name': character.name});
+            },
+            cells: [
               DataCell(Padding(
                   padding: const EdgeInsets.fromLTRB(0, 3, 30, 3),
                   child: ConstrainedBox(
@@ -364,7 +373,6 @@ class _CharacterViewState extends State<CharacterView> {
                     child: Image.memory(
                         Base64Helper.decode(character.profileImage!)),
                   ))),
-              // DataCell(Text("aaa")),
               DataCell(Text(character.name.toString())),
               DataCell(Text(character.characterType.toString())),
               DataCell(Text(character.fruitLimit.toString())),
@@ -376,7 +384,9 @@ class _CharacterViewState extends State<CharacterView> {
               DataCell(Text(character.speed.toString())),
               DataCell(Text(
                   character.fruits.isEmpty ? "" : character.fruits.toString())),
-            ]))
+            ],
+          ),
+        )
         .toList();
     result.addAll(dataList);
     return result;

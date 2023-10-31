@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/views/battle_view.dart';
+import 'package:one_piece_battles_flutter/views/character_detail_view.dart';
 import 'package:one_piece_battles_flutter/views/character_view.dart';
 import 'package:one_piece_battles_flutter/views/fruit_view.dart';
 import 'package:one_piece_battles_flutter/views/issue_view.dart';
@@ -19,11 +20,11 @@ GlobalKey<NavigatorState> _homeNavigatorState = GlobalKey<NavigatorState>();
 class AppRouter {
   // main paths
   static const loginPath = '/login';
-  static const homePath = '/home/character';
+  static const homePath = '/home/characters';
   static const registerPath = '/register';
 
   // sub-paths
-  static const characterPath = '/home/character';
+  static const characterPath = '/home/characters';
   static const fruitPath = '/home/fruit';
   static const battlePath = '/home/battle';
   static const userPath = '/home/user';
@@ -33,7 +34,7 @@ class AppRouter {
   static final router = GoRouter(
     navigatorKey: _rootNavigatorState,
     initialLocation: loginPath,
-    routes: <RouteBase>[
+    routes: [
       ShellRoute(
           navigatorKey: _homeNavigatorState,
           pageBuilder: (context, state, child) {
@@ -43,14 +44,30 @@ class AppRouter {
               ),
             );
           },
-          routes: <RouteBase>[
+          routes: [
             GoRoute(
               path: characterPath,
-              name: "character",
+              name: "characters",
               parentNavigatorKey: _homeNavigatorState,
               pageBuilder: (context, state) {
                 return const NoTransitionPage(child: CharacterView());
               },
+              routes: [
+                GoRoute(
+                  path: ':name',
+                  name: 'characterDetails',
+                  parentNavigatorKey: _homeNavigatorState,
+                  pageBuilder: (context, state) {
+                    String characterId = state.extra as String;
+                    debugPrint('character id router is $characterId');
+                    return NoTransitionPage(
+                      child: CharacterDetail(
+                        characterId: characterId,
+                      ),
+                    );
+                  },
+                ),
+              ]
             ),
             GoRoute(
               path: fruitPath,
@@ -101,12 +118,14 @@ class AppRouter {
           path: registerPath,
           builder: (context, state) => const RegisterPage()),
     ],
+    // debugLogDiagnostics: true,
     redirect: (context, state) {
       // if the user is not logged in, they need to login
       final loggedIn = getIt<User>().name != '';
       final loggingIn = state.matchedLocation == AppRouter.loginPath;
       final registering = state.matchedLocation == AppRouter.registerPath;
       final goingHome = state.matchedLocation == 'home';
+      debugPrint('matched location is ${state.matchedLocation}');
 
       if (registering) {
         return AppRouter.registerPath;
