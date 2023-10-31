@@ -35,7 +35,7 @@ class _HomePageState extends State<HomePage> {
                     padding: const EdgeInsets.all(5.0),
                     child: _getHeaderRoute(
                         GoRouterState.of(context)
-                            .fullPath!
+                            .matchedLocation
                             .split("/")
                             .where((element) => element != '')
                             .toList(),
@@ -74,7 +74,7 @@ class _HomePageState extends State<HomePage> {
         children: routes.expand<Widget>((route) {
       currentRoutePath = "$currentRoutePath/$route";
       var result = _getTextButton(
-          routePathToDisplayName[route]!, currentRoutePath, isFirst);
+          routePathToDisplayName[route]??route, currentRoutePath, isFirst);
       isFirst = false;
       return result;
     }).toList());
