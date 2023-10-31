@@ -53,20 +53,21 @@ class AppRouter {
               pageBuilder: (context, state) {
                 return const NoTransitionPage(child: CharacterView());
               },
-            ),
-            GoRoute(
-              path: characterDetailPath,
-              name: 'characterDetails',
-              parentNavigatorKey: _homeNavigatorState,
-              pageBuilder: (context, state) {
-                Character character = state.extra as Character;
-                return NoTransitionPage(
-                  child: CharacterDetail(
-                    key: state.pageKey,
-                    character: character,
-                  ),
-                );
-              },
+              routes: [
+                GoRoute(
+                  path: ':name',
+                  name: 'characterDetails',
+                  parentNavigatorKey: _homeNavigatorState,
+                  pageBuilder: (context, state) {
+                    Character character = state.extra as Character;
+                    return NoTransitionPage(
+                      child: CharacterDetail(
+                        character: character,
+                      ),
+                    );
+                  },
+                ),
+              ]
             ),
             GoRoute(
               path: fruitPath,
@@ -117,7 +118,7 @@ class AppRouter {
           path: registerPath,
           builder: (context, state) => const RegisterPage()),
     ],
-    debugLogDiagnostics: true,
+    // debugLogDiagnostics: true,
     redirect: (context, state) {
       // if the user is not logged in, they need to login
       final loggedIn = getIt<User>().name != '';
