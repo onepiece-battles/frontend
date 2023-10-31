@@ -20,4 +20,8 @@ class CharacterDao {
   Future<EatFruitResponse?> eatFruit(EatFruitRequest eatFruitRequest) async {
     return await characterApi.eatFruit(eatFruitRequest);
   }
+
+  Future<CharacterFullView?> getCharacter(GetCharacterFullViewRequest request) async {
+    return await characterApi.getCharacterFullView(request);
+  }
 }

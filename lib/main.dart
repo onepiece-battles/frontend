@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
+import 'package:one_piece_battles_flutter/repository/battle_dao.dart';
 import 'package:one_piece_battles_flutter/repository/character_dao.dart';
 import 'package:one_piece_battles_flutter/repository/image_dao.dart';
 import 'package:one_piece_battles_flutter/repository/issue_dao.dart';
@@ -18,6 +19,7 @@ void main() {
   getIt.registerLazySingleton<CharacterDao>(() => CharacterDao.empty());
   getIt.registerLazySingleton<ImageDao>(() => ImageDao.empty());
   getIt.registerLazySingleton<IssueDao>(() => IssueDao.empty());
+  getIt.registerLazySingleton<BattleDao>(() => BattleDao.empty());
   getIt.registerLazySingleton<User>(() => User(id:"",name: ""));
   runApp(const MyApp());
 }
