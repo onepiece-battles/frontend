@@ -27,4 +27,9 @@ class UserDao {
   Future<VerifyEmailResponse?> verifyEmail(VerifyEmailRequest request) async {
     return await userApi.verifyUserEmail(verifyEmailRequest: request);
   }
+
+  Future<UpdateLoginRoleResponse?> updateLoginRole(
+      UpdateLoginRoleRequest request) async {
+    return await userApi.updateRole(request);
+  }
 }
