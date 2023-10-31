@@ -30,7 +30,6 @@ class AppRouter {
   static const userPath = '/home/user';
   static const settingPath = '/home/setting';
   static const issuePath = '/home/issue';
-  static const characterDetailPath = '/home/character/:name';
 
   static final router = GoRouter(
     navigatorKey: _rootNavigatorState,
@@ -59,10 +58,11 @@ class AppRouter {
                   name: 'characterDetails',
                   parentNavigatorKey: _homeNavigatorState,
                   pageBuilder: (context, state) {
-                    Character character = state.extra as Character;
+                    String characterId = state.extra as String;
+                    debugPrint('character id router is $characterId');
                     return NoTransitionPage(
                       child: CharacterDetail(
-                        character: character,
+                        characterId: characterId,
                       ),
                     );
                   },

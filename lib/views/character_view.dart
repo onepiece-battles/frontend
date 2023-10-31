@@ -363,7 +363,7 @@ class _CharacterViewState extends State<CharacterView> {
           (character) => DataRow(
             onSelectChanged: (value) {
               context.goNamed('characterDetails',
-                  extra: character, pathParameters: {'name': character.name});
+                  extra: character.id, pathParameters: {'name': character.name});
             },
             cells: [
               DataCell(Padding(
@@ -373,7 +373,6 @@ class _CharacterViewState extends State<CharacterView> {
                     child: Image.memory(
                         Base64Helper.decode(character.profileImage!)),
                   ))),
-              // DataCell(Text("aaa")),
               DataCell(Text(character.name.toString())),
               DataCell(Text(character.characterType.toString())),
               DataCell(Text(character.fruitLimit.toString())),
