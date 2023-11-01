@@ -27,8 +27,13 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   var _tabTextIndexSelected = 0;
-  String selectedRole = getIt<User>().loginRole!;
-  Map<String, String> userRoleToDisplayNameMap = {};
+  UserRole selectedRole = getIt<User>().loginRole!;
+  Map<UserRole, String> userRoleToDisplayNameMap = {
+    UserRole.NIKA: "NIKA",
+    UserRole.NORMAL: "Normal",
+    UserRole.VISITOR: "visitor",
+    UserRole.ADMIN: "admin"
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -149,7 +154,7 @@ class _HomePageState extends State<HomePage> {
               child: DropdownButton2(
                 isExpanded: true,
                 value: selectedRole,
-                onChanged: (String? value) {
+                onChanged: (UserRole? value) {
                   setState(() {
                     selectedRole = value!;
                     UpdateLoginRoleRequest request =
@@ -173,7 +178,7 @@ class _HomePageState extends State<HomePage> {
                 ),
                 items: getIt<User>()
                     .userRoles
-                    .map((String userRole) => DropdownMenuItem<String>(
+                    .map((UserRole userRole) => DropdownMenuItem<UserRole>(
                           value: userRole,
                           child: Text(
                             userRoleToDisplayNameMap[userRole]!,
