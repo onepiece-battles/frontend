@@ -3,12 +3,12 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_toggle_tab/flutter_toggle_tab.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:one_piece_battles_flutter/config/app_router.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
 import 'config/api_initializer.dart';
+import 'config/resource_permission_manager.dart';
 import 'constants/path_constants.dart';
 import 'main.dart';
 
@@ -52,8 +52,8 @@ class _RegisterPageState extends State<RegisterPage> {
             child: Padding(
               padding: const EdgeInsets.all(30),
               child: FlutterToggleTab(
-                width: 5,
-                height: 27,
+                width: 4,
+                height: 50,
                 borderRadius: 30,
                 selectedBackgroundColors: const [
                   Color.fromARGB(255, 38, 151, 243),
@@ -86,6 +86,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   Color.fromARGB(255, 182, 180, 180)
                 ],
                 selectedIndex: _tabTextIndexSelected,
+                marginSelected: const EdgeInsets.all(3),
                 isScroll: false,
               ),
             ),
@@ -122,7 +123,7 @@ class _RegisterPageState extends State<RegisterPage> {
               controller: userNameController,
               autofocus: true,
               decoration: InputDecoration(
-                labelText: AppLocalizations.of(context)?.userNameLable,
+                labelText: AppLocalizations.of(context)?.userNameLabel,
                 hintText: AppLocalizations.of(context)?.userNameHint,
                 prefixIcon: const Icon(Icons.person),
               ),
@@ -349,7 +350,8 @@ class _RegisterPageState extends State<RegisterPage> {
         password: passwordController.text);
     Future<LoginResponse?> loginResponse = userDao.login(loginRequest);
     loginResponse.then((value) {
-      ApiInitializer.initAuthInfo(value!.user!, value.accessToken!);
+      ApiInitializer.initAuthInfo(value!.accessToken!);
+      ResourcePermissionManager.setResourceOrder(value.user!);
       context.go(AppRouter.homePath);
     });
   }

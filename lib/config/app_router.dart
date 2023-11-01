@@ -50,7 +50,7 @@ class AppRouter {
               name: "characters",
               parentNavigatorKey: _homeNavigatorState,
               pageBuilder: (context, state) {
-                return const NoTransitionPage(child: CharacterView());
+                return  NoTransitionPage(child: const CharacterView(),   key : UniqueKey(),);
               },
               routes: [
                 GoRoute(

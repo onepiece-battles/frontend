@@ -137,7 +137,7 @@ class _CharacterViewState extends State<CharacterView> {
       _createSingleColumn(AppLocalizations.of(context)!.characterName, 1),
       DataColumn(
           label: Text(
-        AppLocalizations.of(context)!.characterTypeLable,
+        AppLocalizations.of(context)!.characterTypeLabel,
         style: OnepieceFonts.tableHeaderStyle,
       )),
       _createSingleColumn(AppLocalizations.of(context)!.fruitLimit, 3),

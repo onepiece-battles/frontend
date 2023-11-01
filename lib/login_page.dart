@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
 import 'package:one_piece_battles_flutter/config/api_initializer.dart';
 import 'package:one_piece_battles_flutter/config/app_router.dart';
+import 'package:one_piece_battles_flutter/config/resource_permission_manager.dart';
 import 'package:one_piece_battles_flutter/constants/path_constants.dart';
 import 'package:one_piece_battles_flutter/main.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
@@ -46,8 +47,8 @@ class _LoginPageState extends State<LoginPage> {
               child: Padding(
                 padding: const EdgeInsets.all(30),
                 child: FlutterToggleTab(
-                  width: 5,
-                  height: 27,
+                  width: 4,
+                  height: 50,
                   borderRadius: 30,
                   selectedBackgroundColors: const [
                     Color.fromARGB(255, 38, 151, 243),
@@ -79,6 +80,7 @@ class _LoginPageState extends State<LoginPage> {
                   unSelectedBackgroundColors: const [
                     Color.fromARGB(255, 182, 180, 180)
                   ],
+                  marginSelected: const EdgeInsets.all(3),
                   selectedIndex: _tabTextIndexSelected,
                   isScroll: false,
                 ),
@@ -117,7 +119,7 @@ class _LoginPageState extends State<LoginPage> {
                 controller: userNameController,
                 autofocus: true,
                 decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)?.userNameLable,
+                    labelText: AppLocalizations.of(context)?.userNameLabel,
                     hintText: AppLocalizations.of(context)?.userNameHint,
                     prefixIcon: const Icon(Icons.person)),
               ),
@@ -168,7 +170,7 @@ class _LoginPageState extends State<LoginPage> {
                 keyboardType: TextInputType.text,
                 obscureText: _isHidden,
                 decoration: InputDecoration(
-                  labelText: AppLocalizations.of(context)?.passwordLable,
+                  labelText: AppLocalizations.of(context)?.passwordLabel,
                   hintText: AppLocalizations.of(context)?.passWordHint,
                   prefixIcon: const Icon(Icons.lock),
                   suffixIcon: IconButton(
@@ -204,7 +206,6 @@ class _LoginPageState extends State<LoginPage> {
                             getIt<UserDao>().login(loginRequest);
                         loginResponse.then((value) {
                           if (value!.verification == null) {
-                            debugPrint('login user data${value.user}');
                             _route(value.user!, value.accessToken!, context);
                           } else {
                             setState(() {
@@ -257,7 +258,8 @@ class _LoginPageState extends State<LoginPage> {
 
   void _route(User user, String token, BuildContext context) {
     // init apis with tokens
-    ApiInitializer.initAuthInfo(user, token);
+    ApiInitializer.initAuthInfo(token);
+    ResourcePermissionManager.setResourceOrder(user);
     context.go(AppRouter.homePath);
   }
 }
