@@ -72,33 +72,35 @@ class _CharacterViewState extends State<CharacterView> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(child:Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-            padding: const EdgeInsets.all(15),
-            child: Text(
-              AppLocalizations.of(context)!.character,
-              style: OnepieceFonts.headerStyle,
-            )),
-        const SizedBox(
-          height: 20,
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
-          child: _createSearchFilterRow(context),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
-          child: SizedBox(width: double.infinity, child: _createDataTable()),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(15, 15, 15, 0),
-          child: _getPageFoot(),
-        )
-      ],
-    ),);
-
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+              padding: const EdgeInsets.all(15),
+              child: Text(
+                AppLocalizations.of(context)!.character,
+                style: OnepieceFonts.headerStyle,
+              )),
+          const SizedBox(
+            height: 20,
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
+            child: _createSearchFilterRow(context),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
+            child:
+                SizedBox(width: double.infinity, child: _createDataTable()),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(15, 15, 15, 0),
+            child: _getPageFoot(),
+          )
+        ],
+      ),
+    );
   }
 
   DataTable _createDataTable() {
@@ -364,7 +366,8 @@ class _CharacterViewState extends State<CharacterView> {
           (character) => DataRow(
             onSelectChanged: (value) {
               context.goNamed('characterDetails',
-                  extra: character.id, pathParameters: {'name': character.name});
+                  extra: character.id,
+                  pathParameters: {'name': character.name});
             },
             cells: [
               DataCell(Padding(
