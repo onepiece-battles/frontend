@@ -72,34 +72,51 @@ class _CharacterViewState extends State<CharacterView> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-              padding: const EdgeInsets.all(15),
-              child: Text(
-                AppLocalizations.of(context)!.character,
-                style: OnepieceFonts.headerStyle,
-              )),
-          const SizedBox(
-            height: 20,
+    return Column(
+      // mainAxisAlignment: MainAxisAlignment.start,
+      // crossAxisAlignment: CrossAxisAlignment.start,
+      // verticalDirection: VerticalDirection.down,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(15),
+          child: Text(
+            AppLocalizations.of(context)!.character,
+            style: OnepieceFonts.headerStyle,
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
-            child: _createSearchFilterRow(context),
+        ),
+        const SizedBox(
+          height: 20,
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
+          child: _createSearchFilterRow(context),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: ConstrainedBox(
+              constraints: BoxConstraints.loose(const Size.fromWidth(1500)),
+              child: FittedBox(
+                fit: BoxFit.fill,
+                child: _createDataTable(),
+              ),
+            ),
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
-            child:
-                SizedBox(width: double.infinity, child: _createDataTable()),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(15, 15, 15, 0),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: 1120,
+              ),
+              child: _getPageFoot(),
+            ),
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(15, 15, 15, 0),
-            child: _getPageFoot(),
-          )
-        ],
-      ),
+        )
+      ],
     );
   }
 
@@ -112,7 +129,7 @@ class _CharacterViewState extends State<CharacterView> {
           bottom: BorderSide(color: OnepieceColors.themeColor)),
       columns: _createColumns(),
       rows: _createRows(context),
-      columnSpacing: 0,
+      columnSpacing: 10,
     );
   }
 
@@ -218,7 +235,7 @@ class _CharacterViewState extends State<CharacterView> {
       Padding(
         padding: const EdgeInsets.fromLTRB(0, 0, 8, 6),
         child: SizedBox(
-          height: 35,
+          height: 34,
           child: ElevatedButton(
               onPressed: () {
                 showDialog(
@@ -235,7 +252,7 @@ class _CharacterViewState extends State<CharacterView> {
           padding: const EdgeInsets.fromLTRB(0, 0, 8, 6),
           child: SizedBox(
             width: 200,
-            height: 35,
+            height: 34,
             child: TextField(
               textAlign: TextAlign.center,
               controller: searchNameController,
@@ -298,8 +315,8 @@ class _CharacterViewState extends State<CharacterView> {
             },
             buttonStyleData: ButtonStyleData(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                height: 35,
-                width: 240,
+                height: 34,
+                width: 280,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(3),
                   color: OnepieceColors.menuBackgroundColor,
@@ -516,6 +533,7 @@ class _CharacterViewState extends State<CharacterView> {
     ));
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
+      mainAxisSize: MainAxisSize.max,
       children: widgetList,
     );
   }
