@@ -72,7 +72,7 @@ class _CharacterViewState extends State<CharacterView> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return SingleChildScrollView(child:Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
@@ -97,7 +97,8 @@ class _CharacterViewState extends State<CharacterView> {
           child: _getPageFoot(),
         )
       ],
-    );
+    ),);
+
   }
 
   DataTable _createDataTable() {

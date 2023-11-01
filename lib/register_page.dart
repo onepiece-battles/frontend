@@ -53,8 +53,8 @@ class _RegisterPageState extends State<RegisterPage> {
               padding: const EdgeInsets.all(30),
               child: FlutterToggleTab(
                 width: 4,
-                height: 50,
-                borderRadius: 30,
+                height: 30,
+                borderRadius: 20,
                 selectedBackgroundColors: const [
                   Color.fromARGB(255, 38, 151, 243),
                   Colors.blueAccent
