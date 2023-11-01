@@ -4,6 +4,7 @@ import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/components/side_menu.dart';
 import 'package:one_piece_battles_flutter/config/app_router.dart';
+import 'package:one_piece_battles_flutter/config/resource_permission_manager.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
@@ -28,16 +29,9 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   var _tabTextIndexSelected = 0;
   UserRole selectedRole = getIt<User>().loginRole!;
-  Map<UserRole, String> userRoleToDisplayNameMap = {
-    UserRole.NIKA: "NIKA",
-    UserRole.NORMAL: "Normal",
-    UserRole.VISITOR: "visitor",
-    UserRole.ADMIN: "admin"
-  };
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('print user roles: ${getIt<User>().userRoles.toString()}');
     return Scaffold(
       body: Row(
         children: [
@@ -161,9 +155,12 @@ class _HomePageState extends State<HomePage> {
                         UpdateLoginRoleRequest(role: selectedRole);
                     getIt<UserDao>().updateLoginRole(request).then((value) {
                       var currentUser = getIt<User>();
-                      //todo(yichi): refresh user information.
+                      currentUser.loginRole = value!.currentRole;
+                      currentUser.loginRoleResources = value.resources;
+                      ResourcePermissionManager.setResourceOrder(currentUser);
                     });
                   });
+                  context.go(AppRouter.characterPath);
                 },
                 buttonStyleData: ButtonStyleData(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -176,22 +173,32 @@ class _HomePageState extends State<HomePage> {
                 menuItemStyleData: const MenuItemStyleData(
                   height: 40,
                 ),
-                items: getIt<User>()
-                    .userRoles
-                    .map((UserRole userRole) => DropdownMenuItem<UserRole>(
-                          value: userRole,
-                          child: Text(
-                            userRoleToDisplayNameMap[userRole]!,
-                            style: OnepieceFonts.dropDownItemStyle,
-                          ),
-                        ))
-                    .toList(),
+                items: getItems(context),
               ),
             ),
           )
         ],
       ),
     );
+  }
+
+  List<DropdownMenuItem<UserRole>> getItems(BuildContext context) {
+    Map<UserRole, String> userRoleToDisplayNameMap = {
+      UserRole.NIKA: AppLocalizations.of(context)!.roleNika,
+      UserRole.NORMAL: AppLocalizations.of(context)!.roleNormal,
+      UserRole.VISITOR: AppLocalizations.of(context)!.roleVisitor,
+      UserRole.ADMIN: AppLocalizations.of(context)!.roleAdmin
+    };
+    return getIt<User>()
+        .userRoles
+        .map((UserRole userRole) => DropdownMenuItem<UserRole>(
+              value: userRole,
+              child: Text(
+                userRoleToDisplayNameMap[userRole]!,
+                style: OnepieceFonts.dropDownItemStyle,
+              ),
+            ))
+        .toList();
   }
 
   List<Widget> _getTextButton(String name, String routePath, bool isFirst) {

@@ -17,7 +17,7 @@
   "characterName": "名字",
   "characterSpeed": "速度",
   "characterTypeHint": "选择角色战斗方式",
-  "characterTypeLable": "角色战斗方式",
+  "characterTypeLabel": "角色战斗方式",
   "chinese": "中文",
   "chooseFile": "选择文件 ...",
   "clearAll": "清除",
@@ -61,7 +61,7 @@
   "organization": "您的企业",
   "otherType": "其他类型",
   "passWordHint": "请输入密码。",
-  "passwordLable": "密码",
+  "passwordLabel": "密码",
   "registerAccount": "现在注册！",
   "registerPasswordHint": "您的密码",
   "registerPasswordHint2": "请确认密码",
@@ -81,8 +81,12 @@
   "uploadNewAvatar": "上传新头像",
   "userManagement": "用户管理",
   "userNameHint": "用户名",
-  "userNameLable": "用户名",
+  "userNameLabel": "用户名",
   "valueExceedsLimit": "值超出范围",
   "valueRange": "取 值：",
-  "welcome": "欢迎光临海贼王！"
+  "welcome": "欢迎光临海贼王！",
+  "roleNika": "尼卡",
+  "roleVisitor": "游客",
+  "roleNormal": "普通用户",
+  "roleAdmin": "管理员"
 }

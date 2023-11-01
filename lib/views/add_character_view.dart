@@ -166,7 +166,7 @@ class _AddCharacterViewState extends State<AddCharacterView> {
                       dropdownDecoratorProps: DropDownDecoratorProps(
                         dropdownSearchDecoration: InputDecoration(
                             labelText: AppLocalizations.of(context)!
-                                .characterTypeLable,
+                                .characterTypeLabel,
                             hintText: AppLocalizations.of(context)!
                                 .characterTypeHint),
                       ),
