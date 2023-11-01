@@ -204,6 +204,7 @@ class _LoginPageState extends State<LoginPage> {
                             getIt<UserDao>().login(loginRequest);
                         loginResponse.then((value) {
                           if (value!.verification == null) {
+                            debugPrint('login user data${value.user}');
                             _route(value.user!, value.accessToken!, context);
                           } else {
                             setState(() {
