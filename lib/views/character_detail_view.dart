@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
+import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:one_piece_battles_flutter/repository/character_dao.dart';
 import 'package:openapi/api.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -11,6 +12,7 @@ import '../repository/battle_dao.dart';
 import '../repository/image_dao.dart';
 import '../utils/base64_helper.dart';
 import '../utils/compare_uint8list.dart';
+import '../utils/image_helper.dart';
 import '../utils/onepiece_image_picker.dart';
 
 GetIt getIt = GetIt.instance;
@@ -57,16 +59,29 @@ class _CharacterDetailState extends State<CharacterDetail> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
       children: [
-        _getProfileSection(context),
-        _getCharacterDataList(context),
+        Padding(
+          padding: const EdgeInsets.all(3.0),
+          child: _getCharacterTopBar(),
+        ),
+        const Divider(
+          height: 10,
+          thickness: 1,
+        ),
+        Row(
+          children: [
+            _getProfileSection(context),
+            _getCharacterDataList(context),
+          ],
+        )
       ],
     );
   }
 
   Widget _getProfileSection(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         IconButton(
           onPressed: () async {
@@ -116,6 +131,88 @@ class _CharacterDetailState extends State<CharacterDetail> {
                         });
                       },
                 child: Text(AppLocalizations.of(context)!.confirm))
+          ],
+        )
+      ],
+    );
+  }
+
+  Widget _getCharacterTopBar() {
+    Map<CharacterType, Widget> characterTypeToIconMap = {
+      CharacterType.fist: const Icon(
+        Icons.sports_mma,
+        color: OnepieceColors.themeColor,
+        size: 30,
+      ),
+      CharacterType.body: const Icon(
+        Icons.accessibility,
+        color: OnepieceColors.themeColor,
+        size: 30,
+      ),
+      CharacterType.foot: const Icon(
+        Icons.airline_seat_legroom_extra,
+        color: OnepieceColors.themeColor,
+        size: 30,
+      ),
+      CharacterType.katana: ImageHelper.getSvgIcon(
+        'images/svgs/katana.svg',
+        OnepieceColors.themeColor,
+        30,
+        30,
+      ),
+      CharacterType.science: const Icon(
+        Icons.science,
+        color: OnepieceColors.themeColor,
+        size: 30,
+      ),
+      CharacterType.shooter: ImageHelper.getSvgIcon(
+        'images/svgs/sniper.svg',
+        OnepieceColors.themeColor,
+        30,
+        30,
+      ),
+    };
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Container(
+              color: OnepieceColors.menuHoverColor,
+              child: Padding(
+                padding: const EdgeInsets.all(5.0),
+                child: Text(
+                  characterFullView.character!.name,
+                  style: OnepieceFonts.contentStyleBold,
+                ),
+              ),
+            ),
+            const SizedBox(width: 30,),
+            characterTypeToIconMap[characterFullView.character!.characterType]!
+          ],
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Icon(
+              Icons.apple,
+              size: 30,
+              color: characterFullView.character!.hasFruits
+                  ? Colors.blue
+                  : Colors.grey,
+            ),
+            characterFullView.character!.isSystemResource
+                ? const Icon(
+                    Icons.computer,
+                    size: 30,
+                    color: OnepieceColors.secondaryThemeColor,
+                  )
+                : const Icon(
+                    Icons.person,
+                    size: 30,
+                    color: OnepieceColors.secondaryThemeColor,
+                  )
           ],
         )
       ],
