@@ -70,7 +70,6 @@ class _SideMenuState extends State<SideMenu> {
                     children: [
                       ImageHelper.getSvgIcon(
                         'images/svgs/menu_question.svg',
-                        OnepieceColors.menuIconColor,
                         21,
                         21,
                       ),
@@ -162,7 +161,6 @@ class _SideMenuState extends State<SideMenu> {
     Map<ResourceType, Widget> resourceToIconMap = {
       ResourceType.FRUIT: ImageHelper.getSvgIcon(
         'images/svgs/fruit.svg',
-        OnepieceColors.menuIconColor,
         20,
         20,
       ),
