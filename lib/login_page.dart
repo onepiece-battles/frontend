@@ -24,7 +24,11 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  var _tabTextIndexSelected = 0;
+  var _tabTextIndexSelected =
+      I18nHelper.convertToOnepieceLocale(getIt<Locale>()).toString() ==
+              (OnepieceLocale.zhCN.toString())
+          ? 0
+          : 1;
   bool _isHidden = true;
   bool _buttonEnabled = true;
   String verificationMessage = "";

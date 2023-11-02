@@ -72,51 +72,40 @@ class _CharacterViewState extends State<CharacterView> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      // mainAxisAlignment: MainAxisAlignment.start,
-      // crossAxisAlignment: CrossAxisAlignment.start,
-      // verticalDirection: VerticalDirection.down,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(15),
-          child: Text(
+    return Padding(
+      padding: const EdgeInsets.all(15.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
             AppLocalizations.of(context)!.character,
             style: OnepieceFonts.headerStyle,
           ),
-        ),
-        const SizedBox(
-          height: 20,
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
-          child: _createSearchFilterRow(context),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: ConstrainedBox(
-              constraints: BoxConstraints.loose(const Size.fromWidth(1500)),
-              child: FittedBox(
-                fit: BoxFit.fill,
-                child: _createDataTable(),
+          const SizedBox(height: 15,),
+          _createSearchFilterRow(context),
+          const SizedBox(height: 15,),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              ConstrainedBox(
+                constraints: BoxConstraints.loose(const Size.fromWidth(1500)),
+                child: FittedBox(
+                  fit: BoxFit.fill,
+                  child: _createDataTable(),
+                ),
               ),
-            ),
+              const SizedBox(height: 15,),
+              ConstrainedBox(
+                constraints: BoxConstraints.loose(const Size.fromWidth(1500)),
+                child: FittedBox(
+                  fit: BoxFit.fitWidth,
+                  child: Center(child: _getPageFoot()),
+                ),
+              )
+            ],
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(15, 15, 15, 0),
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxWidth: 1120,
-              ),
-              child: _getPageFoot(),
-            ),
-          ),
-        )
-      ],
+        ],
+      ),
     );
   }
 
@@ -532,8 +521,6 @@ class _CharacterViewState extends State<CharacterView> {
       child: nextPage,
     ));
     return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      mainAxisSize: MainAxisSize.max,
       children: widgetList,
     );
   }
