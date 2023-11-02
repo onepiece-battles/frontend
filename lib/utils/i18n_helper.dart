@@ -28,5 +28,12 @@ class I18nHelper {
     }
   }
 
+  static OnepieceLocale convertToOnepieceLocale(Locale locale) {
+    if (locale.toString() == const Locale('en', 'US').toString()) {
+      return OnepieceLocale.enUS;
+    }
+    return OnepieceLocale.zhCN;
+  }
+
 }
 //--dart-define=http_proxy=http://127.0.0.1:59527 --dart-define=https_proxy=https://127.0.0.1:59527

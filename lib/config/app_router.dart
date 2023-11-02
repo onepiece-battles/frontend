@@ -25,11 +25,11 @@ class AppRouter {
 
   // sub-paths
   static const characterPath = '/home/characters';
-  static const fruitPath = '/home/fruit';
-  static const battlePath = '/home/battle';
-  static const userPath = '/home/user';
+  static const fruitPath = '/home/fruits';
+  static const battlePath = '/home/battles';
+  static const userPath = '/home/users';
   static const settingPath = '/home/setting';
-  static const issuePath = '/home/issue';
+  static const issuePath = '/home/issues';
 
   static final router = GoRouter(
     navigatorKey: _rootNavigatorState,

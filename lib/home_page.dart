@@ -8,6 +8,7 @@ import 'package:one_piece_battles_flutter/config/resource_permission_manager.dar
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
+import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
 import 'constants/device_type.dart';
 import 'package:flutter_toggle_tab/flutter_toggle_tab.dart';
@@ -27,7 +28,11 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  var _tabTextIndexSelected = 0;
+  var _tabTextIndexSelected =
+      I18nHelper.convertToOnepieceLocale(getIt<Locale>()).toString() ==
+              (OnepieceLocale.zhCN.toString())
+          ? 0
+          : 1;
   UserRole selectedRole = getIt<User>().loginRole!;
 
   @override
@@ -76,12 +81,12 @@ class _HomePageState extends State<HomePage> {
   Row _getHeader(List<String> routes, BuildContext context) {
     Map<String, String> routePathToDisplayName = {
       'home': AppLocalizations.of(context)!.home,
-      'character': AppLocalizations.of(context)!.character,
-      'fruit': AppLocalizations.of(context)!.devilFruit,
-      'user': AppLocalizations.of(context)!.userManagement,
-      'battle': AppLocalizations.of(context)!.battle,
+      'characters': AppLocalizations.of(context)!.character,
+      'fruits': AppLocalizations.of(context)!.devilFruit,
+      'users': AppLocalizations.of(context)!.userManagement,
+      'battles': AppLocalizations.of(context)!.battle,
       'setting': AppLocalizations.of(context)!.settings,
-      'issue': AppLocalizations.of(context)!.issue
+      'issues': AppLocalizations.of(context)!.issue
     };
     bool isFirst = true;
     String currentRoutePath = "";
@@ -89,6 +94,7 @@ class _HomePageState extends State<HomePage> {
       Row(
           children: routes.expand<Widget>((route) {
         currentRoutePath = "$currentRoutePath/$route";
+        debugPrint('current route is: $route');
         var result = _getTextButton(
             routePathToDisplayName[route] ?? route, currentRoutePath, isFirst);
         isFirst = false;

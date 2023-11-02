@@ -26,7 +26,10 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  var _tabTextIndexSelected = 0;
+  var _tabTextIndexSelected =  I18nHelper.convertToOnepieceLocale(getIt<Locale>()).toString() ==
+      (OnepieceLocale.zhCN.toString())
+      ? 0
+      : 1;
   I18nText? verificationI18n = I18nText();
   UserDao userDao = UserDao.empty();
   bool _isPasswordHidden = true;
@@ -286,7 +289,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           organization: organizationController.text,
                           password: passwordController.text,
                           confirmedPassword: confirmedPasswordController.text,
-                      locale: convertToOnepieceLocale(getIt<Locale>()));
+                      locale: I18nHelper.convertToOnepieceLocale(getIt<Locale>()));
                       Future<RegisterResponse?> response =
                           userDao.register(request);
                       response.then((value) => {
@@ -354,12 +357,5 @@ class _RegisterPageState extends State<RegisterPage> {
       ResourcePermissionManager.setResourceOrder(value.user!);
       context.go(AppRouter.homePath);
     });
-  }
-
-  OnepieceLocale convertToOnepieceLocale(Locale locale) {
-    if (locale.toString() == const Locale('en', 'US').toString()) {
-      return OnepieceLocale.enUS;
-    }
-    return OnepieceLocale.zhCN;
   }
 }
