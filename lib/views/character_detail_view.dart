@@ -156,7 +156,6 @@ class _CharacterDetailState extends State<CharacterDetail> {
       ),
       CharacterType.katana: ImageHelper.getSvgIcon(
         'images/svgs/katana.svg',
-        OnepieceColors.themeColor,
         30,
         30,
       ),
@@ -167,7 +166,6 @@ class _CharacterDetailState extends State<CharacterDetail> {
       ),
       CharacterType.shooter: ImageHelper.getSvgIcon(
         'images/svgs/sniper.svg',
-        OnepieceColors.themeColor,
         30,
         30,
       ),
@@ -179,40 +177,76 @@ class _CharacterDetailState extends State<CharacterDetail> {
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Container(
-              color: OnepieceColors.menuHoverColor,
+              decoration: const BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(5)),
+                color: OnepieceColors.menuSelectedTileColor,
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(5.0),
-                child: Text(
-                  characterFullView.character!.name,
-                  style: OnepieceFonts.contentStyleBold,
+                child: SizedBox(
+                  height: 30,
+                  child: Text(
+                    characterFullView.character!.name,
+                    style: OnepieceFonts.contentStyleBold,
+                  ),
                 ),
               ),
             ),
-            const SizedBox(width: 30,),
-            characterTypeToIconMap[characterFullView.character!.characterType]!
+            const SizedBox(
+              width: 10,
+            ),
+            Container(
+                decoration: const BoxDecoration(
+                  borderRadius: BorderRadius.all(Radius.circular(5)),
+                  color: OnepieceColors.menuSelectedTileColor,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: characterTypeToIconMap[
+                      characterFullView.character!.characterType]!,
+                ))
           ],
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            Icon(
-              Icons.apple,
-              size: 30,
-              color: characterFullView.character!.hasFruits
-                  ? Colors.blue
-                  : Colors.grey,
+            Container(
+              decoration: const BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(5)),
+                color: OnepieceColors.menuSelectedTileColor,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(5.0),
+                child: ImageHelper.getSvgIconWithColor(
+                  'images/svgs/fruit.svg',
+                  30,
+                  30,
+                  characterFullView.character!.hasFruits
+                      ? Colors.blue
+                      : Colors.white,
+                ),
+              ),
             ),
-            characterFullView.character!.isSystemResource
-                ? const Icon(
-                    Icons.computer,
-                    size: 30,
-                    color: OnepieceColors.secondaryThemeColor,
-                  )
-                : const Icon(
-                    Icons.person,
-                    size: 30,
-                    color: OnepieceColors.secondaryThemeColor,
-                  )
+            const SizedBox(width: 10,),
+            Container(
+              decoration: const BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(5)),
+                color: OnepieceColors.menuSelectedTileColor,
+              ),
+              child: Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: characterFullView.character!.isSystemResource
+                      ? const Icon(
+                          Icons.computer,
+                          size: 30,
+                          color: OnepieceColors.secondaryThemeColor,
+                        )
+                      : const Icon(
+                          Icons.person,
+                          size: 30,
+                          color: OnepieceColors.secondaryThemeColor,
+                        )),
+            ),
           ],
         )
       ],

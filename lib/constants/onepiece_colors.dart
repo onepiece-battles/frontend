@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class OnepieceColors {
   static const themeColor = Color.fromARGB(250, 90, 160, 230);
   static const secondaryThemeColor = Colors.blue;
-
+  static const deepBlue = Color(0x10426AFF);
   static Color buttonSelectedColor = Colors.lightBlueAccent;
   static const black = Colors.black;
   static var backgroundColor = Colors.blue[300];

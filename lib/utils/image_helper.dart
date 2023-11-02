@@ -63,10 +63,20 @@ class ImageHelper {
   }
 
   static Widget getSvgIcon(
-      String svgPath, Color svgColor, double width, double height) {
+      String svgPath, double width, double height) {
     return SvgPicture.asset(
       svgPath,
-      color: svgColor,
+      // color: svgColor,
+      width: width,
+      height: height,
+    );
+  }
+
+  static Widget getSvgIconWithColor(
+      String svgPath, double width, double height, Color color) {
+    return SvgPicture.asset(
+      svgPath,
+      color: color,
       width: width,
       height: height,
     );

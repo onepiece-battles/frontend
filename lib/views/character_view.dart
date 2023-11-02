@@ -200,7 +200,6 @@ class _CharacterViewState extends State<CharacterView> {
             },
             icon: ImageHelper.getSvgIcon(
               sortOrderToPath[columnIndexToSortOrderMap[index]]!,
-              OnepieceColors.themeColor,
               15,
               15,
             ),
