@@ -31,6 +31,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
   late Uint8List _pickedImage;
   late Uint8List _originalImage;
   bool _newImagePicked = false;
+  SliderData sliderData = SliderData();
+
   @override
   void initState() {
     super.initState();
@@ -44,6 +46,16 @@ class _CharacterDetailState extends State<CharacterDetail> {
             GetCharacterFullViewRequest(characterId: widget.characterId))
         .then((value) {
       characterFullView = value!;
+      // set initial slider value
+      sliderData.setAttack(characterFullView.character!.attack.toDouble());
+      sliderData.setDefense(characterFullView.character!.defense.toDouble());
+      sliderData.setBlood(characterFullView.character!.blood.toDouble());
+      sliderData
+          .setGroupGain(characterFullView.character!.groupGain.toDouble());
+      sliderData.setIntelligence(
+          characterFullView.character!.intelligence.toDouble());
+      sliderData.setSpeed(characterFullView.character!.speed.toDouble());
+      // set initial image value
       _originalImage =
           Base64Helper.decode(characterFullView.character!.profileImage!);
       _pickedImage = _originalImage;
@@ -227,7 +239,9 @@ class _CharacterDetailState extends State<CharacterDetail> {
                 ),
               ),
             ),
-            const SizedBox(width: 10,),
+            const SizedBox(
+              width: 10,
+            ),
             Container(
               decoration: const BoxDecoration(
                 borderRadius: BorderRadius.all(Radius.circular(5)),
@@ -264,73 +278,120 @@ class _CharacterDetailState extends State<CharacterDetail> {
   Column _getCharacterDataList(BuildContext context) {
     return Column(
       children: [
-        _getDataRow(AppLocalizations.of(context)!.characterAttack,
-            characterFullView.character!.attack, 1000, 1000, 0),
-        _getDataRow(AppLocalizations.of(context)!.characterDefense,
-            characterFullView.character!.defense, 1000, 1000, 0),
-        _getDataRow(AppLocalizations.of(context)!.characterBlood,
-            characterFullView.character!.blood, 10000, 10000, 0),
-        _getDataRow(AppLocalizations.of(context)!.characterSpeed,
-            characterFullView.character!.speed, 200, 200, 0),
-        _getDataRow(AppLocalizations.of(context)!.groupGain,
-            characterFullView.character!.groupGain, 5, 5, 0),
-        _getDataRow(AppLocalizations.of(context)!.characterIntelligence,
-            characterFullView.character!.intelligence, 260, 260, 0),
+        _getDataRow(
+            AppLocalizations.of(context)!.characterAttack,
+            1000,
+            10,
+            sliderData.attack,
+            characterFullView.character!.attack.toDouble(), (value) {
+          sliderData.setAttack(value);
+        }),
+        _getDataRow(AppLocalizations.of(context)!.characterDefense, 1000, 10,
+            sliderData.defense, sliderData.defense, (value) {
+          sliderData.setDefense(value);
+        }),
+        _getDataRow(AppLocalizations.of(context)!.characterBlood, 10000, 100,
+            sliderData.blood, sliderData.blood, (value) {
+          sliderData.setBlood(value);
+        }),
+        _getDataRow(AppLocalizations.of(context)!.characterSpeed, 200, 10,
+            sliderData.speed, sliderData.speed, (value) {
+          sliderData.setSpeed(value);
+        }),
+        _getDataRow(AppLocalizations.of(context)!.groupGain, 5, 1,
+            sliderData.groupGain, sliderData.groupGain, (value) {
+          sliderData.setGroupGain(value);
+        }),
+        _getDataRow(AppLocalizations.of(context)!.characterIntelligence, 260,
+            70, sliderData.intelligence, sliderData.intelligence, (value) {
+          sliderData.setIntelligence(value);
+        }),
       ],
     );
   }
 
-  Padding _getDataRow(String name, int value, int base, int max, int min) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
-            child: SizedBox(
-                width: 80,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [Text(name), Text(value.toString())],
-                )),
-          ),
-          Column(
+  Row _getDataRow(String name, int max, int min, double currentValue,
+      double originalValue, Function(double) onChangeFunction) {
+    return Row(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Stack(
-                children: [
-                  Container(
-                    width: 300,
-                    height: 25,
-                    decoration: const BoxDecoration(
-                        color: OnepieceColors.menuBackgroundColor,
-                        borderRadius: BorderRadius.all(Radius.circular(10))),
-                  ),
-                  Container(
-                    width: 300 * value / base,
-                    height: 25,
-                    decoration: const BoxDecoration(
-                      color: OnepieceColors.themeColor,
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(10),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(min.toString()),
-                  const SizedBox(
-                    width: 250,
-                  ),
-                  Text(max.toString()),
-                ],
+              SizedBox(width: 70, child: Text(name)),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8.0, 0, 0, 0),
+                child: SizedBox(
+                    width: 42, child: Text(currentValue.toInt().toString())),
               )
             ],
-          )
-        ],
-      ),
+          ),
+        ),
+        SizedBox(
+          width: 360,
+          height: 35,
+          child: Expanded(
+            child: Slider(
+              value: currentValue,
+              allowedInteraction: SliderInteraction.tapAndSlide,
+              label: currentValue.round().toString(),
+              divisions: max - min,
+              min: min.toDouble(),
+              max: max.toDouble(),
+              secondaryTrackValue: originalValue,
+              secondaryActiveColor: OnepieceColors.themeColor,
+              onChanged: (value) {
+                setState(() {
+                  currentValue = value;
+                  onChangeFunction(value);
+                });
+              },
+            ),
+          ),
+        ),
+      ],
     );
   }
+}
+
+class SliderData {
+  late double _currentAttack;
+  late double _currentDefense;
+  late double _currentBlood;
+  late double _currentIntelligence;
+  late double _currentSpeed;
+  late double _currentGroupGain;
+
+  void setAttack(double attack) {
+    _currentAttack = attack;
+  }
+
+  void setDefense(double defense) {
+    _currentDefense = defense;
+  }
+
+  void setBlood(double blood) {
+    _currentBlood = blood;
+  }
+
+  void setIntelligence(double intelligence) {
+    _currentIntelligence = intelligence;
+  }
+
+  void setSpeed(double speed) {
+    _currentSpeed = speed;
+  }
+
+  void setGroupGain(double groupGain) {
+    _currentGroupGain = groupGain;
+  }
+
+  double get attack => _currentAttack;
+  double get defense => _currentDefense;
+  double get blood => _currentBlood;
+  double get speed => _currentSpeed;
+  double get intelligence => _currentIntelligence;
+  double get groupGain => _currentGroupGain;
 }
