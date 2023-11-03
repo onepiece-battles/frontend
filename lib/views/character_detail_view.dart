@@ -85,6 +85,16 @@ class _CharacterDetailState extends State<CharacterDetail> {
           children: [
             _getProfileSection(context),
             _getCharacterDataList(context),
+            // SizedBox(
+            //   width: 600,
+            //   child: ConstrainedBox(
+            //     constraints: BoxConstraints.loose(const Size.fromWidth(1500)),
+            //     child: FittedBox(
+            //       fit: BoxFit.fill,
+            //       child: _getCharacterDataList(context),
+            //     ),
+            //   ),
+            // ),
           ],
         )
       ],
@@ -92,60 +102,74 @@ class _CharacterDetailState extends State<CharacterDetail> {
   }
 
   Widget _getProfileSection(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        IconButton(
-          onPressed: () async {
-            XFile? pickedImage = await OnepieceImagePicker.pickWebImage();
-            Uint8List imageInByte = await pickedImage!.readAsBytes();
-            _pickedImage = imageInByte;
-            setState(() {
-              _compareImage();
-            });
-          },
-          iconSize: 300,
-          splashRadius: 10,
-          icon: Image.memory(_pickedImage),
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            ElevatedButton(
-                onPressed: !_newImagePicked
-                    ? null
-                    : () {
-                        setState(() {
-                          _pickedImage = _originalImage;
-                          _compareImage();
-                        });
-                      },
-                child: Text(AppLocalizations.of(context)!.clearAll)),
-            const SizedBox(
-              width: 250,
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          InkWell(
+            child: Container(
+              height: 200,
+              width: 200,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                    image: Image.memory(_pickedImage).image, fit: BoxFit.fill),
+              ),
             ),
-            ElevatedButton(
-                onPressed: !_newImagePicked
-                    ? null
-                    : () async {
-                        var encodedImage = Base64Helper.encode(_pickedImage);
-                        UploadImageRequest uploadImageRequest =
-                            UploadImageRequest(
-                                resourceId: characterFullView.character!.id,
-                                image: encodedImage,
-                                type: ResourceType.CHARACTER);
-                        var getImageResponse = await getIt<ImageDao>()
-                            .addImage(uploadImageRequest);
-                        setState(() {
-                          _originalImage =
-                              Base64Helper.decode(getImageResponse!.image);
-                          _compareImage();
-                        });
-                      },
-                child: Text(AppLocalizations.of(context)!.confirm))
-          ],
-        )
-      ],
+            onTap: () async {
+              XFile? pickedImage = await OnepieceImagePicker.pickWebImage();
+              Uint8List imageInByte = await pickedImage!.readAsBytes();
+              _pickedImage = imageInByte;
+              setState(() {
+                _compareImage();
+              });
+            },
+          ),
+          SizedBox(
+            width: 200,
+            height: 23,
+            child: Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ElevatedButton(
+                      onPressed: !_newImagePicked
+                          ? null
+                          : () {
+                              setState(() {
+                                _pickedImage = _originalImage;
+                                _compareImage();
+                              });
+                            },
+                      child: Text(AppLocalizations.of(context)!.clearAll)),
+                  ElevatedButton(
+                      onPressed: !_newImagePicked
+                          ? null
+                          : () async {
+                              var encodedImage =
+                                  Base64Helper.encode(_pickedImage);
+                              UploadImageRequest uploadImageRequest =
+                                  UploadImageRequest(
+                                      resourceId:
+                                          characterFullView.character!.id,
+                                      image: encodedImage,
+                                      type: ResourceType.CHARACTER);
+                              var getImageResponse = await getIt<ImageDao>()
+                                  .addImage(uploadImageRequest);
+                              setState(() {
+                                _originalImage = Base64Helper.decode(
+                                    getImageResponse!.image);
+                                _compareImage();
+                              });
+                            },
+                      child: Text(AppLocalizations.of(context)!.submitForm))
+                ],
+              ),
+            ),
+          )
+        ],
+      ),
     );
   }
 
@@ -286,24 +310,44 @@ class _CharacterDetailState extends State<CharacterDetail> {
             characterFullView.character!.attack.toDouble(), (value) {
           sliderData.setAttack(value);
         }),
-        _getDataRow(AppLocalizations.of(context)!.characterDefense, 1000, 10,
-            sliderData.defense, sliderData.defense, (value) {
+        _getDataRow(
+            AppLocalizations.of(context)!.characterDefense,
+            1000,
+            10,
+            sliderData.defense,
+            characterFullView.character!.defense.toDouble(), (value) {
           sliderData.setDefense(value);
         }),
-        _getDataRow(AppLocalizations.of(context)!.characterBlood, 10000, 100,
-            sliderData.blood, sliderData.blood, (value) {
+        _getDataRow(
+            AppLocalizations.of(context)!.characterBlood,
+            10000,
+            100,
+            sliderData.blood,
+            characterFullView.character!.blood.toDouble(), (value) {
           sliderData.setBlood(value);
         }),
-        _getDataRow(AppLocalizations.of(context)!.characterSpeed, 200, 10,
-            sliderData.speed, sliderData.speed, (value) {
+        _getDataRow(
+            AppLocalizations.of(context)!.characterSpeed,
+            200,
+            10,
+            sliderData.speed,
+            characterFullView.character!.speed.toDouble(), (value) {
           sliderData.setSpeed(value);
         }),
-        _getDataRow(AppLocalizations.of(context)!.groupGain, 5, 1,
-            sliderData.groupGain, sliderData.groupGain, (value) {
+        _getDataRow(
+            AppLocalizations.of(context)!.groupGain,
+            5,
+            1,
+            sliderData.groupGain,
+            characterFullView.character!.groupGain.toDouble(), (value) {
           sliderData.setGroupGain(value);
         }),
-        _getDataRow(AppLocalizations.of(context)!.characterIntelligence, 260,
-            70, sliderData.intelligence, sliderData.intelligence, (value) {
+        _getDataRow(
+            AppLocalizations.of(context)!.characterIntelligence,
+            260,
+            70,
+            sliderData.intelligence,
+            characterFullView.character!.intelligence.toDouble(), (value) {
           sliderData.setIntelligence(value);
         }),
       ],
