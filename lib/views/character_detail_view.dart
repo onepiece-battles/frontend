@@ -335,7 +335,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
           child: Expanded(
             child: Slider(
               value: currentValue,
-              allowedInteraction: SliderInteraction.tapAndSlide,
+              // allowedInteraction: SliderInteraction.tapAndSlide,
               label: currentValue.round().toString(),
               divisions: max - min,
               min: min.toDouble(),
