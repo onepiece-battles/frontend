@@ -23,22 +23,14 @@ class CharacterView extends StatefulWidget {
 }
 
 class _CharacterViewState extends State<CharacterView> {
-  Logger logger = Logger('_CharacterViewState');
+  Logger logger = Logger('CharacterView');
   TextEditingController searchNameController = TextEditingController();
   TextEditingController pageNumberController = TextEditingController(text: "1");
   CharacterFilter characterFilter = CharacterFilter();
   List<Character> currentCharacterList = [];
   List<CharacterSortableField> sortKeys = [];
-  Map<int, SortOrder?> columnIndexToSortOrderMap = {
-    1: null,
-    3: null,
-    4: null,
-    5: null,
-    6: null,
-    7: null,
-    8: null,
-    9: null,
-  };
+
+  // sorting related fields
   Map<SortOrder?, String> sortOrderToPath = const {
     null: 'images/svgs/sort-solid.svg',
     SortOrder.ASC: 'images/svgs/sort-up-solid.svg',
@@ -54,7 +46,17 @@ class _CharacterViewState extends State<CharacterView> {
     8: CharacterSortableFieldsEnum.blood,
     9: CharacterSortableFieldsEnum.speed
   };
-  List<CharacterType> selectedItems = [];
+  Map<int, SortOrder?> columnIndexToSortOrderMap = {
+    1: null,
+    3: null,
+    4: null,
+    5: null,
+    6: null,
+    7: null,
+    8: null,
+    9: null,
+  };
+  List<CharacterType> selectedCharacterTypes = [];
 
   int selectedPageIndex = 1;
   int pageNum = 1;
@@ -67,7 +69,7 @@ class _CharacterViewState extends State<CharacterView> {
   @override
   void initState() {
     super.initState();
-    _doSearch();
+    _search();
   }
 
   @override
@@ -139,14 +141,14 @@ class _CharacterViewState extends State<CharacterView> {
                 8: null,
                 9: null,
               };
-              _doSearch();
+              _search();
             },
             child: Text(AppLocalizations.of(context)!.resetSort)),
       ),
       _createSingleColumn(AppLocalizations.of(context)!.characterName, 1),
       DataColumn(
           label: Text(
-        AppLocalizations.of(context)!.characterTypeLabel,
+        AppLocalizations.of(context)!.characterTypeLable,
         style: OnepieceFonts.tableHeaderStyle,
       )),
       _createSingleColumn(AppLocalizations.of(context)!.fruitLimit, 3),
@@ -195,7 +197,7 @@ class _CharacterViewState extends State<CharacterView> {
                       CharacterSortableField(
                           sortKey: sortKey, sortOrder: sortOrder));
                 }
-                _doSearch();
+                _search();
               });
             },
             icon: ImageHelper.getSvgIcon(
@@ -211,7 +213,7 @@ class _CharacterViewState extends State<CharacterView> {
 
   Row _createSearchFilterRow(BuildContext context) {
     Map<CharacterType, String> enumValueToDisplayValue =
-        <CharacterType, String>{
+        <CharacterType, String> {
       CharacterType.body: AppLocalizations.of(context)!.body,
       CharacterType.foot: AppLocalizations.of(context)!.leg,
       CharacterType.science: AppLocalizations.of(context)!.science,
@@ -246,14 +248,14 @@ class _CharacterViewState extends State<CharacterView> {
               controller: searchNameController,
               onChanged: (value) {
                 characterFilter.name = value;
-                _doSearch();
+                _search();
               },
               decoration: InputDecoration(
                 contentPadding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                 prefixIcon: IconButton(
                     onPressed: () {
                       characterFilter.name = searchNameController.text;
-                      _doSearch();
+                      _search();
                     },
                     icon: const Icon(Icons.search)),
                 hintText: AppLocalizations.of(context)!.searchCharacterName,
@@ -262,7 +264,7 @@ class _CharacterViewState extends State<CharacterView> {
                   onPressed: () {
                     searchNameController.clear();
                     characterFilter.name = null;
-                    _doSearch();
+                    _search();
                   },
                 ),
               ),
@@ -273,7 +275,7 @@ class _CharacterViewState extends State<CharacterView> {
         child: DropdownButtonHideUnderline(
           child: DropdownButton2(
             isExpanded: true,
-            value: selectedItems.isEmpty ? null : selectedItems.last,
+            value: selectedCharacterTypes.isEmpty ? null : selectedCharacterTypes.last,
             hint: Text(
               AppLocalizations.of(context)!.characterTypeHint,
               style: OnepieceFonts.dropDownItemStyle,
@@ -285,7 +287,7 @@ class _CharacterViewState extends State<CharacterView> {
                   return Container(
                     alignment: AlignmentDirectional.center,
                     child: Text(
-                      selectedItems
+                      selectedCharacterTypes
                           .map((selectedType) {
                             return enumValueToDisplayValue[selectedType];
                           })
@@ -318,19 +320,19 @@ class _CharacterViewState extends State<CharacterView> {
                 enabled: false,
                 child: StatefulBuilder(
                   builder: (context, menuSetState) {
-                    final isSelected = selectedItems.contains(characterType);
+                    final isSelected = selectedCharacterTypes.contains(characterType);
                     return InkWell(
                       onTap: () {
                         isSelected
-                            ? selectedItems.remove(characterType)
-                            : selectedItems.add(characterType);
-                        characterFilter.characterTypes = selectedItems;
+                            ? selectedCharacterTypes.remove(characterType)
+                            : selectedCharacterTypes.add(characterType);
+                        characterFilter.characterTypes = selectedCharacterTypes;
 
                         // //This rebuilds the StatefulWidget to update the button's text
                         setState(() {});
                         //This rebuilds the dropdownMenu Widget to update the check mark
                         menuSetState(() {});
-                        _doSearch();
+                        _search();
                       },
                       child: Container(
                         height: double.infinity,
@@ -401,13 +403,12 @@ class _CharacterViewState extends State<CharacterView> {
     return result;
   }
 
-  void _doSearch() {
+  void _search() {
     ListCharacterRequest listCharacterRequest = ListCharacterRequest(
         pageSize: pageSize,
         pageIndex: selectedPageIndex,
         sortKeys: sortKeys,
         characterFilter: characterFilter);
-    debugPrint(listCharacterRequest.toString());
     Future<ListCharacterResponse?> listCharacterResponse =
         getIt<CharacterDao>().listCharacter(listCharacterRequest);
 
@@ -438,7 +439,7 @@ class _CharacterViewState extends State<CharacterView> {
             ? null
             : () {
                 selectedPageIndex = selectedPageIndex - 1;
-                _doSearch();
+                _search();
               },
         child: const Icon(Icons.arrow_back));
     ElevatedButton nextPage = ElevatedButton(
@@ -446,7 +447,7 @@ class _CharacterViewState extends State<CharacterView> {
             ? null
             : () {
                 selectedPageIndex = selectedPageIndex + 1;
-                _doSearch();
+                _search();
               },
         child: const Icon(Icons.arrow_forward));
     Widget pageNumber = SizedBox(
@@ -485,7 +486,7 @@ class _CharacterViewState extends State<CharacterView> {
             ? null
             : () {
                 selectedPageIndex = int.parse(pageNumberController.text);
-                _doSearch();
+                _search();
               },
         child: Text(
           AppLocalizations.of(context)!.jumpToPage,

@@ -11,4 +11,16 @@ class BattleDao{
   Future<ListBattleByIdResponse?> batchFindByIds(ListBattleByIdsRequest request) async {
     return await battleApi.listBattleByIds(request);
   }
+
+  Future<ListBattleResponse?> listBattles(ListBattleRequest request) async {
+    return await battleApi.listBattles(request);
+  }
+
+  Future<Battle?> addBattle(AddBattleRequest request) async {
+    return await battleApi.addBattle(request);
+  }
+
+  Future<StartBattleResponse?> startBattle(StartBattleRequest request) async {
+    return await battleApi.startBattle(request);
+  }
 }
