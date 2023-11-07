@@ -8,6 +8,7 @@ import 'package:openapi/api.dart';
 import 'package:logging/logging.dart';
 import '../constants/onepiece_colors.dart';
 import '../constants/onepiece_fonts.dart';
+import '../utils/image_helper.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -24,26 +25,23 @@ class _BattleViewState extends State<BattleView> {
   // base full data
   List<Battle> currentBattleList = [];
 
-
   // battle filters
   BattleFilter battleFilter = BattleFilter();
   List<BattleType> selectedBattleTypes = [];
   List<BattleStatus> selectedBattleStatus = [];
 
-  // battle sortable fields
-  Map<int, BattleSortableFieldsEnum> columnIndexToSortableFieldMap = {
-    1: BattleSortableFieldsEnum.type,
-    2: BattleSortableFieldsEnum.status,
-    3: BattleSortableFieldsEnum.loser,
-    4: BattleSortableFieldsEnum.winner,
-  };
+  // // battle sortable fields
+  // Map<int, BattleSortableFieldsEnum> columnIndexToSortableFieldMap = {
+  //   1: BattleSortableFieldsEnum.winnerName,
+  //   2: BattleSortableFieldsEnum.creationRecordId,
+  //   3: BattleSortableFieldsEnum.modificationRecordId,
+  // };
 
   // first all columns will be sorted by creation id desc.
-  Map<int, SortOrder?> columnIndexToSortOrderMap = {
-    1: null,
-    2: null,
-    3: null,
-    4: null,
+  Map<BattleSortableFieldsEnum, SortOrder?> sortableEnumToSortOrderMap = {
+    BattleSortableFieldsEnum.winnerName: null,
+    BattleSortableFieldsEnum.creationRecordId: null,
+    BattleSortableFieldsEnum.modificationRecordId: null,
   };
 
   // sorting icon map
@@ -140,18 +138,19 @@ class _BattleViewState extends State<BattleView> {
                 child: Text(AppLocalizations.of(context)!.createBattle)),
           ),
           // battle type filter
-        _getBattleTypeFilter(context),
+          _getBattleTypeFilter(context),
           // battle status filter
           _getBattleStatusFilter(context)
         ],
       ),
     );
   }
+
   Widget _getBattleTypeFilter(BuildContext context) {
     Map<BattleType, String> battleTypeToDisplayValue = {
-    BattleType.single: AppLocalizations.of(context)!.singleBattle,
-    BattleType.group: AppLocalizations.of(context)!.groupBattle,
-  };
+      BattleType.single: AppLocalizations.of(context)!.singleBattle,
+      BattleType.group: AppLocalizations.of(context)!.groupBattle,
+    };
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 0, 0, 6),
       child: DropdownButtonHideUnderline(
@@ -165,14 +164,14 @@ class _BattleViewState extends State<BattleView> {
           onChanged: (value) {},
           selectedItemBuilder: (context) {
             return BattleType.values.map(
-                  (item) {
+              (item) {
                 return Container(
                   alignment: AlignmentDirectional.center,
                   child: Text(
                     selectedBattleTypes
                         .map((selectedType) {
-                      return battleTypeToDisplayValue[selectedType];
-                    })
+                          return battleTypeToDisplayValue[selectedType];
+                        })
                         .toSet()
                         .join(', '),
                     style: const TextStyle(
@@ -247,7 +246,7 @@ class _BattleViewState extends State<BattleView> {
   }
 
   Widget _getBattleStatusFilter(BuildContext context) {
-    Map<BattleStatus, String> battleStatusToDisplayName  = {
+    Map<BattleStatus, String> battleStatusToDisplayName = {
       BattleStatus.created: AppLocalizations.of(context)!.battleStatusCreated,
       BattleStatus.started: AppLocalizations.of(context)!.battleStatusStarted,
       BattleStatus.finished: AppLocalizations.of(context)!.battleStatusFinished,
@@ -259,7 +258,8 @@ class _BattleViewState extends State<BattleView> {
       child: DropdownButtonHideUnderline(
         child: DropdownButton2(
           isExpanded: true,
-          value: selectedBattleStatus.isEmpty ? null : selectedBattleStatus.last,
+          value:
+              selectedBattleStatus.isEmpty ? null : selectedBattleStatus.last,
           hint: Text(
             AppLocalizations.of(context)!.battleStatusHint,
             style: OnepieceFonts.dropDownItemStyle,
@@ -267,14 +267,14 @@ class _BattleViewState extends State<BattleView> {
           onChanged: (value) {},
           selectedItemBuilder: (context) {
             return CharacterType.values.map(
-                  (item) {
+              (item) {
                 return Container(
                   alignment: AlignmentDirectional.center,
                   child: Text(
                     selectedBattleStatus
                         .map((selectedType) {
-                      return battleStatusToDisplayName[selectedType];
-                    })
+                          return battleStatusToDisplayName[selectedType];
+                        })
                         .toSet()
                         .join(', '),
                     style: const TextStyle(
@@ -304,7 +304,8 @@ class _BattleViewState extends State<BattleView> {
               enabled: false,
               child: StatefulBuilder(
                 builder: (context, menuSetState) {
-                  final isSelected = selectedBattleStatus.contains(battleStatus);
+                  final isSelected =
+                      selectedBattleStatus.contains(battleStatus);
                   return InkWell(
                     onTap: () {
                       isSelected
@@ -364,45 +365,90 @@ class _BattleViewState extends State<BattleView> {
 
   List<DataColumn> _createColumns() {
     return [
-      // DataColumn(
-      //   label: ElevatedButton(
-      //       onPressed: () {
-      //         battleFilter = BattleFilter();
-      //         sortKeys = [];
-      //         columnIndexToSortOrderMap = {
-      //           1: null,
-      //           2: null,
-      //           3: null,
-      //           4: null,
-      //         };
-      //         _search();
-      //       },
-      //       child: Text(AppLocalizations.of(context)!.resetSort)),
-      // ),
-      // _createSingleColumn(AppLocalizations.of(context)!.characterName, 1),
-      // DataColumn(
-      //     label: Text(
-      //       AppLocalizations.of(context)!.characterTypeLable,
-      //       style: OnepieceFonts.tableHeaderStyle,
-      //     )),
-      // _createSingleColumn(AppLocalizations.of(context)!.fruitLimit, 3),
-      // _createSingleColumn(AppLocalizations.of(context)!.groupGain, 4),
-      // _createSingleColumn(AppLocalizations.of(context)!.characterAttack, 5),
-      // _createSingleColumn(AppLocalizations.of(context)!.characterDefense, 6),
-      // _createSingleColumn(
-      //     AppLocalizations.of(context)!.characterIntelligence, 7),
-      // _createSingleColumn(AppLocalizations.of(context)!.characterBlood, 8),
-      // _createSingleColumn(AppLocalizations.of(context)!.characterSpeed, 9),
-      // DataColumn(
-      //     label: Text(
-      //       AppLocalizations.of(context)!.characterFruits,
-      //       style: OnepieceFonts.tableHeaderStyle,
-      //     )),
+      DataColumn(
+        label: ElevatedButton(
+          onPressed: () {
+            // filter will not be cleared
+            sortKeys = [];
+            sortableEnumToSortOrderMap = {
+              BattleSortableFieldsEnum.winnerName: null,
+              BattleSortableFieldsEnum.creationRecordId: null,
+              BattleSortableFieldsEnum.modificationRecordId: null,
+            };
+            _search();
+          },
+          child: Text(AppLocalizations.of(context)!.resetSort),
+        ),
+      ),
+      _createSingleColumn(AppLocalizations.of(context)!.creator, null),
+      _createSingleColumn(AppLocalizations.of(context)!.initiator, null),
+      _createSingleColumn(AppLocalizations.of(context)!.receiver, null),
+      _createSingleColumn(AppLocalizations.of(context)!.creationTime,
+          BattleSortableFieldsEnum.creationRecordId),
+      _createSingleColumn(AppLocalizations.of(context)!.modificationTime,
+          BattleSortableFieldsEnum.modificationRecordId),
+      _createSingleColumn(AppLocalizations.of(context)!.status, null),
+      _createSingleColumn(AppLocalizations.of(context)!.winner,
+          BattleSortableFieldsEnum.winnerName),
+      _createSingleColumn(AppLocalizations.of(context)!.createdBySystem, null),
     ];
+  }
+
+  DataColumn _createSingleColumn(
+      String displayText, BattleSortableFieldsEnum? sortableFieldsEnum) {
+    return DataColumn(
+        label: InkWell(
+      onTap: sortableFieldsEnum == null
+          ? null
+          : () {
+              setState(() {
+                var sortOrder = sortableEnumToSortOrderMap[sortableFieldsEnum];
+                var sortKey = sortableFieldsEnum;
+                if (sortOrder == null) {
+                  sortOrder = SortOrder.ASC;
+                } else if (sortOrder == SortOrder.ASC) {
+                  sortOrder = SortOrder.DESC;
+                } else {
+                  sortOrder = null;
+                }
+                sortableEnumToSortOrderMap[sortableFieldsEnum] = sortOrder;
+                sortKeys.removeWhere((element) => element.sortKey == sortKey);
+                if (sortOrder != null) {
+                  sortKeys.insert(
+                      0,
+                      BattleSortableField(
+                          sortKey: sortKey, sortOrder: sortOrder));
+                }
+                _search();
+              });
+            },
+      child: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              displayText,
+              style: OnepieceFonts.tableHeaderStyle,
+            ),
+            sortableFieldsEnum != null
+                ? Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: ImageHelper.getSvgIcon(
+                      sortOrderToPath[
+                          sortableEnumToSortOrderMap[sortableFieldsEnum]]!,
+                      15,
+                      15,
+                    ),
+                )
+                : const SizedBox.shrink()
+          ],
+        ),
+      ),
+    ));
   }
 
   List<DataRow> _createRows(BuildContext context) {
     return [];
   }
-
 }
