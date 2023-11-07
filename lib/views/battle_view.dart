@@ -123,19 +123,23 @@ class _BattleViewState extends State<BattleView> {
     return Container(
       margin: const EdgeInsets.all(10),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          SizedBox(
-            height: 34,
-            child: ElevatedButton(
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: ((context) {
-                      return const CreateBattleView();
-                    }),
-                  );
-                },
-                child: Text(AppLocalizations.of(context)!.createBattle)),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(0,0,6,6),
+            child: SizedBox(
+              height: 33,
+              child: ElevatedButton(
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: ((context) {
+                        return const CreateBattleView();
+                      }),
+                    );
+                  },
+                  child: Text(AppLocalizations.of(context)!.createBattle)),
+            ),
           ),
           // battle type filter
           _getBattleTypeFilter(context),
@@ -152,7 +156,7 @@ class _BattleViewState extends State<BattleView> {
       BattleType.group: AppLocalizations.of(context)!.groupBattle,
     };
     return Padding(
-      padding: const EdgeInsets.fromLTRB(0, 0, 0, 6),
+      padding: const EdgeInsets.fromLTRB(0, 0, 6, 6),
       child: DropdownButtonHideUnderline(
         child: DropdownButton2(
           isExpanded: true,
@@ -254,7 +258,7 @@ class _BattleViewState extends State<BattleView> {
       BattleStatus.failed: AppLocalizations.of(context)!.battleStatusFailed,
     };
     return Padding(
-      padding: const EdgeInsets.fromLTRB(0, 0, 0, 6),
+      padding: const EdgeInsets.fromLTRB(0, 0, 6, 6),
       child: DropdownButtonHideUnderline(
         child: DropdownButton2(
           isExpanded: true,
