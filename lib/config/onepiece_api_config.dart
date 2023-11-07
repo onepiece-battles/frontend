@@ -6,6 +6,6 @@ import 'package:openapi_generator_annotations/openapi_generator_annotations.dart
   inputSpecFile: "onepiece-battles-api/api/openapi.yaml",
   generatorName: Generator.dart,
   outputDirectory: 'generated',
+  alwaysRun: true
 )
 class OnepieceApiConfig {}
-// Mon Nov  6 04:51:28 UTC 2023

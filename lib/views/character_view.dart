@@ -4,7 +4,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
-import 'package:one_piece_battles_flutter/views/add_character_view.dart';
+import 'package:one_piece_battles_flutter/views/create_character_view.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:one_piece_battles_flutter/repository/character_dao.dart';
