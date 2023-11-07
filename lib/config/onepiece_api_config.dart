@@ -8,3 +8,4 @@ import 'package:openapi_generator_annotations/openapi_generator_annotations.dart
   outputDirectory: 'generated',
 )
 class OnepieceApiConfig {}
+// Mon Nov  6 04:51:28 UTC 2023

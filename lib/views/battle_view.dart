@@ -357,7 +357,7 @@ class _BattleViewState extends State<BattleView> {
           top: BorderSide(color: OnepieceColors.themeColor),
           bottom: BorderSide(color: OnepieceColors.themeColor)),
       columns: _createColumns(),
-      // rows: _createRows(context),
+      rows: _createRows(context),
       columnSpacing: 10,
     );
   }
@@ -399,6 +399,10 @@ class _BattleViewState extends State<BattleView> {
       //       style: OnepieceFonts.tableHeaderStyle,
       //     )),
     ];
+  }
+
+  List<DataRow> _createRows(BuildContext context) {
+    return [];
   }
 
 }
