@@ -1,3 +1,4 @@
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:openapi/api.dart';
@@ -6,13 +7,16 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../repository/character_dao.dart';
 
 GetIt getIt = GetIt.instance;
+
 class CreateBattleView extends StatefulWidget {
   const CreateBattleView({super.key});
 
   @override
   State<CreateBattleView> createState() => _CreateBattleViewState();
 }
+
 List<Character> characters = [];
+
 class _CreateBattleViewState extends State<CreateBattleView> {
   List<Character> characters = [];
   List<Character> searchResults = [];
@@ -20,12 +24,18 @@ class _CreateBattleViewState extends State<CreateBattleView> {
   CharacterFilter characterFilter = CharacterFilter();
   bool _isLoading = false;
   int pageSize = 10;
-  int selectedPageIndex =0;
+  int selectedPageIndex = 0;
 
   @override
   void initState() {
     super.initState();
     _search();
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels ==
+          _scrollController.position.maxScrollExtent) {
+        _search();
+      }
+    });
   }
 
   @override
@@ -43,7 +53,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
         sortKeys: [],
         characterFilter: characterFilter);
     Future<ListCharacterResponse?> listCharacterResponse =
-    getIt<CharacterDao>().listCharacter(listCharacterRequest);
+        getIt<CharacterDao>().listCharacter(listCharacterRequest);
     listCharacterResponse.then((value) {
       setState(() {
         var newCharacters = value!.characters;
@@ -64,18 +74,18 @@ class _CreateBattleViewState extends State<CreateBattleView> {
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
-    return Column(children: [
-      Row(children: [
-        _getDropDownList(context),
-    _getDropDownList(context)
-      ],)
-    ],);
+    return Column(
+      children: [
+        Row(
+          children: [_getDropDownList(context), _getDropDownList(context)],
+        )
+      ],
+    );
   }
 
   Widget _getDropDownList(BuildContext context) {
-    return Container();
+   return Container();
   }
 }
