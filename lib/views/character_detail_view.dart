@@ -8,7 +8,6 @@ import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:one_piece_battles_flutter/repository/character_dao.dart';
 import 'package:openapi/api.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import '../repository/battle_dao.dart';
 import '../repository/image_dao.dart';
 import '../utils/base64_helper.dart';
 import '../utils/compare_uint8list.dart';
@@ -28,6 +27,7 @@ class CharacterDetail extends StatefulWidget {
 class _CharacterDetailState extends State<CharacterDetail> {
   CharacterFullView characterFullView = CharacterFullView();
   List<Battle> battles = [];
+  List<Fruit> fruits = [];
   late Uint8List _pickedImage;
   late Uint8List _originalImage;
   bool _newImagePicked = false;
@@ -55,16 +55,13 @@ class _CharacterDetailState extends State<CharacterDetail> {
       sliderData.setIntelligence(
           characterFullView.character!.intelligence.toDouble());
       sliderData.setSpeed(characterFullView.character!.speed.toDouble());
-      // set initial image value
-      _originalImage =
-          Base64Helper.decode(characterFullView.character!.profileImage!);
-      _pickedImage = _originalImage;
-      getIt<BattleDao>()
-          .batchFindByIds(ListBattleByIdsRequest(
-              battleIds: characterFullView.battleIds, userId: getIt<User>().id))
-          .then((value) {
-        battles = value!.battles;
-        setState(() {});
+      setState(() {
+        // set initial image value
+        _originalImage =
+            Base64Helper.decode(characterFullView.character!.profileImage!);
+        _pickedImage = _originalImage;
+        battles = characterFullView.battles;
+        fruits = characterFullView.fruits;
       });
     });
   }
@@ -85,16 +82,6 @@ class _CharacterDetailState extends State<CharacterDetail> {
           children: [
             _getProfileSection(context),
             _getCharacterDataList(context),
-            // SizedBox(
-            //   width: 600,
-            //   child: ConstrainedBox(
-            //     constraints: BoxConstraints.loose(const Size.fromWidth(1500)),
-            //     child: FittedBox(
-            //       fit: BoxFit.fill,
-            //       child: _getCharacterDataList(context),
-            //     ),
-            //   ),
-            // ),
           ],
         )
       ],

@@ -4,6 +4,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:one_piece_battles_flutter/repository/battle_dao.dart';
 import 'package:one_piece_battles_flutter/repository/character_dao.dart';
+import 'package:one_piece_battles_flutter/repository/fruit_dao.dart';
 import 'package:one_piece_battles_flutter/repository/image_dao.dart';
 import 'package:one_piece_battles_flutter/repository/issue_dao.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
@@ -20,6 +21,7 @@ void main() {
   getIt.registerLazySingleton<ImageDao>(() => ImageDao.empty());
   getIt.registerLazySingleton<IssueDao>(() => IssueDao.empty());
   getIt.registerLazySingleton<BattleDao>(() => BattleDao.empty());
+  getIt.registerLazySingleton<FruitDao>(() => FruitDao.empty());
   getIt.registerLazySingleton<User>(() => User(id:"",name: ""));
   runApp(const MyApp());
 }

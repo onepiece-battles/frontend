@@ -30,13 +30,6 @@ class _BattleViewState extends State<BattleView> {
   List<BattleType> selectedBattleTypes = [];
   List<BattleStatus> selectedBattleStatus = [];
 
-  // // battle sortable fields
-  // Map<int, BattleSortableFieldsEnum> columnIndexToSortableFieldMap = {
-  //   1: BattleSortableFieldsEnum.winnerName,
-  //   2: BattleSortableFieldsEnum.creationRecordId,
-  //   3: BattleSortableFieldsEnum.modificationRecordId,
-  // };
-
   // first all columns will be sorted by creation id desc.
   Map<BattleSortableFieldsEnum, SortOrder?> sortableEnumToSortOrderMap = {
     BattleSortableFieldsEnum.winnerName: null,
@@ -68,12 +61,11 @@ class _BattleViewState extends State<BattleView> {
   }
 
   void _search() {
-    // todo(yichi): update api name from "fruit filter" to "battle filter".
     ListBattleRequest request = ListBattleRequest(
         pageSize: pageSize,
         pageIndex: selectedPageIndex,
         sortKeys: sortKeys,
-        fruitFilter: battleFilter);
+        battleFilter: battleFilter);
     Future<ListBattleResponse?> response =
         getIt<BattleDao>().listBattles(request);
     response.then((value) => {
