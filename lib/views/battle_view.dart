@@ -47,7 +47,7 @@ class _BattleViewState extends State<BattleView> {
   List<BattleSortableField> sortKeys = [];
 
   int selectedPageIndex = 1;
-  int pageNum = 1;
+  int pageNum = 0;
   int pageSize = 10;
   int totalSize = 0;
   bool preButtonEnabled = false;
@@ -71,9 +71,14 @@ class _BattleViewState extends State<BattleView> {
     response.then((value) => {
           setState(() {
             currentBattleList = value!.battles;
+            if(currentBattleList.isEmpty) {
+              pageNumberController.text = "0";
+            }else {
+              pageNumberController.text = selectedPageIndex.toString();
+            }
+            debugPrint('total size $totalSize');
             totalSize = value.totalSize!;
             pageNum = (totalSize / 10).ceil();
-            pageNumberController.text = selectedPageIndex.toString();
             if (selectedPageIndex <= 1) {
               preButtonEnabled = false;
             } else {
