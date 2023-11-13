@@ -59,7 +59,7 @@ class _CharacterViewState extends State<CharacterView> {
   List<CharacterType> selectedCharacterTypes = [];
 
   int selectedPageIndex = 1;
-  int pageNum = 1;
+  int pageNum = 0;
   int pageSize = 10;
   int totalSize = 0;
   bool preButtonEnabled = false;
@@ -415,9 +415,13 @@ class _CharacterViewState extends State<CharacterView> {
     listCharacterResponse.then((value) {
       setState(() {
         currentCharacterList = value!.characters;
+        if(currentCharacterList.isEmpty) {
+          pageNumberController.text = "0";
+        }else {
+          pageNumberController.text = selectedPageIndex.toString();
+        }
         totalSize = value.totalSize!;
         pageNum = (totalSize / 10).ceil();
-        pageNumberController.text = selectedPageIndex.toString();
         if (selectedPageIndex <= 1) {
           preButtonEnabled = false;
         } else {

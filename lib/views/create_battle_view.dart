@@ -18,37 +18,47 @@ class CreateBattleView extends StatefulWidget {
 List<Character> characters = [];
 
 class _CreateBattleViewState extends State<CreateBattleView> {
-  List<Character> characters = [];
+  List<Character> leftCharacters = [];
+  List<Character> rightCharacters = [];
   List<Character> searchResults = [];
-  ScrollController _scrollController = ScrollController();
+  ScrollController _leftScrollController = ScrollController();
+  ScrollController _rightScrollController = ScrollController();
   CharacterFilter characterFilter = CharacterFilter();
   bool _isLoading = false;
-  int pageSize = 10;
-  int selectedPageIndex = 0;
+  // these two indexes are used when loading more data
+  int selectedLeftPageIndex = 1;
+  int selectedRightPageIndex = 1;
 
   @override
   void initState() {
     super.initState();
-    _search();
-    _scrollController.addListener(() {
-      if (_scrollController.position.pixels ==
-          _scrollController.position.maxScrollExtent) {
-        _search();
+    _search(leftCharacters);
+    _search(rightCharacters);
+    _leftScrollController.addListener(() {
+      if (_leftScrollController.position.pixels ==
+          _leftScrollController.position.maxScrollExtent) {
+        _loadLeftMoreData();
+      }
+    });
+    _rightScrollController.addListener(() {
+      if (_rightScrollController.position.pixels ==
+          _rightScrollController.position.maxScrollExtent) {
+        _loadRightMoreData();
       }
     });
   }
 
   @override
   void dispose() {
-    _scrollController.dispose();
+    _leftScrollController.dispose();
+    _rightScrollController.dispose();
     super.dispose();
   }
 
-  void _search() {
-    selectedPageIndex++;
+  void _search(List<Character> characters) {
     ListCharacterRequest listCharacterRequest = ListCharacterRequest(
-        pageSize: pageSize,
-        pageIndex: selectedPageIndex,
+        pageSize: 10,
+        pageIndex: 1,
         // do not need to sort in this case.
         sortKeys: [],
         characterFilter: characterFilter);
@@ -56,21 +66,44 @@ class _CreateBattleViewState extends State<CreateBattleView> {
         getIt<CharacterDao>().listCharacter(listCharacterRequest);
     listCharacterResponse.then((value) {
       setState(() {
-        var newCharacters = value!.characters;
-        characters.addAll(newCharacters);
+        characters = value!.characters;
       });
     });
   }
 
-  void _loadMoreData() {
-    if (!_isLoading) {
+  void _loadLeftMoreData() {
+    selectedLeftPageIndex++;
+    ListCharacterRequest listCharacterRequest = ListCharacterRequest(
+        pageSize: 10,
+        pageIndex: selectedLeftPageIndex,
+        // do not need to sort in this case.
+        sortKeys: [],
+        characterFilter: characterFilter);
+    Future<ListCharacterResponse?> listCharacterResponse =
+    getIt<CharacterDao>().listCharacter(listCharacterRequest);
+    listCharacterResponse.then((value) {
       setState(() {
-        _isLoading = true;
+        var newCharacters = value!.characters;
+        leftCharacters.addAll(newCharacters);
       });
-    }
-    _search();
-    setState(() {
-      _isLoading = false;
+    });
+  }
+
+  void _loadRightMoreData() {
+    selectedRightPageIndex++;
+    ListCharacterRequest listCharacterRequest = ListCharacterRequest(
+        pageSize: 10,
+        pageIndex: selectedRightPageIndex,
+        // do not need to sort in this case.
+        sortKeys: [],
+        characterFilter: characterFilter);
+    Future<ListCharacterResponse?> listCharacterResponse =
+    getIt<CharacterDao>().listCharacter(listCharacterRequest);
+    listCharacterResponse.then((value) {
+      setState(() {
+        var newCharacters = value!.characters;
+        rightCharacters.addAll(newCharacters);
+      });
     });
   }
 
