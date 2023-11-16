@@ -1,3 +1,5 @@
+import 'dart:js_interop';
+
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
@@ -8,17 +10,14 @@ import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:one_piece_battles_flutter/views/create_feedback_view.dart';
 import 'package:openapi/api.dart';
-import '../constants/device_type.dart';
 import '../utils/base64_helper.dart';
 
 GetIt getIt = GetIt.instance;
 List<ResourceType> notShownResources = [ResourceType.ROLE];
 
 class SideMenu extends StatefulWidget {
-  final DeviceType deviceType;
   const SideMenu({
     super.key,
-    required this.deviceType,
   });
 
   @override
@@ -124,7 +123,8 @@ class _SideMenuState extends State<SideMenu> {
               ),
             )
           ],
-        ));
+        ),
+    );
   }
 
   List<Widget> _getSideMenuList(
@@ -197,7 +197,7 @@ class _SideMenuState extends State<SideMenu> {
       leading: resourceToIconMap[resourceType] ?? const Icon(Icons.settings),
       selected:
           GoRouterState.of(context).fullPath!.split("/")[2].toUpperCase() ==
-              (resourceType ?? "setting"),
+              (resourceType?.value ?? "setting"),
       selectedTileColor: OnepieceColors.menuSelectedTileColor,
       onTap: () {
         setState(

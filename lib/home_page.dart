@@ -42,9 +42,7 @@ class _HomePageState extends State<HomePage> {
         children: [
           const SizedBox(
             width: 250,
-            child: SideMenu(
-              deviceType: DeviceType.desktop,
-            ),
+            child: SideMenu(),
           ),
           Expanded(
             child: Column(
