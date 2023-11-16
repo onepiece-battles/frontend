@@ -1,9 +1,15 @@
+import 'dart:io';
+
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:dropdown_search/dropdown_search.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:openapi/api.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../constants/onepiece_colors.dart';
 import '../repository/character_dao.dart';
 
 GetIt getIt = GetIt.instance;
@@ -15,15 +21,20 @@ class CreateBattleView extends StatefulWidget {
   State<CreateBattleView> createState() => _CreateBattleViewState();
 }
 
-List<Character> characters = [];
-
 class _CreateBattleViewState extends State<CreateBattleView> {
   List<Character> leftCharacters = [];
   List<Character> rightCharacters = [];
   List<Character> searchResults = [];
   ScrollController _leftScrollController = ScrollController();
+  Character? leftSelectedItem;
+  int _leftCurrentMax = 10;
+  TextEditingController leftTextController = TextEditingController();
+  TextEditingController rightTextController = TextEditingController();
   ScrollController _rightScrollController = ScrollController();
-  CharacterFilter characterFilter = CharacterFilter();
+  Character? rightSelectedItem;
+  int _rightCurrentMax = 10;
+  CharacterFilter leftCharacterFilter = CharacterFilter();
+  CharacterFilter rightCharacterFilter = CharacterFilter();
   bool _isLoading = false;
   // these two indexes are used when loading more data
   int selectedLeftPageIndex = 1;
@@ -32,8 +43,8 @@ class _CreateBattleViewState extends State<CreateBattleView> {
   @override
   void initState() {
     super.initState();
-    _search(leftCharacters);
-    _search(rightCharacters);
+    _searchLeft();
+    _searchRight();
     _leftScrollController.addListener(() {
       if (_leftScrollController.position.pixels ==
           _leftScrollController.position.maxScrollExtent) {
@@ -50,23 +61,42 @@ class _CreateBattleViewState extends State<CreateBattleView> {
 
   @override
   void dispose() {
+    leftTextController.dispose();
     _leftScrollController.dispose();
     _rightScrollController.dispose();
     super.dispose();
   }
 
-  void _search(List<Character> characters) {
+  void _searchLeft() {
     ListCharacterRequest listCharacterRequest = ListCharacterRequest(
         pageSize: 10,
         pageIndex: 1,
         // do not need to sort in this case.
         sortKeys: [],
-        characterFilter: characterFilter);
+        characterFilter: leftCharacterFilter);
+    Future<ListCharacterResponse?> listCharacterResponse =
+        getIt<CharacterDao>().listCharacter(listCharacterRequest);
+    listCharacterResponse.then((value) {
+      debugPrint(
+          'The selected character names are:${value?.characters.map((e) => e.name).toList().toString()}');
+      setState(() {
+        leftCharacters = value!.characters;
+      });
+    });
+  }
+
+  void _searchRight() {
+    ListCharacterRequest listCharacterRequest = ListCharacterRequest(
+        pageSize: 10,
+        pageIndex: 1,
+        // do not need to sort in this case.
+        sortKeys: [],
+        characterFilter: rightCharacterFilter);
     Future<ListCharacterResponse?> listCharacterResponse =
         getIt<CharacterDao>().listCharacter(listCharacterRequest);
     listCharacterResponse.then((value) {
       setState(() {
-        characters = value!.characters;
+        rightCharacters = value!.characters;
       });
     });
   }
@@ -78,9 +108,9 @@ class _CreateBattleViewState extends State<CreateBattleView> {
         pageIndex: selectedLeftPageIndex,
         // do not need to sort in this case.
         sortKeys: [],
-        characterFilter: characterFilter);
+        characterFilter: leftCharacterFilter);
     Future<ListCharacterResponse?> listCharacterResponse =
-    getIt<CharacterDao>().listCharacter(listCharacterRequest);
+        getIt<CharacterDao>().listCharacter(listCharacterRequest);
     listCharacterResponse.then((value) {
       setState(() {
         var newCharacters = value!.characters;
@@ -96,9 +126,9 @@ class _CreateBattleViewState extends State<CreateBattleView> {
         pageIndex: selectedRightPageIndex,
         // do not need to sort in this case.
         sortKeys: [],
-        characterFilter: characterFilter);
+        characterFilter: rightCharacterFilter);
     Future<ListCharacterResponse?> listCharacterResponse =
-    getIt<CharacterDao>().listCharacter(listCharacterRequest);
+        getIt<CharacterDao>().listCharacter(listCharacterRequest);
     listCharacterResponse.then((value) {
       setState(() {
         var newCharacters = value!.characters;
@@ -109,16 +139,22 @@ class _CreateBattleViewState extends State<CreateBattleView> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          children: [_getDropDownList(context), _getDropDownList(context)],
-        )
-      ],
+    return AlertDialog(
+      title: Text("create battle"),
+      content: Row(
+        children: [
+          // _getStarterList(context),
+          // _getReceiverList(context)
+        ],
+      ),
     );
   }
 
-  Widget _getDropDownList(BuildContext context) {
-   return Container();
-  }
+  // Widget _getStarterList(BuildContext context) {
+  //
+  // }
+  //
+  // Widget _getReceiverList(BuildContext context) {
+  //
+  // }
 }

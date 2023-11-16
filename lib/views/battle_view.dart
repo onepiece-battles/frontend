@@ -192,7 +192,8 @@ class _BattleViewState extends State<BattleView> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(3),
                 color: OnepieceColors.menuBackgroundColor,
-              )),
+              ),
+          ),
           menuItemStyleData: const MenuItemStyleData(
             height: 35,
           ),

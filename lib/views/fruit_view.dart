@@ -147,9 +147,13 @@ class _FruitViewState extends State<FruitView> {
   }
 
   Widget _getFruitTypeFilter(BuildContext context) {
-    Map<BattleType, String> battleTypeToDisplayValue = {
-      BattleType.single: AppLocalizations.of(context)!.singleBattle,
-      BattleType.group: AppLocalizations.of(context)!.groupBattle,
+    Map<FruitType, String> fruitTypeToDisplayValue = {
+      FruitType.logia: AppLocalizations.of(context)!.logiaFruit,
+      FruitType.zoan: AppLocalizations.of(context)!.zoanFruit,
+      FruitType.ancientZoan: AppLocalizations.of(context)!.ancientZoanFruit,
+      FruitType.mythicalZoan: AppLocalizations.of(context)!.mythicalZoanFruit,
+      FruitType.artificialZoan: AppLocalizations.of(context)!.artificialZoanFruit,
+      FruitType.paramecia: AppLocalizations.of(context)!.parameciaFruit,
     };
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 0, 6, 6),
@@ -163,14 +167,14 @@ class _FruitViewState extends State<FruitView> {
           ),
           onChanged: (value) {},
           selectedItemBuilder: (context) {
-            return BattleType.values.map(
+            return FruitType.values.map(
               (item) {
                 return Container(
                   alignment: AlignmentDirectional.center,
                   child: Text(
                     selectedFruitTypes
                         .map((selectedType) {
-                          return battleTypeToDisplayValue[selectedType];
+                          return fruitTypeToDisplayValue[selectedType];
                         })
                         .toSet()
                         .join(', '),
@@ -226,7 +230,7 @@ class _FruitViewState extends State<FruitView> {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              battleTypeToDisplayValue[fruitType]!,
+                              fruitTypeToDisplayValue[fruitType]!,
                               style: const TextStyle(
                                 fontSize: 16,
                               ),
