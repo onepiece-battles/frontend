@@ -61,15 +61,12 @@ class _CreateBattleViewState extends State<CreateBattleView> {
 
   @override
   void dispose() {
-    leftTextController.dispose();
-    _leftScrollController.dispose();
-    _rightScrollController.dispose();
     super.dispose();
   }
 
   void _searchLeft() {
     ListCharacterRequest listCharacterRequest = ListCharacterRequest(
-        pageSize: 10,
+        pageSize: 5,
         pageIndex: 1,
         // do not need to sort in this case.
         sortKeys: [],
@@ -87,7 +84,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
 
   void _searchRight() {
     ListCharacterRequest listCharacterRequest = ListCharacterRequest(
-        pageSize: 10,
+        pageSize: 5,
         pageIndex: 1,
         // do not need to sort in this case.
         sortKeys: [],
@@ -104,7 +101,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
   void _loadLeftMoreData() {
     selectedLeftPageIndex++;
     ListCharacterRequest listCharacterRequest = ListCharacterRequest(
-        pageSize: 10,
+        pageSize: 5,
         pageIndex: selectedLeftPageIndex,
         // do not need to sort in this case.
         sortKeys: [],
@@ -114,7 +111,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
     listCharacterResponse.then((value) {
       setState(() {
         var newCharacters = value!.characters;
-        leftCharacters.addAll(newCharacters);
+        leftCharacters = List.from(leftCharacters)..addAll(newCharacters);
       });
     });
   }
@@ -122,7 +119,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
   void _loadRightMoreData() {
     selectedRightPageIndex++;
     ListCharacterRequest listCharacterRequest = ListCharacterRequest(
-        pageSize: 10,
+        pageSize: 5,
         pageIndex: selectedRightPageIndex,
         // do not need to sort in this case.
         sortKeys: [],
@@ -132,7 +129,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
     listCharacterResponse.then((value) {
       setState(() {
         var newCharacters = value!.characters;
-        rightCharacters.addAll(newCharacters);
+        rightCharacters = List.from(rightCharacters)..addAll(newCharacters);
       });
     });
   }
@@ -143,18 +140,52 @@ class _CreateBattleViewState extends State<CreateBattleView> {
       title: Text("create battle"),
       content: Row(
         children: [
-          // _getStarterList(context),
-          // _getReceiverList(context)
+          SizedBox(width: 100, height: 150, child: _getStarterList(context)),
+          SizedBox(width: 100, height: 150, child: _getReceiverList(context)),
         ],
       ),
     );
   }
 
-  // Widget _getStarterList(BuildContext context) {
-  //
-  // }
-  //
-  // Widget _getReceiverList(BuildContext context) {
-  //
-  // }
+  Widget _getStarterList(BuildContext context) {
+    return ListView.builder(
+      controller: _leftScrollController,
+        itemCount: leftCharacters.length,
+        itemBuilder: (context, index) {
+          if (index < leftCharacters.length) {
+            final character = leftCharacters[index];
+            return ListTile(
+              title: Text(character.name),
+            );
+          } else {
+            return const Padding(
+              padding: EdgeInsets.symmetric(vertical: 32),
+              child: Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+          }
+        });
+  }
+
+  Widget _getReceiverList(BuildContext context) {
+    return ListView.builder(
+      controller: _rightScrollController,
+        itemCount: rightCharacters.length,
+        itemBuilder: (context, index) {
+          if (index < rightCharacters.length) {
+            final character = rightCharacters[index];
+            return ListTile(
+              title: Text(character.name),
+            );
+          } else {
+            return const Padding(
+              padding: EdgeInsets.symmetric(vertical: 32),
+              child: Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+          }
+        });
+  }
 }
