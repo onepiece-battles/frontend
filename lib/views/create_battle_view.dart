@@ -1,16 +1,11 @@
-import 'dart:io';
-
-import 'package:dropdown_button2/dropdown_button2.dart';
-import 'package:dropdown_search/dropdown_search.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:openapi/api.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-
 import '../constants/onepiece_colors.dart';
 import '../repository/character_dao.dart';
+import '../utils/base64_helper.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -23,19 +18,18 @@ class CreateBattleView extends StatefulWidget {
 
 class _CreateBattleViewState extends State<CreateBattleView> {
   List<Character> leftCharacters = [];
+  String leftSelectedId = "";
   List<Character> rightCharacters = [];
+  String rightSelectedId = "";
   List<Character> searchResults = [];
-  ScrollController _leftScrollController = ScrollController();
+  final ScrollController _leftScrollController = ScrollController();
   Character? leftSelectedItem;
-  int _leftCurrentMax = 10;
   TextEditingController leftTextController = TextEditingController();
   TextEditingController rightTextController = TextEditingController();
-  ScrollController _rightScrollController = ScrollController();
+  final ScrollController _rightScrollController = ScrollController();
   Character? rightSelectedItem;
-  int _rightCurrentMax = 10;
   CharacterFilter leftCharacterFilter = CharacterFilter();
   CharacterFilter rightCharacterFilter = CharacterFilter();
-  bool _isLoading = false;
   // these two indexes are used when loading more data
   int selectedLeftPageIndex = 1;
   int selectedRightPageIndex = 1;
@@ -137,55 +131,280 @@ class _CreateBattleViewState extends State<CreateBattleView> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text("create battle"),
-      content: Row(
-        children: [
-          SizedBox(width: 100, height: 150, child: _getStarterList(context)),
-          SizedBox(width: 100, height: 150, child: _getReceiverList(context)),
-        ],
+      title: Text(
+        AppLocalizations.of(context)!.createBattle,
+        style: OnepieceFonts.headerStyle,
+      ),
+      content: Padding(
+        padding: const EdgeInsets.all(18.0),
+        child: Row(
+          children: [
+            Container(
+              height: 600,
+              decoration: const BoxDecoration(color: OnepieceColors.menuBackgroundColor,
+                  borderRadius: BorderRadius.all(Radius.circular(15))),
+              child: Column(
+                children: [
+                  // Image(
+                  //   image: MemoryImage(PathConstants.loginLuffyImage),
+                  // ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(AppLocalizations.of(context)!.initiator),
+                        leftSelectedItem == null
+                            ? Text(AppLocalizations.of(context)!.unselected)
+                            : Text("${leftSelectedItem?.name}"),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: SizedBox(
+                      width: 300,
+                      child: TextFormField(
+                        controller: leftTextController,
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    width: 300,
+                    height: 300,
+                    child: _getStarterList(context),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(
+              width: 100,
+            ),
+            Container(
+              height: 600,
+              decoration: const BoxDecoration(color: OnepieceColors.menuBackgroundColor,
+                  borderRadius: BorderRadius.all(Radius.circular(15))),
+              child: Column(
+                children: [
+                  // Image(
+                  //   image: MemoryImage(PathConstants.loginLuffyImage),
+                  // ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(AppLocalizations.of(context)!.receiver),
+                        rightSelectedItem == null
+                            ? Text(AppLocalizations.of(context)!.unselected)
+                            : Text("${rightSelectedItem?.name}"),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: SizedBox(
+                      width: 300,
+                      child: TextFormField(
+                        controller: rightTextController,
+                        onChanged: (value) {
+                          rightCharacterFilter.name = value;
+                          _searchRight();
+                        },
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 300,
+                    width: 300,
+                    child: _getReceiverList(context),
+                  ),
+                ],
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
 
   Widget _getStarterList(BuildContext context) {
+    Map<CharacterType, String> enumValueToDisplayValue =
+        <CharacterType, String>{
+      CharacterType.body: AppLocalizations.of(context)!.body,
+      CharacterType.foot: AppLocalizations.of(context)!.leg,
+      CharacterType.science: AppLocalizations.of(context)!.science,
+      CharacterType.fist: AppLocalizations.of(context)!.fist,
+      CharacterType.katana: AppLocalizations.of(context)!.katana,
+      CharacterType.shooter: AppLocalizations.of(context)!.shoot
+    };
     return ListView.builder(
       controller: _leftScrollController,
-        itemCount: leftCharacters.length,
-        itemBuilder: (context, index) {
-          if (index < leftCharacters.length) {
-            final character = leftCharacters[index];
-            return ListTile(
-              title: Text(character.name),
-            );
-          } else {
-            return const Padding(
-              padding: EdgeInsets.symmetric(vertical: 32),
-              child: Center(
-                child: CircularProgressIndicator(),
+      itemCount: leftCharacters.length,
+      itemBuilder: (context, index) {
+        if (index < leftCharacters.length) {
+          final character = leftCharacters[index];
+          return Material(
+              type: MaterialType.transparency,
+              child: Container(
+            padding: const EdgeInsets.fromLTRB(10, 3, 3, 3),
+            decoration: const BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(5))),
+            child: ListTile(
+              onTap: () {
+                setState(
+                  () {
+                    if (leftSelectedId == character.id) {
+                      leftSelectedId = "";
+                      leftSelectedItem = null;
+                    } else {
+                      leftSelectedId = character.id;
+                      leftSelectedItem = character;
+                    }
+                  },
+                );
+              },
+              contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5),
               ),
-            );
-          }
-        });
+              selected: leftSelectedId == character.id,
+              hoverColor: OnepieceColors.menuHoverColor,
+              selectedTileColor: OnepieceColors.menuHoverColor,
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(3.0),
+                    child: Image.memory(
+                      Base64Helper.decode(character.profileImage!),
+                      width: 80,
+                      height: 60,
+                    ),
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text(
+                          "${AppLocalizations.of(context)!.name}: ${character.name}",
+                          style: OnepieceFonts.smallContentStyle),
+                      Text(
+                          "${AppLocalizations.of(context)!.characterTypeLabel}: ${enumValueToDisplayValue[character.characterType]!}",
+                          style: OnepieceFonts.smallContentStyle),
+                    ],
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 3, 0),
+                    child: leftSelectedId == character.id
+                        ? const Icon(
+                            Icons.check_circle,
+                            size: 20,
+                          )
+                        : const Icon(
+                            Icons.check_circle_outline,
+                            size: 20,
+                          ),
+                  ),
+                ],
+              ),
+            ),
+          ),);
+        } else {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+      },
+    );
   }
 
   Widget _getReceiverList(BuildContext context) {
+    Map<CharacterType, String> enumValueToDisplayValue =
+        <CharacterType, String>{
+      CharacterType.body: AppLocalizations.of(context)!.body,
+      CharacterType.foot: AppLocalizations.of(context)!.leg,
+      CharacterType.science: AppLocalizations.of(context)!.science,
+      CharacterType.fist: AppLocalizations.of(context)!.fist,
+      CharacterType.katana: AppLocalizations.of(context)!.katana,
+      CharacterType.shooter: AppLocalizations.of(context)!.shoot
+    };
     return ListView.builder(
       controller: _rightScrollController,
-        itemCount: rightCharacters.length,
-        itemBuilder: (context, index) {
-          if (index < rightCharacters.length) {
-            final character = rightCharacters[index];
-            return ListTile(
-              title: Text(character.name),
-            );
-          } else {
-            return const Padding(
-              padding: EdgeInsets.symmetric(vertical: 32),
-              child: Center(
-                child: CircularProgressIndicator(),
+      itemCount: rightCharacters.length,
+      itemBuilder: (context, index) {
+        if (index < rightCharacters.length) {
+          final character = rightCharacters[index];
+          return Material(
+              type: MaterialType.transparency,
+              child:Container(
+            padding: const EdgeInsets.fromLTRB(10, 3, 3, 3),
+            decoration: const BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(5))),
+            child: ListTile(
+              onTap: () {
+                setState(
+                  () {
+                    if (rightSelectedId == character.id) {
+                      rightSelectedId = "";
+                      rightSelectedItem = null;
+                    } else {
+                      rightSelectedId = character.id;
+                      rightSelectedItem = character;
+                    }
+                  },
+                );
+              },
+              contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5),
               ),
-            );
-          }
-        });
+              selected: rightSelectedId == character.id,
+              hoverColor: OnepieceColors.menuHoverColor,
+              selectedTileColor: OnepieceColors.menuHoverColor,
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(3.0),
+                    child: Image.memory(
+                      Base64Helper.decode(character.profileImage!),
+                      width: 80,
+                      height: 60,
+                    ),
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text(
+                          "${AppLocalizations.of(context)!.name}: ${character.name}",
+                          style: OnepieceFonts.smallContentStyle),
+                      Text(
+                          "${AppLocalizations.of(context)!.characterTypeLabel}: ${enumValueToDisplayValue[character.characterType]!}",
+                          style: OnepieceFonts.smallContentStyle),
+                    ],
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 3, 0),
+                    child: rightSelectedId == character.id
+                        ? const Icon(
+                            Icons.check_circle,
+                            size: 20,
+                          )
+                        : const Icon(
+                            Icons.check_circle_outline,
+                            size: 20,
+                          ),
+                  ),
+                ],
+              ),
+            ),
+          ),);
+        } else {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+      },
+    );
   }
 }

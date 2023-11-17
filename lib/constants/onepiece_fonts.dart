@@ -6,6 +6,7 @@ class OnepieceFonts {
   static const FontWeight headerFontWeight = FontWeight.bold;
   static const Color headerFontColor = Colors.black;
   static const double contentFontSize = 18;
+  static const double smallContentFontSize = 15;
   static const Color contentFontColor = Colors.black54;
   static const FontWeight sideMenuFontWeight = FontWeight.w500;
   static const int sideMenuFontSize = 10;
@@ -13,6 +14,9 @@ class OnepieceFonts {
   static const TextStyle contentStyle =TextStyle(
   color: OnepieceFonts.contentFontColor,
   fontSize: OnepieceFonts.contentFontSize);
+  static const TextStyle smallContentStyle =TextStyle(
+      color: OnepieceFonts.contentFontColor,
+      fontSize: OnepieceFonts.smallContentFontSize);
   static const TextStyle contentStyleBold =TextStyle(
       color: OnepieceFonts.contentFontColor,
       fontSize: OnepieceFonts.contentFontSize,
