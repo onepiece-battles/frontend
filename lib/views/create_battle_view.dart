@@ -1,16 +1,13 @@
-import 'dart:io';
-
-import 'package:dropdown_button2/dropdown_button2.dart';
-import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:openapi/api.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 import '../constants/onepiece_colors.dart';
 import '../repository/character_dao.dart';
+import '../utils/base64_helper.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -22,117 +19,100 @@ class CreateBattleView extends StatefulWidget {
 }
 
 class _CreateBattleViewState extends State<CreateBattleView> {
-  List<Character> leftCharacters = [];
-  List<Character> rightCharacters = [];
-  List<Character> searchResults = [];
-  ScrollController _leftScrollController = ScrollController();
-  Character? leftSelectedItem;
-  int _leftCurrentMax = 10;
-  TextEditingController leftTextController = TextEditingController();
+  List<Character> starterCharacters = [];
+  String starterSelectedId = "";
+  List<Character> receiverCharacters = [];
+  String receiverSelectedId = "";
+  final ScrollController _starterScrollController = ScrollController();
+  Character? starterSelectedItem;
+  TextEditingController starterTextController = TextEditingController();
   TextEditingController rightTextController = TextEditingController();
-  ScrollController _rightScrollController = ScrollController();
-  Character? rightSelectedItem;
-  int _rightCurrentMax = 10;
-  CharacterFilter leftCharacterFilter = CharacterFilter();
-  CharacterFilter rightCharacterFilter = CharacterFilter();
-  bool _isLoading = false;
+  final ScrollController _receiverScrollController = ScrollController();
+  Character? receiverSelectedItem;
+  CharacterFilter starterCharacterFilter = CharacterFilter();
+  CharacterFilter receiverCharacterFilter = CharacterFilter();
   // these two indexes are used when loading more data
-  int selectedLeftPageIndex = 1;
-  int selectedRightPageIndex = 1;
+  int starterSelectedPageIndex = 1;
+  int receiverSelectedPageIndex = 1;
+  int pageSize = 5;
+  late int totalPages;
+
+  bool starterIsLoading = false;
+  bool receiverIsLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _searchLeft();
-    _searchRight();
-    _leftScrollController.addListener(() {
-      if (_leftScrollController.position.pixels ==
-          _leftScrollController.position.maxScrollExtent) {
-        _loadLeftMoreData();
+    _searchStarter(true);
+    _searchReceiver(true);
+    _starterScrollController.addListener(() {
+      if (_starterScrollController.position.pixels ==
+          _starterScrollController.position.maxScrollExtent) {
+        _searchStarter(false);
       }
     });
-    _rightScrollController.addListener(() {
-      if (_rightScrollController.position.pixels ==
-          _rightScrollController.position.maxScrollExtent) {
-        _loadRightMoreData();
+    _receiverScrollController.addListener(() {
+      if (_receiverScrollController.position.pixels ==
+          _receiverScrollController.position.maxScrollExtent) {
+        _searchReceiver(false);
       }
     });
   }
 
-  @override
-  void dispose() {
-    leftTextController.dispose();
-    _leftScrollController.dispose();
-    _rightScrollController.dispose();
-    super.dispose();
-  }
-
-  void _searchLeft() {
+  void _searchStarter(bool isRefresh) {
+    if (isRefresh) {
+      starterSelectedPageIndex = 1;
+    } else {
+      starterSelectedPageIndex++;
+      starterIsLoading = true;
+      setState(() {
+      });
+    }
     ListCharacterRequest listCharacterRequest = ListCharacterRequest(
-        pageSize: 10,
-        pageIndex: 1,
+        pageSize: pageSize,
+        pageIndex: starterSelectedPageIndex,
         // do not need to sort in this case.
         sortKeys: [],
-        characterFilter: leftCharacterFilter);
+        characterFilter: starterCharacterFilter);
     Future<ListCharacterResponse?> listCharacterResponse =
         getIt<CharacterDao>().listCharacter(listCharacterRequest);
     listCharacterResponse.then((value) {
-      debugPrint(
-          'The selected character names are:${value?.characters.map((e) => e.name).toList().toString()}');
       setState(() {
-        leftCharacters = value!.characters;
+        if (isRefresh) {
+          starterCharacters = value!.characters;
+        } else {
+          starterCharacters = List.from(starterCharacters)..addAll(value!.characters);
+        }
+        starterIsLoading = false;
       });
     });
   }
 
-  void _searchRight() {
-    ListCharacterRequest listCharacterRequest = ListCharacterRequest(
-        pageSize: 10,
-        pageIndex: 1,
-        // do not need to sort in this case.
-        sortKeys: [],
-        characterFilter: rightCharacterFilter);
-    Future<ListCharacterResponse?> listCharacterResponse =
-        getIt<CharacterDao>().listCharacter(listCharacterRequest);
-    listCharacterResponse.then((value) {
+  void _searchReceiver(bool isRefresh) {
+    if (isRefresh) {
+      receiverSelectedPageIndex = 1;
+    } else {
+      receiverSelectedPageIndex++;
+      receiverIsLoading = true;
       setState(() {
-        rightCharacters = value!.characters;
       });
-    });
-  }
-
-  void _loadLeftMoreData() {
-    selectedLeftPageIndex++;
+    }
     ListCharacterRequest listCharacterRequest = ListCharacterRequest(
-        pageSize: 10,
-        pageIndex: selectedLeftPageIndex,
+        pageSize: pageSize,
+        pageIndex: receiverSelectedPageIndex,
         // do not need to sort in this case.
         sortKeys: [],
-        characterFilter: leftCharacterFilter);
+        characterFilter: receiverCharacterFilter);
     Future<ListCharacterResponse?> listCharacterResponse =
         getIt<CharacterDao>().listCharacter(listCharacterRequest);
     listCharacterResponse.then((value) {
       setState(() {
-        var newCharacters = value!.characters;
-        leftCharacters.addAll(newCharacters);
-      });
-    });
-  }
-
-  void _loadRightMoreData() {
-    selectedRightPageIndex++;
-    ListCharacterRequest listCharacterRequest = ListCharacterRequest(
-        pageSize: 10,
-        pageIndex: selectedRightPageIndex,
-        // do not need to sort in this case.
-        sortKeys: [],
-        characterFilter: rightCharacterFilter);
-    Future<ListCharacterResponse?> listCharacterResponse =
-        getIt<CharacterDao>().listCharacter(listCharacterRequest);
-    listCharacterResponse.then((value) {
-      setState(() {
-        var newCharacters = value!.characters;
-        rightCharacters.addAll(newCharacters);
+        if (isRefresh) {
+          receiverCharacters = value!.characters;
+        } else {
+          receiverCharacters = List.from(receiverCharacters)..addAll(value!.characters);
+        }
+        receiverIsLoading = false;
       });
     });
   }
@@ -140,21 +120,286 @@ class _CreateBattleViewState extends State<CreateBattleView> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text("create battle"),
-      content: Row(
-        children: [
-          // _getStarterList(context),
-          // _getReceiverList(context)
-        ],
+      title: Text(
+        AppLocalizations.of(context)!.createBattle,
+        style: OnepieceFonts.headerStyle,
+      ),
+      content: Padding(
+        padding: const EdgeInsets.all(18.0),
+        child: Row(
+          children: [
+            Container(
+              height: 900,
+              decoration: const BoxDecoration(
+                  color: OnepieceColors.menuBackgroundColor,
+                  borderRadius: BorderRadius.all(Radius.circular(15))),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(AppLocalizations.of(context)!.initiator),
+                        starterSelectedItem == null
+                            ? Text(AppLocalizations.of(context)!.unselected)
+                            : Text("${starterSelectedItem?.name}"),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: SizedBox(
+                      width: 300,
+                      child: TextFormField(
+                        controller: starterTextController,
+                        onChanged: (value) {
+                          starterCharacterFilter.name = value;
+                          _searchStarter(true);
+                        },
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    width: 300,
+                    height: 300,
+                    child: getStarter(context),
+                  ),
+                  if (starterIsLoading==true) const Padding(
+                    padding: EdgeInsets.only(top: 10, bottom: 40),
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  )
+                ],
+              ),
+            ),
+            const SizedBox(
+              width: 100,
+            ),
+            Container(
+              height: 900,
+              decoration: const BoxDecoration(
+                  color: OnepieceColors.menuBackgroundColor,
+                  borderRadius: BorderRadius.all(Radius.circular(15))),
+              child: Column(
+                children: [
+                  // Image(
+                  //   image: MemoryImage(PathConstants.loginLuffyImage),
+                  // ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(AppLocalizations.of(context)!.receiver),
+                        receiverSelectedItem == null
+                            ? Text(AppLocalizations.of(context)!.unselected)
+                            : Text("${receiverSelectedItem?.name}"),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: SizedBox(
+                      width: 300,
+                      child: TextFormField(
+                        controller: rightTextController,
+                        onChanged: (value) {
+                          receiverCharacterFilter.name = value;
+                          _searchReceiver(true);
+                        },
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 300,
+                    width: 300,
+                    child: getReceiver(context),
+                  ),
+                  if (receiverIsLoading==true) const Padding(
+                    padding: EdgeInsets.only(top: 10, bottom: 40),
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  // Widget _getStarterList(BuildContext context) {
-  //
-  // }
-  //
-  // Widget _getReceiverList(BuildContext context) {
-  //
-  // }
+
+  Widget getStarter(BuildContext context) {
+    Map<CharacterType, String> enumValueToDisplayValue =
+    <CharacterType, String>{
+      CharacterType.body: AppLocalizations.of(context)!.body,
+      CharacterType.foot: AppLocalizations.of(context)!.leg,
+      CharacterType.science: AppLocalizations.of(context)!.science,
+      CharacterType.fist: AppLocalizations.of(context)!.fist,
+      CharacterType.katana: AppLocalizations.of(context)!.katana,
+      CharacterType.shooter: AppLocalizations.of(context)!.shoot
+    };
+    return ListView.builder(
+      controller: _starterScrollController,
+      itemCount: starterCharacters.length,
+      itemBuilder: (context, index) {
+        final character = starterCharacters[index];
+        return Material(
+          type: MaterialType.transparency,
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+            decoration: const BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(5))),
+            child: ListTile(
+              onTap: () {
+                setState(
+                      () {
+                    if (starterSelectedId == character.id) {
+                      starterSelectedId = "";
+                      starterSelectedItem = null;
+                    } else {
+                      starterSelectedId = character.id;
+                      starterSelectedItem = character;
+                    }
+                  },
+                );
+              },
+              contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5),
+              ),
+              selected: starterSelectedId == character.id,
+              hoverColor: OnepieceColors.menuHoverColor,
+              selectedTileColor: OnepieceColors.menuHoverColor,
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(3.0),
+                    child: Image.memory(
+                      Base64Helper.decode(character.profileImage!),
+                      width: 80,
+                      height: 60,
+                    ),
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text(
+                          "${AppLocalizations.of(context)!.name}: ${character.name}",
+                          style: OnepieceFonts.smallContentStyle),
+                      Text(
+                          "${AppLocalizations.of(context)!.characterTypeLabel}: ${enumValueToDisplayValue[character.characterType]!}",
+                          style: OnepieceFonts.smallContentStyle),
+                    ],
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 3, 0),
+                    child: starterSelectedId == character.id
+                        ? const Icon(
+                      Icons.check_circle,
+                      size: 20,
+                    )
+                        : const Icon(
+                      Icons.check_circle_outline,
+                      size: 20,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+
+  Widget getReceiver(BuildContext context) {
+    Map<CharacterType, String> enumValueToDisplayValue =
+        <CharacterType, String>{
+      CharacterType.body: AppLocalizations.of(context)!.body,
+      CharacterType.foot: AppLocalizations.of(context)!.leg,
+      CharacterType.science: AppLocalizations.of(context)!.science,
+      CharacterType.fist: AppLocalizations.of(context)!.fist,
+      CharacterType.katana: AppLocalizations.of(context)!.katana,
+      CharacterType.shooter: AppLocalizations.of(context)!.shoot
+    };
+    return ListView.builder(
+      itemCount: receiverCharacters.length,
+      itemBuilder: (context, index) {
+        final character = receiverCharacters[index];
+        return Material(
+          type: MaterialType.transparency,
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+            decoration: const BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(5))),
+            child: ListTile(
+              onTap: () {
+                setState(
+                  () {
+                    if (receiverSelectedId == character.id) {
+                      receiverSelectedId = "";
+                      receiverSelectedItem = null;
+                    } else {
+                      receiverSelectedId = character.id;
+                      receiverSelectedItem = character;
+                    }
+                  },
+                );
+              },
+              contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5),
+              ),
+              selected: receiverSelectedId == character.id,
+              hoverColor: OnepieceColors.menuHoverColor,
+              selectedTileColor: OnepieceColors.menuHoverColor,
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(3.0),
+                    child: Image.memory(
+                      Base64Helper.decode(character.profileImage!),
+                      width: 80,
+                      height: 60,
+                    ),
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text(
+                          "${AppLocalizations.of(context)!.name}: ${character.name}",
+                          style: OnepieceFonts.smallContentStyle),
+                      Text(
+                          "${AppLocalizations.of(context)!.characterTypeLabel}: ${enumValueToDisplayValue[character.characterType]!}",
+                          style: OnepieceFonts.smallContentStyle),
+                    ],
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 3, 0),
+                    child: receiverSelectedId == character.id
+                        ? const Icon(
+                            Icons.check_circle,
+                            size: 20,
+                          )
+                        : const Icon(
+                            Icons.check_circle_outline,
+                            size: 20,
+                          ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
 }
