@@ -1,10 +1,8 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:openapi/api.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 import '../constants/onepiece_colors.dart';
 import '../repository/character_dao.dart';
 import '../utils/base64_helper.dart';
@@ -35,10 +33,14 @@ class _CreateBattleViewState extends State<CreateBattleView> {
   int starterSelectedPageIndex = 1;
   int receiverSelectedPageIndex = 1;
   int pageSize = 5;
-  late int totalPages;
 
   bool starterIsLoading = false;
   bool receiverIsLoading = false;
+  bool starterToEnd = false;
+  bool receiverToEnd = false;
+
+  int starterCancelFlex = 1;
+  int receiverCancelFlex = 1;
 
   @override
   void initState() {
@@ -63,10 +65,12 @@ class _CreateBattleViewState extends State<CreateBattleView> {
     if (isRefresh) {
       starterSelectedPageIndex = 1;
     } else {
+      if (starterToEnd) {
+        return;
+      }
       starterSelectedPageIndex++;
       starterIsLoading = true;
-      setState(() {
-      });
+      setState(() {});
     }
     ListCharacterRequest listCharacterRequest = ListCharacterRequest(
         pageSize: pageSize,
@@ -78,10 +82,13 @@ class _CreateBattleViewState extends State<CreateBattleView> {
         getIt<CharacterDao>().listCharacter(listCharacterRequest);
     listCharacterResponse.then((value) {
       setState(() {
+        starterToEnd =
+            (value!.totalSize! / pageSize).ceil() == starterSelectedPageIndex;
         if (isRefresh) {
-          starterCharacters = value!.characters;
+          starterCharacters = value.characters;
         } else {
-          starterCharacters = List.from(starterCharacters)..addAll(value!.characters);
+          starterCharacters = List.from(starterCharacters)
+            ..addAll(value.characters);
         }
         starterIsLoading = false;
       });
@@ -94,8 +101,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
     } else {
       receiverSelectedPageIndex++;
       receiverIsLoading = true;
-      setState(() {
-      });
+      setState(() {});
     }
     ListCharacterRequest listCharacterRequest = ListCharacterRequest(
         pageSize: pageSize,
@@ -110,7 +116,8 @@ class _CreateBattleViewState extends State<CreateBattleView> {
         if (isRefresh) {
           receiverCharacters = value!.characters;
         } else {
-          receiverCharacters = List.from(receiverCharacters)..addAll(value!.characters);
+          receiverCharacters = List.from(receiverCharacters)
+            ..addAll(value!.characters);
         }
         receiverIsLoading = false;
       });
@@ -151,12 +158,43 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                     padding: const EdgeInsets.all(8.0),
                     child: SizedBox(
                       width: 300,
-                      child: TextFormField(
-                        controller: starterTextController,
-                        onChanged: (value) {
-                          starterCharacterFilter.name = value;
-                          _searchStarter(true);
-                        },
+                      child: Row(
+                        children: [
+                          Flexible(flex: 5, child: Focus(
+                            child: TextFormField(
+                              controller: starterTextController,
+                              decoration: InputDecoration(
+                                labelText: AppLocalizations.of(context)!
+                                    .searchCharacterName,
+                                hintText: AppLocalizations.of(context)!
+                                    .searchCharacterName,
+                                prefixIcon: const Icon(Icons.search),
+                              ),
+                              onChanged: (value) {
+                                starterCharacterFilter.name = value;
+                                _searchStarter(true);
+                              },
+                            ),
+                            onFocusChange: (focused) {
+                              if (focused) {
+                                starterCancelFlex = 1;
+                              } else {
+                                starterCancelFlex = 0;
+                              }
+                            },
+                          ),),
+
+                          Flexible(
+                              flex: starterCancelFlex,
+                              child: TextButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      starterCancelFlex = 0;
+                                    });
+                                  },
+                                  child: Text(AppLocalizations.of(context)!
+                                      .cancelPopUp)))
+                        ],
                       ),
                     ),
                   ),
@@ -165,12 +203,15 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                     height: 300,
                     child: getStarter(context),
                   ),
-                  if (starterIsLoading==true) const Padding(
-                    padding: EdgeInsets.only(top: 10, bottom: 40),
-                    child: Center(
-                      child: CircularProgressIndicator(),
+                  if (starterIsLoading == true)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 10, bottom: 40),
+                      child: Center(
+                        child: CircularProgressIndicator(),
+                      ),
                     ),
-                  )
+                  if (starterToEnd == true)
+                    Text(AppLocalizations.of(context)!.endOfList)
                 ],
               ),
             ),
@@ -184,9 +225,6 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                   borderRadius: BorderRadius.all(Radius.circular(15))),
               child: Column(
                 children: [
-                  // Image(
-                  //   image: MemoryImage(PathConstants.loginLuffyImage),
-                  // ),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Row(
@@ -217,12 +255,15 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                     width: 300,
                     child: getReceiver(context),
                   ),
-                  if (receiverIsLoading==true) const Padding(
-                    padding: EdgeInsets.only(top: 10, bottom: 40),
-                    child: Center(
-                      child: CircularProgressIndicator(),
+                  if (receiverIsLoading == true)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 10, bottom: 40),
+                      child: Center(
+                        child: CircularProgressIndicator(),
+                      ),
                     ),
-                  )
+                  if (receiverToEnd == true)
+                    Text(AppLocalizations.of(context)!.endOfList)
                 ],
               ),
             ),
@@ -232,10 +273,9 @@ class _CreateBattleViewState extends State<CreateBattleView> {
     );
   }
 
-
   Widget getStarter(BuildContext context) {
     Map<CharacterType, String> enumValueToDisplayValue =
-    <CharacterType, String>{
+        <CharacterType, String>{
       CharacterType.body: AppLocalizations.of(context)!.body,
       CharacterType.foot: AppLocalizations.of(context)!.leg,
       CharacterType.science: AppLocalizations.of(context)!.science,
@@ -257,7 +297,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
             child: ListTile(
               onTap: () {
                 setState(
-                      () {
+                  () {
                     if (starterSelectedId == character.id) {
                       starterSelectedId = "";
                       starterSelectedItem = null;
@@ -301,13 +341,13 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                     padding: const EdgeInsets.fromLTRB(20, 0, 3, 0),
                     child: starterSelectedId == character.id
                         ? const Icon(
-                      Icons.check_circle,
-                      size: 20,
-                    )
+                            Icons.check_circle,
+                            size: 20,
+                          )
                         : const Icon(
-                      Icons.check_circle_outline,
-                      size: 20,
-                    ),
+                            Icons.check_circle_outline,
+                            size: 20,
+                          ),
                   ),
                 ],
               ),
@@ -317,7 +357,6 @@ class _CreateBattleViewState extends State<CreateBattleView> {
       },
     );
   }
-
 
   Widget getReceiver(BuildContext context) {
     Map<CharacterType, String> enumValueToDisplayValue =
@@ -330,6 +369,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
       CharacterType.shooter: AppLocalizations.of(context)!.shoot
     };
     return ListView.builder(
+      controller: _receiverScrollController,
       itemCount: receiverCharacters.length,
       itemBuilder: (context, index) {
         final character = receiverCharacters[index];
