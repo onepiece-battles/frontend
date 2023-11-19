@@ -73,6 +73,7 @@
   "katana": "Katana",
   "language": "Language",
   "leg": "leg",
+  "listToEnd": "END OF LIST",
   "localizationDescription": "Customize language and region related settings",
   "localizationHeader": "Localization",
   "logiaFruit": "Logia",
