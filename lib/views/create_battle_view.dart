@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
+import 'package:one_piece_battles_flutter/repository/battle_dao.dart';
 import 'package:openapi/api.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../constants/onepiece_colors.dart';
@@ -156,11 +157,15 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                     ),
                   ),
                   starterSelectedItem == null
-                      ? const Text(
-                          "?",
-                          style: OnepieceFonts.contentStyleBold,
+                      ? const SizedBox(
+                          height: 30,
+                          child: Text(
+                            "?",
+                            style: OnepieceFonts.contentStyleBold,
+                          ),
                         )
-                      : Text(starterSelectedItem!.name),
+                      : SizedBox(
+                          height: 30, child: Text(starterSelectedItem!.name)),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: SizedBox(
@@ -215,11 +220,15 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                     ),
                   ),
                   receiverSelectedItem == null
-                      ? const Text(
-                          "?",
-                          style: OnepieceFonts.contentStyleBold,
+                      ? const SizedBox(
+                          height: 30,
+                          child: Text(
+                            "?",
+                            style: OnepieceFonts.contentStyleBold,
+                          ),
                         )
-                      : Text(receiverSelectedItem!.name),
+                      : SizedBox(
+                          height: 30, child: Text(receiverSelectedItem!.name)),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: SizedBox(
@@ -257,6 +266,42 @@ class _CreateBattleViewState extends State<CreateBattleView> {
           ],
         ),
       ),
+      actions: [
+        ElevatedButton(
+          child: Text(AppLocalizations.of(context)!.cancelPopUp),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        ElevatedButton(
+          onPressed:
+              (starterSelectedItem == null && receiverSelectedItem == null)
+                  ? null
+                  : () {
+                      setState(() {
+                        starterSelectedItem = null;
+                        starterSelectedId = "";
+                        receiverSelectedItem = null;
+                        receiverSelectedId = "";
+                      });
+                    },
+          child: Text(AppLocalizations.of(context)!.clearForm),
+        ),
+        ElevatedButton(
+          onPressed:
+              (starterSelectedItem == null || receiverSelectedItem == null)
+                  ? null
+                  : () {
+                      AddBattleRequest request = AddBattleRequest(
+                          userId: getIt<User>().id,
+                          starterId: starterSelectedId,
+                          receiverId: receiverSelectedId);
+                      getIt<BattleDao>().addBattle(request);
+                      Navigator.pop(context);
+                    },
+          child: Text(AppLocalizations.of(context)!.submitForm),
+        ),
+      ],
     );
   }
 
