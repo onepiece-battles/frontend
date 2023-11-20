@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
+import 'package:one_piece_battles_flutter/repository/battle_dao.dart';
 import 'package:openapi/api.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../constants/onepiece_colors.dart';
@@ -38,9 +39,6 @@ class _CreateBattleViewState extends State<CreateBattleView> {
   bool receiverIsLoading = false;
   bool starterToEnd = false;
   bool receiverToEnd = false;
-
-  int starterCancelFlex = 1;
-  int receiverCancelFlex = 1;
 
   @override
   void initState() {
@@ -99,6 +97,9 @@ class _CreateBattleViewState extends State<CreateBattleView> {
     if (isRefresh) {
       receiverSelectedPageIndex = 1;
     } else {
+      if (receiverToEnd) {
+        return;
+      }
       receiverSelectedPageIndex++;
       receiverIsLoading = true;
       setState(() {});
@@ -112,12 +113,14 @@ class _CreateBattleViewState extends State<CreateBattleView> {
     Future<ListCharacterResponse?> listCharacterResponse =
         getIt<CharacterDao>().listCharacter(listCharacterRequest);
     listCharacterResponse.then((value) {
+      receiverToEnd =
+          (value!.totalSize! / pageSize).ceil() == receiverSelectedPageIndex;
       setState(() {
         if (isRefresh) {
-          receiverCharacters = value!.characters;
+          receiverCharacters = value.characters;
         } else {
           receiverCharacters = List.from(receiverCharacters)
-            ..addAll(value!.characters);
+            ..addAll(value.characters);
         }
         receiverIsLoading = false;
       });
@@ -127,122 +130,120 @@ class _CreateBattleViewState extends State<CreateBattleView> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(
-        AppLocalizations.of(context)!.createBattle,
-        style: OnepieceFonts.headerStyle,
+      title: Center(
+        child: Text(
+          AppLocalizations.of(context)!.createBattle,
+          style: OnepieceFonts.headerStyle,
+        ),
       ),
       content: Padding(
         padding: const EdgeInsets.all(18.0),
         child: Row(
           children: [
             Container(
-              height: 900,
+              height: 800,
               decoration: const BoxDecoration(
                   color: OnepieceColors.menuBackgroundColor,
                   borderRadius: BorderRadius.all(Radius.circular(15))),
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Text(AppLocalizations.of(context)!.initiator),
-                        starterSelectedItem == null
-                            ? Text(AppLocalizations.of(context)!.unselected)
-                            : Text("${starterSelectedItem?.name}"),
-                      ],
+                    child: Text(
+                      AppLocalizations.of(context)!.initiator,
+                      style: OnepieceFonts.tableHeaderStyle,
                     ),
                   ),
+                  starterSelectedItem == null
+                      ? const SizedBox(
+                          height: 30,
+                          child: Text(
+                            "?",
+                            style: OnepieceFonts.contentStyleBold,
+                          ),
+                        )
+                      : SizedBox(
+                          height: 30, child: Text(starterSelectedItem!.name)),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: SizedBox(
-                      width: 300,
-                      child: Row(
-                        children: [
-                          Flexible(flex: 5, child: Focus(
-                            child: TextFormField(
-                              controller: starterTextController,
-                              decoration: InputDecoration(
-                                labelText: AppLocalizations.of(context)!
-                                    .searchCharacterName,
-                                hintText: AppLocalizations.of(context)!
-                                    .searchCharacterName,
-                                prefixIcon: const Icon(Icons.search),
-                              ),
-                              onChanged: (value) {
-                                starterCharacterFilter.name = value;
-                                _searchStarter(true);
-                              },
-                            ),
-                            onFocusChange: (focused) {
-                              if (focused) {
-                                starterCancelFlex = 1;
-                              } else {
-                                starterCancelFlex = 0;
-                              }
-                            },
-                          ),),
-
-                          Flexible(
-                              flex: starterCancelFlex,
-                              child: TextButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      starterCancelFlex = 0;
-                                    });
-                                  },
-                                  child: Text(AppLocalizations.of(context)!
-                                      .cancelPopUp)))
-                        ],
+                      width: 350,
+                      height: 60,
+                      child: TextFormField(
+                        controller: starterTextController,
+                        decoration: InputDecoration(
+                          label: Text(
+                            AppLocalizations.of(context)!.characterName,
+                            style: OnepieceFonts.hintFont,
+                          ),
+                          floatingLabelBehavior: FloatingLabelBehavior.auto,
+                          prefixIcon: const Icon(Icons.search),
+                        ),
+                        onChanged: (value) {
+                          starterCharacterFilter.name = value;
+                          _searchStarter(true);
+                        },
                       ),
                     ),
                   ),
-                  SizedBox(
-                    width: 300,
-                    height: 300,
+                  Container(
+                    width: 350,
+                    height: 350,
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.all(Radius.circular(8)),
+                    ),
                     child: getStarter(context),
                   ),
-                  if (starterIsLoading == true)
-                    const Padding(
-                      padding: EdgeInsets.only(top: 10, bottom: 40),
-                      child: Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                    ),
-                  if (starterToEnd == true)
-                    Text(AppLocalizations.of(context)!.endOfList)
                 ],
               ),
             ),
             const SizedBox(
-              width: 100,
+              width: 30,
             ),
             Container(
-              height: 900,
+              height: 800,
               decoration: const BoxDecoration(
                   color: OnepieceColors.menuBackgroundColor,
                   borderRadius: BorderRadius.all(Radius.circular(15))),
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Text(AppLocalizations.of(context)!.receiver),
-                        receiverSelectedItem == null
-                            ? Text(AppLocalizations.of(context)!.unselected)
-                            : Text("${receiverSelectedItem?.name}"),
-                      ],
+                    child: Text(
+                      AppLocalizations.of(context)!.receiver,
+                      style: OnepieceFonts.tableHeaderStyle,
                     ),
                   ),
+                  receiverSelectedItem == null
+                      ? const SizedBox(
+                          height: 30,
+                          child: Text(
+                            "?",
+                            style: OnepieceFonts.contentStyleBold,
+                          ),
+                        )
+                      : SizedBox(
+                          height: 30, child: Text(receiverSelectedItem!.name)),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: SizedBox(
-                      width: 300,
+                      width: 350,
+                      height: 60,
                       child: TextFormField(
                         controller: rightTextController,
+                        decoration: InputDecoration(
+                          label: Text(
+                            AppLocalizations.of(context)!.characterName,
+                            style: OnepieceFonts.hintFont,
+                          ),
+                          floatingLabelBehavior: FloatingLabelBehavior.auto,
+                          prefixIcon: const Icon(Icons.search),
+                        ),
                         onChanged: (value) {
                           receiverCharacterFilter.name = value;
                           _searchReceiver(true);
@@ -250,26 +251,57 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                       ),
                     ),
                   ),
-                  SizedBox(
-                    height: 300,
-                    width: 300,
+                  Container(
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.all(Radius.circular(8)),
+                    ),
+                    height: 350,
+                    width: 350,
                     child: getReceiver(context),
                   ),
-                  if (receiverIsLoading == true)
-                    const Padding(
-                      padding: EdgeInsets.only(top: 10, bottom: 40),
-                      child: Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                    ),
-                  if (receiverToEnd == true)
-                    Text(AppLocalizations.of(context)!.endOfList)
                 ],
               ),
             ),
           ],
         ),
       ),
+      actions: [
+        ElevatedButton(
+          child: Text(AppLocalizations.of(context)!.cancelPopUp),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        ElevatedButton(
+          onPressed:
+              (starterSelectedItem == null && receiverSelectedItem == null)
+                  ? null
+                  : () {
+                      setState(() {
+                        starterSelectedItem = null;
+                        starterSelectedId = "";
+                        receiverSelectedItem = null;
+                        receiverSelectedId = "";
+                      });
+                    },
+          child: Text(AppLocalizations.of(context)!.clearForm),
+        ),
+        ElevatedButton(
+          onPressed:
+              (starterSelectedItem == null || receiverSelectedItem == null)
+                  ? null
+                  : () {
+                      AddBattleRequest request = AddBattleRequest(
+                          userId: getIt<User>().id,
+                          starterId: starterSelectedId,
+                          receiverId: receiverSelectedId);
+                      getIt<BattleDao>().addBattle(request);
+                      Navigator.pop(context);
+                    },
+          child: Text(AppLocalizations.of(context)!.submitForm),
+        ),
+      ],
     );
   }
 
@@ -284,10 +316,23 @@ class _CreateBattleViewState extends State<CreateBattleView> {
       CharacterType.shooter: AppLocalizations.of(context)!.shoot
     };
     return ListView.builder(
+      shrinkWrap: true,
+      physics: const AlwaysScrollableScrollPhysics(),
       controller: _starterScrollController,
       itemCount: starterCharacters.length,
       itemBuilder: (context, index) {
         final character = starterCharacters[index];
+        if (starterCharacters.length == index) {
+          return const Padding(
+            padding: EdgeInsets.only(top: 10, bottom: 10),
+            child: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+        if (starterCharacters.length == index && starterToEnd == true) {
+          return Text(AppLocalizations.of(context)!.endOfList);
+        }
         return Material(
           type: MaterialType.transparency,
           child: Container(
@@ -327,7 +372,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                     ),
                   ),
                   Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                           "${AppLocalizations.of(context)!.name}: ${character.name}",
@@ -373,6 +418,17 @@ class _CreateBattleViewState extends State<CreateBattleView> {
       itemCount: receiverCharacters.length,
       itemBuilder: (context, index) {
         final character = receiverCharacters[index];
+        if (receiverCharacters.length == index) {
+          return const Padding(
+            padding: EdgeInsets.only(top: 10, bottom: 10),
+            child: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+        if (receiverCharacters.length == index && receiverToEnd) {
+          return Text(AppLocalizations.of(context)!.endOfList);
+        }
         return Material(
           type: MaterialType.transparency,
           child: Container(
@@ -412,7 +468,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                     ),
                   ),
                   Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                           "${AppLocalizations.of(context)!.name}: ${character.name}",
