@@ -279,7 +279,7 @@ class _FruitViewState extends State<FruitView> {
           bottom: BorderSide(color: OnepieceColors.themeColor)),
       columns: _createColumns(),
       rows: _createRows(context),
-      columnSpacing: 10,
+      columnSpacing: 30,
     );
   }
 
@@ -355,7 +355,7 @@ class _FruitViewState extends State<FruitView> {
                 });
               },
         child: Padding(
-          padding: const EdgeInsets.all(10.0),
+          padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
