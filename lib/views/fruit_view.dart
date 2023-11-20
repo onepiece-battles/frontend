@@ -71,9 +71,9 @@ class _FruitViewState extends State<FruitView> {
         setState(
           () {
             currentFruitList = value!.fruits;
-            if(currentFruitList.isEmpty) {
+            if (currentFruitList.isEmpty) {
               pageNumberController.text = "0";
-            }else {
+            } else {
               pageNumberController.text = selectedPageIndex.toString();
             }
             totalSize = value.totalSize!;
@@ -96,20 +96,43 @@ class _FruitViewState extends State<FruitView> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _getHeaderText(context),
-        _getControlRow(context),
-        _getFruitsTable(context),
-        _getPageFoot()
-      ],
+    return Padding(
+      padding: const EdgeInsets.all(15.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _getHeaderText(context),
+          _getControlRow(context),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              ConstrainedBox(
+                constraints: BoxConstraints.loose(const Size.fromWidth(1500)),
+                child: FittedBox(
+                  fit: BoxFit.fill,
+                  child: _getFruitsTable(context),
+                ),
+              ),
+              const SizedBox(
+                height: 15,
+              ),
+              ConstrainedBox(
+                constraints: BoxConstraints.loose(const Size.fromWidth(1500)),
+                child: FittedBox(
+                  fit: BoxFit.fitWidth,
+                  child: Center(child: _getPageFoot()),
+                ),
+              )
+            ],
+          ),
+        ],
+      ),
     );
   }
 
   Widget _getHeaderText(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.all(10),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0, 0, 0, 20),
       child: Text(
         AppLocalizations.of(context)!.devilFruit,
         style: OnepieceFonts.headerStyle,
@@ -118,31 +141,28 @@ class _FruitViewState extends State<FruitView> {
   }
 
   Widget _getControlRow(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.all(10),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(0, 0, 6, 6),
-            child: SizedBox(
-              height: 33,
-              child: ElevatedButton(
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: ((context) {
-                        return const CreateBattleView();
-                      }),
-                    );
-                  },
-                  child: Text(AppLocalizations.of(context)!.createDevilFruit)),
-            ),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(0, 0, 6, 6),
+          child: SizedBox(
+            height: 33,
+            child: ElevatedButton(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: ((context) {
+                      return const CreateBattleView();
+                    }),
+                  );
+                },
+                child: Text(AppLocalizations.of(context)!.createDevilFruit)),
           ),
-          // battle type filter
-          _getFruitTypeFilter(context),
-        ],
-      ),
+        ),
+        // battle type filter
+        _getFruitTypeFilter(context),
+      ],
     );
   }
 
@@ -152,7 +172,8 @@ class _FruitViewState extends State<FruitView> {
       FruitType.zoan: AppLocalizations.of(context)!.zoanFruit,
       FruitType.ancientZoan: AppLocalizations.of(context)!.ancientZoanFruit,
       FruitType.mythicalZoan: AppLocalizations.of(context)!.mythicalZoanFruit,
-      FruitType.artificialZoan: AppLocalizations.of(context)!.artificialZoanFruit,
+      FruitType.artificialZoan:
+          AppLocalizations.of(context)!.artificialZoanFruit,
       FruitType.paramecia: AppLocalizations.of(context)!.parameciaFruit,
     };
     return Padding(
@@ -382,7 +403,7 @@ class _FruitViewState extends State<FruitView> {
     return result;
   }
 
-  Row _getPageFoot() {
+  Widget _getPageFoot() {
     List<Widget> widgetList = [];
     ElevatedButton prePage = ElevatedButton(
         onPressed: !preButtonEnabled

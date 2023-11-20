@@ -79,13 +79,8 @@ class _CharacterViewState extends State<CharacterView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            AppLocalizations.of(context)!.character,
-            style: OnepieceFonts.headerStyle,
-          ),
-          const SizedBox(height: 15,),
-          _createSearchFilterRow(context),
-          const SizedBox(height: 15,),
+          _createHeader(context),
+          _createControlPanel(context),
           Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -96,7 +91,9 @@ class _CharacterViewState extends State<CharacterView> {
                   child: _createDataTable(),
                 ),
               ),
-              const SizedBox(height: 15,),
+              const SizedBox(
+                height: 15,
+              ),
               ConstrainedBox(
                 constraints: BoxConstraints.loose(const Size.fromWidth(1500)),
                 child: FittedBox(
@@ -107,6 +104,16 @@ class _CharacterViewState extends State<CharacterView> {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _createHeader(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0, 0, 0, 20),
+      child: Text(
+        AppLocalizations.of(context)!.character,
+        style: OnepieceFonts.headerStyle,
       ),
     );
   }
@@ -211,9 +218,9 @@ class _CharacterViewState extends State<CharacterView> {
     );
   }
 
-  Row _createSearchFilterRow(BuildContext context) {
+  Widget _createControlPanel(BuildContext context) {
     Map<CharacterType, String> enumValueToDisplayValue =
-        <CharacterType, String> {
+        <CharacterType, String>{
       CharacterType.body: AppLocalizations.of(context)!.body,
       CharacterType.foot: AppLocalizations.of(context)!.leg,
       CharacterType.science: AppLocalizations.of(context)!.science,
@@ -223,7 +230,7 @@ class _CharacterViewState extends State<CharacterView> {
     };
     return Row(children: [
       Padding(
-        padding: const EdgeInsets.fromLTRB(0, 0, 8, 6),
+        padding: const EdgeInsets.fromLTRB(0, 0, 6, 6),
         child: SizedBox(
           height: 34,
           child: ElevatedButton(
@@ -275,7 +282,9 @@ class _CharacterViewState extends State<CharacterView> {
         child: DropdownButtonHideUnderline(
           child: DropdownButton2(
             isExpanded: true,
-            value: selectedCharacterTypes.isEmpty ? null : selectedCharacterTypes.last,
+            value: selectedCharacterTypes.isEmpty
+                ? null
+                : selectedCharacterTypes.last,
             hint: Text(
               AppLocalizations.of(context)!.characterTypeHint,
               style: OnepieceFonts.dropDownItemStyle,
@@ -320,13 +329,15 @@ class _CharacterViewState extends State<CharacterView> {
                 enabled: false,
                 child: StatefulBuilder(
                   builder: (context, menuSetState) {
-                    final isSelected = selectedCharacterTypes.contains(characterType);
+                    final isSelected =
+                        selectedCharacterTypes.contains(characterType);
                     return InkWell(
                       onTap: () {
                         isSelected
                             ? selectedCharacterTypes.remove(characterType)
                             : selectedCharacterTypes.add(characterType);
-                        characterFilter.characterTypes = selectedCharacterTypes;
+                        characterFilter.characterTypes =
+                            selectedCharacterTypes;
 
                         // //This rebuilds the StatefulWidget to update the button's text
                         setState(() {});
@@ -415,9 +426,9 @@ class _CharacterViewState extends State<CharacterView> {
     listCharacterResponse.then((value) {
       setState(() {
         currentCharacterList = value!.characters;
-        if(currentCharacterList.isEmpty) {
+        if (currentCharacterList.isEmpty) {
           pageNumberController.text = "0";
-        }else {
+        } else {
           pageNumberController.text = selectedPageIndex.toString();
         }
         totalSize = value.totalSize!;

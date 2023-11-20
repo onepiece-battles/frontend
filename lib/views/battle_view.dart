@@ -8,6 +8,7 @@ import 'package:openapi/api.dart';
 import 'package:logging/logging.dart';
 import '../constants/onepiece_colors.dart';
 import '../constants/onepiece_fonts.dart';
+import '../utils/data_validator.dart';
 import '../utils/image_helper.dart';
 
 GetIt getIt = GetIt.instance;
@@ -71,9 +72,9 @@ class _BattleViewState extends State<BattleView> {
     response.then((value) => {
           setState(() {
             currentBattleList = value!.battles;
-            if(currentBattleList.isEmpty) {
+            if (currentBattleList.isEmpty) {
               pageNumberController.text = "0";
-            }else {
+            } else {
               pageNumberController.text = selectedPageIndex.toString();
             }
             debugPrint('total size $totalSize');
@@ -95,20 +96,43 @@ class _BattleViewState extends State<BattleView> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _getHeaderText(context),
-        _getControlRow(context),
-        _getBattlesTable(context),
-        // _getPageFoot(context)
-      ],
+    return Padding(
+      padding: const EdgeInsets.all(15.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _getHeaderText(context),
+          _getControlRow(context),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              ConstrainedBox(
+                constraints: BoxConstraints.loose(const Size.fromWidth(1500)),
+                child: FittedBox(
+                  fit: BoxFit.fill,
+                  child: _getBattlesTable(context),
+                ),
+              ),
+              const SizedBox(
+                height: 15,
+              ),
+              ConstrainedBox(
+                constraints: BoxConstraints.loose(const Size.fromWidth(1500)),
+                child: FittedBox(
+                  fit: BoxFit.fitWidth,
+                  child: Center(child: _getPageFoot()),
+                ),
+              )
+            ],
+          ),
+        ],
+      ),
     );
   }
 
   Widget _getHeaderText(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.all(10),
+      margin: const EdgeInsets.fromLTRB(0, 0, 0, 20),
       child: Text(
         AppLocalizations.of(context)!.battle,
         style: OnepieceFonts.headerStyle,
@@ -117,33 +141,30 @@ class _BattleViewState extends State<BattleView> {
   }
 
   Widget _getControlRow(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.all(10),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(0,0,6,6),
-            child: SizedBox(
-              height: 33,
-              child: ElevatedButton(
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: ((context) {
-                        return const CreateBattleView();
-                      }),
-                    );
-                  },
-                  child: Text(AppLocalizations.of(context)!.createBattle)),
-            ),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(0, 0, 6, 6),
+          child: SizedBox(
+            height: 33,
+            child: ElevatedButton(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: ((context) {
+                      return const CreateBattleView();
+                    }),
+                  );
+                },
+                child: Text(AppLocalizations.of(context)!.createBattle)),
           ),
-          // battle type filter
-          _getBattleTypeFilter(context),
-          // battle status filter
-          _getBattleStatusFilter(context)
-        ],
-      ),
+        ),
+        // battle type filter
+        _getBattleTypeFilter(context),
+        // battle status filter
+        _getBattleStatusFilter(context)
+      ],
     );
   }
 
@@ -186,13 +207,13 @@ class _BattleViewState extends State<BattleView> {
             ).toList();
           },
           buttonStyleData: ButtonStyleData(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              height: 34,
-              width: 280,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(3),
-                color: OnepieceColors.menuBackgroundColor,
-              ),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            height: 34,
+            width: 280,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(3),
+              color: OnepieceColors.menuBackgroundColor,
+            ),
           ),
           menuItemStyleData: const MenuItemStyleData(
             height: 35,
@@ -435,14 +456,14 @@ class _BattleViewState extends State<BattleView> {
             ),
             sortableFieldsEnum != null
                 ? Padding(
-                  padding: const EdgeInsets.all(5.0),
-                  child: ImageHelper.getSvgIcon(
+                    padding: const EdgeInsets.all(5.0),
+                    child: ImageHelper.getSvgIcon(
                       sortOrderToPath[
                           sortableEnumToSortOrderMap[sortableFieldsEnum]]!,
                       15,
                       15,
                     ),
-                )
+                  )
                 : const SizedBox.shrink()
           ],
         ),
@@ -452,5 +473,98 @@ class _BattleViewState extends State<BattleView> {
 
   List<DataRow> _createRows(BuildContext context) {
     return [];
+  }
+
+  Widget _getPageFoot() {
+    List<Widget> widgetList = [];
+    ElevatedButton prePage = ElevatedButton(
+        onPressed: !preButtonEnabled
+            ? null
+            : () {
+                selectedPageIndex = selectedPageIndex - 1;
+                _search();
+              },
+        child: const Icon(Icons.arrow_back));
+    ElevatedButton nextPage = ElevatedButton(
+        onPressed: !nextButtonEnabled
+            ? null
+            : () {
+                selectedPageIndex = selectedPageIndex + 1;
+                _search();
+              },
+        child: const Icon(Icons.arrow_forward));
+    Widget pageNumber = SizedBox(
+      width: 35,
+      height: 28,
+      child: TextFormField(
+          textAlign: TextAlign.center,
+          textAlignVertical: TextAlignVertical.center,
+          decoration: const InputDecoration(
+            contentPadding: EdgeInsets.fromLTRB(0, 17, 0, 17),
+            enabledBorder: UnderlineInputBorder(),
+            focusedBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: OnepieceColors.themeColor)),
+          ),
+          controller: pageNumberController,
+          onChanged: (value) {
+            setState(() {
+              if (!DataValidator.isInt(pageNumberController.text.trim())) {
+                confirmButtonEnabled = false;
+              } else {
+                int currentTypedPage =
+                    int.parse(pageNumberController.text.trim());
+                if (currentTypedPage < 1 ||
+                    currentTypedPage > pageNum ||
+                    currentTypedPage == selectedPageIndex) {
+                  confirmButtonEnabled = false;
+                } else {
+                  confirmButtonEnabled = true;
+                }
+              }
+            });
+          }),
+    );
+    ElevatedButton confirmPage = ElevatedButton(
+        onPressed: !confirmButtonEnabled
+            ? null
+            : () {
+                selectedPageIndex = int.parse(pageNumberController.text);
+                _search();
+              },
+        child: Text(
+          AppLocalizations.of(context)!.jumpToPage,
+          textAlign: TextAlign.left,
+        ));
+    widgetList.add(Padding(
+      padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
+      child: prePage,
+    ));
+    widgetList.add(pageNumber);
+    var totalPageCount = ClipRRect(
+      borderRadius: BorderRadius.circular(3),
+      child: Container(
+          height: 28,
+          color: OnepieceColors.menuBackgroundColor,
+          alignment: AlignmentDirectional.center,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(3, 0, 3, 3),
+            child: Text(
+              "$pageNum",
+              style: OnepieceFonts.contentStyle,
+            ),
+          )),
+    );
+    widgetList.add(totalPageCount);
+    widgetList.add(Padding(
+      padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+      child: confirmPage,
+    ));
+    widgetList.add(Padding(
+      padding: const EdgeInsets.fromLTRB(8.0, 0, 0, 0),
+      child: nextPage,
+    ));
+    return Row(
+      children: widgetList,
+    );
   }
 }
