@@ -36,25 +36,15 @@ class _CharacterViewState extends State<CharacterView> {
     SortOrder.ASC: 'images/svgs/sort-up-solid.svg',
     SortOrder.DESC: 'images/svgs/sort-down-solid.svg'
   };
-  Map<int, CharacterSortableFieldsEnum> columnIndexToSortableFieldMap = {
-    1: CharacterSortableFieldsEnum.name,
-    3: CharacterSortableFieldsEnum.fruitLimit,
-    4: CharacterSortableFieldsEnum.groupGain,
-    5: CharacterSortableFieldsEnum.attack,
-    6: CharacterSortableFieldsEnum.defense,
-    7: CharacterSortableFieldsEnum.intelligence,
-    8: CharacterSortableFieldsEnum.blood,
-    9: CharacterSortableFieldsEnum.speed
-  };
-  Map<int, SortOrder?> columnIndexToSortOrderMap = {
-    1: null,
-    3: null,
-    4: null,
-    5: null,
-    6: null,
-    7: null,
-    8: null,
-    9: null,
+  Map<CharacterSortableFieldsEnum, SortOrder?> sortableEnumToSortOrderMap = {
+    CharacterSortableFieldsEnum.name: null,
+    CharacterSortableFieldsEnum.fruitLimit: null,
+    CharacterSortableFieldsEnum.groupGain: null,
+    CharacterSortableFieldsEnum.attack: null,
+    CharacterSortableFieldsEnum.defense: null,
+    CharacterSortableFieldsEnum.intelligence: null,
+    CharacterSortableFieldsEnum.blood: null,
+    CharacterSortableFieldsEnum.speed: null,
   };
   List<CharacterType> selectedCharacterTypes = [];
 
@@ -127,7 +117,7 @@ class _CharacterViewState extends State<CharacterView> {
           bottom: BorderSide(color: OnepieceColors.themeColor)),
       columns: _createColumns(),
       rows: _createRows(context),
-      columnSpacing: 10,
+      columnSpacing: 30,
     );
   }
 
@@ -136,36 +126,42 @@ class _CharacterViewState extends State<CharacterView> {
       DataColumn(
         label: ElevatedButton(
             onPressed: () {
-              characterFilter = CharacterFilter();
               sortKeys = [];
-              columnIndexToSortOrderMap = {
-                1: null,
-                3: null,
-                4: null,
-                5: null,
-                6: null,
-                7: null,
-                8: null,
-                9: null,
+              sortableEnumToSortOrderMap = {
+                CharacterSortableFieldsEnum.name: null,
+                CharacterSortableFieldsEnum.fruitLimit: null,
+                CharacterSortableFieldsEnum.groupGain: null,
+                CharacterSortableFieldsEnum.attack: null,
+                CharacterSortableFieldsEnum.defense: null,
+                CharacterSortableFieldsEnum.intelligence: null,
+                CharacterSortableFieldsEnum.blood: null,
+                CharacterSortableFieldsEnum.speed: null,
               };
               _search();
             },
             child: Text(AppLocalizations.of(context)!.resetSort)),
       ),
-      _createSingleColumn(AppLocalizations.of(context)!.characterName, 1),
+      _createSingleColumn(AppLocalizations.of(context)!.characterName,
+          CharacterSortableFieldsEnum.name),
       DataColumn(
           label: Text(
         AppLocalizations.of(context)!.characterTypeLabel,
         style: OnepieceFonts.tableHeaderStyle,
       )),
-      _createSingleColumn(AppLocalizations.of(context)!.fruitLimit, 3),
-      _createSingleColumn(AppLocalizations.of(context)!.groupGain, 4),
-      _createSingleColumn(AppLocalizations.of(context)!.characterAttack, 5),
-      _createSingleColumn(AppLocalizations.of(context)!.characterDefense, 6),
-      _createSingleColumn(
-          AppLocalizations.of(context)!.characterIntelligence, 7),
-      _createSingleColumn(AppLocalizations.of(context)!.characterBlood, 8),
-      _createSingleColumn(AppLocalizations.of(context)!.characterSpeed, 9),
+      _createSingleColumn(AppLocalizations.of(context)!.fruitLimit,
+          CharacterSortableFieldsEnum.fruitLimit),
+      _createSingleColumn(AppLocalizations.of(context)!.groupGain,
+          CharacterSortableFieldsEnum.groupGain),
+      _createSingleColumn(AppLocalizations.of(context)!.characterAttack,
+          CharacterSortableFieldsEnum.attack),
+      _createSingleColumn(AppLocalizations.of(context)!.characterDefense,
+          CharacterSortableFieldsEnum.defense),
+      _createSingleColumn(AppLocalizations.of(context)!.characterIntelligence,
+          CharacterSortableFieldsEnum.intelligence),
+      _createSingleColumn(AppLocalizations.of(context)!.characterBlood,
+          CharacterSortableFieldsEnum.blood),
+      _createSingleColumn(AppLocalizations.of(context)!.characterSpeed,
+          CharacterSortableFieldsEnum.speed),
       DataColumn(
           label: Text(
         AppLocalizations.of(context)!.characterFruits,
@@ -174,46 +170,59 @@ class _CharacterViewState extends State<CharacterView> {
     ];
   }
 
-  DataColumn _createSingleColumn(String name, int index) {
+  DataColumn _createSingleColumn(String displayText,
+      CharacterSortableFieldsEnum? characterSortableFieldsEnum) {
     return DataColumn(
-      label: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          Text(
-            name,
-            style: OnepieceFonts.tableHeaderStyle,
+      label: InkWell(
+        onTap: characterSortableFieldsEnum == null
+            ? null
+            : () {
+                setState(() {
+                  var sortOrder =
+                      sortableEnumToSortOrderMap[characterSortableFieldsEnum];
+                  var sortKey = characterSortableFieldsEnum;
+                  if (sortOrder == null) {
+                    sortOrder = SortOrder.ASC;
+                  } else if (sortOrder == SortOrder.ASC) {
+                    sortOrder = SortOrder.DESC;
+                  } else {
+                    sortOrder = null;
+                  }
+                  sortableEnumToSortOrderMap[characterSortableFieldsEnum] =
+                      sortOrder;
+                  sortKeys.removeWhere((element) => element.sortKey == sortKey);
+                  if (sortOrder != null) {
+                    sortKeys.insert(
+                        0,
+                        CharacterSortableField(
+                            sortKey: sortKey, sortOrder: sortOrder));
+                  }
+                  _search();
+                });
+              },
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Text(
+                displayText,
+                style: OnepieceFonts.tableHeaderStyle,
+              ),
+              characterSortableFieldsEnum != null
+                  ? Padding(
+                      padding: const EdgeInsets.all(5.0),
+                      child: ImageHelper.getSvgIcon(
+                        sortOrderToPath[sortableEnumToSortOrderMap[
+                            characterSortableFieldsEnum]]!,
+                        15,
+                        15,
+                      ),
+                    )
+                  : const SizedBox.shrink()
+            ],
           ),
-          IconButton(
-            splashRadius: 0.1,
-            onPressed: () {
-              setState(() {
-                var sortOrder = columnIndexToSortOrderMap[index];
-                var sortKey = columnIndexToSortableFieldMap[index]!;
-                if (sortOrder == null) {
-                  sortOrder = SortOrder.ASC;
-                } else if (sortOrder == SortOrder.ASC) {
-                  sortOrder = SortOrder.DESC;
-                } else {
-                  sortOrder = null;
-                }
-                columnIndexToSortOrderMap[index] = sortOrder;
-                sortKeys.removeWhere((element) => element.sortKey == sortKey);
-                if (sortOrder != null) {
-                  sortKeys.insert(
-                      0,
-                      CharacterSortableField(
-                          sortKey: sortKey, sortOrder: sortOrder));
-                }
-                _search();
-              });
-            },
-            icon: ImageHelper.getSvgIcon(
-              sortOrderToPath[columnIndexToSortOrderMap[index]]!,
-              15,
-              15,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -336,8 +345,7 @@ class _CharacterViewState extends State<CharacterView> {
                         isSelected
                             ? selectedCharacterTypes.remove(characterType)
                             : selectedCharacterTypes.add(characterType);
-                        characterFilter.characterTypes =
-                            selectedCharacterTypes;
+                        characterFilter.characterTypes = selectedCharacterTypes;
 
                         // //This rebuilds the StatefulWidget to update the button's text
                         setState(() {});
@@ -378,8 +386,7 @@ class _CharacterViewState extends State<CharacterView> {
   }
 
   List<DataRow> _createRows(BuildContext context) {
-    List<DataRow> result = [];
-    var dataList = currentCharacterList
+    return currentCharacterList
         .map(
           (character) => DataRow(
             onSelectChanged: (value) {
@@ -410,8 +417,6 @@ class _CharacterViewState extends State<CharacterView> {
           ),
         )
         .toList();
-    result.addAll(dataList);
-    return result;
   }
 
   void _search() {

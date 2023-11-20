@@ -382,7 +382,7 @@ class _BattleViewState extends State<BattleView> {
           bottom: BorderSide(color: OnepieceColors.themeColor)),
       columns: _createColumns(),
       rows: _createRows(context),
-      columnSpacing: 10,
+      columnSpacing: 30,
     );
   }
 
@@ -446,7 +446,7 @@ class _BattleViewState extends State<BattleView> {
               });
             },
       child: Padding(
-        padding: const EdgeInsets.all(10.0),
+        padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -472,7 +472,25 @@ class _BattleViewState extends State<BattleView> {
   }
 
   List<DataRow> _createRows(BuildContext context) {
-    return [];
+    return currentBattleList
+        .asMap()
+        .entries
+        .map(
+          (entry) => DataRow(cells: [
+            DataCell(Text("${entry.key + 1}")),
+            DataCell(Text(entry.value.userName.toString())),
+            DataCell(Text(entry.value.starterName.toString())),
+            DataCell(Text(entry.value.receiverName.toString())),
+            DataCell(Text(DateTime.fromMicrosecondsSinceEpoch(
+                    entry.value.creationTimestamp!)
+                .toString())),
+            DataCell(Text(entry.value.modificationTimestamp.toString())),
+            DataCell(Text(entry.value.status.toString())),
+            DataCell(Text(" to be added in the future")),
+            DataCell(Text(entry.value.isSystemResource.toString())),
+          ]),
+        )
+        .toList();
   }
 
   Widget _getPageFoot() {
