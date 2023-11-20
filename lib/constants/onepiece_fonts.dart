@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 
 class OnepieceFonts {
   static const double headerFontSize = 27;
@@ -14,6 +15,8 @@ class OnepieceFonts {
   static const TextStyle contentStyle =TextStyle(
   color: OnepieceFonts.contentFontColor,
   fontSize: OnepieceFonts.contentFontSize);
+  static const TextStyle hintFont = TextStyle(color: OnepieceColors.menuIconColor,
+      fontSize: OnepieceFonts.contentFontSize);
   static const TextStyle smallContentStyle =TextStyle(
       color: OnepieceFonts.contentFontColor,
       fontSize: OnepieceFonts.smallContentFontSize);
