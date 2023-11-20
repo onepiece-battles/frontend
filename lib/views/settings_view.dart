@@ -54,33 +54,35 @@ class _SettingsViewState extends State<SettingsView> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _getAvatar(context),
-        const Divider(
-          height: 10,
-          thickness: 1,
-        ),
-        _getName(context),
-        const Divider(
-          height: 10,
-          thickness: 1,
-        ),
-        _getEmail(context),
-        const Divider(
-          height: 10,
-          thickness: 1,
-        ),
-        _getLocalization(context),
-        const Divider(
-          height: 10,
-          thickness: 1,
-        ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: _getFootButtons(context),
-        )
-      ],
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          _getAvatar(context),
+          const Divider(
+            height: 10,
+            thickness: 1,
+          ),
+          _getName(context),
+          const Divider(
+            height: 10,
+            thickness: 1,
+          ),
+          _getEmail(context),
+          const Divider(
+            height: 10,
+            thickness: 1,
+          ),
+          _getLocalization(context),
+          const Divider(
+            height: 10,
+            thickness: 1,
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: _getFootButtons(context),
+          )
+        ],
+      ),
     );
   }
 
