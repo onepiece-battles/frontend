@@ -5,6 +5,8 @@ import 'package:one_piece_battles_flutter/views/battle_detail_view.dart';
 import 'package:one_piece_battles_flutter/views/battle_view.dart';
 import 'package:one_piece_battles_flutter/views/character_detail_view.dart';
 import 'package:one_piece_battles_flutter/views/character_view.dart';
+import 'package:one_piece_battles_flutter/views/create_battle_view.dart';
+import 'package:one_piece_battles_flutter/views/create_character_view.dart';
 import 'package:one_piece_battles_flutter/views/fruit_view.dart';
 import 'package:one_piece_battles_flutter/views/issue_view.dart';
 import 'package:one_piece_battles_flutter/views/settings_view.dart';
@@ -47,29 +49,39 @@ class AppRouter {
           },
           routes: [
             GoRoute(
-              path: characterPath,
-              name: "characters",
-              parentNavigatorKey: _homeNavigatorState,
-              pageBuilder: (context, state) {
-                return  NoTransitionPage(child: const CharacterView(),   key : UniqueKey(),);
-              },
-              routes: [
-                GoRoute(
-                  path: ':name',
-                  name: 'characterDetails',
-                  parentNavigatorKey: _homeNavigatorState,
-                  pageBuilder: (context, state) {
-                    String characterId = state.extra as String;
-                    debugPrint('character id router is $characterId');
-                    return NoTransitionPage(
-                      child: CharacterDetail(
-                        characterId: characterId,
-                      ),
-                    );
-                  },
-                ),
-              ]
-            ),
+                path: characterPath,
+                name: "characters",
+                parentNavigatorKey: _homeNavigatorState,
+                pageBuilder: (context, state) {
+                  return const NoTransitionPage(
+                    child: CharacterView(),
+                  );
+                },
+                routes: [
+                  GoRoute(
+                    path: 'create',
+                    name: 'createCharacter',
+                    parentNavigatorKey: _homeNavigatorState,
+                    pageBuilder: (context, state) {
+                      return const NoTransitionPage(
+                        child: CreateCharacterView(),
+                      );
+                    },
+                  ),
+                  GoRoute(
+                    path: ':name',
+                    name: 'characterDetails',
+                    parentNavigatorKey: _homeNavigatorState,
+                    pageBuilder: (context, state) {
+                      String characterId = state.extra as String;
+                      return NoTransitionPage(
+                        child: CharacterDetail(
+                          characterId: characterId,
+                        ),
+                      );
+                    },
+                  ),
+                ]),
             GoRoute(
               path: fruitPath,
               name: "fruit",
@@ -79,29 +91,28 @@ class AppRouter {
               },
             ),
             GoRoute(
-              path: battlePath,
-              name: "battle",
-              parentNavigatorKey: _homeNavigatorState,
-              pageBuilder: (context, state) {
-                return const NoTransitionPage(child: BattleView());
-              },
-              routes: [
-                GoRoute(
-                  path: ':id',
-                  name: 'battleDetails',
-                  parentNavigatorKey: _homeNavigatorState,
-                  pageBuilder: (context, state) {
-                    String battleId = state.extra as String;
-                    debugPrint('battle id router is $battleId');
-                    return NoTransitionPage(
-                      child: BattleDetailView(
-                        battleId: battleId,
-                      ),
-                    );
-                  },
-                ),
-              ]
-            ),
+                path: battlePath,
+                name: "battle",
+                parentNavigatorKey: _homeNavigatorState,
+                pageBuilder: (context, state) {
+                  return const NoTransitionPage(child: BattleView());
+                },
+                routes: [
+                  GoRoute(
+                    path: ':id',
+                    name: 'battleDetails',
+                    parentNavigatorKey: _homeNavigatorState,
+                    pageBuilder: (context, state) {
+                      String battleId = state.extra as String;
+                      debugPrint('battle id router is $battleId');
+                      return NoTransitionPage(
+                        child: BattleDetailView(
+                          battleId: battleId,
+                        ),
+                      );
+                    },
+                  ),
+                ]),
             GoRoute(
               path: userPath,
               name: "user",
@@ -135,7 +146,7 @@ class AppRouter {
           path: registerPath,
           builder: (context, state) => const RegisterPage()),
     ],
-    // debugLogDiagnostics: true,
+    debugLogDiagnostics: true,
     redirect: (context, state) {
       // if the user is not logged in, they need to login
       final loggedIn = getIt<User>().name != '';

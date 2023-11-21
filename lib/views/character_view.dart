@@ -11,6 +11,7 @@ import 'package:one_piece_battles_flutter/repository/character_dao.dart';
 import 'package:one_piece_battles_flutter/utils/base64_helper.dart';
 import 'package:one_piece_battles_flutter/utils/data_validator.dart';
 import 'package:openapi/api.dart';
+import '../app_router.dart';
 import '../utils/image_helper.dart';
 
 GetIt getIt = GetIt.instance;
@@ -246,12 +247,7 @@ class _CharacterViewState extends State<CharacterView> {
           height: 34,
           child: ElevatedButton(
               onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: ((context) {
-                    return const AddCharacterView();
-                  }),
-                );
+                context.goNamed("createCharacter");
               },
               child: Text(AppLocalizations.of(context)!.createCharacter)),
         ),
