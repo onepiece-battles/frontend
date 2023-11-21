@@ -28,8 +28,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
   CharacterFullView characterFullView = CharacterFullView();
   List<Battle> battles = [];
   List<Fruit> fruits = [];
-  late Uint8List _pickedImage;
-  late Uint8List _originalImage;
+  Uint8List _pickedImage = Uint8List(0);
+  Uint8List _originalImage = Uint8List(0);
   bool _newImagePicked = false;
   SliderData sliderData = SliderData();
 
