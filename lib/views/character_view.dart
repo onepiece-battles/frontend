@@ -4,14 +4,12 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
-import 'package:one_piece_battles_flutter/views/create_character_view.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:one_piece_battles_flutter/repository/character_dao.dart';
 import 'package:one_piece_battles_flutter/utils/base64_helper.dart';
 import 'package:one_piece_battles_flutter/utils/data_validator.dart';
 import 'package:openapi/api.dart';
-import '../app_router.dart';
 import '../utils/image_helper.dart';
 
 GetIt getIt = GetIt.instance;
@@ -418,11 +416,22 @@ class _CharacterViewState extends State<CharacterView> {
             cells: [
               DataCell(
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 3, 30, 3),
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 30),
-                    child: Image.memory(
-                        Base64Helper.decode(character.profileImage!)),
+                  padding: const EdgeInsets.fromLTRB(0, 3, 3, 3),
+                  child: Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      borderRadius:
+                          const BorderRadius.all(Radius.circular(2.0)),
+                      border: Border.all(
+                          color: OnepieceColors.themeColor,
+                          width: 2,
+                          style: BorderStyle.solid),
+                    ),
+                    child: Expanded(
+                      child: Image.memory(
+                          Base64Helper.decode(character.profileImage!)),
+                    ),
                   ),
                 ),
               ),
