@@ -48,6 +48,7 @@ class _CharacterViewState extends State<CharacterView> {
     CharacterSortableFieldsEnum.speed: null,
   };
   List<CharacterType> selectedCharacterTypes = [];
+  ScrollController scrollController = ScrollController();
 
   int selectedPageIndex = 1;
   int pageNum = 0;
@@ -67,34 +68,36 @@ class _CharacterViewState extends State<CharacterView> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(15.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _createHeader(context),
-          _createControlPanel(context),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
+      child: SingleChildScrollView(
+        controller: scrollController,
+        scrollDirection: Axis.vertical,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ConstrainedBox(
-                constraints: BoxConstraints.loose(const Size.fromWidth(1500)),
-                child: FittedBox(
-                  fit: BoxFit.fill,
-                  child: _createDataTable(),
-                ),
+              _createHeader(context),
+              _createControlPanel(context),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  _createDataTable(),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  ConstrainedBox(
+                    constraints:
+                        BoxConstraints.loose(const Size.fromWidth(1500)),
+                    child: FittedBox(
+                      fit: BoxFit.fitWidth,
+                      child: Center(child: _getPageFoot()),
+                    ),
+                  )
+                ],
               ),
-              const SizedBox(
-                height: 15,
-              ),
-              ConstrainedBox(
-                constraints: BoxConstraints.loose(const Size.fromWidth(1500)),
-                child: FittedBox(
-                  fit: BoxFit.fitWidth,
-                  child: Center(child: _getPageFoot()),
-                ),
-              )
             ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -240,147 +243,154 @@ class _CharacterViewState extends State<CharacterView> {
       CharacterType.katana: AppLocalizations.of(context)!.katana,
       CharacterType.shooter: AppLocalizations.of(context)!.shoot
     };
-    return Row(children: [
-      Padding(
-        padding: const EdgeInsets.fromLTRB(0, 0, 6, 6),
-        child: SizedBox(
-          height: 34,
-          child: ElevatedButton(
-              onPressed: () {
-                context.goNamed("createCharacter");
-              },
-              child: Text(AppLocalizations.of(context)!.createCharacter)),
-        ),
-      ),
-      Padding(
-          padding: const EdgeInsets.fromLTRB(0, 0, 8, 6),
-          child: SizedBox(
-            width: 200,
-            height: 34,
-            child: TextField(
-              textAlign: TextAlign.center,
-              controller: searchNameController,
-              onChanged: (value) {
-                characterFilter.name = value;
-                _search();
-              },
-              decoration: InputDecoration(
-                contentPadding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-                prefixIcon: IconButton(
-                    onPressed: () {
-                      characterFilter.name = searchNameController.text;
-                      _search();
-                    },
-                    icon: const Icon(Icons.search)),
-                hintText: AppLocalizations.of(context)!.searchCharacterName,
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: () {
-                    searchNameController.clear();
-                    characterFilter.name = null;
+    return SizedBox(
+      width: 1250,
+      child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0, 0, 6, 6),
+              child: SizedBox(
+                width: 200,
+                height: 45,
+                child: TextFormField(
+                  controller: searchNameController,
+                  onChanged: (value) {
+                    characterFilter.name = value;
                     _search();
                   },
+                  decoration: InputDecoration(
+                    prefixIcon: IconButton(
+                        onPressed: () {
+                          characterFilter.name = searchNameController.text;
+                          _search();
+                        },
+                        icon: const Icon(Icons.search)),
+                    labelText: AppLocalizations.of(context)!.name,
+                  ),
                 ),
               ),
             ),
-          )),
-      Padding(
-        padding: const EdgeInsets.fromLTRB(0, 0, 0, 6),
-        child: DropdownButtonHideUnderline(
-          child: DropdownButton2(
-            isExpanded: true,
-            value: selectedCharacterTypes.isEmpty
-                ? null
-                : selectedCharacterTypes.last,
-            hint: Text(
-              AppLocalizations.of(context)!.characterTypeHint,
-              style: OnepieceFonts.dropDownItemStyle,
-            ),
-            onChanged: (value) {},
-            selectedItemBuilder: (context) {
-              return CharacterType.values.map(
-                (item) {
-                  return Container(
-                    alignment: AlignmentDirectional.center,
-                    child: Text(
-                      selectedCharacterTypes
-                          .map((selectedType) {
-                            return enumValueToDisplayValue[selectedType];
-                          })
-                          .toSet()
-                          .join(', '),
-                      style: const TextStyle(
-                        fontSize: 16,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      maxLines: 1,
-                    ),
-                  );
-                },
-              ).toList();
-            },
-            buttonStyleData: ButtonStyleData(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                height: 34,
-                width: 280,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(3),
-                  color: OnepieceColors.menuBackgroundColor,
-                )),
-            menuItemStyleData: const MenuItemStyleData(
-              height: 35,
-            ),
-            items: CharacterType.values.map((CharacterType characterType) {
-              return DropdownMenuItem<CharacterType>(
-                value: characterType,
-                enabled: false,
-                child: StatefulBuilder(
-                  builder: (context, menuSetState) {
-                    final isSelected =
-                        selectedCharacterTypes.contains(characterType);
-                    return InkWell(
-                      onTap: () {
-                        isSelected
-                            ? selectedCharacterTypes.remove(characterType)
-                            : selectedCharacterTypes.add(characterType);
-                        characterFilter.characterTypes = selectedCharacterTypes;
-
-                        // //This rebuilds the StatefulWidget to update the button's text
-                        setState(() {});
-                        //This rebuilds the dropdownMenu Widget to update the check mark
-                        menuSetState(() {});
-                        _search();
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0, 0, 0, 2),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton2(
+                  isExpanded: true,
+                  value: selectedCharacterTypes.isEmpty
+                      ? null
+                      : selectedCharacterTypes.last,
+                  hint: Text(
+                    AppLocalizations.of(context)!.characterTypeLabel,
+                    style: OnepieceFonts.dropDownItemStyle,
+                  ),
+                  onChanged: (value) {},
+                  selectedItemBuilder: (context) {
+                    return CharacterType.values.map(
+                      (item) {
+                        return Container(
+                          alignment: AlignmentDirectional.center,
+                          child: Text(
+                            selectedCharacterTypes
+                                .map((selectedType) {
+                                  return enumValueToDisplayValue[selectedType];
+                                })
+                                .toSet()
+                                .join(', '),
+                            style: const TextStyle(
+                              fontSize: 16,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            maxLines: 1,
+                          ),
+                        );
                       },
-                      child: Container(
-                        height: double.infinity,
-                        padding: const EdgeInsets.symmetric(horizontal: 6.0),
-                        child: Row(
-                          children: [
-                            if (isSelected)
-                              const Icon(Icons.check_box_outlined)
-                            else
-                              const Icon(Icons.check_box_outline_blank),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                enumValueToDisplayValue[characterType]!,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                ),
+                    ).toList();
+                  },
+                  buttonStyleData: ButtonStyleData(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      height: 34,
+                      width: 280,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(3),
+                        color: OnepieceColors.menuBackgroundColor,
+                      )),
+                  menuItemStyleData: const MenuItemStyleData(
+                    height: 35,
+                  ),
+                  items:
+                      CharacterType.values.map((CharacterType characterType) {
+                    return DropdownMenuItem<CharacterType>(
+                      value: characterType,
+                      enabled: false,
+                      child: StatefulBuilder(
+                        builder: (context, menuSetState) {
+                          final isSelected =
+                              selectedCharacterTypes.contains(characterType);
+                          return InkWell(
+                            onTap: () {
+                              isSelected
+                                  ? selectedCharacterTypes.remove(characterType)
+                                  : selectedCharacterTypes.add(characterType);
+                              characterFilter.characterTypes =
+                                  selectedCharacterTypes;
+
+                              // //This rebuilds the StatefulWidget to update the button's text
+                              setState(() {});
+                              //This rebuilds the dropdownMenu Widget to update the check mark
+                              menuSetState(() {});
+                              _search();
+                            },
+                            child: Container(
+                              height: double.infinity,
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 6.0),
+                              child: Row(
+                                children: [
+                                  if (isSelected)
+                                    const Icon(Icons.check_box_outlined)
+                                  else
+                                    const Icon(Icons.check_box_outline_blank),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      enumValueToDisplayValue[characterType]!,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ],
-                        ),
+                          );
+                        },
                       ),
                     );
-                  },
+                  }).toList(),
                 ),
-              );
-            }).toList(),
-          ),
+              ),
+            ),
+          ],
         ),
-      ),
-    ]);
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0, 0, 6, 3),
+              child: SizedBox(
+                height: 34,
+                child: ElevatedButton(
+                    onPressed: () {
+                      context.goNamed("createCharacter");
+                    },
+                    child: Text(AppLocalizations.of(context)!.createCharacter)),
+              ),
+            ),
+          ],
+        )
+      ]),
+    );
   }
 
   List<DataRow> _createRows(BuildContext context) {
