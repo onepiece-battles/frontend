@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:one_piece_battles_flutter/utils/random_string_generator.dart';
 import 'package:one_piece_battles_flutter/utils/string_extensions.dart';
 import 'package:openapi/api.dart';
+import '../constants/onepiece_colors.dart';
 import '../constants/path_constants.dart';
 import '../popup/onepiece_alert.dart';
 import '../repository/character_dao.dart';
@@ -17,14 +18,14 @@ import '../utils/onepiece_image_picker.dart';
 
 GetIt getIt = GetIt.instance;
 
-class AddCharacterView extends StatefulWidget {
-  const AddCharacterView({super.key});
+class CreateCharacterView extends StatefulWidget {
+  const CreateCharacterView({super.key});
 
   @override
-  State<AddCharacterView> createState() => _AddCharacterViewState();
+  State<CreateCharacterView> createState() => _CreateCharacterViewState();
 }
 
-class _AddCharacterViewState extends State<AddCharacterView> {
+class _CreateCharacterViewState extends State<CreateCharacterView> {
   TextEditingController characterNameController = TextEditingController(
       text: RandomStringGenerator.generateRandomString(8));
   TextEditingController characterFruitLimitController =
@@ -82,425 +83,429 @@ class _AddCharacterViewState extends State<AddCharacterView> {
       AppLocalizations.of(context)!.shoot: CharacterType.shooter,
     };
     String selectedItem = displayCharacterTypes.first;
-    return AlertDialog(
-      title: Center(
-        child: Text(
-          AppLocalizations.of(context)!.createCharacter,
-          style: const TextStyle(
-              color: Colors.blue, fontSize: 28, fontStyle: FontStyle.normal),
-        ),
-      ),
-      content: Container(
-        width: 800,
-        height: 800,
-        padding: const EdgeInsets.all(50),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: <Widget>[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  IconButton(
-                    onPressed: () async {
-                      XFile? pickedImage =
-                          await OnepieceImagePicker.pickWebImage();
-                      Uint8List imageInByte = await pickedImage!.readAsBytes();
-                      _pickedImage = imageInByte;
-                      setState(() {
-                        _newImagePicked = true;
-                      });
+    return Container(
+      width: 800,
+      height: 800,
+      padding: const EdgeInsets.all(50),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          children: <Widget>[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton(
+                  onPressed: () async {
+                    XFile? pickedImage =
+                        await OnepieceImagePicker.pickWebImage();
+                    Uint8List imageInByte = await pickedImage!.readAsBytes();
+                    _pickedImage = imageInByte;
+                    setState(() {
+                      _newImagePicked = true;
+                    });
+                  },
+                  iconSize: 100,
+                  splashRadius: 10,
+                  splashColor: Colors.red,
+                  icon: _pickedImage.isEmpty
+                      ? Image.asset(PathConstants.loginLuffyImage)
+                      : Image.memory(_pickedImage),
+                ),
+              ],
+            ),
+            const SizedBox(
+              height: 60,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 300,
+                  child: TextFormField(
+                    controller: characterNameController,
+                    validator: (value) {
+                      if (value!.isWhiteSpace()) {
+                        return AppLocalizations.of(context)!.requiredField;
+                      }
+                      return null;
                     },
-                    iconSize: 100,
-                    splashRadius: 10,
-                    splashColor: Colors.red,
-                    icon: _pickedImage.isEmpty
-                        ? Image.asset(PathConstants.loginLuffyImage)
-                        : Image.memory(_pickedImage),
-                  ),
-                ],
-              ),
-              const SizedBox(
-                height: 60,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    width: 300,
-                    child: TextFormField(
-                      controller: characterNameController,
-                      validator: (value) {
-                        if (value!.isWhiteSpace()) {
-                          return AppLocalizations.of(context)!.requiredField;
-                        }
-                        return null;
-                      },
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      maxLength: 10,
-                      maxLengthEnforcement: MaxLengthEnforcement.enforced,
-                      decoration: InputDecoration(
-                        labelText: AppLocalizations.of(context)!.characterName,
-                        prefixIcon: const Icon(Icons.people),
-                        suffixIcon: IconButton(
-                          onPressed: () {
-                            characterNameController.text = '';
-                          },
-                          icon: const Icon(Icons.cancel),
-                          splashRadius: 0.1,
-                        ),
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    maxLength: 10,
+                    maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                    decoration: InputDecoration(
+                      labelText: AppLocalizations.of(context)!.characterName,
+                      prefixIcon: const Icon(Icons.people),
+                      suffixIcon: IconButton(
+                        onPressed: () {
+                          characterNameController.text = '';
+                        },
+                        icon: const Icon(Icons.cancel),
+                        splashRadius: 0.1,
                       ),
                     ),
                   ),
-                  const SizedBox(
-                    width: 30,
-                  ),
-                  SizedBox(
-                    width: 300,
-                    child: DropdownSearch<String>(
-                      items: displayCharacterTypes,
-                      selectedItem: selectedItem,
-                      onChanged: (value) {
-                        selectedItem = value!;
-                      },
-                      dropdownDecoratorProps: DropDownDecoratorProps(
-                        dropdownSearchDecoration: InputDecoration(
-                            labelText: AppLocalizations.of(context)!
-                                .characterTypeLabel,
-                            hintText: AppLocalizations.of(context)!
-                                .characterTypeHint),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(
-                height: 30,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    width: 300,
-                    child: TextFormField(
-                      controller: characterFruitLimitController,
-                      validator: (value) {
-                        if (value!.isWhiteSpace()) {
-                          return AppLocalizations.of(context)!.requiredField;
-                        } else if (!value.isValidInt()) {
-                          return AppLocalizations.of(context)!.fieldMustBeInt;
-                        }
-                        int valueInt = int.parse(value);
-                        if (valueInt < 1 || valueInt > 3) {
-                          return AppLocalizations.of(context)!
-                              .valueExceedsLimit;
-                        }
-                        return null;
-                      },
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      decoration: InputDecoration(
-                          labelText: AppLocalizations.of(context)!.fruitLimit,
-                          hintStyle: const TextStyle(color: Colors.grey),
+                ),
+                const SizedBox(
+                  width: 30,
+                ),
+                SizedBox(
+                  width: 300,
+                  child: DropdownSearch<String>(
+                    items: displayCharacterTypes,
+                    selectedItem: selectedItem,
+                    onChanged: (value) {
+                      selectedItem = value!;
+                    },
+                    dropdownDecoratorProps: DropDownDecoratorProps(
+                      dropdownSearchDecoration: InputDecoration(
+                          labelText:
+                              AppLocalizations.of(context)!.characterTypeLabel,
                           hintText:
-                              "${AppLocalizations.of(context)!.valueRange}[1-2]"),
+                              AppLocalizations.of(context)!.characterTypeHint),
                     ),
                   ),
-                  const SizedBox(
-                    width: 30,
-                  ),
-                  SizedBox(
-                    width: 300,
-                    child: TextFormField(
-                      controller: characterGroupGainController,
-                      validator: (value) {
-                        if (value!.isWhiteSpace()) {
-                          return AppLocalizations.of(context)!.requiredField;
-                        } else if (!value.isValidInt()) {
-                          return AppLocalizations.of(context)!.fieldMustBeInt;
-                        }
-                        int valueInt = int.parse(value);
-                        if (valueInt < 1 || valueInt > 10) {
-                          return AppLocalizations.of(context)!
-                              .valueExceedsLimit;
-                        }
-                        return null;
-                      },
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      decoration: InputDecoration(
-                          labelText: AppLocalizations.of(context)!.groupGain,
-                          hintStyle: const TextStyle(color: Colors.grey),
-                          hintText:
-                              "${AppLocalizations.of(context)!.valueRange}[1-10]"),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(
-                height: 30,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    width: 300,
-                    child: TextFormField(
-                      controller: characterAttackController,
-                      validator: (value) {
-                        if (value!.isWhiteSpace()) {
-                          return AppLocalizations.of(context)!.requiredField;
-                        } else if (!value.isValidInt()) {
-                          return AppLocalizations.of(context)!.fieldMustBeInt;
-                        }
-                        int valueInt = int.parse(value);
-                        if (valueInt < 10 || valueInt > 1000) {
-                          return AppLocalizations.of(context)!
-                              .valueExceedsLimit;
-                        }
-                        return null;
-                      },
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      decoration: InputDecoration(
-                        labelText:
-                            AppLocalizations.of(context)!.characterAttack,
+                ),
+              ],
+            ),
+            const SizedBox(
+              height: 30,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 300,
+                  child: _getFormField(context, characterFruitLimitController,
+                      AppLocalizations.of(context)!.fruitLimit, "1-2", (value) {
+                    if (value!.isWhiteSpace()) {
+                      return AppLocalizations.of(context)!.requiredField;
+                    } else if (!value.isValidInt()) {
+                      return AppLocalizations.of(context)!.fieldMustBeInt;
+                    }
+                    int valueInt = int.parse(value);
+                    if (valueInt < 1 || valueInt > 3) {
+                      return AppLocalizations.of(context)!.valueExceedsLimit;
+                    }
+                    return "";
+                  }),
+                ),
+                const SizedBox(
+                  width: 30,
+                ),
+                SizedBox(
+                  width: 300,
+                  child: TextFormField(
+                    controller: characterGroupGainController,
+                    validator: (value) {
+                      if (value!.isWhiteSpace()) {
+                        return AppLocalizations.of(context)!.requiredField;
+                      } else if (!value.isValidInt()) {
+                        return AppLocalizations.of(context)!.fieldMustBeInt;
+                      }
+                      int valueInt = int.parse(value);
+                      if (valueInt < 1 || valueInt > 10) {
+                        return AppLocalizations.of(context)!.valueExceedsLimit;
+                      }
+                      return null;
+                    },
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    decoration: InputDecoration(
+                        labelText: AppLocalizations.of(context)!.groupGain,
                         hintStyle: const TextStyle(color: Colors.grey),
                         hintText:
-                            "${AppLocalizations.of(context)!.valueRange}[10-1000]",
-                      ),
+                            "${AppLocalizations.of(context)!.valueRange}[1-10]"),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(
+              height: 30,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 300,
+                  child: TextFormField(
+                    controller: characterAttackController,
+                    validator: (value) {
+                      if (value!.isWhiteSpace()) {
+                        return AppLocalizations.of(context)!.requiredField;
+                      } else if (!value.isValidInt()) {
+                        return AppLocalizations.of(context)!.fieldMustBeInt;
+                      }
+                      int valueInt = int.parse(value);
+                      if (valueInt < 10 || valueInt > 1000) {
+                        return AppLocalizations.of(context)!.valueExceedsLimit;
+                      }
+                      return null;
+                    },
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    decoration: InputDecoration(
+                      labelText: AppLocalizations.of(context)!.characterAttack,
+                      hintStyle: const TextStyle(color: Colors.grey),
+                      hintText:
+                          "${AppLocalizations.of(context)!.valueRange}[10-1000]",
                     ),
                   ),
-                  const SizedBox(
-                    width: 30,
+                ),
+                const SizedBox(
+                  width: 30,
+                ),
+                SizedBox(
+                  width: 300,
+                  child: TextFormField(
+                    controller: characterDefenseController,
+                    validator: (value) {
+                      if (value!.isWhiteSpace()) {
+                        return AppLocalizations.of(context)!.requiredField;
+                      } else if (!value.isValidInt()) {
+                        return AppLocalizations.of(context)!.fieldMustBeInt;
+                      }
+                      int valueInt = int.parse(value);
+                      if (valueInt < 10 || valueInt > 1000) {
+                        return AppLocalizations.of(context)!.valueExceedsLimit;
+                      }
+                      return null;
+                    },
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    decoration: InputDecoration(
+                      hintStyle: const TextStyle(color: Colors.grey),
+                      hintText:
+                          "${AppLocalizations.of(context)!.valueRange}[10-1000]",
+                      labelText: AppLocalizations.of(context)!.characterDefense,
+                    ),
                   ),
-                  SizedBox(
-                    width: 300,
-                    child: TextFormField(
-                      controller: characterDefenseController,
-                      validator: (value) {
-                        if (value!.isWhiteSpace()) {
-                          return AppLocalizations.of(context)!.requiredField;
-                        } else if (!value.isValidInt()) {
-                          return AppLocalizations.of(context)!.fieldMustBeInt;
-                        }
-                        int valueInt = int.parse(value);
-                        if (valueInt < 10 || valueInt > 1000) {
-                          return AppLocalizations.of(context)!
-                              .valueExceedsLimit;
-                        }
-                        return null;
-                      },
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      decoration: InputDecoration(
+                ),
+              ],
+            ),
+            const SizedBox(
+              height: 30,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 300,
+                  child: TextFormField(
+                    controller: characterIntelligenceController,
+                    validator: (value) {
+                      if (value!.isWhiteSpace()) {
+                        return AppLocalizations.of(context)!.requiredField;
+                      } else if (!value.isValidInt()) {
+                        return AppLocalizations.of(context)!.fieldMustBeInt;
+                      }
+                      int valueInt = int.parse(value);
+                      if (valueInt < 70 || valueInt > 260) {
+                        return AppLocalizations.of(context)!.valueExceedsLimit;
+                      }
+                      return null;
+                    },
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    decoration: InputDecoration(
+                        labelText:
+                            AppLocalizations.of(context)!.characterIntelligence,
                         hintStyle: const TextStyle(color: Colors.grey),
                         hintText:
-                            "${AppLocalizations.of(context)!.valueRange}[10-1000]",
+                            "${AppLocalizations.of(context)!.valueRange}[70-260]"),
+                  ),
+                ),
+                const SizedBox(
+                  width: 30,
+                ),
+                SizedBox(
+                  width: 300,
+                  child: TextFormField(
+                    controller: characterBloodController,
+                    validator: (value) {
+                      if (value!.isWhiteSpace()) {
+                        return AppLocalizations.of(context)!.requiredField;
+                      } else if (!value.isValidInt()) {
+                        return AppLocalizations.of(context)!.fieldMustBeInt;
+                      }
+                      int valueInt = int.parse(value);
+                      if (valueInt < 100 || valueInt > 10000) {
+                        return AppLocalizations.of(context)!.valueExceedsLimit;
+                      }
+                      return null;
+                    },
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    decoration: InputDecoration(
+                        labelText: AppLocalizations.of(context)!.characterBlood,
+                        hintStyle: const TextStyle(color: Colors.grey),
+                        hintText:
+                            "${AppLocalizations.of(context)!.valueRange}[100-10000]"),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(
+              height: 30,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 300,
+                  child: TextFormField(
+                    controller: characterSpeedController,
+                    validator: (value) {
+                      if (value!.isWhiteSpace()) {
+                        return AppLocalizations.of(context)!.requiredField;
+                      } else if (!value.isValidInt()) {
+                        return AppLocalizations.of(context)!.fieldMustBeInt;
+                      }
+                      int valueInt = int.parse(value);
+                      if (valueInt < 10 || valueInt > 200) {
+                        return AppLocalizations.of(context)!.valueExceedsLimit;
+                      }
+                      return null;
+                    },
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    decoration: InputDecoration(
+                        labelText: AppLocalizations.of(context)!.characterSpeed,
+                        hintStyle: const TextStyle(color: Colors.grey),
+                        hintText:
+                            "${AppLocalizations.of(context)!.valueRange}[10-200]"),
+                  ),
+                ),
+                const SizedBox(
+                  width: 30,
+                ),
+                SizedBox(
+                  width: 300,
+                  child: TextFormField(
+                    controller: characterEnergyController,
+                    validator: (value) {
+                      if (value!.isWhiteSpace()) {
+                        return AppLocalizations.of(context)!.requiredField;
+                      } else if (!value.isValidInt()) {
+                        return AppLocalizations.of(context)!.fieldMustBeInt;
+                      }
+                      int valueInt = int.parse(value);
+                      if (valueInt < 10 || valueInt > 50) {
+                        return AppLocalizations.of(context)!.valueExceedsLimit;
+                      }
+                      return null;
+                    },
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    decoration: InputDecoration(
                         labelText:
-                            AppLocalizations.of(context)!.characterDefense,
-                      ),
-                    ),
+                            AppLocalizations.of(context)!.characterEnergy,
+                        hintStyle: const TextStyle(color: Colors.grey),
+                        hintText:
+                            "${AppLocalizations.of(context)!.valueRange}[10-50]"),
                   ),
-                ],
-              ),
-              const SizedBox(
-                height: 30,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    width: 300,
-                    child: TextFormField(
-                      controller: characterIntelligenceController,
-                      validator: (value) {
-                        if (value!.isWhiteSpace()) {
-                          return AppLocalizations.of(context)!.requiredField;
-                        } else if (!value.isValidInt()) {
-                          return AppLocalizations.of(context)!.fieldMustBeInt;
-                        }
-                        int valueInt = int.parse(value);
-                        if (valueInt < 70 || valueInt > 260) {
-                          return AppLocalizations.of(context)!
-                              .valueExceedsLimit;
-                        }
-                        return null;
-                      },
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      decoration: InputDecoration(
-                          labelText: AppLocalizations.of(context)!
-                              .characterIntelligence,
-                          hintStyle: const TextStyle(color: Colors.grey),
-                          hintText:
-                              "${AppLocalizations.of(context)!.valueRange}[70-260]"),
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 30,
-                  ),
-                  SizedBox(
-                    width: 300,
-                    child: TextFormField(
-                      controller: characterBloodController,
-                      validator: (value) {
-                        if (value!.isWhiteSpace()) {
-                          return AppLocalizations.of(context)!.requiredField;
-                        } else if (!value.isValidInt()) {
-                          return AppLocalizations.of(context)!.fieldMustBeInt;
-                        }
-                        int valueInt = int.parse(value);
-                        if (valueInt < 100 || valueInt > 10000) {
-                          return AppLocalizations.of(context)!
-                              .valueExceedsLimit;
-                        }
-                        return null;
-                      },
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      decoration: InputDecoration(
-                          labelText:
-                              AppLocalizations.of(context)!.characterBlood,
-                          hintStyle: const TextStyle(color: Colors.grey),
-                          hintText:
-                              "${AppLocalizations.of(context)!.valueRange}[100-10000]"),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(
-                height: 30,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    width: 300,
-                    child: TextFormField(
-                      controller: characterSpeedController,
-                      validator: (value) {
-                        if (value!.isWhiteSpace()) {
-                          return AppLocalizations.of(context)!.requiredField;
-                        } else if (!value.isValidInt()) {
-                          return AppLocalizations.of(context)!.fieldMustBeInt;
-                        }
-                        int valueInt = int.parse(value);
-                        if (valueInt < 10 || valueInt > 200) {
-                          return AppLocalizations.of(context)!
-                              .valueExceedsLimit;
-                        }
-                        return null;
-                      },
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      decoration: InputDecoration(
-                          labelText:
-                              AppLocalizations.of(context)!.characterSpeed,
-                          hintStyle: const TextStyle(color: Colors.grey),
-                          hintText:
-                              "${AppLocalizations.of(context)!.valueRange}[10-200]"),
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 30,
-                  ),
-                  SizedBox(
-                    width: 300,
-                    child: TextFormField(
-                      controller: characterEnergyController,
-                      validator: (value) {
-                        if (value!.isWhiteSpace()) {
-                          return AppLocalizations.of(context)!.requiredField;
-                        } else if (!value.isValidInt()) {
-                          return AppLocalizations.of(context)!.fieldMustBeInt;
-                        }
-                        int valueInt = int.parse(value);
-                        if (valueInt < 10 || valueInt > 50) {
-                          return AppLocalizations.of(context)!
-                              .valueExceedsLimit;
-                        }
-                        return null;
-                      },
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      decoration: InputDecoration(
-                          labelText:
-                              AppLocalizations.of(context)!.characterEnergy,
-                          hintStyle: const TextStyle(color: Colors.grey),
-                          hintText:
-                              "${AppLocalizations.of(context)!.valueRange}[10-50]"),
-                    ),
-                  )
-                ],
-              ),
-            ],
-          ),
+                )
+              ],
+            ),
+          ],
         ),
       ),
-      actions: [
-        ElevatedButton(
-          child: Text(AppLocalizations.of(context)!.cancelPopUp),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        ElevatedButton(
-          child: Text(AppLocalizations.of(context)!.clearForm),
-          onPressed: () {
-            setState(() {
-              characterControllerList().forEach((element) {
-                element.clear();
-              });
-              _pickedImage = Uint8List(0);
-              _newImagePicked = false;
-            });
-          },
-        ),
-        ElevatedButton(
-          child: Text(AppLocalizations.of(context)!.submitForm),
-          onPressed: () {
-            final isValid = _formKey.currentState!.validate();
-            if (!_newImagePicked) {
-              OnepieceAlert.getBasicAlertDialogFunc(
-                  context,
-                  AppLocalizations.of(context)!.hint,
-                  'please upload character image');
-              return;
-            }
-            if (isValid) {
-              AddCharacterRequest addCharacterRequest = AddCharacterRequest(
-                  characterType: displayValueToEnumValue[selectedItem] ??
-                      CharacterType.body,
-                  name: characterNameController.text,
-                  fruitLimit: DataConverter.stringToInt(
-                      characterFruitLimitController.text),
-                  groupGain: DataConverter.stringToInt(
-                      characterGroupGainController.text),
-                  attack:
-                      DataConverter.stringToInt(characterAttackController.text),
-                  defense: DataConverter.stringToInt(
-                      characterDefenseController.text),
-                  intelligence: DataConverter.stringToInt(
-                      characterIntelligenceController.text),
-                  blood:
-                      DataConverter.stringToInt(characterBloodController.text),
-                  speed:
-                      DataConverter.stringToInt(characterSpeedController.text),
-                  magic: DataConverter.stringToInt(
-                      characterEnergyController.text));
-              getIt<CharacterDao>()
-                  .addCharacter(addCharacterRequest)
-                  .then((value) {
-                var encodedImage = Base64Helper.encode(_pickedImage);
-                UploadImageRequest uploadImageRequest = UploadImageRequest(
-                    resourceId: value!.id,
-                    image: encodedImage,
-                    type: ResourceType.CHARACTER);
-                getIt<ImageDao>().addImage(uploadImageRequest);
-                Navigator.of(context).pop();
-              });
-            } else {
-              OnepieceAlert.getBasicAlertDialogFunc(
-                  context,
-                  AppLocalizations.of(context)!.hint,
-                  'form is invalid please check again');
-            }
-          },
-        ),
-      ],
+
+      // actions: [
+      //   ElevatedButton(
+      //     child: Text(AppLocalizations.of(context)!.cancelPopUp),
+      //     onPressed: () {
+      //       Navigator.pop(context);
+      //     },
+      //   ),
+      //   ElevatedButton(
+      //     child: Text(AppLocalizations.of(context)!.clearForm),
+      //     onPressed: () {
+      //       setState(() {
+      //         characterControllerList().forEach((element) {
+      //           element.clear();
+      //         });
+      //         _pickedImage = Uint8List(0);
+      //         _newImagePicked = false;
+      //       });
+      //     },
+      //   ),
+      //   ElevatedButton(
+      //     child: Text(AppLocalizations.of(context)!.submitForm),
+      //     onPressed: () {
+      //       final isValid = _formKey.currentState!.validate();
+      //       if (!_newImagePicked) {
+      //         OnepieceAlert.getBasicAlertDialogFunc(
+      //             context,
+      //             AppLocalizations.of(context)!.hint,
+      //             'please upload character image');
+      //         return;
+      //       }
+      //       if (isValid) {
+      //         AddCharacterRequest addCharacterRequest = AddCharacterRequest(
+      //             characterType: displayValueToEnumValue[selectedItem] ??
+      //                 CharacterType.body,
+      //             name: characterNameController.text,
+      //             fruitLimit: DataConverter.stringToInt(
+      //                 characterFruitLimitController.text),
+      //             groupGain: DataConverter.stringToInt(
+      //                 characterGroupGainController.text),
+      //             attack:
+      //                 DataConverter.stringToInt(characterAttackController.text),
+      //             defense: DataConverter.stringToInt(
+      //                 characterDefenseController.text),
+      //             intelligence: DataConverter.stringToInt(
+      //                 characterIntelligenceController.text),
+      //             blood:
+      //                 DataConverter.stringToInt(characterBloodController.text),
+      //             speed:
+      //                 DataConverter.stringToInt(characterSpeedController.text),
+      //             magic: DataConverter.stringToInt(
+      //                 characterEnergyController.text));
+      //         getIt<CharacterDao>()
+      //             .addCharacter(addCharacterRequest)
+      //             .then((value) {
+      //           var encodedImage = Base64Helper.encode(_pickedImage);
+      //           UploadImageRequest uploadImageRequest = UploadImageRequest(
+      //               resourceId: value!.id,
+      //               image: encodedImage,
+      //               type: ResourceType.CHARACTER);
+      //           getIt<ImageDao>().addImage(uploadImageRequest);
+      //           Navigator.of(context).pop();
+      //         });
+      //       } else {
+      //         OnepieceAlert.getBasicAlertDialogFunc(
+      //             context,
+      //             AppLocalizations.of(context)!.hint,
+      //             'form is invalid please check again');
+      //       }
+      //     },
+      //   ),
+      // ],
     );
+  }
+
+  Widget _getFormField(
+      BuildContext context,
+      TextEditingController controller,
+      String label,
+      String rangeDescription,
+      String Function(String?) validationFunc) {
+    return TextFormField(
+      controller: controller,
+      validator: validationFunc,
+      // autovalidateMode: AutovalidateMode.onUserInteraction,
+      decoration: InputDecoration(
+        prefixIcon: const Icon(Icons.accessibility,),
+        floatingLabelBehavior: FloatingLabelBehavior.auto,
+        enabledBorder: const UnderlineInputBorder(),
+        disabledBorder: const UnderlineInputBorder(),
+        // border: const UnderlineInputBorder(),
+        focusedBorder: const UnderlineInputBorder(
+          borderSide: BorderSide(color: OnepieceColors.themeColor,style: BorderStyle.solid),
+        ),
+        contentPadding: const EdgeInsets.fromLTRB(0, 2, 0, 2),
+        labelText:"$label ($rangeDescription)",
+            // style: const TextStyle(
+            //   color: Colors.grey,
+            // ),
+        ),
+      );
+  }
+
+  Widget _getFootBar(BuildContext context) {
+    return Container();
   }
 }
