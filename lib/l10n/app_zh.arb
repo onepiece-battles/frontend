@@ -125,5 +125,8 @@
   "valueRange": "取 值：",
   "welcome": "欢迎光临海贼王！",
   "winner": "获胜者",
-  "zoanFruit": "动物系"
+  "zoanFruit": "动物系",
+  "yes": "是",
+  "no": "否",
+  "empty": "空"
 }

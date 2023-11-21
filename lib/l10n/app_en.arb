@@ -125,5 +125,8 @@
   "valueRange": "Value Range : ",
   "welcome": "Welcome to OnePiece!",
   "winner": "Winner",
-  "zoanFruit": "Zoan"
+  "zoanFruit": "Zoan",
+  "yes": "YES",
+  "no": "NO",
+  "empty": "Empty"
 }

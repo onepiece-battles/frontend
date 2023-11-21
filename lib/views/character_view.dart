@@ -163,10 +163,12 @@ class _CharacterViewState extends State<CharacterView> {
       _createSingleColumn(AppLocalizations.of(context)!.characterSpeed,
           CharacterSortableFieldsEnum.speed),
       DataColumn(
-          label: Text(
-        AppLocalizations.of(context)!.characterFruits,
-        style: OnepieceFonts.tableHeaderStyle,
-      )),
+        label: Text(
+          AppLocalizations.of(context)!.characterFruits,
+          style: OnepieceFonts.tableHeaderStyle,
+        ),
+      ),
+      _createSingleColumn(AppLocalizations.of(context)!.createdBySystem, null),
     ];
   }
 
@@ -386,6 +388,19 @@ class _CharacterViewState extends State<CharacterView> {
   }
 
   List<DataRow> _createRows(BuildContext context) {
+    Map<CharacterType, String> enumValueToDisplayValue =
+        <CharacterType, String>{
+      CharacterType.body: AppLocalizations.of(context)!.body,
+      CharacterType.foot: AppLocalizations.of(context)!.leg,
+      CharacterType.science: AppLocalizations.of(context)!.science,
+      CharacterType.fist: AppLocalizations.of(context)!.fist,
+      CharacterType.katana: AppLocalizations.of(context)!.katana,
+      CharacterType.shooter: AppLocalizations.of(context)!.shoot
+    };
+    Map<bool, String> booleanToDisplayName = {
+      true: AppLocalizations.of(context)!.yes,
+      false: AppLocalizations.of(context)!.no
+    };
     return currentCharacterList
         .map(
           (character) => DataRow(
@@ -403,7 +418,7 @@ class _CharacterViewState extends State<CharacterView> {
                         Base64Helper.decode(character.profileImage!)),
                   ))),
               DataCell(Text(character.name.toString())),
-              DataCell(Text(character.characterType.toString())),
+              DataCell(Text(enumValueToDisplayValue[character.characterType]!)),
               DataCell(Text(character.fruitLimit.toString())),
               DataCell(Text(character.groupGain.toString())),
               DataCell(Text(character.attack.toString())),
@@ -413,6 +428,7 @@ class _CharacterViewState extends State<CharacterView> {
               DataCell(Text(character.speed.toString())),
               DataCell(Text(
                   character.fruits.isEmpty ? "" : character.fruits.toString())),
+              DataCell(Text(booleanToDisplayName[character.isSystemResource]!)),
             ],
           ),
         )

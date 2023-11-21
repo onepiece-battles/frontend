@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:one_piece_battles_flutter/repository/battle_dao.dart';
+import 'package:one_piece_battles_flutter/utils/date_helper.dart';
 import 'package:one_piece_battles_flutter/views/create_battle_view.dart';
 import 'package:openapi/api.dart';
 import 'package:logging/logging.dart';
@@ -472,23 +473,43 @@ class _BattleViewState extends State<BattleView> {
   }
 
   List<DataRow> _createRows(BuildContext context) {
+    Map<BattleStatus, String> battleStatusToDisplayName = {
+      BattleStatus.created: AppLocalizations.of(context)!.battleStatusCreated,
+      BattleStatus.started: AppLocalizations.of(context)!.battleStatusStarted,
+      BattleStatus.finished: AppLocalizations.of(context)!.battleStatusFinished,
+      BattleStatus.canceled: AppLocalizations.of(context)!.battleStatusCanceled,
+      BattleStatus.failed: AppLocalizations.of(context)!.battleStatusFailed,
+    };
+    Map<bool, String> booleanToDisplayName = {
+      true: AppLocalizations.of(context)!.yes,
+      false: AppLocalizations.of(context)!.no
+    };
     return currentBattleList
         .asMap()
         .entries
         .map(
-          (entry) => DataRow(cells: [
-            DataCell(Text("${entry.key + 1}")),
-            DataCell(Text(entry.value.userName.toString())),
-            DataCell(Text(entry.value.starterName.toString())),
-            DataCell(Text(entry.value.receiverName.toString())),
-            DataCell(Text(DateTime.fromMicrosecondsSinceEpoch(
-                    entry.value.creationTimestamp!)
-                .toString())),
-            DataCell(Text(entry.value.modificationTimestamp.toString())),
-            DataCell(Text(entry.value.status.toString())),
-            DataCell(Text(" to be added in the future")),
-            DataCell(Text(entry.value.isSystemResource.toString())),
-          ]),
+          (entry) => DataRow(
+            cells: [
+              DataCell(Text("${entry.key + 1}")),
+              DataCell(Text(entry.value.userName.toString())),
+              DataCell(Text(entry.value.starterName.toString())),
+              DataCell(Text(entry.value.receiverName.toString())),
+              DataCell(Text(DateHelper.getLocalDateTimeFromTimestamp(
+                      entry.value.creationTimestamp!)
+                  .toString())),
+              DataCell(Text(DateHelper.getLocalDateTimeFromTimestamp(
+                  entry.value.modificationTimestamp!).toString())),
+              DataCell(Text(battleStatusToDisplayName[entry.value.status]!)),
+              DataCell(Text(entry.value.winnerId == null
+                  ? ""
+                  : (entry.value.winnerId == entry.value.starterId
+                      ? entry.value.starterName
+                      : entry.value.receiverName))),
+              DataCell(
+                Text(booleanToDisplayName[entry.value.isSystemResource]!),
+              ),
+            ],
+          ),
         )
         .toList();
   }
