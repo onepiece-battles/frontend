@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 class BattleDetailView extends StatefulWidget {
-  const BattleDetailView({super.key});
+  final String battleId;
+  const BattleDetailView({super.key, required this.battleId});
 
   @override
   State<BattleDetailView> createState() => _BattleDetailViewState();

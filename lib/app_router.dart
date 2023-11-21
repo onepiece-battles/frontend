@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:one_piece_battles_flutter/views/battle_detail_view.dart';
 import 'package:one_piece_battles_flutter/views/battle_view.dart';
 import 'package:one_piece_battles_flutter/views/character_detail_view.dart';
 import 'package:one_piece_battles_flutter/views/character_view.dart';
@@ -84,6 +85,22 @@ class AppRouter {
               pageBuilder: (context, state) {
                 return const NoTransitionPage(child: BattleView());
               },
+              routes: [
+                GoRoute(
+                  path: ':id',
+                  name: 'battleDetails',
+                  parentNavigatorKey: _homeNavigatorState,
+                  pageBuilder: (context, state) {
+                    String battleId = state.extra as String;
+                    debugPrint('battle id router is $battleId');
+                    return NoTransitionPage(
+                      child: BattleDetailView(
+                        battleId: battleId,
+                      ),
+                    );
+                  },
+                ),
+              ]
             ),
             GoRoute(
               path: userPath,
