@@ -27,7 +27,6 @@
   "characterIntelligence": "Intelligence",
   "characterName": "character name",
   "characterSpeed": "Speed",
-  "characterTypeHint": "Select character battle style",
   "characterTypeLabel": "Character battle style",
   "chinese": "Chinese",
   "chooseFile": "Choose file ...",
@@ -47,6 +46,7 @@
   "email": "Email",
   "emailAddress": "Your email address ",
   "emailSetting": "Email",
+  "empty": "Empty",
   "endOfList": "END OF LIST",
   "english": "English",
   "featureSuggestion": "Feature related suggestion",
@@ -83,6 +83,7 @@
   "mythicalZoanFruit": "Mythical (Zoan)",
   "name": "name",
   "nickname": "Nick name",
+  "no": "NO",
   "noAccount": "Don't have an account?",
   "noFileChosen": "No file chosen",
   "onButton": "OK",
@@ -104,7 +105,6 @@
   "roleVisitor": "VISITOR",
   "route": "Navigation",
   "science": "science",
-  "searchCharacterName": "search name ... ",
   "selectCharacter": "Select character",
   "settings": "Settings",
   "shoot": "sniper",
@@ -125,8 +125,6 @@
   "valueRange": "Value Range : ",
   "welcome": "Welcome to OnePiece!",
   "winner": "Winner",
-  "zoanFruit": "Zoan",
   "yes": "YES",
-  "no": "NO",
-  "empty": "Empty"
+  "zoanFruit": "Zoan"
 }

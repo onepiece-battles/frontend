@@ -43,12 +43,11 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[300],
-      body: SafeArea(
-        child: Column(
-          children: [
-            Align(
-              alignment: Alignment.topRight,
-              child: Padding(
+      body: Column(
+        children: [
+          Align(
+            alignment: Alignment.topRight,
+            child: Padding(
                 padding: const EdgeInsets.all(30),
                 child: FlutterToggleTab(
                   width: 4,
@@ -69,8 +68,8 @@ class _LoginPageState extends State<LoginPage> {
                         locale = locales.last;
                       }
                       MyApp.setLocale(context, locale);
-                      verificationMessage =
-                          I18nHelper.getI18nByLocale(verificationI18n, locale);
+                      verificationMessage = I18nHelper.getI18nByLocale(
+                          verificationI18n, locale);
                     });
                   },
                   selectedTextStyle: const TextStyle(
@@ -86,176 +85,171 @@ class _LoginPageState extends State<LoginPage> {
                   ],
                   marginSelected: const EdgeInsets.all(3),
                   selectedIndex: _tabTextIndexSelected,
-                  isScroll: false,
+                  // isScroll: true,
+                )),
+          ),
+          const SizedBox(height: 50),
+          const Image(
+            image: AssetImage(PathConstants.loginLuffyImage),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 40,
+            child: Text(
+              AppLocalizations.of(context)!.welcome,
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
+                  color: Colors.blue),
+            ),
+          ),
+          const SizedBox(height: 90),
+          SizedBox(
+            width: 300,
+            child: TextField(
+              onChanged: (value) {
+                setState(() {
+                  if (userNameController.text != "" &&
+                      emailController.text != "" &&
+                      passwordController.text != "") {
+                    _buttonEnabled = true;
+                  } else {
+                    _buttonEnabled = false;
+                  }
+                });
+              },
+              controller: userNameController,
+              autofocus: true,
+              decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)?.userNameLabel,
+                  prefixIcon: const Icon(Icons.person)),
+            ),
+          ),
+          const SizedBox(
+            height: 20,
+          ),
+          SizedBox(
+            width: 300,
+            child: TextField(
+              onChanged: (value) {
+                setState(() {
+                  if (userNameController.text != "" &&
+                      emailController.text != "" &&
+                      passwordController.text != "") {
+                    _buttonEnabled = true;
+                  } else {
+                    _buttonEnabled = false;
+                  }
+                });
+              },
+              controller: emailController,
+              autofocus: true,
+              decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)?.emailAddress,
+                  prefixIcon: const Icon(Icons.email)),
+            ),
+          ),
+          const SizedBox(
+            height: 20,
+          ),
+          SizedBox(
+            width: 300,
+            child: TextFormField(
+              onChanged: (value) {
+                setState(() {
+                  if (userNameController.text != "" &&
+                      emailController.text != "" &&
+                      passwordController.text != "") {
+                    _buttonEnabled = true;
+                  } else {
+                    _buttonEnabled = false;
+                  }
+                });
+              },
+              controller: passwordController,
+              keyboardType: TextInputType.text,
+              obscureText: _isHidden,
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context)?.passwordLabel,
+                prefixIcon: const Icon(Icons.lock),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _isHidden ? Icons.visibility_off : Icons.visibility,
+                    color: Theme.of(context).primaryColorDark,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isHidden = !_isHidden;
+                    });
+                  },
                 ),
               ),
             ),
-            const SizedBox(height: 50),
-            const Image(
-              image: AssetImage(PathConstants.loginLuffyImage),
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              height: 40,
-              child: Text(
-                AppLocalizations.of(context)!.welcome,
-                style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 24,
-                    color: Colors.blue),
-              ),
-            ),
-            const SizedBox(height: 90),
-            SizedBox(
-              width: 300,
-              child: TextField(
-                onChanged: (value) {
-                  setState(() {
-                    if (userNameController.text != "" &&
-                        emailController.text != "" &&
-                        passwordController.text != "") {
-                      _buttonEnabled = true;
-                    } else {
-                      _buttonEnabled = false;
-                    }
-                  });
-                },
-                controller: userNameController,
-                autofocus: true,
-                decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)?.userNameLabel,
-                    hintText: AppLocalizations.of(context)?.userNameHint,
-                    prefixIcon: const Icon(Icons.person)),
-              ),
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            SizedBox(
-              width: 300,
-              child: TextField(
-                onChanged: (value) {
-                  setState(() {
-                    if (userNameController.text != "" &&
-                        emailController.text != "" &&
-                        passwordController.text != "") {
-                      _buttonEnabled = true;
-                    } else {
-                      _buttonEnabled = false;
-                    }
-                  });
-                },
-                controller: emailController,
-                autofocus: true,
-                decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)?.emailAddress,
-                    hintText: AppLocalizations.of(context)?.emailAddress,
-                    prefixIcon: const Icon(Icons.email)),
-              ),
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            SizedBox(
-              width: 300,
-              child: TextFormField(
-                onChanged: (value) {
-                  setState(() {
-                    if (userNameController.text != "" &&
-                        emailController.text != "" &&
-                        passwordController.text != "") {
-                      _buttonEnabled = true;
-                    } else {
-                      _buttonEnabled = false;
-                    }
-                  });
-                },
-                controller: passwordController,
-                keyboardType: TextInputType.text,
-                obscureText: _isHidden,
-                decoration: InputDecoration(
-                  labelText: AppLocalizations.of(context)?.passwordLabel,
-                  hintText: AppLocalizations.of(context)?.passWordHint,
-                  prefixIcon: const Icon(Icons.lock),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _isHidden ? Icons.visibility_off : Icons.visibility,
-                      color: Theme.of(context).primaryColorDark,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _isHidden = !_isHidden;
+          ),
+          Text(
+            verificationMessage,
+            style: const TextStyle(color: Colors.red, fontSize: 10),
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: 300,
+            child: ElevatedButton(
+              onPressed: !_buttonEnabled
+                  ? null
+                  : () {
+                      LoginRequest loginRequest = LoginRequest(
+                          userName: userNameController.text,
+                          email: emailController.text,
+                          password: passwordController.text);
+                      Future<LoginResponse?> loginResponse =
+                          getIt<UserDao>().login(loginRequest);
+                      loginResponse.then((value) {
+                        if (value!.verification == null) {
+                          _route(value.user!, value.accessToken!, context);
+                        } else {
+                          setState(() {
+                            verificationI18n = value.verification;
+                            Locale myLocale = Localizations.localeOf(context);
+                            verificationMessage = I18nHelper.getI18nByLocale(
+                                verificationI18n, myLocale);
+                          });
+                        }
                       });
                     },
-                  ),
-                ),
+              child: Text(
+                AppLocalizations.of(context)!.signIn,
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 17),
               ),
             ),
-            Text(
-              verificationMessage,
-              style: const TextStyle(color: Colors.red, fontSize: 10),
-            ),
-            const SizedBox(height: 10),
-            SizedBox(
-              width: 300,
-              child: ElevatedButton(
-                onPressed: !_buttonEnabled
-                    ? null
-                    : () {
-                        LoginRequest loginRequest = LoginRequest(
-                            userName: userNameController.text,
-                            email: emailController.text,
-                            password: passwordController.text);
-                        Future<LoginResponse?> loginResponse =
-                            getIt<UserDao>().login(loginRequest);
-                        loginResponse.then((value) {
-                          if (value!.verification == null) {
-                            _route(value.user!, value.accessToken!, context);
-                          } else {
-                            setState(() {
-                              verificationI18n = value.verification;
-                              Locale myLocale = Localizations.localeOf(context);
-                              verificationMessage = I18nHelper.getI18nByLocale(
-                                  verificationI18n, myLocale);
-                            });
-                          }
-                        });
-                      },
+          ),
+          const SizedBox(height: 5),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                AppLocalizations.of(context)!.noAccount,
+                style:
+                    const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+              ),
+              TextButton(
+                onPressed: () {
+                  context.go(AppRouter.registerPath);
+                },
                 child: Text(
-                  AppLocalizations.of(context)!.signIn,
+                  AppLocalizations.of(context)!.registerAccount,
                   style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w500,
-                      fontSize: 17),
+                      color: Colors.blue,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      fontStyle: FontStyle.italic),
                 ),
-              ),
-            ),
-            const SizedBox(height: 5),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  AppLocalizations.of(context)!.noAccount,
-                  style: const TextStyle(
-                      fontSize: 12, fontWeight: FontWeight.bold),
-                ),
-                TextButton(
-                  onPressed: () {
-                    context.go(AppRouter.registerPath);
-                  },
-                  child: Text(
-                    AppLocalizations.of(context)!.registerAccount,
-                    style: const TextStyle(
-                        color: Colors.blue,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        fontStyle: FontStyle.italic),
-                  ),
-                )
-              ],
-            )
-          ],
-        ),
+              )
+            ],
+          )
+        ],
       ),
     );
   }

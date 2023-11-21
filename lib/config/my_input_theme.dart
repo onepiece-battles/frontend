@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 
 class MyInputTheme {
   TextStyle _buildTextStyle(Color color, {double size = 16.0}) {
     return TextStyle(color: color, fontSize: size);
   }
 
-  OutlineInputBorder _buildBorder(Color color) {
-    return OutlineInputBorder(
+  UnderlineInputBorder _buildBorder(Color color) {
+    return UnderlineInputBorder(
       borderRadius: const BorderRadius.all(Radius.circular(10)),
       borderSide: BorderSide(color: color, width: 1.0),
     );
   }
 
   InputDecorationTheme theme() => InputDecorationTheme(
-        contentPadding: const EdgeInsets.all(16),
-        floatingLabelBehavior: FloatingLabelBehavior.always,
+        contentPadding: const EdgeInsets.fromLTRB(0,5,0,3),
+        floatingLabelBehavior: FloatingLabelBehavior.auto,
 
         // borders
         enabledBorder: _buildBorder(Colors.grey[600]!),
@@ -27,12 +28,12 @@ class MyInputTheme {
         // text styles
         suffixStyle: _buildTextStyle(Colors.black),
         counterStyle: _buildTextStyle(Colors.grey, size: 12.0),
-        floatingLabelStyle: _buildTextStyle(Colors.black),
+        floatingLabelStyle: _buildTextStyle(OnepieceColors.themeColor),
 
         errorStyle: _buildTextStyle(Colors.red, size: 12),
         helperStyle: _buildTextStyle(Colors.black, size: 12),
         hintStyle: _buildTextStyle(Colors.grey),
-        labelStyle: _buildTextStyle(Colors.black),
+        labelStyle: _buildTextStyle(Colors.grey),
         prefixStyle: _buildTextStyle(Colors.black),
       );
 }

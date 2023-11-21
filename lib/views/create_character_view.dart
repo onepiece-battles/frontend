@@ -160,9 +160,8 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                       dropdownSearchDecoration: InputDecoration(
                           labelText:
                               AppLocalizations.of(context)!.characterTypeLabel,
-                          hintText:
-                              AppLocalizations.of(context)!.characterTypeHint),
                     ),
+                    )
                   ),
                 ),
               ],
