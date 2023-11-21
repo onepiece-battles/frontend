@@ -322,6 +322,8 @@ class _FruitViewState extends State<FruitView> {
           FruitSortableFieldsEnum.speedStrengthen),
       _createSingleColumn(AppLocalizations.of(context)!.fruitType,
           FruitSortableFieldsEnum.fruitType),
+      _createSingleColumn(AppLocalizations.of(context)!.createdBySystem,
+          null),
     ];
   }
 
@@ -382,6 +384,19 @@ class _FruitViewState extends State<FruitView> {
   }
 
   List<DataRow> _createRows(BuildContext context) {
+    Map<FruitType, String> fruitTypeToDisplayValue = {
+      FruitType.logia: AppLocalizations.of(context)!.logiaFruit,
+      FruitType.zoan: AppLocalizations.of(context)!.zoanFruit,
+      FruitType.ancientZoan: AppLocalizations.of(context)!.ancientZoanFruit,
+      FruitType.mythicalZoan: AppLocalizations.of(context)!.mythicalZoanFruit,
+      FruitType.artificialZoan:
+      AppLocalizations.of(context)!.artificialZoanFruit,
+      FruitType.paramecia: AppLocalizations.of(context)!.parameciaFruit,
+    };
+    Map<bool, String> booleanToDisplayName = {
+      true: AppLocalizations.of(context)!.yes,
+      false: AppLocalizations.of(context)!.no
+    };
     List<DataRow> result = [];
     var dataList = currentFruitList
         .map(
@@ -394,7 +409,8 @@ class _FruitViewState extends State<FruitView> {
               DataCell(Text(fruit.intelligenceStrengthen.toString())),
               DataCell(Text(fruit.groupGainStrengthen.toString())),
               DataCell(Text(fruit.speedStrengthen.toString())),
-              DataCell(Text(fruit.fruitType.toString())),
+              DataCell(Text(fruitTypeToDisplayValue[fruit.fruitType]!)),
+              DataCell(Text(booleanToDisplayName[fruit.isSystemResource]!)),
             ],
           ),
         )
