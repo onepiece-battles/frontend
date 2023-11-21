@@ -9,7 +9,7 @@ import 'package:one_piece_battles_flutter/repository/image_dao.dart';
 import 'package:one_piece_battles_flutter/repository/issue_dao.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
 import 'package:openapi/api.dart';
-import 'config/app_router.dart';
+import 'app_router.dart';
 import 'config/my_input_theme.dart';
 
 GetIt getIt = GetIt.instance;

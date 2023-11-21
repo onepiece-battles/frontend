@@ -3,7 +3,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_toggle_tab/flutter_toggle_tab.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
-import 'package:one_piece_battles_flutter/config/app_router.dart';
+import 'package:one_piece_battles_flutter/app_router.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';

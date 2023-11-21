@@ -410,13 +410,16 @@ class _CharacterViewState extends State<CharacterView> {
                   pathParameters: {'name': character.name});
             },
             cells: [
-              DataCell(Padding(
+              DataCell(
+                Padding(
                   padding: const EdgeInsets.fromLTRB(0, 3, 30, 3),
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 30),
                     child: Image.memory(
                         Base64Helper.decode(character.profileImage!)),
-                  ))),
+                  ),
+                ),
+              ),
               DataCell(Text(character.name.toString())),
               DataCell(Text(enumValueToDisplayValue[character.characterType]!)),
               DataCell(Text(character.fruitLimit.toString())),

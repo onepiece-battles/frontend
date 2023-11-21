@@ -2,6 +2,7 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
+import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/repository/battle_dao.dart';
 import 'package:one_piece_battles_flutter/utils/date_helper.dart';
 import 'package:one_piece_battles_flutter/views/create_battle_view.dart';
@@ -489,6 +490,11 @@ class _BattleViewState extends State<BattleView> {
         .entries
         .map(
           (entry) => DataRow(
+            onSelectChanged: (value) {
+              context.goNamed('battleDetails',
+              extra: entry.value.id,
+              pathParameters: {'id': entry.value.id});
+            },
             cells: [
               DataCell(Text("${entry.key + 1}")),
               DataCell(Text(entry.value.userName.toString())),

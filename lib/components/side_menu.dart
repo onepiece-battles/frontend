@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
-import 'package:one_piece_battles_flutter/config/app_router.dart';
+import 'package:one_piece_battles_flutter/app_router.dart';
 import 'package:one_piece_battles_flutter/utils/image_helper.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
