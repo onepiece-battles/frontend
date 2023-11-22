@@ -5,4 +5,15 @@ class DataValidator {
     }
     return int.tryParse(inputString) == null ? false : true;
   }
+
+  static bool validName(String name) {
+    if(name.isEmpty) {
+      return true;
+    }
+    // not case sensitive
+    if (name.contains(RegExp(r"[^a-zA-Z|\d]"))) {
+      return false;
+    }
+    return true;
+  }
 }

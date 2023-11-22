@@ -25,7 +25,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
   final ScrollController _starterScrollController = ScrollController();
   Character? starterSelectedItem;
   TextEditingController starterTextController = TextEditingController();
-  TextEditingController rightTextController = TextEditingController();
+  TextEditingController receiverTextController = TextEditingController();
   final ScrollController _receiverScrollController = ScrollController();
   Character? receiverSelectedItem;
   CharacterFilter starterCharacterFilter = CharacterFilter();
@@ -180,6 +180,13 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                           ),
                           floatingLabelBehavior: FloatingLabelBehavior.auto,
                           prefixIcon: const Icon(Icons.search),
+                          suffixIcon: IconButton(
+                            onPressed: () {
+                              starterTextController.text = '';
+                            },
+                            icon: const Icon(Icons.cancel),
+                            splashRadius: 0.1,
+                          ),
                         ),
                         onChanged: (value) {
                           starterCharacterFilter.name = value;
@@ -235,7 +242,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                       width: 350,
                       height: 60,
                       child: TextFormField(
-                        controller: rightTextController,
+                        controller: receiverTextController,
                         decoration: InputDecoration(
                           label: Text(
                             AppLocalizations.of(context)!.characterName,
@@ -243,6 +250,13 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                           ),
                           floatingLabelBehavior: FloatingLabelBehavior.auto,
                           prefixIcon: const Icon(Icons.search),
+                          suffixIcon: IconButton(
+                            onPressed: () {
+                              receiverTextController.text = '';
+                            },
+                            icon: const Icon(Icons.cancel),
+                            splashRadius: 0.1,
+                          ),
                         ),
                         onChanged: (value) {
                           receiverCharacterFilter.name = value;
