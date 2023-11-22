@@ -7,6 +7,7 @@ import 'package:one_piece_battles_flutter/views/character_detail_view.dart';
 import 'package:one_piece_battles_flutter/views/character_view.dart';
 import 'package:one_piece_battles_flutter/views/create_battle_view.dart';
 import 'package:one_piece_battles_flutter/views/create_character_view.dart';
+import 'package:one_piece_battles_flutter/views/create_fruit_view.dart';
 import 'package:one_piece_battles_flutter/views/fruit_view.dart';
 import 'package:one_piece_battles_flutter/views/issue_view.dart';
 import 'package:one_piece_battles_flutter/views/settings_view.dart';
@@ -89,6 +90,18 @@ class AppRouter {
               pageBuilder: (context, state) {
                 return const NoTransitionPage(child: FruitView());
               },
+              routes: [
+                GoRoute(
+                  path: 'create',
+                  name: 'createFruit',
+                  parentNavigatorKey: _homeNavigatorState,
+                  pageBuilder: (context, state) {
+                    return const NoTransitionPage(
+                      child: CreateFruitView(),
+                    );
+                  },
+                ),
+              ]
             ),
             GoRoute(
                 path: battlePath,
