@@ -130,5 +130,6 @@
   "invalidName": "name should only contains alphabet letters and digits",
   "characterImageRequired": "Please upload character head image",
   "basicInfo": "Basic information",
-  "digitalInfo": "Digital information"
+  "digitalInfo": "Digital information",
+  "energyConsume": "Energy consume"
 }
