@@ -426,19 +426,20 @@ class _FruitViewState extends State<FruitView> {
       false: AppLocalizations.of(context)!.no
     };
     List<DataRow> result = [];
-    var dataList = currentFruitList
+    var dataList = currentFruitList.asMap().entries
         .map(
-          (fruit) => DataRow(
+          (entry) => DataRow(
             cells: [
-              DataCell(Text(fruit.name.toString())),
-              DataCell(Text(fruit.attackStrengthen.toString())),
-              DataCell(Text(fruit.defenseStrengthen.toString())),
-              DataCell(Text(fruit.bloodStrengthen.toString())),
-              DataCell(Text(fruit.intelligenceStrengthen.toString())),
-              DataCell(Text(fruit.groupGainStrengthen.toString())),
-              DataCell(Text(fruit.speedStrengthen.toString())),
-              DataCell(Text(fruitTypeToDisplayValue[fruit.fruitType]!)),
-              DataCell(Text(booleanToDisplayName[fruit.isSystemResource]!)),
+              DataCell(Text("${entry.key + 1}")),
+              DataCell(Text(entry.value.name.toString())),
+              DataCell(Text(entry.value.attackStrengthen.toString())),
+              DataCell(Text(entry.value.defenseStrengthen.toString())),
+              DataCell(Text(entry.value.bloodStrengthen.toString())),
+              DataCell(Text(entry.value.intelligenceStrengthen.toString())),
+              DataCell(Text(entry.value.groupGainStrengthen.toString())),
+              DataCell(Text(entry.value.speedStrengthen.toString())),
+              DataCell(Text(fruitTypeToDisplayValue[entry.value.fruitType]!)),
+              DataCell(Text(booleanToDisplayName[entry.value.isSystemResource]!)),
             ],
           ),
         )

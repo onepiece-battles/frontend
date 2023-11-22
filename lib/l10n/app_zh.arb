@@ -130,5 +130,6 @@
   "invalidName": "名字只能包含字母和数字",
   "characterImageRequired": "请上传角色头像",
   "basicInfo": "基本信息",
-  "digitalInfo": "数值信息"
+  "digitalInfo": "数值信息",
+  "energyConsume": "能量消耗"
 }

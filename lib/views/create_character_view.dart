@@ -72,12 +72,12 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(15,0,15,0),
+        padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(0,0,0,15),
+              padding: const EdgeInsets.fromLTRB(0, 0, 0, 15),
               child: Text(
                 AppLocalizations.of(context)!.basicInfo,
                 style: OnepieceFonts.headerStyle,
@@ -119,13 +119,13 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
               ],
             ),
             const Padding(
-              padding: EdgeInsets.fromLTRB(0,0,0,8),
+              padding: EdgeInsets.fromLTRB(0, 0, 0, 8),
               child: Divider(
                 height: 2,
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(0,0,0,15),
+              padding: const EdgeInsets.fromLTRB(0, 0, 0, 15),
               child: Text(
                 AppLocalizations.of(context)!.digitalInfo,
                 style: OnepieceFonts.headerStyle,
@@ -136,37 +136,59 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
               child: Column(
                 children: <Widget>[
                   _getFormField(
-                    1,
-                    2,
-                    context,
-                    characterFruitLimitController,
-                    AppLocalizations.of(context)!.fruitLimit,
-                    const Icon(Icons.ac_unit)
-                  ),
+                      1,
+                      2,
+                      context,
+                      characterFruitLimitController,
+                      AppLocalizations.of(context)!.fruitLimit,
+                      const Icon(Icons.ac_unit)),
                   _getFormField(
-                    1,
-                    5,
-                    context,
-                    characterGroupGainController,
-                    AppLocalizations.of(context)!.groupGain,
-                      const Icon(Icons.face)
-                  ),
-                  _getFormField(10, 1000, context, characterAttackController,
+                      1,
+                      5,
+                      context,
+                      characterGroupGainController,
+                      AppLocalizations.of(context)!.groupGain,
+                      const Icon(Icons.face)),
+                  _getFormField(
+                      10,
+                      1000,
+                      context,
+                      characterAttackController,
                       AppLocalizations.of(context)!.characterAttack,
                       const Icon(Icons.face)),
-                  _getFormField(10, 1000, context, characterDefenseController,
+                  _getFormField(
+                      10,
+                      1000,
+                      context,
+                      characterDefenseController,
                       AppLocalizations.of(context)!.characterDefense,
                       const Icon(Icons.face)),
-                  _getFormField(70, 260, context, characterIntelligenceController,
+                  _getFormField(
+                      70,
+                      260,
+                      context,
+                      characterIntelligenceController,
                       AppLocalizations.of(context)!.characterIntelligence,
                       const Icon(Icons.face)),
-                  _getFormField(100, 10000, context, characterBloodController,
+                  _getFormField(
+                      100,
+                      10000,
+                      context,
+                      characterBloodController,
                       AppLocalizations.of(context)!.characterBlood,
                       const Icon(Icons.face)),
-                  _getFormField(10, 200, context, characterSpeedController,
+                  _getFormField(
+                      10,
+                      200,
+                      context,
+                      characterSpeedController,
                       AppLocalizations.of(context)!.characterSpeed,
                       const Icon(Icons.face)),
-                  _getFormField(10, 50, context, characterEnergyController,
+                  _getFormField(
+                      10,
+                      50,
+                      context,
+                      characterEnergyController,
                       AppLocalizations.of(context)!.characterEnergy,
                       const Icon(Icons.face)),
                 ],
@@ -184,7 +206,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
 
   Widget _getAvatar(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(0,0,15.0,0),
+      padding: const EdgeInsets.fromLTRB(0, 0, 15.0, 0),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(
           children: [
@@ -328,14 +350,8 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
     );
   }
 
-  Widget _getFormField(
-    int min,
-    int max,
-    BuildContext context,
-    TextEditingController controller,
-    String label,
-      Icon icon
-  ) {
+  Widget _getFormField(int min, int max, BuildContext context,
+      TextEditingController controller, String label, Icon icon) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 20, 0, 10),
       child: SizedBox(
@@ -355,9 +371,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
             return null;
           },
           decoration: InputDecoration(
-            prefixIcon: const Icon(
-              Icons.accessibility,
-            ),
+            prefixIcon: icon,
             floatingLabelBehavior: FloatingLabelBehavior.auto,
             contentPadding: const EdgeInsets.fromLTRB(0, 2, 0, 2),
             labelText: "$label ($min-$max)",
@@ -368,15 +382,6 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
   }
 
   Widget _getFootBar(BuildContext context) {
-    Map<String, CharacterType> displayValueToEnumValue =
-        <String, CharacterType>{
-      AppLocalizations.of(context)!.body: CharacterType.body,
-      AppLocalizations.of(context)!.leg: CharacterType.foot,
-      AppLocalizations.of(context)!.science: CharacterType.science,
-      AppLocalizations.of(context)!.fist: CharacterType.fist,
-      AppLocalizations.of(context)!.katana: CharacterType.katana,
-      AppLocalizations.of(context)!.shoot: CharacterType.shooter,
-    };
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Row(
@@ -400,6 +405,9 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                 ? null
                 : () {
                     final isValid = _formKey.currentState!.validate();
+                    if (!isValid) {
+                      return;
+                    }
                     if (!_newImagePicked) {
                       OnepieceAlert.getBasicAlertDialogFunc(
                           context,
@@ -407,45 +415,38 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                           AppLocalizations.of(context)!.characterImageRequired);
                       return;
                     }
-                    if (isValid) {
-                      AddCharacterRequest addCharacterRequest = AddCharacterRequest(
-                          characterType:
-                              displayValueToEnumValue[selectedCharacterType] ??
-                                  CharacterType.body,
-                          name: characterNameController.text,
-                          fruitLimit: DataConverter.stringToInt(
-                              characterFruitLimitController.text),
-                          groupGain: DataConverter.stringToInt(
-                              characterGroupGainController.text),
-                          attack: DataConverter.stringToInt(
-                              characterAttackController.text),
-                          defense: DataConverter.stringToInt(
-                              characterDefenseController.text),
-                          intelligence: DataConverter.stringToInt(
-                              characterIntelligenceController.text),
-                          blood: DataConverter.stringToInt(
-                              characterBloodController.text),
-                          speed:
-                              DataConverter.stringToInt(characterSpeedController.text),
-                          magic: DataConverter.stringToInt(characterEnergyController.text));
-                      getIt<CharacterDao>()
-                          .addCharacter(addCharacterRequest)
-                          .then((value) {
-                        var encodedImage = Base64Helper.encode(_pickedImage);
-                        UploadImageRequest uploadImageRequest =
-                            UploadImageRequest(
-                                resourceId: value!.id,
-                                image: encodedImage,
-                                type: ResourceType.CHARACTER);
-                        getIt<ImageDao>().addImage(uploadImageRequest);
-                        context.goNamed("characters");
-                      });
-                    } else {
-                      OnepieceAlert.getBasicAlertDialogFunc(
-                          context,
-                          AppLocalizations.of(context)!.hint,
-                          'form is invalid please check again');
-                    }
+                    AddCharacterRequest addCharacterRequest =
+                        AddCharacterRequest(
+                            characterType: selectedCharacterType,
+                            name: characterNameController.text,
+                            fruitLimit: DataConverter.stringToInt(
+                                characterFruitLimitController.text),
+                            groupGain: DataConverter.stringToInt(
+                                characterGroupGainController.text),
+                            attack: DataConverter.stringToInt(
+                                characterAttackController.text),
+                            defense: DataConverter.stringToInt(
+                                characterDefenseController.text),
+                            intelligence: DataConverter.stringToInt(
+                                characterIntelligenceController.text),
+                            blood: DataConverter.stringToInt(
+                                characterBloodController.text),
+                            speed: DataConverter.stringToInt(
+                                characterSpeedController.text),
+                            magic: DataConverter.stringToInt(
+                                characterEnergyController.text));
+                    getIt<CharacterDao>()
+                        .addCharacter(addCharacterRequest)
+                        .then((value) {
+                      var encodedImage = Base64Helper.encode(_pickedImage);
+                      UploadImageRequest uploadImageRequest =
+                          UploadImageRequest(
+                              resourceId: value!.id,
+                              image: encodedImage,
+                              type: ResourceType.CHARACTER);
+                      getIt<ImageDao>().addImage(uploadImageRequest);
+                      context.goNamed("characters");
+                    });
                   },
             child: Text(AppLocalizations.of(context)!.submitForm),
           ),
