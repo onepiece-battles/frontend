@@ -117,7 +117,7 @@
   "submitForm": "Submit",
   "unselected": "Unselected",
   "updateUserSettings": "Update user settings",
-  "uploadNewAvatar": "Upload new avatar",
+  "uploadNewAvatar": "Upload avatar",
   "userManagement": "User Management",
   "userNameHint": "Username",
   "userNameLabel": "Username",
@@ -126,5 +126,9 @@
   "welcome": "Welcome to OnePiece!",
   "winner": "Winner",
   "yes": "YES",
-  "zoanFruit": "Zoan"
+  "zoanFruit": "Zoan",
+  "invalidName": "name should only contains alphabet letters and digits",
+  "characterImageRequired": "Please upload character head image",
+  "basicInfo": "Basic information",
+  "digitalInfo": "Digital information"
 }

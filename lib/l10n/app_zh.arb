@@ -117,7 +117,7 @@
   "submitForm": "提交",
   "unselected": "未选择",
   "updateUserSettings": "更新用户设置",
-  "uploadNewAvatar": "上传新头像",
+  "uploadNewAvatar": "上传头像",
   "userManagement": "用户管理",
   "userNameHint": "用户名",
   "userNameLabel": "用户名",
@@ -126,5 +126,9 @@
   "welcome": "欢迎光临海贼王！",
   "winner": "获胜者",
   "yes": "是",
-  "zoanFruit": "动物系"
+  "zoanFruit": "动物系",
+  "invalidName": "名字只能包含字母和数字",
+  "characterImageRequired": "请上传角色头像",
+  "basicInfo": "基本信息",
+  "digitalInfo": "数值信息"
 }

@@ -146,7 +146,7 @@ class AppRouter {
           path: registerPath,
           builder: (context, state) => const RegisterPage()),
     ],
-    debugLogDiagnostics: true,
+    // debugLogDiagnostics: true,
     redirect: (context, state) {
       // if the user is not logged in, they need to login
       final loggedIn = getIt<User>().name != '';

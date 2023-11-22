@@ -211,19 +211,26 @@ class _CharacterViewState extends State<CharacterView> {
             children: [
               Text(
                 displayText,
-                style: OnepieceFonts.tableHeaderStyle,
+                style:
+                    sortableEnumToSortOrderMap[characterSortableFieldsEnum] ==
+                            null
+                        ? OnepieceFonts.tableHeaderStyle
+                        : OnepieceFonts.selectedTableHeaderStyle,
               ),
-              characterSortableFieldsEnum != null
-                  ? Padding(
-                      padding: const EdgeInsets.all(5.0),
-                      child: ImageHelper.getSvgIcon(
-                        sortOrderToPath[sortableEnumToSortOrderMap[
-                            characterSortableFieldsEnum]]!,
-                        15,
-                        15,
-                      ),
-                    )
-                  : const SizedBox.shrink()
+              if (characterSortableFieldsEnum != null)
+                Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: ImageHelper.getSvgIconWithColor(
+                    sortOrderToPath[sortableEnumToSortOrderMap[
+                        characterSortableFieldsEnum]]!,
+                    15,
+                    15,
+                    sortableEnumToSortOrderMap[characterSortableFieldsEnum] ==
+                            null
+                        ? Colors.grey
+                        : OnepieceColors.themeColor,
+                  ),
+                )
             ],
           ),
         ),
@@ -424,11 +431,12 @@ class _CharacterViewState extends State<CharacterView> {
                       borderRadius:
                           const BorderRadius.all(Radius.circular(2.0)),
                       border: Border.all(
-                          color: OnepieceColors.themeColor,
+                          color: Colors.grey,
                           width: 2,
                           style: BorderStyle.solid),
                     ),
-                    child: Expanded(
+                    child: FittedBox(
+                      fit: BoxFit.fill,
                       child: Image.memory(
                           Base64Helper.decode(character.profileImage!)),
                     ),

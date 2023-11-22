@@ -40,6 +40,11 @@ class OnepieceFonts {
       fontSize: OnepieceFonts.contentFontSize,
       fontWeight: OnepieceFonts.headerFontWeight
   );
+  static const TextStyle selectedTableHeaderStyle = TextStyle(
+      color: OnepieceColors.themeColor,
+      fontSize: OnepieceFonts.contentFontSize,
+      fontWeight: OnepieceFonts.headerFontWeight
+  );
   static const TextStyle dropDownItemStyle = TextStyle(
       color: OnepieceFonts.contentFontColor,
       fontSize: OnepieceFonts.contentFontSize
