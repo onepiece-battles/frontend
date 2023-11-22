@@ -1,6 +1,7 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:go_router/go_router.dart';
 import 'package:openapi/api.dart';
 import '../constants/onepiece_colors.dart';
 import '../constants/onepiece_fonts.dart';
@@ -8,7 +9,6 @@ import '../repository/fruit_dao.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../utils/data_validator.dart';
 import '../utils/image_helper.dart';
-import 'create_battle_view.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -26,6 +26,7 @@ class _FruitViewState extends State<FruitView> {
   List<FruitSortableField> sortKeys = [];
 
   TextEditingController pageNumberController = TextEditingController(text: "1");
+  TextEditingController searchNameController = TextEditingController();
 
   // first all columns will be sorted by creation id desc.
   Map<FruitSortableFieldsEnum, SortOrder?> sortableEnumToSortOrderMap = {
@@ -98,34 +99,35 @@ class _FruitViewState extends State<FruitView> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(15.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _getHeaderText(context),
-          _getControlRow(context),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.vertical,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ConstrainedBox(
-                constraints: BoxConstraints.loose(const Size.fromWidth(1500)),
-                child: FittedBox(
-                  fit: BoxFit.fill,
-                  child: _getFruitsTable(context),
-                ),
+              _getHeaderText(context),
+              _getControlRow(context),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  _getFruitsTable(context),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  ConstrainedBox(
+                    constraints:
+                        BoxConstraints.loose(const Size.fromWidth(1500)),
+                    child: FittedBox(
+                      fit: BoxFit.fitWidth,
+                      child: Center(child: _getPageFoot()),
+                    ),
+                  )
+                ],
               ),
-              const SizedBox(
-                height: 15,
-              ),
-              ConstrainedBox(
-                constraints: BoxConstraints.loose(const Size.fromWidth(1500)),
-                child: FittedBox(
-                  fit: BoxFit.fitWidth,
-                  child: Center(child: _getPageFoot()),
-                ),
-              )
             ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -141,28 +143,55 @@ class _FruitViewState extends State<FruitView> {
   }
 
   Widget _getControlRow(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(0, 0, 6, 6),
-          child: SizedBox(
-            height: 33,
-            child: ElevatedButton(
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: ((context) {
-                      return const CreateBattleView();
-                    }),
-                  );
-                },
-                child: Text(AppLocalizations.of(context)!.createDevilFruit)),
+    return SizedBox(
+      width: 1228,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 0, 6,8),
+                child: SizedBox(
+                  width: 200,
+                  height: 45,
+                  child: TextFormField(
+                    controller: searchNameController,
+                    onChanged: (value) {
+                      fruitFilter.name = value;
+                      _search();
+                    },
+                    decoration: InputDecoration(
+                      prefixIcon: IconButton(
+                          onPressed: () {
+                            fruitFilter.name = searchNameController.text;
+                            _search();
+                          },
+                          icon: const Icon(Icons.search)),
+                      labelText: AppLocalizations.of(context)!.name,
+                    ),
+                  ),
+                ),
+              ),
+              _getFruitTypeFilter(context),
+            ],
           ),
-        ),
-        // battle type filter
-        _getFruitTypeFilter(context),
-      ],
+          Padding(
+            padding: const EdgeInsets.fromLTRB(0, 0, 6, 0),
+            child: SizedBox(
+              height: 33,
+              child: ElevatedButton(
+                  onPressed: () {
+                    context.goNamed("createFruit");
+                  },
+                  child: Text(AppLocalizations.of(context)!.createDevilFruit)),
+            ),
+          ),
+          // battle type filter
+        ],
+      ),
     );
   }
 
@@ -177,7 +206,7 @@ class _FruitViewState extends State<FruitView> {
       FruitType.paramecia: AppLocalizations.of(context)!.parameciaFruit,
     };
     return Padding(
-      padding: const EdgeInsets.fromLTRB(0, 0, 6, 6),
+      padding: const EdgeInsets.fromLTRB(0, 0, 6, 0),
       child: DropdownButtonHideUnderline(
         child: DropdownButton2(
           isExpanded: true,
@@ -322,8 +351,7 @@ class _FruitViewState extends State<FruitView> {
           FruitSortableFieldsEnum.speedStrengthen),
       _createSingleColumn(AppLocalizations.of(context)!.fruitType,
           FruitSortableFieldsEnum.fruitType),
-      _createSingleColumn(AppLocalizations.of(context)!.createdBySystem,
-          null),
+      _createSingleColumn(AppLocalizations.of(context)!.createdBySystem, null),
     ];
   }
 
@@ -390,7 +418,7 @@ class _FruitViewState extends State<FruitView> {
       FruitType.ancientZoan: AppLocalizations.of(context)!.ancientZoanFruit,
       FruitType.mythicalZoan: AppLocalizations.of(context)!.mythicalZoanFruit,
       FruitType.artificialZoan:
-      AppLocalizations.of(context)!.artificialZoanFruit,
+          AppLocalizations.of(context)!.artificialZoanFruit,
       FruitType.paramecia: AppLocalizations.of(context)!.parameciaFruit,
     };
     Map<bool, String> booleanToDisplayName = {
