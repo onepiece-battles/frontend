@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
-import 'package:one_piece_battles_flutter/repository/battle_dao.dart';
 import 'package:openapi/api.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../constants/onepiece_colors.dart';
@@ -129,194 +128,202 @@ class _CreateBattleViewState extends State<CreateBattleView> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Center(
-        child: Text(
-          AppLocalizations.of(context)!.createBattle,
-          style: OnepieceFonts.headerStyle,
-        ),
-      ),
-      content: Padding(
-        padding: const EdgeInsets.all(18.0),
-        child: Row(
-          children: [
-            Container(
-              height: 800,
-              decoration: const BoxDecoration(
-                  color: OnepieceColors.menuBackgroundColor,
-                  borderRadius: BorderRadius.all(Radius.circular(15))),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      AppLocalizations.of(context)!.initiator,
-                      style: OnepieceFonts.tableHeaderStyle,
-                    ),
-                  ),
-                  starterSelectedItem == null
-                      ? const SizedBox(
-                          height: 30,
-                          child: Text(
-                            "?",
-                            style: OnepieceFonts.contentStyleBold,
+    return Padding(
+        padding: const EdgeInsets.all(15.0),
+        child: Center(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: SizedBox(
+                        width: 350,
+                        height: 60,
+                        child: TextFormField(
+                          controller: starterTextController,
+                          decoration: InputDecoration(
+                            label: Text(
+                              AppLocalizations.of(context)!.characterName,
+                              style: OnepieceFonts.hintFont,
+                            ),
+                            floatingLabelBehavior: FloatingLabelBehavior.auto,
+                            prefixIcon: const Icon(Icons.search),
                           ),
-                        )
-                      : SizedBox(
-                          height: 30, child: Text(starterSelectedItem!.name)),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: SizedBox(
-                      width: 350,
-                      height: 60,
-                      child: TextFormField(
-                        controller: starterTextController,
-                        decoration: InputDecoration(
-                          label: Text(
-                            AppLocalizations.of(context)!.characterName,
-                            style: OnepieceFonts.hintFont,
-                          ),
-                          floatingLabelBehavior: FloatingLabelBehavior.auto,
-                          prefixIcon: const Icon(Icons.search),
-                          suffixIcon: IconButton(
-                            onPressed: () {
-                              starterTextController.text = '';
-                            },
-                            icon: const Icon(Icons.cancel),
-                            splashRadius: 0.1,
-                          ),
+                          onChanged: (value) {
+                            starterCharacterFilter.name = value;
+                            _searchStarter(true);
+                          },
                         ),
-                        onChanged: (value) {
-                          starterCharacterFilter.name = value;
-                          _searchStarter(true);
-                        },
                       ),
                     ),
-                  ),
-                  Container(
-                    width: 350,
-                    height: 350,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.all(Radius.circular(8)),
-                    ),
-                    child: getStarter(context),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(
-              width: 30,
-            ),
-            Container(
-              height: 800,
-              decoration: const BoxDecoration(
-                  color: OnepieceColors.menuBackgroundColor,
-                  borderRadius: BorderRadius.all(Radius.circular(15))),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      AppLocalizations.of(context)!.receiver,
-                      style: OnepieceFonts.tableHeaderStyle,
-                    ),
-                  ),
-                  receiverSelectedItem == null
-                      ? const SizedBox(
-                          height: 30,
-                          child: Text(
-                            "?",
-                            style: OnepieceFonts.contentStyleBold,
-                          ),
-                        )
-                      : SizedBox(
-                          height: 30, child: Text(receiverSelectedItem!.name)),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: SizedBox(
+                    Container(
                       width: 350,
-                      height: 60,
-                      child: TextFormField(
-                        controller: receiverTextController,
-                        decoration: InputDecoration(
-                          label: Text(
-                            AppLocalizations.of(context)!.characterName,
-                            style: OnepieceFonts.hintFont,
-                          ),
-                          floatingLabelBehavior: FloatingLabelBehavior.auto,
-                          prefixIcon: const Icon(Icons.search),
-                          suffixIcon: IconButton(
-                            onPressed: () {
-                              receiverTextController.text = '';
-                            },
-                            icon: const Icon(Icons.cancel),
-                            splashRadius: 0.1,
-                          ),
-                        ),
-                        onChanged: (value) {
-                          receiverCharacterFilter.name = value;
-                          _searchReceiver(true);
-                        },
+                      height: 350,
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.all(Radius.circular(8)),
+                      ),
+                      child: getStarter(context),
+                    ),
+                  ],
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        AppLocalizations.of(context)!.initiator,
+                        style: OnepieceFonts.tableHeaderStyle,
                       ),
                     ),
-                  ),
-                  Container(
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.all(Radius.circular(8)),
+                    const Text("image"),
+                    starterSelectedItem == null
+                        ? const SizedBox(
+                            height: 30,
+                            child: Text(
+                              "?",
+                              style: OnepieceFonts.contentStyleBold,
+                            ),
+                          )
+                        : SizedBox(
+                            height: 30, child: Text(starterSelectedItem!.name)),
+                  ],
+                ),
+                const Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: SizedBox(
+                        height: 400,
+                        child: VerticalDivider(
+                          width: 3,
+                          thickness: 3,
+                          color: Colors.black45,
+                        ),
+                      ),
                     ),
-                    height: 350,
-                    width: 350,
-                    child: getReceiver(context),
-                  ),
-                ],
-              ),
+                    Text("VS"),
+                    Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: SizedBox(
+                        height: 400,
+                        child: VerticalDivider(
+                          width: 3,
+                          thickness: 3,
+                          color: Colors.black45,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        AppLocalizations.of(context)!.receiver,
+                        style: OnepieceFonts.tableHeaderStyle,
+                      ),
+                    ),
+                    const Text("image"),
+                    receiverSelectedItem == null
+                        ? const SizedBox(
+                            height: 30,
+                            child: Text(
+                              "?",
+                              style: OnepieceFonts.contentStyleBold,
+                            ),
+                          )
+                        : SizedBox(
+                            height: 30, child: Text(receiverSelectedItem!.name)),
+                  ],
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: SizedBox(
+                        width: 350,
+                        height: 60,
+                        child: TextFormField(
+                          controller: receiverTextController,
+                          decoration: InputDecoration(
+                            label: Text(
+                              AppLocalizations.of(context)!.characterName,
+                              style: OnepieceFonts.hintFont,
+                            ),
+                            floatingLabelBehavior: FloatingLabelBehavior.auto,
+                            prefixIcon: const Icon(Icons.search),
+                          ),
+                          onChanged: (value) {
+                            receiverCharacterFilter.name = value;
+                            _searchReceiver(true);
+                          },
+                        ),
+                      ),
+                    ),
+                    Container(
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.all(Radius.circular(8)),
+                      ),
+                      height: 350,
+                      width: 350,
+                      child: getReceiver(context),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
-      actions: [
-        ElevatedButton(
-          child: Text(AppLocalizations.of(context)!.cancelPopUp),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        ElevatedButton(
-          onPressed:
-              (starterSelectedItem == null && receiverSelectedItem == null)
-                  ? null
-                  : () {
-                      setState(() {
-                        starterSelectedItem = null;
-                        starterSelectedId = "";
-                        receiverSelectedItem = null;
-                        receiverSelectedId = "";
-                      });
-                    },
-          child: Text(AppLocalizations.of(context)!.clearForm),
-        ),
-        ElevatedButton(
-          onPressed:
-              (starterSelectedItem == null || receiverSelectedItem == null)
-                  ? null
-                  : () {
-                      AddBattleRequest request = AddBattleRequest(
-                          userId: getIt<User>().id,
-                          starterId: starterSelectedId,
-                          receiverId: receiverSelectedId);
-                      getIt<BattleDao>().addBattle(request);
-                      Navigator.pop(context);
-                    },
-          child: Text(AppLocalizations.of(context)!.submitForm),
-        ),
-      ],
-    );
+          ),
+        ));
+    // actions: [
+    //   ElevatedButton(
+    //     child: Text(AppLocalizations.of(context)!.cancelPopUp),
+    //     onPressed: () {
+    //       Navigator.pop(context);
+    //     },
+    //   ),
+    //   ElevatedButton(
+    //     onPressed:
+    //         (starterSelectedItem == null && receiverSelectedItem == null)
+    //             ? null
+    //             : () {
+    //                 setState(() {
+    //                   starterSelectedItem = null;
+    //                   starterSelectedId = "";
+    //                   receiverSelectedItem = null;
+    //                   receiverSelectedId = "";
+    //                 });
+    //               },
+    //     child: Text(AppLocalizations.of(context)!.clearForm),
+    //   ),
+    //   ElevatedButton(
+    //     onPressed:
+    //         (starterSelectedItem == null || receiverSelectedItem == null)
+    //             ? null
+    //             : () {
+    //                 AddBattleRequest request = AddBattleRequest(
+    //                     userId: getIt<User>().id,
+    //                     starterId: starterSelectedId,
+    //                     receiverId: receiverSelectedId);
+    //                 getIt<BattleDao>().addBattle(request);
+    //                 Navigator.pop(context);
+    //               },
+    //     child: Text(AppLocalizations.of(context)!.submitForm),
+    //   ),
+    // ],
   }
 
   Widget getStarter(BuildContext context) {

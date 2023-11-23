@@ -162,12 +162,7 @@ class _BattleViewState extends State<BattleView> {
           padding: const EdgeInsets.fromLTRB(0, 0, 0, 6),
           child: ElevatedButton(
             onPressed: () {
-              showDialog(
-                context: context,
-                builder: ((context) {
-                  return const CreateBattleView();
-                }),
-              );
+              context.goNamed("createBattle");
             },
             child: Text(AppLocalizations.of(context)!.createBattle),
           ),
