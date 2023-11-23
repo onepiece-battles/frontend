@@ -112,6 +112,16 @@ class AppRouter {
                 },
                 routes: [
                   GoRoute(
+                    path: 'create',
+                    name: 'createBattle',
+                    parentNavigatorKey: _homeNavigatorState,
+                    pageBuilder: (context, state) {
+                      return const NoTransitionPage(
+                        child: CreateBattleView(),
+                      );
+                    },
+                  ),
+                  GoRoute(
                     path: ':id',
                     name: 'battleDetails',
                     parentNavigatorKey: _homeNavigatorState,
