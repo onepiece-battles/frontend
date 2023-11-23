@@ -100,34 +100,36 @@ class _BattleViewState extends State<BattleView> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(15.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _getHeaderText(context),
-          _getControlRow(context),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              ConstrainedBox(
-                constraints: BoxConstraints.loose(const Size.fromWidth(1500)),
-                child: FittedBox(
-                  fit: BoxFit.fill,
-                  child: _getBattlesTable(context),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _getHeaderText(context),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 1200,
+                  height: 35,
+                  child: _getControlRow(context),
                 ),
-              ),
-              const SizedBox(
-                height: 15,
-              ),
-              ConstrainedBox(
-                constraints: BoxConstraints.loose(const Size.fromWidth(1500)),
-                child: FittedBox(
-                  fit: BoxFit.fitWidth,
-                  child: Center(child: _getPageFoot()),
+                SizedBox(
+                  width: 1200,
+                  child: FittedBox(
+                    fit: BoxFit.fitWidth,
+                    child: _getBattlesTable(context),
+                  ),
                 ),
-              )
-            ],
-          ),
-        ],
+                const SizedBox(
+                  height: 15,
+                ),
+                SizedBox(width: 1200, child:
+                Center(child: _getPageFoot()),)
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -144,28 +146,30 @@ class _BattleViewState extends State<BattleView> {
 
   Widget _getControlRow(BuildContext context) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            _getBattleTypeFilter(context),
+            _getBattleStatusFilter(context)
+          ],
+        ),
         Padding(
-          padding: const EdgeInsets.fromLTRB(0, 0, 6, 6),
-          child: SizedBox(
-            height: 33,
-            child: ElevatedButton(
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: ((context) {
-                      return const CreateBattleView();
-                    }),
-                  );
-                },
-                child: Text(AppLocalizations.of(context)!.createBattle)),
+          padding: const EdgeInsets.fromLTRB(0, 0, 0, 6),
+          child: ElevatedButton(
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: ((context) {
+                  return const CreateBattleView();
+                }),
+              );
+            },
+            child: Text(AppLocalizations.of(context)!.createBattle),
           ),
         ),
-        // battle type filter
-        _getBattleTypeFilter(context),
-        // battle status filter
-        _getBattleStatusFilter(context)
       ],
     );
   }
@@ -210,8 +214,8 @@ class _BattleViewState extends State<BattleView> {
           },
           buttonStyleData: ButtonStyleData(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            height: 34,
-            width: 280,
+            height: 35,
+            width: 180,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(3),
               color: OnepieceColors.menuBackgroundColor,
@@ -314,8 +318,8 @@ class _BattleViewState extends State<BattleView> {
           },
           buttonStyleData: ButtonStyleData(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              height: 34,
-              width: 280,
+              height: 35,
+              width: 180,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(3),
                 color: OnepieceColors.menuBackgroundColor,
@@ -448,25 +452,29 @@ class _BattleViewState extends State<BattleView> {
               });
             },
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
+        padding: const EdgeInsets.fromLTRB(5, 10, 0, 10),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Text(
               displayText,
-              style: OnepieceFonts.tableHeaderStyle,
+              style: sortableEnumToSortOrderMap[sortableFieldsEnum] == null
+                  ? OnepieceFonts.tableHeaderStyle
+                  : OnepieceFonts.selectedTableHeaderStyle,
             ),
-            sortableFieldsEnum != null
-                ? Padding(
-                    padding: const EdgeInsets.all(5.0),
-                    child: ImageHelper.getSvgIcon(
-                      sortOrderToPath[
-                          sortableEnumToSortOrderMap[sortableFieldsEnum]]!,
-                      15,
-                      15,
-                    ),
-                  )
-                : const SizedBox.shrink()
+            if (sortableFieldsEnum != null)
+              Padding(
+                padding: const EdgeInsets.all(5.0),
+                child: ImageHelper.getSvgIconWithColor(
+                  sortOrderToPath[
+                      sortableEnumToSortOrderMap[sortableFieldsEnum]]!,
+                  15,
+                  15,
+                  sortableEnumToSortOrderMap[sortableFieldsEnum] == null
+                      ? Colors.grey
+                      : OnepieceColors.themeColor,
+                ),
+              )
           ],
         ),
       ),
@@ -492,32 +500,38 @@ class _BattleViewState extends State<BattleView> {
           (entry) => DataRow(
             onSelectChanged: (value) {
               context.goNamed('battleDetails',
-              extra: entry.value.id,
-              pathParameters: {'id': entry.value.id});
+                  extra: entry.value.id,
+                  pathParameters: {'id': entry.value.id});
             },
             cells: [
-              DataCell(Text("${entry.key + 1}")),
-              DataCell(Text(entry.value.userName.toString())),
-              DataCell(Text(entry.value.starterName.toString())),
-              DataCell(Text(entry.value.receiverName.toString())),
-              DataCell(Text(DateHelper.getLocalDateTimeFromTimestamp(
+              _getDataCell("${entry.key + 1}"),
+              _getDataCell(entry.value.userName.toString()),
+              _getDataCell(entry.value.starterName.toString()),
+              _getDataCell(entry.value.receiverName.toString()),
+              _getDataCell(DateHelper.getLocalDateTimeFromTimestamp(
                       entry.value.creationTimestamp!)
-                  .toString())),
-              DataCell(Text(DateHelper.getLocalDateTimeFromTimestamp(
-                  entry.value.modificationTimestamp!).toString())),
-              DataCell(Text(battleStatusToDisplayName[entry.value.status]!)),
-              DataCell(Text(entry.value.winnerId == null
+                  .toString()),
+              _getDataCell(DateHelper.getLocalDateTimeFromTimestamp(
+                      entry.value.modificationTimestamp!)
+                  .toString()),
+              _getDataCell(battleStatusToDisplayName[entry.value.status]!),
+              _getDataCell(entry.value.winnerId == null
                   ? ""
                   : (entry.value.winnerId == entry.value.starterId
                       ? entry.value.starterName
-                      : entry.value.receiverName))),
-              DataCell(
-                Text(booleanToDisplayName[entry.value.isSystemResource]!),
-              ),
+                      : entry.value.receiverName)),
+              _getDataCell(booleanToDisplayName[entry.value.isSystemResource]!),
             ],
           ),
         )
         .toList();
+  }
+
+  DataCell _getDataCell(String value) {
+    return DataCell(Padding(
+      padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+      child: Text(value),
+    ));
   }
 
   Widget _getPageFoot() {
@@ -609,6 +623,7 @@ class _BattleViewState extends State<BattleView> {
       child: nextPage,
     ));
     return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: widgetList,
     );
   }

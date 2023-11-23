@@ -153,7 +153,7 @@ class _FruitViewState extends State<FruitView> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(0, 0, 6,8),
+                padding: const EdgeInsets.fromLTRB(0, 0, 6, 8),
                 child: SizedBox(
                   width: 200,
                   height: 45,
@@ -385,25 +385,29 @@ class _FruitViewState extends State<FruitView> {
                 });
               },
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
+          padding: const EdgeInsets.fromLTRB(5, 10, 0, 10),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Text(
                 displayText,
-                style: OnepieceFonts.tableHeaderStyle,
+                style: sortableEnumToSortOrderMap[sortableFieldsEnum] == null
+                    ? OnepieceFonts.tableHeaderStyle
+                    : OnepieceFonts.selectedTableHeaderStyle,
               ),
-              sortableFieldsEnum != null
-                  ? Padding(
-                      padding: const EdgeInsets.all(5.0),
-                      child: ImageHelper.getSvgIcon(
-                        sortOrderToPath[
-                            sortableEnumToSortOrderMap[sortableFieldsEnum]]!,
-                        15,
-                        15,
-                      ),
-                    )
-                  : const SizedBox.shrink()
+              if (sortableFieldsEnum != null)
+                Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: ImageHelper.getSvgIconWithColor(
+                    sortOrderToPath[
+                        sortableEnumToSortOrderMap[sortableFieldsEnum]]!,
+                    15,
+                    15,
+                    sortableEnumToSortOrderMap[sortableFieldsEnum] == null
+                        ? Colors.grey
+                        : OnepieceColors.themeColor,
+                  ),
+                )
             ],
           ),
         ),
@@ -426,26 +430,35 @@ class _FruitViewState extends State<FruitView> {
       false: AppLocalizations.of(context)!.no
     };
     List<DataRow> result = [];
-    var dataList = currentFruitList.asMap().entries
+    var dataList = currentFruitList
+        .asMap()
+        .entries
         .map(
           (entry) => DataRow(
             cells: [
-              DataCell(Text("${entry.key + 1}")),
-              DataCell(Text(entry.value.name.toString())),
-              DataCell(Text(entry.value.attackStrengthen.toString())),
-              DataCell(Text(entry.value.defenseStrengthen.toString())),
-              DataCell(Text(entry.value.bloodStrengthen.toString())),
-              DataCell(Text(entry.value.intelligenceStrengthen.toString())),
-              DataCell(Text(entry.value.groupGainStrengthen.toString())),
-              DataCell(Text(entry.value.speedStrengthen.toString())),
-              DataCell(Text(fruitTypeToDisplayValue[entry.value.fruitType]!)),
-              DataCell(Text(booleanToDisplayName[entry.value.isSystemResource]!)),
+              _getDataCell("${entry.key + 1}"),
+              _getDataCell(entry.value.name.toString()),
+              _getDataCell(entry.value.attackStrengthen.toString()),
+              _getDataCell(entry.value.defenseStrengthen.toString()),
+              _getDataCell(entry.value.bloodStrengthen.toString()),
+              _getDataCell(entry.value.intelligenceStrengthen.toString()),
+              _getDataCell(entry.value.groupGainStrengthen.toString()),
+              _getDataCell(entry.value.speedStrengthen.toString()),
+              _getDataCell(fruitTypeToDisplayValue[entry.value.fruitType]!),
+              _getDataCell(booleanToDisplayName[entry.value.isSystemResource]!),
             ],
           ),
         )
         .toList();
     result.addAll(dataList);
     return result;
+  }
+
+  DataCell _getDataCell(String value) {
+    return DataCell(Padding(
+      padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+      child: Text(value),
+    ));
   }
 
   Widget _getPageFoot() {
