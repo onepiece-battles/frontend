@@ -131,5 +131,10 @@
   "characterImageRequired": "请上传角色头像",
   "basicInfo": "基本信息",
   "digitalInfo": "数值信息",
-  "energyConsume": "能量消耗"
+  "energyConsume": "能量消耗",
+  "statusCreated": "已创建",
+  "statusInProgress": "处理中",
+  "statusRevoked": "驳回",
+  "statusResolved": "已解决",
+  "statusBackLogged": "暂不处理"
 }
