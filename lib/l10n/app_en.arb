@@ -131,5 +131,10 @@
   "characterImageRequired": "Please upload character head image",
   "basicInfo": "Basic information",
   "digitalInfo": "Digital information",
-  "energyConsume": "Energy consume"
+  "energyConsume": "Energy consume",
+  "statusCreated": "Created",
+  "statusInProgress": "In Progress",
+  "statusRevoked": "Revoked",
+  "statusResolved": "Resolved",
+  "statusBackLogged": "Backlog"
 }

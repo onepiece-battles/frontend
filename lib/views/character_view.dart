@@ -61,6 +61,38 @@ class _CharacterViewState extends State<CharacterView> {
     super.initState();
     _search();
   }
+  void _search() {
+    ListCharacterRequest listCharacterRequest = ListCharacterRequest(
+        pageSize: pageSize,
+        pageIndex: selectedPageIndex,
+        sortKeys: sortKeys,
+        characterFilter: characterFilter);
+    Future<ListCharacterResponse?> listCharacterResponse =
+    getIt<CharacterDao>().listCharacter(listCharacterRequest);
+
+    listCharacterResponse.then((value) {
+      setState(() {
+        currentCharacterList = value!.characters;
+        if (currentCharacterList.isEmpty) {
+          pageNumberController.text = "0";
+        } else {
+          pageNumberController.text = selectedPageIndex.toString();
+        }
+        totalSize = value.totalSize!;
+        pageNum = (totalSize / 10).ceil();
+        if (selectedPageIndex <= 1) {
+          preButtonEnabled = false;
+        } else {
+          preButtonEnabled = true;
+        }
+        if (selectedPageIndex >= pageNum) {
+          nextButtonEnabled = false;
+        } else {
+          nextButtonEnabled = true;
+        }
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -110,7 +142,149 @@ class _CharacterViewState extends State<CharacterView> {
       ),
     );
   }
-
+  Widget _createControlPanel(BuildContext context) {
+    Map<CharacterType, String> enumValueToDisplayValue =
+    <CharacterType, String>{
+      CharacterType.body: AppLocalizations.of(context)!.body,
+      CharacterType.foot: AppLocalizations.of(context)!.leg,
+      CharacterType.science: AppLocalizations.of(context)!.science,
+      CharacterType.fist: AppLocalizations.of(context)!.fist,
+      CharacterType.katana: AppLocalizations.of(context)!.katana,
+      CharacterType.shooter: AppLocalizations.of(context)!.shoot
+    };
+    return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(0, 0, 0, 6),
+            child: SizedBox(
+              width: 200,
+              child: TextFormField(
+                controller: searchNameController,
+                onChanged: (value) {
+                  characterFilter.name = value;
+                  _search();
+                },
+                decoration: InputDecoration(
+                  prefixIcon: IconButton(
+                      onPressed: () {
+                        characterFilter.name = searchNameController.text;
+                        _search();
+                      },
+                      icon: const Icon(Icons.search)),
+                  labelText: AppLocalizations.of(context)!.name,
+                ),
+              ),
+            ),
+          ),
+          DropdownButtonHideUnderline(
+            child: DropdownButton2(
+              isExpanded: true,
+              value: selectedCharacterTypes.isEmpty
+                  ? null
+                  : selectedCharacterTypes.last,
+              hint: Text(
+                AppLocalizations.of(context)!.characterTypeLabel,
+                style: OnepieceFonts.dropDownItemStyle,
+              ),
+              onChanged: (value) {},
+              selectedItemBuilder: (context) {
+                return CharacterType.values.map(
+                      (item) {
+                    return Container(
+                      alignment: AlignmentDirectional.center,
+                      child: Text(
+                        selectedCharacterTypes
+                            .map((selectedType) {
+                          return enumValueToDisplayValue[selectedType];
+                        })
+                            .toSet()
+                            .join(', '),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        maxLines: 1,
+                      ),
+                    );
+                  },
+                ).toList();
+              },
+              buttonStyleData: ButtonStyleData(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  height: 35,
+                  width: 280,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(3),
+                    color: OnepieceColors.menuBackgroundColor,
+                  )),
+              menuItemStyleData: const MenuItemStyleData(
+                height: 35,
+              ),
+              items: CharacterType.values.map((CharacterType characterType) {
+                return DropdownMenuItem<CharacterType>(
+                  value: characterType,
+                  enabled: false,
+                  child: StatefulBuilder(
+                    builder: (context, menuSetState) {
+                      final isSelected =
+                      selectedCharacterTypes.contains(characterType);
+                      return InkWell(
+                        onTap: () {
+                          isSelected
+                              ? selectedCharacterTypes.remove(characterType)
+                              : selectedCharacterTypes.add(characterType);
+                          characterFilter.characterTypes =
+                              selectedCharacterTypes;
+                          // //This rebuilds the StatefulWidget to update the button's text
+                          setState(() {});
+                          //This rebuilds the dropdownMenu Widget to update the check mark
+                          menuSetState(() {});
+                          _search();
+                        },
+                        child: Container(
+                          height: double.infinity,
+                          padding:
+                          const EdgeInsets.symmetric(horizontal: 6.0),
+                          child: Row(
+                            children: [
+                              if (isSelected)
+                                const Icon(Icons.check_box_outlined)
+                              else
+                                const Icon(Icons.check_box_outline_blank),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  enumValueToDisplayValue[characterType]!,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ],
+      ),
+      SizedBox(
+        height: 35,
+        child: ElevatedButton(
+            onPressed: () {
+              context.goNamed("createCharacter");
+            },
+            child: Text(AppLocalizations.of(context)!.createCharacter)),
+      )
+    ]);
+  }
   DataTable _createCharacterTable(BuildContext context) {
     return DataTable(
       showCheckboxColumn: false,
@@ -123,7 +297,6 @@ class _CharacterViewState extends State<CharacterView> {
       columnSpacing: 30,
     );
   }
-
   List<DataColumn> _createColumns() {
     return [
       DataColumn(
@@ -174,7 +347,6 @@ class _CharacterViewState extends State<CharacterView> {
       _createSingleColumn(AppLocalizations.of(context)!.createdBySystem, null),
     ];
   }
-
   DataColumn _createSingleColumn(String displayText,
       CharacterSortableFieldsEnum? characterSortableFieldsEnum) {
     return DataColumn(
@@ -238,151 +410,6 @@ class _CharacterViewState extends State<CharacterView> {
       ),
     );
   }
-
-  Widget _createControlPanel(BuildContext context) {
-    Map<CharacterType, String> enumValueToDisplayValue =
-        <CharacterType, String>{
-      CharacterType.body: AppLocalizations.of(context)!.body,
-      CharacterType.foot: AppLocalizations.of(context)!.leg,
-      CharacterType.science: AppLocalizations.of(context)!.science,
-      CharacterType.fist: AppLocalizations.of(context)!.fist,
-      CharacterType.katana: AppLocalizations.of(context)!.katana,
-      CharacterType.shooter: AppLocalizations.of(context)!.shoot
-    };
-    return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-      Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(0, 0, 0, 6),
-            child: SizedBox(
-              width: 200,
-              child: TextFormField(
-                controller: searchNameController,
-                onChanged: (value) {
-                  characterFilter.name = value;
-                  _search();
-                },
-                decoration: InputDecoration(
-                  prefixIcon: IconButton(
-                      onPressed: () {
-                        characterFilter.name = searchNameController.text;
-                        _search();
-                      },
-                      icon: const Icon(Icons.search)),
-                  labelText: AppLocalizations.of(context)!.name,
-                ),
-              ),
-            ),
-          ),
-          DropdownButtonHideUnderline(
-            child: DropdownButton2(
-              isExpanded: true,
-              value: selectedCharacterTypes.isEmpty
-                  ? null
-                  : selectedCharacterTypes.last,
-              hint: Text(
-                AppLocalizations.of(context)!.characterTypeLabel,
-                style: OnepieceFonts.dropDownItemStyle,
-              ),
-              onChanged: (value) {},
-              selectedItemBuilder: (context) {
-                return CharacterType.values.map(
-                  (item) {
-                    return Container(
-                      alignment: AlignmentDirectional.center,
-                      child: Text(
-                        selectedCharacterTypes
-                            .map((selectedType) {
-                              return enumValueToDisplayValue[selectedType];
-                            })
-                            .toSet()
-                            .join(', '),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        maxLines: 1,
-                      ),
-                    );
-                  },
-                ).toList();
-              },
-              buttonStyleData: ButtonStyleData(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  height: 35,
-                  width: 280,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(3),
-                    color: OnepieceColors.menuBackgroundColor,
-                  )),
-              menuItemStyleData: const MenuItemStyleData(
-                height: 35,
-              ),
-              items: CharacterType.values.map((CharacterType characterType) {
-                return DropdownMenuItem<CharacterType>(
-                  value: characterType,
-                  enabled: false,
-                  child: StatefulBuilder(
-                    builder: (context, menuSetState) {
-                      final isSelected =
-                          selectedCharacterTypes.contains(characterType);
-                      return InkWell(
-                        onTap: () {
-                          isSelected
-                              ? selectedCharacterTypes.remove(characterType)
-                              : selectedCharacterTypes.add(characterType);
-                          characterFilter.characterTypes =
-                              selectedCharacterTypes;
-                          // //This rebuilds the StatefulWidget to update the button's text
-                          setState(() {});
-                          //This rebuilds the dropdownMenu Widget to update the check mark
-                          menuSetState(() {});
-                          _search();
-                        },
-                        child: Container(
-                          height: double.infinity,
-                          padding:
-                              const EdgeInsets.symmetric(horizontal: 6.0),
-                          child: Row(
-                            children: [
-                              if (isSelected)
-                                const Icon(Icons.check_box_outlined)
-                              else
-                                const Icon(Icons.check_box_outline_blank),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  enumValueToDisplayValue[characterType]!,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-        ],
-      ),
-      SizedBox(
-        height: 35,
-        child: ElevatedButton(
-            onPressed: () {
-              context.goNamed("createCharacter");
-            },
-            child: Text(AppLocalizations.of(context)!.createCharacter)),
-      )
-    ]);
-  }
-
   List<DataRow> _createRows(BuildContext context) {
     Map<CharacterType, String> enumValueToDisplayValue =
         <CharacterType, String>{
@@ -479,40 +506,6 @@ class _CharacterViewState extends State<CharacterView> {
         )
         .toList();
   }
-
-  void _search() {
-    ListCharacterRequest listCharacterRequest = ListCharacterRequest(
-        pageSize: pageSize,
-        pageIndex: selectedPageIndex,
-        sortKeys: sortKeys,
-        characterFilter: characterFilter);
-    Future<ListCharacterResponse?> listCharacterResponse =
-        getIt<CharacterDao>().listCharacter(listCharacterRequest);
-
-    listCharacterResponse.then((value) {
-      setState(() {
-        currentCharacterList = value!.characters;
-        if (currentCharacterList.isEmpty) {
-          pageNumberController.text = "0";
-        } else {
-          pageNumberController.text = selectedPageIndex.toString();
-        }
-        totalSize = value.totalSize!;
-        pageNum = (totalSize / 10).ceil();
-        if (selectedPageIndex <= 1) {
-          preButtonEnabled = false;
-        } else {
-          preButtonEnabled = true;
-        }
-        if (selectedPageIndex >= pageNum) {
-          nextButtonEnabled = false;
-        } else {
-          nextButtonEnabled = true;
-        }
-      });
-    });
-  }
-
   Row _getPageFoot() {
     List<Widget> widgetList = [];
     ElevatedButton prePage = ElevatedButton(

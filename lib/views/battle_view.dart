@@ -5,7 +5,6 @@ import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/repository/battle_dao.dart';
 import 'package:one_piece_battles_flutter/utils/date_helper.dart';
-import 'package:one_piece_battles_flutter/views/create_battle_view.dart';
 import 'package:openapi/api.dart';
 import 'package:logging/logging.dart';
 import '../constants/onepiece_colors.dart';
