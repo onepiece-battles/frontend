@@ -107,24 +107,25 @@ class _FruitViewState extends State<FruitView> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _getHeaderText(context),
-              _getControlRow(context),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  _getFruitsTable(context),
-                  const SizedBox(
-                    height: 15,
-                  ),
-                  ConstrainedBox(
-                    constraints:
-                        BoxConstraints.loose(const Size.fromWidth(1500)),
-                    child: FittedBox(
-                      fit: BoxFit.fitWidth,
-                      child: Center(child: _getPageFoot()),
-                    ),
-                  )
-                ],
+              SizedBox(
+                width: 1200,
+                height: 50,
+                child: _getControlRow(context),
               ),
+              SizedBox(
+                width: 1200,
+                child: FittedBox(
+                  fit: BoxFit.fitWidth,
+                  child: _getFruitsTable(context),
+                ),
+              ),
+              const SizedBox(
+                height: 15,
+              ),
+              SizedBox(
+                width: 1200,
+                child: Center(child: _getPageFoot()),
+              )
             ],
           ),
         ),
@@ -143,55 +144,51 @@ class _FruitViewState extends State<FruitView> {
   }
 
   Widget _getControlRow(BuildContext context) {
-    return SizedBox(
-      width: 1228,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 0, 6, 8),
-                child: SizedBox(
-                  width: 200,
-                  height: 45,
-                  child: TextFormField(
-                    controller: searchNameController,
-                    onChanged: (value) {
-                      fruitFilter.name = value;
-                      _search();
-                    },
-                    decoration: InputDecoration(
-                      prefixIcon: IconButton(
-                          onPressed: () {
-                            fruitFilter.name = searchNameController.text;
-                            _search();
-                          },
-                          icon: const Icon(Icons.search)),
-                      labelText: AppLocalizations.of(context)!.name,
-                    ),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0, 0, 0, 6),
+              child: SizedBox(
+                width: 200,
+                child: TextFormField(
+                  controller: searchNameController,
+                  onChanged: (value) {
+                    fruitFilter.name = value;
+                    _search();
+                  },
+                  decoration: InputDecoration(
+                    prefixIcon: IconButton(
+                        onPressed: () {
+                          fruitFilter.name = searchNameController.text;
+                          _search();
+                        },
+                        icon: const Icon(Icons.search)),
+                    labelText: AppLocalizations.of(context)!.name,
                   ),
                 ),
               ),
-              _getFruitTypeFilter(context),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(0, 0, 6, 0),
-            child: SizedBox(
-              height: 33,
-              child: ElevatedButton(
-                  onPressed: () {
-                    context.goNamed("createFruit");
-                  },
-                  child: Text(AppLocalizations.of(context)!.createDevilFruit)),
+            ),
+            _getFruitTypeFilter(context),
+          ],
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(0,0,0,6),
+          child: SizedBox(
+            height: 35,
+            child: ElevatedButton(
+                onPressed: () {
+                  context.goNamed("createFruit");
+                },
+                child: Text(AppLocalizations.of(context)!.createDevilFruit),
             ),
           ),
-          // battle type filter
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -205,96 +202,93 @@ class _FruitViewState extends State<FruitView> {
           AppLocalizations.of(context)!.artificialZoanFruit,
       FruitType.paramecia: AppLocalizations.of(context)!.parameciaFruit,
     };
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(0, 0, 6, 0),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton2(
-          isExpanded: true,
-          value: selectedFruitTypes.isEmpty ? null : selectedFruitTypes.last,
-          hint: Text(
-            AppLocalizations.of(context)!.battleTypeHint,
-            style: OnepieceFonts.dropDownItemStyle,
-          ),
-          onChanged: (value) {},
-          selectedItemBuilder: (context) {
-            return FruitType.values.map(
-              (item) {
-                return Container(
-                  alignment: AlignmentDirectional.center,
-                  child: Text(
-                    selectedFruitTypes
-                        .map((selectedType) {
-                          return fruitTypeToDisplayValue[selectedType];
-                        })
-                        .toSet()
-                        .join(', '),
-                    style: const TextStyle(
-                      fontSize: 16,
-                      overflow: TextOverflow.ellipsis,
+    return DropdownButtonHideUnderline(
+      child: DropdownButton2(
+        isExpanded: true,
+        value: selectedFruitTypes.isEmpty ? null : selectedFruitTypes.last,
+        hint: Text(
+          AppLocalizations.of(context)!.battleTypeHint,
+          style: OnepieceFonts.dropDownItemStyle,
+        ),
+        onChanged: (value) {},
+        selectedItemBuilder: (context) {
+          return FruitType.values.map(
+            (item) {
+              return Container(
+                alignment: AlignmentDirectional.center,
+                child: Text(
+                  selectedFruitTypes
+                      .map((selectedType) {
+                        return fruitTypeToDisplayValue[selectedType];
+                      })
+                      .toSet()
+                      .join(', '),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  maxLines: 1,
+                ),
+              );
+            },
+          ).toList();
+        },
+        buttonStyleData: ButtonStyleData(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            height: 35,
+            width: 280,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(3),
+              color: OnepieceColors.menuBackgroundColor,
+            )),
+        menuItemStyleData: const MenuItemStyleData(
+          height: 35,
+        ),
+        items: FruitType.values.map((FruitType fruitType) {
+          return DropdownMenuItem<FruitType>(
+            value: fruitType,
+            enabled: false,
+            child: StatefulBuilder(
+              builder: (context, menuSetState) {
+                final isSelected = selectedFruitTypes.contains(fruitType);
+                return InkWell(
+                  onTap: () {
+                    isSelected
+                        ? selectedFruitTypes.remove(fruitType)
+                        : selectedFruitTypes.add(fruitType);
+                    fruitFilter.types = selectedFruitTypes;
+                    // //This rebuilds the StatefulWidget to update the button's text
+                    setState(() {});
+                    //This rebuilds the dropdownMenu Widget to update the check mark
+                    menuSetState(() {});
+                    _search();
+                  },
+                  child: Container(
+                    height: double.infinity,
+                    padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                    child: Row(
+                      children: [
+                        if (isSelected)
+                          const Icon(Icons.check_box_outlined)
+                        else
+                          const Icon(Icons.check_box_outline_blank),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            fruitTypeToDisplayValue[fruitType]!,
+                            style: const TextStyle(
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    maxLines: 1,
                   ),
                 );
               },
-            ).toList();
-          },
-          buttonStyleData: ButtonStyleData(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              height: 34,
-              width: 280,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(3),
-                color: OnepieceColors.menuBackgroundColor,
-              )),
-          menuItemStyleData: const MenuItemStyleData(
-            height: 35,
-          ),
-          items: FruitType.values.map((FruitType fruitType) {
-            return DropdownMenuItem<FruitType>(
-              value: fruitType,
-              enabled: false,
-              child: StatefulBuilder(
-                builder: (context, menuSetState) {
-                  final isSelected = selectedFruitTypes.contains(fruitType);
-                  return InkWell(
-                    onTap: () {
-                      isSelected
-                          ? selectedFruitTypes.remove(fruitType)
-                          : selectedFruitTypes.add(fruitType);
-                      fruitFilter.types = selectedFruitTypes;
-                      // //This rebuilds the StatefulWidget to update the button's text
-                      setState(() {});
-                      //This rebuilds the dropdownMenu Widget to update the check mark
-                      menuSetState(() {});
-                      _search();
-                    },
-                    child: Container(
-                      height: double.infinity,
-                      padding: const EdgeInsets.symmetric(horizontal: 6.0),
-                      child: Row(
-                        children: [
-                          if (isSelected)
-                            const Icon(Icons.check_box_outlined)
-                          else
-                            const Icon(Icons.check_box_outline_blank),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              fruitTypeToDisplayValue[fruitType]!,
-                              style: const TextStyle(
-                                fontSize: 16,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-            );
-          }).toList(),
-        ),
+            ),
+          );
+        }).toList(),
       ),
     );
   }
@@ -550,6 +544,7 @@ class _FruitViewState extends State<FruitView> {
       child: nextPage,
     ));
     return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: widgetList,
     );
   }

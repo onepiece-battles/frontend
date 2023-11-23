@@ -124,8 +124,10 @@ class _BattleViewState extends State<BattleView> {
                 const SizedBox(
                   height: 15,
                 ),
-                SizedBox(width: 1200, child:
-                Center(child: _getPageFoot()),)
+                SizedBox(
+                  width: 1200,
+                  child: Center(child: _getPageFoot()),
+                )
               ],
             ),
           ],
