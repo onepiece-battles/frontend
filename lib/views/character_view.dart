@@ -75,10 +75,10 @@ class _CharacterViewState extends State<CharacterView> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _createHeader(context),
-              _createControlPanel(context),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                  _createControlPanel(context),
                   _createDataTable(),
                   const SizedBox(
                     height: 15,
@@ -205,7 +205,7 @@ class _CharacterViewState extends State<CharacterView> {
                 });
               },
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
+          padding: const EdgeInsets.fromLTRB(5, 10, 0, 10),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
@@ -443,18 +443,52 @@ class _CharacterViewState extends State<CharacterView> {
                   ),
                 ),
               ),
-              DataCell(Text(character.name.toString())),
-              DataCell(Text(enumValueToDisplayValue[character.characterType]!)),
-              DataCell(Text(character.fruitLimit.toString())),
-              DataCell(Text(character.groupGain.toString())),
-              DataCell(Text(character.attack.toString())),
-              DataCell(Text(character.defense.toString())),
-              DataCell(Text(character.intelligence.toString())),
-              DataCell(Text(character.blood.toString())),
-              DataCell(Text(character.speed.toString())),
-              DataCell(Text(
-                  character.fruits.isEmpty ? "" : character.fruits.toString())),
-              DataCell(Text(booleanToDisplayName[character.isSystemResource]!)),
+              DataCell(Padding(
+                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                child: Text(character.name.toString()),
+              )),
+              DataCell(Padding(
+                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                child: Text(enumValueToDisplayValue[character.characterType]!),
+              )),
+              DataCell(Padding(
+                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                child: Text(character.fruitLimit.toString()),
+              )),
+              DataCell(Padding(
+                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                child: Text(character.groupGain.toString()),
+              )),
+              DataCell(Padding(
+                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                child: Text(character.attack.toString()),
+              )),
+              DataCell(Padding(
+                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                child: Text(character.defense.toString()),
+              )),
+              DataCell(Padding(
+                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                child: Text(character.intelligence.toString()),
+              )),
+              DataCell(Padding(
+                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                child: Text(character.blood.toString()),
+              )),
+              DataCell(Padding(
+                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                child: Text(character.speed.toString()),
+              )),
+              DataCell(Padding(
+                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                child: Text(character.fruits.isEmpty
+                    ? ""
+                    : character.fruits.toString()),
+              )),
+              DataCell(Padding(
+                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                child: Text(booleanToDisplayName[character.isSystemResource]!),
+              )),
             ],
           ),
         )
