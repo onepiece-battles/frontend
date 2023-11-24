@@ -104,12 +104,12 @@ class _IssueViewState extends State<IssueView> {
             children: [
               _createHeader(context),
               SizedBox(
-                width: 800,
+                width: 1200,
                 height: 50,
                 child: _createControlPanel(context),
               ),
               SizedBox(
-                width: 800,
+                width: 1200,
                 child: FittedBox(
                   fit: BoxFit.fitWidth,
                   child: _createIssueTable(context),
@@ -119,7 +119,7 @@ class _IssueViewState extends State<IssueView> {
                 height: 15,
               ),
               SizedBox(
-                width: 800,
+                width: 1200,
                 child: Center(child: _getPageFoot()),
               )
             ],
@@ -143,7 +143,7 @@ class _IssueViewState extends State<IssueView> {
     Map<IssueType, String> issueTypeToDisplayValue = <IssueType, String>{
       IssueType.OTHER: AppLocalizations.of(context)!.otherType,
       IssueType.FEATURE_SUGGESTION:
-      AppLocalizations.of(context)!.featureSuggestion,
+          AppLocalizations.of(context)!.featureSuggestion,
       IssueType.BUG_REPORT: AppLocalizations.of(context)!.bugReport,
     };
     Map<IssueStatus, String> issueStatusToDisplayValue = <IssueStatus, String>{
@@ -180,7 +180,7 @@ class _IssueViewState extends State<IssueView> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(2,0,6,0),
+            padding: const EdgeInsets.fromLTRB(2, 0, 6, 0),
             child: DropdownButtonHideUnderline(
               child: DropdownButton2(
                 isExpanded: true,
@@ -230,7 +230,8 @@ class _IssueViewState extends State<IssueView> {
                     enabled: false,
                     child: StatefulBuilder(
                       builder: (context, menuSetState) {
-                        final isSelected = selectedIssueTypes.contains(issueType);
+                        final isSelected =
+                            selectedIssueTypes.contains(issueType);
                         return InkWell(
                           onTap: () {
                             isSelected
@@ -245,7 +246,8 @@ class _IssueViewState extends State<IssueView> {
                           },
                           child: Container(
                             height: double.infinity,
-                            padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 6.0),
                             child: Row(
                               children: [
                                 if (isSelected)
@@ -275,8 +277,9 @@ class _IssueViewState extends State<IssueView> {
           DropdownButtonHideUnderline(
             child: DropdownButton2(
               isExpanded: true,
-              value:
-              selectedIssueStatuses.isEmpty ? null : selectedIssueStatuses.last,
+              value: selectedIssueStatuses.isEmpty
+                  ? null
+                  : selectedIssueStatuses.last,
               hint: Text(
                 AppLocalizations.of(context)!.status,
                 style: OnepieceFonts.dropDownItemStyle,
@@ -284,14 +287,14 @@ class _IssueViewState extends State<IssueView> {
               onChanged: (value) {},
               selectedItemBuilder: (context) {
                 return IssueStatus.values.map(
-                      (item) {
+                  (item) {
                     return Container(
                       alignment: AlignmentDirectional.center,
                       child: Text(
                         selectedIssueStatuses
                             .map((selectedType) {
-                          return issueStatusToDisplayValue[selectedType];
-                        })
+                              return issueStatusToDisplayValue[selectedType];
+                            })
                             .toSet()
                             .join(', '),
                         style: const TextStyle(
@@ -321,7 +324,8 @@ class _IssueViewState extends State<IssueView> {
                   enabled: false,
                   child: StatefulBuilder(
                     builder: (context, menuSetState) {
-                      final isSelected = selectedIssueStatuses.contains(issueStatus);
+                      final isSelected =
+                          selectedIssueStatuses.contains(issueStatus);
                       return InkWell(
                         onTap: () {
                           isSelected
@@ -499,24 +503,43 @@ class _IssueViewState extends State<IssueView> {
               context.goNamed('issueDetails');
             },
             cells: [
-              _getDataCell("${entry.key + 1}"),
-              _getDataCell("created user"),
-              _getDataCell(issueTypeToDisplayValue[entry.value.issueHeader]!),
-              _getDataCell(issueStatusToDisplayValue[entry.value.issueType]!),
-              _getDataCell(entry.value.issueStatus.toString()),
-              _getDataCell(DateHelper.getLocalDateTimeFromTimestamp(
-                      entry.value.creationTimestamp!)
-                  .toString()),
-              _getDataCell(DateHelper.getLocalDateTimeFromTimestamp(
-                      entry.value.modificationTimestamp!)
-                  .toString()),
+              _getDataCell("${entry.key + 1}", null),
+              _getDataCell("created user", null),
+              _getDataCell(entry.value.issueHeader.toString(), 200),
+              _getDataCell(
+                  issueTypeToDisplayValue[entry.value.issueType]!, null),
+              _getDataCell(
+                  issueStatusToDisplayValue[entry.value.issueStatus]!, null),
+              _getDataCell(
+                  DateHelper.getLocalDateTimeFromTimestamp(
+                          entry.value.creationTimestamp!)
+                      .toString(),
+                  null),
+              _getDataCell(
+                  DateHelper.getLocalDateTimeFromTimestamp(
+                          entry.value.modificationTimestamp!)
+                      .toString(),
+                  null),
             ],
           ),
         )
         .toList();
   }
 
-  DataCell _getDataCell(String value) {
+  DataCell _getDataCell(String value, double? customizeWidth) {
+    if (customizeWidth != null) {
+      return DataCell(
+          Padding(
+        padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+        child: SizedBox(
+            width: customizeWidth,
+            child: Text(
+              value,
+              overflow: TextOverflow.ellipsis,
+            ),
+        ),
+      ),);
+    }
     return DataCell(Padding(
       padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
       child: Text(value),
