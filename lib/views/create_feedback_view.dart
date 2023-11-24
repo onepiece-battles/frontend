@@ -48,13 +48,17 @@ class _CreateFeedbackViewState extends State<CreateFeedbackView> {
               children: [
                 Padding(
                   padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
-                  child: SizedBox(
+                  child: Container(
                       height: 40,
-                      width: 100,
+                      width: 120,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(3),
+                        color: OnepieceColors.menuBackgroundColor,
+                      ),
                       child: Align(
                         alignment: Alignment.center,
                         child: Text(
-                          AppLocalizations.of(context)!.issueType,
+                          "${AppLocalizations.of(context)!.issueType} :",
                           style: OnepieceFonts.contentStyle,
                         ),
                       )),
@@ -101,14 +105,19 @@ class _CreateFeedbackViewState extends State<CreateFeedbackView> {
               maxLines: 1,
               controller: headerController,
               autovalidateMode: AutovalidateMode.onUserInteraction,
-              maxLength: 10,
+              maxLength: 30,
               maxLengthEnforcement: MaxLengthEnforcement.enforced,
               onChanged: (value) {
                 _calculateButtonCondition();
               },
               decoration: InputDecoration(
+                contentPadding: const EdgeInsets.fromLTRB(6, 8, 6, 8),
+                floatingLabelBehavior: FloatingLabelBehavior.always,
                 labelText: AppLocalizations.of(context)!.feedbackTitle,
                 hintText: AppLocalizations.of(context)!.feedbackTitleHint,
+                disabledBorder: const OutlineInputBorder(),
+                enabledBorder: const OutlineInputBorder(),
+                focusedBorder: const OutlineInputBorder(),
                 suffixIcon: IconButton(
                   onPressed: () {
                     headerController.text = '';
@@ -129,6 +138,11 @@ class _CreateFeedbackViewState extends State<CreateFeedbackView> {
                 _calculateButtonCondition();
               },
               decoration: InputDecoration(
+                floatingLabelBehavior: FloatingLabelBehavior.always,
+                contentPadding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+                disabledBorder: const OutlineInputBorder(),
+                enabledBorder: const OutlineInputBorder(),
+                focusedBorder: const OutlineInputBorder(),
                 labelText: AppLocalizations.of(context)!.feedbackContent,
                 hintText: AppLocalizations.of(context)!.feedbackContentHint,
               ),
