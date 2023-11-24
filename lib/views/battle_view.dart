@@ -379,6 +379,13 @@ class _BattleViewState extends State<BattleView> {
     return DataTable(
       showCheckboxColumn: false,
       showBottomBorder: true,
+      headingRowHeight: 50,
+      headingRowColor:  MaterialStateProperty.resolveWith ((Set  states) {
+        if (states.contains(MaterialState.hovered)) {
+          return Theme.of(context).colorScheme.primary.withOpacity(0.08);
+        }
+        return null;  // Use the default value.
+      }),
       border: const TableBorder(
           top: BorderSide(color: OnepieceColors.themeColor),
           bottom: BorderSide(color: OnepieceColors.themeColor)),
@@ -405,22 +412,23 @@ class _BattleViewState extends State<BattleView> {
           child: Text(AppLocalizations.of(context)!.resetSort),
         ),
       ),
-      _createSingleColumn(AppLocalizations.of(context)!.creator, null),
-      _createSingleColumn(AppLocalizations.of(context)!.initiator, null),
-      _createSingleColumn(AppLocalizations.of(context)!.receiver, null),
+      _createSingleColumn(AppLocalizations.of(context)!.creator, null, null),
+      _createSingleColumn(AppLocalizations.of(context)!.initiator, null, null),
+      _createSingleColumn(AppLocalizations.of(context)!.receiver, null, null),
       _createSingleColumn(AppLocalizations.of(context)!.creationTime,
-          BattleSortableFieldsEnum.creationRecordId),
+          BattleSortableFieldsEnum.creationRecordId, null),
       _createSingleColumn(AppLocalizations.of(context)!.modificationTime,
-          BattleSortableFieldsEnum.modificationRecordId),
-      _createSingleColumn(AppLocalizations.of(context)!.status, null),
+          BattleSortableFieldsEnum.modificationRecordId, null),
+      _createSingleColumn(AppLocalizations.of(context)!.status, null, null),
       _createSingleColumn(AppLocalizations.of(context)!.winner,
-          BattleSortableFieldsEnum.winnerName),
-      _createSingleColumn(AppLocalizations.of(context)!.createdBySystem, null),
+          BattleSortableFieldsEnum.winnerName, null),
+      _createSingleColumn(
+          AppLocalizations.of(context)!.createdBySystem, null, null),
     ];
   }
 
-  DataColumn _createSingleColumn(
-      String displayText, BattleSortableFieldsEnum? sortableFieldsEnum) {
+  DataColumn _createSingleColumn(String displayText,
+      BattleSortableFieldsEnum? sortableFieldsEnum, double? width) {
     return DataColumn(
         label: InkWell(
       onTap: sortableFieldsEnum == null
@@ -452,12 +460,23 @@ class _BattleViewState extends State<BattleView> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Text(
-              displayText,
-              style: sortableEnumToSortOrderMap[sortableFieldsEnum] == null
-                  ? OnepieceFonts.tableHeaderStyle
-                  : OnepieceFonts.selectedTableHeaderStyle,
-            ),
+            width == null
+                ? Text(
+                    displayText,
+                    style:
+                        sortableEnumToSortOrderMap[sortableFieldsEnum] == null
+                            ? OnepieceFonts.tableHeaderStyle
+                            : OnepieceFonts.selectedTableHeaderStyle,
+                  )
+                : SizedBox(
+                    width: width,
+                    child: Text(
+                      displayText,
+                      style:
+                          sortableEnumToSortOrderMap[sortableFieldsEnum] == null
+                              ? OnepieceFonts.tableHeaderStyle
+                              : OnepieceFonts.selectedTableHeaderStyle,
+                    )),
             if (sortableFieldsEnum != null)
               Padding(
                 padding: const EdgeInsets.all(5.0),

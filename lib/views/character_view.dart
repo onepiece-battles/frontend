@@ -287,6 +287,7 @@ class _CharacterViewState extends State<CharacterView> {
   }
   DataTable _createCharacterTable(BuildContext context) {
     return DataTable(
+      headingRowHeight: 50,
       showCheckboxColumn: false,
       showBottomBorder: true,
       border: const TableBorder(

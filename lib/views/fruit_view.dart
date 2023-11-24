@@ -295,6 +295,7 @@ class _FruitViewState extends State<FruitView> {
 
   Widget _getFruitsTable(BuildContext context) {
     return DataTable(
+      headingRowHeight: 50,
       showCheckboxColumn: false,
       showBottomBorder: true,
       border: const TableBorder(
@@ -380,29 +381,32 @@ class _FruitViewState extends State<FruitView> {
               },
         child: Padding(
           padding: const EdgeInsets.fromLTRB(5, 10, 0, 10),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Text(
-                displayText,
-                style: sortableEnumToSortOrderMap[sortableFieldsEnum] == null
-                    ? OnepieceFonts.tableHeaderStyle
-                    : OnepieceFonts.selectedTableHeaderStyle,
-              ),
-              if (sortableFieldsEnum != null)
-                Padding(
-                  padding: const EdgeInsets.all(5.0),
-                  child: ImageHelper.getSvgIconWithColor(
-                    sortOrderToPath[
-                        sortableEnumToSortOrderMap[sortableFieldsEnum]]!,
-                    15,
-                    15,
-                    sortableEnumToSortOrderMap[sortableFieldsEnum] == null
-                        ? Colors.grey
-                        : OnepieceColors.themeColor,
-                  ),
-                )
-            ],
+          child: SizedBox(
+            width: 200,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Text(
+                  displayText,
+                  style: sortableEnumToSortOrderMap[sortableFieldsEnum] == null
+                      ? OnepieceFonts.tableHeaderStyle
+                      : OnepieceFonts.selectedTableHeaderStyle,
+                ),
+                if (sortableFieldsEnum != null)
+                  Padding(
+                    padding: const EdgeInsets.all(5.0),
+                    child: ImageHelper.getSvgIconWithColor(
+                      sortOrderToPath[
+                          sortableEnumToSortOrderMap[sortableFieldsEnum]]!,
+                      15,
+                      15,
+                      sortableEnumToSortOrderMap[sortableFieldsEnum] == null
+                          ? Colors.grey
+                          : OnepieceColors.themeColor,
+                    ),
+                  )
+              ],
+            ),
           ),
         ),
       ),
