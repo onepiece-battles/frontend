@@ -380,12 +380,6 @@ class _BattleViewState extends State<BattleView> {
       showCheckboxColumn: false,
       showBottomBorder: true,
       headingRowHeight: 50,
-      headingRowColor:  MaterialStateProperty.resolveWith ((Set  states) {
-        if (states.contains(MaterialState.hovered)) {
-          return Theme.of(context).colorScheme.primary.withOpacity(0.08);
-        }
-        return null;  // Use the default value.
-      }),
       border: const TableBorder(
           top: BorderSide(color: OnepieceColors.themeColor),
           bottom: BorderSide(color: OnepieceColors.themeColor)),
@@ -412,16 +406,16 @@ class _BattleViewState extends State<BattleView> {
           child: Text(AppLocalizations.of(context)!.resetSort),
         ),
       ),
-      _createSingleColumn(AppLocalizations.of(context)!.creator, null, null),
-      _createSingleColumn(AppLocalizations.of(context)!.initiator, null, null),
-      _createSingleColumn(AppLocalizations.of(context)!.receiver, null, null),
+      _createSingleColumn(AppLocalizations.of(context)!.creator, null, 80),
+      _createSingleColumn(AppLocalizations.of(context)!.initiator, null, 80),
+      _createSingleColumn(AppLocalizations.of(context)!.receiver, null, 80),
       _createSingleColumn(AppLocalizations.of(context)!.creationTime,
-          BattleSortableFieldsEnum.creationRecordId, null),
+          BattleSortableFieldsEnum.creationRecordId, 160),
       _createSingleColumn(AppLocalizations.of(context)!.modificationTime,
-          BattleSortableFieldsEnum.modificationRecordId, null),
-      _createSingleColumn(AppLocalizations.of(context)!.status, null, null),
+          BattleSortableFieldsEnum.modificationRecordId, 160),
+      _createSingleColumn(AppLocalizations.of(context)!.status, null, 70),
       _createSingleColumn(AppLocalizations.of(context)!.winner,
-          BattleSortableFieldsEnum.winnerName, null),
+          BattleSortableFieldsEnum.winnerName, 80),
       _createSingleColumn(
           AppLocalizations.of(context)!.createdBySystem, null, null),
     ];

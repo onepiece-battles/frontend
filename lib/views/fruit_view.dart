@@ -331,27 +331,27 @@ class _FruitViewState extends State<FruitView> {
         ),
       ),
       _createSingleColumn(
-          AppLocalizations.of(context)!.name, FruitSortableFieldsEnum.name),
+          AppLocalizations.of(context)!.name, FruitSortableFieldsEnum.name,80),
       _createSingleColumn(AppLocalizations.of(context)!.attackStrengthen,
-          FruitSortableFieldsEnum.attackStrengthen),
+          FruitSortableFieldsEnum.attackStrengthen,null),
       _createSingleColumn(AppLocalizations.of(context)!.defenseStrengthen,
-          FruitSortableFieldsEnum.defenseStrengthen),
+          FruitSortableFieldsEnum.defenseStrengthen, null),
       _createSingleColumn(AppLocalizations.of(context)!.bloodStrengthen,
-          FruitSortableFieldsEnum.bloodStrengthen),
+          FruitSortableFieldsEnum.bloodStrengthen, null),
       _createSingleColumn(AppLocalizations.of(context)!.intelligenceStrengthen,
-          FruitSortableFieldsEnum.intelligenceStrengthen),
+          FruitSortableFieldsEnum.intelligenceStrengthen, null),
       _createSingleColumn(AppLocalizations.of(context)!.groupStrengthen,
-          FruitSortableFieldsEnum.groupGainStrengthen),
+          FruitSortableFieldsEnum.groupGainStrengthen, null),
       _createSingleColumn(AppLocalizations.of(context)!.speedStrengthen,
-          FruitSortableFieldsEnum.speedStrengthen),
+          FruitSortableFieldsEnum.speedStrengthen, null),
       _createSingleColumn(AppLocalizations.of(context)!.fruitType,
-          FruitSortableFieldsEnum.fruitType),
-      _createSingleColumn(AppLocalizations.of(context)!.createdBySystem, null),
+          FruitSortableFieldsEnum.fruitType, 200),
+      _createSingleColumn(AppLocalizations.of(context)!.createdBySystem, null, null),
     ];
   }
 
   DataColumn _createSingleColumn(
-      String displayText, FruitSortableFieldsEnum? sortableFieldsEnum) {
+      String displayText, FruitSortableFieldsEnum? sortableFieldsEnum, double? width) {
     return DataColumn(
       label: InkWell(
         onTap: sortableFieldsEnum == null
@@ -382,7 +382,7 @@ class _FruitViewState extends State<FruitView> {
         child: Padding(
           padding: const EdgeInsets.fromLTRB(5, 10, 0, 10),
           child: SizedBox(
-            width: 200,
+            width: width,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
