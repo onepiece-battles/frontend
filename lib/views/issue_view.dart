@@ -67,8 +67,6 @@ class _IssueViewState extends State<IssueView> {
     listIssueResponse.then((value) {
       setState(() {
         currentIssueList = value!.issues;
-        debugPrint("current issue list");
-        debugPrint(currentIssueList.toString());
         if (currentIssueList.isEmpty) {
           pageNumberController.text = "0";
         } else {
@@ -164,7 +162,7 @@ class _IssueViewState extends State<IssueView> {
               child: TextFormField(
                 controller: searchHeaderController,
                 onChanged: (value) {
-                  issueFilter.issueHeader = value;
+                  issueFilter.issueHeader = searchHeaderController.text;
                   _search();
                 },
                 decoration: InputDecoration(
@@ -174,7 +172,7 @@ class _IssueViewState extends State<IssueView> {
                         _search();
                       },
                       icon: const Icon(Icons.search)),
-                  labelText: AppLocalizations.of(context)!.name,
+                  labelText: AppLocalizations.of(context)!.title,
                 ),
               ),
             ),
@@ -375,6 +373,7 @@ class _IssueViewState extends State<IssueView> {
     return DataTable(
       showCheckboxColumn: false,
       showBottomBorder: true,
+      headingRowHeight: 50,
       border: const TableBorder(
           top: BorderSide(color: OnepieceColors.themeColor),
           bottom: BorderSide(color: OnepieceColors.themeColor)),
@@ -400,25 +399,21 @@ class _IssueViewState extends State<IssueView> {
             },
             child: Text(AppLocalizations.of(context)!.resetSort)),
       ),
-      DataColumn(
-          label: Text(
-        AppLocalizations.of(context)!.userNameLabel,
-        style: OnepieceFonts.tableHeaderStyle,
-      )),
-      _createSingleColumn(AppLocalizations.of(context)!.feedbackTitle, null),
+      _createSingleColumn(AppLocalizations.of(context)!.userNameLabel, null, 180),
+      _createSingleColumn(AppLocalizations.of(context)!.feedbackTitle, null, 220),
       _createSingleColumn(AppLocalizations.of(context)!.issueType,
-          IssueSortableFieldEnum.issueType),
+          IssueSortableFieldEnum.issueType, null),
       _createSingleColumn(AppLocalizations.of(context)!.status,
-          IssueSortableFieldEnum.issueStatus),
+          IssueSortableFieldEnum.issueStatus, null),
       _createSingleColumn(AppLocalizations.of(context)!.creationTime,
-          IssueSortableFieldEnum.creationTimestamp),
+          IssueSortableFieldEnum.creationTimestamp, 200),
       _createSingleColumn(AppLocalizations.of(context)!.modificationTime,
-          IssueSortableFieldEnum.modificationTimestamp),
+          IssueSortableFieldEnum.modificationTimestamp, 200),
     ];
   }
 
   DataColumn _createSingleColumn(
-      String displayText, IssueSortableFieldEnum? issueSortableFieldsEnum) {
+      String displayText, IssueSortableFieldEnum? issueSortableFieldsEnum, double? width) {
     return DataColumn(
       label: InkWell(
         onTap: issueSortableFieldsEnum == null
@@ -449,30 +444,33 @@ class _IssueViewState extends State<IssueView> {
               },
         child: Padding(
           padding: const EdgeInsets.fromLTRB(5, 10, 0, 10),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Text(
-                displayText,
-                style:
-                    sortableEnumToSortOrderMap[issueSortableFieldsEnum] == null
-                        ? OnepieceFonts.tableHeaderStyle
-                        : OnepieceFonts.selectedTableHeaderStyle,
-              ),
-              if (issueSortableFieldsEnum != null)
-                Padding(
-                  padding: const EdgeInsets.all(5.0),
-                  child: ImageHelper.getSvgIconWithColor(
-                    sortOrderToPath[
-                        sortableEnumToSortOrderMap[issueSortableFieldsEnum]]!,
-                    15,
-                    15,
-                    sortableEnumToSortOrderMap[issueSortableFieldsEnum] == null
-                        ? Colors.grey
-                        : OnepieceColors.themeColor,
-                  ),
-                )
-            ],
+          child: SizedBox(
+            width: width,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Text(
+                  displayText,
+                  style:
+                      sortableEnumToSortOrderMap[issueSortableFieldsEnum] == null
+                          ? OnepieceFonts.tableHeaderStyle
+                          : OnepieceFonts.selectedTableHeaderStyle,
+                ),
+                if (issueSortableFieldsEnum != null)
+                  Padding(
+                    padding: const EdgeInsets.all(5.0),
+                    child: ImageHelper.getSvgIconWithColor(
+                      sortOrderToPath[
+                          sortableEnumToSortOrderMap[issueSortableFieldsEnum]]!,
+                      15,
+                      15,
+                      sortableEnumToSortOrderMap[issueSortableFieldsEnum] == null
+                          ? Colors.grey
+                          : OnepieceColors.themeColor,
+                    ),
+                  )
+              ],
+            ),
           ),
         ),
       ),
