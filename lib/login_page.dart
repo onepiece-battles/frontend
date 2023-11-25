@@ -257,7 +257,7 @@ class _LoginPageState extends State<LoginPage> {
   void _route(User user, String token, BuildContext context) {
     // init apis with tokens
     ApiInitializer.initAuthInfo(token);
-    ResourcePermissionManager.setResourceOrder(user);
+    ResourcePermissionManager.updateUserCache(user);
     context.go(AppRouter.homePath);
   }
 }

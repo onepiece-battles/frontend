@@ -12,9 +12,9 @@ import 'package:openapi/api.dart';
 import 'app_router.dart';
 import 'config/my_input_theme.dart';
 
-GetIt getIt = GetIt.instance;
+final getIt = GetIt.instance;
 
-void main() {
+void setup() {
   getIt.allowReassignment = true;
   getIt.registerLazySingleton<UserDao>(() => UserDao.empty());
   getIt.registerLazySingleton<CharacterDao>(() => CharacterDao.empty());
@@ -22,7 +22,10 @@ void main() {
   getIt.registerLazySingleton<IssueDao>(() => IssueDao.empty());
   getIt.registerLazySingleton<BattleDao>(() => BattleDao.empty());
   getIt.registerLazySingleton<FruitDao>(() => FruitDao.empty());
-  getIt.registerLazySingleton<User>(() => User(id:"",name: ""));
+  getIt.registerLazySingleton<User>(() => User(id: "", name: ""));
+}
+void main() {
+  setup();
   runApp(const MyApp());
 }
 

@@ -354,7 +354,7 @@ class _RegisterPageState extends State<RegisterPage> {
     Future<LoginResponse?> loginResponse = userDao.login(loginRequest);
     loginResponse.then((value) {
       ApiInitializer.initAuthInfo(value!.accessToken!);
-      ResourcePermissionManager.setResourceOrder(value.user!);
+      ResourcePermissionManager.updateUserCache(value.user!);
       context.go(AppRouter.homePath);
     });
   }

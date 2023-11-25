@@ -61,6 +61,7 @@ class _CharacterViewState extends State<CharacterView> {
     super.initState();
     _search();
   }
+
   void _search() {
     ListCharacterRequest listCharacterRequest = ListCharacterRequest(
         pageSize: pageSize,
@@ -68,7 +69,7 @@ class _CharacterViewState extends State<CharacterView> {
         sortKeys: sortKeys,
         characterFilter: characterFilter);
     Future<ListCharacterResponse?> listCharacterResponse =
-    getIt<CharacterDao>().listCharacter(listCharacterRequest);
+        getIt<CharacterDao>().listCharacter(listCharacterRequest);
 
     listCharacterResponse.then((value) {
       setState(() {
@@ -142,9 +143,10 @@ class _CharacterViewState extends State<CharacterView> {
       ),
     );
   }
+
   Widget _createControlPanel(BuildContext context) {
     Map<CharacterType, String> enumValueToDisplayValue =
-    <CharacterType, String>{
+        <CharacterType, String>{
       CharacterType.body: AppLocalizations.of(context)!.body,
       CharacterType.foot: AppLocalizations.of(context)!.leg,
       CharacterType.science: AppLocalizations.of(context)!.science,
@@ -152,8 +154,7 @@ class _CharacterViewState extends State<CharacterView> {
       CharacterType.katana: AppLocalizations.of(context)!.katana,
       CharacterType.shooter: AppLocalizations.of(context)!.shoot
     };
-    return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+    return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
       Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
@@ -192,14 +193,14 @@ class _CharacterViewState extends State<CharacterView> {
               onChanged: (value) {},
               selectedItemBuilder: (context) {
                 return CharacterType.values.map(
-                      (item) {
+                  (item) {
                     return Container(
                       alignment: AlignmentDirectional.center,
                       child: Text(
                         selectedCharacterTypes
                             .map((selectedType) {
-                          return enumValueToDisplayValue[selectedType];
-                        })
+                              return enumValueToDisplayValue[selectedType];
+                            })
                             .toSet()
                             .join(', '),
                         style: const TextStyle(
@@ -230,7 +231,7 @@ class _CharacterViewState extends State<CharacterView> {
                   child: StatefulBuilder(
                     builder: (context, menuSetState) {
                       final isSelected =
-                      selectedCharacterTypes.contains(characterType);
+                          selectedCharacterTypes.contains(characterType);
                       return InkWell(
                         onTap: () {
                           isSelected
@@ -246,8 +247,7 @@ class _CharacterViewState extends State<CharacterView> {
                         },
                         child: Container(
                           height: double.infinity,
-                          padding:
-                          const EdgeInsets.symmetric(horizontal: 6.0),
+                          padding: const EdgeInsets.symmetric(horizontal: 6.0),
                           child: Row(
                             children: [
                               if (isSelected)
@@ -285,9 +285,10 @@ class _CharacterViewState extends State<CharacterView> {
       )
     ]);
   }
+
   DataTable _createCharacterTable(BuildContext context) {
     return DataTable(
-      headingRowHeight: 50,
+      // headingRowHeight: 50,
       showCheckboxColumn: false,
       showBottomBorder: true,
       border: const TableBorder(
@@ -298,6 +299,7 @@ class _CharacterViewState extends State<CharacterView> {
       columnSpacing: 30,
     );
   }
+
   List<DataColumn> _createColumns() {
     return [
       DataColumn(
@@ -348,6 +350,7 @@ class _CharacterViewState extends State<CharacterView> {
       _createSingleColumn(AppLocalizations.of(context)!.createdBySystem, null),
     ];
   }
+
   DataColumn _createSingleColumn(String displayText,
       CharacterSortableFieldsEnum? characterSortableFieldsEnum) {
     return DataColumn(
@@ -411,6 +414,7 @@ class _CharacterViewState extends State<CharacterView> {
       ),
     );
   }
+
   List<DataRow> _createRows(BuildContext context) {
     Map<CharacterType, String> enumValueToDisplayValue =
         <CharacterType, String>{
@@ -436,7 +440,7 @@ class _CharacterViewState extends State<CharacterView> {
             cells: [
               DataCell(
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 3, 3, 3),
+                  padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
                   child: Container(
                     width: 50,
                     height: 50,
@@ -507,6 +511,7 @@ class _CharacterViewState extends State<CharacterView> {
         )
         .toList();
   }
+
   Row _getPageFoot() {
     List<Widget> widgetList = [];
     ElevatedButton prePage = ElevatedButton(
