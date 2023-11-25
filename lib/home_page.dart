@@ -164,7 +164,7 @@ class HomePageState extends State<HomePage> {
                     currentUser.loginRoleResources = value.resources;
                     ResourcePermissionManager.updateUserCache(currentUser);
                     setState(() {
-                      loginRoleResources =  getIt<User>()
+                      loginRoleResources = getIt<User>()
                           .loginRoleResources
                           .where((e) => !notShownResources.contains(e))
                           .toList();
@@ -253,17 +253,16 @@ class HomePageState extends State<HomePage> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-            _getDrawerHeader(context),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(18, 10, 0, 10),
-              child: Text(AppLocalizations.of(context)!.route,
-                  style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.w800)),
-            ),
-            _getSideMenuList(context),
-          ],),
-
-
+              _getDrawerHeader(context),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(18, 10, 0, 10),
+                child: Text(AppLocalizations.of(context)!.route,
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.w800)),
+              ),
+              _getSideMenuList(context),
+            ],
+          ),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Align(
@@ -317,36 +316,62 @@ class HomePageState extends State<HomePage> {
     return Container(
       width: 250,
       height: 150,
-      color: OnepieceColors.secondaryThemeColor,
+      color: OnepieceColors.fancyBlue,
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 60,
-            height: 60,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(60),
-              child: Image.memory(
-                Base64Helper.decode(getIt<User>().profileImage!),
-              ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(8,8,0,0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Container(
+                  width: 70,
+                  height: 70,
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.all(Radius.circular(2.0)),
+                    border: Border.all(
+                        color: Colors.grey, width: 2, style: BorderStyle.solid),
+                  ),
+                  child: FittedBox(
+                    fit: BoxFit.fill,
+                    child: Image.memory(
+                        Base64Helper.decode(getIt<User>().profileImage!)),
+                  ),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    SizedBox(
+                      width: 80,
+                      child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(getIt<User>().name,
+                              style: OnepieceFonts.smallHeaderStyle,overflow: TextOverflow.ellipsis,)),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: RichText(
+                        text: TextSpan(children: [
+                          const WidgetSpan(
+                              child: Icon(
+                            Icons.email,
+                            color: Colors.grey,
+                            size: 17,
+                          )),
+                          TextSpan(
+                              text: " ${getIt<User>().email!}",
+                              style: OnepieceFonts.emailFont,
+                          )
+                        ]),
+                      ),
+                    ),
+                  ],
+                )
+              ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: RichText(
-              text: TextSpan(children: [
-                const WidgetSpan(
-                    child: Icon(
-                  Icons.email,
-                  color: Colors.grey,
-                  size: 17,
-                )),
-                TextSpan(
-                    text: " ${getIt<User>().email!}",
-                    style: OnepieceFonts.emailFont)
-              ]),
-            ),
-          )
         ],
       ),
     );
