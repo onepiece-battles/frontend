@@ -162,7 +162,7 @@ class _IssueViewState extends State<IssueView> {
               child: TextFormField(
                 controller: searchHeaderController,
                 onChanged: (value) {
-                  issueFilter.issueHeader = searchHeaderController.text;
+                  issueFilter.issueHeader = value;
                   _search();
                 },
                 decoration: InputDecoration(

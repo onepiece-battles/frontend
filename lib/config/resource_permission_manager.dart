@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:openapi/api.dart';
@@ -13,10 +15,10 @@ class ResourcePermissionManager {
     ResourceType.ROLE: 6
   };
 
-  static void setResourceOrder(User user) {
+  static void updateUserCache(User user) {
     // sort resource type value, the display order is dependent on this order map
     user.loginRoleResources
         .sort((a, b) => resourceOrderMap[a]!.compareTo(resourceOrderMap[b]!));
-    getIt.registerLazySingleton<User>(() => user);
+    getIt.registerLazySingleton(()=>user);
   }
 }

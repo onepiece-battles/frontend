@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:one_piece_battles_flutter/repository/image_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
+import '../config/resource_permission_manager.dart';
 import '../constants/onepiece_colors.dart';
 import '../constants/onepiece_fonts.dart';
 import '../main.dart';
@@ -440,7 +441,7 @@ class _SettingsViewState extends State<SettingsView> {
               onPressed: !_footButtonEnabled
                   ? null
                   : () async {
-                      _submitSettingForm().then((value) {
+                      _submitSettingForm().then((user) {
                         setState(() {
                           _chosenImageName = "";
                           _emailSettingEnabled = false;
@@ -448,7 +449,7 @@ class _SettingsViewState extends State<SettingsView> {
                           _footButtonEnabled = false;
                           _originalData.copy(_realtimeData);
                           MyApp.setLocale(context, _realtimeData.locale);
-                          getIt.registerLazySingleton<User>(() => value);
+                          ResourcePermissionManager.updateUserCache(user);
                         });
                       });
                     },
