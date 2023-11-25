@@ -163,10 +163,13 @@ class HomePageState extends State<HomePage> {
                     currentUser.loginRole = value!.currentRole;
                     currentUser.loginRoleResources = value.resources;
                     ResourcePermissionManager.updateUserCache(currentUser);
-                  });
-                  setState(() {
-                    //todo(yichi): will be fixed by fix routing refresh
-                    context.go(AppRouter.homePath);
+                    setState(() {
+                      loginRoleResources =  getIt<User>()
+                          .loginRoleResources
+                          .where((e) => !notShownResources.contains(e))
+                          .toList();
+                      context.go(AppRouter.homePath);
+                    });
                   });
                 },
                 buttonStyleData: ButtonStyleData(
