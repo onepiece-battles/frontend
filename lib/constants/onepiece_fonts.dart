@@ -4,6 +4,7 @@ import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 
 class OnepieceFonts {
   static const double headerFontSize = 27;
+  static const double smallHeaderFontSize = 22;
   static const FontWeight headerFontWeight = FontWeight.bold;
   static const Color headerFontColor = Colors.black;
   static const double contentFontSize = 18;
@@ -35,6 +36,11 @@ class OnepieceFonts {
       fontSize: OnepieceFonts.headerFontSize,
       fontWeight: OnepieceFonts.headerFontWeight);
 
+  static const TextStyle smallHeaderStyle =   TextStyle(
+      color: OnepieceFonts.headerFontColor,
+      fontSize: OnepieceFonts.smallHeaderFontSize,
+      fontWeight: OnepieceFonts.headerFontWeight);
+
   static const TextStyle tableHeaderStyle = TextStyle(
       color: OnepieceFonts.contentFontColor,
       fontSize: OnepieceFonts.contentFontSize,
@@ -51,7 +57,7 @@ class OnepieceFonts {
   );
 
   static const TextStyle emailFont = TextStyle(
-    color: contentFontColor,
+    color: Colors.white,
     fontSize: 14,
     fontWeight: FontWeight.bold,
     fontStyle: FontStyle.italic

@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 
 class OnepieceColors {
-  static const themeColor = Color.fromARGB(250, 90, 160, 230);
-  static const secondaryThemeColor = Colors.blue;
+  // static const themeColor = Color.fromARGB(250, 90, 160, 230);
+  static const themeColor = fancyGreen;
+  static const secondaryThemeColor = fancyGreen;
   static const deepBlue = Color(0x10426AFF);
   static Color buttonSelectedColor = Colors.lightBlueAccent;
   static const black = Colors.black;
   static var backgroundColor = Colors.blue[300];
-  static const backgroundPurple = Color.fromARGB(255, 44, 18, 85);
+  static const fancyBlue = Color.fromARGB(255, 16, 85, 154);
+  static const fancyGreen = Color.fromARGB(255, 60, 126, 200);
   static const menuTextColor = Color.fromARGB(250, 36, 46, 53);
   static const menuIconColor = Color.fromARGB(250, 95, 110, 121);
   static const menuBackgroundColor = Color.fromARGB(250, 229, 238, 244);
