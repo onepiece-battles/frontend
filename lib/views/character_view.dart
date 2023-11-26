@@ -159,22 +159,21 @@ class _CharacterViewState extends State<CharacterView> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(0, 0, 0, 6),
+            padding: const EdgeInsets.fromLTRB(0, 0, 6, 1),
             child: SizedBox(
-              width: 200,
+              width: 230,
+              height: 35,
               child: TextFormField(
                 controller: searchNameController,
                 onChanged: (value) {
                   characterFilter.name = value;
                   _search();
                 },
-                decoration: InputDecoration(
-                  prefixIcon: IconButton(
-                      onPressed: () {
-                        characterFilter.name = searchNameController.text;
-                        _search();
-                      },
-                      icon: const Icon(Icons.search)),
+                decoration:  InputDecoration(
+                  disabledBorder:  const OutlineInputBorder(borderSide: BorderSide(color: OnepieceColors.menuHoverColor)),
+                  enabledBorder:  const OutlineInputBorder(borderSide: BorderSide(color: OnepieceColors.menuHoverColor)),
+                  focusedBorder:  const OutlineInputBorder(borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
+                  prefixIcon:  const Icon(Icons.search),
                   labelText: AppLocalizations.of(context)!.name,
                 ),
               ),
@@ -219,8 +218,9 @@ class _CharacterViewState extends State<CharacterView> {
                   width: 280,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(3),
-                    color: OnepieceColors.menuBackgroundColor,
-                  )),
+                    color: OnepieceColors.liteFancyGreen,
+                  ),
+              ),
               menuItemStyleData: const MenuItemStyleData(
                 height: 35,
               ),
@@ -247,7 +247,7 @@ class _CharacterViewState extends State<CharacterView> {
                         },
                         child: Container(
                           height: double.infinity,
-                          padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                          padding: const EdgeInsets.symmetric(horizontal: 3.0),
                           child: Row(
                             children: [
                               if (isSelected)

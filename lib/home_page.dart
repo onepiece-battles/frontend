@@ -175,13 +175,13 @@ class HomePageState extends State<HomePage> {
                 buttonStyleData: ButtonStyleData(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      color: OnepieceColors.menuBackgroundColor),
+                      borderRadius: BorderRadius.circular(3),
+                      color: OnepieceColors.liteFancyGreen),
                   height: 40,
                   width: 240,
                 ),
                 menuItemStyleData: const MenuItemStyleData(
-                  height: 40,
+                  height: 30,
                 ),
                 items: getItems(context),
               ),
@@ -321,7 +321,7 @@ class HomePageState extends State<HomePage> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(8,8,0,0),
+            padding: const EdgeInsets.fromLTRB(8, 8, 0, 0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
@@ -347,8 +347,11 @@ class HomePageState extends State<HomePage> {
                       width: 80,
                       child: Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: Text(getIt<User>().name,
-                              style: OnepieceFonts.smallHeaderStyle,overflow: TextOverflow.ellipsis,)),
+                          child: Text(
+                            getIt<User>().name,
+                            style: OnepieceFonts.smallHeaderStyle,
+                            overflow: TextOverflow.ellipsis,
+                          )),
                     ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
@@ -361,8 +364,8 @@ class HomePageState extends State<HomePage> {
                             size: 17,
                           )),
                           TextSpan(
-                              text: " ${getIt<User>().email!}",
-                              style: OnepieceFonts.emailFont,
+                            text: " ${getIt<User>().email!}",
+                            style: OnepieceFonts.emailFont,
                           )
                         ]),
                       ),
@@ -370,6 +373,46 @@ class HomePageState extends State<HomePage> {
                   ],
                 )
               ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(2, 8, 2, 8),
+            child: Material(
+              type: MaterialType.transparency,
+              child: Container(
+                width: 230,
+                height: 30,
+                decoration: const BoxDecoration(
+                  color: OnepieceColors.fancyGreen,
+                  borderRadius: BorderRadius.all(Radius.circular(3.0)),
+                ),
+                child: TextButton(
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Icon(
+                        Icons.search,
+                        color: OnepieceColors.fancyBlue,
+                      ),
+                      Text(
+                        " search resource ...",
+                        style: OnepieceFonts.smallContentStyle,
+                      )
+                    ],
+                  ),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: ((context) {
+                        return const AlertDialog(
+                          alignment: AlignmentDirectional.center,
+                          content: CreateFeedbackView(),
+                        );
+                      }),
+                    );
+                  },
+                ),
+              ),
             ),
           ),
         ],
@@ -436,7 +479,7 @@ class HomePageState extends State<HomePage> {
                 ),
                 leading: resourceToIconMap[resourceType],
                 selected: selectedResource == resourceType,
-                selectedTileColor: OnepieceColors.menuSelectedTileColor,
+                selectedTileColor: OnepieceColors.liteFancyBlue,
                 onTap: () {
                   setState(
                     () {
@@ -456,7 +499,7 @@ class HomePageState extends State<HomePage> {
                         borderRadius: BorderRadius.circular(3)),
                   ),
                 ),
-                hoverColor: OnepieceColors.menuHoverColor,
+                hoverColor: OnepieceColors.liteFancyBlue,
                 title: Text(
                   resourceToDisplayTextMap[resourceType]!,
                   textAlign: TextAlign.left,
