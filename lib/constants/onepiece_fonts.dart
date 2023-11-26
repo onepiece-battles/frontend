@@ -8,6 +8,7 @@ class OnepieceFonts {
   static const FontWeight headerFontWeight = FontWeight.bold;
   static const Color headerFontColor = Colors.black;
   static const double contentFontSize = 18;
+  static const double dropDownFontSize = 16;
   static const double smallContentFontSize = 15;
   static const Color contentFontColor = Colors.black54;
   static const FontWeight sideMenuFontWeight = FontWeight.w500;
@@ -53,7 +54,7 @@ class OnepieceFonts {
   );
   static const TextStyle dropDownItemStyle = TextStyle(
       color: OnepieceFonts.contentFontColor,
-      fontSize: OnepieceFonts.contentFontSize
+      fontSize: OnepieceFonts.dropDownFontSize
   );
 
   static const TextStyle emailFont = TextStyle(
