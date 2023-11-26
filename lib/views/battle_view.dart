@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:one_piece_battles_flutter/constants/button_style.dart';
 import 'package:one_piece_battles_flutter/repository/battle_dao.dart';
 import 'package:one_piece_battles_flutter/utils/date_helper.dart';
 import 'package:openapi/api.dart';
@@ -163,6 +164,7 @@ class _BattleViewState extends State<BattleView> {
             onPressed: () {
               context.goNamed("createBattle");
             },
+            style: OnepieceButtonStyle.getDefaultStyle(),
             child: Text(AppLocalizations.of(context)!.createBattle),
           ),
         ),
@@ -393,6 +395,7 @@ class _BattleViewState extends State<BattleView> {
     return [
       DataColumn(
         label: ElevatedButton(
+          style: OnepieceButtonStyle.getDefaultStyle(),
           onPressed: () {
             // filter will not be cleared
             sortKeys = [];
@@ -546,6 +549,7 @@ class _BattleViewState extends State<BattleView> {
   Widget _getPageFoot() {
     List<Widget> widgetList = [];
     ElevatedButton prePage = ElevatedButton(
+        style: OnepieceButtonStyle.getDefaultStyle(),
         onPressed: !preButtonEnabled
             ? null
             : () {
@@ -554,6 +558,7 @@ class _BattleViewState extends State<BattleView> {
               },
         child: const Icon(Icons.arrow_back));
     ElevatedButton nextPage = ElevatedButton(
+        style: OnepieceButtonStyle.getDefaultStyle(),
         onPressed: !nextButtonEnabled
             ? null
             : () {
@@ -593,6 +598,7 @@ class _BattleViewState extends State<BattleView> {
           }),
     );
     ElevatedButton confirmPage = ElevatedButton(
+        style: OnepieceButtonStyle.getDefaultStyle(),
         onPressed: !confirmButtonEnabled
             ? null
             : () {

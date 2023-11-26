@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:openapi/api.dart';
+import '../constants/button_style.dart';
 import '../constants/onepiece_colors.dart';
 import '../constants/onepiece_fonts.dart';
 import '../repository/fruit_dao.dart';
@@ -108,12 +109,12 @@ class _FruitViewState extends State<FruitView> {
             children: [
               _getHeaderText(context),
               SizedBox(
-                width: 1200,
+                width: 1500,
                 height: 50,
                 child: _getControlRow(context),
               ),
               SizedBox(
-                width: 1200,
+                width: 1500,
                 child: FittedBox(
                   fit: BoxFit.fitWidth,
                   child: _getFruitsTable(context),
@@ -123,7 +124,7 @@ class _FruitViewState extends State<FruitView> {
                 height: 15,
               ),
               SizedBox(
-                width: 1200,
+                width: 1500,
                 child: Center(child: _getPageFoot()),
               )
             ],
@@ -144,51 +145,62 @@ class _FruitViewState extends State<FruitView> {
   }
 
   Widget _getControlRow(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 0, 6),
-              child: SizedBox(
-                width: 200,
-                child: TextFormField(
-                  controller: searchNameController,
-                  onChanged: (value) {
-                    fruitFilter.name = value;
-                    _search();
-                  },
-                  decoration: InputDecoration(
-                    prefixIcon: IconButton(
-                        onPressed: () {
-                          fruitFilter.name = searchNameController.text;
-                          _search();
-                        },
-                        icon: const Icon(Icons.search)),
-                    labelText: AppLocalizations.of(context)!.name,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 0, 6, 0),
+                child: SizedBox(
+                  width: 200,
+                  height: 35,
+                  child: TextFormField(
+                    controller: searchNameController,
+                    onChanged: (value) {
+                      fruitFilter.name = value;
+                      _search();
+                    },
+                    decoration: InputDecoration(
+                      disabledBorder: const OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: OnepieceColors.menuHoverColor)),
+                      enabledBorder: const OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: OnepieceColors.menuHoverColor)),
+                      focusedBorder: const OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: OnepieceColors.fancyGreen)),
+                      prefixIcon: IconButton(
+                          onPressed: () {
+                            fruitFilter.name = searchNameController.text;
+                            _search();
+                          },
+                          icon: const Icon(Icons.search)),
+                      labelText: AppLocalizations.of(context)!.name,
+                    ),
                   ),
                 ),
               ),
-            ),
-            _getFruitTypeFilter(context),
-          ],
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(0,0,0,6),
-          child: SizedBox(
+              _getFruitTypeFilter(context),
+            ],
+          ),
+          SizedBox(
             height: 35,
             child: ElevatedButton(
-                onPressed: () {
-                  context.goNamed("createFruit");
-                },
-                child: Text(AppLocalizations.of(context)!.createDevilFruit),
+              style: OnepieceButtonStyle.getDefaultStyle(),
+              onPressed: () {
+                context.goNamed("createFruit");
+              },
+              child: Text(AppLocalizations.of(context)!.createDevilFruit),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -311,6 +323,7 @@ class _FruitViewState extends State<FruitView> {
     return [
       DataColumn(
         label: ElevatedButton(
+          style: OnepieceButtonStyle.getDefaultStyle(),
           onPressed: () {
             // filter will not be cleared
             sortKeys = [];
@@ -331,9 +344,9 @@ class _FruitViewState extends State<FruitView> {
         ),
       ),
       _createSingleColumn(
-          AppLocalizations.of(context)!.name, FruitSortableFieldsEnum.name,80),
+          AppLocalizations.of(context)!.name, FruitSortableFieldsEnum.name, 80),
       _createSingleColumn(AppLocalizations.of(context)!.attackStrengthen,
-          FruitSortableFieldsEnum.attackStrengthen,null),
+          FruitSortableFieldsEnum.attackStrengthen, null),
       _createSingleColumn(AppLocalizations.of(context)!.defenseStrengthen,
           FruitSortableFieldsEnum.defenseStrengthen, null),
       _createSingleColumn(AppLocalizations.of(context)!.bloodStrengthen,
@@ -346,12 +359,13 @@ class _FruitViewState extends State<FruitView> {
           FruitSortableFieldsEnum.speedStrengthen, null),
       _createSingleColumn(AppLocalizations.of(context)!.fruitType,
           FruitSortableFieldsEnum.fruitType, 200),
-      _createSingleColumn(AppLocalizations.of(context)!.createdBySystem, null, null),
+      _createSingleColumn(
+          AppLocalizations.of(context)!.createdBySystem, null, null),
     ];
   }
 
-  DataColumn _createSingleColumn(
-      String displayText, FruitSortableFieldsEnum? sortableFieldsEnum, double? width) {
+  DataColumn _createSingleColumn(String displayText,
+      FruitSortableFieldsEnum? sortableFieldsEnum, double? width) {
     return DataColumn(
       label: InkWell(
         onTap: sortableFieldsEnum == null
@@ -462,6 +476,7 @@ class _FruitViewState extends State<FruitView> {
   Widget _getPageFoot() {
     List<Widget> widgetList = [];
     ElevatedButton prePage = ElevatedButton(
+        style: OnepieceButtonStyle.getDefaultStyle(),
         onPressed: !preButtonEnabled
             ? null
             : () {
@@ -470,6 +485,7 @@ class _FruitViewState extends State<FruitView> {
               },
         child: const Icon(Icons.arrow_back));
     ElevatedButton nextPage = ElevatedButton(
+        style: OnepieceButtonStyle.getDefaultStyle(),
         onPressed: !nextButtonEnabled
             ? null
             : () {
@@ -509,6 +525,7 @@ class _FruitViewState extends State<FruitView> {
           }),
     );
     ElevatedButton confirmPage = ElevatedButton(
+        style: OnepieceButtonStyle.getDefaultStyle(),
         onPressed: !confirmButtonEnabled
             ? null
             : () {

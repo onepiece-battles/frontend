@@ -116,8 +116,8 @@ class HomePageState extends State<HomePage> {
               height: 50,
               borderRadius: 20,
               selectedBackgroundColors: const [
-                Color.fromARGB(255, 38, 151, 243),
-                Colors.blueAccent
+                OnepieceColors.fancyBlue,
+                // Colors.blueAccent
               ],
               labels: const ["文", "EN"],
               selectedLabelIndex: (index) {
