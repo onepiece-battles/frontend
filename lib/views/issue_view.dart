@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/repository/issue_dao.dart';
 import 'package:openapi/api.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../constants/button_style.dart';
 import '../constants/onepiece_colors.dart';
 import '../constants/onepiece_fonts.dart';
 import '../utils/data_validator.dart';
@@ -156,9 +157,10 @@ class _IssueViewState extends State<IssueView> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(0, 0, 0, 6),
+            padding: const EdgeInsets.fromLTRB(0, 0, 6, 0),
             child: SizedBox(
               width: 200,
+              height: 35,
               child: TextFormField(
                 controller: searchHeaderController,
                 onChanged: (value) {
@@ -166,6 +168,14 @@ class _IssueViewState extends State<IssueView> {
                   _search();
                 },
                 decoration: InputDecoration(
+                  disabledBorder: const OutlineInputBorder(
+                      borderSide:
+                          BorderSide(color: OnepieceColors.menuHoverColor)),
+                  enabledBorder: const OutlineInputBorder(
+                      borderSide:
+                          BorderSide(color: OnepieceColors.menuHoverColor)),
+                  focusedBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
                   prefixIcon: IconButton(
                       onPressed: () {
                         issueFilter.issueHeader = searchHeaderController.text;
@@ -387,6 +397,7 @@ class _IssueViewState extends State<IssueView> {
     return [
       DataColumn(
         label: ElevatedButton(
+            style: OnepieceButtonStyle.getDefaultStyle(),
             onPressed: () {
               sortKeys = [];
               sortableEnumToSortOrderMap = {
@@ -399,8 +410,10 @@ class _IssueViewState extends State<IssueView> {
             },
             child: Text(AppLocalizations.of(context)!.resetSort)),
       ),
-      _createSingleColumn(AppLocalizations.of(context)!.userNameLabel, null, 180),
-      _createSingleColumn(AppLocalizations.of(context)!.feedbackTitle, null, 220),
+      _createSingleColumn(
+          AppLocalizations.of(context)!.userNameLabel, null, 180),
+      _createSingleColumn(
+          AppLocalizations.of(context)!.feedbackTitle, null, 220),
       _createSingleColumn(AppLocalizations.of(context)!.issueType,
           IssueSortableFieldEnum.issueType, null),
       _createSingleColumn(AppLocalizations.of(context)!.status,
@@ -412,8 +425,8 @@ class _IssueViewState extends State<IssueView> {
     ];
   }
 
-  DataColumn _createSingleColumn(
-      String displayText, IssueSortableFieldEnum? issueSortableFieldsEnum, double? width) {
+  DataColumn _createSingleColumn(String displayText,
+      IssueSortableFieldEnum? issueSortableFieldsEnum, double? width) {
     return DataColumn(
       label: InkWell(
         onTap: issueSortableFieldsEnum == null
@@ -451,10 +464,10 @@ class _IssueViewState extends State<IssueView> {
               children: [
                 Text(
                   displayText,
-                  style:
-                      sortableEnumToSortOrderMap[issueSortableFieldsEnum] == null
-                          ? OnepieceFonts.tableHeaderStyle
-                          : OnepieceFonts.selectedTableHeaderStyle,
+                  style: sortableEnumToSortOrderMap[issueSortableFieldsEnum] ==
+                          null
+                      ? OnepieceFonts.tableHeaderStyle
+                      : OnepieceFonts.selectedTableHeaderStyle,
                 ),
                 if (issueSortableFieldsEnum != null)
                   Padding(
@@ -464,7 +477,8 @@ class _IssueViewState extends State<IssueView> {
                           sortableEnumToSortOrderMap[issueSortableFieldsEnum]]!,
                       15,
                       15,
-                      sortableEnumToSortOrderMap[issueSortableFieldsEnum] == null
+                      sortableEnumToSortOrderMap[issueSortableFieldsEnum] ==
+                              null
                           ? Colors.grey
                           : OnepieceColors.themeColor,
                     ),
@@ -527,16 +541,17 @@ class _IssueViewState extends State<IssueView> {
   DataCell _getDataCell(String value, double? customizeWidth) {
     if (customizeWidth != null) {
       return DataCell(
-          Padding(
-        padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-        child: SizedBox(
+        Padding(
+          padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+          child: SizedBox(
             width: customizeWidth,
             child: Text(
               value,
               overflow: TextOverflow.ellipsis,
             ),
+          ),
         ),
-      ),);
+      );
     }
     return DataCell(Padding(
       padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
@@ -547,6 +562,7 @@ class _IssueViewState extends State<IssueView> {
   Row _getPageFoot() {
     List<Widget> widgetList = [];
     ElevatedButton prePage = ElevatedButton(
+        style: OnepieceButtonStyle.getDefaultStyle(),
         onPressed: !preButtonEnabled
             ? null
             : () {
@@ -555,6 +571,7 @@ class _IssueViewState extends State<IssueView> {
               },
         child: const Icon(Icons.arrow_back));
     ElevatedButton nextPage = ElevatedButton(
+        style: OnepieceButtonStyle.getDefaultStyle(),
         onPressed: !nextButtonEnabled
             ? null
             : () {
@@ -594,6 +611,7 @@ class _IssueViewState extends State<IssueView> {
           }),
     );
     ElevatedButton confirmPage = ElevatedButton(
+        style: OnepieceButtonStyle.getDefaultStyle(),
         onPressed: !confirmButtonEnabled
             ? null
             : () {

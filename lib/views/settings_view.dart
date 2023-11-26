@@ -9,6 +9,7 @@ import 'package:one_piece_battles_flutter/repository/image_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
 import '../config/resource_permission_manager.dart';
+import '../constants/button_style.dart';
 import '../constants/onepiece_colors.dart';
 import '../constants/onepiece_fonts.dart';
 import '../main.dart';
@@ -133,6 +134,7 @@ class _SettingsViewState extends State<SettingsView> {
                 Row(
                   children: [
                     ElevatedButton(
+                      style: OnepieceButtonStyle.getDefaultStyle(),
                       onPressed: () async {
                         XFile? pickedImage =
                             await OnepieceImagePicker.pickWebImage();
@@ -230,6 +232,7 @@ class _SettingsViewState extends State<SettingsView> {
                           ? AppLocalizations.of(context)!.confirmHint
                           : AppLocalizations.of(context)!.editHint,
                       child: ElevatedButton(
+                        style: OnepieceButtonStyle.getDefaultStyle(),
                         onPressed: () {
                           setState(() {
                             _nameSettingEnabled = !_nameSettingEnabled;
@@ -305,6 +308,7 @@ class _SettingsViewState extends State<SettingsView> {
                           ? AppLocalizations.of(context)!.confirmHint
                           : AppLocalizations.of(context)!.editHint,
                       child: ElevatedButton(
+                        style: OnepieceButtonStyle.getDefaultStyle(),
                         onPressed: () {
                           setState(() {
                             _emailSettingEnabled = !_emailSettingEnabled;
@@ -335,6 +339,7 @@ class _SettingsViewState extends State<SettingsView> {
                           ? AppLocalizations.of(context)!.confirmHint
                           : AppLocalizations.of(context)!.editHint,
                       child: ElevatedButton(
+                          style: OnepieceButtonStyle.getDefaultStyle(),
                           onPressed: () {
                             setState(
                               () {
@@ -422,6 +427,7 @@ class _SettingsViewState extends State<SettingsView> {
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         ElevatedButton(
+          style: OnepieceButtonStyle.getDefaultStyle(),
           onPressed: !_footButtonEnabled
               ? null
               : () {
@@ -438,6 +444,7 @@ class _SettingsViewState extends State<SettingsView> {
         Padding(
           padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
           child: ElevatedButton(
+              style: OnepieceButtonStyle.getDefaultStyle(),
               onPressed: !_footButtonEnabled
                   ? null
                   : () async {

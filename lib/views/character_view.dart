@@ -10,6 +10,7 @@ import 'package:one_piece_battles_flutter/repository/character_dao.dart';
 import 'package:one_piece_battles_flutter/utils/base64_helper.dart';
 import 'package:one_piece_battles_flutter/utils/data_validator.dart';
 import 'package:openapi/api.dart';
+import '../constants/button_style.dart';
 import '../utils/image_helper.dart';
 
 GetIt getIt = GetIt.instance;
@@ -109,12 +110,12 @@ class _CharacterViewState extends State<CharacterView> {
             children: [
               _createHeader(context),
               SizedBox(
-                width: 1200,
+                width: 1500,
                 height: 50,
                 child: _createControlPanel(context),
               ),
               SizedBox(
-                width: 1200,
+                width: 1500,
                 child: FittedBox(
                   fit: BoxFit.fitWidth,
                   child: _createCharacterTable(context),
@@ -124,7 +125,7 @@ class _CharacterViewState extends State<CharacterView> {
                 height: 15,
               ),
               SizedBox(
-                width: 1200,
+                width: 1500,
                 child: Center(child: _getPageFoot()),
               )
             ],
@@ -159,7 +160,7 @@ class _CharacterViewState extends State<CharacterView> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(0, 0, 6, 1),
+            padding: const EdgeInsets.fromLTRB(0, 0, 6, 0),
             child: SizedBox(
               width: 230,
               height: 35,
@@ -169,11 +170,16 @@ class _CharacterViewState extends State<CharacterView> {
                   characterFilter.name = value;
                   _search();
                 },
-                decoration:  InputDecoration(
-                  disabledBorder:  const OutlineInputBorder(borderSide: BorderSide(color: OnepieceColors.menuHoverColor)),
-                  enabledBorder:  const OutlineInputBorder(borderSide: BorderSide(color: OnepieceColors.menuHoverColor)),
-                  focusedBorder:  const OutlineInputBorder(borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
-                  prefixIcon:  const Icon(Icons.search),
+                decoration: InputDecoration(
+                  disabledBorder: const OutlineInputBorder(
+                      borderSide:
+                          BorderSide(color: OnepieceColors.menuHoverColor)),
+                  enabledBorder: const OutlineInputBorder(
+                      borderSide:
+                          BorderSide(color: OnepieceColors.menuHoverColor)),
+                  focusedBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
+                  prefixIcon: const Icon(Icons.search),
                   labelText: AppLocalizations.of(context)!.name,
                 ),
               ),
@@ -213,13 +219,13 @@ class _CharacterViewState extends State<CharacterView> {
                 ).toList();
               },
               buttonStyleData: ButtonStyleData(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  height: 35,
-                  width: 280,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(3),
-                    color: OnepieceColors.liteFancyGreen,
-                  ),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                height: 35,
+                width: 280,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(3),
+                  color: OnepieceColors.liteFancyGreen,
+                ),
               ),
               menuItemStyleData: const MenuItemStyleData(
                 height: 35,
@@ -281,6 +287,7 @@ class _CharacterViewState extends State<CharacterView> {
             onPressed: () {
               context.goNamed("createCharacter");
             },
+            style: OnepieceButtonStyle.getDefaultStyle(),
             child: Text(AppLocalizations.of(context)!.createCharacter)),
       )
     ]);
@@ -288,7 +295,6 @@ class _CharacterViewState extends State<CharacterView> {
 
   DataTable _createCharacterTable(BuildContext context) {
     return DataTable(
-      // headingRowHeight: 50,
       showCheckboxColumn: false,
       showBottomBorder: true,
       border: const TableBorder(
@@ -304,6 +310,7 @@ class _CharacterViewState extends State<CharacterView> {
     return [
       DataColumn(
         label: ElevatedButton(
+            style: OnepieceButtonStyle.getDefaultStyle(),
             onPressed: () {
               sortKeys = [];
               sortableEnumToSortOrderMap = {
@@ -515,6 +522,7 @@ class _CharacterViewState extends State<CharacterView> {
   Row _getPageFoot() {
     List<Widget> widgetList = [];
     ElevatedButton prePage = ElevatedButton(
+        style: OnepieceButtonStyle.getDefaultStyle(),
         onPressed: !preButtonEnabled
             ? null
             : () {
@@ -523,6 +531,7 @@ class _CharacterViewState extends State<CharacterView> {
               },
         child: const Icon(Icons.arrow_back));
     ElevatedButton nextPage = ElevatedButton(
+        style: OnepieceButtonStyle.getDefaultStyle(),
         onPressed: !nextButtonEnabled
             ? null
             : () {
@@ -562,6 +571,7 @@ class _CharacterViewState extends State<CharacterView> {
           }),
     );
     ElevatedButton confirmPage = ElevatedButton(
+        style: OnepieceButtonStyle.getDefaultStyle(),
         onPressed: !confirmButtonEnabled
             ? null
             : () {
