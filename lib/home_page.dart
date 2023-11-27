@@ -343,15 +343,13 @@ class HomePageState extends State<HomePage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    SizedBox(
-                      width: 80,
-                      child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            getIt<User>().name,
-                            style: OnepieceFonts.smallHeaderStyle,
-                            overflow: TextOverflow.ellipsis,
-                          )),
+                    Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          getIt<User>().name,
+                          style: OnepieceFonts.smallHeaderStyle,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                     ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
