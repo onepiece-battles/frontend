@@ -106,7 +106,7 @@
   "resetSort": "Clear Sorting",
   "roleAdmin": "ADMIN",
   "roleNika": "NIKA",
-  "roleNormal": "NORMAL USER",
+  "roleNormal": "NORMAL",
   "roleVisitor": "VISITOR",
   "route": "Navigation",
   "science": "science",
@@ -138,5 +138,7 @@
   "welcome": "Welcome to OnePiece!",
   "winner": "Winner",
   "yes": "YES",
-  "zoanFruit": "Zoan"
+  "zoanFruit": "Zoan",
+  "systemResource": "System Resource Only",
+  "noSystemResource": "Exclude System Resource"
 }

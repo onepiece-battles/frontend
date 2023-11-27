@@ -138,5 +138,7 @@
   "welcome": "欢迎光临海贼王！",
   "winner": "获胜者",
   "yes": "是",
-  "zoanFruit": "动物系"
+  "zoanFruit": "动物系",
+  "systemResource": "只显示系统资源",
+  "noSystemResource": "不显示系统资源"
 }
