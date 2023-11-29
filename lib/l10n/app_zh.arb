@@ -82,6 +82,7 @@
   "localizationDescription": "自定义语言和区域相关设置。",
   "localizationHeader": "本地化",
   "logiaFruit": "自然系",
+  "loginRole": "登录角色",
   "logout": "登出",
   "maxFileSizeDescription": "允许最大文件大小为200KB。",
   "modificationTime": "更新时间",
@@ -138,7 +139,5 @@
   "welcome": "欢迎光临海贼王！",
   "winner": "获胜者",
   "yes": "是",
-  "zoanFruit": "动物系",
-  "systemResource": "只显示系统资源",
-  "noSystemResource": "不显示系统资源"
+  "zoanFruit": "动物系"
 }

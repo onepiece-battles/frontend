@@ -310,7 +310,7 @@ class _UserViewState extends State<UserView> {
       _createSingleColumn(AppLocalizations.of(context)!.fruitLimit,
           UserSortableFieldsEnum.email),
       _createSingleColumn("login role", UserSortableFieldsEnum.loginRole),
-      _createSingleColumn("status", null),
+      _createSingleColumn( AppLocalizations.of(context)!.status, null),
     ];
   }
 
