@@ -487,8 +487,8 @@ class _SettingsViewState extends State<SettingsView> {
         locale: _realtimeData.locale.languageCode == 'en'
             ? OnepieceLocale.enUS
             : OnepieceLocale.zhCN,
-        name: _realtimeData.name,
-        email: _realtimeData.email,
+        name: _realtimeData.name.trim(),
+        email: _realtimeData.email.trim(),
         id: getIt<User>().id);
     var updateUserResponse =
         await getIt<UserDao>().updateUser(updateUserRequest);

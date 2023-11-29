@@ -49,7 +49,7 @@ class OnepieceFonts {
       fontWeight: OnepieceFonts.headerFontWeight
   );
   static const TextStyle selectedTableHeaderStyle = TextStyle(
-      color: OnepieceColors.themeColor,
+      color: OnepieceColors.fancyBlue,
       fontSize: OnepieceFonts.tableHeaderFontSize,
       fontWeight: OnepieceFonts.headerFontWeight
   );

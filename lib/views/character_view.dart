@@ -389,12 +389,13 @@ class _CharacterViewState extends State<CharacterView> {
     return DataTable(
       showCheckboxColumn: false,
       showBottomBorder: true,
+      headingRowHeight: 50,
       border: const TableBorder(
           top: BorderSide(color: OnepieceColors.themeColor),
           bottom: BorderSide(color: OnepieceColors.themeColor)),
       columns: _createColumns(),
       rows: _createRows(context),
-      columnSpacing: 20,
+      columnSpacing: 10,
     );
   }
 
@@ -420,38 +421,30 @@ class _CharacterViewState extends State<CharacterView> {
             child: Text(AppLocalizations.of(context)!.resetSort)),
       ),
       _createSingleColumn(AppLocalizations.of(context)!.characterName,
-          CharacterSortableFieldsEnum.name),
-      DataColumn(
-          label: Text(
-        AppLocalizations.of(context)!.characterTypeLabel,
-        style: OnepieceFonts.tableHeaderStyle,
-      )),
+          CharacterSortableFieldsEnum.name, 120),
+      _createSingleColumn(   AppLocalizations.of(context)!.characterTypeLabel, null, 120),
       _createSingleColumn(AppLocalizations.of(context)!.fruitLimit,
-          CharacterSortableFieldsEnum.fruitLimit),
+          CharacterSortableFieldsEnum.fruitLimit, null),
       _createSingleColumn(AppLocalizations.of(context)!.groupGain,
-          CharacterSortableFieldsEnum.groupGain),
+          CharacterSortableFieldsEnum.groupGain, null),
       _createSingleColumn(AppLocalizations.of(context)!.characterAttack,
-          CharacterSortableFieldsEnum.attack),
+          CharacterSortableFieldsEnum.attack , null),
       _createSingleColumn(AppLocalizations.of(context)!.characterDefense,
-          CharacterSortableFieldsEnum.defense),
+          CharacterSortableFieldsEnum.defense, null),
       _createSingleColumn(AppLocalizations.of(context)!.characterIntelligence,
-          CharacterSortableFieldsEnum.intelligence),
+          CharacterSortableFieldsEnum.intelligence, null),
       _createSingleColumn(AppLocalizations.of(context)!.characterBlood,
-          CharacterSortableFieldsEnum.blood),
+          CharacterSortableFieldsEnum.blood, null),
       _createSingleColumn(AppLocalizations.of(context)!.characterSpeed,
-          CharacterSortableFieldsEnum.speed),
-      DataColumn(
-        label: Text(
-          AppLocalizations.of(context)!.characterFruits,
-          style: OnepieceFonts.tableHeaderStyle,
-        ),
-      ),
-      _createSingleColumn(AppLocalizations.of(context)!.createdBySystem, null),
+          CharacterSortableFieldsEnum.speed, null),
+      _createSingleColumn(AppLocalizations.of(context)!.characterFruits,
+          null, null),
+      _createSingleColumn(AppLocalizations.of(context)!.createdBySystem, null, 130),
     ];
   }
 
   DataColumn _createSingleColumn(String displayText,
-      CharacterSortableFieldsEnum? characterSortableFieldsEnum) {
+      CharacterSortableFieldsEnum? characterSortableFieldsEnum, double? width) {
     return DataColumn(
       label: InkWell(
         onTap: characterSortableFieldsEnum == null
@@ -482,32 +475,35 @@ class _CharacterViewState extends State<CharacterView> {
               },
         child: Padding(
           padding: const EdgeInsets.fromLTRB(5, 10, 0, 10),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Text(
-                displayText,
-                style:
-                    sortableEnumToSortOrderMap[characterSortableFieldsEnum] ==
-                            null
-                        ? OnepieceFonts.tableHeaderStyle
-                        : OnepieceFonts.selectedTableHeaderStyle,
-              ),
-              if (characterSortableFieldsEnum != null)
-                Padding(
-                  padding: const EdgeInsets.all(5.0),
-                  child: ImageHelper.getSvgIconWithColor(
-                    sortOrderToPath[sortableEnumToSortOrderMap[
-                        characterSortableFieldsEnum]]!,
-                    15,
-                    15,
-                    sortableEnumToSortOrderMap[characterSortableFieldsEnum] ==
-                            null
-                        ? Colors.grey
-                        : OnepieceColors.themeColor,
-                  ),
-                )
-            ],
+          child: SizedBox(
+            width: width,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Text(
+                  displayText,
+                  style:
+                      sortableEnumToSortOrderMap[characterSortableFieldsEnum] ==
+                              null
+                          ? OnepieceFonts.tableHeaderStyle
+                          : OnepieceFonts.selectedTableHeaderStyle,
+                ),
+                if (characterSortableFieldsEnum != null)
+                  Padding(
+                    padding: const EdgeInsets.all(5.0),
+                    child: ImageHelper.getSvgIconWithColor(
+                      sortOrderToPath[sortableEnumToSortOrderMap[
+                          characterSortableFieldsEnum]]!,
+                      15,
+                      15,
+                      sortableEnumToSortOrderMap[characterSortableFieldsEnum] ==
+                              null
+                          ? Colors.grey
+                          : OnepieceColors.themeColor,
+                    ),
+                  )
+              ],
+            ),
           ),
         ),
       ),
