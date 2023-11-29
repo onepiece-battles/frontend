@@ -92,7 +92,7 @@ class _CreateFruitViewState extends State<CreateFruitView> {
                 maxLength: 10,
                 maxLengthEnforcement: MaxLengthEnforcement.enforced,
                 decoration: InputDecoration(
-                  labelText: AppLocalizations.of(context)!.characterName,
+                  labelText: AppLocalizations.of(context)!.fruitName,
                   prefixIcon: const Icon(Icons.people),
                 ),
               ),
@@ -310,22 +310,22 @@ class _CreateFruitViewState extends State<CreateFruitView> {
                 return;
               }
               AddFruitRequest addFruitRequest = AddFruitRequest(
-                name: fruitNameController.text,
+                name: fruitNameController.text.trim(),
                 fruitType: selectedFruitType,
                 attackStrengthen: DataConverter.stringToInt(
-                    fruitAttackStrengthenController.text),
+                    fruitAttackStrengthenController.text.trim()),
                 defenseStrengthen: DataConverter.stringToInt(
-                    fruitDefenseStrengthenController.text),
+                    fruitDefenseStrengthenController.text.trim()),
                 bloodStrengthen: DataConverter.stringToInt(
-                    fruitBloodStrengthenController.text),
+                    fruitBloodStrengthenController.text.trim()),
                 intelligenceStrengthen: DataConverter.stringToInt(
-                    fruitIntelligenceStrengthenController.text),
+                    fruitIntelligenceStrengthenController.text.trim()),
                 speedStrengthen: DataConverter.stringToInt(
-                    fruitSpeedStrengthenController.text),
+                    fruitSpeedStrengthenController.text.trim()),
                 magicConsume:
                     DataConverter.stringToInt(fruitMagicConsumeController.text),
                 groupGainStrengthen: DataConverter.stringToInt(
-                    fruitGroupGainStrengthenController.text),
+                    fruitGroupGainStrengthenController.text.trim()),
               );
 
               getIt<FruitDao>().add(addFruitRequest).then((value) {

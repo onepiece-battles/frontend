@@ -181,9 +181,9 @@ class _CreateFeedbackViewState extends State<CreateFeedbackView> {
                           : () {
                               CreateIssueRequest createIssueRequest =
                                   CreateIssueRequest(
-                                      issueHeader: headerController.text,
+                                      issueHeader: headerController.text.trim(),
                                       issueDescription:
-                                          descriptionController.text,
+                                          descriptionController.text.trim(),
                                       issueStatus: IssueStatus.CREATED,
                                       issueType: selectedIssueType);
                               getIt<IssueDao>()

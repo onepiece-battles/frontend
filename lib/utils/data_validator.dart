@@ -11,7 +11,7 @@ class DataValidator {
       return true;
     }
     // not case sensitive
-    if (name.contains(RegExp(r"[^a-zA-Z|\d]"))) {
+    if (name.trim().contains(RegExp(r"[^a-zA-Z|\d\u4e00-\u9fa5]"))) {
       return false;
     }
     return true;

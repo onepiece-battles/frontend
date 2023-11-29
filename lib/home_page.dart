@@ -164,6 +164,7 @@ class HomePageState extends State<HomePage> {
                     currentUser.loginRoleResources = value.resources;
                     ResourcePermissionManager.updateUserCache(currentUser);
                     setState(() {
+                      selectedResource = ResourceType.CHARACTER.toString();
                       loginRoleResources = getIt<User>()
                           .loginRoleResources
                           .where((e) => !notShownResources.contains(e))

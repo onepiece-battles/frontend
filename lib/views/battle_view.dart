@@ -512,7 +512,7 @@ class _BattleViewState extends State<BattleView> {
       _createSingleColumn(AppLocalizations.of(context)!.winner,
           BattleSortableFieldsEnum.winnerName, 80),
       _createSingleColumn(
-          AppLocalizations.of(context)!.createdBySystem, null, null),
+          AppLocalizations.of(context)!.createdBySystem, null, 120),
     ];
   }
 
@@ -546,40 +546,33 @@ class _BattleViewState extends State<BattleView> {
             },
       child: Padding(
         padding: const EdgeInsets.fromLTRB(5, 10, 0, 10),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            width == null
-                ? Text(
-                    displayText,
-                    style:
-                        sortableEnumToSortOrderMap[sortableFieldsEnum] == null
-                            ? OnepieceFonts.tableHeaderStyle
-                            : OnepieceFonts.selectedTableHeaderStyle,
-                  )
-                : SizedBox(
-                    width: width,
-                    child: Text(
+        child: SizedBox(
+          width: width,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Text(
                       displayText,
                       style:
                           sortableEnumToSortOrderMap[sortableFieldsEnum] == null
                               ? OnepieceFonts.tableHeaderStyle
                               : OnepieceFonts.selectedTableHeaderStyle,
-                    )),
-            if (sortableFieldsEnum != null)
-              Padding(
-                padding: const EdgeInsets.all(5.0),
-                child: ImageHelper.getSvgIconWithColor(
-                  sortOrderToPath[
-                      sortableEnumToSortOrderMap[sortableFieldsEnum]]!,
-                  15,
-                  15,
-                  sortableEnumToSortOrderMap[sortableFieldsEnum] == null
-                      ? Colors.grey
-                      : OnepieceColors.themeColor,
-                ),
-              )
-          ],
+                    ),
+              if (sortableFieldsEnum != null)
+                Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: ImageHelper.getSvgIconWithColor(
+                    sortOrderToPath[
+                        sortableEnumToSortOrderMap[sortableFieldsEnum]]!,
+                    15,
+                    15,
+                    sortableEnumToSortOrderMap[sortableFieldsEnum] == null
+                        ? Colors.grey
+                        : OnepieceColors.themeColor,
+                  ),
+                )
+            ],
+          ),
         ),
       ),
     ));

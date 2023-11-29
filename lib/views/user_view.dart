@@ -307,19 +307,22 @@ class _UserViewState extends State<UserView> {
             child: Text(AppLocalizations.of(context)!.resetSort)),
       ),
       _createSingleColumn(
-          AppLocalizations.of(context)!.name, UserSortableFieldsEnum.name),
+          AppLocalizations.of(context)!.name, UserSortableFieldsEnum.name, 120),
       _createSingleColumn(AppLocalizations.of(context)!.email,
-          UserSortableFieldsEnum.email),
+          UserSortableFieldsEnum.email, 130),
+      _createSingleColumn(AppLocalizations.of(context)!.emailStatus, null, 80),
       _createSingleColumn(AppLocalizations.of(context)!.loginRole,
-          UserSortableFieldsEnum.loginRole),
-      _createSingleColumn(AppLocalizations.of(context)!.status, null),
-      _createSingleColumn(AppLocalizations.of(context)!.creationTime, null),
-      _createSingleColumn(AppLocalizations.of(context)!.modificationTime, null),
+          UserSortableFieldsEnum.loginRole, null),
+      _createSingleColumn(AppLocalizations.of(context)!.status, null, 80),
+      _createSingleColumn(
+          AppLocalizations.of(context)!.creationTime, null, 150),
+      _createSingleColumn(
+          AppLocalizations.of(context)!.modificationTime, null, 150),
     ];
   }
 
-  DataColumn _createSingleColumn(
-      String displayText, UserSortableFieldsEnum? userSortableFieldsEnum) {
+  DataColumn _createSingleColumn(String displayText,
+      UserSortableFieldsEnum? userSortableFieldsEnum, double? width) {
     return DataColumn(
       label: InkWell(
         onTap: userSortableFieldsEnum == null
@@ -394,6 +397,37 @@ class _UserViewState extends State<UserView> {
       AccountStatus.stopped: AppLocalizations.of(context)!.accoutStopped,
       AccountStatus.closed: AppLocalizations.of(context)!.accountClosed,
     };
+
+    Map<bool, Widget> boolToEmailRowMap = {
+      true: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            AppLocalizations.of(context)!.verified,
+            style: const TextStyle(color: Colors.greenAccent),
+          ),
+          const Icon(
+            Icons.check,
+            color: Colors.greenAccent,
+            size: 20,
+          )
+        ],
+      ),
+      false: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            AppLocalizations.of(context)!.notVerified,
+            style: const TextStyle(color: Colors.redAccent),
+          ),
+          const Icon(
+            Icons.cancel,
+            color: Colors.redAccent,
+            size: 20,
+          )
+        ],
+      )
+    };
     return currentUserList
         .map(
           (user) => DataRow(
@@ -431,6 +465,10 @@ class _UserViewState extends State<UserView> {
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
                 child: Text(user.email.toString()),
+              )),
+              DataCell(Padding(
+                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                child: boolToEmailRowMap[user.emailVerified],
               )),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),

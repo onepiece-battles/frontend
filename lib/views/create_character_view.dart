@@ -418,23 +418,23 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                     AddCharacterRequest addCharacterRequest =
                         AddCharacterRequest(
                             characterType: selectedCharacterType,
-                            name: characterNameController.text,
+                            name: characterNameController.text.trim(),
                             fruitLimit: DataConverter.stringToInt(
-                                characterFruitLimitController.text),
+                                characterFruitLimitController.text.trim()),
                             groupGain: DataConverter.stringToInt(
-                                characterGroupGainController.text),
+                                characterGroupGainController.text.trim()),
                             attack: DataConverter.stringToInt(
-                                characterAttackController.text),
+                                characterAttackController.text.trim()),
                             defense: DataConverter.stringToInt(
-                                characterDefenseController.text),
+                                characterDefenseController.text.trim()),
                             intelligence: DataConverter.stringToInt(
-                                characterIntelligenceController.text),
+                                characterIntelligenceController.text.trim()),
                             blood: DataConverter.stringToInt(
-                                characterBloodController.text),
+                                characterBloodController.text.trim()),
                             speed: DataConverter.stringToInt(
-                                characterSpeedController.text),
+                                characterSpeedController.text.trim()),
                             magic: DataConverter.stringToInt(
-                                characterEnergyController.text));
+                                characterEnergyController.text.trim()));
                     getIt<CharacterDao>()
                         .addCharacter(addCharacterRequest)
                         .then((value) {
