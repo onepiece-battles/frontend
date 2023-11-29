@@ -1,5 +1,9 @@
 {
   "accountCheck": "Already have an account?",
+  "accountClosed": "Closed",
+  "accountLoggedIn": "Logged In",
+  "accountLoggedOut": "Logged Out",
+  "accoutStopped": "Stopped",
   "ancientZoanFruit": "Ancient (Zoan)",
   "artificialZoanFruit": "Artificial (Zoan)",
   "attackStrengthen": "attack strengthen",
@@ -92,6 +96,7 @@
   "no": "NO",
   "noAccount": "Don't have an account?",
   "noFileChosen": "No file chosen",
+  "noSystemResource": "Exclude System Resource",
   "onButton": "OK",
   "organization": "Your organization",
   "otherType": "Other types",
@@ -127,6 +132,7 @@
   "statusResolved": "Resolved",
   "statusRevoked": "Revoked",
   "submitForm": "Submit",
+  "systemResource": "System Resource Only",
   "title": "title",
   "unselected": "Unselected",
   "updateUserSettings": "Update user settings",
@@ -139,7 +145,5 @@
   "welcome": "Welcome to OnePiece!",
   "winner": "Winner",
   "yes": "YES",
-  "zoanFruit": "Zoan",
-  "systemResource": "System Resource Only",
-  "noSystemResource": "Exclude System Resource"
+  "zoanFruit": "Zoan"
 }
