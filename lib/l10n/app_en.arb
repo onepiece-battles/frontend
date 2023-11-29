@@ -1,5 +1,9 @@
 {
   "accountCheck": "Already have an account?",
+  "accountClosed": "Closed",
+  "accountLoggedIn": "Logged In",
+  "accountLoggedOut": "Logged Out",
+  "accoutStopped": "Stopped",
   "ancientZoanFruit": "Ancient (Zoan)",
   "artificialZoanFruit": "Artificial (Zoan)",
   "attackStrengthen": "attack strengthen",
@@ -82,6 +86,7 @@
   "localizationDescription": "Customize language and region related settings",
   "localizationHeader": "Localization",
   "logiaFruit": "Logia",
+  "loginRole": "login role",
   "logout": "Logout",
   "maxFileSizeDescription": "The maximum file size allowed is 200 kb",
   "modificationTime": "Modification Time",
@@ -91,6 +96,7 @@
   "no": "NO",
   "noAccount": "Don't have an account?",
   "noFileChosen": "No file chosen",
+  "noSystemResource": "Exclude System Resource",
   "onButton": "OK",
   "organization": "Your organization",
   "otherType": "Other types",
@@ -106,7 +112,7 @@
   "resetSort": "Clear Sorting",
   "roleAdmin": "ADMIN",
   "roleNika": "NIKA",
-  "roleNormal": "NORMAL",
+  "roleNormal": "NORMAL USER",
   "roleVisitor": "VISITOR",
   "route": "Navigation",
   "science": "science",
@@ -126,6 +132,7 @@
   "statusResolved": "Resolved",
   "statusRevoked": "Revoked",
   "submitForm": "Submit",
+  "systemResource": "System Resource Only",
   "title": "title",
   "unselected": "Unselected",
   "updateUserSettings": "Update user settings",
@@ -138,7 +145,5 @@
   "welcome": "Welcome to OnePiece!",
   "winner": "Winner",
   "yes": "YES",
-  "zoanFruit": "Zoan",
-  "systemResource": "System Resource Only",
-  "noSystemResource": "Exclude System Resource"
+  "zoanFruit": "Zoan"
 }

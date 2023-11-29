@@ -11,6 +11,7 @@ import '../constants/onepiece_fonts.dart';
 import '../repository/user_dao.dart';
 import '../utils/base64_helper.dart';
 import '../utils/data_validator.dart';
+import '../utils/date_helper.dart';
 import '../utils/image_helper.dart';
 
 GetIt getIt = GetIt.instance;
@@ -109,12 +110,12 @@ class _UserViewState extends State<UserView> {
             children: [
               _createHeader(context),
               SizedBox(
-                width: 1500,
+                width: 1200,
                 height: 50,
                 child: _createControlPanel(context),
               ),
               SizedBox(
-                width: 1500,
+                width: 1200,
                 child: FittedBox(
                   fit: BoxFit.fitWidth,
                   child: _createCharacterTable(context),
@@ -124,7 +125,7 @@ class _UserViewState extends State<UserView> {
                 height: 15,
               ),
               SizedBox(
-                width: 1500,
+                width: 1200,
                 child: Center(child: _getPageFoot()),
               )
             ],
@@ -307,10 +308,13 @@ class _UserViewState extends State<UserView> {
       ),
       _createSingleColumn(
           AppLocalizations.of(context)!.name, UserSortableFieldsEnum.name),
-      _createSingleColumn(AppLocalizations.of(context)!.fruitLimit,
+      _createSingleColumn(AppLocalizations.of(context)!.email,
           UserSortableFieldsEnum.email),
-      _createSingleColumn("login role", UserSortableFieldsEnum.loginRole),
-      _createSingleColumn("status", null),
+      _createSingleColumn(AppLocalizations.of(context)!.loginRole,
+          UserSortableFieldsEnum.loginRole),
+      _createSingleColumn(AppLocalizations.of(context)!.status, null),
+      _createSingleColumn(AppLocalizations.of(context)!.creationTime, null),
+      _createSingleColumn(AppLocalizations.of(context)!.modificationTime, null),
     ];
   }
 
@@ -377,18 +381,18 @@ class _UserViewState extends State<UserView> {
   }
 
   List<DataRow> _createRows(BuildContext context) {
-    Map<CharacterType, String> enumValueToDisplayValue =
-        <CharacterType, String>{
-      CharacterType.body: AppLocalizations.of(context)!.body,
-      CharacterType.foot: AppLocalizations.of(context)!.leg,
-      CharacterType.science: AppLocalizations.of(context)!.science,
-      CharacterType.fist: AppLocalizations.of(context)!.fist,
-      CharacterType.katana: AppLocalizations.of(context)!.katana,
-      CharacterType.shooter: AppLocalizations.of(context)!.shoot
+    Map<UserRole, String> userRoleToDisplayNameMap = {
+      UserRole.NIKA: AppLocalizations.of(context)!.roleNika,
+      UserRole.NORMAL: AppLocalizations.of(context)!.roleNormal,
+      UserRole.VISITOR: AppLocalizations.of(context)!.roleVisitor,
+      UserRole.ADMIN: AppLocalizations.of(context)!.roleAdmin
     };
-    Map<bool, String> booleanToDisplayName = {
-      true: AppLocalizations.of(context)!.yes,
-      false: AppLocalizations.of(context)!.no
+
+    Map<AccountStatus, String> accountStatusEnumToDisplayValue = {
+      AccountStatus.loggedIn: AppLocalizations.of(context)!.accountLoggedIn,
+      AccountStatus.loggedOut: AppLocalizations.of(context)!.accountLoggedOut,
+      AccountStatus.stopped: AppLocalizations.of(context)!.accoutStopped,
+      AccountStatus.closed: AppLocalizations.of(context)!.accountClosed,
     };
     return currentUserList
         .map(
@@ -430,7 +434,24 @@ class _UserViewState extends State<UserView> {
               )),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: Text(enumValueToDisplayValue[user.loginRole]!),
+                child: Text(userRoleToDisplayNameMap[user.loginRole]!),
+              )),
+              DataCell(Padding(
+                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                child:
+                    Text(accountStatusEnumToDisplayValue[user.accountStatus]!),
+              )),
+              DataCell(Padding(
+                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                child: Text(DateHelper.getLocalDateTimeFromTimestamp(
+                        user.creationTimestamp!)
+                    .toString()),
+              )),
+              DataCell(Padding(
+                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                child: Text(DateHelper.getLocalDateTimeFromTimestamp(
+                        user.creationTimestamp!)
+                    .toString()),
               )),
             ],
           ),
