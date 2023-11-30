@@ -110,12 +110,12 @@ class _UserViewState extends State<UserView> {
             children: [
               _createHeader(context),
               SizedBox(
-                width: 1200,
+                width: 1500,
                 height: 50,
                 child: _createControlPanel(context),
               ),
               SizedBox(
-                width: 1200,
+                width: 1500,
                 child: FittedBox(
                   fit: BoxFit.fitWidth,
                   child: _createUserTable(context),
@@ -125,7 +125,7 @@ class _UserViewState extends State<UserView> {
                 height: 15,
               ),
               SizedBox(
-                width: 1200,
+                width: 1500,
                 child: Center(child: _getPageFoot()),
               )
             ],
@@ -187,7 +187,7 @@ class _UserViewState extends State<UserView> {
               isExpanded: true,
               value: selectedUserRoles.isEmpty ? null : selectedUserRoles.last,
               hint: Text(
-                AppLocalizations.of(context)!.characterTypeLabel,
+                AppLocalizations.of(context)!.loginRole,
                 style: OnepieceFonts.dropDownItemStyle,
               ),
               onChanged: (value) {},
@@ -314,6 +314,8 @@ class _UserViewState extends State<UserView> {
       _createSingleColumn(AppLocalizations.of(context)!.loginRole,
           UserSortableFieldsEnum.loginRole, null),
       _createSingleColumn(AppLocalizations.of(context)!.status, null, 80),
+      _createSingleColumn(
+          AppLocalizations.of(context)!.allUserRoles, null, 150),
       _createSingleColumn(
           AppLocalizations.of(context)!.creationTime, null, 150),
       _createSingleColumn(
@@ -478,6 +480,15 @@ class _UserViewState extends State<UserView> {
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
                 child:
                     Text(accountStatusEnumToDisplayValue[user.accountStatus]!),
+              )),
+              DataCell(Padding(
+                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                child: Text(
+                    user.userRoles
+                        .map((e) => userRoleToDisplayNameMap[e])
+                        .toSet()
+                        .join(', '),
+                    overflow: TextOverflow.ellipsis),
               )),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
