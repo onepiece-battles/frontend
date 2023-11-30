@@ -451,7 +451,7 @@ class _FruitViewState extends State<FruitView> {
       _createSingleColumn(AppLocalizations.of(context)!.speedStrengthen,
           FruitSortableFieldsEnum.speedStrengthen, null),
       _createSingleColumn(AppLocalizations.of(context)!.fruitType,
-          FruitSortableFieldsEnum.fruitType, 200),
+          FruitSortableFieldsEnum.fruitType, 150),
       _createSingleColumn(
           AppLocalizations.of(context)!.createdBySystem, null, null),
     ];

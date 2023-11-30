@@ -103,12 +103,12 @@ class _IssueViewState extends State<IssueView> {
             children: [
               _createHeader(context),
               SizedBox(
-                width: 1200,
+                width: 1500,
                 height: 50,
                 child: _createControlPanel(context),
               ),
               SizedBox(
-                width: 1200,
+                width: 1500,
                 child: FittedBox(
                   fit: BoxFit.fitWidth,
                   child: _createIssueTable(context),
@@ -118,7 +118,7 @@ class _IssueViewState extends State<IssueView> {
                 height: 15,
               ),
               SizedBox(
-                width: 1200,
+                width: 1500,
                 child: Center(child: _getPageFoot()),
               )
             ],
@@ -516,6 +516,7 @@ class _IssueViewState extends State<IssueView> {
             },
             cells: [
               _getDataCell("${entry.key + 1}", null),
+              // todo(yichi): need to add username to issue api
               _getDataCell("created user", null),
               _getDataCell(entry.value.issueHeader.toString(), 200),
               _getDataCell(
