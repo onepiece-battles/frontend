@@ -54,9 +54,8 @@ class AppRouter {
                 name: "characters",
                 parentNavigatorKey: _homeNavigatorState,
                 pageBuilder: (context, state) {
-                  return const NoTransitionPage(
-                    child: CharacterView(),
-                  );
+                  return NoTransitionPage(
+                      child: const CharacterView(), key: UniqueKey());
                 },
                 routes: [
                   GoRoute(
@@ -84,31 +83,32 @@ class AppRouter {
                   ),
                 ]),
             GoRoute(
-              path: fruitPath,
-              name: "fruit",
-              parentNavigatorKey: _homeNavigatorState,
-              pageBuilder: (context, state) {
-                return const NoTransitionPage(child: FruitView());
-              },
-              routes: [
-                GoRoute(
-                  path: 'create',
-                  name: 'createFruit',
-                  parentNavigatorKey: _homeNavigatorState,
-                  pageBuilder: (context, state) {
-                    return const NoTransitionPage(
-                      child: CreateFruitView(),
-                    );
-                  },
-                ),
-              ]
-            ),
+                path: fruitPath,
+                name: "fruit",
+                parentNavigatorKey: _homeNavigatorState,
+                pageBuilder: (context, state) {
+                  return NoTransitionPage(
+                      child: const FruitView(), key: UniqueKey());
+                },
+                routes: [
+                  GoRoute(
+                    path: 'create',
+                    name: 'createFruit',
+                    parentNavigatorKey: _homeNavigatorState,
+                    pageBuilder: (context, state) {
+                      return const NoTransitionPage(
+                        child: CreateFruitView(),
+                      );
+                    },
+                  ),
+                ]),
             GoRoute(
                 path: battlePath,
                 name: "battle",
                 parentNavigatorKey: _homeNavigatorState,
                 pageBuilder: (context, state) {
-                  return const NoTransitionPage(child: BattleView());
+                  return NoTransitionPage(
+                      child: const BattleView(), key: UniqueKey());
                 },
                 routes: [
                   GoRoute(
@@ -141,7 +141,8 @@ class AppRouter {
               name: "user",
               parentNavigatorKey: _homeNavigatorState,
               pageBuilder: (context, state) {
-                return const NoTransitionPage(child: UserView());
+                return NoTransitionPage(
+                    child: const UserView(), key: UniqueKey());
               },
             ),
             GoRoute(
@@ -157,7 +158,8 @@ class AppRouter {
               name: "issue",
               parentNavigatorKey: _homeNavigatorState,
               pageBuilder: (context, state) {
-                return const NoTransitionPage(child: IssueView());
+                return NoTransitionPage(
+                    child: const IssueView(), key: UniqueKey());
               },
             ),
           ]),

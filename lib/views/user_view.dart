@@ -118,7 +118,7 @@ class _UserViewState extends State<UserView> {
                 width: 1200,
                 child: FittedBox(
                   fit: BoxFit.fitWidth,
-                  child: _createCharacterTable(context),
+                  child: _createUserTable(context),
                 ),
               ),
               const SizedBox(
@@ -139,7 +139,7 @@ class _UserViewState extends State<UserView> {
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 0, 0, 20),
       child: Text(
-        AppLocalizations.of(context)!.character,
+        AppLocalizations.of(context)!.user,
         style: OnepieceFonts.headerStyle,
       ),
     );
@@ -277,7 +277,7 @@ class _UserViewState extends State<UserView> {
     ]);
   }
 
-  DataTable _createCharacterTable(BuildContext context) {
+  DataTable _createUserTable(BuildContext context) {
     return DataTable(
       showCheckboxColumn: false,
       showBottomBorder: true,
