@@ -66,7 +66,6 @@ class _FruitViewState extends State<FruitView> {
   }
 
   void _search() {
-    debugPrint('search fruit');
     ListFruitRequest request = ListFruitRequest(
         pageSize: pageSize,
         pageIndex: selectedPageIndex,

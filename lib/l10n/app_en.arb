@@ -120,6 +120,7 @@
   "route": "Navigation",
   "science": "science",
   "searchResource": "search resource ...",
+  "searchResourceDetail": "search resource [character name| devil fruit name]",
   "selectCharacter": "Select character",
   "settings": "Settings",
   "shoot": "sniper",

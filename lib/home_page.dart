@@ -6,6 +6,7 @@ import 'package:one_piece_battles_flutter/app_router.dart';
 import 'package:one_piece_battles_flutter/config/resource_permission_manager.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:one_piece_battles_flutter/popup/search_popup.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
 import 'package:one_piece_battles_flutter/utils/base64_helper.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
@@ -405,9 +406,9 @@ class HomePageState extends State<HomePage> {
                     showDialog(
                       context: context,
                       builder: ((context) {
-                        return const AlertDialog(
-                          alignment: AlignmentDirectional.center,
-                          content: CreateFeedbackView(),
+                        return const Dialog(
+                          alignment: AlignmentDirectional.topCenter,
+                          child: SearchPopup(),
                         );
                       }),
                     );
@@ -434,7 +435,7 @@ class HomePageState extends State<HomePage> {
           color: OnepieceColors.menuIconColor, size: 20),
       ResourceType.CHARACTER.toString():
           const Icon(Icons.face, color: OnepieceColors.menuIconColor, size: 20),
-      ResourceType.ISSUE.toString(): const Icon(Icons.report_problem,
+      ResourceType.ISSUE.toString(): const Icon(Icons.add_alert,
           color: OnepieceColors.menuIconColor, size: 20),
       setting: const Icon(Icons.settings,
           color: OnepieceColors.menuIconColor, size: 20)
