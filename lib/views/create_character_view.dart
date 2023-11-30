@@ -9,6 +9,7 @@ import 'package:one_piece_battles_flutter/utils/data_validator.dart';
 import 'package:one_piece_battles_flutter/utils/random_string_generator.dart';
 import 'package:one_piece_battles_flutter/utils/string_extensions.dart';
 import 'package:openapi/api.dart';
+import '../app_router.dart';
 import '../constants/onepiece_colors.dart';
 import '../constants/onepiece_fonts.dart';
 import '../constants/path_constants.dart';
@@ -415,26 +416,24 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                           AppLocalizations.of(context)!.characterImageRequired);
                       return;
                     }
-                    AddCharacterRequest addCharacterRequest =
-                        AddCharacterRequest(
-                            characterType: selectedCharacterType,
-                            name: characterNameController.text.trim(),
-                            fruitLimit: DataConverter.stringToInt(
-                                characterFruitLimitController.text.trim()),
-                            groupGain: DataConverter.stringToInt(
-                                characterGroupGainController.text.trim()),
-                            attack: DataConverter.stringToInt(
-                                characterAttackController.text.trim()),
-                            defense: DataConverter.stringToInt(
-                                characterDefenseController.text.trim()),
-                            intelligence: DataConverter.stringToInt(
-                                characterIntelligenceController.text.trim()),
-                            blood: DataConverter.stringToInt(
-                                characterBloodController.text.trim()),
-                            speed: DataConverter.stringToInt(
-                                characterSpeedController.text.trim()),
-                            magic: DataConverter.stringToInt(
-                                characterEnergyController.text.trim()));
+                    AddCharacterRequest addCharacterRequest = AddCharacterRequest(
+                        characterType: selectedCharacterType,
+                        name: characterNameController.text.trim(),
+                        fruitLimit: DataConverter.stringToInt(
+                            characterFruitLimitController.text.trim()),
+                        groupGain: DataConverter.stringToInt(
+                            characterGroupGainController.text.trim()),
+                        attack: DataConverter.stringToInt(
+                            characterAttackController.text.trim()),
+                        defense: DataConverter.stringToInt(
+                            characterDefenseController.text.trim()),
+                        intelligence: DataConverter.stringToInt(
+                            characterIntelligenceController.text.trim()),
+                        blood: DataConverter.stringToInt(
+                            characterBloodController.text.trim()),
+                        speed: DataConverter.stringToInt(
+                            characterSpeedController.text.trim()),
+                        magic: DataConverter.stringToInt(characterEnergyController.text.trim()));
                     getIt<CharacterDao>()
                         .addCharacter(addCharacterRequest)
                         .then((value) {
@@ -444,8 +443,9 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                               resourceId: value!.id,
                               image: encodedImage,
                               type: ResourceType.CHARACTER);
-                      getIt<ImageDao>().addImage(uploadImageRequest);
-                      context.goNamed("characters");
+                      getIt<ImageDao>()
+                          .addImage(uploadImageRequest)
+                          .then((value) => context.goNamed("characters"));
                     });
                   },
             child: Text(AppLocalizations.of(context)!.submitForm),

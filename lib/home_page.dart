@@ -29,6 +29,7 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
+  final String setting = "setting";
   var _tabTextIndexSelected =
       I18nHelper.convertToOnepieceLocale(getIt<Locale>()).toString() ==
               (OnepieceLocale.zhCN.toString())
@@ -345,12 +346,12 @@ class HomePageState extends State<HomePage> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          getIt<User>().name,
-                          style: OnepieceFonts.smallHeaderStyle,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        getIt<User>().name,
+                        style: OnepieceFonts.smallHeaderStyle,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
@@ -380,21 +381,22 @@ class HomePageState extends State<HomePage> {
               type: MaterialType.transparency,
               child: Container(
                 width: 230,
-                height: 30,
+                height: 33,
                 decoration: const BoxDecoration(
                   color: OnepieceColors.fancyGreen,
                   borderRadius: BorderRadius.all(Radius.circular(3.0)),
                 ),
                 child: TextButton(
-                  child: const Row(
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.search,
                         color: OnepieceColors.fancyBlue,
                       ),
                       Text(
-                        " search resource ...",
+                        AppLocalizations.of(context)!.searchResource,
                         style: OnepieceFonts.smallContentStyle,
                       )
                     ],
@@ -434,7 +436,7 @@ class HomePageState extends State<HomePage> {
           const Icon(Icons.face, color: OnepieceColors.menuIconColor, size: 20),
       ResourceType.ISSUE.toString(): const Icon(Icons.report_problem,
           color: OnepieceColors.menuIconColor, size: 20),
-      "setting": const Icon(Icons.settings,
+      setting: const Icon(Icons.settings,
           color: OnepieceColors.menuIconColor, size: 20)
     };
 
@@ -444,7 +446,7 @@ class HomePageState extends State<HomePage> {
       ResourceType.BATTLE.toString(): AppRouter.battlePath,
       ResourceType.CHARACTER.toString(): AppRouter.characterPath,
       ResourceType.ISSUE.toString(): AppRouter.issuePath,
-      "setting": AppRouter.settingPath
+      setting: AppRouter.settingPath
     };
     Map<String, String> resourceToDisplayTextMap = {
       ResourceType.FRUIT.toString(): AppLocalizations.of(context)!.devilFruit,
@@ -453,12 +455,12 @@ class HomePageState extends State<HomePage> {
       ResourceType.BATTLE.toString(): AppLocalizations.of(context)!.battle,
       ResourceType.CHARACTER.toString():
           AppLocalizations.of(context)!.character,
-      ResourceType.ISSUE.toString(): AppLocalizations.of(context)!.issue,
-      "setting": AppLocalizations.of(context)!.settings
+      ResourceType.ISSUE.toString(): AppLocalizations.of(context)!.feedback,
+      setting: AppLocalizations.of(context)!.settings
     };
     var currentLoginRoleResources =
         loginRoleResources.map((e) => e.toString()).toList();
-    currentLoginRoleResources.add("setting");
+    currentLoginRoleResources.add(setting);
     return ListView.builder(
         shrinkWrap: true,
         itemCount: currentLoginRoleResources.length,
