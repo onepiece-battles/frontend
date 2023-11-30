@@ -8,9 +8,11 @@ import 'package:one_piece_battles_flutter/views/character_view.dart';
 import 'package:one_piece_battles_flutter/views/create_battle_view.dart';
 import 'package:one_piece_battles_flutter/views/create_character_view.dart';
 import 'package:one_piece_battles_flutter/views/create_fruit_view.dart';
+import 'package:one_piece_battles_flutter/views/fruit_detail_view.dart';
 import 'package:one_piece_battles_flutter/views/fruit_view.dart';
 import 'package:one_piece_battles_flutter/views/issue_view.dart';
 import 'package:one_piece_battles_flutter/views/settings_view.dart';
+import 'package:one_piece_battles_flutter/views/user_detail_view.dart';
 import 'package:one_piece_battles_flutter/views/user_view.dart';
 import 'package:one_piece_battles_flutter/register_page.dart';
 import 'package:one_piece_battles_flutter/login_page.dart';
@@ -101,6 +103,19 @@ class AppRouter {
                       );
                     },
                   ),
+                  GoRoute(
+                    path: ':name',
+                    name: 'fruitDetails',
+                    parentNavigatorKey: _homeNavigatorState,
+                    pageBuilder: (context, state) {
+                      String fruitId = state.extra as String;
+                      return NoTransitionPage(
+                        child: FruitDetailView(
+                          fruitId: fruitId,
+                        ),
+                      );
+                    },
+                  ),
                 ]),
             GoRoute(
                 path: battlePath,
@@ -127,7 +142,6 @@ class AppRouter {
                     parentNavigatorKey: _homeNavigatorState,
                     pageBuilder: (context, state) {
                       String battleId = state.extra as String;
-                      debugPrint('battle id router is $battleId');
                       return NoTransitionPage(
                         child: BattleDetailView(
                           battleId: battleId,
@@ -144,6 +158,21 @@ class AppRouter {
                 return NoTransitionPage(
                     child: const UserView(), key: UniqueKey());
               },
+              routes: [
+                GoRoute(
+                  path: ':name',
+                  name: 'userDetails',
+                  parentNavigatorKey: _homeNavigatorState,
+                  pageBuilder: (context, state) {
+                    String userId = state.extra as String;
+                    return NoTransitionPage(
+                      child: UserDetailView(
+                        userId: userId,
+                      ),
+                    );
+                  },
+                ),
+              ]
             ),
             GoRoute(
               path: settingPath,

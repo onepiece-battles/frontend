@@ -9,6 +9,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:one_piece_battles_flutter/popup/search_popup.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
 import 'package:one_piece_battles_flutter/utils/base64_helper.dart';
+import 'package:one_piece_battles_flutter/utils/data_validator.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:one_piece_battles_flutter/utils/image_helper.dart';
 import 'package:one_piece_battles_flutter/views/create_feedback_view.dart';
@@ -76,10 +77,17 @@ class HomePageState extends State<HomePage> {
 
   // the first one route is fixed in this case, and the latter routes are clickable
   Row _getHeader(BuildContext context) {
+    return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [_getRoutingBar(), _getRightControlPanel(context)]);
+  }
+
+  Widget _getRoutingBar() {
     List<String> routes = GoRouterState.of(context)
         .matchedLocation
         .split("/")
-        .where((element) => element != '')
+        .where((element) => element != '' && element != "home")
         .toList();
     Map<String, String> routePathToDisplayName = {
       'home': AppLocalizations.of(context)!.home,
@@ -88,22 +96,72 @@ class HomePageState extends State<HomePage> {
       'users': AppLocalizations.of(context)!.userManagement,
       'battles': AppLocalizations.of(context)!.battle,
       'setting': AppLocalizations.of(context)!.settings,
-      'issues': AppLocalizations.of(context)!.issue
+      'issues': AppLocalizations.of(context)!.issue,
+      'create': AppLocalizations.of(context)!.create
     };
-    bool isFirst = true;
-    String currentRoutePath = "";
-    return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-      Row(
-          children: routes.expand<Widget>((route) {
-        currentRoutePath = "$currentRoutePath/$route";
-        debugPrint('current route is: $route');
-        var result = _getTextButton(
-            routePathToDisplayName[route] ?? route, currentRoutePath, isFirst);
-        isFirst = false;
-        return result;
-      }).toList()),
-      _getRightControlPanel(context)
-    ]);
+    debugPrint(routes.toString());
+    var list = <Widget>[];
+    int routeLength = routes.length;
+    var currentPath = "/home";
+    var detailList = routes
+        .asMap()
+        .entries
+        .map((entry) {
+          String? text;
+          if (routePathToDisplayName.keys.contains(entry.value)) {
+            text = routePathToDisplayName[entry.value];
+          } else if(DataValidator.isUuid(entry.value)) {
+            text = AppLocalizations.of(context)!.detailInformation;
+          } else {
+            text = Uri.decodeFull(entry.value);
+          }
+          return routeLength != (entry.key + 1)
+              ? [
+                  _getMiddleArrow(),
+                  TextButton(
+                    onPressed: () {
+                      context.go("$currentPath/${entry.value}");
+                    },
+                    child: Text(
+                      text!,
+                      style: OnepieceFonts.navigationTopBarStyleClickable,
+                    ),
+                  )
+                ]
+              : [
+                  _getMiddleArrow(),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 5),
+                    child: Text(
+                      text!,
+                      style: OnepieceFonts.navigationTopBarStyleBold,
+                    ),
+                  )
+                ];
+        })
+        .toList()
+        .expand((element) => element);
+    var home = Padding(
+      padding: const EdgeInsets.fromLTRB(0,0,0,4),
+      child: IconButton(
+        splashRadius: 0.1,
+        onPressed: () {
+          context.go(AppRouter.homePath);
+        },
+        icon: const Icon(
+          Icons.home,
+          color: OnepieceColors.fancyBlue,
+          size: 30,
+        ),
+      ),
+    );
+    list.add(home);
+    list.addAll(detailList);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: list,
+    );
   }
 
   Padding _getRightControlPanel(BuildContext context) {
@@ -214,36 +272,6 @@ class HomePageState extends State<HomePage> {
           ),
         )
         .toList();
-  }
-
-  List<Widget> _getTextButton(String name, String routePath, bool isFirst) {
-    if (isFirst) {
-      return [
-        TextButton(
-          onPressed: () {
-            GoRouter.of(context).go(AppRouter.homePath);
-          },
-          child: Text(
-            name,
-            style: OnepieceFonts.navigationTopBarStyle,
-          ),
-        )
-      ];
-    } else {
-      return [
-        _getMiddleArrow(),
-        TextButton(
-          onPressed: () {
-            debugPrint(routePath);
-            GoRouter.of(context).go(routePath);
-          },
-          child: Text(
-            name,
-            style: OnepieceFonts.navigationTopBarStyle,
-          ),
-        )
-      ];
-    }
   }
 
   Widget _getSideMenu(BuildContext context) {
@@ -517,9 +545,9 @@ class HomePageState extends State<HomePage> {
   }
 
   Widget _getMiddleArrow() {
-    return const Text(
-      ">",
-      style: OnepieceFonts.navigationTopBarStyle,
+    return const Padding(
+      padding:  EdgeInsets.symmetric(horizontal: 5),
+      child:  Icon(Icons.arrow_forward_ios, size: 15,),
     );
   }
 }

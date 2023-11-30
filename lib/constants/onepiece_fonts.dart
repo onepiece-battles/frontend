@@ -65,9 +65,15 @@ class OnepieceFonts {
     fontStyle: FontStyle.italic
   );
 
-  static const TextStyle navigationTopBarStyle = TextStyle(
-    color: contentFontColor,
+  static const TextStyle navigationTopBarStyleClickable = TextStyle(
+    color: OnepieceColors.fancyBlue,
     fontSize: 16,
-    fontWeight: FontWeight.w500
+    fontWeight: FontWeight.w700
+  );
+
+  static const TextStyle navigationTopBarStyleBold = TextStyle(
+      color: contentFontColor,
+      fontSize: 16,
+      fontWeight: FontWeight.w700
   );
 }
