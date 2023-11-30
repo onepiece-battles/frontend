@@ -178,7 +178,6 @@ class AppRouter {
       final loggingIn = state.matchedLocation == AppRouter.loginPath;
       final registering = state.matchedLocation == AppRouter.registerPath;
       final goingHome = state.matchedLocation == 'home';
-      debugPrint('matched location is ${state.matchedLocation}');
 
       if (registering) {
         return AppRouter.registerPath;

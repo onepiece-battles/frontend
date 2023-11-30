@@ -120,6 +120,7 @@
   "route": "导航",
   "science": "科技",
   "searchResource": "搜索资源 ...",
+  "searchResourceDetail": "搜索资源 [ 角色名 | 恶魔果实名]",
   "selectCharacter": "选择角色",
   "settings": "设置",
   "shoot": "狙击枪",
