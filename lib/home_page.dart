@@ -146,6 +146,7 @@ class HomePageState extends State<HomePage> {
       child: IconButton(
         splashRadius: 0.1,
         onPressed: () {
+          selectedResource = ResourceType.CHARACTER.toString();
           context.go(AppRouter.homePath);
         },
         icon: const Icon(
