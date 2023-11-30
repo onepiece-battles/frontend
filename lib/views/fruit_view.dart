@@ -540,6 +540,11 @@ class _FruitViewState extends State<FruitView> {
         .entries
         .map(
           (entry) => DataRow(
+            onSelectChanged: (value) {
+              context.goNamed('fruitDetails',
+                  extra: entry.value.id,
+                  pathParameters: {'name': entry.value.name!});
+            },
             cells: [
               _getDataCell("${entry.key + 1}"),
               _getDataCell(entry.value.name.toString()),

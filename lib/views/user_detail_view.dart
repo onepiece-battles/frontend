@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 class UserDetailView extends StatefulWidget {
-  const UserDetailView({super.key});
+  final String userId;
+  const UserDetailView({super.key, required this.userId});
 
   @override
   State<UserDetailView> createState() => _UserDetailViewState();
