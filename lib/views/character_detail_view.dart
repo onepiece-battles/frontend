@@ -5,6 +5,7 @@ import 'package:get_it/get_it.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
+import 'package:one_piece_battles_flutter/popup/pending_animation.dart';
 import 'package:one_piece_battles_flutter/repository/character_dao.dart';
 import 'package:openapi/api.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -25,7 +26,8 @@ class CharacterDetail extends StatefulWidget {
 }
 
 class _CharacterDetailState extends State<CharacterDetail> {
-  CharacterFullView characterFullView = CharacterFullView();
+  CharacterFullView? characterFullView;
+  late Character character;
   List<Battle> battles = [];
   List<Fruit> fruits = [];
   Uint8List _pickedImage = Uint8List(0);
@@ -36,56 +38,69 @@ class _CharacterDetailState extends State<CharacterDetail> {
   @override
   void initState() {
     super.initState();
-    //todo(yichi): consider future builder!
-    _loadData();
   }
 
-  Future<void> _loadData() async {
-    getIt<CharacterDao>()
-        .getCharacter(
-            GetCharacterFullViewRequest(characterId: widget.characterId))
-        .then((value) {
-      characterFullView = value!;
-      // set initial slider value
-      sliderData.setAttack(characterFullView.character!.attack.toDouble());
-      sliderData.setDefense(characterFullView.character!.defense.toDouble());
-      sliderData.setBlood(characterFullView.character!.blood.toDouble());
-      sliderData
-          .setGroupGain(characterFullView.character!.groupGain.toDouble());
-      sliderData.setIntelligence(
-          characterFullView.character!.intelligence.toDouble());
-      sliderData.setSpeed(characterFullView.character!.speed.toDouble());
-      setState(() {
-        // set initial image value
-        _originalImage =
-            Base64Helper.decode(characterFullView.character!.profileImage!);
-        _pickedImage = _originalImage;
-        battles = characterFullView.battles;
-        fruits = characterFullView.fruits;
-      });
-    });
+  Future<CharacterFullView?> _loadData() async {
+    return getIt<CharacterDao>().getCharacter(
+        GetCharacterFullViewRequest(characterId: widget.characterId));
+  }
+
+  void _updateData(CharacterFullView characterFullView) {
+    characterFullView = characterFullView;
+    character = characterFullView.character!;
+    battles = characterFullView.battles;
+    fruits = characterFullView.fruits;
+    // set initial slider value
+    sliderData.setAttack(characterFullView.character!.attack.toDouble());
+    sliderData.setDefense(characterFullView.character!.defense.toDouble());
+    sliderData.setBlood(characterFullView.character!.blood.toDouble());
+    sliderData.setGroupGain(characterFullView.character!.groupGain.toDouble());
+    sliderData
+        .setIntelligence(characterFullView.character!.intelligence.toDouble());
+    sliderData.setSpeed(characterFullView.character!.speed.toDouble());
+
+    // set initial image value
+    _originalImage =
+        Base64Helper.decode(characterFullView.character!.profileImage!);
+    _pickedImage = _originalImage;
+    battles = characterFullView.battles;
+    fruits = characterFullView.fruits;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(3.0),
-          child: _getCharacterTopBar(),
-        ),
-        const Divider(
-          height: 10,
-          thickness: 1,
-        ),
-        Row(
-          children: [
-            _getProfileSection(context),
-            _getCharacterDataList(context),
-          ],
-        )
-      ],
-    );
+    return FutureBuilder(
+        future: _loadData(),
+        builder: (context, AsyncSnapshot snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            _updateData(snapshot.data);
+            return Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(3.0),
+                  child: _getCharacterTopBar(),
+                ),
+                const Divider(
+                  height: 10,
+                  thickness: 1,
+                ),
+                Row(
+                  children: [
+                    _getProfileSection(context),
+                    _getCharacterDataList(context),
+                  ],
+                )
+              ],
+            );
+          } else {
+            return Center(
+              child: Text(
+                AppLocalizations.of(context)!.loading,
+                style: OnepieceFonts.loadingFont,
+              ),
+            );
+          }
+        });
   }
 
   Widget _getProfileSection(BuildContext context) {
@@ -138,8 +153,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                   Base64Helper.encode(_pickedImage);
                               UploadImageRequest uploadImageRequest =
                                   UploadImageRequest(
-                                      resourceId:
-                                          characterFullView.character!.id,
+                                      resourceId: character.id,
                                       image: encodedImage,
                                       type: ResourceType.CHARACTER);
                               var getImageResponse = await getIt<ImageDao>()
@@ -209,7 +223,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                 child: SizedBox(
                   height: 30,
                   child: Text(
-                    characterFullView.character!.name,
+                    character.name,
                     style: OnepieceFonts.contentStyleBold,
                   ),
                 ),
@@ -225,8 +239,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(5.0),
-                  child: characterTypeToIconMap[
-                      characterFullView.character!.characterType]!,
+                  child: characterTypeToIconMap[character.characterType]!,
                 ))
           ],
         ),
@@ -244,9 +257,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                   'images/svgs/fruit.svg',
                   30,
                   30,
-                  characterFullView.character!.hasFruits
-                      ? Colors.blue
-                      : Colors.white,
+                  character.hasFruits ? Colors.blue : Colors.white,
                 ),
               ),
             ),
@@ -260,7 +271,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
               ),
               child: Padding(
                   padding: const EdgeInsets.all(5.0),
-                  child: characterFullView.character!.isSystemResource
+                  child: character.isSystemResource
                       ? const Icon(
                           Icons.computer,
                           size: 30,
@@ -289,44 +300,24 @@ class _CharacterDetailState extends State<CharacterDetail> {
   Column _getCharacterDataList(BuildContext context) {
     return Column(
       children: [
-        _getDataRow(
-            AppLocalizations.of(context)!.characterAttack,
-            1000,
-            10,
-            sliderData.attack,
-            characterFullView.character!.attack.toDouble(), (value) {
+        _getDataRow(AppLocalizations.of(context)!.characterAttack, 1000, 10,
+            sliderData.attack, character.attack.toDouble(), (value) {
           sliderData.setAttack(value);
         }),
-        _getDataRow(
-            AppLocalizations.of(context)!.characterDefense,
-            1000,
-            10,
-            sliderData.defense,
-            characterFullView.character!.defense.toDouble(), (value) {
+        _getDataRow(AppLocalizations.of(context)!.characterDefense, 1000, 10,
+            sliderData.defense, character.defense.toDouble(), (value) {
           sliderData.setDefense(value);
         }),
-        _getDataRow(
-            AppLocalizations.of(context)!.characterBlood,
-            10000,
-            100,
-            sliderData.blood,
-            characterFullView.character!.blood.toDouble(), (value) {
+        _getDataRow(AppLocalizations.of(context)!.characterBlood, 10000, 100,
+            sliderData.blood, character.blood.toDouble(), (value) {
           sliderData.setBlood(value);
         }),
-        _getDataRow(
-            AppLocalizations.of(context)!.characterSpeed,
-            200,
-            10,
-            sliderData.speed,
-            characterFullView.character!.speed.toDouble(), (value) {
+        _getDataRow(AppLocalizations.of(context)!.characterSpeed, 200, 10,
+            sliderData.speed, character.speed.toDouble(), (value) {
           sliderData.setSpeed(value);
         }),
-        _getDataRow(
-            AppLocalizations.of(context)!.groupGain,
-            5,
-            1,
-            sliderData.groupGain,
-            characterFullView.character!.groupGain.toDouble(), (value) {
+        _getDataRow(AppLocalizations.of(context)!.groupGain, 5, 1,
+            sliderData.groupGain, character.groupGain.toDouble(), (value) {
           sliderData.setGroupGain(value);
         }),
         _getDataRow(
@@ -334,7 +325,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
             260,
             70,
             sliderData.intelligence,
-            characterFullView.character!.intelligence.toDouble(), (value) {
+            character.intelligence.toDouble(), (value) {
           sliderData.setIntelligence(value);
         }),
       ],
