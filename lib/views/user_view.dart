@@ -355,30 +355,33 @@ class _UserViewState extends State<UserView> {
               },
         child: Padding(
           padding: const EdgeInsets.fromLTRB(5, 10, 0, 10),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Text(
-                displayText,
-                style:
-                    sortableEnumToSortOrderMap[userSortableFieldsEnum] == null
-                        ? OnepieceFonts.tableHeaderStyle
-                        : OnepieceFonts.selectedTableHeaderStyle,
-              ),
-              if (userSortableFieldsEnum != null)
-                Padding(
-                  padding: const EdgeInsets.all(5.0),
-                  child: ImageHelper.getSvgIconWithColor(
-                    sortOrderToPath[
-                        sortableEnumToSortOrderMap[userSortableFieldsEnum]]!,
-                    15,
-                    15,
-                    sortableEnumToSortOrderMap[userSortableFieldsEnum] == null
-                        ? Colors.grey
-                        : OnepieceColors.themeColor,
-                  ),
-                )
-            ],
+          child: SizedBox(
+            width: width,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Text(
+                  displayText,
+                  style:
+                      sortableEnumToSortOrderMap[userSortableFieldsEnum] == null
+                          ? OnepieceFonts.tableHeaderStyle
+                          : OnepieceFonts.selectedTableHeaderStyle,
+                ),
+                if (userSortableFieldsEnum != null)
+                  Padding(
+                    padding: const EdgeInsets.all(5.0),
+                    child: ImageHelper.getSvgIconWithColor(
+                      sortOrderToPath[
+                          sortableEnumToSortOrderMap[userSortableFieldsEnum]]!,
+                      15,
+                      15,
+                      sortableEnumToSortOrderMap[userSortableFieldsEnum] == null
+                          ? Colors.grey
+                          : OnepieceColors.themeColor,
+                    ),
+                  )
+              ],
+            ),
           ),
         ),
       ),

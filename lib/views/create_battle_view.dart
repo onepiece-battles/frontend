@@ -218,7 +218,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                               child: starterSelectedItem == null
                                   ? const Image(
                                       image: AssetImage(
-                                          PathConstants.loginLuffyImage))
+                                          PathConstants.userImage))
                                   : Image.memory(Base64Helper.decode(
                                       starterSelectedItem!.profileImage!)),
                             ),
@@ -279,7 +279,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                               child: receiverSelectedItem == null
                                   ? const Image(
                                       image: AssetImage(
-                                          PathConstants.loginLuffyImage))
+                                          PathConstants.userImage))
                                   : Image.memory(Base64Helper.decode(
                                       receiverSelectedItem!.profileImage!)),
                             ),

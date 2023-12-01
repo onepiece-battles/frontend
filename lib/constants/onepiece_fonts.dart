@@ -3,6 +3,7 @@ import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 
 class OnepieceFonts {
   static const double maxSize = 65;
+  static const double loadingSize = 30;
   static const double headerFontSize = 27;
   static const double smallHeaderFontSize = 20;
   static const FontWeight headerFontWeight = FontWeight.bold;
@@ -23,6 +24,8 @@ class OnepieceFonts {
       fontSize: OnepieceFonts.contentFontSize);
   static const TextStyle fancyBlueHintFont = TextStyle(
       color: OnepieceColors.fancyBlue, fontSize: OnepieceFonts.contentFontSize);
+  static const TextStyle loadingFont = TextStyle(
+      color: OnepieceColors.fancyBlue, fontSize: OnepieceFonts.loadingSize);
   static const TextStyle smallContentStyle = TextStyle(
       color: OnepieceFonts.contentFontColor,
       fontSize: OnepieceFonts.smallContentFontSize);
