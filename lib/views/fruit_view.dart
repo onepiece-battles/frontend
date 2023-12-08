@@ -21,7 +21,7 @@ class FruitView extends StatefulWidget {
 }
 
 class _FruitViewState extends State<FruitView> {
-  List<Fruit> currentFruitList = [];
+  List<FruitListView> currentFruitList = [];
   FruitFilter fruitFilter = FruitFilter();
   List<FruitType> selectedFruitTypes = [];
   List<FruitSortableField> sortKeys = [];
@@ -555,7 +555,7 @@ class _FruitViewState extends State<FruitView> {
               _getDataCell(entry.value.groupGainStrengthen.toString()),
               _getDataCell(entry.value.speedStrengthen.toString()),
               _getDataCell(fruitTypeToDisplayValue[entry.value.fruitType]!),
-              _getDataCell(booleanToDisplayName[entry.value.isSystemResource]!),
+              _getDataCell(booleanToDisplayName[entry.value.roleName==UserRole.NIKA]!),
             ],
           ),
         )

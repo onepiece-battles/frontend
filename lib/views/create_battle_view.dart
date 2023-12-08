@@ -21,16 +21,16 @@ class CreateBattleView extends StatefulWidget {
 }
 
 class _CreateBattleViewState extends State<CreateBattleView> {
-  List<Character> starterCharacters = [];
+  List<CharacterListView> starterCharacters = [];
   String starterSelectedId = "";
-  List<Character> receiverCharacters = [];
+  List<CharacterListView> receiverCharacters = [];
   String receiverSelectedId = "";
   final ScrollController _starterScrollController = ScrollController();
-  Character? starterSelectedItem;
+  CharacterListView? starterSelectedItem;
   TextEditingController starterTextController = TextEditingController();
   TextEditingController receiverTextController = TextEditingController();
   final ScrollController _receiverScrollController = ScrollController();
-  Character? receiverSelectedItem;
+  CharacterListView? receiverSelectedItem;
   CharacterFilter starterCharacterFilter = CharacterFilter();
   CharacterFilter receiverCharacterFilter = CharacterFilter();
   // these two indexes are used when loading more data
@@ -199,7 +199,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.fromLTRB(60,10,60,10),
+                          padding: const EdgeInsets.fromLTRB(60, 10, 60, 10),
                           child: Container(
                             width: 200,
                             height: 200,
@@ -217,8 +217,8 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                               fit: BoxFit.fill,
                               child: starterSelectedItem == null
                                   ? const Image(
-                                      image: AssetImage(
-                                          PathConstants.userImage))
+                                      image:
+                                          AssetImage(PathConstants.userImage))
                                   : Image.memory(Base64Helper.decode(
                                       starterSelectedItem!.profileImage!)),
                             ),
@@ -260,7 +260,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.fromLTRB(60,10,60,10),
+                          padding: const EdgeInsets.fromLTRB(60, 10, 60, 10),
                           child: Container(
                             width: 200,
                             height: 200,
@@ -278,8 +278,8 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                               fit: BoxFit.fill,
                               child: receiverSelectedItem == null
                                   ? const Image(
-                                      image: AssetImage(
-                                          PathConstants.userImage))
+                                      image:
+                                          AssetImage(PathConstants.userImage))
                                   : Image.memory(Base64Helper.decode(
                                       receiverSelectedItem!.profileImage!)),
                             ),
@@ -498,7 +498,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                               "${AppLocalizations.of(context)!.name}: ${character.name}",
                               style: OnepieceFonts.smallContentStyle),
                           Text(
-                              "${AppLocalizations.of(context)!.characterTypeLabel}: ${enumValueToDisplayValue[character.characterType]!}",
+                              "${AppLocalizations.of(context)!.characterTypeLabel}: ${character.characterTypes.map((e) => enumValueToDisplayValue[e]).join(", ")}",
                               style: OnepieceFonts.smallContentStyle),
                         ],
                       ),
@@ -611,7 +611,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                               "${AppLocalizations.of(context)!.name}: ${character.name}",
                               style: OnepieceFonts.smallContentStyle),
                           Text(
-                              "${AppLocalizations.of(context)!.characterTypeLabel}: ${enumValueToDisplayValue[character.characterType]!}",
+                              "${AppLocalizations.of(context)!.characterTypeLabel}: ${character.characterTypes.map((e) => enumValueToDisplayValue[e]).join(", ")}",
                               style: OnepieceFonts.smallContentStyle),
                         ],
                       ),

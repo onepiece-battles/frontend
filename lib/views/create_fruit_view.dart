@@ -40,7 +40,7 @@ class _CreateFruitViewState extends State<CreateFruitView> {
   TextEditingController fruitGroupGainStrengthenController =
       TextEditingController(
           text: RandomStringGenerator.generateRandomNumber(1, 5));
-  TextEditingController fruitMagicConsumeController = TextEditingController(
+  TextEditingController fruitEnergyConsumeController = TextEditingController(
       text: RandomStringGenerator.generateRandomNumber(1, 10));
   List<TextEditingController> fruitControllerList() {
     return <TextEditingController>[
@@ -51,7 +51,7 @@ class _CreateFruitViewState extends State<CreateFruitView> {
       fruitBloodStrengthenController,
       fruitSpeedStrengthenController,
       fruitGroupGainStrengthenController,
-      fruitMagicConsumeController,
+      fruitEnergyConsumeController,
     ];
   }
 
@@ -172,7 +172,7 @@ class _CreateFruitViewState extends State<CreateFruitView> {
                       1,
                       10,
                       context,
-                      fruitMagicConsumeController,
+                      fruitEnergyConsumeController,
                       AppLocalizations.of(context)!.energyConsume,
                       const Icon(Icons.face)),
                 ],
@@ -309,7 +309,7 @@ class _CreateFruitViewState extends State<CreateFruitView> {
               if (!isValid) {
                 return;
               }
-              AddFruitRequest addFruitRequest = AddFruitRequest(
+              CreateFruitRequest addFruitRequest = CreateFruitRequest(
                 name: fruitNameController.text.trim(),
                 fruitType: selectedFruitType,
                 attackStrengthen: DataConverter.stringToInt(
@@ -322,8 +322,8 @@ class _CreateFruitViewState extends State<CreateFruitView> {
                     fruitIntelligenceStrengthenController.text.trim()),
                 speedStrengthen: DataConverter.stringToInt(
                     fruitSpeedStrengthenController.text.trim()),
-                magicConsume:
-                    DataConverter.stringToInt(fruitMagicConsumeController.text),
+                energyConsume:
+                    DataConverter.stringToInt(fruitEnergyConsumeController.text),
                 groupGainStrengthen: DataConverter.stringToInt(
                     fruitGroupGainStrengthenController.text.trim()),
               );

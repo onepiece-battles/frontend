@@ -26,7 +26,7 @@ class _BattleViewState extends State<BattleView> {
   Logger logger = Logger('BattleView');
   TextEditingController pageNumberController = TextEditingController(text: "1");
   // base full data
-  List<Battle> currentBattleList = [];
+  List<BattleListView> currentBattleList = [];
 
   // battle filters
   BattleFilter battleFilter = BattleFilter();
@@ -602,7 +602,7 @@ class _BattleViewState extends State<BattleView> {
             },
             cells: [
               _getDataCell("${entry.key + 1}"),
-              _getDataCell(entry.value.userName.toString()),
+              _getDataCell(entry.value.creator.toString()),
               _getDataCell(entry.value.starterName.toString()),
               _getDataCell(entry.value.receiverName.toString()),
               _getDataCell(DateHelper.getLocalDateTimeFromTimestamp(
@@ -613,11 +613,11 @@ class _BattleViewState extends State<BattleView> {
                   .toString()),
               _getDataCell(battleStatusToDisplayName[entry.value.status]!),
               _getDataCell(entry.value.winnerId == null
-                  ? ""
+                  ? "-"
                   : (entry.value.winnerId == entry.value.starterId
-                      ? entry.value.starterName
-                      : entry.value.receiverName)),
-              _getDataCell(booleanToDisplayName[entry.value.isSystemResource]!),
+                      ? entry.value.starterName!
+                      : entry.value.receiverName!)),
+              _getDataCell(booleanToDisplayName[entry.value.roleName==UserRole.NIKA]!),
             ],
           ),
         )

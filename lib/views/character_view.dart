@@ -27,7 +27,7 @@ class _CharacterViewState extends State<CharacterView> {
   TextEditingController searchNameController = TextEditingController();
   TextEditingController pageNumberController = TextEditingController(text: "1");
   CharacterFilter characterFilter = CharacterFilter();
-  List<Character> currentCharacterList = [];
+  List<CharacterListView> currentCharacterList = [];
   List<CharacterSortableField> sortKeys = [];
 
   // sorting related fields
@@ -437,8 +437,6 @@ class _CharacterViewState extends State<CharacterView> {
           CharacterSortableFieldsEnum.blood, null),
       _createSingleColumn(AppLocalizations.of(context)!.characterSpeed,
           CharacterSortableFieldsEnum.speed, null),
-      _createSingleColumn(AppLocalizations.of(context)!.characterFruits,
-          null, null),
       _createSingleColumn(AppLocalizations.of(context)!.createdBySystem, null, 130),
     ];
   }
@@ -561,11 +559,11 @@ class _CharacterViewState extends State<CharacterView> {
               )),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: Text(enumValueToDisplayValue[character.characterType]!),
+                child: Text(character.characterTypes.map((e) => enumValueToDisplayValue[e]).join(", ")),
               )),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: Text(character.fruitLimit.toString()),
+                child: Text(character.maximumFruitCount.toString()),
               )),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
@@ -593,13 +591,7 @@ class _CharacterViewState extends State<CharacterView> {
               )),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: Text(character.fruits.isEmpty
-                    ? ""
-                    : character.fruits.toString()),
-              )),
-              DataCell(Padding(
-                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: Text(booleanToDisplayName[character.isSystemResource]!),
+                child: Text(booleanToDisplayName[character.roleName==UserRole.NIKA]!),
               )),
             ],
           ),
