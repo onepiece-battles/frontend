@@ -8,7 +8,7 @@ class BattleDao{
     battleApi = BattleApi(apiClient);
   }
 
-  Future<ListBattleByIdResponse?> batchFindByIds(ListBattleByIdsRequest request) async {
+  Future<ListBattleByIdsResponse?> batchFindByIds(ListBattleByIdsRequest request) async {
     return await battleApi.listBattleByIds(request);
   }
 

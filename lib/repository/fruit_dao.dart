@@ -12,7 +12,7 @@ class FruitDao {
     return await fruitApi.listFruit(request);
   }
 
-  Future<Fruit?> add(AddFruitRequest request) async {
+  Future<Fruit?> add(CreateFruitRequest request) async {
     return await fruitApi.addFruit(request);
   }
 

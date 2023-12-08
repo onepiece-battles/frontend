@@ -9,7 +9,6 @@ import 'package:one_piece_battles_flutter/utils/data_validator.dart';
 import 'package:one_piece_battles_flutter/utils/random_string_generator.dart';
 import 'package:one_piece_battles_flutter/utils/string_extensions.dart';
 import 'package:openapi/api.dart';
-import '../app_router.dart';
 import '../constants/onepiece_colors.dart';
 import '../constants/onepiece_fonts.dart';
 import '../constants/path_constants.dart';
@@ -66,7 +65,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
   Uint8List _pickedImage = Uint8List(0);
   bool _newImagePicked = false;
   String _chosenImageName = "";
-  CharacterType selectedCharacterType = CharacterType.body;
+  List<CharacterType> selectedCharacterTypes = [];
 
   final _formKey = GlobalKey<FormState>();
   @override
@@ -285,7 +284,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
   }
 
   Widget _getDropDownList(BuildContext context) {
-    Map<CharacterType, String> enumToCharacterTypeDisplayName = {
+    Map<CharacterType, String> enumValueToDisplayValue = {
       CharacterType.body: AppLocalizations.of(context)!.body,
       CharacterType.science: AppLocalizations.of(context)!.science,
       CharacterType.katana: AppLocalizations.of(context)!.katana,
@@ -295,54 +294,92 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
     };
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 0, 0, 2),
-      child: DropdownButtonHideUnderline(
+      child:   DropdownButtonHideUnderline(
         child: DropdownButton2(
           isExpanded: true,
-          value: selectedCharacterType,
+          value: selectedCharacterTypes.isEmpty
+              ? null
+              : selectedCharacterTypes.last,
           hint: Text(
             AppLocalizations.of(context)!.characterTypeLabel,
             style: OnepieceFonts.dropDownItemStyle,
           ),
-          onChanged: (value) {
-            setState(() {
-              selectedCharacterType = value!;
-            });
-          },
+          onChanged: (value) {},
           selectedItemBuilder: (context) {
             return CharacterType.values.map(
-              (item) {
+                  (item) {
                 return Container(
                   alignment: AlignmentDirectional.center,
                   child: Text(
-                    enumToCharacterTypeDisplayName[selectedCharacterType]!,
+                    selectedCharacterTypes
+                        .map((selectedType) {
+                      return enumValueToDisplayValue[selectedType];
+                    })
+                        .toSet()
+                        .join(', '),
                     style: const TextStyle(
                       fontSize: 16,
                       overflow: TextOverflow.ellipsis,
                     ),
+                    maxLines: 1,
                   ),
                 );
               },
             ).toList();
           },
           buttonStyleData: ButtonStyleData(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              height: 34,
-              width: 210,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(3),
-                color: OnepieceColors.menuBackgroundColor,
-              )),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            height: 35,
+            width: 280,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(3),
+              color: OnepieceColors.liteFancyGreen,
+            ),
+          ),
           menuItemStyleData: const MenuItemStyleData(
             height: 35,
           ),
           items: CharacterType.values.map((CharacterType characterType) {
             return DropdownMenuItem<CharacterType>(
               value: characterType,
-              child: Text(
-                enumToCharacterTypeDisplayName[characterType]!,
-                style: const TextStyle(
-                  fontSize: 14,
-                ),
+              enabled: false,
+              child: StatefulBuilder(
+                builder: (context, menuSetState) {
+                  final isSelected =
+                  selectedCharacterTypes.contains(characterType);
+                  return InkWell(
+                    onTap: () {
+                      isSelected
+                          ? selectedCharacterTypes.remove(characterType)
+                          : selectedCharacterTypes.add(characterType);
+                      // //This rebuilds the StatefulWidget to update the button's text
+                      setState(() {});
+                      //This rebuilds the dropdownMenu Widget to update the check mark
+                      menuSetState(() {});
+                    },
+                    child: Container(
+                      height: double.infinity,
+                      padding: const EdgeInsets.symmetric(horizontal: 3.0),
+                      child: Row(
+                        children: [
+                          if (isSelected)
+                            const Icon(Icons.check_box_outlined)
+                          else
+                            const Icon(Icons.check_box_outline_blank),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              enumValueToDisplayValue[characterType]!,
+                              style: const TextStyle(
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
               ),
             );
           }).toList(),
@@ -416,10 +453,10 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                           AppLocalizations.of(context)!.characterImageRequired);
                       return;
                     }
-                    AddCharacterRequest addCharacterRequest = AddCharacterRequest(
-                        characterType: selectedCharacterType,
+                    CreateCharacterRequest addCharacterRequest = CreateCharacterRequest(
+                        characterTypes: selectedCharacterTypes,
                         name: characterNameController.text.trim(),
-                        fruitLimit: DataConverter.stringToInt(
+                        maximumFruitCount: DataConverter.stringToInt(
                             characterFruitLimitController.text.trim()),
                         groupGain: DataConverter.stringToInt(
                             characterGroupGainController.text.trim()),
@@ -433,7 +470,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                             characterBloodController.text.trim()),
                         speed: DataConverter.stringToInt(
                             characterSpeedController.text.trim()),
-                        magic: DataConverter.stringToInt(characterEnergyController.text.trim()));
+                        energy: DataConverter.stringToInt(characterEnergyController.text.trim()));
                     getIt<CharacterDao>()
                         .addCharacter(addCharacterRequest)
                         .then((value) {

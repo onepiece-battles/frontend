@@ -5,14 +5,12 @@ import 'package:get_it/get_it.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
-import 'package:one_piece_battles_flutter/popup/pending_animation.dart';
 import 'package:one_piece_battles_flutter/repository/character_dao.dart';
 import 'package:openapi/api.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../repository/image_dao.dart';
 import '../utils/base64_helper.dart';
 import '../utils/compare_uint8list.dart';
-import '../utils/image_helper.dart';
 import '../utils/onepiece_image_picker.dart';
 
 GetIt getIt = GetIt.instance;
@@ -26,10 +24,10 @@ class CharacterDetail extends StatefulWidget {
 }
 
 class _CharacterDetailState extends State<CharacterDetail> {
-  CharacterFullView? characterFullView;
-  late Character character;
-  List<Battle> battles = [];
+  late CharacterFullView character;
+  List<BattleListView> battles = [];
   List<Fruit> fruits = [];
+  List<Group> groups = [];
   Uint8List _pickedImage = Uint8List(0);
   Uint8List _originalImage = Uint8List(0);
   bool _newImagePicked = false;
@@ -46,22 +44,21 @@ class _CharacterDetailState extends State<CharacterDetail> {
   }
 
   void _updateData(CharacterFullView characterFullView) {
-    characterFullView = characterFullView;
-    character = characterFullView.character!;
+    character = characterFullView;
     battles = characterFullView.battles;
     fruits = characterFullView.fruits;
     // set initial slider value
-    sliderData.setAttack(characterFullView.character!.attack.toDouble());
-    sliderData.setDefense(characterFullView.character!.defense.toDouble());
-    sliderData.setBlood(characterFullView.character!.blood.toDouble());
-    sliderData.setGroupGain(characterFullView.character!.groupGain.toDouble());
+    sliderData.setAttack(characterFullView.attack.toDouble());
+    sliderData.setDefense(characterFullView.defense.toDouble());
+    sliderData.setBlood(characterFullView.blood.toDouble());
+    sliderData.setGroupGain(characterFullView.groupGain.toDouble());
     sliderData
-        .setIntelligence(characterFullView.character!.intelligence.toDouble());
-    sliderData.setSpeed(characterFullView.character!.speed.toDouble());
+        .setIntelligence(characterFullView.intelligence.toDouble());
+    sliderData.setSpeed(characterFullView.speed.toDouble());
 
     // set initial image value
     _originalImage =
-        Base64Helper.decode(characterFullView.character!.profileImage!);
+        Base64Helper.decode(characterFullView.profileImage!);
     _pickedImage = _originalImage;
     battles = characterFullView.battles;
     fruits = characterFullView.fruits;
@@ -76,14 +73,6 @@ class _CharacterDetailState extends State<CharacterDetail> {
             _updateData(snapshot.data);
             return Column(
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(3.0),
-                  child: _getCharacterTopBar(),
-                ),
-                const Divider(
-                  height: 10,
-                  thickness: 1,
-                ),
                 Row(
                   children: [
                     _getProfileSection(context),
@@ -171,121 +160,6 @@ class _CharacterDetailState extends State<CharacterDetail> {
           )
         ],
       ),
-    );
-  }
-
-  Widget _getCharacterTopBar() {
-    Map<CharacterType, Widget> characterTypeToIconMap = {
-      CharacterType.fist: const Icon(
-        Icons.sports_mma,
-        color: OnepieceColors.themeColor,
-        size: 30,
-      ),
-      CharacterType.body: const Icon(
-        Icons.accessibility,
-        color: OnepieceColors.themeColor,
-        size: 30,
-      ),
-      CharacterType.foot: const Icon(
-        Icons.airline_seat_legroom_extra,
-        color: OnepieceColors.themeColor,
-        size: 30,
-      ),
-      CharacterType.katana: ImageHelper.getSvgIcon(
-        'images/svgs/katana.svg',
-        30,
-        30,
-      ),
-      CharacterType.science: const Icon(
-        Icons.science,
-        color: OnepieceColors.themeColor,
-        size: 30,
-      ),
-      CharacterType.shooter: ImageHelper.getSvgIcon(
-        'images/svgs/sniper.svg',
-        30,
-        30,
-      ),
-    };
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Container(
-              decoration: const BoxDecoration(
-                borderRadius: BorderRadius.all(Radius.circular(5)),
-                color: OnepieceColors.menuSelectedTileColor,
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(5.0),
-                child: SizedBox(
-                  height: 30,
-                  child: Text(
-                    character.name,
-                    style: OnepieceFonts.contentStyleBold,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(
-              width: 10,
-            ),
-            Container(
-                decoration: const BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(5)),
-                  color: OnepieceColors.menuSelectedTileColor,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(5.0),
-                  child: characterTypeToIconMap[character.characterType]!,
-                ))
-          ],
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Container(
-              decoration: const BoxDecoration(
-                borderRadius: BorderRadius.all(Radius.circular(5)),
-                color: OnepieceColors.menuSelectedTileColor,
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(5.0),
-                child: ImageHelper.getSvgIconWithColor(
-                  'images/svgs/fruit.svg',
-                  30,
-                  30,
-                  character.hasFruits ? Colors.blue : Colors.white,
-                ),
-              ),
-            ),
-            const SizedBox(
-              width: 10,
-            ),
-            Container(
-              decoration: const BoxDecoration(
-                borderRadius: BorderRadius.all(Radius.circular(5)),
-                color: OnepieceColors.menuSelectedTileColor,
-              ),
-              child: Padding(
-                  padding: const EdgeInsets.all(5.0),
-                  child: character.isSystemResource
-                      ? const Icon(
-                          Icons.computer,
-                          size: 30,
-                          color: OnepieceColors.secondaryThemeColor,
-                        )
-                      : const Icon(
-                          Icons.person,
-                          size: 30,
-                          color: OnepieceColors.secondaryThemeColor,
-                        )),
-            ),
-          ],
-        )
-      ],
     );
   }
 

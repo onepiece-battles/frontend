@@ -22,9 +22,9 @@ class SearchPopup extends StatefulWidget {
 
 class _SearchPopupState extends State<SearchPopup> {
   TextEditingController searchBarController = TextEditingController();
-  List<Character> characters = <Character>[].toList(growable: true);
+  List<CharacterListView> characters = <CharacterListView>[].toList(growable: true);
   CharacterFilter characterFilter = CharacterFilter();
-  List<Fruit> fruits = <Fruit>[].toList(growable: true);
+  List<FruitListView> fruits = <FruitListView>[].toList(growable: true);
   FruitFilter fruitFilter = FruitFilter();
   List<Battle> battle = [];
 

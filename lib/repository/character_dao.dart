@@ -13,7 +13,7 @@ class CharacterDao {
   }
 
   Future<Character?> addCharacter(
-      AddCharacterRequest addCharacterRequest) async {
+      CreateCharacterRequest addCharacterRequest) async {
     return await characterApi.addCharacter(addCharacterRequest);
   }
 
