@@ -285,16 +285,16 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
 
   Widget _getDropDownList(BuildContext context) {
     Map<CharacterType, String> enumValueToDisplayValue = {
-      CharacterType.body: AppLocalizations.of(context)!.body,
-      CharacterType.science: AppLocalizations.of(context)!.science,
-      CharacterType.katana: AppLocalizations.of(context)!.katana,
-      CharacterType.shooter: AppLocalizations.of(context)!.shoot,
-      CharacterType.fist: AppLocalizations.of(context)!.fist,
-      CharacterType.foot: AppLocalizations.of(context)!.leg
+      CharacterType.BODY: AppLocalizations.of(context)!.body,
+      CharacterType.FOOT: AppLocalizations.of(context)!.leg,
+      CharacterType.SCIENCE: AppLocalizations.of(context)!.science,
+      CharacterType.FIST: AppLocalizations.of(context)!.fist,
+      CharacterType.KATANA: AppLocalizations.of(context)!.katana,
+      CharacterType.SHOOTER: AppLocalizations.of(context)!.shoot
     };
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 0, 0, 2),
-      child:   DropdownButtonHideUnderline(
+      child: DropdownButtonHideUnderline(
         child: DropdownButton2(
           isExpanded: true,
           value: selectedCharacterTypes.isEmpty
@@ -307,14 +307,14 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
           onChanged: (value) {},
           selectedItemBuilder: (context) {
             return CharacterType.values.map(
-                  (item) {
+              (item) {
                 return Container(
                   alignment: AlignmentDirectional.center,
                   child: Text(
                     selectedCharacterTypes
                         .map((selectedType) {
-                      return enumValueToDisplayValue[selectedType];
-                    })
+                          return enumValueToDisplayValue[selectedType];
+                        })
                         .toSet()
                         .join(', '),
                     style: const TextStyle(
@@ -346,7 +346,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
               child: StatefulBuilder(
                 builder: (context, menuSetState) {
                   final isSelected =
-                  selectedCharacterTypes.contains(characterType);
+                      selectedCharacterTypes.contains(characterType);
                   return InkWell(
                     onTap: () {
                       isSelected

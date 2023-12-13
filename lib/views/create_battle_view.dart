@@ -413,12 +413,12 @@ class _CreateBattleViewState extends State<CreateBattleView> {
   Widget getStarter(BuildContext context) {
     Map<CharacterType, String> enumValueToDisplayValue =
         <CharacterType, String>{
-      CharacterType.body: AppLocalizations.of(context)!.body,
-      CharacterType.foot: AppLocalizations.of(context)!.leg,
-      CharacterType.science: AppLocalizations.of(context)!.science,
-      CharacterType.fist: AppLocalizations.of(context)!.fist,
-      CharacterType.katana: AppLocalizations.of(context)!.katana,
-      CharacterType.shooter: AppLocalizations.of(context)!.shoot
+      CharacterType.BODY: AppLocalizations.of(context)!.body,
+      CharacterType.FOOT: AppLocalizations.of(context)!.leg,
+      CharacterType.SCIENCE: AppLocalizations.of(context)!.science,
+      CharacterType.FIST: AppLocalizations.of(context)!.fist,
+      CharacterType.KATANA: AppLocalizations.of(context)!.katana,
+      CharacterType.SHOOTER: AppLocalizations.of(context)!.shoot
     };
     return ListView.builder(
       shrinkWrap: true,
@@ -528,12 +528,12 @@ class _CreateBattleViewState extends State<CreateBattleView> {
   Widget getReceiver(BuildContext context) {
     Map<CharacterType, String> enumValueToDisplayValue =
         <CharacterType, String>{
-      CharacterType.body: AppLocalizations.of(context)!.body,
-      CharacterType.foot: AppLocalizations.of(context)!.leg,
-      CharacterType.science: AppLocalizations.of(context)!.science,
-      CharacterType.fist: AppLocalizations.of(context)!.fist,
-      CharacterType.katana: AppLocalizations.of(context)!.katana,
-      CharacterType.shooter: AppLocalizations.of(context)!.shoot
+      CharacterType.BODY: AppLocalizations.of(context)!.body,
+      CharacterType.FOOT: AppLocalizations.of(context)!.leg,
+      CharacterType.SCIENCE: AppLocalizations.of(context)!.science,
+      CharacterType.FIST: AppLocalizations.of(context)!.fist,
+      CharacterType.KATANA: AppLocalizations.of(context)!.katana,
+      CharacterType.SHOOTER: AppLocalizations.of(context)!.shoot
     };
     return ListView.builder(
       controller: _receiverScrollController,
