@@ -38,13 +38,18 @@ class _CharacterDetailState extends State<CharacterDetail> {
     super.initState();
   }
 
-  Future<CharacterFullView?> _loadData() async {
-    return getIt<CharacterDao>().getCharacter(
-        GetCharacterFullViewRequest(characterId: widget.characterId));
+  _loadData()  {
+    getIt<CharacterDao>().getCharacter(
+        GetCharacterFullViewRequest(characterId: widget.characterId)).then((value) => {
+          _updateData(value!)
+    });
+    return null;
   }
 
   void _updateData(CharacterFullView characterFullView) {
     character = characterFullView;
+    character.profileImage = null;
+    debugPrint(character.toString());
     battles = characterFullView.battles;
     fruits = characterFullView.fruits;
     // set initial slider value
@@ -52,13 +57,11 @@ class _CharacterDetailState extends State<CharacterDetail> {
     sliderData.setDefense(characterFullView.defense.toDouble());
     sliderData.setBlood(characterFullView.blood.toDouble());
     sliderData.setGroupGain(characterFullView.groupGain.toDouble());
-    sliderData
-        .setIntelligence(characterFullView.intelligence.toDouble());
+    sliderData.setIntelligence(characterFullView.intelligence.toDouble());
     sliderData.setSpeed(characterFullView.speed.toDouble());
 
     // set initial image value
-    _originalImage =
-        Base64Helper.decode(characterFullView.profileImage!);
+    _originalImage = Base64Helper.decode(characterFullView.profileImage!);
     _pickedImage = _originalImage;
     battles = characterFullView.battles;
     fruits = characterFullView.fruits;
@@ -70,7 +73,6 @@ class _CharacterDetailState extends State<CharacterDetail> {
         future: _loadData(),
         builder: (context, AsyncSnapshot snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
-            _updateData(snapshot.data);
             return Column(
               children: [
                 Row(
