@@ -151,12 +151,12 @@ class _CharacterViewState extends State<CharacterView> {
   Widget _createControlPanel(BuildContext context) {
     Map<CharacterType, String> enumValueToDisplayValue =
         <CharacterType, String>{
-      CharacterType.body: AppLocalizations.of(context)!.body,
-      CharacterType.foot: AppLocalizations.of(context)!.leg,
-      CharacterType.science: AppLocalizations.of(context)!.science,
-      CharacterType.fist: AppLocalizations.of(context)!.fist,
-      CharacterType.katana: AppLocalizations.of(context)!.katana,
-      CharacterType.shooter: AppLocalizations.of(context)!.shoot
+      CharacterType.BODY: AppLocalizations.of(context)!.body,
+      CharacterType.FOOT: AppLocalizations.of(context)!.leg,
+      CharacterType.SCIENCE: AppLocalizations.of(context)!.science,
+      CharacterType.FIST: AppLocalizations.of(context)!.fist,
+      CharacterType.KATANA: AppLocalizations.of(context)!.katana,
+      CharacterType.SHOOTER: AppLocalizations.of(context)!.shoot
     };
     return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
       Row(
@@ -285,7 +285,7 @@ class _CharacterViewState extends State<CharacterView> {
           Row(
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(40,0, 20,0),
+                padding: const EdgeInsets.fromLTRB(40, 0, 20, 0),
                 child: SizedBox(
                   height: 35,
                   child: Row(
@@ -422,13 +422,14 @@ class _CharacterViewState extends State<CharacterView> {
       ),
       _createSingleColumn(AppLocalizations.of(context)!.characterName,
           CharacterSortableFieldsEnum.name, 120),
-      _createSingleColumn(   AppLocalizations.of(context)!.characterTypeLabel, null, 120),
+      _createSingleColumn(
+          AppLocalizations.of(context)!.characterTypeLabel, null, 120),
       _createSingleColumn(AppLocalizations.of(context)!.fruitLimit,
           CharacterSortableFieldsEnum.fruitLimit, null),
       _createSingleColumn(AppLocalizations.of(context)!.groupGain,
           CharacterSortableFieldsEnum.groupGain, null),
       _createSingleColumn(AppLocalizations.of(context)!.characterAttack,
-          CharacterSortableFieldsEnum.attack , null),
+          CharacterSortableFieldsEnum.attack, null),
       _createSingleColumn(AppLocalizations.of(context)!.characterDefense,
           CharacterSortableFieldsEnum.defense, null),
       _createSingleColumn(AppLocalizations.of(context)!.characterIntelligence,
@@ -437,7 +438,8 @@ class _CharacterViewState extends State<CharacterView> {
           CharacterSortableFieldsEnum.blood, null),
       _createSingleColumn(AppLocalizations.of(context)!.characterSpeed,
           CharacterSortableFieldsEnum.speed, null),
-      _createSingleColumn(AppLocalizations.of(context)!.createdBySystem, null, 130),
+      _createSingleColumn(
+          AppLocalizations.of(context)!.createdBySystem, null, 130),
     ];
   }
 
@@ -511,12 +513,12 @@ class _CharacterViewState extends State<CharacterView> {
   List<DataRow> _createRows(BuildContext context) {
     Map<CharacterType, String> enumValueToDisplayValue =
         <CharacterType, String>{
-      CharacterType.body: AppLocalizations.of(context)!.body,
-      CharacterType.foot: AppLocalizations.of(context)!.leg,
-      CharacterType.science: AppLocalizations.of(context)!.science,
-      CharacterType.fist: AppLocalizations.of(context)!.fist,
-      CharacterType.katana: AppLocalizations.of(context)!.katana,
-      CharacterType.shooter: AppLocalizations.of(context)!.shoot
+      CharacterType.BODY: AppLocalizations.of(context)!.body,
+      CharacterType.FOOT: AppLocalizations.of(context)!.leg,
+      CharacterType.SCIENCE: AppLocalizations.of(context)!.science,
+      CharacterType.FIST: AppLocalizations.of(context)!.fist,
+      CharacterType.KATANA: AppLocalizations.of(context)!.katana,
+      CharacterType.SHOOTER: AppLocalizations.of(context)!.shoot
     };
     Map<bool, String> booleanToDisplayName = {
       true: AppLocalizations.of(context)!.yes,
@@ -547,8 +549,10 @@ class _CharacterViewState extends State<CharacterView> {
                     ),
                     child: FittedBox(
                       fit: BoxFit.fill,
-                      child: Image.memory(
-                          Base64Helper.decode(character.profileImage!)),
+                      child: character.profileImage == null
+                          ? Container()
+                          : Image.memory(
+                              Base64Helper.decode(character.profileImage!)),
                     ),
                   ),
                 ),
@@ -559,7 +563,9 @@ class _CharacterViewState extends State<CharacterView> {
               )),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: Text(character.characterTypes.map((e) => enumValueToDisplayValue[e]).join(", ")),
+                child: Text(character.characterTypes
+                    .map((e) => enumValueToDisplayValue[e])
+                    .join(", ")),
               )),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
@@ -591,7 +597,8 @@ class _CharacterViewState extends State<CharacterView> {
               )),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: Text(booleanToDisplayName[character.roleName==UserRole.NIKA]!),
+                child: Text(
+                    booleanToDisplayName[character.roleName == UserRole.NIKA]!),
               )),
             ],
           ),
