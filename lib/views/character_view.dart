@@ -172,7 +172,7 @@ class _CharacterViewState extends State<CharacterView> {
           Padding(
             padding: const EdgeInsets.fromLTRB(0, 0, 6, 0),
             child: SizedBox(
-              width: 230,
+              width: 200,
               height: 35,
               child: TextFormField(
                 controller: searchNameController,
@@ -231,7 +231,7 @@ class _CharacterViewState extends State<CharacterView> {
               buttonStyleData: ButtonStyleData(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 height: 35,
-                width: 280,
+                width: 200,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(3),
                   color: OnepieceColors.liteFancyGreen,
@@ -326,7 +326,7 @@ class _CharacterViewState extends State<CharacterView> {
               buttonStyleData: ButtonStyleData(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 height: 35,
-                width: 280,
+                width: 200,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(3),
                   color: OnepieceColors.liteFancyGreen,
