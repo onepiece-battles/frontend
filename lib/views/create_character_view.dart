@@ -684,6 +684,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                     CreateCharacterRequest addCharacterRequest =
                         CreateCharacterRequest(
                       characterTypes: selectedCharacterTypes,
+                      hakis: selectedHakis,
                       name: characterNameController.text.trim(),
                       maximumFruitCount: DataConverter.stringToInt(
                           characterFruitLimitController.text.trim()),
