@@ -18,4 +18,14 @@ class RandomStringGenerator{
   static String generateRandomNumber(int min, int max) {
       return (min + Random().nextInt(max - min)).toString();
   }
+
+  static String generateDateString() {
+    final random = Random();
+    var startDate = DateTime(1000);
+    var endDate = DateTime(1600);
+    var diffDays = endDate.difference(startDate).inDays;
+    var randomDays = random.nextInt(diffDays);
+    var randomDate = startDate.add(Duration(days: randomDays));
+    return "${randomDate.month}/${randomDate.day}";
+  }
 }

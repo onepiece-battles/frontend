@@ -31,6 +31,7 @@ class CreateCharacterView extends StatefulWidget {
 class _CreateCharacterViewState extends State<CreateCharacterView> {
   TextEditingController characterNameController =
       TextEditingController(text: RandomStringGenerator.generateRandomName(8));
+  // battle data controller
   TextEditingController characterFruitLimitController = TextEditingController(
       text: RandomStringGenerator.generateRandomNumber(1, 2));
   TextEditingController characterGroupGainController = TextEditingController(
@@ -47,7 +48,20 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
       text: RandomStringGenerator.generateRandomNumber(10, 200));
   TextEditingController characterEnergyController = TextEditingController(
       text: RandomStringGenerator.generateRandomNumber(10, 50));
-  List<TextEditingController> characterControllerList() {
+
+  // character details controller
+  TextEditingController characterAge = TextEditingController(
+      text: RandomStringGenerator.generateRandomNumber(0, 100000));
+  TextEditingController characterHeight = TextEditingController(
+      text: RandomStringGenerator.generateRandomNumber(1, 100000));
+  TextEditingController characterBirthPlace = TextEditingController(
+      text: RandomStringGenerator.generateRandomString(10));
+  TextEditingController characterDateOfBirth =
+      TextEditingController(text: RandomStringGenerator.generateDateString());
+  TextEditingController characterBounty = TextEditingController(
+      text: RandomStringGenerator.generateRandomNumber(10, 100000));
+
+  List<TextEditingController> characterControllerListRequired() {
     return <TextEditingController>[
       characterNameController,
       characterFruitLimitController,
@@ -62,10 +76,31 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
     ];
   }
 
+  List<TextEditingController> characterControllerListAll() {
+    return <TextEditingController>[
+      characterNameController,
+      characterFruitLimitController,
+      characterGroupGainController,
+      characterAttackController,
+      characterDefenseController,
+      characterDefenseController,
+      characterIntelligenceController,
+      characterBloodController,
+      characterSpeedController,
+      characterEnergyController,
+      characterAge,
+      characterHeight,
+      characterDateOfBirth,
+      characterBirthPlace,
+      characterBounty
+    ];
+  }
+
   Uint8List _pickedImage = Uint8List(0);
   bool _newImagePicked = false;
   String _chosenImageName = "";
   List<CharacterType> selectedCharacterTypes = [];
+  List<Haki> selectedHakis = [];
 
   final _formKey = GlobalKey<FormState>();
   @override
@@ -108,14 +143,11 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
             ),
             Row(
               children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
-                  child: Text(
-                    AppLocalizations.of(context)!.characterTypeLabel,
-                    style: OnepieceFonts.tableHeaderStyle,
-                  ),
+                _getTypeList(context),
+                const SizedBox(
+                  width: 30,
                 ),
-                _getDropDownList(context),
+                _getHakiList(context),
               ],
             ),
             const Padding(
@@ -124,73 +156,145 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                 height: 2,
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 0, 15),
-              child: Text(
-                AppLocalizations.of(context)!.digitalInfo,
-                style: OnepieceFonts.headerStyle,
-              ),
-            ),
             Form(
               key: _formKey,
-              child: Column(
-                children: <Widget>[
-                  _getFormField(
-                      1,
-                      2,
-                      context,
-                      characterFruitLimitController,
-                      AppLocalizations.of(context)!.fruitLimit,
-                      const Icon(Icons.ac_unit)),
-                  _getFormField(
-                      1,
-                      5,
-                      context,
-                      characterGroupGainController,
-                      AppLocalizations.of(context)!.groupGain,
-                      const Icon(Icons.face)),
-                  _getFormField(
-                      10,
-                      1000,
-                      context,
-                      characterAttackController,
-                      AppLocalizations.of(context)!.characterAttack,
-                      const Icon(Icons.face)),
-                  _getFormField(
-                      10,
-                      1000,
-                      context,
-                      characterDefenseController,
-                      AppLocalizations.of(context)!.characterDefense,
-                      const Icon(Icons.face)),
-                  _getFormField(
-                      70,
-                      260,
-                      context,
-                      characterIntelligenceController,
-                      AppLocalizations.of(context)!.characterIntelligence,
-                      const Icon(Icons.face)),
-                  _getFormField(
-                      100,
-                      10000,
-                      context,
-                      characterBloodController,
-                      AppLocalizations.of(context)!.characterBlood,
-                      const Icon(Icons.face)),
-                  _getFormField(
-                      10,
-                      200,
-                      context,
-                      characterSpeedController,
-                      AppLocalizations.of(context)!.characterSpeed,
-                      const Icon(Icons.face)),
-                  _getFormField(
-                      10,
-                      50,
-                      context,
-                      characterEnergyController,
-                      AppLocalizations.of(context)!.characterEnergy,
-                      const Icon(Icons.face)),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(0, 0, 0, 15),
+                        child: Row(
+                          children: [
+                            Text(
+                              AppLocalizations.of(context)!.battleInfo,
+                              style: OnepieceFonts.headerStyle,
+                            ),
+                            Text(
+                              "  ( ${AppLocalizations.of(context)!.required} )",
+                              style: OnepieceFonts.hintFont,
+                            )
+                          ],
+                        ),
+                      ),
+                      _getFormField(
+                          1,
+                          2,
+                          context,
+                          characterFruitLimitController,
+                          AppLocalizations.of(context)!.fruitLimit,
+                          const Icon(Icons.ac_unit)),
+                      _getFormField(
+                          1,
+                          5,
+                          context,
+                          characterGroupGainController,
+                          AppLocalizations.of(context)!.groupGain,
+                          const Icon(Icons.face)),
+                      _getFormField(
+                          10,
+                          1000,
+                          context,
+                          characterAttackController,
+                          AppLocalizations.of(context)!.characterAttack,
+                          const Icon(Icons.face)),
+                      _getFormField(
+                          10,
+                          1000,
+                          context,
+                          characterDefenseController,
+                          AppLocalizations.of(context)!.characterDefense,
+                          const Icon(Icons.face)),
+                      _getFormField(
+                          70,
+                          260,
+                          context,
+                          characterIntelligenceController,
+                          AppLocalizations.of(context)!.characterIntelligence,
+                          const Icon(Icons.face)),
+                      _getFormField(
+                          100,
+                          10000,
+                          context,
+                          characterBloodController,
+                          AppLocalizations.of(context)!.characterBlood,
+                          const Icon(Icons.face)),
+                      _getFormField(
+                          10,
+                          200,
+                          context,
+                          characterSpeedController,
+                          AppLocalizations.of(context)!.characterSpeed,
+                          const Icon(Icons.face)),
+                      _getFormField(
+                          10,
+                          50,
+                          context,
+                          characterEnergyController,
+                          AppLocalizations.of(context)!.characterEnergy,
+                          const Icon(Icons.face)),
+                    ],
+                  ),
+                  const SizedBox(
+                    width: 100,
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(0, 0, 0, 15),
+                        child: Row(
+                          children: [
+                            Text(
+                              AppLocalizations.of(context)!.characterDetail,
+                              style: OnepieceFonts.headerStyle,
+                            ),
+                            Text(
+                              "  ( ${AppLocalizations.of(context)!.optional} )",
+                              style: OnepieceFonts.hintFont,
+                            )
+                          ],
+                        ),
+                      ),
+                      _getFormField(
+                          0,
+                          100000,
+                          context,
+                          characterAge,
+                          AppLocalizations.of(context)!.age,
+                          const Icon(Icons.ac_unit)),
+                      _getFormField(
+                          1,
+                          100000,
+                          context,
+                          characterHeight,
+                          AppLocalizations.of(context)!.height,
+                          const Icon(Icons.face)),
+                      _getStringFormField(
+                          20,
+                          context,
+                          characterBirthPlace,
+                          AppLocalizations.of(context)!.birthPlace,
+                          const Icon(Icons.face)),
+                      _getStringFormField(
+                          20,
+                          context,
+                          characterDateOfBirth,
+                          AppLocalizations.of(context)!.birthDay,
+                          const Icon(Icons.face)),
+                      _getFormField(
+                          10,
+                          100000000000,
+                          context,
+                          characterBounty,
+                          AppLocalizations.of(context)!.bounty,
+                          const Icon(Icons.face)),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -283,7 +387,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
     );
   }
 
-  Widget _getDropDownList(BuildContext context) {
+  Widget _getTypeList(BuildContext context) {
     Map<CharacterType, String> enumValueToDisplayValue = {
       CharacterType.BODY: AppLocalizations.of(context)!.body,
       CharacterType.FOOT: AppLocalizations.of(context)!.leg,
@@ -388,6 +492,106 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
     );
   }
 
+  Widget _getHakiList(BuildContext context) {
+    Map<Haki, String> enumValueToDisplayValue = {
+      Haki.busoshoku: AppLocalizations.of(context)!.busoshoku,
+      Haki.haoshoku: AppLocalizations.of(context)!.haoshoku,
+      Haki.kenbunshoku: AppLocalizations.of(context)!.kenbunshoku,
+    };
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0, 0, 0, 2),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton2(
+          isExpanded: true,
+          value: selectedHakis.isEmpty ? null : selectedHakis.last,
+          hint: Text(
+            AppLocalizations.of(context)!.hakis,
+            style: OnepieceFonts.dropDownItemStyle,
+          ),
+          onChanged: (value) {},
+          selectedItemBuilder: (context) {
+            return Haki.values.map(
+              (item) {
+                return Container(
+                  alignment: AlignmentDirectional.center,
+                  child: Text(
+                    selectedHakis
+                        .map((selectedHaki) {
+                          return enumValueToDisplayValue[selectedHaki];
+                        })
+                        .toSet()
+                        .join(', '),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    maxLines: 1,
+                  ),
+                );
+              },
+            ).toList();
+          },
+          buttonStyleData: ButtonStyleData(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            height: 35,
+            width: 280,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(3),
+              color: OnepieceColors.liteFancyGreen,
+            ),
+          ),
+          menuItemStyleData: const MenuItemStyleData(
+            height: 35,
+          ),
+          items: Haki.values.map((Haki haki) {
+            return DropdownMenuItem<Haki>(
+              value: haki,
+              enabled: false,
+              child: StatefulBuilder(
+                builder: (context, menuSetState) {
+                  final isSelected = selectedHakis.contains(haki);
+                  return InkWell(
+                    onTap: () {
+                      isSelected
+                          ? selectedHakis.remove(haki)
+                          : selectedHakis.add(haki);
+                      // //This rebuilds the StatefulWidget to update the button's text
+                      setState(() {});
+                      //This rebuilds the dropdownMenu Widget to update the check mark
+                      menuSetState(() {});
+                    },
+                    child: Container(
+                      height: double.infinity,
+                      padding: const EdgeInsets.symmetric(horizontal: 3.0),
+                      child: Row(
+                        children: [
+                          if (isSelected)
+                            const Icon(Icons.check_box_outlined)
+                          else
+                            const Icon(Icons.check_box_outline_blank),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              enumValueToDisplayValue[haki]!,
+                              style: const TextStyle(
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
   Widget _getFormField(int min, int max, BuildContext context,
       TextEditingController controller, String label, Icon icon) {
     return Padding(
@@ -419,6 +623,26 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
     );
   }
 
+  Widget _getStringFormField(int length, BuildContext context,
+      TextEditingController controller, String label, Icon icon) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0, 20, 0, 10),
+      child: SizedBox(
+        width: 300,
+        child: TextFormField(
+          controller: controller,
+          maxLength: length,
+          decoration: InputDecoration(
+            prefixIcon: icon,
+            floatingLabelBehavior: FloatingLabelBehavior.auto,
+            contentPadding: const EdgeInsets.fromLTRB(0, 2, 0, 2),
+            labelText: label,
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _getFootBar(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -429,7 +653,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
             child: Text(AppLocalizations.of(context)!.clearForm),
             onPressed: () {
               setState(() {
-                characterControllerList().forEach((element) {
+                characterControllerListAll().forEach((element) {
                   element.clear();
                 });
                 _pickedImage = Uint8List(0);
@@ -453,24 +677,38 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                           AppLocalizations.of(context)!.characterImageRequired);
                       return;
                     }
-                    CreateCharacterRequest addCharacterRequest = CreateCharacterRequest(
-                        characterTypes: selectedCharacterTypes,
-                        name: characterNameController.text.trim(),
-                        maximumFruitCount: DataConverter.stringToInt(
-                            characterFruitLimitController.text.trim()),
-                        groupGain: DataConverter.stringToInt(
-                            characterGroupGainController.text.trim()),
-                        attack: DataConverter.stringToInt(
-                            characterAttackController.text.trim()),
-                        defense: DataConverter.stringToInt(
-                            characterDefenseController.text.trim()),
-                        intelligence: DataConverter.stringToInt(
-                            characterIntelligenceController.text.trim()),
-                        blood: DataConverter.stringToInt(
-                            characterBloodController.text.trim()),
-                        speed: DataConverter.stringToInt(
-                            characterSpeedController.text.trim()),
-                        energy: DataConverter.stringToInt(characterEnergyController.text.trim()));
+                    var monthDay = characterDateOfBirth.text
+                        .split("/")
+                        .map((e) => DataConverter.stringToInt(e))
+                        .toList();
+                    CreateCharacterRequest addCharacterRequest =
+                        CreateCharacterRequest(
+                      characterTypes: selectedCharacterTypes,
+                      name: characterNameController.text.trim(),
+                      maximumFruitCount: DataConverter.stringToInt(
+                          characterFruitLimitController.text.trim()),
+                      groupGain: DataConverter.stringToInt(
+                          characterGroupGainController.text.trim()),
+                      attack: DataConverter.stringToInt(
+                          characterAttackController.text.trim()),
+                      defense: DataConverter.stringToInt(
+                          characterDefenseController.text.trim()),
+                      intelligence: DataConverter.stringToInt(
+                          characterIntelligenceController.text.trim()),
+                      blood: DataConverter.stringToInt(
+                          characterBloodController.text.trim()),
+                      speed: DataConverter.stringToInt(
+                          characterSpeedController.text.trim()),
+                      energy: DataConverter.stringToInt(
+                          characterEnergyController.text.trim()),
+                      height: DataConverter.stringToInt(
+                          characterHeight.text.trim()),
+                      age: DataConverter.stringToInt(characterAge.text.trim()),
+                      birthPlace: characterBirthPlace.text.trim(),
+                      dateOfBirth: DateTime(monthDay.first, monthDay.last),
+                      bounty: DataConverter.stringToInt(
+                          characterBounty.text.trim()),
+                    );
                     getIt<CharacterDao>()
                         .addCharacter(addCharacterRequest)
                         .then((value) {
@@ -493,7 +731,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
   }
 
   bool _allElementsAreFilled() {
-    characterControllerList().map((e) {
+    characterControllerListRequired().map((e) {
       if (e.text == '') {
         return false;
       }

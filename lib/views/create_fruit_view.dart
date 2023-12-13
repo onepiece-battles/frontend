@@ -118,7 +118,7 @@ class _CreateFruitViewState extends State<CreateFruitView> {
             Padding(
               padding: const EdgeInsets.fromLTRB(0, 0, 0, 15),
               child: Text(
-                AppLocalizations.of(context)!.digitalInfo,
+                AppLocalizations.of(context)!.battleInfo,
                 style: OnepieceFonts.headerStyle,
               ),
             ),
