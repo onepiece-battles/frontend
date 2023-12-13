@@ -47,6 +47,7 @@ class _CharacterViewState extends State<CharacterView> {
     CharacterSortableFieldsEnum.speed: null,
   };
   List<CharacterType> selectedCharacterTypes = [];
+  List<Haki> selectedHakis = [];
   ScrollController scrollController = ScrollController();
 
   int selectedPageIndex = 1;
@@ -59,6 +60,7 @@ class _CharacterViewState extends State<CharacterView> {
 
   bool onlyShowSystemResource = false;
   bool donNotShowSystemResource = false;
+  bool fruitOwnersOnly = false;
 
   @override
   void initState() {
@@ -157,6 +159,11 @@ class _CharacterViewState extends State<CharacterView> {
       CharacterType.FIST: AppLocalizations.of(context)!.fist,
       CharacterType.KATANA: AppLocalizations.of(context)!.katana,
       CharacterType.SHOOTER: AppLocalizations.of(context)!.shoot
+    };
+    Map<Haki, String> hakiEnumValueToDisplayValue = {
+      Haki.busoshoku: AppLocalizations.of(context)!.busoshoku,
+      Haki.haoshoku: AppLocalizations.of(context)!.haoshoku,
+      Haki.kenbunshoku: AppLocalizations.of(context)!.kenbunshoku,
     };
     return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
       Row(
@@ -282,6 +289,100 @@ class _CharacterViewState extends State<CharacterView> {
               }).toList(),
             ),
           ),
+          const SizedBox(
+            width: 6,
+          ),
+          DropdownButtonHideUnderline(
+            child: DropdownButton2(
+              isExpanded: true,
+              value: selectedHakis.isEmpty ? null : selectedHakis.last,
+              hint: Text(
+                AppLocalizations.of(context)!.hakis,
+                style: OnepieceFonts.dropDownItemStyle,
+              ),
+              onChanged: (value) {},
+              selectedItemBuilder: (context) {
+                return CharacterType.values.map(
+                  (item) {
+                    return Container(
+                      alignment: AlignmentDirectional.center,
+                      child: Text(
+                        selectedHakis
+                            .map((selectedType) {
+                              return hakiEnumValueToDisplayValue[selectedType];
+                            })
+                            .toSet()
+                            .join(', '),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        maxLines: 1,
+                      ),
+                    );
+                  },
+                ).toList();
+              },
+              buttonStyleData: ButtonStyleData(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                height: 35,
+                width: 280,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(3),
+                  color: OnepieceColors.liteFancyGreen,
+                ),
+              ),
+              menuItemStyleData: const MenuItemStyleData(
+                height: 35,
+              ),
+              items: Haki.values.map((Haki haki) {
+                return DropdownMenuItem<Haki>(
+                  value: haki,
+                  enabled: false,
+                  child: StatefulBuilder(
+                    builder: (context, menuSetState) {
+                      final isSelected = selectedHakis.contains(haki);
+                      return InkWell(
+                        onTap: () {
+                          isSelected
+                              ? selectedHakis.remove(haki)
+                              : selectedHakis.add(haki);
+                          characterFilter.hakis = selectedHakis;
+                          debugPrint('$selectedHakis');
+                          // //This rebuilds the StatefulWidget to update the button's text
+                          setState(() {});
+                          //This rebuilds the dropdownMenu Widget to update the check mark
+                          menuSetState(() {});
+                          _search();
+                        },
+                        child: Container(
+                          height: double.infinity,
+                          padding: const EdgeInsets.symmetric(horizontal: 3.0),
+                          child: Row(
+                            children: [
+                              if (isSelected)
+                                const Icon(Icons.check_box_outlined)
+                              else
+                                const Icon(Icons.check_box_outline_blank),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  hakiEnumValueToDisplayValue[haki]!,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
           Row(
             children: [
               Padding(
@@ -328,6 +429,51 @@ class _CharacterViewState extends State<CharacterView> {
                   ),
                 ),
               ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
+                child: SizedBox(
+                  height: 35,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        AppLocalizations.of(context)!.noSystemResource,
+                        style: OnepieceFonts.smallContentStyle,
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          setState(() {
+                            donNotShowSystemResource =
+                                !donNotShowSystemResource;
+                            if (onlyShowSystemResource) {
+                              onlyShowSystemResource = false;
+                            }
+                            if (donNotShowSystemResource) {
+                              characterFilter.onlySystem = false;
+                            } else {
+                              characterFilter.onlySystem = null;
+                            }
+                            _search();
+                          });
+                        },
+                        splashRadius: 1,
+                        icon: donNotShowSystemResource
+                            ? const Icon(
+                                Icons.check_box,
+                                color: OnepieceColors.fancyBlue,
+                                size: 20,
+                              )
+                            : const Icon(
+                                Icons.check_box_outline_blank,
+                                color: OnepieceColors.fancyBlue,
+                                size: 20,
+                              ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               SizedBox(
                 height: 35,
                 child: Row(
@@ -335,26 +481,23 @@ class _CharacterViewState extends State<CharacterView> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
-                      AppLocalizations.of(context)!.noSystemResource,
+                      AppLocalizations.of(context)!.fruitOwner,
                       style: OnepieceFonts.smallContentStyle,
                     ),
                     IconButton(
                       onPressed: () {
                         setState(() {
-                          donNotShowSystemResource = !donNotShowSystemResource;
-                          if (onlyShowSystemResource) {
-                            onlyShowSystemResource = false;
-                          }
-                          if (donNotShowSystemResource) {
-                            characterFilter.onlySystem = false;
+                          fruitOwnersOnly = !fruitOwnersOnly;
+                          if (fruitOwnersOnly) {
+                            characterFilter.hasFruit = true;
                           } else {
-                            characterFilter.onlySystem = null;
+                            characterFilter.hasFruit = null;
                           }
                           _search();
                         });
                       },
                       splashRadius: 1,
-                      icon: donNotShowSystemResource
+                      icon: fruitOwnersOnly
                           ? const Icon(
                               Icons.check_box,
                               color: OnepieceColors.fancyBlue,
