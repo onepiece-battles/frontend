@@ -54,7 +54,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
 
   // Uint8List _pickedImage = Uint8List(0);
   // Uint8List _originalImage = Uint8List(0);
-  bool _newImagePicked = false;
+  // bool _newImagePicked = false;
   SliderData sliderData = SliderData();
 
   final _basicFormKey = GlobalKey<FormState>();
@@ -90,6 +90,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
 
   void _updateControllerData() {
     // update basic information
+    characterNameController.text = character.name.toString();
     characterAge.text = character.age == null ? "" : character.age.toString();
     characterHeight.text =
         character.height == null ? "" : character.height.toString();
@@ -120,8 +121,21 @@ class _CharacterDetailState extends State<CharacterDetail> {
             _updateControllerData();
             return SingleChildScrollView(
               scrollDirection: Axis.vertical,
-              child: Column(
-                children: [_getBasicInfo(context), _getCombatInfo(context)],
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(8,0,8,0),
+                child: Column(
+                  children: [
+                    _getBasicInfo(context),
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Divider(
+                        color: OnepieceColors.fancyBlue,
+                        thickness: 1,
+                      ),
+                    ),
+                    _getCombatInfo(context)
+                  ],
+                ),
               ),
             );
           } else {
@@ -236,7 +250,9 @@ class _CharacterDetailState extends State<CharacterDetail> {
                 AppLocalizations.of(context)!.basicInfo,
                 style: OnepieceFonts.headerStyle,
               ),
-              const SizedBox(width: 15,),
+              const SizedBox(
+                width: 15,
+              ),
               IconButton(
                 splashRadius: 0.1,
                 onPressed: () {
@@ -267,12 +283,12 @@ class _CharacterDetailState extends State<CharacterDetail> {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Container(
-                  width: 300,
-                  height: 300,
+                  width: 270,
+                  height: 270,
                   decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.all(Radius.circular(2.0)),
+                    borderRadius: const BorderRadius.all(Radius.circular(5.0)),
                     border: Border.all(
-                        color: Colors.grey, width: 8, style: BorderStyle.solid),
+                        color: OnepieceColors.liteFancyBlue, width: 5, style: BorderStyle.solid),
                   ),
                   child: FittedBox(
                     fit: BoxFit.fill,
@@ -353,10 +369,126 @@ class _CharacterDetailState extends State<CharacterDetail> {
   Widget _getCombatInfo(BuildContext context) {
     return Column(
       children: [
-        Text(
-          AppLocalizations.of(context)!.battleInfo,
-          style: OnepieceFonts.navigationTopBarStyleBold,
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Text(
+                AppLocalizations.of(context)!.battleInfo,
+                style: OnepieceFonts.headerStyle,
+              ),
+              const SizedBox(
+                width: 15,
+              ),
+              IconButton(
+                splashRadius: 0.1,
+                onPressed: () {
+                  setState(() {
+                    combatInfoEditable = !combatInfoEditable;
+                  });
+                },
+                icon: basicInfoEditable
+                    ? const Icon(
+                        Icons.check,
+                        size: 25,
+                        color: OnepieceColors.fancyBlue,
+                      )
+                    : const Icon(
+                        Icons.edit,
+                        size: 25,
+                        color: OnepieceColors.fancyBlue,
+                      ),
+              )
+            ],
+          ),
         ),
+        Form(
+          key: _digitFormKey,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  children: [
+                    _getDigitFormField(
+                      context,
+                      basicInfoEditable,
+                      characterAttackController,
+                      AppLocalizations.of(context)!.characterAttack,
+                      10,
+                      1000,
+                    ),
+                    _getDigitFormField(
+                      context,
+                      basicInfoEditable,
+                      characterDefenseController,
+                      AppLocalizations.of(context)!.characterDefense,
+                      10,
+                      1000,
+                    ),
+                    _getDigitFormField(
+                      context,
+                      basicInfoEditable,
+                      characterBloodController,
+                      AppLocalizations.of(context)!.characterBlood,
+                      100,
+                      10000,
+                    ),
+                    _getDigitFormField(
+                      context,
+                      basicInfoEditable,
+                      characterSpeedController,
+                      AppLocalizations.of(context)!.characterSpeed,
+                      10,
+                      200,
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  children: [
+                    _getDigitFormField(
+                      context,
+                      basicInfoEditable,
+                      characterIntelligenceController,
+                      AppLocalizations.of(context)!.characterIntelligence,
+                      70,
+                      260,
+                    ),
+                    _getDigitFormField(
+                      context,
+                      basicInfoEditable,
+                      characterEnergyController,
+                      AppLocalizations.of(context)!.age,
+                      10,
+                      50,
+                    ),
+                    _getDigitFormField(
+                      context,
+                      basicInfoEditable,
+                      characterGroupGainController,
+                      AppLocalizations.of(context)!.groupGain,
+                      1,
+                      5,
+                    ),
+                    _getDigitFormField(
+                      context,
+                      basicInfoEditable,
+                      characterFruitLimitController,
+                      AppLocalizations.of(context)!.fruitLimit,
+                      1,
+                      2,
+                    ),
+                  ],
+                ),
+              )
+            ],
+          ),
+        )
       ],
     );
   }
@@ -365,24 +497,29 @@ class _CharacterDetailState extends State<CharacterDetail> {
       TextEditingController controller, String label, int length) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 20, 0, 10),
-      child: Row(
+      child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-              width: 80,
-              child: Text(
-                label,
-                style: OnepieceFonts.contentStyle,
-              )),
+              width: 300,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 8),
+                child: Text(
+                  label,
+                  style: OnepieceFonts.deepBlackHintFont,
+                ),
+              ),
+          ),
           SizedBox(
             width: 300,
             child: TextFormField(
               controller: controller,
               enabled: editable,
-              maxLength: length,
+              // maxLength: length,
               decoration: const InputDecoration(
                 floatingLabelBehavior: FloatingLabelBehavior.auto,
-                contentPadding: EdgeInsets.fromLTRB(0, 2, 0, 2),
+                contentPadding: EdgeInsets.fromLTRB(10, 2, 10, 2)
               ),
             ),
           ),
@@ -395,13 +532,18 @@ class _CharacterDetailState extends State<CharacterDetail> {
       TextEditingController controller, String label, int min, int max) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 20, 0, 10),
-      child: Row(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 80,
-            child: Text(
-              label,
-              style: OnepieceFonts.contentStyle,
+            width: 300,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 8),
+              child: Text(
+                label,
+                style: OnepieceFonts.deepBlackHintFont,
+              ),
             ),
           ),
           SizedBox(
@@ -423,7 +565,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
               },
               decoration: InputDecoration(
                 floatingLabelBehavior: FloatingLabelBehavior.auto,
-                contentPadding: const EdgeInsets.fromLTRB(0, 2, 0, 2),
+                contentPadding: const EdgeInsets.fromLTRB(10, 2, 10, 2),
                 labelText: "($min-$max)",
               ),
             ),
