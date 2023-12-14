@@ -1,20 +1,13 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:one_piece_battles_flutter/repository/character_dao.dart';
 import 'package:one_piece_battles_flutter/utils/string_extensions.dart';
 import 'package:openapi/api.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import '../repository/image_dao.dart';
+import '../repository/fruit_dao.dart';
 import '../utils/base64_helper.dart';
-import '../utils/compare_uint8list.dart';
-import '../utils/data_converter.dart';
-import '../utils/onepiece_image_picker.dart';
-import '../utils/random_string_generator.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -47,6 +40,13 @@ class _CharacterDetailState extends State<CharacterDetail> {
   TextEditingController characterDateOfBirth = TextEditingController();
   TextEditingController characterBounty = TextEditingController();
 
+  // fruit search data
+  TextEditingController fruitNameController = TextEditingController();
+  FruitFilter fruitFilter = FruitFilter();
+  List<FruitListView> searchingFruitList = [];
+  String? selectedFruitId;
+
+  // initial date
   late CharacterFullView character;
   List<BattleListView> battles = [];
   List<Fruit> fruits = [];
@@ -71,6 +71,36 @@ class _CharacterDetailState extends State<CharacterDetail> {
   _loadData() {
     return getIt<CharacterDao>().getCharacter(
         GetCharacterFullViewRequest(characterId: widget.characterId));
+  }
+
+  _searchFruit() {
+    ListFruitRequest request = ListFruitRequest(
+        pageSize: 5, pageIndex: 1, sortKeys: [], fruitFilter: fruitFilter);
+    Future<ListFruitResponse?> response = getIt<FruitDao>().list(request);
+    response.then(
+      (value) => {
+        setState(
+          () {
+            // change to partially setstate
+            searchingFruitList = value!.fruits;
+          },
+        )
+      },
+    );
+  }
+
+  _eatFruit() {
+    EatFruitRequest request =
+        EatFruitRequest(characterId: character.id, fruitId: selectedFruitId!);
+    Future<EatFruitResponse?> response =
+        getIt<CharacterDao>().eatFruit(request);
+    response.then(
+      (value) => {
+        setState(
+          () {},
+        )
+      },
+    );
   }
 
   void _updateData(CharacterFullView characterFullView) {
@@ -122,7 +152,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
             return SingleChildScrollView(
               scrollDirection: Axis.vertical,
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(8,0,8,0),
+                padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                 child: Column(
                   children: [
                     _getBasicInfo(context),
@@ -133,7 +163,15 @@ class _CharacterDetailState extends State<CharacterDetail> {
                         thickness: 1,
                       ),
                     ),
-                    _getCombatInfo(context)
+                    _getCombatInfo(context),
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Divider(
+                        color: OnepieceColors.fancyBlue,
+                        thickness: 1,
+                      ),
+                    ),
+                    _getEatFruit(context),
                   ],
                 ),
               ),
@@ -149,95 +187,6 @@ class _CharacterDetailState extends State<CharacterDetail> {
         });
   }
 
-  // void _compareImage() {
-  //   if (CompareUint8List.equals(_originalImage, _pickedImage)) {
-  //     _newImagePicked = false;
-  //   } else {
-  //     _newImagePicked = true;
-  //   }
-  // }
-
-  // Column _getCharacterDataList(BuildContext context) {
-  //   return Column(
-  //     children: [
-  //       _getDataRow(AppLocalizations.of(context)!.characterAttack, 1000, 10,
-  //           sliderData.attack, character.attack.toDouble(), (value) {
-  //         sliderData.setAttack(value);
-  //       }),
-  //       _getDataRow(AppLocalizations.of(context)!.characterDefense, 1000, 10,
-  //           sliderData.defense, character.defense.toDouble(), (value) {
-  //         sliderData.setDefense(value);
-  //       }),
-  //       _getDataRow(AppLocalizations.of(context)!.characterBlood, 10000, 100,
-  //           sliderData.blood, character.blood.toDouble(), (value) {
-  //         sliderData.setBlood(value);
-  //       }),
-  //       _getDataRow(AppLocalizations.of(context)!.characterSpeed, 200, 10,
-  //           sliderData.speed, character.speed.toDouble(), (value) {
-  //         sliderData.setSpeed(value);
-  //       }),
-  //       _getDataRow(AppLocalizations.of(context)!.groupGain, 5, 1,
-  //           sliderData.groupGain, character.groupGain.toDouble(), (value) {
-  //         sliderData.setGroupGain(value);
-  //       }),
-  //       _getDataRow(
-  //           AppLocalizations.of(context)!.characterIntelligence,
-  //           260,
-  //           70,
-  //           sliderData.intelligence,
-  //           character.intelligence.toDouble(), (value) {
-  //         sliderData.setIntelligence(value);
-  //       }),
-  //     ],
-  //   );
-  // }
-  //
-  // Row _getDataRow(String name, int max, int min, double currentValue,
-  //     double originalValue, Function(double) onChangeFunction) {
-  //   return Row(
-  //     children: [
-  //       Padding(
-  //         padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
-  //         child: Row(
-  //           crossAxisAlignment: CrossAxisAlignment.center,
-  //           mainAxisAlignment: MainAxisAlignment.start,
-  //           children: [
-  //             SizedBox(width: 70, child: Text(name)),
-  //             Padding(
-  //               padding: const EdgeInsets.fromLTRB(8.0, 0, 0, 0),
-  //               child: SizedBox(
-  //                   width: 42, child: Text(currentValue.toInt().toString())),
-  //             )
-  //           ],
-  //         ),
-  //       ),
-  //       SizedBox(
-  //         width: 360,
-  //         height: 35,
-  //         child: Expanded(
-  //           child: Slider(
-  //             value: currentValue,
-  //             // allowedInteraction: SliderInteraction.tapAndSlide,
-  //             label: currentValue.round().toString(),
-  //             divisions: max - min,
-  //             min: min.toDouble(),
-  //             max: max.toDouble(),
-  //             secondaryTrackValue: originalValue,
-  //             secondaryActiveColor: OnepieceColors.themeColor,
-  //             onChanged: (value) {
-  //               setState(() {
-  //                 currentValue = value;
-  //                 onChangeFunction(value);
-  //               });
-  //             },
-  //           ),
-  //         ),
-  //       ),
-  //     ],
-  //   );
-  // }
-
-  // show character basic information (editable if permitted)
   Widget _getBasicInfo(BuildContext context) {
     return Column(
       children: [
@@ -288,7 +237,9 @@ class _CharacterDetailState extends State<CharacterDetail> {
                   decoration: BoxDecoration(
                     borderRadius: const BorderRadius.all(Radius.circular(5.0)),
                     border: Border.all(
-                        color: OnepieceColors.liteFancyBlue, width: 5, style: BorderStyle.solid),
+                        color: OnepieceColors.liteFancyBlue,
+                        width: 5,
+                        style: BorderStyle.solid),
                   ),
                   child: FittedBox(
                     fit: BoxFit.fill,
@@ -463,7 +414,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                       context,
                       basicInfoEditable,
                       characterEnergyController,
-                      AppLocalizations.of(context)!.age,
+                      AppLocalizations.of(context)!.characterEnergy,
                       10,
                       50,
                     ),
@@ -493,6 +444,103 @@ class _CharacterDetailState extends State<CharacterDetail> {
     );
   }
 
+  Widget _getEatFruit(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Text(
+                AppLocalizations.of(context)!.devilFruit,
+                style: OnepieceFonts.headerStyle,
+              ),
+              const SizedBox(
+                width: 15,
+              ),
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text("choose fruit"),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: SizedBox(
+            width: 300,
+            height: 60,
+            child: TextFormField(
+              controller: fruitNameController,
+              decoration: InputDecoration(
+                label: Text(
+                  AppLocalizations.of(context)!.characterName,
+                  style: OnepieceFonts.hintFont,
+                ),
+                disabledBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
+                enabledBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
+                focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
+                prefixIcon: const Icon(Icons.search),
+              ),
+              onChanged: (value) {
+                fruitFilter.name = value;
+                _searchFruit();
+              },
+            ),
+          ),
+        ),
+        _getFruitList(),
+        ElevatedButton(
+            onPressed: selectedFruitId == null
+                ? null
+                : () {
+                    _eatFruit();
+                  },
+            child: const Text("eat"))
+      ],
+    );
+  }
+
+  Widget _getFruitList() {
+    return ListView.builder(
+        shrinkWrap: true,
+        itemCount: searchingFruitList.length,
+        itemBuilder: (context, index) {
+          var fruit = searchingFruitList[index];
+          return Material(
+            type: MaterialType.transparency,
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+              decoration: const BoxDecoration(
+                  borderRadius: BorderRadius.all(Radius.circular(5))),
+              child: ListTile(
+                minLeadingWidth: 10,
+                contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                onTap: () {
+                  selectedFruitId = fruit.id!;
+                },
+                hoverColor: OnepieceColors.liteFancyBlue,
+                title: Row(
+                  children: [Text(fruit.name!)],
+                ),
+              ),
+            ),
+          );
+        });
+  }
+
+  Widget _getBattle(BuildContext context) {
+    return Column();
+  }
+
   Widget _getStringFormField(BuildContext context, bool editable,
       TextEditingController controller, String label, int length) {
     return Padding(
@@ -502,14 +550,14 @@ class _CharacterDetailState extends State<CharacterDetail> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-              width: 300,
-              child: Padding(
-                padding: const EdgeInsets.only(left: 8),
-                child: Text(
-                  label,
-                  style: OnepieceFonts.deepBlackHintFont,
-                ),
+            width: 300,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 8),
+              child: Text(
+                label,
+                style: OnepieceFonts.deepBlackHintFont,
               ),
+            ),
           ),
           SizedBox(
             width: 300,
@@ -518,9 +566,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
               enabled: editable,
               // maxLength: length,
               decoration: const InputDecoration(
-                floatingLabelBehavior: FloatingLabelBehavior.auto,
-                contentPadding: EdgeInsets.fromLTRB(10, 2, 10, 2)
-              ),
+                  floatingLabelBehavior: FloatingLabelBehavior.auto,
+                  contentPadding: EdgeInsets.fromLTRB(10, 2, 10, 2)),
             ),
           ),
         ],
@@ -573,18 +620,6 @@ class _CharacterDetailState extends State<CharacterDetail> {
         ],
       ),
     );
-  }
-
-  Widget _EatFruit(BuildContext context) {
-    return Column();
-  }
-
-  Widget _getFruits(BuildContext context) {
-    return Column();
-  }
-
-  Widget _getBattle(BuildContext context) {
-    return Column();
   }
 }
 
