@@ -62,6 +62,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
 
   bool basicInfoEditable = false;
   bool combatInfoEditable = false;
+  bool fruitSearchEnabled = false;
 
   @override
   void initState() {
@@ -71,22 +72,6 @@ class _CharacterDetailState extends State<CharacterDetail> {
   _loadData() {
     return getIt<CharacterDao>().getCharacter(
         GetCharacterFullViewRequest(characterId: widget.characterId));
-  }
-
-  _searchFruit() {
-    ListFruitRequest request = ListFruitRequest(
-        pageSize: 5, pageIndex: 1, sortKeys: [], fruitFilter: fruitFilter);
-    Future<ListFruitResponse?> response = getIt<FruitDao>().list(request);
-    response.then(
-      (value) => {
-        setState(
-          () {
-            // change to partially setstate
-            searchingFruitList = value!.fruits;
-          },
-        )
-      },
-    );
   }
 
   _eatFruit() {
@@ -116,6 +101,9 @@ class _CharacterDetailState extends State<CharacterDetail> {
     sliderData.setSpeed(characterFullView.speed.toDouble());
     battles = characterFullView.battles;
     fruits = characterFullView.fruits;
+    if (fruits.length<character.maximumFruitCount) {
+      fruitSearchEnabled = true;
+    }
   }
 
   void _updateControllerData() {
@@ -467,76 +455,116 @@ class _CharacterDetailState extends State<CharacterDetail> {
           padding: const EdgeInsets.all(8.0),
           child: Text("choose fruit"),
         ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: SizedBox(
-            width: 300,
-            height: 60,
-            child: TextFormField(
-              controller: fruitNameController,
-              decoration: InputDecoration(
-                label: Text(
-                  AppLocalizations.of(context)!.characterName,
-                  style: OnepieceFonts.hintFont,
-                ),
-                disabledBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
-                enabledBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
-                focusedBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
-                prefixIcon: const Icon(Icons.search),
-              ),
-              onChanged: (value) {
-                fruitFilter.name = value;
-                _searchFruit();
-              },
-            ),
-          ),
-        ),
-        _getFruitList(),
-        ElevatedButton(
-            onPressed: selectedFruitId == null
-                ? null
-                : () {
-                    _eatFruit();
-                  },
-            child: const Text("eat"))
+        _getFruitEat(context),
+        _getFruitList()
       ],
     );
   }
-
-  Widget _getFruitList() {
-    return ListView.builder(
-        shrinkWrap: true,
-        itemCount: searchingFruitList.length,
-        itemBuilder: (context, index) {
-          var fruit = searchingFruitList[index];
-          return Material(
-            type: MaterialType.transparency,
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-              decoration: const BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(5))),
-              child: ListTile(
-                minLeadingWidth: 10,
-                contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5),
+  Widget _getFruitEat(BuildContext context){
+    return  StatefulBuilder(builder: (context, fruitSetstate) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: SizedBox(
+              width: 300,
+              height: 60,
+              child: TextFormField(
+                enabled: fruitSearchEnabled,
+                controller: fruitNameController,
+                decoration: InputDecoration(
+                  label: Text(
+                    AppLocalizations.of(context)!.fruitName,
+                    style: OnepieceFonts.hintFont,
+                  ),
+                  disabledBorder: const OutlineInputBorder(
+                      borderSide:
+                      BorderSide(color: OnepieceColors.fancyGreen)),
+                  enabledBorder: const OutlineInputBorder(
+                      borderSide:
+                      BorderSide(color: OnepieceColors.fancyGreen)),
+                  focusedBorder: const OutlineInputBorder(
+                      borderSide:
+                      BorderSide(color: OnepieceColors.fancyGreen)),
+                  prefixIcon: const Icon(Icons.search),
                 ),
-                onTap: () {
-                  selectedFruitId = fruit.id!;
+                onChanged: (value) {
+                  if (value.isEmpty) {
+                    searchingFruitList = [];
+                    fruitSetstate(() {});
+                    return;
+                  }
+                  fruitFilter.name = value;
+                  ListFruitRequest request = ListFruitRequest(
+                      pageSize: 5,
+                      pageIndex: 1,
+                      sortKeys: [],
+                      fruitFilter: fruitFilter);
+                  Future<ListFruitResponse?> response =
+                  getIt<FruitDao>().list(request);
+                  response.then(
+                        (value) => {
+                      searchingFruitList = value!.fruits,
+                      fruitSetstate(() {})
+                    },
+                  );
                 },
-                hoverColor: OnepieceColors.liteFancyBlue,
-                title: Row(
-                  children: [Text(fruit.name!)],
-                ),
               ),
             ),
-          );
-        });
+          ),
+          ListView.builder(
+            shrinkWrap: true,
+            itemCount: searchingFruitList.length,
+            itemBuilder: (context, index) {
+              var fruit = searchingFruitList[index];
+              return Material(
+                type: MaterialType.transparency,
+                child: Container(
+                  padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+                  decoration: const BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(5))),
+                  child: SizedBox(
+                    width: 200,
+                    child: ListTile(
+                      minLeadingWidth: 10,
+                      contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      selected: selectedFruitId==fruit.id,
+                      selectedTileColor:  OnepieceColors.liteFancyBlue,
+                      onTap: () {
+                        selectedFruitId = fruit.id!;
+                        fruitSetstate(() {});
+                      },
+                      hoverColor: OnepieceColors.liteFancyBlue,
+                      title: Row(
+                        children: [Text(fruit.name!)],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+          ElevatedButton(
+              onPressed: selectedFruitId == null
+                  ? null
+                  : () {
+                setState(() {
+                  _eatFruit();
+                });
+              },
+              child: const Text("eat"))
+        ],
+      );
+    });
   }
 
+  Widget _getFruitList() {
+    return Container();
+  }
   Widget _getBattle(BuildContext context) {
     return Column();
   }
