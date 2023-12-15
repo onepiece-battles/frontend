@@ -174,260 +174,265 @@ class _CharacterDetailState extends State<CharacterDetail> {
   }
 
   Widget _getBasicInfo(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Text(
-                AppLocalizations.of(context)!.basicInfo,
-                style: OnepieceFonts.headerStyle,
-              ),
-              const SizedBox(
-                width: 15,
-              ),
-              IconButton(
-                splashRadius: 0.1,
-                onPressed: () {
-                  setState(() {
-                    basicInfoEditable = !basicInfoEditable;
-                  });
-                },
-                icon: basicInfoEditable
-                    ? const Icon(
-                        Icons.check,
-                        size: 25,
-                        color: OnepieceColors.fancyBlue,
-                      )
-                    : const Icon(
-                        Icons.edit,
-                        size: 25,
-                        color: OnepieceColors.fancyBlue,
+    return StatefulBuilder(builder: (context, basicState) {
+      return Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Text(
+                  AppLocalizations.of(context)!.basicInfo,
+                  style: OnepieceFonts.headerStyle,
+                ),
+                const SizedBox(
+                  width: 15,
+                ),
+                IconButton(
+                  splashRadius: 0.1,
+                  onPressed: () {
+                    basicState(() {
+                      basicInfoEditable = !basicInfoEditable;
+                    });
+                  },
+                  icon: basicInfoEditable
+                      ? const Icon(
+                          Icons.check,
+                          size: 25,
+                          color: OnepieceColors.fancyBlue,
+                        )
+                      : const Icon(
+                          Icons.edit,
+                          size: 25,
+                          color: OnepieceColors.fancyBlue,
+                        ),
+                )
+              ],
+            ),
+          ),
+          Form(
+            key: _basicFormKey,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Container(
+                    width: 270,
+                    height: 270,
+                    decoration: BoxDecoration(
+                      borderRadius:
+                          const BorderRadius.all(Radius.circular(5.0)),
+                      border: Border.all(
+                          color: OnepieceColors.liteFancyBlue,
+                          width: 5,
+                          style: BorderStyle.solid),
+                    ),
+                    child: FittedBox(
+                      fit: BoxFit.fill,
+                      child: character.profileImage == null
+                          ? Container()
+                          : Image.memory(
+                              Base64Helper.decode(character.profileImage!)),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    children: [
+                      _getStringFormField(
+                        context,
+                        basicInfoEditable,
+                        characterNameController,
+                        AppLocalizations.of(context)!.name,
+                        20,
                       ),
-              )
-            ],
-          ),
-        ),
-        Form(
-          key: _basicFormKey,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  width: 270,
-                  height: 270,
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.all(Radius.circular(5.0)),
-                    border: Border.all(
-                        color: OnepieceColors.liteFancyBlue,
-                        width: 5,
-                        style: BorderStyle.solid),
-                  ),
-                  child: FittedBox(
-                    fit: BoxFit.fill,
-                    child: character.profileImage == null
-                        ? Container()
-                        : Image.memory(
-                            Base64Helper.decode(character.profileImage!)),
+                      _getStringFormField(
+                        context,
+                        basicInfoEditable,
+                        characterBirthPlace,
+                        AppLocalizations.of(context)!.birthPlace,
+                        20,
+                      ),
+                      _getStringFormField(
+                        context,
+                        basicInfoEditable,
+                        characterDateOfBirth,
+                        AppLocalizations.of(context)!.birthDay,
+                        20,
+                      ),
+                    ],
                   ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  children: [
-                    _getStringFormField(
-                      context,
-                      basicInfoEditable,
-                      characterNameController,
-                      AppLocalizations.of(context)!.name,
-                      20,
-                    ),
-                    _getStringFormField(
-                      context,
-                      basicInfoEditable,
-                      characterBirthPlace,
-                      AppLocalizations.of(context)!.birthPlace,
-                      20,
-                    ),
-                    _getStringFormField(
-                      context,
-                      basicInfoEditable,
-                      characterDateOfBirth,
-                      AppLocalizations.of(context)!.birthDay,
-                      20,
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  children: [
-                    _getDigitFormField(
-                      context,
-                      basicInfoEditable,
-                      characterBounty,
-                      AppLocalizations.of(context)!.bounty,
-                      10,
-                      100000000000,
-                    ),
-                    _getDigitFormField(
-                      context,
-                      basicInfoEditable,
-                      characterAge,
-                      AppLocalizations.of(context)!.age,
-                      0,
-                      100000,
-                    ),
-                    _getDigitFormField(
-                      context,
-                      basicInfoEditable,
-                      characterHeight,
-                      AppLocalizations.of(context)!.height,
-                      1,
-                      100000,
-                    ),
-                  ],
-                ),
-              )
-            ],
-          ),
-        )
-      ],
-    );
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    children: [
+                      _getDigitFormField(
+                        context,
+                        basicInfoEditable,
+                        characterBounty,
+                        AppLocalizations.of(context)!.bounty,
+                        10,
+                        100000000000,
+                      ),
+                      _getDigitFormField(
+                        context,
+                        basicInfoEditable,
+                        characterAge,
+                        AppLocalizations.of(context)!.age,
+                        0,
+                        100000,
+                      ),
+                      _getDigitFormField(
+                        context,
+                        basicInfoEditable,
+                        characterHeight,
+                        AppLocalizations.of(context)!.height,
+                        1,
+                        100000,
+                      ),
+                    ],
+                  ),
+                )
+              ],
+            ),
+          )
+        ],
+      );
+    });
   }
 
 // show character combat information (editable if permitted)
   Widget _getCombatInfo(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Text(
-                AppLocalizations.of(context)!.battleInfo,
-                style: OnepieceFonts.headerStyle,
-              ),
-              const SizedBox(
-                width: 15,
-              ),
-              IconButton(
-                splashRadius: 0.1,
-                onPressed: () {
-                  setState(() {
-                    combatInfoEditable = !combatInfoEditable;
-                  });
-                },
-                icon: basicInfoEditable
-                    ? const Icon(
-                        Icons.check,
-                        size: 25,
-                        color: OnepieceColors.fancyBlue,
-                      )
-                    : const Icon(
-                        Icons.edit,
-                        size: 25,
-                        color: OnepieceColors.fancyBlue,
+    return StatefulBuilder(builder: (context, combatState) {
+      return Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Text(
+                  AppLocalizations.of(context)!.battleInfo,
+                  style: OnepieceFonts.headerStyle,
+                ),
+                const SizedBox(
+                  width: 15,
+                ),
+                IconButton(
+                  splashRadius: 0.1,
+                  onPressed: () {
+                    combatState(() {
+                      combatInfoEditable = !combatInfoEditable;
+                    });
+                  },
+                  icon: combatInfoEditable
+                      ? const Icon(
+                          Icons.check,
+                          size: 25,
+                          color: OnepieceColors.fancyBlue,
+                        )
+                      : const Icon(
+                          Icons.edit,
+                          size: 25,
+                          color: OnepieceColors.fancyBlue,
+                        ),
+                )
+              ],
+            ),
+          ),
+          Form(
+            key: _digitFormKey,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    children: [
+                      _getDigitFormField(
+                        context,
+                        combatInfoEditable,
+                        characterAttackController,
+                        AppLocalizations.of(context)!.characterAttack,
+                        10,
+                        1000,
                       ),
-              )
-            ],
-          ),
-        ),
-        Form(
-          key: _digitFormKey,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  children: [
-                    _getDigitFormField(
-                      context,
-                      basicInfoEditable,
-                      characterAttackController,
-                      AppLocalizations.of(context)!.characterAttack,
-                      10,
-                      1000,
-                    ),
-                    _getDigitFormField(
-                      context,
-                      basicInfoEditable,
-                      characterDefenseController,
-                      AppLocalizations.of(context)!.characterDefense,
-                      10,
-                      1000,
-                    ),
-                    _getDigitFormField(
-                      context,
-                      basicInfoEditable,
-                      characterBloodController,
-                      AppLocalizations.of(context)!.characterBlood,
-                      100,
-                      10000,
-                    ),
-                    _getDigitFormField(
-                      context,
-                      basicInfoEditable,
-                      characterSpeedController,
-                      AppLocalizations.of(context)!.characterSpeed,
-                      10,
-                      200,
-                    ),
-                  ],
+                      _getDigitFormField(
+                        context,
+                        combatInfoEditable,
+                        characterDefenseController,
+                        AppLocalizations.of(context)!.characterDefense,
+                        10,
+                        1000,
+                      ),
+                      _getDigitFormField(
+                        context,
+                        combatInfoEditable,
+                        characterBloodController,
+                        AppLocalizations.of(context)!.characterBlood,
+                        100,
+                        10000,
+                      ),
+                      _getDigitFormField(
+                        context,
+                        combatInfoEditable,
+                        characterSpeedController,
+                        AppLocalizations.of(context)!.characterSpeed,
+                        10,
+                        200,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  children: [
-                    _getDigitFormField(
-                      context,
-                      basicInfoEditable,
-                      characterIntelligenceController,
-                      AppLocalizations.of(context)!.characterIntelligence,
-                      70,
-                      260,
-                    ),
-                    _getDigitFormField(
-                      context,
-                      basicInfoEditable,
-                      characterEnergyController,
-                      AppLocalizations.of(context)!.characterEnergy,
-                      10,
-                      50,
-                    ),
-                    _getDigitFormField(
-                      context,
-                      basicInfoEditable,
-                      characterGroupGainController,
-                      AppLocalizations.of(context)!.groupGain,
-                      1,
-                      5,
-                    ),
-                    _getDigitFormField(
-                      context,
-                      basicInfoEditable,
-                      characterFruitLimitController,
-                      AppLocalizations.of(context)!.fruitLimit,
-                      1,
-                      2,
-                    ),
-                  ],
-                ),
-              )
-            ],
-          ),
-        )
-      ],
-    );
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    children: [
+                      _getDigitFormField(
+                        context,
+                        combatInfoEditable,
+                        characterIntelligenceController,
+                        AppLocalizations.of(context)!.characterIntelligence,
+                        70,
+                        260,
+                      ),
+                      _getDigitFormField(
+                        context,
+                        combatInfoEditable,
+                        characterEnergyController,
+                        AppLocalizations.of(context)!.characterEnergy,
+                        10,
+                        50,
+                      ),
+                      _getDigitFormField(
+                        context,
+                        combatInfoEditable,
+                        characterGroupGainController,
+                        AppLocalizations.of(context)!.groupGain,
+                        1,
+                        5,
+                      ),
+                      _getDigitFormField(
+                        context,
+                        combatInfoEditable,
+                        characterFruitLimitController,
+                        AppLocalizations.of(context)!.fruitLimit,
+                        1,
+                        2,
+                      ),
+                    ],
+                  ),
+                )
+              ],
+            ),
+          )
+        ],
+      );
+    });
   }
 
   Widget _getEatFruit(BuildContext context) {
