@@ -191,14 +191,13 @@ class _FruitViewState extends State<FruitView> {
                 ),
               ),
               _getFruitTypeFilter(context),
-
             ],
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(40,0, 20,0),
+                padding: const EdgeInsets.fromLTRB(40, 0, 20, 0),
                 child: SizedBox(
                   height: 35,
                   child: Row(
@@ -227,15 +226,15 @@ class _FruitViewState extends State<FruitView> {
                         splashRadius: 1,
                         icon: onlyShowSystemResource
                             ? const Icon(
-                          Icons.check_box,
-                          color: OnepieceColors.fancyBlue,
-                          size: 20,
-                        )
+                                Icons.check_box,
+                                color: OnepieceColors.fancyBlue,
+                                size: 20,
+                              )
                             : const Icon(
-                          Icons.check_box_outline_blank,
-                          color: OnepieceColors.fancyBlue,
-                          size: 20,
-                        ),
+                                Icons.check_box_outline_blank,
+                                color: OnepieceColors.fancyBlue,
+                                size: 20,
+                              ),
                       ),
                     ],
                   ),
@@ -269,15 +268,15 @@ class _FruitViewState extends State<FruitView> {
                       splashRadius: 1,
                       icon: donNotShowSystemResource
                           ? const Icon(
-                        Icons.check_box,
-                        color: OnepieceColors.fancyBlue,
-                        size: 20,
-                      )
+                              Icons.check_box,
+                              color: OnepieceColors.fancyBlue,
+                              size: 20,
+                            )
                           : const Icon(
-                        Icons.check_box_outline_blank,
-                        color: OnepieceColors.fancyBlue,
-                        size: 20,
-                      ),
+                              Icons.check_box_outline_blank,
+                              color: OnepieceColors.fancyBlue,
+                              size: 20,
+                            ),
                     ),
                   ],
                 ),
@@ -297,7 +296,6 @@ class _FruitViewState extends State<FruitView> {
               ),
             ],
           ),
-
         ],
       ),
     );
@@ -561,7 +559,8 @@ class _FruitViewState extends State<FruitView> {
               _getDataCell(entry.value.groupGainStrengthen.toString()),
               _getDataCell(entry.value.speedStrengthen.toString()),
               _getDataCell(fruitTypeToDisplayValue[entry.value.fruitType]!),
-              _getDataCell(booleanToDisplayName[entry.value.roleName==UserRole.NIKA]!),
+              _getDataCell(
+                  booleanToDisplayName[entry.value.roleName == UserRole.NIKA]!),
             ],
           ),
         )

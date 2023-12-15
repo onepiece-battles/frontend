@@ -113,12 +113,11 @@ class _BattleViewState extends State<BattleView> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 SizedBox(
-                  width: 1200,
-                  height: 35,
+                  width: 1500,
                   child: _getControlRow(context),
                 ),
                 SizedBox(
-                  width: 1200,
+                  width: 1500,
                   child: FittedBox(
                     fit: BoxFit.fitWidth,
                     child: _getBattlesTable(context),
@@ -128,7 +127,7 @@ class _BattleViewState extends State<BattleView> {
                   height: 15,
                 ),
                 SizedBox(
-                  width: 1200,
+                  width: 1500,
                   child: Center(child: _getPageFoot()),
                 )
               ],
@@ -150,80 +149,43 @@ class _BattleViewState extends State<BattleView> {
   }
 
   Widget _getControlRow(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            _getBattleTypeFilter(context),
-            _getBattleStatusFilter(context),
-            Row(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(40,0, 20,0),
-                  child: SizedBox(
-                    height: 35,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          AppLocalizations.of(context)!.systemResource,
-                          style: OnepieceFonts.smallContentStyle,
-                        ),
-                        IconButton(
-                          onPressed: () {
-                            setState(() {
-                              onlyShowSystemResource = !onlyShowSystemResource;
-                              if (donNotShowSystemResource) {
-                                donNotShowSystemResource = false;
-                              }
-                              if (onlyShowSystemResource) {
-                                battleFilter.onlySystem = true;
-                              } else {
-                                battleFilter.onlySystem = null;
-                              }
-                              _search();
-                            });
-                          },
-                          splashRadius: 1,
-                          icon: onlyShowSystemResource
-                              ? const Icon(
-                            Icons.check_box,
-                            color: OnepieceColors.fancyBlue,
-                            size: 20,
-                          )
-                              : const Icon(
-                            Icons.check_box_outline_blank,
-                            color: OnepieceColors.fancyBlue,
-                            size: 20,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                SizedBox(
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              _getBattleTypeFilter(context),
+              _getBattleStatusFilter(context),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(40, 0, 20, 0),
+                child: SizedBox(
                   height: 35,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
-                        AppLocalizations.of(context)!.noSystemResource,
+                        AppLocalizations.of(context)!.systemResource,
                         style: OnepieceFonts.smallContentStyle,
                       ),
                       IconButton(
                         onPressed: () {
                           setState(() {
-                            donNotShowSystemResource = !donNotShowSystemResource;
-                            if (onlyShowSystemResource) {
-                              onlyShowSystemResource = false;
-                            }
+                            onlyShowSystemResource = !onlyShowSystemResource;
                             if (donNotShowSystemResource) {
-                              battleFilter.onlySystem = false;
+                              donNotShowSystemResource = false;
+                            }
+                            if (onlyShowSystemResource) {
+                              battleFilter.onlySystem = true;
                             } else {
                               battleFilter.onlySystem = null;
                             }
@@ -231,36 +193,80 @@ class _BattleViewState extends State<BattleView> {
                           });
                         },
                         splashRadius: 1,
-                        icon: donNotShowSystemResource
+                        icon: onlyShowSystemResource
                             ? const Icon(
-                          Icons.check_box,
-                          color: OnepieceColors.fancyBlue,
-                          size: 20,
-                        )
+                                Icons.check_box,
+                                color: OnepieceColors.fancyBlue,
+                                size: 20,
+                              )
                             : const Icon(
-                          Icons.check_box_outline_blank,
-                          color: OnepieceColors.fancyBlue,
-                          size: 20,
-                        ),
+                                Icons.check_box_outline_blank,
+                                color: OnepieceColors.fancyBlue,
+                                size: 20,
+                              ),
                       ),
                     ],
                   ),
                 ),
-              ],
-            ),
-          ],
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(0, 0, 0, 6),
-          child: ElevatedButton(
-            onPressed: () {
-              context.goNamed("createBattle");
-            },
-            style: OnepieceButtonStyle.getDefaultStyle(),
-            child: Text(AppLocalizations.of(context)!.createBattle),
+              ),
+              SizedBox(
+                height: 35,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      AppLocalizations.of(context)!.noSystemResource,
+                      style: OnepieceFonts.smallContentStyle,
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        setState(() {
+                          donNotShowSystemResource = !donNotShowSystemResource;
+                          if (onlyShowSystemResource) {
+                            onlyShowSystemResource = false;
+                          }
+                          if (donNotShowSystemResource) {
+                            battleFilter.onlySystem = false;
+                          } else {
+                            battleFilter.onlySystem = null;
+                          }
+                          _search();
+                        });
+                      },
+                      splashRadius: 1,
+                      icon: donNotShowSystemResource
+                          ? const Icon(
+                              Icons.check_box,
+                              color: OnepieceColors.fancyBlue,
+                              size: 20,
+                            )
+                          : const Icon(
+                              Icons.check_box_outline_blank,
+                              color: OnepieceColors.fancyBlue,
+                              size: 20,
+                            ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                height: 35,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 10),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      context.goNamed("createBattle");
+                    },
+                    style: OnepieceButtonStyle.getDefaultStyle(),
+                    child: Text(AppLocalizations.of(context)!.createBattle),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -270,7 +276,7 @@ class _BattleViewState extends State<BattleView> {
       BattleType.group: AppLocalizations.of(context)!.groupBattle,
     };
     return Padding(
-      padding: const EdgeInsets.fromLTRB(0, 0, 6, 6),
+      padding: const EdgeInsets.only(right: 6),
       child: DropdownButtonHideUnderline(
         child: DropdownButton2(
           isExpanded: true,
@@ -373,7 +379,7 @@ class _BattleViewState extends State<BattleView> {
       BattleStatus.failed: AppLocalizations.of(context)!.battleStatusFailed,
     };
     return Padding(
-      padding: const EdgeInsets.fromLTRB(0, 0, 6, 6),
+      padding: const EdgeInsets.only(right: 6),
       child: DropdownButtonHideUnderline(
         child: DropdownButton2(
           isExpanded: true,
@@ -552,12 +558,11 @@ class _BattleViewState extends State<BattleView> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Text(
-                      displayText,
-                      style:
-                          sortableEnumToSortOrderMap[sortableFieldsEnum] == null
-                              ? OnepieceFonts.tableHeaderStyle
-                              : OnepieceFonts.selectedTableHeaderStyle,
-                    ),
+                displayText,
+                style: sortableEnumToSortOrderMap[sortableFieldsEnum] == null
+                    ? OnepieceFonts.tableHeaderStyle
+                    : OnepieceFonts.selectedTableHeaderStyle,
+              ),
               if (sortableFieldsEnum != null)
                 Padding(
                   padding: const EdgeInsets.all(5.0),
@@ -613,11 +618,12 @@ class _BattleViewState extends State<BattleView> {
                   .toString()),
               _getDataCell(battleStatusToDisplayName[entry.value.status]!),
               _getDataCell(entry.value.winnerId == null
-                  ? "-"
+                  ? "---"
                   : (entry.value.winnerId == entry.value.starterId
                       ? entry.value.starterName!
                       : entry.value.receiverName!)),
-              _getDataCell(booleanToDisplayName[entry.value.roleName==UserRole.NIKA]!),
+              _getDataCell(
+                  booleanToDisplayName[entry.value.roleName == UserRole.NIKA]!),
             ],
           ),
         )

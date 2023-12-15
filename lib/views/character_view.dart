@@ -383,13 +383,12 @@ class _CharacterViewState extends State<CharacterView> {
               }).toList(),
             ),
           ),
-
         ],
       ),
       Row(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(40, 0, 20, 0),
+            padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
             child: SizedBox(
               height: 35,
               child: Row(
@@ -418,15 +417,15 @@ class _CharacterViewState extends State<CharacterView> {
                     splashRadius: 1,
                     icon: onlyShowSystemResource
                         ? const Icon(
-                      Icons.check_box,
-                      color: OnepieceColors.fancyBlue,
-                      size: 20,
-                    )
+                            Icons.check_box,
+                            color: OnepieceColors.fancyBlue,
+                            size: 20,
+                          )
                         : const Icon(
-                      Icons.check_box_outline_blank,
-                      color: OnepieceColors.fancyBlue,
-                      size: 20,
-                    ),
+                            Icons.check_box_outline_blank,
+                            color: OnepieceColors.fancyBlue,
+                            size: 20,
+                          ),
                   ),
                 ],
               ),
@@ -447,8 +446,7 @@ class _CharacterViewState extends State<CharacterView> {
                   IconButton(
                     onPressed: () {
                       setState(() {
-                        donNotShowSystemResource =
-                        !donNotShowSystemResource;
+                        donNotShowSystemResource = !donNotShowSystemResource;
                         if (onlyShowSystemResource) {
                           onlyShowSystemResource = false;
                         }
@@ -463,15 +461,15 @@ class _CharacterViewState extends State<CharacterView> {
                     splashRadius: 1,
                     icon: donNotShowSystemResource
                         ? const Icon(
-                      Icons.check_box,
-                      color: OnepieceColors.fancyBlue,
-                      size: 20,
-                    )
+                            Icons.check_box,
+                            color: OnepieceColors.fancyBlue,
+                            size: 20,
+                          )
                         : const Icon(
-                      Icons.check_box_outline_blank,
-                      color: OnepieceColors.fancyBlue,
-                      size: 20,
-                    ),
+                            Icons.check_box_outline_blank,
+                            color: OnepieceColors.fancyBlue,
+                            size: 20,
+                          ),
                   ),
                 ],
               ),
@@ -502,15 +500,15 @@ class _CharacterViewState extends State<CharacterView> {
                   splashRadius: 1,
                   icon: fruitOwnersOnly
                       ? const Icon(
-                    Icons.check_box,
-                    color: OnepieceColors.fancyBlue,
-                    size: 20,
-                  )
+                          Icons.check_box,
+                          color: OnepieceColors.fancyBlue,
+                          size: 20,
+                        )
                       : const Icon(
-                    Icons.check_box_outline_blank,
-                    color: OnepieceColors.fancyBlue,
-                    size: 20,
-                  ),
+                          Icons.check_box_outline_blank,
+                          color: OnepieceColors.fancyBlue,
+                          size: 20,
+                        ),
                 ),
               ],
             ),
@@ -529,7 +527,6 @@ class _CharacterViewState extends State<CharacterView> {
           )
         ],
       ),
-
     ]);
   }
 
