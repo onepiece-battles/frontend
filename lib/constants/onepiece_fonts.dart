@@ -14,11 +14,15 @@ class OnepieceFonts {
   static const double smallContentFontSize = 16;
   static const Color contentFontColor = Colors.black54;
   static const FontWeight sideMenuFontWeight = FontWeight.w500;
-  static const int sideMenuFontSize = 10;
+  static const double tagFont = 12;
 
   static const TextStyle contentStyle = TextStyle(
       color: OnepieceFonts.contentFontColor,
       fontSize: OnepieceFonts.contentFontSize);
+  static const TextStyle tagStyle = TextStyle(
+      color: Colors.white,
+      fontWeight: FontWeight.w400,
+      fontSize: OnepieceFonts.tagFont);
   static const TextStyle hintFont = TextStyle(
       color: OnepieceColors.menuIconColor,
       fontSize: OnepieceFonts.contentFontSize);

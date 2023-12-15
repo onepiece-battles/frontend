@@ -17,4 +17,14 @@ class OnepieceColors {
   static const menuBackgroundColor = Color.fromARGB(250, 229, 238, 244);
   static const menuHoverColor = Color.fromARGB(250, 209, 209, 213);
   static const menuSelectedTileColor = Color.fromARGB(250, 209, 209, 213);
+
+  // tag colors
+
+  static const fruitLogia = Color.fromARGB(225, 0, 255, 0);
+  static const fruitParamecia = Colors.blue;
+  static const fruitZoan = Color.fromARGB(255, 255, 0, 0);
+  static const fruitAncientZoan = Color.fromARGB(255, 255, 0, 255);
+  static const fruitMythicalZoan = fancyBlue;
+  static const fruitArtificialZoan = Colors.yellow;
+
 }
