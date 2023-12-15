@@ -191,107 +191,113 @@ class _FruitViewState extends State<FruitView> {
                 ),
               ),
               _getFruitTypeFilter(context),
-              Row(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(40,0, 20,0),
-                    child: SizedBox(
-                      height: 35,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            AppLocalizations.of(context)!.systemResource,
-                            style: OnepieceFonts.smallContentStyle,
-                          ),
-                          IconButton(
-                            onPressed: () {
-                              setState(() {
-                                onlyShowSystemResource = !onlyShowSystemResource;
-                                if (donNotShowSystemResource) {
-                                  donNotShowSystemResource = false;
-                                }
-                                if (onlyShowSystemResource) {
-                                  fruitFilter.onlySystem = true;
-                                } else {
-                                  fruitFilter.onlySystem = null;
-                                }
-                                _search();
-                              });
-                            },
-                            splashRadius: 1,
-                            icon: onlyShowSystemResource
-                                ? const Icon(
-                              Icons.check_box,
-                              color: OnepieceColors.fancyBlue,
-                              size: 20,
-                            )
-                                : const Icon(
-                              Icons.check_box_outline_blank,
-                              color: OnepieceColors.fancyBlue,
-                              size: 20,
-                            ),
-                          ),
-                        ],
+
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(40,0, 20,0),
+                child: SizedBox(
+                  height: 35,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        AppLocalizations.of(context)!.systemResource,
+                        style: OnepieceFonts.smallContentStyle,
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          setState(() {
+                            onlyShowSystemResource = !onlyShowSystemResource;
+                            if (donNotShowSystemResource) {
+                              donNotShowSystemResource = false;
+                            }
+                            if (onlyShowSystemResource) {
+                              fruitFilter.onlySystem = true;
+                            } else {
+                              fruitFilter.onlySystem = null;
+                            }
+                            _search();
+                          });
+                        },
+                        splashRadius: 1,
+                        icon: onlyShowSystemResource
+                            ? const Icon(
+                          Icons.check_box,
+                          color: OnepieceColors.fancyBlue,
+                          size: 20,
+                        )
+                            : const Icon(
+                          Icons.check_box_outline_blank,
+                          color: OnepieceColors.fancyBlue,
+                          size: 20,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(
+                height: 35,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      AppLocalizations.of(context)!.noSystemResource,
+                      style: OnepieceFonts.smallContentStyle,
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        setState(() {
+                          donNotShowSystemResource = !donNotShowSystemResource;
+                          if (onlyShowSystemResource) {
+                            onlyShowSystemResource = false;
+                          }
+                          if (donNotShowSystemResource) {
+                            fruitFilter.onlySystem = false;
+                          } else {
+                            fruitFilter.onlySystem = null;
+                          }
+                          _search();
+                        });
+                      },
+                      splashRadius: 1,
+                      icon: donNotShowSystemResource
+                          ? const Icon(
+                        Icons.check_box,
+                        color: OnepieceColors.fancyBlue,
+                        size: 20,
+                      )
+                          : const Icon(
+                        Icons.check_box_outline_blank,
+                        color: OnepieceColors.fancyBlue,
+                        size: 20,
                       ),
                     ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                height: 35,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 10.0),
+                  child: ElevatedButton(
+                    style: OnepieceButtonStyle.getDefaultStyle(),
+                    onPressed: () {
+                      context.goNamed("createFruit");
+                    },
+                    child: Text(AppLocalizations.of(context)!.createDevilFruit),
                   ),
-                  SizedBox(
-                    height: 35,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          AppLocalizations.of(context)!.noSystemResource,
-                          style: OnepieceFonts.smallContentStyle,
-                        ),
-                        IconButton(
-                          onPressed: () {
-                            setState(() {
-                              donNotShowSystemResource = !donNotShowSystemResource;
-                              if (onlyShowSystemResource) {
-                                onlyShowSystemResource = false;
-                              }
-                              if (donNotShowSystemResource) {
-                                fruitFilter.onlySystem = false;
-                              } else {
-                                fruitFilter.onlySystem = null;
-                              }
-                              _search();
-                            });
-                          },
-                          splashRadius: 1,
-                          icon: donNotShowSystemResource
-                              ? const Icon(
-                            Icons.check_box,
-                            color: OnepieceColors.fancyBlue,
-                            size: 20,
-                          )
-                              : const Icon(
-                            Icons.check_box_outline_blank,
-                            color: OnepieceColors.fancyBlue,
-                            size: 20,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                ),
               ),
             ],
           ),
-          SizedBox(
-            height: 35,
-            child: ElevatedButton(
-              style: OnepieceButtonStyle.getDefaultStyle(),
-              onPressed: () {
-                context.goNamed("createFruit");
-              },
-              child: Text(AppLocalizations.of(context)!.createDevilFruit),
-            ),
-          ),
+
         ],
       ),
     );

@@ -383,148 +383,153 @@ class _CharacterViewState extends State<CharacterView> {
               }).toList(),
             ),
           ),
-          Row(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(40, 0, 20, 0),
-                child: SizedBox(
-                  height: 35,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        AppLocalizations.of(context)!.systemResource,
-                        style: OnepieceFonts.smallContentStyle,
-                      ),
-                      IconButton(
-                        onPressed: () {
-                          setState(() {
-                            onlyShowSystemResource = !onlyShowSystemResource;
-                            if (donNotShowSystemResource) {
-                              donNotShowSystemResource = false;
-                            }
-                            if (onlyShowSystemResource) {
-                              characterFilter.onlySystem = true;
-                            } else {
-                              characterFilter.onlySystem = null;
-                            }
-                            _search();
-                          });
-                        },
-                        splashRadius: 1,
-                        icon: onlyShowSystemResource
-                            ? const Icon(
-                                Icons.check_box,
-                                color: OnepieceColors.fancyBlue,
-                                size: 20,
-                              )
-                            : const Icon(
-                                Icons.check_box_outline_blank,
-                                color: OnepieceColors.fancyBlue,
-                                size: 20,
-                              ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
-                child: SizedBox(
-                  height: 35,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        AppLocalizations.of(context)!.noSystemResource,
-                        style: OnepieceFonts.smallContentStyle,
-                      ),
-                      IconButton(
-                        onPressed: () {
-                          setState(() {
-                            donNotShowSystemResource =
-                                !donNotShowSystemResource;
-                            if (onlyShowSystemResource) {
-                              onlyShowSystemResource = false;
-                            }
-                            if (donNotShowSystemResource) {
-                              characterFilter.onlySystem = false;
-                            } else {
-                              characterFilter.onlySystem = null;
-                            }
-                            _search();
-                          });
-                        },
-                        splashRadius: 1,
-                        icon: donNotShowSystemResource
-                            ? const Icon(
-                                Icons.check_box,
-                                color: OnepieceColors.fancyBlue,
-                                size: 20,
-                              )
-                            : const Icon(
-                                Icons.check_box_outline_blank,
-                                color: OnepieceColors.fancyBlue,
-                                size: 20,
-                              ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(
-                height: 35,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      AppLocalizations.of(context)!.fruitOwner,
-                      style: OnepieceFonts.smallContentStyle,
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        setState(() {
-                          fruitOwnersOnly = !fruitOwnersOnly;
-                          if (fruitOwnersOnly) {
-                            characterFilter.hasFruit = true;
-                          } else {
-                            characterFilter.hasFruit = null;
-                          }
-                          _search();
-                        });
-                      },
-                      splashRadius: 1,
-                      icon: fruitOwnersOnly
-                          ? const Icon(
-                              Icons.check_box,
-                              color: OnepieceColors.fancyBlue,
-                              size: 20,
-                            )
-                          : const Icon(
-                              Icons.check_box_outline_blank,
-                              color: OnepieceColors.fancyBlue,
-                              size: 20,
-                            ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+
         ],
       ),
-      SizedBox(
-        height: 35,
-        child: ElevatedButton(
-            onPressed: () {
-              context.goNamed("createCharacter");
-            },
-            style: OnepieceButtonStyle.getDefaultStyle(),
-            child: Text(AppLocalizations.of(context)!.createCharacter)),
-      )
+      Row(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(40, 0, 20, 0),
+            child: SizedBox(
+              height: 35,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    AppLocalizations.of(context)!.systemResource,
+                    style: OnepieceFonts.smallContentStyle,
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        onlyShowSystemResource = !onlyShowSystemResource;
+                        if (donNotShowSystemResource) {
+                          donNotShowSystemResource = false;
+                        }
+                        if (onlyShowSystemResource) {
+                          characterFilter.onlySystem = true;
+                        } else {
+                          characterFilter.onlySystem = null;
+                        }
+                        _search();
+                      });
+                    },
+                    splashRadius: 1,
+                    icon: onlyShowSystemResource
+                        ? const Icon(
+                      Icons.check_box,
+                      color: OnepieceColors.fancyBlue,
+                      size: 20,
+                    )
+                        : const Icon(
+                      Icons.check_box_outline_blank,
+                      color: OnepieceColors.fancyBlue,
+                      size: 20,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
+            child: SizedBox(
+              height: 35,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    AppLocalizations.of(context)!.noSystemResource,
+                    style: OnepieceFonts.smallContentStyle,
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        donNotShowSystemResource =
+                        !donNotShowSystemResource;
+                        if (onlyShowSystemResource) {
+                          onlyShowSystemResource = false;
+                        }
+                        if (donNotShowSystemResource) {
+                          characterFilter.onlySystem = false;
+                        } else {
+                          characterFilter.onlySystem = null;
+                        }
+                        _search();
+                      });
+                    },
+                    splashRadius: 1,
+                    icon: donNotShowSystemResource
+                        ? const Icon(
+                      Icons.check_box,
+                      color: OnepieceColors.fancyBlue,
+                      size: 20,
+                    )
+                        : const Icon(
+                      Icons.check_box_outline_blank,
+                      color: OnepieceColors.fancyBlue,
+                      size: 20,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SizedBox(
+            height: 35,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  AppLocalizations.of(context)!.fruitOwner,
+                  style: OnepieceFonts.smallContentStyle,
+                ),
+                IconButton(
+                  onPressed: () {
+                    setState(() {
+                      fruitOwnersOnly = !fruitOwnersOnly;
+                      if (fruitOwnersOnly) {
+                        characterFilter.hasFruit = true;
+                      } else {
+                        characterFilter.hasFruit = null;
+                      }
+                      _search();
+                    });
+                  },
+                  splashRadius: 1,
+                  icon: fruitOwnersOnly
+                      ? const Icon(
+                    Icons.check_box,
+                    color: OnepieceColors.fancyBlue,
+                    size: 20,
+                  )
+                      : const Icon(
+                    Icons.check_box_outline_blank,
+                    color: OnepieceColors.fancyBlue,
+                    size: 20,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(
+            height: 35,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 10.0),
+              child: ElevatedButton(
+                  onPressed: () {
+                    context.goNamed("createCharacter");
+                  },
+                  style: OnepieceButtonStyle.getDefaultStyle(),
+                  child: Text(AppLocalizations.of(context)!.createCharacter)),
+            ),
+          )
+        ],
+      ),
+
     ]);
   }
 
