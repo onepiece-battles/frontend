@@ -30,7 +30,11 @@ class CreateCharacterView extends StatefulWidget {
 
 class _CreateCharacterViewState extends State<CreateCharacterView> {
   TextEditingController characterNameController =
-      TextEditingController(text: RandomStringGenerator.generateRandomName(8));
+    TextEditingController(
+          text: RandomStringGenerator.generateI18n(
+              RandomStringGenerator.generateRandomName(8),
+              RandomStringGenerator.generateRandomName(8))
+              .enUS);
   // battle data controller
   TextEditingController characterFruitLimitController = TextEditingController(
       text: RandomStringGenerator.generateRandomNumber(1, 2));
@@ -685,7 +689,9 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                         CreateCharacterRequest(
                       characterTypes: selectedCharacterTypes,
                       hakis: selectedHakis,
-                      name: characterNameController.text.trim(),
+                      name: RandomStringGenerator.generateI18n(
+                        RandomStringGenerator.generateRandomName(8),
+                        RandomStringGenerator.generateRandomName(8)),
                       maximumFruitCount: DataConverter.stringToInt(
                           characterFruitLimitController.text.trim()),
                       groupGain: DataConverter.stringToInt(

@@ -10,6 +10,7 @@ import '../constants/path_constants.dart';
 import '../repository/battle_dao.dart';
 import '../repository/character_dao.dart';
 import '../utils/base64_helper.dart';
+import '../utils/i18n_helper.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -235,7 +236,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                             : SizedBox(
                                 height: 30,
                                 child: Text(
-                                  starterSelectedItem!.name,
+                                    I18nHelper.getI18nByLocale2(starterSelectedItem!.name),
                                   style: OnepieceFonts.headerStyle,
                                 )),
                       ],
@@ -296,7 +297,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                             : SizedBox(
                                 height: 30,
                                 child: Text(
-                                  receiverSelectedItem!.name,
+                                    I18nHelper.getI18nByLocale2(receiverSelectedItem!.name),
                                   style: OnepieceFonts.headerStyle,
                                 )),
                       ],

@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:openapi/api.dart';
+
 class RandomStringGenerator{
   static String generateRandomString(int length) {
     var r = Random();
@@ -13,6 +15,10 @@ class RandomStringGenerator{
     final randomString = List.generate(length,
             (index) => availableChars[random.nextInt(availableChars.length)]).join();
     return randomString;
+  }
+
+  static I18nText generateI18n(String enString, String cnString) {
+    return I18nText(enUS: enString, zhCN: cnString);
   }
 
   static String generateRandomNumber(int min, int max) {

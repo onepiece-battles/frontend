@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
+import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../constants/onepiece_colors.dart';
@@ -22,7 +23,8 @@ class SearchPopup extends StatefulWidget {
 
 class _SearchPopupState extends State<SearchPopup> {
   TextEditingController searchBarController = TextEditingController();
-  List<CharacterListView> characters = <CharacterListView>[].toList(growable: true);
+  List<CharacterListView> characters =
+      <CharacterListView>[].toList(growable: true);
   CharacterFilter characterFilter = CharacterFilter();
   List<FruitListView> fruits = <FruitListView>[].toList(growable: true);
   FruitFilter fruitFilter = FruitFilter();
@@ -176,7 +178,9 @@ class _SearchPopupState extends State<SearchPopup> {
                     () {
                       context.goNamed('characterDetails',
                           extra: character.id,
-                          pathParameters: {'name': character.name});
+                          pathParameters: {
+                            'name': I18nHelper.getI18nByLocale2(character.name)
+                          });
                       Navigator.pop(context);
                     },
                   );
@@ -204,7 +208,7 @@ class _SearchPopupState extends State<SearchPopup> {
                         ),
                       ),
                     ),
-                    Text(character.name)
+                    Text(I18nHelper.getI18nByLocale2(character.name))
                   ],
                 ),
               ),
@@ -236,14 +240,16 @@ class _SearchPopupState extends State<SearchPopup> {
                     () {
                       context.goNamed('fruitDetails',
                           extra: fruit.id,
-                          pathParameters: {'name': fruit.name!});
+                          pathParameters: {
+                            'name': I18nHelper.getI18nByLocale2(fruit.name!)
+                          });
                       Navigator.pop(context);
                     },
                   );
                 },
                 hoverColor: OnepieceColors.liteFancyBlue,
                 title: Row(
-                  children: [Text(fruit.name!)],
+                  children: [Text(I18nHelper.getI18nByLocale2(fruit.name!))],
                 ),
               ),
             ),

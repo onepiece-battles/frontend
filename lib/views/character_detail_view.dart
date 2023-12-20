@@ -9,6 +9,7 @@ import 'package:openapi/api.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../repository/fruit_dao.dart';
 import '../utils/base64_helper.dart';
+import '../utils/i18n_helper.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -571,7 +572,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                             title: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(fruit.name!),
+                                Text(I18nHelper.getI18nByLocale2(fruit.name!)),
                                 Padding(
                                   padding: const EdgeInsets.only(right: 5),
                                   child: OnepieceTag.getFruitTag(
@@ -625,7 +626,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(fruit.name!),
+              Text(I18nHelper.getI18nByLocale2(fruit.name!)),
               Padding(
                 padding: const EdgeInsets.only(right: 5),
                 child: OnepieceTag.getFruitTag(

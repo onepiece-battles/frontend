@@ -2,6 +2,7 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
 import '../constants/button_style.dart';
 import '../constants/onepiece_colors.dart';
@@ -547,7 +548,7 @@ class _FruitViewState extends State<FruitView> {
             onSelectChanged: (value) {
               context.goNamed('fruitDetails',
                   extra: entry.value.id,
-                  pathParameters: {'name': entry.value.name!});
+                  pathParameters: {'name': I18nHelper.getI18nByLocale2(entry.value.name!)});
             },
             cells: [
               _getDataCell("${entry.key + 1}"),

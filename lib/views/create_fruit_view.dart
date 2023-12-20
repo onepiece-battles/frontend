@@ -23,8 +23,11 @@ class CreateFruitView extends StatefulWidget {
 }
 
 class _CreateFruitViewState extends State<CreateFruitView> {
-  TextEditingController fruitNameController =
-      TextEditingController(text: RandomStringGenerator.generateRandomName(8));
+  TextEditingController fruitNameController = TextEditingController(
+      text: RandomStringGenerator.generateI18n(
+              RandomStringGenerator.generateRandomName(8),
+              RandomStringGenerator.generateRandomName(8))
+          .toString());
   TextEditingController fruitAttackStrengthenController = TextEditingController(
       text: RandomStringGenerator.generateRandomNumber(1, 5));
   TextEditingController fruitDefenseStrengthenController =
@@ -310,7 +313,9 @@ class _CreateFruitViewState extends State<CreateFruitView> {
                 return;
               }
               CreateFruitRequest addFruitRequest = CreateFruitRequest(
-                name: fruitNameController.text.trim(),
+                name: RandomStringGenerator.generateI18n(
+                  RandomStringGenerator.generateRandomName(8),
+                  RandomStringGenerator.generateRandomName(8)),
                 fruitType: selectedFruitType,
                 attackStrengthen: DataConverter.stringToInt(
                     fruitAttackStrengthenController.text.trim()),
@@ -322,8 +327,8 @@ class _CreateFruitViewState extends State<CreateFruitView> {
                     fruitIntelligenceStrengthenController.text.trim()),
                 speedStrengthen: DataConverter.stringToInt(
                     fruitSpeedStrengthenController.text.trim()),
-                energyConsume:
-                    DataConverter.stringToInt(fruitEnergyConsumeController.text),
+                energyConsume: DataConverter.stringToInt(
+                    fruitEnergyConsumeController.text),
                 groupGainStrengthen: DataConverter.stringToInt(
                     fruitGroupGainStrengthenController.text.trim()),
               );
