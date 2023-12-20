@@ -11,6 +11,7 @@ import 'package:one_piece_battles_flutter/utils/base64_helper.dart';
 import 'package:one_piece_battles_flutter/utils/data_validator.dart';
 import 'package:openapi/api.dart';
 import '../constants/button_style.dart';
+import '../utils/i18n_helper.dart';
 import '../utils/image_helper.dart';
 
 GetIt getIt = GetIt.instance;
@@ -675,7 +676,7 @@ class _CharacterViewState extends State<CharacterView> {
             onSelectChanged: (value) {
               context.goNamed('characterDetails',
                   extra: character.id,
-                  pathParameters: {'name': character.name});
+                  pathParameters: {'name':  I18nHelper.getI18nByLocale2(character.name)});
             },
             cells: [
               DataCell(
