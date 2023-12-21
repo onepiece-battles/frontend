@@ -23,11 +23,10 @@ class CreateFruitView extends StatefulWidget {
 }
 
 class _CreateFruitViewState extends State<CreateFruitView> {
-  TextEditingController fruitNameController = TextEditingController(
-      text: RandomStringGenerator.generateI18n(
-              RandomStringGenerator.generateRandomName(8),
-              RandomStringGenerator.generateRandomName(8))
-          .toString());
+  TextEditingController fruitNameEnController =
+      TextEditingController(text: RandomStringGenerator.generateRandomName(8));
+  TextEditingController fruitNameChController =
+      TextEditingController(text: RandomStringGenerator.generateRandomChineseName(3));
   TextEditingController fruitAttackStrengthenController = TextEditingController(
       text: RandomStringGenerator.generateRandomNumber(1, 5));
   TextEditingController fruitDefenseStrengthenController =
@@ -47,7 +46,8 @@ class _CreateFruitViewState extends State<CreateFruitView> {
       text: RandomStringGenerator.generateRandomNumber(1, 10));
   List<TextEditingController> fruitControllerList() {
     return <TextEditingController>[
-      fruitNameController,
+      fruitNameEnController,
+      fruitNameChController,
       fruitAttackStrengthenController,
       fruitDefenseStrengthenController,
       fruitIntelligenceStrengthenController,
@@ -78,32 +78,62 @@ class _CreateFruitViewState extends State<CreateFruitView> {
                 style: OnepieceFonts.headerStyle,
               ),
             ),
-            SizedBox(
-              width: 300,
-              child: TextFormField(
-                controller: fruitNameController,
-                validator: (value) {
-                  if (value!.isWhiteSpace()) {
-                    return AppLocalizations.of(context)!.requiredField;
-                  }
-                  if (!DataValidator.validName(value)) {
-                    return AppLocalizations.of(context)!.invalidName;
-                  }
-                  return null;
-                },
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                maxLength: 10,
-                maxLengthEnforcement: MaxLengthEnforcement.enforced,
-                decoration: InputDecoration(
-                  labelText: AppLocalizations.of(context)!.fruitName,
-                  prefixIcon: const Icon(Icons.people),
-                ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 300,
+                    child: TextFormField(
+                      controller: fruitNameChController,
+                      validator: (value) {
+                        if (value!.isWhiteSpace()) {
+                          return AppLocalizations.of(context)!.requiredField;
+                        }
+                        if (!DataValidator.validName(value)) {
+                          return AppLocalizations.of(context)!.invalidName;
+                        }
+                        return null;
+                      },
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                      maxLength: 10,
+                      maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                      decoration: InputDecoration(
+                        labelText: AppLocalizations.of(context)!.fruitName,
+                        prefixIcon: const Icon(Icons.people),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 25,),
+                  SizedBox(
+                    width: 300,
+                    child: TextFormField(
+                      controller: fruitNameEnController,
+                      validator: (value) {
+                        if (value!.isWhiteSpace()) {
+                          return AppLocalizations.of(context)!.requiredField;
+                        }
+                        if (!DataValidator.validName(value)) {
+                          return AppLocalizations.of(context)!.invalidName;
+                        }
+                        return null;
+                      },
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                      maxLength: 10,
+                      maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                      decoration: InputDecoration(
+                        labelText: AppLocalizations.of(context)!.fruitName,
+                        prefixIcon: const Icon(Icons.people),
+                      ),
+                    ),
+                  )
+                ],
               ),
             ),
             Row(
               children: [
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
+                  padding: const EdgeInsets.fromLTRB(0, 0, 8, 10),
                   child: Text(
                     AppLocalizations.of(context)!.fruitType,
                     style: OnepieceFonts.tableHeaderStyle,
@@ -202,7 +232,7 @@ class _CreateFruitViewState extends State<CreateFruitView> {
       FruitType.paramecia: AppLocalizations.of(context)!.parameciaFruit,
     };
     return Padding(
-      padding: const EdgeInsets.fromLTRB(0, 0, 0, 2),
+      padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
       child: DropdownButtonHideUnderline(
         child: DropdownButton2(
           isExpanded: true,
@@ -314,8 +344,8 @@ class _CreateFruitViewState extends State<CreateFruitView> {
               }
               CreateFruitRequest addFruitRequest = CreateFruitRequest(
                 name: RandomStringGenerator.generateI18n(
-                  RandomStringGenerator.generateRandomName(8),
-                  RandomStringGenerator.generateRandomName(8)),
+                   fruitNameEnController.text,
+                    fruitNameChController.text),
                 fruitType: selectedFruitType,
                 attackStrengthen: DataConverter.stringToInt(
                     fruitAttackStrengthenController.text.trim()),

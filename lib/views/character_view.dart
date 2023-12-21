@@ -70,6 +70,12 @@ class _CharacterViewState extends State<CharacterView> {
   }
 
   void _search() {
+    var locale = getIt<Locale>();
+    if(locale.languageCode=="en") {
+      characterFilter.languageCode = LanguageCode.enUS;
+    } else {
+      characterFilter.languageCode = LanguageCode.zhCN;
+    }
     ListCharacterRequest listCharacterRequest = ListCharacterRequest(
         pageSize: pageSize,
         pageIndex: selectedPageIndex,
@@ -705,7 +711,7 @@ class _CharacterViewState extends State<CharacterView> {
               ),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: Text(character.name.toString()),
+                child: Text(I18nHelper.getI18nByLocale2(character.name)),
               )),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
