@@ -29,12 +29,11 @@ class CreateCharacterView extends StatefulWidget {
 }
 
 class _CreateCharacterViewState extends State<CreateCharacterView> {
-  TextEditingController characterNameController =
-    TextEditingController(
-          text: RandomStringGenerator.generateI18n(
-              RandomStringGenerator.generateRandomName(8),
-              RandomStringGenerator.generateRandomName(8))
-              .enUS);
+  TextEditingController characterNameEnController =
+      TextEditingController(text: RandomStringGenerator.generateRandomName(8));
+  TextEditingController characterNameCnController =
+      TextEditingController(text: RandomStringGenerator.generateRandomChineseName(3));
+
   // battle data controller
   TextEditingController characterFruitLimitController = TextEditingController(
       text: RandomStringGenerator.generateRandomNumber(1, 2));
@@ -67,7 +66,8 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
 
   List<TextEditingController> characterControllerListRequired() {
     return <TextEditingController>[
-      characterNameController,
+      characterNameEnController,
+      characterNameCnController,
       characterFruitLimitController,
       characterGroupGainController,
       characterAttackController,
@@ -82,7 +82,8 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
 
   List<TextEditingController> characterControllerListAll() {
     return <TextEditingController>[
-      characterNameController,
+      characterNameEnController,
+      characterNameCnController,
       characterFruitLimitController,
       characterGroupGainController,
       characterAttackController,
@@ -123,27 +124,56 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
               ),
             ),
             _getAvatar(context),
-            SizedBox(
-              width: 300,
-              child: TextFormField(
-                controller: characterNameController,
-                validator: (value) {
-                  if (value!.isWhiteSpace()) {
-                    return AppLocalizations.of(context)!.requiredField;
-                  }
-                  if (!DataValidator.validName(value)) {
-                    return AppLocalizations.of(context)!.invalidName;
-                  }
-                  return null;
-                },
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                maxLength: 10,
-                maxLengthEnforcement: MaxLengthEnforcement.enforced,
-                decoration: InputDecoration(
-                  labelText: AppLocalizations.of(context)!.characterName,
-                  prefixIcon: const Icon(Icons.people),
+            Row(
+              children: [
+                SizedBox(
+                  width: 280,
+                  child: TextFormField(
+                    controller: characterNameCnController,
+                    validator: (value) {
+                      if (value!.isWhiteSpace()) {
+                        return AppLocalizations.of(context)!.requiredField;
+                      }
+                      if (!DataValidator.validName(value)) {
+                        return AppLocalizations.of(context)!.invalidName;
+                      }
+                      return null;
+                    },
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    maxLength: 10,
+                    maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                    decoration: InputDecoration(
+                      labelText: AppLocalizations.of(context)!.characterName,
+                      prefixIcon: const Icon(Icons.people),
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(
+                  width: 25,
+                ),
+                if(getIt<User>().loginRole==UserRole.NIKA) SizedBox(
+                  width: 280,
+                  child: TextFormField(
+                    controller: characterNameEnController,
+                    validator: (value) {
+                      if (value!.isWhiteSpace()) {
+                        return AppLocalizations.of(context)!.requiredField;
+                      }
+                      if (!DataValidator.validName(value)) {
+                        return AppLocalizations.of(context)!.invalidName;
+                      }
+                      return null;
+                    },
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    maxLength: 10,
+                    maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                    decoration: InputDecoration(
+                      labelText: AppLocalizations.of(context)!.characterName,
+                      prefixIcon: const Icon(Icons.people),
+                    ),
+                  ),
+                ),
+              ],
             ),
             Row(
               children: [
@@ -690,8 +720,8 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                       characterTypes: selectedCharacterTypes,
                       hakis: selectedHakis,
                       name: RandomStringGenerator.generateI18n(
-                        RandomStringGenerator.generateRandomName(8),
-                        RandomStringGenerator.generateRandomName(8)),
+                          characterNameEnController.text,
+                          characterNameCnController.text),
                       maximumFruitCount: DataConverter.stringToInt(
                           characterFruitLimitController.text.trim()),
                       groupGain: DataConverter.stringToInt(

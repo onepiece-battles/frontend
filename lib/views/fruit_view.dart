@@ -552,7 +552,7 @@ class _FruitViewState extends State<FruitView> {
             },
             cells: [
               _getDataCell("${entry.key + 1}"),
-              _getDataCell(entry.value.name.toString()),
+              _getDataCell(I18nHelper.getI18nByLocale2(entry.value.name)),
               _getDataCell(entry.value.attackStrengthen.toString()),
               _getDataCell(entry.value.defenseStrengthen.toString()),
               _getDataCell(entry.value.bloodStrengthen.toString()),

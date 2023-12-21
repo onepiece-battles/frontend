@@ -17,6 +17,15 @@ class RandomStringGenerator{
     return randomString;
   }
 
+  static String generateRandomChineseName(int length) {
+    final random = Random();
+    const availableChars =
+        '发货就撒开返回克拉夫等级考试垃圾大量贷记卡浪费了开始了的激昂奋进斯拉夫看我发了';
+    final randomString = List.generate(length,
+            (index) => availableChars[random.nextInt(availableChars.length)]).join();
+    return randomString;
+  }
+
   static I18nText generateI18n(String enString, String cnString) {
     return I18nText(enUS: enString, zhCN: cnString);
   }
