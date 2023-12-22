@@ -35,5 +35,14 @@ class I18nHelper {
     return OnepieceLocale.zhCN;
   }
 
+  static LanguageCode getLanguageCode() {
+    var locale = getIt<Locale>();
+    if(locale.languageCode=="en") {
+      return LanguageCode.enUS;
+    } else {
+      return LanguageCode.zhCN;
+    }
+  }
+
 }
 //--dart-define=http_proxy=http://127.0.0.1:59527 --dart-define=https_proxy=https://127.0.0.1:59527

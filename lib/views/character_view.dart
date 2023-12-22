@@ -70,12 +70,7 @@ class _CharacterViewState extends State<CharacterView> {
   }
 
   void _search() {
-    var locale = getIt<Locale>();
-    if(locale.languageCode=="en") {
-      characterFilter.languageCode = LanguageCode.enUS;
-    } else {
-      characterFilter.languageCode = LanguageCode.zhCN;
-    }
+    characterFilter.languageCode = I18nHelper.getLanguageCode();
     ListCharacterRequest listCharacterRequest = ListCharacterRequest(
         pageSize: pageSize,
         pageIndex: selectedPageIndex,
