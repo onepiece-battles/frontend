@@ -105,7 +105,8 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                       width: 200,
                       height: 200,
                       decoration: BoxDecoration(
-                        borderRadius: const BorderRadius.all(Radius.circular(8)),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(8)),
                         border: starterSelectedItem.value == null
                             ? null
                             : Border.all(
@@ -234,13 +235,15 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                           borderRadius: BorderRadius.all(Radius.circular(5))),
                       child: ListTile(
                         onTap: () {
-                          if (starterSelectedId == character.id) {
-                            starterSelectedId = "";
-                            starterSelectedItem.value = null;
-                          } else {
-                            starterSelectedId = character.id;
-                            starterSelectedItem.value = character;
-                          }
+                          leftSearchState(() {
+                            if (starterSelectedId == character.id) {
+                              starterSelectedId = "";
+                              starterSelectedItem.value = null;
+                            } else {
+                              starterSelectedId = character.id;
+                              starterSelectedItem.value = character;
+                            }
+                          });
                         },
                         contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
                         shape: RoundedRectangleBorder(
@@ -249,6 +252,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                         selected: starterSelectedId == character.id,
                         hoverColor: OnepieceColors.fancyBlue,
                         selectedTileColor: OnepieceColors.fancyBlue,
+                        tileColor: Colors.grey,
                         title: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -465,21 +469,24 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                             borderRadius: BorderRadius.all(Radius.circular(5))),
                         child: ListTile(
                           onTap: () {
-                            if (receiverSelectedId == character.id) {
-                              receiverSelectedId = "";
-                              receiverSelectedItem.value = null;
-                            } else {
-                              receiverSelectedId = character.id;
-                              receiverSelectedItem.value = character;
-                            }
+                            rightSearchState(() {
+                              if (receiverSelectedId == character.id) {
+                                receiverSelectedId = "";
+                                receiverSelectedItem.value = null;
+                              } else {
+                                receiverSelectedId = character.id;
+                                receiverSelectedItem.value = character;
+                              }
+                            });
                           },
                           contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(5),
                           ),
                           selected: receiverSelectedId == character.id,
-                          hoverColor: OnepieceColors.liteFancyBlue,
-                          selectedTileColor: OnepieceColors.liteFancyBlue,
+                          hoverColor: OnepieceColors.fancyBlue,
+                          selectedTileColor: OnepieceColors.fancyBlue,
+                          tileColor: Colors.grey,
                           title: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -487,7 +494,8 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
                                   Padding(
-                                    padding: const EdgeInsets.all(3.0),
+                                    padding:
+                                        const EdgeInsets.fromLTRB(3, 3, 8, 3),
                                     child: Container(
                                       width: 50,
                                       height: 50,
