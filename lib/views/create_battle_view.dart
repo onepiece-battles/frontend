@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
@@ -13,6 +15,7 @@ import '../utils/base64_helper.dart';
 import '../utils/i18n_helper.dart';
 
 GetIt getIt = GetIt.instance;
+Timer? _timer;
 
 class CreateBattleView extends StatefulWidget {
   const CreateBattleView({super.key});
@@ -27,17 +30,16 @@ class _CreateBattleViewState extends State<CreateBattleView> {
   List<CharacterListView> receiverCharacters = [];
   String receiverSelectedId = "";
   final ScrollController _starterScrollController = ScrollController();
-  CharacterListView? starterSelectedItem;
+  final ScrollController _receiverScrollController = ScrollController();
+  ValueNotifier<CharacterListView?> starterSelectedItem = ValueNotifier(null);
+  ValueNotifier<CharacterListView?> receiverSelectedItem = ValueNotifier(null);
   TextEditingController starterTextController = TextEditingController();
   TextEditingController receiverTextController = TextEditingController();
-  final ScrollController _receiverScrollController = ScrollController();
-  CharacterListView? receiverSelectedItem;
   CharacterFilter starterCharacterFilter = CharacterFilter();
   CharacterFilter receiverCharacterFilter = CharacterFilter();
   // these two indexes are used when loading more data
   int starterSelectedPageIndex = 1;
   int receiverSelectedPageIndex = 1;
-  int pageSize = 5;
 
   bool starterIsLoading = false;
   bool receiverIsLoading = false;
@@ -47,88 +49,6 @@ class _CreateBattleViewState extends State<CreateBattleView> {
   @override
   void initState() {
     super.initState();
-    _searchStarter(true);
-    _searchReceiver(true);
-    _starterScrollController.addListener(() {
-      if (_starterScrollController.position.pixels ==
-          _starterScrollController.position.maxScrollExtent) {
-        _searchStarter(false);
-      }
-    });
-    _receiverScrollController.addListener(() {
-      if (_receiverScrollController.position.pixels ==
-          _receiverScrollController.position.maxScrollExtent) {
-        _searchReceiver(false);
-      }
-    });
-  }
-
-  void _searchStarter(bool isRefresh) {
-    if (isRefresh) {
-      starterSelectedPageIndex = 1;
-    } else {
-      if (starterToEnd) {
-        return;
-      }
-      starterSelectedPageIndex++;
-      starterIsLoading = true;
-      setState(() {});
-    }
-    ListCharacterRequest listCharacterRequest = ListCharacterRequest(
-        pageSize: pageSize,
-        pageIndex: starterSelectedPageIndex,
-        // do not need to sort in this case.
-        sortKeys: [],
-        characterFilter: starterCharacterFilter);
-    Future<ListCharacterResponse?> listCharacterResponse =
-        getIt<CharacterDao>().listCharacter(listCharacterRequest);
-    listCharacterResponse.then((value) {
-      setState(() {
-        starterToEnd =
-            (value!.totalSize! / pageSize).ceil() == starterSelectedPageIndex;
-        if (isRefresh) {
-          starterCharacters = value.characters;
-        } else {
-          starterCharacters = List.from(starterCharacters)
-            ..addAll(value.characters);
-        }
-        starterIsLoading = false;
-      });
-    });
-  }
-
-  void _searchReceiver(bool isRefresh) {
-    if (isRefresh) {
-      receiverSelectedPageIndex = 1;
-    } else {
-      if (receiverToEnd) {
-        return;
-      }
-      receiverSelectedPageIndex++;
-      receiverIsLoading = true;
-      setState(() {});
-    }
-    ListCharacterRequest listCharacterRequest = ListCharacterRequest(
-        pageSize: pageSize,
-        pageIndex: receiverSelectedPageIndex,
-        // do not need to sort in this case.
-        sortKeys: [],
-        characterFilter: receiverCharacterFilter);
-    Future<ListCharacterResponse?> listCharacterResponse =
-        getIt<CharacterDao>().listCharacter(listCharacterRequest);
-    listCharacterResponse.then((value) {
-      receiverToEnd =
-          (value!.totalSize! / pageSize).ceil() == receiverSelectedPageIndex;
-      setState(() {
-        if (isRefresh) {
-          receiverCharacters = value.characters;
-        } else {
-          receiverCharacters = List.from(receiverCharacters)
-            ..addAll(value.characters);
-        }
-        receiverIsLoading = false;
-      });
-    });
   }
 
   @override
@@ -138,223 +58,493 @@ class _CreateBattleViewState extends State<CreateBattleView> {
         child: Center(
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: SizedBox(
-                            width: 300,
-                            height: 60,
-                            child: TextFormField(
-                              controller: starterTextController,
-                              decoration: InputDecoration(
-                                label: Text(
-                                  AppLocalizations.of(context)!.characterName,
-                                  style: OnepieceFonts.hintFont,
-                                ),
-                                disabledBorder: const OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                        color: OnepieceColors.fancyGreen)),
-                                enabledBorder: const OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                        color: OnepieceColors.fancyGreen)),
-                                focusedBorder: const OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                        color: OnepieceColors.fancyGreen)),
-                                prefixIcon: const Icon(Icons.search),
-                              ),
-                              onChanged: (value) {
-                                starterCharacterFilter.name = value;
-                                _searchStarter(true);
-                              },
-                            ),
-                          ),
-                        ),
-                        Container(
-                          width: 300,
-                          height: 350,
-                          decoration: const BoxDecoration(
-                            color: OnepieceColors.fancyBlue,
-                            borderRadius: BorderRadius.all(Radius.circular(8)),
-                          ),
-                          child: getStarter(context),
-                        ),
-                      ],
-                    ),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            AppLocalizations.of(context)!.initiator,
-                            style: OnepieceFonts.tableHeaderStyle,
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(60, 10, 60, 10),
-                          child: Container(
-                            width: 200,
-                            height: 200,
-                            decoration: BoxDecoration(
-                              borderRadius:
-                                  const BorderRadius.all(Radius.circular(8)),
-                              border: starterSelectedItem == null
-                                  ? null
-                                  : Border.all(
-                                      color: OnepieceColors.fancyBlue,
-                                      width: 5,
-                                      style: BorderStyle.solid),
-                            ),
-                            child: FittedBox(
-                              fit: BoxFit.fill,
-                              child: starterSelectedItem == null
-                                  ? const Image(
-                                      image:
-                                          AssetImage(PathConstants.userImage))
-                                  : Image.memory(Base64Helper.decode(
-                                      starterSelectedItem!.profileImage!)),
-                            ),
-                          ),
-                        ),
-                        starterSelectedItem == null
-                            ? const SizedBox(
-                                height: 30,
-                                child: Text(
-                                  "?",
-                                  style: OnepieceFonts.headerStyle,
-                                ),
-                              )
-                            : SizedBox(
-                                height: 30,
-                                child: Text(
-                                    I18nHelper.getI18nByLocale2(starterSelectedItem!.name),
-                                  style: OnepieceFonts.headerStyle,
-                                )),
-                      ],
-                    ),
-                    const Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 300.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      getLeftPanel(context),
+                      const Padding(
+                        padding: EdgeInsets.all(30.0),
+                        child: Text(
                           "VS",
                           style: OnepieceFonts.fancyMax,
                         ),
-                      ],
-                    ),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            AppLocalizations.of(context)!.receiver,
-                            style: OnepieceFonts.tableHeaderStyle,
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(60, 10, 60, 10),
-                          child: Container(
-                            width: 200,
-                            height: 200,
-                            decoration: BoxDecoration(
-                              borderRadius:
-                                  const BorderRadius.all(Radius.circular(8)),
-                              border: receiverSelectedItem == null
-                                  ? null
-                                  : Border.all(
-                                      color: OnepieceColors.fancyBlue,
-                                      width: 5,
-                                      style: BorderStyle.solid),
-                            ),
-                            child: FittedBox(
-                              fit: BoxFit.fill,
-                              child: receiverSelectedItem == null
-                                  ? const Image(
-                                      image:
-                                          AssetImage(PathConstants.userImage))
-                                  : Image.memory(Base64Helper.decode(
-                                      receiverSelectedItem!.profileImage!)),
-                            ),
-                          ),
-                        ),
-                        receiverSelectedItem == null
-                            ? const SizedBox(
-                                height: 30,
-                                child: Text(
-                                  "?",
-                                  style: OnepieceFonts.headerStyle,
-                                ),
-                              )
-                            : SizedBox(
-                                height: 30,
-                                child: Text(
-                                    I18nHelper.getI18nByLocale2(receiverSelectedItem!.name),
-                                  style: OnepieceFonts.headerStyle,
-                                )),
-                      ],
-                    ),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: SizedBox(
-                            width: 300,
-                            height: 60,
-                            child: TextFormField(
-                              controller: receiverTextController,
-                              decoration: InputDecoration(
-                                label: Text(
-                                  AppLocalizations.of(context)!.characterName,
-                                  style: OnepieceFonts.hintFont,
-                                ),
-                                disabledBorder: const OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                        color: OnepieceColors.fancyGreen)),
-                                enabledBorder: const OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                        color: OnepieceColors.fancyGreen)),
-                                focusedBorder: const OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                        color: OnepieceColors.fancyGreen)),
-                                prefixIcon: const Icon(Icons.search),
-                              ),
-                              onChanged: (value) {
-                                receiverCharacterFilter.name = value;
-                                _searchReceiver(true);
-                              },
-                            ),
-                          ),
-                        ),
-                        Container(
-                          decoration: const BoxDecoration(
-                            color: OnepieceColors.fancyBlue,
-                            borderRadius: BorderRadius.all(Radius.circular(8)),
-                          ),
-                          height: 350,
-                          width: 300,
-                          child: getReceiver(context),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                const Divider(height: 3),
-                _getFoot(context)
-              ],
+                      ),
+                      getRightPanel(context)
+                    ],
+                  ),
+                  const Divider(height: 3),
+                  _getFoot(context)
+                ],
+              ),
             ),
           ),
         ));
+  }
+
+  Widget getLeftPanel(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(60, 10, 60, 10),
+          child: ValueListenableBuilder<CharacterListView?>(
+            valueListenable: starterSelectedItem,
+            builder: (context, value, _) {
+              return Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 60),
+                    child: Container(
+                      width: 200,
+                      height: 200,
+                      decoration: BoxDecoration(
+                        borderRadius: const BorderRadius.all(Radius.circular(8)),
+                        border: starterSelectedItem.value == null
+                            ? null
+                            : Border.all(
+                                color: OnepieceColors.fancyBlue,
+                                width: 5,
+                                style: BorderStyle.solid),
+                      ),
+                      child: FittedBox(
+                        fit: BoxFit.fill,
+                        child: starterSelectedItem.value == null
+                            ? const Image(
+                                image: AssetImage(PathConstants.userImage))
+                            : Image.memory(Base64Helper.decode(
+                                starterSelectedItem.value!.profileImage!)),
+                      ),
+                    ),
+                  ),
+                  starterSelectedItem.value == null
+                      ? const SizedBox(
+                          height: 50,
+                          child: Text(
+                            "?",
+                            style: OnepieceFonts.headerStyle,
+                          ),
+                        )
+                      : SizedBox(
+                          height: 50,
+                          child: Text(
+                            I18nHelper.getI18nByLocale2(
+                                starterSelectedItem.value!.name),
+                            style: OnepieceFonts.headerStyle,
+                          )),
+                ],
+              );
+            },
+          ),
+        ),
+        getLeftSearchPanel(context)
+      ],
+    );
+  }
+
+  Widget getLeftSearchPanel(BuildContext context) {
+    Map<CharacterType, String> enumValueToDisplayValue =
+        <CharacterType, String>{
+      CharacterType.BODY: AppLocalizations.of(context)!.body,
+      CharacterType.FOOT: AppLocalizations.of(context)!.leg,
+      CharacterType.SCIENCE: AppLocalizations.of(context)!.science,
+      CharacterType.FIST: AppLocalizations.of(context)!.fist,
+      CharacterType.KATANA: AppLocalizations.of(context)!.katana,
+      CharacterType.SHOOTER: AppLocalizations.of(context)!.shoot
+    };
+    return StatefulBuilder(builder: (context, leftSearchState) {
+      return Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: const BorderRadius.all(Radius.circular(10.0)),
+          border: Border.all(
+              color: OnepieceColors.fancyBlue,
+              width: 3,
+              style: BorderStyle.solid),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: SizedBox(
+                width: 300,
+                height: 60,
+                child: TextFormField(
+                  controller: starterTextController,
+                  decoration: InputDecoration(
+                    label: Text(
+                      AppLocalizations.of(context)!.searchStarter,
+                      style: OnepieceFonts.hintFont,
+                    ),
+                    enabledBorder: const OutlineInputBorder(
+                        borderSide:
+                            BorderSide(color: OnepieceColors.fancyGreen)),
+                    focusedBorder: const OutlineInputBorder(
+                        borderSide:
+                            BorderSide(color: OnepieceColors.fancyGreen)),
+                    prefixIcon: const Icon(Icons.search),
+                  ),
+                  onChanged: (value) {
+                    if (_timer?.isActive ?? false) _timer?.cancel();
+                    _timer = Timer(const Duration(milliseconds: 500), () {
+                      starterCharacterFilter.name = value;
+                      starterCharacterFilter.languageCode =
+                          I18nHelper.getLanguageCode();
+                      ListCharacterRequest listCharacterRequest =
+                          ListCharacterRequest(
+                              pageSize: 5,
+                              pageIndex: 1,
+                              // do not need to sort in this case.
+                              sortKeys: [],
+                              characterFilter: starterCharacterFilter);
+                      Future<ListCharacterResponse?> listCharacterResponse =
+                          getIt<CharacterDao>()
+                              .listCharacter(listCharacterRequest);
+                      listCharacterResponse.then((value) {
+                        leftSearchState(() {
+                          starterCharacters = value!.characters;
+                        });
+                      });
+                    });
+                  },
+                ),
+              ),
+            ),
+            SizedBox(
+              width: 300,
+              child: ListView.builder(
+                shrinkWrap: true,
+                physics: const AlwaysScrollableScrollPhysics(),
+                controller: _starterScrollController,
+                itemCount: starterCharacters.length,
+                itemBuilder: (context, index) {
+                  final character = starterCharacters[index];
+                  return Material(
+                    type: MaterialType.transparency,
+                    child: Container(
+                      padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+                      decoration: const BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(5))),
+                      child: ListTile(
+                        onTap: () {
+                          if (starterSelectedId == character.id) {
+                            starterSelectedId = "";
+                            starterSelectedItem.value = null;
+                          } else {
+                            starterSelectedId = character.id;
+                            starterSelectedItem.value = character;
+                          }
+                        },
+                        contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        selected: starterSelectedId == character.id,
+                        hoverColor: OnepieceColors.fancyBlue,
+                        selectedTileColor: OnepieceColors.fancyBlue,
+                        title: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(3, 3, 8, 3),
+                                  child: Container(
+                                    width: 50,
+                                    height: 50,
+                                    decoration: BoxDecoration(
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(2.0)),
+                                      border: Border.all(
+                                          color: Colors.grey,
+                                          width: 2,
+                                          style: BorderStyle.solid),
+                                    ),
+                                    child: FittedBox(
+                                      fit: BoxFit.fill,
+                                      child: Image.memory(Base64Helper.decode(
+                                          character.profileImage!)),
+                                    ),
+                                  ),
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                        "${AppLocalizations.of(context)!.name}: ${I18nHelper.getI18nByLocale2(character.name)}",
+                                        style: OnepieceFonts
+                                            .smallContentStyleWhite),
+                                    Text(
+                                        "${AppLocalizations.of(context)!.characterTypeLabel}: ${character.characterTypes.map((e) => enumValueToDisplayValue[e]).join(", ")}",
+                                        style: OnepieceFonts
+                                            .smallContentStyleWhite),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(20, 0, 3, 0),
+                              child: starterSelectedId == character.id
+                                  ? const Icon(
+                                      Icons.check_circle,
+                                      size: 20,
+                                    )
+                                  : const Icon(
+                                      Icons.check_circle_outline,
+                                      size: 20,
+                                    ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      );
+    });
+  }
+
+  Widget getRightPanel(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Padding(
+            padding: const EdgeInsets.fromLTRB(60, 10, 60, 10),
+            child: ValueListenableBuilder<CharacterListView?>(
+                valueListenable: receiverSelectedItem,
+                builder: (context, value, _) {
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 60),
+                        child: Container(
+                          width: 200,
+                          height: 200,
+                          decoration: BoxDecoration(
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(8)),
+                            border: receiverSelectedItem.value == null
+                                ? null
+                                : Border.all(
+                                    color: OnepieceColors.fancyBlue,
+                                    width: 5,
+                                    style: BorderStyle.solid),
+                          ),
+                          child: FittedBox(
+                            fit: BoxFit.fill,
+                            child: receiverSelectedItem.value == null
+                                ? const Image(
+                                    image: AssetImage(PathConstants.userImage))
+                                : Image.memory(Base64Helper.decode(
+                                    receiverSelectedItem.value!.profileImage!)),
+                          ),
+                        ),
+                      ),
+                      receiverSelectedItem.value == null
+                          ? const SizedBox(
+                              height: 50,
+                              child: Text(
+                                "?",
+                                style: OnepieceFonts.headerStyle,
+                              ),
+                            )
+                          : SizedBox(
+                              height: 50,
+                              child: Text(
+                                I18nHelper.getI18nByLocale2(
+                                    receiverSelectedItem.value!.name),
+                                style: OnepieceFonts.headerStyle,
+                              ),
+                            ),
+                    ],
+                  );
+                })),
+        getRightSearchPanel(context)
+      ],
+    );
+  }
+
+  Widget getRightSearchPanel(BuildContext context) {
+    Map<CharacterType, String> enumValueToDisplayValue =
+        <CharacterType, String>{
+      CharacterType.BODY: AppLocalizations.of(context)!.body,
+      CharacterType.FOOT: AppLocalizations.of(context)!.leg,
+      CharacterType.SCIENCE: AppLocalizations.of(context)!.science,
+      CharacterType.FIST: AppLocalizations.of(context)!.fist,
+      CharacterType.KATANA: AppLocalizations.of(context)!.katana,
+      CharacterType.SHOOTER: AppLocalizations.of(context)!.shoot
+    };
+    return StatefulBuilder(builder: (context, rightSearchState) {
+      return Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: const BorderRadius.all(Radius.circular(10.0)),
+            border: Border.all(
+                color: OnepieceColors.fancyBlue,
+                width: 3,
+                style: BorderStyle.solid),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(15.0),
+                child: SizedBox(
+                  width: 300,
+                  height: 60,
+                  child: TextFormField(
+                    controller: receiverTextController,
+                    decoration: InputDecoration(
+                      label: Text(
+                        AppLocalizations.of(context)!.searchReceiver,
+                        style: OnepieceFonts.hintFont,
+                      ),
+                      enabledBorder: const OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: OnepieceColors.fancyGreen)),
+                      focusedBorder: const OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: OnepieceColors.fancyGreen)),
+                      prefixIcon: const Icon(Icons.search),
+                    ),
+                    onChanged: (value) {
+                      if (_timer?.isActive ?? false) _timer?.cancel();
+                      _timer = Timer(const Duration(milliseconds: 500), () {
+                        receiverCharacterFilter.name = value;
+                        receiverCharacterFilter.languageCode =
+                            I18nHelper.getLanguageCode();
+                        ListCharacterRequest listCharacterRequest =
+                            ListCharacterRequest(
+                                pageSize: 5,
+                                pageIndex: receiverSelectedPageIndex,
+                                // do not need to sort in this case.
+                                sortKeys: [],
+                                characterFilter: receiverCharacterFilter);
+                        Future<ListCharacterResponse?> listCharacterResponse =
+                            getIt<CharacterDao>()
+                                .listCharacter(listCharacterRequest);
+                        listCharacterResponse.then((value) {
+                          rightSearchState(() {
+                            receiverCharacters = value!.characters;
+                          });
+                        });
+                      });
+                    },
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: 300,
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  controller: _receiverScrollController,
+                  itemCount: receiverCharacters.length,
+                  itemBuilder: (context, index) {
+                    final character = receiverCharacters[index];
+                    return Material(
+                      type: MaterialType.transparency,
+                      child: Container(
+                        padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+                        decoration: const BoxDecoration(
+                            borderRadius: BorderRadius.all(Radius.circular(5))),
+                        child: ListTile(
+                          onTap: () {
+                            if (receiverSelectedId == character.id) {
+                              receiverSelectedId = "";
+                              receiverSelectedItem.value = null;
+                            } else {
+                              receiverSelectedId = character.id;
+                              receiverSelectedItem.value = character;
+                            }
+                          },
+                          contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                          selected: receiverSelectedId == character.id,
+                          hoverColor: OnepieceColors.liteFancyBlue,
+                          selectedTileColor: OnepieceColors.liteFancyBlue,
+                          title: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(3.0),
+                                    child: Container(
+                                      width: 50,
+                                      height: 50,
+                                      decoration: BoxDecoration(
+                                        borderRadius: const BorderRadius.all(
+                                            Radius.circular(2.0)),
+                                        border: Border.all(
+                                            color: Colors.grey,
+                                            width: 2,
+                                            style: BorderStyle.solid),
+                                      ),
+                                      child: FittedBox(
+                                        fit: BoxFit.fill,
+                                        child: Image.memory(Base64Helper.decode(
+                                            character.profileImage!)),
+                                      ),
+                                    ),
+                                  ),
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                          "${AppLocalizations.of(context)!.name}: ${I18nHelper.getI18nByLocale2(character.name)}",
+                                          style: OnepieceFonts
+                                              .smallContentStyleWhite),
+                                      Text(
+                                          "${AppLocalizations.of(context)!.characterTypeLabel}: ${character.characterTypes.map((e) => enumValueToDisplayValue[e]).join(", ")}",
+                                          style: OnepieceFonts
+                                              .smallContentStyleWhite),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(20, 0, 3, 0),
+                                child: receiverSelectedId == character.id
+                                    ? const Icon(
+                                        Icons.check_circle,
+                                        size: 20,
+                                      )
+                                    : const Icon(
+                                        Icons.check_circle_outline,
+                                        size: 20,
+                                      ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              )
+            ],
+          ));
+    });
   }
 
   Widget _getFoot(BuildContext context) {
@@ -377,265 +567,37 @@ class _CreateBattleViewState extends State<CreateBattleView> {
             padding: const EdgeInsets.only(right: 8),
             child: ElevatedButton(
               style: OnepieceButtonStyle.getDefaultStyle(),
-              onPressed:
-                  (starterSelectedItem == null && receiverSelectedItem == null)
-                      ? null
-                      : () {
-                          setState(() {
-                            starterSelectedItem = null;
-                            starterSelectedId = "";
-                            receiverSelectedItem = null;
-                            receiverSelectedId = "";
-                          });
-                        },
+              onPressed: (starterSelectedItem.value == null &&
+                      receiverSelectedItem.value == null)
+                  ? null
+                  : () {
+                      setState(() {
+                        starterSelectedItem.value = null;
+                        starterSelectedId = "";
+                        receiverSelectedItem.value = null;
+                        receiverSelectedId = "";
+                      });
+                    },
               child: Text(AppLocalizations.of(context)!.clearForm),
             ),
           ),
           ElevatedButton(
             style: OnepieceButtonStyle.getDefaultStyle(),
-            onPressed:
-                (starterSelectedItem == null || receiverSelectedItem == null)
-                    ? null
-                    : () {
-                        AddBattleRequest request = AddBattleRequest(
-                            userId: getIt<User>().id,
-                            starterId: starterSelectedId,
-                            receiverId: receiverSelectedId);
-                        getIt<BattleDao>().addBattle(request);
-                        context.goNamed("battle");
-                      },
+            onPressed: (starterSelectedItem.value == null ||
+                    receiverSelectedItem.value == null)
+                ? null
+                : () {
+                    AddBattleRequest request = AddBattleRequest(
+                        userId: getIt<User>().id,
+                        starterId: starterSelectedId,
+                        receiverId: receiverSelectedId);
+                    getIt<BattleDao>().addBattle(request);
+                    context.goNamed("battle");
+                  },
             child: Text(AppLocalizations.of(context)!.submitForm),
           ),
         ],
       ),
-    );
-  }
-
-  Widget getStarter(BuildContext context) {
-    Map<CharacterType, String> enumValueToDisplayValue =
-        <CharacterType, String>{
-      CharacterType.BODY: AppLocalizations.of(context)!.body,
-      CharacterType.FOOT: AppLocalizations.of(context)!.leg,
-      CharacterType.SCIENCE: AppLocalizations.of(context)!.science,
-      CharacterType.FIST: AppLocalizations.of(context)!.fist,
-      CharacterType.KATANA: AppLocalizations.of(context)!.katana,
-      CharacterType.SHOOTER: AppLocalizations.of(context)!.shoot
-    };
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const AlwaysScrollableScrollPhysics(),
-      controller: _starterScrollController,
-      itemCount: starterCharacters.length,
-      itemBuilder: (context, index) {
-        final character = starterCharacters[index];
-        if (starterCharacters.length == (index)) {
-          return const Padding(
-            padding: EdgeInsets.only(top: 10, bottom: 10),
-            child: Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
-        }
-        if (starterCharacters.length == (index + 1) && starterToEnd == true) {
-          return Center(child: Text(AppLocalizations.of(context)!.endOfList));
-        }
-        return Material(
-          type: MaterialType.transparency,
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-            decoration: const BoxDecoration(
-                borderRadius: BorderRadius.all(Radius.circular(5))),
-            child: ListTile(
-              onTap: () {
-                setState(
-                  () {
-                    if (starterSelectedId == character.id) {
-                      starterSelectedId = "";
-                      starterSelectedItem = null;
-                    } else {
-                      starterSelectedId = character.id;
-                      starterSelectedItem = character;
-                    }
-                  },
-                );
-              },
-              contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(5),
-              ),
-              selected: starterSelectedId == character.id,
-              hoverColor: OnepieceColors.menuHoverColor,
-              selectedTileColor: OnepieceColors.menuHoverColor,
-              title: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(3.0),
-                        child: Container(
-                          width: 50,
-                          height: 50,
-                          decoration: BoxDecoration(
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(2.0)),
-                            border: Border.all(
-                                color: Colors.grey,
-                                width: 2,
-                                style: BorderStyle.solid),
-                          ),
-                          child: FittedBox(
-                            fit: BoxFit.fill,
-                            child: Image.memory(
-                                Base64Helper.decode(character.profileImage!)),
-                          ),
-                        ),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                              "${AppLocalizations.of(context)!.name}: ${character.name}",
-                              style: OnepieceFonts.smallContentStyle),
-                          Text(
-                              "${AppLocalizations.of(context)!.characterTypeLabel}: ${character.characterTypes.map((e) => enumValueToDisplayValue[e]).join(", ")}",
-                              style: OnepieceFonts.smallContentStyle),
-                        ],
-                      ),
-                    ],
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 3, 0),
-                    child: starterSelectedId == character.id
-                        ? const Icon(
-                            Icons.check_circle,
-                            size: 20,
-                          )
-                        : const Icon(
-                            Icons.check_circle_outline,
-                            size: 20,
-                          ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget getReceiver(BuildContext context) {
-    Map<CharacterType, String> enumValueToDisplayValue =
-        <CharacterType, String>{
-      CharacterType.BODY: AppLocalizations.of(context)!.body,
-      CharacterType.FOOT: AppLocalizations.of(context)!.leg,
-      CharacterType.SCIENCE: AppLocalizations.of(context)!.science,
-      CharacterType.FIST: AppLocalizations.of(context)!.fist,
-      CharacterType.KATANA: AppLocalizations.of(context)!.katana,
-      CharacterType.SHOOTER: AppLocalizations.of(context)!.shoot
-    };
-    return ListView.builder(
-      controller: _receiverScrollController,
-      itemCount: receiverCharacters.length,
-      itemBuilder: (context, index) {
-        final character = receiverCharacters[index];
-        if (receiverCharacters.length == index) {
-          return const Padding(
-            padding: EdgeInsets.only(top: 10, bottom: 10),
-            child: Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
-        }
-        if (receiverCharacters.length == index && receiverToEnd) {
-          return Text(AppLocalizations.of(context)!.endOfList);
-        }
-        return Material(
-          type: MaterialType.transparency,
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-            decoration: const BoxDecoration(
-                borderRadius: BorderRadius.all(Radius.circular(5))),
-            child: ListTile(
-              onTap: () {
-                setState(
-                  () {
-                    if (receiverSelectedId == character.id) {
-                      receiverSelectedId = "";
-                      receiverSelectedItem = null;
-                    } else {
-                      receiverSelectedId = character.id;
-                      receiverSelectedItem = character;
-                    }
-                  },
-                );
-              },
-              contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(5),
-              ),
-              selected: receiverSelectedId == character.id,
-              hoverColor: OnepieceColors.menuHoverColor,
-              selectedTileColor: OnepieceColors.menuHoverColor,
-              title: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(3.0),
-                        child: Container(
-                          width: 50,
-                          height: 50,
-                          decoration: BoxDecoration(
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(2.0)),
-                            border: Border.all(
-                                color: Colors.grey,
-                                width: 2,
-                                style: BorderStyle.solid),
-                          ),
-                          child: FittedBox(
-                            fit: BoxFit.fill,
-                            child: Image.memory(
-                                Base64Helper.decode(character.profileImage!)),
-                          ),
-                        ),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                              "${AppLocalizations.of(context)!.name}: ${character.name}",
-                              style: OnepieceFonts.smallContentStyle),
-                          Text(
-                              "${AppLocalizations.of(context)!.characterTypeLabel}: ${character.characterTypes.map((e) => enumValueToDisplayValue[e]).join(", ")}",
-                              style: OnepieceFonts.smallContentStyle),
-                        ],
-                      ),
-                    ],
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 3, 0),
-                    child: receiverSelectedId == character.id
-                        ? const Icon(
-                            Icons.check_circle,
-                            size: 20,
-                          )
-                        : const Icon(
-                            Icons.check_circle_outline,
-                            size: 20,
-                          ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
     );
   }
 }

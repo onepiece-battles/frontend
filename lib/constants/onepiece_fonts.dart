@@ -35,6 +35,9 @@ class OnepieceFonts {
   static const TextStyle smallContentStyle = TextStyle(
       color: OnepieceFonts.contentFontColor,
       fontSize: OnepieceFonts.smallContentFontSize);
+  static const TextStyle smallContentStyleWhite = TextStyle(
+      color: Colors.white,
+      fontSize: OnepieceFonts.smallContentFontSize);
   static const TextStyle contentStyleBold = TextStyle(
       color: OnepieceFonts.contentFontColor,
       fontSize: OnepieceFonts.contentFontSize,
