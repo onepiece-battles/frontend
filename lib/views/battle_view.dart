@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/constants/button_style.dart';
 import 'package:one_piece_battles_flutter/repository/battle_dao.dart';
 import 'package:one_piece_battles_flutter/utils/date_helper.dart';
+import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
 import 'package:logging/logging.dart';
 import '../constants/onepiece_colors.dart';
@@ -608,8 +609,8 @@ class _BattleViewState extends State<BattleView> {
             cells: [
               _getDataCell("${entry.key + 1}"),
               _getDataCell(entry.value.creator.toString()),
-              _getDataCell(entry.value.starterName.toString()),
-              _getDataCell(entry.value.receiverName.toString()),
+              _getDataCell(I18nHelper.getDisplayNameFromI18n(entry.value.starterName)),
+              _getDataCell(I18nHelper.getDisplayNameFromI18n(entry.value.receiverName)),
               _getDataCell(DateHelper.getLocalDateTimeFromTimestamp(
                       entry.value.creationTimestamp!)
                   .toString()),
@@ -618,10 +619,10 @@ class _BattleViewState extends State<BattleView> {
                   .toString()),
               _getDataCell(battleStatusToDisplayName[entry.value.status]!),
               _getDataCell(entry.value.winnerId == null
-                  ? "---"
+                  ? "------"
                   : (entry.value.winnerId == entry.value.starterId
-                      ? entry.value.starterName!
-                      : entry.value.receiverName!)),
+                      ? I18nHelper.getDisplayNameFromI18n(entry.value.starterName!)
+                      : I18nHelper.getDisplayNameFromI18n(entry.value.receiverName!))),
               _getDataCell(
                   booleanToDisplayName[entry.value.roleName == UserRole.NIKA]!),
             ],

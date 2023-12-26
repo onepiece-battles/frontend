@@ -192,7 +192,7 @@ class _CreateFeedbackViewState extends State<CreateFeedbackView> {
                                 OnepieceAlert.getBasicAlertDialogFunc(
                                     context,
                                     AppLocalizations.of(context)!.hint,
-                                    I18nHelper.getI18nByLocale2(
+                                    I18nHelper.getDisplayNameFromI18n(
                                         value!.issueCreationResult));
                               });
                               headerController.text = '';

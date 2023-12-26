@@ -351,7 +351,7 @@ class _SettingsViewState extends State<SettingsView> {
                                   getIt<UserDao>().verifyEmail(request).then(
                                     (value) {
                                       String notification =
-                                          I18nHelper.getI18nByLocale(
+                                          I18nHelper.getDisplayNameFromI18nByLocale(
                                               value!.emailNotification,
                                               _realtimeData.locale);
                                       showDialog(

@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
@@ -49,6 +48,26 @@ class _CreateBattleViewState extends State<CreateBattleView> {
   @override
   void initState() {
     super.initState();
+    searchOnStart();
+  }
+
+  void searchOnStart() {
+    ListCharacterRequest listCharacterRequest =
+    ListCharacterRequest(
+        pageSize: 5,
+        pageIndex: 1,
+        // do not need to sort in this case.
+        sortKeys: [],
+        characterFilter: CharacterFilter());
+    Future<ListCharacterResponse?> listCharacterResponse =
+    getIt<CharacterDao>()
+        .listCharacter(listCharacterRequest);
+    listCharacterResponse.then((value) {
+      setState(() {
+        starterCharacters = value!.characters;
+        receiverCharacters = value.characters;
+      });
+    });
   }
 
   @override
@@ -59,7 +78,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Padding(
-              padding: const EdgeInsets.only(top: 300.0),
+              padding: const EdgeInsets.only(top: 100.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
@@ -68,13 +87,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       getLeftPanel(context),
-                      const Padding(
-                        padding: EdgeInsets.all(30.0),
-                        child: Text(
-                          "VS",
-                          style: OnepieceFonts.fancyMax,
-                        ),
-                      ),
+                      const SizedBox(width: 100,),
                       getRightPanel(context)
                     ],
                   ),
@@ -135,7 +148,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                       : SizedBox(
                           height: 50,
                           child: Text(
-                            I18nHelper.getI18nByLocale2(
+                            I18nHelper.getDisplayNameFromI18n(
                                 starterSelectedItem.value!.name),
                             style: OnepieceFonts.headerStyle,
                           )),
@@ -252,7 +265,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                         selected: starterSelectedId == character.id,
                         hoverColor: OnepieceColors.fancyBlue,
                         selectedTileColor: OnepieceColors.fancyBlue,
-                        tileColor: Colors.grey,
+                        tileColor: Colors.black54,
                         title: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -269,7 +282,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                                       borderRadius: const BorderRadius.all(
                                           Radius.circular(2.0)),
                                       border: Border.all(
-                                          color: Colors.grey,
+                                          color: Colors.black54,
                                           width: 2,
                                           style: BorderStyle.solid),
                                     ),
@@ -284,7 +297,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                        "${AppLocalizations.of(context)!.name}: ${I18nHelper.getI18nByLocale2(character.name)}",
+                                        "${AppLocalizations.of(context)!.name}: ${I18nHelper.getDisplayNameFromI18n(character.name)}",
                                         style: OnepieceFonts
                                             .smallContentStyleWhite),
                                     Text(
@@ -370,7 +383,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                           : SizedBox(
                               height: 50,
                               child: Text(
-                                I18nHelper.getI18nByLocale2(
+                                I18nHelper.getDisplayNameFromI18n(
                                     receiverSelectedItem.value!.name),
                                 style: OnepieceFonts.headerStyle,
                               ),
@@ -519,7 +532,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                          "${AppLocalizations.of(context)!.name}: ${I18nHelper.getI18nByLocale2(character.name)}",
+                                          "${AppLocalizations.of(context)!.name}: ${I18nHelper.getDisplayNameFromI18n(character.name)}",
                                           style: OnepieceFonts
                                               .smallContentStyleWhite),
                                       Text(
@@ -556,56 +569,64 @@ class _CreateBattleViewState extends State<CreateBattleView> {
   }
 
   Widget _getFoot(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 50),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: ElevatedButton(
-              style: OnepieceButtonStyle.getDefaultStyle(),
-              child: Text(AppLocalizations.of(context)!.back),
-              onPressed: () {
-                context.goNamed("battle");
-              },
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: ElevatedButton(
-              style: OnepieceButtonStyle.getDefaultStyle(),
-              onPressed: (starterSelectedItem.value == null &&
-                      receiverSelectedItem.value == null)
-                  ? null
-                  : () {
-                      setState(() {
-                        starterSelectedItem.value = null;
-                        starterSelectedId = "";
-                        receiverSelectedItem.value = null;
-                        receiverSelectedId = "";
-                      });
-                    },
-              child: Text(AppLocalizations.of(context)!.clearForm),
-            ),
-          ),
-          ElevatedButton(
-            style: OnepieceButtonStyle.getDefaultStyle(),
-            onPressed: (starterSelectedItem.value == null ||
-                    receiverSelectedItem.value == null)
-                ? null
-                : () {
-                    AddBattleRequest request = AddBattleRequest(
-                        userId: getIt<User>().id,
-                        starterId: starterSelectedId,
-                        receiverId: receiverSelectedId);
-                    getIt<BattleDao>().addBattle(request);
-                    context.goNamed("battle");
-                  },
-            child: Text(AppLocalizations.of(context)!.submitForm),
-          ),
-        ],
-      ),
-    );
+    return ValueListenableBuilder<CharacterListView?>(
+        valueListenable: starterSelectedItem,
+        builder: (context, value, _) {
+          return ValueListenableBuilder<CharacterListView?>(
+              valueListenable: receiverSelectedItem,
+              builder: (context, value, _) {
+                return Padding(
+                  padding: const EdgeInsets.only(top: 50),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: ElevatedButton(
+                          style: OnepieceButtonStyle.getDefaultStyle(),
+                          child: Text(AppLocalizations.of(context)!.back),
+                          onPressed: () {
+                            context.goNamed("battle");
+                          },
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: ElevatedButton(
+                          style: OnepieceButtonStyle.getDefaultStyle(),
+                          onPressed: (starterSelectedId.isEmpty &&
+                              receiverSelectedId.isEmpty)
+                              ? null
+                              : () {
+                            setState(() {
+                              starterSelectedItem.value = null;
+                              starterSelectedId = "";
+                              receiverSelectedItem.value = null;
+                              receiverSelectedId = "";
+                            });
+                          },
+                          child: Text(AppLocalizations.of(context)!.clearForm),
+                        ),
+                      ),
+                      ElevatedButton(
+                        style: OnepieceButtonStyle.getDefaultStyle(),
+                        onPressed: (starterSelectedId.isEmpty ||
+                            receiverSelectedId.isEmpty)
+                            ? null
+                            : () {
+                          AddBattleRequest request = AddBattleRequest(
+                              userId: getIt<User>().id,
+                              starterId: starterSelectedId,
+                              receiverId: receiverSelectedId);
+                          getIt<BattleDao>().addBattle(request);
+                          context.goNamed("battle");
+                        },
+                        child: Text(AppLocalizations.of(context)!.create),
+                      ),
+                    ],
+                  ),
+                );
+              });
+        });
   }
 }
