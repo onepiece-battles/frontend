@@ -179,7 +179,7 @@ class _SearchPopupState extends State<SearchPopup> {
                       context.goNamed('characterDetails',
                           extra: character.id,
                           pathParameters: {
-                            'name': I18nHelper.getI18nByLocale2(character.name)
+                            'name': I18nHelper.getDisplayNameFromI18n(character.name)
                           });
                       Navigator.pop(context);
                     },
@@ -208,7 +208,7 @@ class _SearchPopupState extends State<SearchPopup> {
                         ),
                       ),
                     ),
-                    Text(I18nHelper.getI18nByLocale2(character.name))
+                    Text(I18nHelper.getDisplayNameFromI18n(character.name))
                   ],
                 ),
               ),
@@ -241,7 +241,7 @@ class _SearchPopupState extends State<SearchPopup> {
                       context.goNamed('fruitDetails',
                           extra: fruit.id,
                           pathParameters: {
-                            'name': I18nHelper.getI18nByLocale2(fruit.name!)
+                            'name': I18nHelper.getDisplayNameFromI18n(fruit.name!)
                           });
                       Navigator.pop(context);
                     },
@@ -249,7 +249,7 @@ class _SearchPopupState extends State<SearchPopup> {
                 },
                 hoverColor: OnepieceColors.liteFancyBlue,
                 title: Row(
-                  children: [Text(I18nHelper.getI18nByLocale2(fruit.name!))],
+                  children: [Text(I18nHelper.getDisplayNameFromI18n(fruit.name!))],
                 ),
               ),
             ),

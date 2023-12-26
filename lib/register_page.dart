@@ -74,7 +74,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     }
                     MyApp.setLocale(context, locale);
                     verificationMessage =
-                        I18nHelper.getI18nByLocale(verificationI18n, locale);
+                        I18nHelper.getDisplayNameFromI18nByLocale(verificationI18n, locale);
                   });
                 },
                 selectedTextStyle: const TextStyle(
@@ -301,7 +301,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                   Locale myLocale =
                                       Localizations.localeOf(context);
                                   verificationMessage =
-                                      I18nHelper.getI18nByLocale(
+                                      I18nHelper.getDisplayNameFromI18nByLocale(
                                           value.verification, myLocale);
                                 })
                               }

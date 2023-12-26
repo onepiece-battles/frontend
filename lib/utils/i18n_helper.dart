@@ -5,7 +5,7 @@ import 'package:openapi/api.dart';
 GetIt getIt = GetIt.instance;
 class I18nHelper {
   final Map<Character, I18nText> characterTypeMap = HashMap();
-  static String getI18nByLocale(I18nText? i18nText, Locale locale) {
+  static String getDisplayNameFromI18nByLocale(I18nText? i18nText, Locale locale) {
     if (i18nText == null) {
       return "";
     }
@@ -16,7 +16,7 @@ class I18nHelper {
     }
   }
 
-  static String getI18nByLocale2(I18nText? i18nText) {
+  static String getDisplayNameFromI18n(I18nText? i18nText) {
     var locale = getIt<Locale>();
     if (i18nText == null) {
       return "";

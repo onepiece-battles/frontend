@@ -677,7 +677,7 @@ class _CharacterViewState extends State<CharacterView> {
             onSelectChanged: (value) {
               context.goNamed('characterDetails',
                   extra: character.id,
-                  pathParameters: {'name':  I18nHelper.getI18nByLocale2(character.name)});
+                  pathParameters: {'name':  I18nHelper.getDisplayNameFromI18n(character.name)});
             },
             cells: [
               DataCell(
@@ -706,7 +706,7 @@ class _CharacterViewState extends State<CharacterView> {
               ),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: Text(I18nHelper.getI18nByLocale2(character.name)),
+                child: Text(I18nHelper.getDisplayNameFromI18n(character.name)),
               )),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),

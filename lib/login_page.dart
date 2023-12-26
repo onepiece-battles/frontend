@@ -68,7 +68,7 @@ class _LoginPageState extends State<LoginPage> {
                         locale = locales.last;
                       }
                       MyApp.setLocale(context, locale);
-                      verificationMessage = I18nHelper.getI18nByLocale(
+                      verificationMessage = I18nHelper.getDisplayNameFromI18nByLocale(
                           verificationI18n, locale);
                     });
                   },
@@ -210,7 +210,7 @@ class _LoginPageState extends State<LoginPage> {
                           setState(() {
                             verificationI18n = value.verification;
                             Locale myLocale = Localizations.localeOf(context);
-                            verificationMessage = I18nHelper.getI18nByLocale(
+                            verificationMessage = I18nHelper.getDisplayNameFromI18nByLocale(
                                 verificationI18n, myLocale);
                           });
                         }

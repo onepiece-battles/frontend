@@ -572,7 +572,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                             title: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(I18nHelper.getI18nByLocale2(fruit.name!)),
+                                Text(I18nHelper.getDisplayNameFromI18n(fruit.name!)),
                                 Padding(
                                   padding: const EdgeInsets.only(right: 5),
                                   child: OnepieceTag.getFruitTag(
@@ -626,7 +626,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(I18nHelper.getI18nByLocale2(fruit.name!)),
+              Text(I18nHelper.getDisplayNameFromI18n(fruit.name!)),
               Padding(
                 padding: const EdgeInsets.only(right: 5),
                 child: OnepieceTag.getFruitTag(
