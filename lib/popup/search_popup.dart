@@ -31,6 +31,8 @@ class _SearchPopupState extends State<SearchPopup> {
   List<Battle> battle = [];
 
   _search(String name) {
+    characterFilter.languageCode = I18nHelper.getLanguageCode();
+    fruitFilter.languageCode = I18nHelper.getLanguageCode();
     if (name.isEmpty) {
       setState(() {
         characters = [];

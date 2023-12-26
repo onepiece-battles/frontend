@@ -273,8 +273,8 @@ class _BattleViewState extends State<BattleView> {
 
   Widget _getBattleTypeFilter(BuildContext context) {
     Map<BattleType, String> battleTypeToDisplayValue = {
-      BattleType.single: AppLocalizations.of(context)!.singleBattle,
-      BattleType.group: AppLocalizations.of(context)!.groupBattle,
+      BattleType.SINGLE: AppLocalizations.of(context)!.singleBattle,
+      BattleType.GROUP: AppLocalizations.of(context)!.groupBattle,
     };
     return Padding(
       padding: const EdgeInsets.only(right: 6),
@@ -373,11 +373,10 @@ class _BattleViewState extends State<BattleView> {
 
   Widget _getBattleStatusFilter(BuildContext context) {
     Map<BattleStatus, String> battleStatusToDisplayName = {
-      BattleStatus.created: AppLocalizations.of(context)!.battleStatusCreated,
-      BattleStatus.started: AppLocalizations.of(context)!.battleStatusStarted,
-      BattleStatus.finished: AppLocalizations.of(context)!.battleStatusFinished,
-      BattleStatus.canceled: AppLocalizations.of(context)!.battleStatusCanceled,
-      BattleStatus.failed: AppLocalizations.of(context)!.battleStatusFailed,
+      BattleStatus.CREATED: AppLocalizations.of(context)!.battleStatusCreated,
+      BattleStatus.STARTED: AppLocalizations.of(context)!.battleStatusStarted,
+      BattleStatus.FINISHED: AppLocalizations.of(context)!.battleStatusFinished,
+      BattleStatus.FAILED: AppLocalizations.of(context)!.battleStatusFailed,
     };
     return Padding(
       padding: const EdgeInsets.only(right: 6),
@@ -586,11 +585,10 @@ class _BattleViewState extends State<BattleView> {
 
   List<DataRow> _createRows(BuildContext context) {
     Map<BattleStatus, String> battleStatusToDisplayName = {
-      BattleStatus.created: AppLocalizations.of(context)!.battleStatusCreated,
-      BattleStatus.started: AppLocalizations.of(context)!.battleStatusStarted,
-      BattleStatus.finished: AppLocalizations.of(context)!.battleStatusFinished,
-      BattleStatus.canceled: AppLocalizations.of(context)!.battleStatusCanceled,
-      BattleStatus.failed: AppLocalizations.of(context)!.battleStatusFailed,
+      BattleStatus.CREATED: AppLocalizations.of(context)!.battleStatusCreated,
+      BattleStatus.STARTED: AppLocalizations.of(context)!.battleStatusStarted,
+      BattleStatus.FINISHED: AppLocalizations.of(context)!.battleStatusFinished,
+      BattleStatus.FAILED: AppLocalizations.of(context)!.battleStatusFailed,
     };
     Map<bool, String> booleanToDisplayName = {
       true: AppLocalizations.of(context)!.yes,

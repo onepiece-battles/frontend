@@ -23,4 +23,8 @@ class BattleDao{
   Future<StartBattleResponse?> startBattle(StartBattleRequest request) async {
     return await battleApi.startBattle(request);
   }
+
+  Future<BattleFullView?> getBattleFullView(GetBattleFullViewRequest request)async {
+    return await battleApi.getBattleFullView(request);
+  }
 }
