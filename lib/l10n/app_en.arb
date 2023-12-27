@@ -173,5 +173,7 @@
   "welcome": "Welcome to OnePiece!",
   "winner": "Winner",
   "yes": "YES",
-  "zoanFruit": "Zoan"
+  "zoanFruit": "Zoan",
+  "startBattle": "Start Battle",
+  "downloadReport": "Download battle report"
 }
