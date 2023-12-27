@@ -24,7 +24,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
   late BattleFullView battle;
   late Character starter;
   late Character receiver;
-  late BattleStatus battleStatus;
+  late ValueNotifier<BattleStatus> battleStatus;
 
   _loadData() {
     return getIt<BattleDao>()
@@ -33,7 +33,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
 
   void _updateData(BattleFullView battleFullView) {
     battle = battleFullView;
-    battleStatus = battle.status;
+    battleStatus = ValueNotifier(battle.status);
     starter = battleFullView.starter!;
     receiver = battleFullView.receiver!;
   }
@@ -66,48 +66,50 @@ class _BattleDetailViewState extends State<BattleDetailView> {
   }
 
   _getTopBar(BuildContext context) {
-    return StatefulBuilder(builder: (context, topBarState) {
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          SizedBox(
-            height: 35,
-            child: ElevatedButton(
-              style: OnepieceButtonStyle.getDefaultStyle(),
-              onPressed: battleStatus != BattleStatus.CREATED
-                  ? null
-                  : () {
-                      StartBattleRequest request =
-                          StartBattleRequest(battleId: battle.id);
-                      getIt<BattleDao>().startBattle(request);
-                    },
-              child: Text(
-                AppLocalizations.of(context)!.startBattle,
-                style: OnepieceFonts.contentStyleBoldWhite,
+    return ValueListenableBuilder(
+        valueListenable: battleStatus,
+        builder: (context, value, _) {
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              SizedBox(
+                height: 35,
+                child: ElevatedButton(
+                  style: OnepieceButtonStyle.getDefaultStyle(),
+                  onPressed: battleStatus.value != BattleStatus.CREATED
+                      ? null
+                      : () {
+                          StartBattleRequest request =
+                              StartBattleRequest(battleId: battle.id);
+                          getIt<BattleDao>().startBattle(request);
+                        },
+                  child: Text(
+                    AppLocalizations.of(context)!.startBattle,
+                    style: OnepieceFonts.contentStyleBoldWhite,
+                  ),
+                ),
               ),
-            ),
-          ),
-          if (battleStatus == BattleStatus.FINISHED)
-            IconButton(
-              onPressed: () {
-                DownloadFileRequest request =
-                    DownloadFileRequest(id: battle.id);
-                getIt<FileDao>().downloadFile(request);
-              },
-              splashRadius: 1,
-              tooltip: AppLocalizations.of(context)!.downloadReport,
-              hoverColor: OnepieceColors.liteFancyBlue,
-              disabledColor: Colors.grey,
-              icon: const Icon(
-                Icons.file_copy_sharp,
-                color: OnepieceColors.fancyBlue,
-                size: 30,
-              ),
-            )
-        ],
-      );
-    });
+              if (battleStatus.value == BattleStatus.FINISHED)
+                IconButton(
+                  onPressed: () {
+                    DownloadFileRequest request =
+                        DownloadFileRequest(id: battle.id);
+                    getIt<FileDao>().downloadFile(request);
+                  },
+                  splashRadius: 1,
+                  tooltip: AppLocalizations.of(context)!.downloadReport,
+                  hoverColor: OnepieceColors.liteFancyBlue,
+                  disabledColor: Colors.grey,
+                  icon: const Icon(
+                    Icons.file_copy_sharp,
+                    color: OnepieceColors.fancyBlue,
+                    size: 30,
+                  ),
+                )
+            ],
+          );
+        });
   }
 
   _getProgressLine(BuildContext context) {
@@ -117,12 +119,12 @@ class _BattleDetailViewState extends State<BattleDetailView> {
         Column(
           children: [
             SizedBox(
-              width: 120,
+              width: 180,
               child: Row(
                 children: [
                   Container(
-                    width: 50,
-                    height: 50,
+                    width: 80,
+                    height: 80,
                     decoration: BoxDecoration(
                       borderRadius:
                           const BorderRadius.all(Radius.circular(2.0)),
@@ -148,12 +150,12 @@ class _BattleDetailViewState extends State<BattleDetailView> {
               height: 20,
             ),
             SizedBox(
-              width: 120,
+              width: 180,
               child: Row(
                 children: [
                   Container(
-                    width: 50,
-                    height: 50,
+                    width: 80,
+                    height: 80,
                     decoration: BoxDecoration(
                       borderRadius:
                           const BorderRadius.all(Radius.circular(2.0)),
@@ -177,8 +179,108 @@ class _BattleDetailViewState extends State<BattleDetailView> {
             ),
           ],
         ),
+        Column(
+          children: [
+            _getStartStatusIndicator(context),
+            Text("on going")
+          ],
+        ),
+
         _getRightProgress(),
+        Column(
+          children: [_getProgressStatusIndicator(context), Text("on going")],
+        ),
+        _getRightProgress(),
+        _getFinishedStatusIndicator(context),
+        SizedBox(
+          width: 180,
+          child: Row(
+            children: [
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.all(Radius.circular(2.0)),
+                  border: Border.all(
+                      color: Colors.grey, width: 2, style: BorderStyle.solid),
+                ),
+                child: FittedBox(
+                  fit: BoxFit.fill,
+                  child:
+                      Image.memory(Base64Helper.decode(receiver.profileImage!)),
+                ),
+              ),
+              Text(
+                I18nHelper.getDisplayNameFromI18n(receiver.name),
+                style: OnepieceFonts.fancyBlueHintFont,
+              )
+            ],
+          ),
+        ),
       ],
+    );
+  }
+
+  Widget _getStartStatusIndicator(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: battleStatus,
+      builder: (context, value, _) {
+        return Container(
+          child: battleStatus.value == BattleStatus.CREATED
+              ? const Icon(
+                  Icons.check_circle_outline,
+                  color: Colors.green,
+                  size: 30,
+                )
+              : const Icon(
+                  Icons.check_circle,
+                  size: 30,
+                ),
+        );
+      },
+    );
+  }
+
+  Widget _getProgressStatusIndicator(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: battleStatus,
+      builder: (context, value, _) {
+        return Container(
+          child: battleStatus.value == BattleStatus.CREATED ||
+                  battleStatus.value == BattleStatus.STARTED
+              ? const Icon(
+                  Icons.check_circle_outline,
+                  color: Colors.green,
+                  size: 30,
+                )
+              : const Icon(
+                  Icons.check_circle,
+                  color: Colors.green,
+                  size: 30,
+                ),
+        );
+      },
+    );
+  }
+
+  Widget _getFinishedStatusIndicator(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: battleStatus,
+      builder: (context, value, _) {
+        return Container(
+          child: battleStatus.value == BattleStatus.FINISHED
+              ? const Icon(
+                  Icons.check_circle,
+                  color: Colors.green,
+                  size: 30,
+                )
+              : const Icon(
+                  Icons.check_circle_outline,
+                  color: Colors.green,
+                  size: 30,
+                ),
+        );
+      },
     );
   }
 
