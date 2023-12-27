@@ -175,5 +175,7 @@
   "yes": "YES",
   "zoanFruit": "Zoan",
   "startBattle": "Start Battle",
-  "downloadReport": "Download battle report"
+  "downloadReport": "Download battle report",
+  "battleFinished": "Battle finished",
+  "battleInProgress": "Battle in progress"
 }
