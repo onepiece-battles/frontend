@@ -518,6 +518,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                         return;
                       }
                       fruitFilter.name = value;
+                      fruitFilter.languageCode = I18nHelper.getLanguageCode();
                       ListFruitRequest request = ListFruitRequest(
                           pageSize: 5,
                           pageIndex: 1,
