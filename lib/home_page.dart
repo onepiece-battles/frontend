@@ -39,7 +39,7 @@ class HomePageState extends State<HomePage> {
           : 1;
   UserRole selectedRole = getIt<User>().loginRole!;
   List<ResourceType> loginRoleResources = getIt<User>()
-      .loginRoleResources
+      .loginRoleResourcesPermissionMap.map((e) => e.resourceType!).toList()
       .where((e) => !notShownResources.contains(e))
       .toList();
   String selectedResource = ResourceType.CHARACTER.toString();
@@ -222,12 +222,12 @@ class HomePageState extends State<HomePage> {
                   getIt<UserDao>().updateLoginRole(request).then((value) {
                     var currentUser = getIt<User>();
                     currentUser.loginRole = value!.currentRole;
-                    currentUser.loginRoleResources = value.resources;
+                    currentUser.loginRoleResourcesPermissionMap = value.resourcePermissionMap;
                     ResourcePermissionManager.updateUserCache(currentUser);
                     setState(() {
                       selectedResource = ResourceType.CHARACTER.toString();
                       loginRoleResources = getIt<User>()
-                          .loginRoleResources
+                          .loginRoleResourcesPermissionMap.map((e) => e.resourceType!)
                           .where((e) => !notShownResources.contains(e))
                           .toList();
                       context.go(AppRouter.homePath);
