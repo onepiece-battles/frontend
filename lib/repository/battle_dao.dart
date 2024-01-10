@@ -27,4 +27,8 @@ class BattleDao{
   Future<BattleFullView?> getBattleFullView(GetBattleFullViewRequest request)async {
     return await battleApi.getBattleFullView(request);
   }
+
+  Future<BattleExecution?> getBattleExecution(GetBattleExecutionRequest request) async {
+    return await battleApi.getBattleExecution(request);
+  }
 }

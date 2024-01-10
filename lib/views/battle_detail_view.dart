@@ -33,7 +33,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
 
   void _updateData(BattleFullView battleFullView) {
     battle = battleFullView;
-    battleStatus = ValueNotifier(battle.status);
+    battleStatus = ValueNotifier(battle.battleExecution!.battleStatus!);
     starter = battleFullView.starter!;
     receiver = battleFullView.receiver!;
   }
@@ -185,7 +185,6 @@ class _BattleDetailViewState extends State<BattleDetailView> {
             Text("on going")
           ],
         ),
-
         _getRightProgress(),
         Column(
           children: [_getProgressStatusIndicator(context), Text("on going")],
@@ -247,7 +246,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
       builder: (context, value, _) {
         return Container(
           child: battleStatus.value == BattleStatus.CREATED ||
-                  battleStatus.value == BattleStatus.STARTED
+                  battleStatus.value == BattleStatus.IN_PROGRESS
               ? const Icon(
                   Icons.check_circle_outline,
                   color: Colors.green,

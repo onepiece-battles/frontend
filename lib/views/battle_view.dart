@@ -374,7 +374,7 @@ class _BattleViewState extends State<BattleView> {
   Widget _getBattleStatusFilter(BuildContext context) {
     Map<BattleStatus, String> battleStatusToDisplayName = {
       BattleStatus.CREATED: AppLocalizations.of(context)!.battleStatusCreated,
-      BattleStatus.STARTED: AppLocalizations.of(context)!.battleStatusStarted,
+      BattleStatus.IN_PROGRESS: AppLocalizations.of(context)!.battleStatusStarted,
       BattleStatus.FINISHED: AppLocalizations.of(context)!.battleStatusFinished,
       BattleStatus.FAILED: AppLocalizations.of(context)!.battleStatusFailed,
     };
@@ -586,7 +586,7 @@ class _BattleViewState extends State<BattleView> {
   List<DataRow> _createRows(BuildContext context) {
     Map<BattleStatus, String> battleStatusToDisplayName = {
       BattleStatus.CREATED: AppLocalizations.of(context)!.battleStatusCreated,
-      BattleStatus.STARTED: AppLocalizations.of(context)!.battleStatusStarted,
+      BattleStatus.IN_PROGRESS: AppLocalizations.of(context)!.battleStatusStarted,
       BattleStatus.FINISHED: AppLocalizations.of(context)!.battleStatusFinished,
       BattleStatus.FAILED: AppLocalizations.of(context)!.battleStatusFailed,
     };
@@ -615,7 +615,7 @@ class _BattleViewState extends State<BattleView> {
               _getDataCell(DateHelper.getLocalDateTimeFromTimestamp(
                       entry.value.modificationTimestamp!)
                   .toString()),
-              _getDataCell(battleStatusToDisplayName[entry.value.status]!),
+              _getDataCell(battleStatusToDisplayName[entry.value.battleStatus]!),
               _getDataCell(entry.value.winnerId == null
                   ? "------"
                   : (entry.value.winnerId == entry.value.starterId
