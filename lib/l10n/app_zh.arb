@@ -178,5 +178,7 @@
   "downloadReport": "下载战斗报告",
   "battleFinished": "战斗已完成",
   "battleInProgress": "战斗已开始",
-  "group": "团体"
+  "group": "团体",
+  "category": "类型",
+  "createGroup": "创建团体"
 }
