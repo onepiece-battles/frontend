@@ -177,5 +177,6 @@
   "startBattle": "开始战斗",
   "downloadReport": "下载战斗报告",
   "battleFinished": "战斗已完成",
-  "battleInProgress": "战斗已开始"
+  "battleInProgress": "战斗已开始",
+  "group": "团体"
 }

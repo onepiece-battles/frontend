@@ -177,5 +177,6 @@
   "startBattle": "Start Battle",
   "downloadReport": "Download battle report",
   "battleFinished": "Battle finished",
-  "battleInProgress": "Battle in progress"
+  "battleInProgress": "Battle in progress",
+  "group": "Group"
 }

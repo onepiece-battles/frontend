@@ -39,7 +39,9 @@ class HomePageState extends State<HomePage> {
           : 1;
   UserRole selectedRole = getIt<User>().loginRole!;
   List<ResourceType> loginRoleResources = getIt<User>()
-      .loginRoleResourcesPermissionMap.map((e) => e.resourceType!).toList()
+      .loginRoleResourcesPermissionMap
+      .map((e) => e.resourceType!)
+      .toList()
       .where((e) => !notShownResources.contains(e))
       .toList();
   String selectedResource = ResourceType.CHARACTER.toString();
@@ -93,6 +95,7 @@ class HomePageState extends State<HomePage> {
       'home': AppLocalizations.of(context)!.home,
       'characters': AppLocalizations.of(context)!.character,
       'fruits': AppLocalizations.of(context)!.devilFruit,
+      'groups': AppLocalizations.of(context)!.group,
       'users': AppLocalizations.of(context)!.userManagement,
       'battles': AppLocalizations.of(context)!.battle,
       'setting': AppLocalizations.of(context)!.settings,
@@ -110,7 +113,7 @@ class HomePageState extends State<HomePage> {
           String? text;
           if (routePathToDisplayName.keys.contains(entry.value)) {
             text = routePathToDisplayName[entry.value];
-          } else if(DataValidator.isUuid(entry.value)) {
+          } else if (DataValidator.isUuid(entry.value)) {
             text = AppLocalizations.of(context)!.detailInformation;
           } else {
             text = Uri.decodeFull(entry.value);
@@ -142,7 +145,7 @@ class HomePageState extends State<HomePage> {
         .toList()
         .expand((element) => element);
     var home = Padding(
-      padding: const EdgeInsets.fromLTRB(0,0,0,4),
+      padding: const EdgeInsets.fromLTRB(0, 0, 0, 4),
       child: IconButton(
         splashRadius: 0.1,
         onPressed: () {
@@ -222,12 +225,14 @@ class HomePageState extends State<HomePage> {
                   getIt<UserDao>().updateLoginRole(request).then((value) {
                     var currentUser = getIt<User>();
                     currentUser.loginRole = value!.currentRole;
-                    currentUser.loginRoleResourcesPermissionMap = value.resourcePermissionMap;
+                    currentUser.loginRoleResourcesPermissionMap =
+                        value.resourcePermissionMap;
                     ResourcePermissionManager.updateUserCache(currentUser);
                     setState(() {
                       selectedResource = ResourceType.CHARACTER.toString();
                       loginRoleResources = getIt<User>()
-                          .loginRoleResourcesPermissionMap.map((e) => e.resourceType!)
+                          .loginRoleResourcesPermissionMap
+                          .map((e) => e.resourceType!)
                           .where((e) => !notShownResources.contains(e))
                           .toList();
                       context.go(AppRouter.homePath);
@@ -458,6 +463,8 @@ class HomePageState extends State<HomePage> {
         20,
         20,
       ),
+      ResourceType.GROUP.toString(): const Icon(Icons.group,
+          color: OnepieceColors.menuIconColor, size: 20),
       ResourceType.USER.toString(): const Icon(Icons.manage_accounts,
           color: OnepieceColors.menuIconColor, size: 20),
       ResourceType.BATTLE.toString(): const Icon(Icons.sports_mma_outlined,
@@ -476,10 +483,12 @@ class HomePageState extends State<HomePage> {
       ResourceType.BATTLE.toString(): AppRouter.battlePath,
       ResourceType.CHARACTER.toString(): AppRouter.characterPath,
       ResourceType.ISSUE.toString(): AppRouter.issuePath,
+      ResourceType.GROUP.toString(): AppRouter.groupPath,
       setting: AppRouter.settingPath
     };
     Map<String, String> resourceToDisplayTextMap = {
       ResourceType.FRUIT.toString(): AppLocalizations.of(context)!.devilFruit,
+      ResourceType.GROUP.toString(): AppLocalizations.of(context)!.group,
       ResourceType.USER.toString():
           AppLocalizations.of(context)!.userManagement,
       ResourceType.BATTLE.toString(): AppLocalizations.of(context)!.battle,
@@ -547,8 +556,11 @@ class HomePageState extends State<HomePage> {
 
   Widget _getMiddleArrow() {
     return const Padding(
-      padding:  EdgeInsets.symmetric(horizontal: 5),
-      child:  Icon(Icons.arrow_forward_ios, size: 15,),
+      padding: EdgeInsets.symmetric(horizontal: 5),
+      child: Icon(
+        Icons.arrow_forward_ios,
+        size: 15,
+      ),
     );
   }
 }

@@ -26,6 +26,13 @@ class _BattleDetailViewState extends State<BattleDetailView> {
   late Character receiver;
   late ValueNotifier<BattleStatus> battleStatus;
 
+  Map<BattleStatus, int> statusOrderMap = {
+    BattleStatus.CREATED:1,
+    BattleStatus.IN_PROGRESS:2,
+    BattleStatus.FINISHED:3,
+    BattleStatus.FAILED:3
+  };
+
   _loadData() {
     return getIt<BattleDao>()
         .getBattleFullView(GetBattleFullViewRequest(battleId: widget.battleId));
