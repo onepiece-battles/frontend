@@ -10,6 +10,9 @@ import 'package:one_piece_battles_flutter/views/create_character_view.dart';
 import 'package:one_piece_battles_flutter/views/create_fruit_view.dart';
 import 'package:one_piece_battles_flutter/views/fruit_detail_view.dart';
 import 'package:one_piece_battles_flutter/views/fruit_view.dart';
+import 'package:one_piece_battles_flutter/views/group/create_group_view.dart';
+import 'package:one_piece_battles_flutter/views/group/group_detail_view.dart';
+import 'package:one_piece_battles_flutter/views/group/group_view.dart';
 import 'package:one_piece_battles_flutter/views/issue_view.dart';
 import 'package:one_piece_battles_flutter/views/settings_view.dart';
 import 'package:one_piece_battles_flutter/views/user_detail_view.dart';
@@ -33,6 +36,7 @@ class AppRouter {
   static const characterPath = '/home/characters';
   static const fruitPath = '/home/fruits';
   static const battlePath = '/home/battles';
+  static const groupPath = '/home/groups';
   static const userPath = '/home/users';
   static const settingPath = '/home/setting';
   static const issuePath = '/home/issues';
@@ -83,7 +87,42 @@ class AppRouter {
                       );
                     },
                   ),
-                ]),
+                ],
+            ),
+            GoRoute(
+              path: groupPath,
+              name: "groups",
+              parentNavigatorKey: _homeNavigatorState,
+              pageBuilder: (context, state) {
+                return NoTransitionPage(
+                    child: const GroupView(), key: UniqueKey());
+              },
+              routes: [
+                GoRoute(
+                  path: 'create',
+                  name: 'createGroup',
+                  parentNavigatorKey: _homeNavigatorState,
+                  pageBuilder: (context, state) {
+                    return const NoTransitionPage(
+                      child: CreateGroupView(),
+                    );
+                  },
+                ),
+                GoRoute(
+                  path: ':name',
+                  name: 'groupDetails',
+                  parentNavigatorKey: _homeNavigatorState,
+                  pageBuilder: (context, state) {
+                    String groupId = state.extra as String;
+                    return NoTransitionPage(
+                      child: GroupDetailView(
+                        groupId: groupId,
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
             GoRoute(
                 path: fruitPath,
                 name: "fruit",
