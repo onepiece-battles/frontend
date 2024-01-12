@@ -7,9 +7,9 @@ import 'package:one_piece_battles_flutter/repository/character_dao.dart';
 import 'package:one_piece_battles_flutter/utils/string_extensions.dart';
 import 'package:openapi/api.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import '../repository/fruit_dao.dart';
-import '../utils/base64_helper.dart';
-import '../utils/i18n_helper.dart';
+import '../../repository/fruit_dao.dart';
+import '../../utils/base64_helper.dart';
+import '../../utils/i18n_helper.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -573,7 +573,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
                             title: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(I18nHelper.getDisplayNameFromI18n(fruit.name!)),
+                                Text(I18nHelper.getDisplayNameFromI18n(
+                                    fruit.name!)),
                                 Padding(
                                   padding: const EdgeInsets.only(right: 5),
                                   child: OnepieceTag.getFruitTag(
@@ -652,7 +653,54 @@ class _CharacterDetailState extends State<CharacterDetail> {
   }
 
   Widget _getBattle(BuildContext context) {
-    return Column();
+    return Column(
+      children: [
+        Text(
+          AppLocalizations.of(context)!.battleInfo,
+          style: OnepieceFonts.headerStyle,
+        ),
+      ],
+    );
+  }
+
+  Widget _getBattlesTable(String starterId) {
+    return DataTable(
+      showCheckboxColumn: false,
+      showBottomBorder: true,
+      headingRowHeight: 50,
+      border: const TableBorder(
+          top: BorderSide(color: OnepieceColors.themeColor),
+          bottom: BorderSide(color: OnepieceColors.themeColor)),
+      columns: _createColumns(starterId),
+      rows: _createRows(context),
+      columnSpacing: 20,
+    );
+  }
+
+  List<DataColumn> _createColumns(String starterId) {
+    return [
+      DataColumn(
+          label: Text(""),)
+    ];
+  }
+
+  List<DataRow> _createRows(BuildContext context) {
+    var battles = character.battles;
+    return battles.map((e) =>  DataRow(cells:
+    [
+      _getDataCell(character.id == e.starterId
+        ? AppLocalizations.of(context)!.initiator
+            : AppLocalizations.of(context)!.receiver)
+      ]
+    )).toList();
+
+  }
+
+  DataCell _getDataCell(String value) {
+    return DataCell(Padding(
+      padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+      child: Text(value),
+    ));
   }
 
   Widget _getStringFormField(BuildContext context, bool editable,

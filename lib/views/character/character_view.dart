@@ -10,9 +10,9 @@ import 'package:one_piece_battles_flutter/repository/character_dao.dart';
 import 'package:one_piece_battles_flutter/utils/base64_helper.dart';
 import 'package:one_piece_battles_flutter/utils/data_validator.dart';
 import 'package:openapi/api.dart';
-import '../constants/button_style.dart';
-import '../utils/i18n_helper.dart';
-import '../utils/image_helper.dart';
+import '../../constants/button_style.dart';
+import '../../utils/i18n_helper.dart';
+import '../../utils/image_helper.dart';
 
 GetIt getIt = GetIt.instance;
 

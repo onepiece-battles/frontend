@@ -9,15 +9,15 @@ import 'package:one_piece_battles_flutter/utils/data_validator.dart';
 import 'package:one_piece_battles_flutter/utils/random_string_generator.dart';
 import 'package:one_piece_battles_flutter/utils/string_extensions.dart';
 import 'package:openapi/api.dart';
-import '../constants/onepiece_colors.dart';
-import '../constants/onepiece_fonts.dart';
-import '../constants/path_constants.dart';
-import '../popup/onepiece_alert.dart';
-import '../repository/character_dao.dart';
-import '../repository/image_dao.dart';
-import '../utils/base64_helper.dart';
-import '../utils/data_converter.dart';
-import '../utils/onepiece_image_picker.dart';
+import '../../constants/onepiece_colors.dart';
+import '../../constants/onepiece_fonts.dart';
+import '../../constants/path_constants.dart';
+import '../../popup/onepiece_alert.dart';
+import '../../repository/character_dao.dart';
+import '../../repository/image_dao.dart';
+import '../../utils/base64_helper.dart';
+import '../../utils/data_converter.dart';
+import '../../utils/onepiece_image_picker.dart';
 
 GetIt getIt = GetIt.instance;
 

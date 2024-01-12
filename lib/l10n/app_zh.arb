@@ -181,5 +181,6 @@
   "group": "团体",
   "category": "类型",
   "createGroup": "创建团体",
-  "leaved": "已退出"
+  "leaved": "已退出",
+  "thisCharacter": "此角色"
 }
