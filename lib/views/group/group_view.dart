@@ -42,7 +42,6 @@ class _GroupViewState extends State<GroupView> {
   };
   // group filter options
 
-
   List<GroupCategory> selectedGroupCategories = [];
 
   bool onlyShowSystemResource = false;
@@ -563,7 +562,50 @@ class _GroupViewState extends State<GroupView> {
   }
 
   Widget _createCharacterList(List<CharacterInGroupLite> character) {
-    return Container();
+    return ListView.builder(itemBuilder: (context, index) {
+      CharacterInGroupLite currentCharacter = character[index];
+      return Material(
+        type: MaterialType.transparency,
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+          decoration: const BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(5))),
+          child: ListTile(
+            minLeadingWidth: 10,
+            contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(5),
+            ),
+            onTap: () {
+              setState(
+                () {
+                  GoRouter.of(context).goNamed('characterDetails',
+                      extra: currentCharacter.id,
+                      pathParameters: {
+                        'name': I18nHelper.getDisplayNameFromI18n(
+                            currentCharacter.name)
+                      });
+                },
+              );
+            },
+            hoverColor: OnepieceColors.liteFancyBlue,
+            title: Row(
+              children: [
+                SizedBox(
+                  width: 200,
+                  child: Text(
+                    I18nHelper.getDisplayNameFromI18n(currentCharacter.name),
+                  ),
+                ),
+                SizedBox(width: 250, child: Text(currentCharacter.position!)),
+                if (currentCharacter.onceBelongedTo!)
+                  Text("(${AppLocalizations.of(context)!.leaved})"),
+              ],
+            ),
+          ),
+        ),
+      );
+    });
   }
 
   Row _getPageFoot() {
@@ -628,7 +670,8 @@ class _GroupViewState extends State<GroupView> {
         child: Text(
           AppLocalizations.of(context)!.jumpToPage,
           textAlign: TextAlign.left,
-        ));
+        ),
+    );
     widgetList.add(Padding(
       padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
       child: prePage,

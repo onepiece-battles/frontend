@@ -551,7 +551,8 @@ class HomePageState extends State<HomePage> {
               ),
             ),
           );
-        });
+        },
+    );
   }
 
   Widget _getMiddleArrow() {
