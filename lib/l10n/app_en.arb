@@ -181,5 +181,6 @@
   "group": "Group",
   "category": "Category",
   "createGroup": "Create Group",
-  "leaved": "leaved"
+  "leaved": "leaved",
+  "thisCharacter": "This character"
 }
