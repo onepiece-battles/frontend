@@ -180,5 +180,6 @@
   "battleInProgress": "Battle in progress",
   "group": "Group",
   "category": "Category",
-  "createGroup": "Create Group"
+  "createGroup": "Create Group",
+  "leaved": "leaved"
 }

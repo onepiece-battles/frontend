@@ -10,3 +10,4 @@ import 'package:openapi_generator_annotations/openapi_generator_annotations.dart
 )
 class OnepieceApiConfig {}
 // Thu Jan 11 09:37:27 UTC 2024
+// Fri Jan 12 03:18:57 UTC 2024

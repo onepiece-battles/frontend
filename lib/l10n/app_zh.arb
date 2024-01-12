@@ -180,5 +180,6 @@
   "battleInProgress": "战斗已开始",
   "group": "团体",
   "category": "类型",
-  "createGroup": "创建团体"
+  "createGroup": "创建团体",
+  "leaved": "已退出"
 }
