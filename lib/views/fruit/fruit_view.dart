@@ -67,6 +67,7 @@ class _FruitViewState extends State<FruitView> {
   }
 
   void _search() {
+    fruitFilter.languageCode = I18nHelper.getLanguageCode();
     ListFruitRequest request = ListFruitRequest(
         pageSize: pageSize,
         pageIndex: selectedPageIndex,
