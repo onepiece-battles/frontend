@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_tag.dart';
@@ -141,6 +142,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _getBasicInfo(context),
                     const Padding(
@@ -159,6 +161,14 @@ class _CharacterDetailState extends State<CharacterDetail> {
                       ),
                     ),
                     _getEatFruit(context),
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Divider(
+                        color: OnepieceColors.fancyBlue,
+                        thickness: 1,
+                      ),
+                    ),
+                    _getBattle(context),
                   ],
                 ),
               ),
@@ -625,18 +635,30 @@ class _CharacterDetailState extends State<CharacterDetail> {
     for (var fruit in fruits) {
       var column = Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(I18nHelper.getDisplayNameFromI18n(fruit.name!)),
-              Padding(
-                padding: const EdgeInsets.only(right: 5),
-                child: OnepieceTag.getFruitTag(
-                  fruit.fruitType!,
-                  fruitTypeToDisplayValue[fruit.fruitType!]!,
-                ),
+          InkWell(
+            onTap: () {
+              // todo(yichi): update left menu list selected tab
+              context.goNamed('fruitDetails', extra: fruit.id, pathParameters: {
+                'name': I18nHelper.getDisplayNameFromI18n(fruit.name!)
+              });
+            },
+            borderRadius: const BorderRadius.all(Radius.circular(5)),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(I18nHelper.getDisplayNameFromI18n(fruit.name!)),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 5),
+                    child: OnepieceTag.getFruitTag(
+                      fruit.fruitType!,
+                      fruitTypeToDisplayValue[fruit.fruitType!]!,
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ],
       );
@@ -653,17 +675,23 @@ class _CharacterDetailState extends State<CharacterDetail> {
   }
 
   Widget _getBattle(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          AppLocalizations.of(context)!.battleInfo,
-          style: OnepieceFonts.headerStyle,
-        ),
-      ],
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Text(
+            AppLocalizations.of(context)!.relatedBattles,
+            style: OnepieceFonts.headerStyle,
+          ),
+          _getBattlesTable()
+        ],
+      ),
     );
   }
 
-  Widget _getBattlesTable(String starterId) {
+  Widget _getBattlesTable() {
     return DataTable(
       showCheckboxColumn: false,
       showBottomBorder: true,
@@ -671,36 +699,87 @@ class _CharacterDetailState extends State<CharacterDetail> {
       border: const TableBorder(
           top: BorderSide(color: OnepieceColors.themeColor),
           bottom: BorderSide(color: OnepieceColors.themeColor)),
-      columns: _createColumns(starterId),
+      columns: _createColumns(character.id),
       rows: _createRows(context),
       columnSpacing: 20,
     );
   }
 
-  List<DataColumn> _createColumns(String starterId) {
+  List<DataColumn> _createColumns(String currentCharacterId) {
     return [
+      const DataColumn(
+        label: Text(""),
+      ),
       DataColumn(
-          label: Text(""),)
+        label: SizedBox(
+            width: 150, child: Text(AppLocalizations.of(context)!.initiator)),
+      ),
+      DataColumn(
+        label: SizedBox(
+            width: 150, child: Text(AppLocalizations.of(context)!.receiver)),
+      ),
+      DataColumn(
+        label: SizedBox(
+            width: 150, child: Text(AppLocalizations.of(context)!.status)),
+      ),
+      DataColumn(
+        label: SizedBox(
+            width: 150, child: Text(AppLocalizations.of(context)!.winner)),
+      ),
     ];
   }
 
   List<DataRow> _createRows(BuildContext context) {
+    Map<BattleStatus, String> battleStatusToDisplayName = {
+      BattleStatus.CREATED: AppLocalizations.of(context)!.battleStatusCreated,
+      BattleStatus.IN_PROGRESS:
+          AppLocalizations.of(context)!.battleStatusStarted,
+      BattleStatus.FINISHED: AppLocalizations.of(context)!.battleStatusFinished,
+      BattleStatus.FAILED: AppLocalizations.of(context)!.battleStatusFailed,
+    };
     var battles = character.battles;
-    return battles.map((e) =>  DataRow(cells:
-    [
-      _getDataCell(character.id == e.starterId
-        ? AppLocalizations.of(context)!.initiator
-            : AppLocalizations.of(context)!.receiver)
-      ]
-    )).toList();
-
+    return battles
+        .asMap()
+        .entries
+        .map((entry) => DataRow(
+                onSelectChanged: (value) {
+                  context.goNamed('battleDetails',
+                      extra: entry.value.id,
+                      pathParameters: {'id': entry.value.id});
+                },
+                cells: [
+                  _getDataCell("${entry.key + 1}", false),
+                  _getDataCell(
+                      I18nHelper.getDisplayNameFromI18n(
+                          entry.value.starterName),
+                      character.id == entry.value.starterId),
+                  _getDataCell(
+                      I18nHelper.getDisplayNameFromI18n(
+                          entry.value.receiverName),
+                      character.id == entry.value.receiverId),
+                  _getDataCell(
+                      battleStatusToDisplayName[entry.value.battleStatus]!,
+                      false),
+                  _getDataCell(
+                      entry.value.winnerId != null
+                          ? (entry.value.winnerId == entry.value.starterId
+                              ? I18nHelper.getDisplayNameFromI18n(
+                                  entry.value.starterName)
+                              : I18nHelper.getDisplayNameFromI18n(
+                                  entry.value.receiverName))
+                          : "",
+                      false),
+                ]))
+        .toList();
   }
 
-  DataCell _getDataCell(String value) {
-    return DataCell(Padding(
-      padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-      child: Text(value),
-    ));
+  DataCell _getDataCell(String value, bool heightLight) {
+    return DataCell(heightLight
+        ? Text(
+            value,
+            style: OnepieceFonts.tableHeightStyle,
+          )
+        : Text(value));
   }
 
   Widget _getStringFormField(BuildContext context, bool editable,

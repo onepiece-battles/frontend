@@ -86,6 +86,11 @@ class OnepieceFonts {
       fontSize: 16,
       fontWeight: FontWeight.w700);
 
+  static const TextStyle tableHeightStyle = TextStyle(
+      color: OnepieceColors.fancyBlue,
+      fontSize: 16,
+      fontWeight: FontWeight.w700);
+
   static const TextStyle navigationTopBarStyleBold = TextStyle(
       color: contentFontColor, fontSize: 16, fontWeight: FontWeight.w700);
 }
