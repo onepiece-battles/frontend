@@ -142,6 +142,7 @@
   "registerPasswordHint": "New password",
   "registerPasswordHint2": "Your password again",
   "registerUserNameHint": "Please choose your nick name",
+  "relatedBattles": "Related battles",
   "required": "Required",
   "requiredField": "This is a required field",
   "resetSort": "Clear Sort",

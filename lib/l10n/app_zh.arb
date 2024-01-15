@@ -142,6 +142,7 @@
   "registerPasswordHint": "密码",
   "registerPasswordHint2": "请确认密码",
   "registerUserNameHint": "请选择您的昵称。",
+  "relatedBattles": "相关战斗",
   "required": "必填",
   "requiredField": "此处不能为空",
   "resetSort": "清除排序",
