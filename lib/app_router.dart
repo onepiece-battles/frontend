@@ -7,9 +7,9 @@ import 'package:one_piece_battles_flutter/views/character/character_detail_view.
 import 'package:one_piece_battles_flutter/views/character/character_view.dart';
 import 'package:one_piece_battles_flutter/views/create_battle_view.dart';
 import 'package:one_piece_battles_flutter/views/character/create_character_view.dart';
-import 'package:one_piece_battles_flutter/views/create_fruit_view.dart';
-import 'package:one_piece_battles_flutter/views/fruit_detail_view.dart';
-import 'package:one_piece_battles_flutter/views/fruit_view.dart';
+import 'package:one_piece_battles_flutter/views/fruit/create_fruit_view.dart';
+import 'package:one_piece_battles_flutter/views/fruit/fruit_detail_view.dart';
+import 'package:one_piece_battles_flutter/views/fruit/fruit_view.dart';
 import 'package:one_piece_battles_flutter/views/group/create_group_view.dart';
 import 'package:one_piece_battles_flutter/views/group/group_detail_view.dart';
 import 'package:one_piece_battles_flutter/views/group/group_view.dart';

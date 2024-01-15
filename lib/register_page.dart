@@ -98,7 +98,7 @@ class _RegisterPageState extends State<RegisterPage> {
             height: 50,
           ),
           const Image(
-            image: AssetImage(PathConstants.loginLuffyImage),
+            image: AssetImage(PathConstants.luffyFlag),
           ),
           const SizedBox(height: 12),
           Text(

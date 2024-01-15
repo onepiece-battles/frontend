@@ -189,7 +189,7 @@ class _GroupViewState extends State<GroupView> {
                   ? null
                   : selectedGroupCategories.last,
               hint: Text(
-                AppLocalizations.of(context)!.characterTypeLabel,
+                AppLocalizations.of(context)!.groupCategory,
                 style: OnepieceFonts.dropDownItemStyle,
               ),
               onChanged: (value) {},
@@ -562,6 +562,9 @@ class _GroupViewState extends State<GroupView> {
   }
 
   Widget _createCharacterList(List<CharacterInGroupLite> character) {
+    if (character.isEmpty) {
+      return const Text("");
+    }
     return ListView.builder(itemBuilder: (context, index) {
       CharacterInGroupLite currentCharacter = character[index];
       return Material(
