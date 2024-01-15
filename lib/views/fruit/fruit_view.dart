@@ -4,13 +4,13 @@ import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
-import '../constants/button_style.dart';
-import '../constants/onepiece_colors.dart';
-import '../constants/onepiece_fonts.dart';
-import '../repository/fruit_dao.dart';
+import '../../constants/button_style.dart';
+import '../../constants/onepiece_colors.dart';
+import '../../constants/onepiece_fonts.dart';
+import '../../repository/fruit_dao.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import '../utils/data_validator.dart';
-import '../utils/image_helper.dart';
+import '../../utils/data_validator.dart';
+import '../../utils/image_helper.dart';
 
 GetIt getIt = GetIt.instance;
 

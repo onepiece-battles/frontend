@@ -353,7 +353,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
               height: 80,
               child: _pickedImage.isEmpty
                   ? ClipOval(
-                      child: Image.asset(PathConstants.loginLuffyImage),
+                      child: Image.asset(PathConstants.luffyHat),
                     )
                   : ClipOval(
                       child: Image.memory(_pickedImage),
