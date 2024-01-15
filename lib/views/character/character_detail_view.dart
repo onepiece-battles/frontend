@@ -5,6 +5,7 @@ import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_tag.dart';
 import 'package:one_piece_battles_flutter/repository/character_dao.dart';
+import 'package:one_piece_battles_flutter/repository/group_dao.dart';
 import 'package:one_piece_battles_flutter/utils/string_extensions.dart';
 import 'package:openapi/api.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -45,9 +46,13 @@ class _CharacterDetailState extends State<CharacterDetail> {
 
   // fruit search data
   TextEditingController fruitNameController = TextEditingController();
+  TextEditingController groupNameController = TextEditingController();
+  GroupFilter groupFilter = GroupFilter();
   FruitFilter fruitFilter = FruitFilter();
+  List<GroupListView> searchingGroupList = [];
   List<FruitListView> searchingFruitList = [];
   String? selectedFruitId;
+  String? selectedGroupId;
 
   // initial date
   late CharacterFullView character;
@@ -63,6 +68,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
   bool basicInfoEditable = false;
   bool combatInfoEditable = false;
   bool fruitSearchEnabled = false;
+  bool groupSearchEnabled = true;
 
   @override
   void initState() {
@@ -88,6 +94,10 @@ class _CharacterDetailState extends State<CharacterDetail> {
     );
   }
 
+  _joinGroup() {
+    // todo(yichi): implements join group request
+  }
+
   void _updateData(CharacterFullView characterFullView) {
     character = characterFullView;
     battles = characterFullView.battles;
@@ -108,7 +118,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
 
   void _updateControllerData() {
     // update basic information
-    characterNameController.text = character.name.toString();
+    characterNameController.text =
+        I18nHelper.getDisplayNameFromI18n(character.name);
     characterAge.text = character.age == null ? "" : character.age.toString();
     characterHeight.text =
         character.height == null ? "" : character.height.toString();
@@ -161,6 +172,14 @@ class _CharacterDetailState extends State<CharacterDetail> {
                       ),
                     ),
                     _getEatFruit(context),
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Divider(
+                        color: OnepieceColors.fancyBlue,
+                        thickness: 1,
+                      ),
+                    ),
+                    _getGroup(context),
                     const Padding(
                       padding: EdgeInsets.all(8.0),
                       child: Divider(
@@ -465,8 +484,16 @@ class _CharacterDetailState extends State<CharacterDetail> {
             ],
           ),
         ),
-        if (fruits.length < character.maximumFruitCount) _getFruitEat(context),
-        if (fruits.isNotEmpty) _getFruitList(context)
+        if (fruits.length < character.maximumFruitCount)
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: _getFruitEat(context),
+          ),
+        if (fruits.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: _getFruitList(context),
+          )
       ],
     );
   }
@@ -674,6 +701,187 @@ class _CharacterDetailState extends State<CharacterDetail> {
     );
   }
 
+  Widget _getGroup(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Text(
+                AppLocalizations.of(context)!.group,
+                style: OnepieceFonts.headerStyle,
+              ),
+              const SizedBox(
+                width: 15,
+              ),
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: _getJoinGroup(context),
+        ),
+        // Padding(
+        //   padding: const EdgeInsets.all(8.0),
+        //   child: _getGroupList(context),
+        // )
+      ],
+    );
+  }
+
+  Widget _getJoinGroup(BuildContext context) {
+    Map<GroupCategory, String> groupCategoryToDisplayValue = {
+      GroupCategory.pirate: AppLocalizations.of(context)!.pirate,
+      GroupCategory.worldGovernment:
+          AppLocalizations.of(context)!.worldGovernment,
+      GroupCategory.marine: AppLocalizations.of(context)!.marine,
+      GroupCategory.underWorld: AppLocalizations.of(context)!.underworld,
+    };
+    return StatefulBuilder(builder: (context, groupSetState) {
+      return Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: const BorderRadius.all(Radius.circular(5.0)),
+          border: Border.all(
+              color: OnepieceColors.fancyBlue,
+              width: 3,
+              style: BorderStyle.solid),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8.0, 8, 8, 0),
+                child: SizedBox(
+                  width: 300,
+                  child: TextFormField(
+                    enabled: groupSearchEnabled,
+                    controller: groupNameController,
+                    decoration: InputDecoration(
+                      label: Text(
+                        AppLocalizations.of(context)!.groupName,
+                        style: OnepieceFonts.hintFont,
+                      ),
+                      disabledBorder: const OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: OnepieceColors.fancyGreen)),
+                      enabledBorder: const OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: OnepieceColors.fancyGreen)),
+                      focusedBorder: const OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: OnepieceColors.fancyGreen)),
+                      prefixIcon: const Icon(Icons.search),
+                    ),
+                    onChanged: (value) {
+                      selectedGroupId = null;
+                      groupSetState(() {});
+                      if (value.isEmpty) {
+                        searchingGroupList = [];
+                        groupSetState(() {});
+                        return;
+                      }
+                      groupFilter.name = value;
+                      groupFilter.languageCode = I18nHelper.getLanguageCode();
+                      ListGroupRequest request = ListGroupRequest(
+                          pageSize: 5,
+                          pageIndex: 1,
+                          sortKeys: [],
+                          groupFilter: groupFilter);
+                      Future<ListGroupResponse?> response =
+                          getIt<GroupDao>().listGroups(request);
+                      response.then(
+                        (value) => {
+                          searchingGroupList = value!.groups,
+                          groupSetState(() {})
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                  width: 300,
+                  decoration: const BoxDecoration(
+                    color: OnepieceColors.menuBackgroundColor,
+                    borderRadius: BorderRadius.all(Radius.circular(8)),
+                  ),
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: searchingGroupList.length,
+                    itemBuilder: (context, index) {
+                      var group = searchingGroupList[index];
+                      return Material(
+                        type: MaterialType.transparency,
+                        child: Container(
+                          padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+                          decoration: const BoxDecoration(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(5))),
+                          child: ListTile(
+                            minLeadingWidth: 10,
+                            contentPadding:
+                                const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            selected: selectedGroupId == group.id,
+                            selectedTileColor: OnepieceColors.liteFancyBlue,
+                            // todo(yichi): fix on tap issue
+                            onTap: () {
+                              selectedGroupId = group.id!;
+                              groupSetState(() {});
+                            },
+                            hoverColor: OnepieceColors.liteFancyBlue,
+                            title: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(I18nHelper.getDisplayNameFromI18n(
+                                    group.name!)),
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 5),
+                                  child: OnepieceTag.getGroupTag(
+                                    group.groupCategory!,
+                                    groupCategoryToDisplayValue[
+                                        group.groupCategory!]!,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+              if (searchingGroupList.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: ElevatedButton(
+                      onPressed: selectedGroupId == null
+                          ? null
+                          : () {
+                              setState(() {
+                                _joinGroup();
+                              });
+                            },
+                      child: Text(AppLocalizations.of(context)!.join)),
+                )
+            ],
+          ),
+        ),
+      );
+    });
+  }
+
   Widget _getBattle(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -684,6 +892,9 @@ class _CharacterDetailState extends State<CharacterDetail> {
           Text(
             AppLocalizations.of(context)!.relatedBattles,
             style: OnepieceFonts.headerStyle,
+          ),
+          const SizedBox(
+            height: 20,
           ),
           _getBattlesTable()
         ],
@@ -720,11 +931,11 @@ class _CharacterDetailState extends State<CharacterDetail> {
       ),
       DataColumn(
         label: SizedBox(
-            width: 150, child: Text(AppLocalizations.of(context)!.status)),
+            width: 150, child: Text(AppLocalizations.of(context)!.winner)),
       ),
       DataColumn(
         label: SizedBox(
-            width: 150, child: Text(AppLocalizations.of(context)!.winner)),
+            width: 80, child: Text(AppLocalizations.of(context)!.status)),
       ),
     ];
   }
@@ -758,9 +969,6 @@ class _CharacterDetailState extends State<CharacterDetail> {
                           entry.value.receiverName),
                       character.id == entry.value.receiverId),
                   _getDataCell(
-                      battleStatusToDisplayName[entry.value.battleStatus]!,
-                      false),
-                  _getDataCell(
                       entry.value.winnerId != null
                           ? (entry.value.winnerId == entry.value.starterId
                               ? I18nHelper.getDisplayNameFromI18n(
@@ -768,6 +976,9 @@ class _CharacterDetailState extends State<CharacterDetail> {
                               : I18nHelper.getDisplayNameFromI18n(
                                   entry.value.receiverName))
                           : "",
+                      false),
+                  _getDataCell(
+                      battleStatusToDisplayName[entry.value.battleStatus]!,
                       false),
                 ]))
         .toList();

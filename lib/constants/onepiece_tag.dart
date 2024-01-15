@@ -14,6 +14,13 @@ class OnepieceTag {
     FruitType.artificialZoan: OnepieceColors.fruitArtificialZoan
   };
 
+  static Map<GroupCategory, Color> groupCategoryToColor = {
+    GroupCategory.worldGovernment: OnepieceColors.fancyBlue,
+    GroupCategory.pirate: OnepieceColors.black,
+    GroupCategory.underWorld: OnepieceColors.fancyGreen,
+    GroupCategory.marine: OnepieceColors.liteFancyBlue,
+  };
+
 
   static getFruitTag(FruitType fruitType, String text) {
     return Container(
@@ -21,6 +28,20 @@ class OnepieceTag {
       decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(5)),
           color: fruitTypeToColor[fruitType]
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(4.0),
+        child: Text(text, style: OnepieceFonts.tagStyle,),
+      ),
+    );
+  }
+
+  static getGroupTag(GroupCategory groupCategory, String text) {
+    return Container(
+      height: 25,
+      decoration: BoxDecoration(
+          borderRadius: const BorderRadius.all(Radius.circular(5)),
+          color: groupCategoryToColor[groupCategory]
       ),
       child: Padding(
         padding: const EdgeInsets.all(4.0),
