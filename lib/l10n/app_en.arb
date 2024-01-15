@@ -105,6 +105,7 @@
   "invalidName": "name should only contains alphabet letters (chinese characters) and digits",
   "issue": "Issue",
   "issueType": "Issue Type",
+  "join": "Join",
   "jumpToPage": "Jump",
   "katana": "Katana",
   "kenbunshoku": "Kenbunshoku",
