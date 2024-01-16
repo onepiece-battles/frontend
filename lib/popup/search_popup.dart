@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
+import 'package:one_piece_battles_flutter/constants/onepiece_tag.dart';
 import 'package:one_piece_battles_flutter/repository/group_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
@@ -115,7 +116,7 @@ class _SearchPopupState extends State<SearchPopup> {
               width: 800,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: _getCharacterList(),
+                child: _getCharacterList(context),
               )),
           if (fruits.isNotEmpty)
             SizedBox(
@@ -140,7 +141,7 @@ class _SearchPopupState extends State<SearchPopup> {
               width: 800,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: _getFruitList(),
+                child: _getFruitList(context),
               )),
           if (groups.isNotEmpty)
             SizedBox(
@@ -165,7 +166,7 @@ class _SearchPopupState extends State<SearchPopup> {
               width: 800,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: _getGroupList(),
+                child: _getGroupList(context),
               )),
           if (characters.isNotEmpty || fruits.isNotEmpty || groups.isNotEmpty)
             const SizedBox(
@@ -181,6 +182,7 @@ class _SearchPopupState extends State<SearchPopup> {
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: TextFormField(
+        autofocus: true,
         controller: searchBarController,
         decoration: InputDecoration(
           disabledBorder: const OutlineInputBorder(
@@ -202,71 +204,100 @@ class _SearchPopupState extends State<SearchPopup> {
     );
   }
 
-  Widget _getCharacterList() {
-    debugPrint("build new character list, length ${characters.length}");
+  Widget _getCharacterList(BuildContext context) {
+    Map<Haki, String> hakiEnumValueToDisplayValue = {
+      Haki.busoshoku: AppLocalizations.of(context)!.busoshoku,
+      Haki.haoshoku: AppLocalizations.of(context)!.haoshoku,
+      Haki.kenbunshoku: AppLocalizations.of(context)!.kenbunshoku,
+    };
     return ListView.builder(
-        shrinkWrap: true,
-        itemCount: characters.length,
-        itemBuilder: (context, index) {
-          var character = characters[index];
-          return Material(
-            type: MaterialType.transparency,
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-              decoration: const BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(5))),
-              child: ListTile(
-                minLeadingWidth: 10,
-                contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5),
-                ),
-                onTap: () {
-                  setState(
-                    () {
-                      context.goNamed('characterDetails',
-                          extra: character.id,
-                          pathParameters: {
-                            'name': I18nHelper.getDisplayNameFromI18n(
-                                character.name)
-                          });
-                      Navigator.pop(context);
-                    },
-                  );
-                },
-                hoverColor: OnepieceColors.liteFancyBlue,
-                title: Row(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                      child: Container(
-                        width: 50,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          borderRadius:
-                              const BorderRadius.all(Radius.circular(2.0)),
-                          border: Border.all(
-                              color: Colors.grey,
-                              width: 2,
-                              style: BorderStyle.solid),
-                        ),
-                        child: FittedBox(
-                          fit: BoxFit.fill,
-                          child: Image.memory(
-                              Base64Helper.decode(character.profileImage!)),
+      shrinkWrap: true,
+      itemCount: characters.length,
+      itemBuilder: (context, index) {
+        var character = characters[index];
+        return Material(
+          type: MaterialType.transparency,
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+            decoration: const BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(5))),
+            child: ListTile(
+              minLeadingWidth: 10,
+              contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5),
+              ),
+              onTap: () {
+                setState(
+                  () {
+                    context.goNamed('characterDetails',
+                        extra: character.id,
+                        pathParameters: {
+                          'name':
+                              I18nHelper.getDisplayNameFromI18n(character.name)
+                        });
+                    Navigator.pop(context);
+                  },
+                );
+              },
+              hoverColor: OnepieceColors.liteFancyBlue,
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(3, 3, 6, 3),
+                        child: Container(
+                          width: 50,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(2.0)),
+                            border: Border.all(
+                                color: Colors.grey,
+                                width: 2,
+                                style: BorderStyle.solid),
+                          ),
+                          child: FittedBox(
+                            fit: BoxFit.fill,
+                            child: Image.memory(
+                                Base64Helper.decode(character.profileImage!)),
+                          ),
                         ),
                       ),
-                    ),
-                    Text(I18nHelper.getDisplayNameFromI18n(character.name))
-                  ],
-                ),
+                      Text(I18nHelper.getDisplayNameFromI18n(character.name))
+                    ],
+                  ),
+                  if (character.hakis.isNotEmpty)
+                    Row(
+                      children: character.hakis
+                          .map((e) => Padding(
+                                padding: const EdgeInsets.only(right: 5),
+                                child: OnepieceTag.getHakiTag(
+                                    e, hakiEnumValueToDisplayValue[e]!),
+                              ))
+                          .toList(),
+                    )
+                ],
               ),
             ),
-          );
-        });
+          ),
+        );
+      },
+    );
   }
 
-  Widget _getFruitList() {
+  Widget _getFruitList(BuildContext context) {
+    Map<FruitType, String> fruitTypeToDisplayValue = {
+      FruitType.logia: AppLocalizations.of(context)!.logiaFruit,
+      FruitType.zoan: AppLocalizations.of(context)!.zoanFruit,
+      FruitType.ancientZoan: AppLocalizations.of(context)!.ancientZoanFruit,
+      FruitType.mythicalZoan: AppLocalizations.of(context)!.mythicalZoanFruit,
+      FruitType.artificialZoan:
+          AppLocalizations.of(context)!.artificialZoanFruit,
+      FruitType.paramecia: AppLocalizations.of(context)!.parameciaFruit,
+    };
     return ListView.builder(
         shrinkWrap: true,
         itemCount: fruits.length,
@@ -299,8 +330,14 @@ class _SearchPopupState extends State<SearchPopup> {
                 },
                 hoverColor: OnepieceColors.liteFancyBlue,
                 title: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(I18nHelper.getDisplayNameFromI18n(fruit.name!))
+                    Text(I18nHelper.getDisplayNameFromI18n(fruit.name!)),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 5),
+                      child: OnepieceTag.getFruitTag(fruit.fruitType!,
+                          fruitTypeToDisplayValue[fruit.fruitType]!),
+                    )
                   ],
                 ),
               ),
@@ -309,7 +346,14 @@ class _SearchPopupState extends State<SearchPopup> {
         });
   }
 
-  Widget _getGroupList() {
+  Widget _getGroupList(BuildContext context) {
+    Map<GroupCategory, String> groupCategoryToDisplayValue =
+        <GroupCategory, String>{
+      GroupCategory.marine: AppLocalizations.of(context)!.marine,
+      GroupCategory.pirate: AppLocalizations.of(context)!.pirate,
+      GroupCategory.underWorld: AppLocalizations.of(context)!.underworld,
+      GroupCategory.worldGovernment: AppLocalizations.of(context)!.worldGovernment,
+    };
     return ListView.builder(
         shrinkWrap: true,
         itemCount: groups.length,
@@ -343,28 +387,38 @@ class _SearchPopupState extends State<SearchPopup> {
                 },
                 hoverColor: OnepieceColors.liteFancyBlue,
                 title: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                      child: Container(
-                        width: 50,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          borderRadius:
-                              const BorderRadius.all(Radius.circular(2.0)),
-                          border: Border.all(
-                              color: Colors.grey,
-                              width: 2,
-                              style: BorderStyle.solid),
+                    Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(3, 6, 3, 3),
+                          child: Container(
+                            width: 50,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(2.0)),
+                              border: Border.all(
+                                  color: Colors.grey,
+                                  width: 2,
+                                  style: BorderStyle.solid),
+                            ),
+                            child: FittedBox(
+                              fit: BoxFit.fill,
+                              child: Image.memory(
+                                  Base64Helper.decode(group.profileImage!)),
+                            ),
+                          ),
                         ),
-                        child: FittedBox(
-                          fit: BoxFit.fill,
-                          child: Image.memory(
-                              Base64Helper.decode(group.profileImage!)),
-                        ),
-                      ),
+                        Text(I18nHelper.getDisplayNameFromI18n(group.name))
+                      ],
                     ),
-                    Text(I18nHelper.getDisplayNameFromI18n(group.name))
+                    Padding(
+                      padding: const EdgeInsets.only(right: 5),
+                      child: OnepieceTag.getGroupTag(group.groupCategory!,
+                          groupCategoryToDisplayValue[group.groupCategory]!),
+                    )
                   ],
                 ),
               ),

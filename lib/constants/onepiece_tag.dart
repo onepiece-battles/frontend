@@ -21,6 +21,25 @@ class OnepieceTag {
     GroupCategory.marine: OnepieceColors.liteFancyBlue,
   };
 
+  static Map<Haki, Color> hakiToColor = {
+    Haki.busoshoku: OnepieceColors.black,
+    Haki.kenbunshoku: OnepieceColors.liteFancyBlue,
+    Haki.haoshoku: Colors.deepPurple
+  };
+
+  static Widget getHakiTag(Haki haki, String text) {
+    return Container(
+      height: 25,
+      decoration: BoxDecoration(
+          borderRadius: const BorderRadius.all(Radius.circular(5)),
+          color: hakiToColor[haki]
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(4.0),
+        child: Text(text, style: OnepieceFonts.tagStyle,),
+      ),
+    );
+  }
 
   static getFruitTag(FruitType fruitType, String text) {
     return Container(

@@ -155,7 +155,7 @@
   "science": "science",
   "searchReceiver": "Search receiver ...",
   "searchResource": "search resource ...",
-  "searchResourceDetail": "search resource [character name| devil fruit name]",
+  "searchResourceDetail": "Search resource [character name| fruit name | group name]",
   "searchStarter": "Search starter ...",
   "selectCharacter": "Select character",
   "settings": "Settings",
