@@ -21,6 +21,10 @@ class CharacterDao {
     return await characterApi.eatFruit(eatFruitRequest);
   }
 
+  Future<JoinGroupResponse?> joinGroup(JoinGroupRequest request) async {
+    return await characterApi.joinGroup(request);
+  }
+
   Future<CharacterFullView?> getCharacter(GetCharacterFullViewRequest request) async {
     return await characterApi.getCharacterFullView(request);
   }
