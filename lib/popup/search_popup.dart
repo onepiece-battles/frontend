@@ -182,6 +182,7 @@ class _SearchPopupState extends State<SearchPopup> {
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: TextFormField(
+        autofocus: true,
         controller: searchBarController,
         decoration: InputDecoration(
           disabledBorder: const OutlineInputBorder(
@@ -348,10 +349,10 @@ class _SearchPopupState extends State<SearchPopup> {
   Widget _getGroupList(BuildContext context) {
     Map<GroupCategory, String> groupCategoryToDisplayValue =
         <GroupCategory, String>{
-      GroupCategory.marine: AppLocalizations.of(context)!.body,
-      GroupCategory.pirate: AppLocalizations.of(context)!.leg,
-      GroupCategory.underWorld: AppLocalizations.of(context)!.science,
-      GroupCategory.worldGovernment: AppLocalizations.of(context)!.fist,
+      GroupCategory.marine: AppLocalizations.of(context)!.marine,
+      GroupCategory.pirate: AppLocalizations.of(context)!.pirate,
+      GroupCategory.underWorld: AppLocalizations.of(context)!.underworld,
+      GroupCategory.worldGovernment: AppLocalizations.of(context)!.worldGovernment,
     };
     return ListView.builder(
         shrinkWrap: true,

@@ -147,10 +147,11 @@ class _GroupViewState extends State<GroupView> {
   Widget _createControlPanel(BuildContext context) {
     Map<GroupCategory, String> enumValueToDisplayValue =
         <GroupCategory, String>{
-      GroupCategory.marine: AppLocalizations.of(context)!.body,
-      GroupCategory.pirate: AppLocalizations.of(context)!.leg,
-      GroupCategory.underWorld: AppLocalizations.of(context)!.science,
-      GroupCategory.worldGovernment: AppLocalizations.of(context)!.fist,
+      GroupCategory.marine: AppLocalizations.of(context)!.marine,
+      GroupCategory.pirate: AppLocalizations.of(context)!.pirate,
+      GroupCategory.underWorld: AppLocalizations.of(context)!.underworld,
+      GroupCategory.worldGovernment:
+          AppLocalizations.of(context)!.worldGovernment,
     };
     return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
       Row(
@@ -493,10 +494,11 @@ class _GroupViewState extends State<GroupView> {
   List<DataRow> _createRows(BuildContext context) {
     Map<GroupCategory, String> enumValueToDisplayValue =
         <GroupCategory, String>{
-      GroupCategory.marine: AppLocalizations.of(context)!.body,
-      GroupCategory.pirate: AppLocalizations.of(context)!.leg,
-      GroupCategory.underWorld: AppLocalizations.of(context)!.science,
-      GroupCategory.worldGovernment: AppLocalizations.of(context)!.fist,
+      GroupCategory.marine: AppLocalizations.of(context)!.marine,
+      GroupCategory.pirate: AppLocalizations.of(context)!.pirate,
+      GroupCategory.underWorld: AppLocalizations.of(context)!.underworld,
+      GroupCategory.worldGovernment:
+          AppLocalizations.of(context)!.worldGovernment,
     };
     Map<bool, String> booleanToDisplayName = {
       true: AppLocalizations.of(context)!.yes,
@@ -663,17 +665,17 @@ class _GroupViewState extends State<GroupView> {
           }),
     );
     ElevatedButton confirmPage = ElevatedButton(
-        style: OnepieceButtonStyle.getDefaultStyle(),
-        onPressed: !confirmButtonEnabled
-            ? null
-            : () {
-                selectedPageIndex = int.parse(pageNumberController.text);
-                _search();
-              },
-        child: Text(
-          AppLocalizations.of(context)!.jumpToPage,
-          textAlign: TextAlign.left,
-        ),
+      style: OnepieceButtonStyle.getDefaultStyle(),
+      onPressed: !confirmButtonEnabled
+          ? null
+          : () {
+              selectedPageIndex = int.parse(pageNumberController.text);
+              _search();
+            },
+      child: Text(
+        AppLocalizations.of(context)!.jumpToPage,
+        textAlign: TextAlign.left,
+      ),
     );
     widgetList.add(Padding(
       padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
