@@ -95,7 +95,17 @@ class _CharacterDetailState extends State<CharacterDetail> {
   }
 
   _joinGroup() {
-    // todo(yichi): implements join group request
+    JoinGroupRequest request =
+        JoinGroupRequest(characterId: character.id, groupId: selectedGroupId!);
+    Future<JoinGroupResponse?> response =
+        getIt<CharacterDao>().joinGroup(request);
+    response.then(
+      (value) => {
+        setState(
+          () {},
+        )
+      },
+    );
   }
 
   void _updateData(CharacterFullView characterFullView) {
@@ -724,10 +734,10 @@ class _CharacterDetailState extends State<CharacterDetail> {
           padding: const EdgeInsets.all(8.0),
           child: _getJoinGroup(context),
         ),
-        // Padding(
-        //   padding: const EdgeInsets.all(8.0),
-        //   child: _getGroupList(context),
-        // )
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: _getGroupList(context),
+        )
       ],
     );
   }
@@ -880,6 +890,57 @@ class _CharacterDetailState extends State<CharacterDetail> {
         ),
       );
     });
+  }
+
+  Widget _getGroupList(BuildContext context) {
+    Map<GroupCategory, String> groupCategoryToDisplayValue =
+    <GroupCategory, String>{
+      GroupCategory.marine: AppLocalizations.of(context)!.marine,
+      GroupCategory.pirate: AppLocalizations.of(context)!.pirate,
+      GroupCategory.underWorld: AppLocalizations.of(context)!.underworld,
+      GroupCategory.worldGovernment: AppLocalizations.of(context)!.worldGovernment,
+    };
+    List<Widget> groupPart = [];
+    for (var group in groups) {
+      var column = Column(
+        children: [
+          InkWell(
+            onTap: () {
+              // todo(yichi): update left menu list selected tab
+              context.goNamed('groupDetails', extra: group.id, pathParameters: {
+                'name': I18nHelper.getDisplayNameFromI18n(group.name!)
+              });
+            },
+            borderRadius: const BorderRadius.all(Radius.circular(5)),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(I18nHelper.getDisplayNameFromI18n(group.name!)),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 5),
+                    child: OnepieceTag.getGroupTag(
+                      group.groupCategory!,
+                      groupCategoryToDisplayValue[group.groupCategory!]!,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      );
+      groupPart.add(column);
+    }
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: SizedBox(
+          width: 300,
+          child: Column(
+            children: groupPart,
+          )),
+    );
   }
 
   Widget _getBattle(BuildContext context) {
