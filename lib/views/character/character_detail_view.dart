@@ -58,7 +58,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
   late CharacterFullView character;
   List<BattleListView> battles = [];
   List<FruitListView> fruits = [];
-  List<Group> groups = [];
+  List<GroupForCharacterView> groups = [];
 
   SliderData sliderData = SliderData();
 
@@ -112,6 +112,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
     character = characterFullView;
     battles = characterFullView.battles;
     fruits = characterFullView.fruits;
+    groups = characterFullView.groups;
     // set initial slider value
     sliderData.setAttack(characterFullView.attack.toDouble());
     sliderData.setDefense(characterFullView.defense.toDouble());
@@ -827,7 +828,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                     shrinkWrap: true,
                     itemCount: searchingGroupList.length,
                     itemBuilder: (context, index) {
-                      var group = searchingGroupList[index];
+                      var currentGroup = searchingGroupList[index];
                       return Material(
                         type: MaterialType.transparency,
                         child: Container(
@@ -842,25 +843,25 @@ class _CharacterDetailState extends State<CharacterDetail> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(5),
                             ),
-                            selected: selectedGroupId == group.id,
+                            selected: selectedGroupId == currentGroup.id,
                             selectedTileColor: OnepieceColors.liteFancyBlue,
-                            // todo(yichi): fix on tap issue
                             onTap: () {
-                              selectedGroupId = group.id!;
-                              groupSetState(() {});
+                              groupSetState(() {
+                                selectedGroupId = currentGroup.id!;
+                              });
                             },
                             hoverColor: OnepieceColors.liteFancyBlue,
                             title: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(I18nHelper.getDisplayNameFromI18n(
-                                    group.name!)),
+                                    currentGroup.name!)),
                                 Padding(
                                   padding: const EdgeInsets.only(right: 5),
                                   child: OnepieceTag.getGroupTag(
-                                    group.groupCategory!,
+                                    currentGroup.groupCategory!,
                                     groupCategoryToDisplayValue[
-                                        group.groupCategory!]!,
+                                        currentGroup.groupCategory!]!,
                                   ),
                                 ),
                               ],
@@ -917,12 +918,36 @@ class _CharacterDetailState extends State<CharacterDetail> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(3, 6, 3, 3),
+                    child: Container(
+                      width: 50,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        borderRadius:
+                        const BorderRadius.all(Radius.circular(2.0)),
+                        border: Border.all(
+                            color: Colors.grey,
+                            width: 2,
+                            style: BorderStyle.solid),
+                      ),
+                      child: FittedBox(
+                        fit: BoxFit.fill,
+                        child: Image.memory(
+                            Base64Helper.decode(group.profileImage!)),
+                      ),
+                    ),
+                  ),
                   Text(I18nHelper.getDisplayNameFromI18n(group.name!)),
+                  if(group.onceBelongedTo!)  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 5),
+                    child: Text("(${AppLocalizations.of(context)!.onceBelongTo})"),
+                  ),
                   Padding(
                     padding: const EdgeInsets.only(right: 5),
                     child: OnepieceTag.getGroupTag(
-                      group.groupCategory!,
-                      groupCategoryToDisplayValue[group.groupCategory!]!,
+                      group.category!,
+                      groupCategoryToDisplayValue[group.category!]!,
                     ),
                   ),
                 ],
