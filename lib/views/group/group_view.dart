@@ -548,10 +548,15 @@ class _GroupViewState extends State<GroupView> {
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
                 child: Text(group.creator!),
               )),
-              DataCell(Padding(
-                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: _createCharacterList(group.characters),
-              )),
+              DataCell(
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                  child: SizedBox(
+                    width: 700,
+                    child: _createCharacterList(group.characters),
+                  ),
+                ),
+              ),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
                 child: Text(
@@ -563,54 +568,50 @@ class _GroupViewState extends State<GroupView> {
         .toList();
   }
 
-  Widget _createCharacterList(List<CharacterInGroupLite> character) {
-    if (character.isEmpty) {
+  Widget _createCharacterList(List<CharacterInGroupLite> characters) {
+    if (characters.isEmpty) {
       return const Text("");
     }
-    return ListView.builder(itemBuilder: (context, index) {
-      CharacterInGroupLite currentCharacter = character[index];
-      return Material(
-        type: MaterialType.transparency,
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-          decoration: const BoxDecoration(
-              borderRadius: BorderRadius.all(Radius.circular(5))),
-          child: ListTile(
-            minLeadingWidth: 10,
-            contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(5),
-            ),
-            onTap: () {
-              setState(
-                () {
-                  GoRouter.of(context).goNamed('characterDetails',
-                      extra: currentCharacter.id,
-                      pathParameters: {
-                        'name': I18nHelper.getDisplayNameFromI18n(
-                            currentCharacter.name)
-                      });
-                },
-              );
-            },
-            hoverColor: OnepieceColors.liteFancyBlue,
-            title: Row(
-              children: [
-                SizedBox(
-                  width: 200,
-                  child: Text(
-                    I18nHelper.getDisplayNameFromI18n(currentCharacter.name),
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: characters
+            .map((character) => InkWell(
+                  onTap: () {
+                    debugPrint("id ${character.id}");
+                    debugPrint("name ${character.name}");
+
+                    context.goNamed('characterDetails',
+                        extra: character.id,
+                        pathParameters: {
+                          'name':
+                              I18nHelper.getDisplayNameFromI18n(character.name!)
+                        });
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+                    child: Container(
+                      width: 50,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(2.0)),
+                        border: Border.all(
+                            color: Colors.grey,
+                            width: 2,
+                            style: BorderStyle.solid),
+                      ),
+                      child: FittedBox(
+                        fit: BoxFit.fill,
+                        child: Image.memory(
+                            Base64Helper.decode(character.profileImage!)),
+                      ),
+                    ),
                   ),
-                ),
-                SizedBox(width: 250, child: Text(currentCharacter.position!)),
-                if (currentCharacter.onceBelongedTo!)
-                  Text("(${AppLocalizations.of(context)!.leaved})"),
-              ],
-            ),
-          ),
-        ),
-      );
-    });
+                ))
+            .toList(),
+      ),
+    );
   }
 
   Row _getPageFoot() {

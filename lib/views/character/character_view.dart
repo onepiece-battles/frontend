@@ -675,6 +675,8 @@ class _CharacterViewState extends State<CharacterView> {
         .map(
           (character) => DataRow(
             onSelectChanged: (value) {
+              debugPrint("id list ${character.id}");
+              debugPrint("name list ${character.name}");
               context.goNamed('characterDetails',
                   extra: character.id,
                   pathParameters: {'name':  I18nHelper.getDisplayNameFromI18n(character.name)});
