@@ -1,11 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
-import 'package:one_piece_battles_flutter/views/battle_detail_view.dart';
-import 'package:one_piece_battles_flutter/views/battle_view.dart';
+import 'package:one_piece_battles_flutter/views/battle/battle_detail_view.dart';
+import 'package:one_piece_battles_flutter/views/battle/battle_view.dart';
 import 'package:one_piece_battles_flutter/views/character/character_detail_view.dart';
 import 'package:one_piece_battles_flutter/views/character/character_view.dart';
-import 'package:one_piece_battles_flutter/views/create_battle_view.dart';
+import 'package:one_piece_battles_flutter/views/battle/create_battle_view.dart';
 import 'package:one_piece_battles_flutter/views/character/create_character_view.dart';
 import 'package:one_piece_battles_flutter/views/fruit/create_fruit_view.dart';
 import 'package:one_piece_battles_flutter/views/fruit/fruit_detail_view.dart';
