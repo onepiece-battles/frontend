@@ -9,10 +9,10 @@ import 'package:one_piece_battles_flutter/utils/date_helper.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
 import 'package:logging/logging.dart';
-import '../constants/onepiece_colors.dart';
-import '../constants/onepiece_fonts.dart';
-import '../utils/data_validator.dart';
-import '../utils/image_helper.dart';
+import '../../constants/onepiece_colors.dart';
+import '../../constants/onepiece_fonts.dart';
+import '../../utils/data_validator.dart';
+import '../../utils/image_helper.dart';
 
 GetIt getIt = GetIt.instance;
 
