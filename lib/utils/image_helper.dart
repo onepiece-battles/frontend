@@ -21,26 +21,6 @@ class ImageHelper {
     );
   }
 
-  static Transform getTransformFromSvg(
-    String svgPath,
-    Color svgColor,
-    double width,
-    double height,
-    Function() onPressed,
-    double scale,
-  ) {
-    return Transform.scale(
-      scale: scale,
-      child: getIconButtonFromSvg(
-        svgPath,
-        svgColor,
-        width,
-        height,
-        onPressed,
-      ),
-    );
-  }
-
   static Image getImageFromPath(String path) {
     return Image(
       image: AssetImage(path),
