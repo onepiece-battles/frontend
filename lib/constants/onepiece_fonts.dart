@@ -12,6 +12,7 @@ class OnepieceFonts {
   static const double tableHeaderFontSize = 15;
   static const double dropDownFontSize = 16;
   static const double smallContentFontSize = 16;
+  static const double superSmallContentFontSize = 12;
   static const Color contentFontColor = Colors.black54;
   static const FontWeight sideMenuFontWeight = FontWeight.w500;
   static const double tagFont = 12;
@@ -38,6 +39,9 @@ class OnepieceFonts {
   static const TextStyle smallContentStyleWhite = TextStyle(
       color: Colors.white,
       fontSize: OnepieceFonts.smallContentFontSize);
+  static const TextStyle superSmallContentStyleWhite = TextStyle(
+      color: Colors.white,
+      fontSize: OnepieceFonts.superSmallContentFontSize);
   static const TextStyle contentStyleBold = TextStyle(
       color: OnepieceFonts.contentFontColor,
       fontSize: OnepieceFonts.contentFontSize,
