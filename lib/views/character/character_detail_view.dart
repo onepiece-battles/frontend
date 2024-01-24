@@ -12,6 +12,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../repository/fruit_dao.dart';
 import '../../utils/base64_helper.dart';
 import '../../utils/i18n_helper.dart';
+import '../../utils/image_helper.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -289,6 +290,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                         characterNameController,
                         AppLocalizations.of(context)!.name,
                         20,
+                          _getIcon('images/character_digits_icon/name.svg')
                       ),
                       _getStringFormField(
                         context,
@@ -296,6 +298,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                         characterBirthPlace,
                         AppLocalizations.of(context)!.birthPlace,
                         20,
+                          _getIcon('images/character_digits_icon/birth_place.svg')
                       ),
                       _getStringFormField(
                         context,
@@ -303,6 +306,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                         characterDateOfBirth,
                         AppLocalizations.of(context)!.birthDay,
                         20,
+                          _getIcon('images/character_digits_icon/birthday.svg')
                       ),
                     ],
                   ),
@@ -318,6 +322,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                         AppLocalizations.of(context)!.bounty,
                         10,
                         100000000000,
+                        _getIcon('images/character_digits_icon/bounty.svg')
                       ),
                       _getDigitFormField(
                         context,
@@ -326,6 +331,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                         AppLocalizations.of(context)!.age,
                         0,
                         100000,
+                          _getIcon('images/character_digits_icon/age.svg')
                       ),
                       _getDigitFormField(
                         context,
@@ -334,6 +340,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                         AppLocalizations.of(context)!.height,
                         1,
                         100000,
+                          _getIcon('images/character_digits_icon/height.svg')
                       ),
                     ],
                   ),
@@ -344,6 +351,17 @@ class _CharacterDetailState extends State<CharacterDetail> {
         ],
       );
     });
+  }
+
+  Widget _getIcon(String path) {
+    return Padding(
+      padding: const EdgeInsets.all(10.0),
+      child: ImageHelper.getSvgIconWithColor(
+          path,
+          3,
+          3,
+          OnepieceColors.fancyBlue),
+    );
   }
 
 // show character combat information (editable if permitted)
@@ -401,6 +419,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                         AppLocalizations.of(context)!.characterAttack,
                         10,
                         1000,
+                          _getIcon('images/character_digits_icon/attack.svg')
                       ),
                       _getDigitFormField(
                         context,
@@ -409,6 +428,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                         AppLocalizations.of(context)!.characterDefense,
                         10,
                         1000,
+                          _getIcon('images/character_digits_icon/defense.svg')
                       ),
                       _getDigitFormField(
                         context,
@@ -417,6 +437,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                         AppLocalizations.of(context)!.characterBlood,
                         100,
                         10000,
+                          _getIcon('images/character_digits_icon/blood.svg')
                       ),
                       _getDigitFormField(
                         context,
@@ -425,6 +446,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                         AppLocalizations.of(context)!.characterSpeed,
                         10,
                         200,
+                          _getIcon('images/character_digits_icon/speed.svg')
                       ),
                     ],
                   ),
@@ -440,6 +462,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                         AppLocalizations.of(context)!.characterIntelligence,
                         70,
                         260,
+                          _getIcon('images/character_digits_icon/intelligence.svg')
                       ),
                       _getDigitFormField(
                         context,
@@ -448,6 +471,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                         AppLocalizations.of(context)!.characterEnergy,
                         10,
                         50,
+                          _getIcon('images/character_digits_icon/energy.svg')
                       ),
                       _getDigitFormField(
                         context,
@@ -456,6 +480,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                         AppLocalizations.of(context)!.groupGain,
                         1,
                         5,
+                          _getIcon('images/character_digits_icon/group_gain.svg')
                       ),
                       _getDigitFormField(
                         context,
@@ -464,6 +489,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                         AppLocalizations.of(context)!.fruitLimit,
                         1,
                         2,
+                          _getIcon('images/character_digits_icon/fruit_limit.svg')
                       ),
                     ],
                   ),
@@ -1080,7 +1106,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
   }
 
   Widget _getStringFormField(BuildContext context, bool editable,
-      TextEditingController controller, String label, int length) {
+      TextEditingController controller, String label, int length, Widget? icon) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 20, 0, 10),
       child: Column(
@@ -1103,9 +1129,10 @@ class _CharacterDetailState extends State<CharacterDetail> {
               controller: controller,
               enabled: editable,
               // maxLength: length,
-              decoration: const InputDecoration(
+              decoration:  InputDecoration(
+                prefixIcon: icon,
                   floatingLabelBehavior: FloatingLabelBehavior.auto,
-                  contentPadding: EdgeInsets.fromLTRB(10, 2, 10, 2)),
+                  contentPadding: const EdgeInsets.fromLTRB(10, 2, 10, 2)),
             ),
           ),
         ],
@@ -1114,7 +1141,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
   }
 
   Widget _getDigitFormField(BuildContext context, bool editable,
-      TextEditingController controller, String label, int min, int max) {
+      TextEditingController controller, String label, int min, int max, Widget? icon) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 20, 0, 10),
       child: Column(
@@ -1149,6 +1176,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                 return null;
               },
               decoration: InputDecoration(
+                prefixIcon: icon,
                 floatingLabelBehavior: FloatingLabelBehavior.auto,
                 contentPadding: const EdgeInsets.fromLTRB(10, 2, 10, 2),
                 labelText: "($min-$max)",

@@ -17,6 +17,7 @@ import '../../repository/character_dao.dart';
 import '../../repository/image_dao.dart';
 import '../../utils/base64_helper.dart';
 import '../../utils/data_converter.dart';
+import '../../utils/image_helper.dart';
 import '../../utils/onepiece_image_picker.dart';
 
 GetIt getIt = GetIt.instance;
@@ -220,56 +221,56 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                           context,
                           characterFruitLimitController,
                           AppLocalizations.of(context)!.fruitLimit,
-                          const Icon(Icons.ac_unit)),
+                          _getIcon('images/character_digits_icon/fruit_limit.svg')),
                       _getFormField(
                           1,
                           5,
                           context,
                           characterGroupGainController,
                           AppLocalizations.of(context)!.groupGain,
-                          const Icon(Icons.face)),
+                        _getIcon('images/character_digits_icon/group_gain.svg')),
                       _getFormField(
                           10,
                           1000,
                           context,
                           characterAttackController,
                           AppLocalizations.of(context)!.characterAttack,
-                          const Icon(Icons.face)),
+                        _getIcon('images/character_digits_icon/attack.svg')),
                       _getFormField(
                           10,
                           1000,
                           context,
                           characterDefenseController,
                           AppLocalizations.of(context)!.characterDefense,
-                          const Icon(Icons.face)),
+                        _getIcon('images/character_digits_icon/defense.svg'),),
                       _getFormField(
                           70,
                           260,
                           context,
                           characterIntelligenceController,
                           AppLocalizations.of(context)!.characterIntelligence,
-                          const Icon(Icons.face)),
+                        _getIcon('images/character_digits_icon/intelligence.svg'),),
                       _getFormField(
                           100,
                           10000,
                           context,
                           characterBloodController,
                           AppLocalizations.of(context)!.characterBlood,
-                          const Icon(Icons.face)),
+                        _getIcon('images/character_digits_icon/blood.svg'),),
                       _getFormField(
                           10,
                           200,
                           context,
                           characterSpeedController,
                           AppLocalizations.of(context)!.characterSpeed,
-                          const Icon(Icons.face)),
+                        _getIcon('images/character_digits_icon/speed.svg'),),
                       _getFormField(
                           10,
                           50,
                           context,
                           characterEnergyController,
                           AppLocalizations.of(context)!.characterEnergy,
-                          const Icon(Icons.face)),
+                        _getIcon('images/character_digits_icon/energy.svg'),),
                     ],
                   ),
                   const SizedBox(
@@ -300,33 +301,33 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                           context,
                           characterAge,
                           AppLocalizations.of(context)!.age,
-                          const Icon(Icons.ac_unit)),
+                        _getIcon('images/character_digits_icon/age.svg'),),
                       _getFormField(
                           1,
                           100000,
                           context,
                           characterHeight,
                           AppLocalizations.of(context)!.height,
-                          const Icon(Icons.face)),
+                        _getIcon('images/character_digits_icon/height.svg'),),
                       _getStringFormField(
                           20,
                           context,
                           characterBirthPlace,
                           AppLocalizations.of(context)!.birthPlace,
-                          const Icon(Icons.face)),
+                        _getIcon('images/character_digits_icon/birth_place.svg'),),
                       _getStringFormField(
                           20,
                           context,
                           characterDateOfBirth,
                           AppLocalizations.of(context)!.birthDay,
-                          const Icon(Icons.face)),
+                        _getIcon('images/character_digits_icon/birthday.svg'),),
                       _getFormField(
                           10,
                           100000000000,
                           context,
                           characterBounty,
                           AppLocalizations.of(context)!.bounty,
-                          const Icon(Icons.face)),
+                        _getIcon('images/character_digits_icon/bounty.svg'),),
                     ],
                   ),
                 ],
@@ -627,7 +628,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
   }
 
   Widget _getFormField(int min, int max, BuildContext context,
-      TextEditingController controller, String label, Icon icon) {
+      TextEditingController controller, String label, Widget? icon) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 20, 0, 10),
       child: SizedBox(
@@ -658,7 +659,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
   }
 
   Widget _getStringFormField(int length, BuildContext context,
-      TextEditingController controller, String label, Icon icon) {
+      TextEditingController controller, String label, Widget? icon) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 20, 0, 10),
       child: SizedBox(
@@ -674,6 +675,16 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
           ),
         ),
       ),
+    );
+  }
+  Widget _getIcon(String path) {
+    return Padding(
+      padding: const EdgeInsets.all(10.0),
+      child: ImageHelper.getSvgIconWithColor(
+          path,
+          3,
+          3,
+          OnepieceColors.fancyBlue),
     );
   }
 
