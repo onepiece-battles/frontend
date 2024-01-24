@@ -1,4 +1,7 @@
+import 'dart:ui';
+
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
@@ -437,10 +440,12 @@ class HomePageState extends State<HomePage> {
                     ],
                   ),
                   onPressed: () {
-                    showDialog(
+                    showCupertinoModalPopup(
+                      filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
                       context: context,
                       builder: ((context) {
                         return const Dialog(
+                          backgroundColor: OnepieceColors.liteFancyGreen,
                           alignment: AlignmentDirectional.topCenter,
                           child: SearchPopup(),
                         );
