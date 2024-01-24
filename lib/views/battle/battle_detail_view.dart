@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get_it/get_it.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
+import 'package:one_piece_battles_flutter/graph/character_bar_graph.dart';
 import 'package:one_piece_battles_flutter/popup/onepiece_alert.dart';
 import 'package:one_piece_battles_flutter/repository/battle_dao.dart';
 import 'package:one_piece_battles_flutter/repository/file_dao.dart';
@@ -14,6 +15,7 @@ import 'package:openapi/api.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../constants/button_style.dart';
 import '../../constants/onepiece_fonts.dart';
+import '../../graph/individual_bar.dart';
 import '../../utils/base64_helper.dart';
 
 GetIt getIt = GetIt.instance;
@@ -161,8 +163,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
     return Consumer<BattleExecutionData>(builder: (context, model, child) {
       return Column(
         children: [
-          const
-          Icon(
+          const Icon(
             Icons.check_circle,
             size: 60,
             color: OnepieceColors.fancyBlue,
@@ -179,7 +180,8 @@ class _BattleDetailViewState extends State<BattleDetailView> {
               color: OnepieceColors.fancyBlue,
             ),
           if (model.battleStatus == BattleStatus.FINISHED)
-            const Icon(Icons.check_circle, size: 60, color: OnepieceColors.fancyBlue),
+            const Icon(Icons.check_circle,
+                size: 60, color: OnepieceColors.fancyBlue),
           if (model.battleStatus == BattleStatus.FAILED)
             ImageHelper.getSvgIconWithColor(
                 'images/svgs/failed.svg', 60, 60, Colors.red),
@@ -191,6 +193,28 @@ class _BattleDetailViewState extends State<BattleDetailView> {
   Widget _getStart(BuildContext context) {
     return Row(
       children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 60.0),
+          child: SizedBox(
+            width: 180,
+            height: 180,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: RotatedBox(
+                quarterTurns: 1,
+                child: CharacterBarGraph(
+                    characterData: CharacterData(
+                  battle.starter!.attack,
+                  battle.starter!.defense,
+                  battle.starter!.intelligence,
+                  battle.starter!.speed,
+                  battle.starter!.blood,
+                  battle.starter!.energy,
+                )),
+              ),
+            ),
+          ),
+        ),
         Container(
           width: 120,
           height: 120,
@@ -224,6 +248,28 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                 Base64Helper.decode(battle.receiver!.profileImage!)),
           ),
         ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 60.0),
+          child: SizedBox(
+            width: 180,
+            height: 180,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: RotatedBox(
+                quarterTurns: 1,
+                child: CharacterBarGraph(
+                    characterData: CharacterData(
+                  battle.receiver!.attack,
+                  battle.receiver!.defense,
+                  battle.receiver!.intelligence,
+                  battle.receiver!.speed,
+                  battle.receiver!.blood,
+                  battle.receiver!.energy,
+                )),
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -232,30 +278,28 @@ class _BattleDetailViewState extends State<BattleDetailView> {
     return Consumer<BattleExecutionData>(builder: (context, model, child) {
       return Padding(
         padding: const EdgeInsets.all(20.0),
-        child:
-          IconButton(
-            iconSize: 50,
-            tooltip: AppLocalizations.of(context)!.startBattle,
-            onPressed: model.battleStatus == BattleStatus.CREATED
-                ? () {
-              getIt<BattleDao>()
-                  .startBattle(StartBattleRequest(battleId: battle.id))
-                  .then((value) => {
-                OnepieceAlert.getBasicAlertDialogFunc(
-                    context, "battle", "start success")
-              });
-            }
-                : null,
-            disabledColor: Colors.grey,
-            splashRadius: 1,
-            icon: SvgPicture.asset(
-              'images/svgs/battle.svg',
-              color: OnepieceColors.fancyBlue,
-              width: 500,
-              height: 500,
-            ),
+        child: IconButton(
+          iconSize: 50,
+          tooltip: AppLocalizations.of(context)!.startBattle,
+          onPressed: model.battleStatus == BattleStatus.CREATED
+              ? () {
+                  getIt<BattleDao>()
+                      .startBattle(StartBattleRequest(battleId: battle.id))
+                      .then((value) => {
+                            OnepieceAlert.getBasicAlertDialogFunc(
+                                context, "battle", "start success")
+                          });
+                }
+              : null,
+          disabledColor: Colors.grey,
+          splashRadius: 1,
+          icon: SvgPicture.asset(
+            'images/svgs/battle.svg',
+            color: OnepieceColors.fancyBlue,
+            width: 500,
+            height: 500,
           ),
-
+        ),
       );
     });
   }
@@ -328,5 +372,36 @@ class BattleExecutionData extends ChangeNotifier {
       _winnerId = winnerId;
       notifyListeners();
     }
+  }
+}
+
+class CharacterData {
+  final int attackMax = 1000;
+  final int defenseMax = 1000;
+  final int intelligenceMax = 260;
+  final int speedMax = 200;
+  final int bloodMax = 10000;
+  final int energyMax = 50;
+  final int attack;
+  final int defense;
+  final int intelligence;
+  final int speed;
+  final int blood;
+  final int energy;
+
+  CharacterData(this.attack, this.defense, this.intelligence, this.speed,
+      this.blood, this.energy);
+
+  List<IndividualBar> barData = [];
+
+  void initBarData() {
+    barData = [
+      IndividualBar(x: 0, y: attack, yMax: attackMax),
+      IndividualBar(x: 1, y: defense, yMax: defenseMax),
+      IndividualBar(x: 2, y: intelligence, yMax: intelligenceMax),
+      IndividualBar(x: 3, y: speed, yMax: speedMax),
+      IndividualBar(x: 4, y: blood, yMax: bloodMax),
+      IndividualBar(x: 5, y: energy, yMax: energyMax),
+    ];
   }
 }
