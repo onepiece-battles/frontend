@@ -441,7 +441,7 @@ class HomePageState extends State<HomePage> {
                   ),
                   onPressed: () {
                     showCupertinoModalPopup(
-                      filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                      filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
                       context: context,
                       builder: ((context) {
                         return const Dialog(
