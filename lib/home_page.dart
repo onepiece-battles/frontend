@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/app_router.dart';
@@ -51,33 +52,40 @@ class HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Row(
-        children: [
-          _getSideMenu(context),
-          Expanded(
-            child: Column(
-              children: [
-                SizedBox(
-                  height: 55,
-                  child: Padding(
-                    padding: const EdgeInsets.all(5.0),
-                    child: _getHeader(context),
-                  ),
+    return RawKeyboardListener(
+        focusNode: FocusNode(),
+        onKey: (event) {
+          if (event.isKeyPressed(LogicalKeyboardKey.slash)) {
+            _showDialog(context);
+          }
+        },
+        child: Scaffold(
+          body: Row(
+            children: [
+              _getSideMenu(context),
+              Expanded(
+                child: Column(
+                  children: [
+                    SizedBox(
+                      height: 55,
+                      child: Padding(
+                        padding: const EdgeInsets.all(5.0),
+                        child: _getHeader(context),
+                      ),
+                    ),
+                    const Divider(
+                      height: 10,
+                      thickness: 1.5,
+                    ),
+                    Expanded(
+                      child: widget.mainScreen,
+                    )
+                  ],
                 ),
-                const Divider(
-                  height: 10,
-                  thickness: 1.5,
-                ),
-                Expanded(
-                  child: widget.mainScreen,
-                )
-              ],
-            ),
-          )
-        ],
-      ),
-    );
+              )
+            ],
+          ),
+        ));
   }
 
   // the first one route is fixed in this case, and the latter routes are clickable
@@ -440,17 +448,7 @@ class HomePageState extends State<HomePage> {
                     ],
                   ),
                   onPressed: () {
-                    showCupertinoModalPopup(
-                      filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                      context: context,
-                      builder: ((context) {
-                        return const Dialog(
-                          backgroundColor: OnepieceColors.liteFancyGreen,
-                          alignment: AlignmentDirectional.topCenter,
-                          child: SearchPopup(),
-                        );
-                      }),
-                    );
+                    _showDialog(context);
                   },
                 ),
               ),
@@ -458,6 +456,20 @@ class HomePageState extends State<HomePage> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showDialog(BuildContext context) {
+    showCupertinoModalPopup(
+      filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+      context: context,
+      builder: ((context) {
+        return const Dialog(
+          backgroundColor: OnepieceColors.liteFancyGreen,
+          alignment: AlignmentDirectional.topCenter,
+          child: SearchPopup(),
+        );
+      }),
     );
   }
 
@@ -506,57 +518,57 @@ class HomePageState extends State<HomePage> {
         loginRoleResources.map((e) => e.toString()).toList();
     currentLoginRoleResources.add(setting);
     return ListView.builder(
-        shrinkWrap: true,
-        itemCount: currentLoginRoleResources.length,
-        itemBuilder: (context, index) {
-          String resourceType = currentLoginRoleResources[index];
-          return Material(
-            type: MaterialType.transparency,
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-              decoration: const BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(5))),
-              child: ListTile(
-                minLeadingWidth: 10,
-                contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5),
-                ),
-                leading: resourceToIconMap[resourceType],
-                selected: selectedResource == resourceType,
-                selectedTileColor: OnepieceColors.liteFancyBlue,
-                onTap: () {
-                  setState(
-                    () {
-                      selectedResource = resourceType;
-                      GoRouter.of(context)
-                          .go(resourceToLocationMap[resourceType]!);
-                    },
-                  );
-                },
-                trailing: Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 0, 3, 0),
-                  child: Container(
-                    width: 3,
-                    height: 30,
-                    decoration: BoxDecoration(
-                        color: OnepieceColors.menuBackgroundColor,
-                        borderRadius: BorderRadius.circular(3)),
-                  ),
-                ),
-                hoverColor: OnepieceColors.liteFancyBlue,
-                title: Text(
-                  resourceToDisplayTextMap[resourceType]!,
-                  textAlign: TextAlign.left,
-                  style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: OnepieceFonts.sideMenuFontWeight,
-                      color: OnepieceColors.menuTextColor),
+      shrinkWrap: true,
+      itemCount: currentLoginRoleResources.length,
+      itemBuilder: (context, index) {
+        String resourceType = currentLoginRoleResources[index];
+        return Material(
+          type: MaterialType.transparency,
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+            decoration: const BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(5))),
+            child: ListTile(
+              minLeadingWidth: 10,
+              contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5),
+              ),
+              leading: resourceToIconMap[resourceType],
+              selected: selectedResource == resourceType,
+              selectedTileColor: OnepieceColors.liteFancyBlue,
+              onTap: () {
+                setState(
+                  () {
+                    selectedResource = resourceType;
+                    GoRouter.of(context)
+                        .go(resourceToLocationMap[resourceType]!);
+                  },
+                );
+              },
+              trailing: Padding(
+                padding: const EdgeInsets.fromLTRB(0, 0, 3, 0),
+                child: Container(
+                  width: 3,
+                  height: 30,
+                  decoration: BoxDecoration(
+                      color: OnepieceColors.menuBackgroundColor,
+                      borderRadius: BorderRadius.circular(3)),
                 ),
               ),
+              hoverColor: OnepieceColors.liteFancyBlue,
+              title: Text(
+                resourceToDisplayTextMap[resourceType]!,
+                textAlign: TextAlign.left,
+                style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: OnepieceFonts.sideMenuFontWeight,
+                    color: OnepieceColors.menuTextColor),
+              ),
             ),
-          );
-        },
+          ),
+        );
+      },
     );
   }
 
