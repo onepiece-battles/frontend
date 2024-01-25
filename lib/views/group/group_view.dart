@@ -523,7 +523,7 @@ class _GroupViewState extends State<GroupView> {
                       borderRadius:
                           const BorderRadius.all(Radius.circular(2.0)),
                       border: Border.all(
-                          color: Colors.grey,
+                          color: OnepieceColors.fancyBlue,
                           width: 2,
                           style: BorderStyle.solid),
                     ),
@@ -597,7 +597,7 @@ class _GroupViewState extends State<GroupView> {
                         borderRadius:
                             const BorderRadius.all(Radius.circular(2.0)),
                         border: Border.all(
-                            color: Colors.grey,
+                            color: OnepieceColors.fancyBlue,
                             width: 2,
                             style: BorderStyle.solid),
                       ),

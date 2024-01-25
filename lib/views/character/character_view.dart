@@ -692,7 +692,7 @@ class _CharacterViewState extends State<CharacterView> {
                       borderRadius:
                           const BorderRadius.all(Radius.circular(2.0)),
                       border: Border.all(
-                          color: Colors.grey,
+                          color: OnepieceColors.fancyBlue,
                           width: 2,
                           style: BorderStyle.solid),
                     ),
