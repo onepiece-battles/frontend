@@ -267,7 +267,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                       borderRadius:
                           const BorderRadius.all(Radius.circular(5.0)),
                       border: Border.all(
-                          color: OnepieceColors.liteFancyBlue,
+                          color: OnepieceColors.fancyBlue,
                           width: 5,
                           style: BorderStyle.solid),
                     ),
