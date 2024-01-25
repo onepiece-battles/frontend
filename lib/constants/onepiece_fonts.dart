@@ -29,6 +29,9 @@ class OnepieceFonts {
       fontSize: OnepieceFonts.contentFontSize);
   static const TextStyle fancyBlueHintFont = TextStyle(
       color: OnepieceColors.fancyBlue, fontSize: OnepieceFonts.contentFontSize);
+  static const TextStyle liteFancyBlueHintFont = TextStyle(
+      color: OnepieceColors.liteFancyBlue,
+      fontSize: OnepieceFonts.contentFontSize);
   static const TextStyle deepBlackHintFont = TextStyle(
       color: OnepieceColors.black, fontSize: OnepieceFonts.contentFontSize);
   static const TextStyle loadingFont = TextStyle(
@@ -37,11 +40,9 @@ class OnepieceFonts {
       color: OnepieceFonts.contentFontColor,
       fontSize: OnepieceFonts.smallContentFontSize);
   static const TextStyle smallContentStyleWhite = TextStyle(
-      color: Colors.white,
-      fontSize: OnepieceFonts.smallContentFontSize);
+      color: Colors.white, fontSize: OnepieceFonts.smallContentFontSize);
   static const TextStyle superSmallContentStyleWhite = TextStyle(
-      color: Colors.white,
-      fontSize: OnepieceFonts.superSmallContentFontSize);
+      color: Colors.white, fontSize: OnepieceFonts.superSmallContentFontSize);
   static const TextStyle contentStyleBold = TextStyle(
       color: OnepieceFonts.contentFontColor,
       fontSize: OnepieceFonts.contentFontSize,

@@ -104,24 +104,50 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                   create: (context) => BattleExecutionData(BattleStatus.CREATED,
                       BattleReportStage.WAITING, null, null),
                   child: Padding(
-                    padding: const EdgeInsets.only(top: 200),
+                    padding: const EdgeInsets.only(top: 100),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        _getHeader(context),
+                        // _getHeader(context),
                         _getStart(context),
-                        const Padding(
-                          padding: EdgeInsets.all(8.0),
+                        const SizedBox(
+                          width: 400,
                           child: Divider(
                             color: OnepieceColors.fancyBlue,
-                            thickness: 5,
+                            thickness: 2,
                             height: 20,
                           ),
                         ),
-                        _getProgressBar(context),
+                        _getProgressBar(context, 40),
+                        const SizedBox(
+                          width: 400,
+                          child: Divider(
+                            color: OnepieceColors.fancyBlue,
+                            thickness: 2,
+                            height: 20,
+                          ),
+                        ),
                         _getWinnerTag(context),
-                        _getResult(context)
+                        _getResult(context),
+                        const SizedBox(
+                          width: 400,
+                          child: Divider(
+                            color: OnepieceColors.fancyBlue,
+                            thickness: 2,
+                            height: 20,
+                          ),
+                        ),
+                        _getBattleReportProgress(context, 40),
+                        const SizedBox(
+                          width: 400,
+                          child: Divider(
+                            color: OnepieceColors.fancyBlue,
+                            thickness: 2,
+                            height: 20,
+                          ),
+                        ),
+                        _getBattleReportIcon(context)
                       ],
                     ),
                   ),
@@ -151,44 +177,134 @@ class _BattleDetailViewState extends State<BattleDetailView> {
 
   Widget _getWinnerTag(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.fromLTRB(0, 0, 0, 20),
-      child: Text(
+      margin: const EdgeInsets.fromLTRB(0, 20, 0, 10),
+      child:  Text(
         AppLocalizations.of(context)!.winner,
-        style: OnepieceFonts.headerStyle,
+        style: const TextStyle(
+          color: OnepieceColors.fancyGreen,
+          fontStyle: FontStyle.normal,
+          fontSize: 20,
+          fontWeight: FontWeight.bold
+        ),
       ),
     );
   }
 
-  Widget _getProgressBar(BuildContext context) {
+  Widget _getProgressBar(BuildContext context, double iconSize) {
     return Consumer<BattleExecutionData>(builder: (context, model, child) {
-      return Column(
-        children: [
-          const Icon(
-            Icons.check_circle,
-            size: 60,
-            color: OnepieceColors.fancyBlue,
-          ),
-          model.battleStatus == BattleStatus.CREATED
-              ? const Icon(Icons.check_circle_outline,
-                  size: 60, color: OnepieceColors.fancyBlue)
-              : const Icon(Icons.check_circle, size: 60),
-          if (model.battleStatus == BattleStatus.CREATED ||
-              model.battleStatus == BattleStatus.IN_PROGRESS)
-            const Icon(
-              Icons.check_circle_outline,
-              size: 60,
-              color: OnepieceColors.fancyBlue,
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.check_circle,
+                  size: iconSize,
+                  color: OnepieceColors.fancyBlue,
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: Text(
+                    AppLocalizations.of(context)!.battleStatusCreated,
+                    style: OnepieceFonts.fancyBlueHintFont,
+                  ),
+                )
+              ],
             ),
-          if (model.battleStatus == BattleStatus.FINISHED)
-            const Icon(Icons.check_circle,
-                size: 60, color: OnepieceColors.fancyBlue),
-          if (model.battleStatus == BattleStatus.FAILED)
-            ImageHelper.getSvgIconWithColor(
-                'images/svgs/failed.svg', 60, 60, Colors.red),
-        ],
+            const Padding(
+              padding: EdgeInsets.only(left: 17.0),
+              child: Text(
+                "|",
+                style: OnepieceFonts.fancyBlueHintFont,
+              ),
+            ),
+            model.battleStatus == BattleStatus.CREATED
+                ? Row(
+                    children: [
+                      Icon(Icons.check_circle_outline,
+                          size: iconSize, color: OnepieceColors.liteFancyBlue),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8.0),
+                        child: Text(
+                          AppLocalizations.of(context)!.battleInProgress,
+                          style: OnepieceFonts.liteFancyBlueHintFont,
+                        ),
+                      )
+                    ],
+                  )
+                : Row(
+                    children: [
+                      Icon(Icons.check_circle, size: iconSize),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8.0),
+                        child: Text(
+                          AppLocalizations.of(context)!.battleInProgress,
+                          style: OnepieceFonts.fancyBlueHintFont,
+                        ),
+                      )
+                    ],
+                  ),
+            const Padding(
+              padding: EdgeInsets.only(left: 17.0),
+              child: Text(
+                "|",
+                style: OnepieceFonts.fancyBlueHintFont,
+              ),
+            ),
+            if (model.battleStatus == BattleStatus.CREATED ||
+                model.battleStatus == BattleStatus.IN_PROGRESS)
+              Row(
+                children: [
+                  Icon(
+                    Icons.check_circle_outline,
+                    size: iconSize,
+                    color: OnepieceColors.liteFancyBlue,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: Text(
+                      AppLocalizations.of(context)!.battleFinished,
+                      style: OnepieceFonts.liteFancyBlueHintFont,
+                    ),
+                  )
+                ],
+              ),
+            if (model.battleStatus == BattleStatus.FINISHED)
+              Row(
+                children: [
+                  Icon(Icons.check_circle,
+                      size: iconSize, color: OnepieceColors.fancyBlue),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: Text(
+                      AppLocalizations.of(context)!.battleStatusFinished,
+                      style: OnepieceFonts.fancyBlueHintFont,
+                    ),
+                  )
+                ],
+              ),
+            if (model.battleStatus == BattleStatus.FAILED)
+              Row(
+                children: [
+                  ImageHelper.getSvgIconWithColor(
+                      'images/svgs/failed.svg', iconSize, iconSize, Colors.red),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: Text(
+                      AppLocalizations.of(context)!.battleStatusFailed,
+                      style: OnepieceFonts.liteFancyBlueHintFont,
+                    ),
+                  )
+                ],
+              ),
+          ],
+        ),
       );
     });
   }
+
 
   Widget _getStart(BuildContext context) {
     return Row(
@@ -215,38 +331,54 @@ class _BattleDetailViewState extends State<BattleDetailView> {
             ),
           ),
         ),
-        Container(
-          width: 120,
-          height: 120,
-          decoration: BoxDecoration(
-            borderRadius: const BorderRadius.all(Radius.circular(8)),
-            border: Border.all(
-                color: OnepieceColors.fancyBlue,
-                width: 5,
-                style: BorderStyle.solid),
-          ),
-          child: FittedBox(
-            fit: BoxFit.fill,
-            child: Image.memory(
-                Base64Helper.decode(battle.starter!.profileImage!)),
-          ),
+        Column(
+          children: [
+            Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.all(Radius.circular(8)),
+                border: Border.all(
+                    color: OnepieceColors.fancyBlue,
+                    width: 5,
+                    style: BorderStyle.solid),
+              ),
+              child: FittedBox(
+                fit: BoxFit.fill,
+                child: Image.memory(
+                    Base64Helper.decode(battle.starter!.profileImage!)),
+              ),
+            ),
+            Text(
+              I18nHelper.getDisplayNameFromI18n(starter.name),
+              style: OnepieceFonts.fancyBlueHintFont,
+            )
+          ],
         ),
         _getStartButton(context),
-        Container(
-          width: 120,
-          height: 120,
-          decoration: BoxDecoration(
-            borderRadius: const BorderRadius.all(Radius.circular(8)),
-            border: Border.all(
-                color: OnepieceColors.fancyBlue,
-                width: 5,
-                style: BorderStyle.solid),
-          ),
-          child: FittedBox(
-            fit: BoxFit.fill,
-            child: Image.memory(
-                Base64Helper.decode(battle.receiver!.profileImage!)),
-          ),
+        Column(
+          children: [
+            Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.all(Radius.circular(8)),
+                border: Border.all(
+                    color: OnepieceColors.fancyBlue,
+                    width: 5,
+                    style: BorderStyle.solid),
+              ),
+              child: FittedBox(
+                fit: BoxFit.fill,
+                child: Image.memory(
+                    Base64Helper.decode(battle.receiver!.profileImage!)),
+              ),
+            ),
+            Text(
+              I18nHelper.getDisplayNameFromI18n(receiver.name),
+              style: OnepieceFonts.fancyBlueHintFont,
+            )
+          ],
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 60.0),
@@ -295,7 +427,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
           splashRadius: 1,
           icon: SvgPicture.asset(
             'images/svgs/battle.svg',
-            color: OnepieceColors.fancyBlue,
+            color: OnepieceColors.fancyGreen,
             width: 500,
             height: 500,
           ),
@@ -307,8 +439,11 @@ class _BattleDetailViewState extends State<BattleDetailView> {
   Widget _getResult(BuildContext context) {
     return Consumer<BattleExecutionData>(builder: (context, model, child) {
       return model.winnerId == null
-          ? ImageHelper.getSvgIconWithColor(
-              'images/svgs/question.svg', 120, 120, OnepieceColors.fancyBlue)
+          ? Padding(
+            padding: const EdgeInsets.only(bottom: 10.0),
+            child: ImageHelper.getSvgIconWithColor('images/svgs/question.svg', 120,
+                120, OnepieceColors.liteFancyBlue),
+          )
           : Container(
               width: 120,
               height: 120,
@@ -329,6 +464,130 @@ class _BattleDetailViewState extends State<BattleDetailView> {
               ),
             );
     });
+  }
+
+  Widget _getBattleReportProgress(BuildContext context, double iconSize) {
+    return Consumer<BattleExecutionData>(builder: (context, model, child) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.check_circle,
+                  size: iconSize,
+                  color: OnepieceColors.fancyBlue,
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: Text(
+                    AppLocalizations.of(context)!.battleReportWaiting,
+                    style: OnepieceFonts.fancyBlueHintFont,
+                  ),
+                )
+              ],
+            ),
+            const Padding(
+              padding: EdgeInsets.only(left: 17.0),
+              child: Text(
+                "|",
+                style: OnepieceFonts.fancyBlueHintFont,
+              ),
+            ),
+            model.battleReportStage == BattleReportStage.WAITING
+                ? Row(
+              children: [
+                Icon(Icons.check_circle_outline,
+                    size: iconSize, color: OnepieceColors.liteFancyBlue),
+                Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: Text(
+                    AppLocalizations.of(context)!.battleReportInProgress,
+                    style: OnepieceFonts.liteFancyBlueHintFont,
+                  ),
+                )
+              ],
+            )
+                : Row(
+              children: [
+                Icon(Icons.check_circle, size: iconSize),
+                Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: Text(
+                    AppLocalizations.of(context)!.battleReportInProgress,
+                    style: OnepieceFonts.fancyBlueHintFont,
+                  ),
+                )
+              ],
+            ),
+            const Padding(
+              padding: EdgeInsets.only(left: 17.0),
+              child: Text(
+                "|",
+                style: OnepieceFonts.fancyBlueHintFont,
+              ),
+            ),
+            if (model.battleReportStage == BattleReportStage.WAITING ||
+                model.battleReportStage == BattleReportStage.IN_PROGRESS)
+              Row(
+                children: [
+                  Icon(
+                    Icons.check_circle_outline,
+                    size: iconSize,
+                    color: OnepieceColors.liteFancyBlue,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: Text(
+                      AppLocalizations.of(context)!.battleReportGenerated,
+                      style: OnepieceFonts.liteFancyBlueHintFont,
+                    ),
+                  )
+                ],
+              ),
+            if (model.battleReportStage == BattleReportStage.FINISHED)
+              Row(
+                children: [
+                  Icon(Icons.check_circle,
+                      size: iconSize, color: OnepieceColors.fancyBlue),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: Text(
+                      AppLocalizations.of(context)!.battleReportGenerated,
+                      style: OnepieceFonts.liteFancyBlueHintFont,
+                    ),
+                  )
+                ],
+              ),
+          ],
+        ),
+      );
+    });
+  }
+
+  Widget _getBattleReportIcon(BuildContext context) {
+    return IconButton(
+      iconSize: 50,
+      tooltip: AppLocalizations.of(context)!.downloadReport,
+      onPressed: battleExecutionData.battleReportStage   == BattleReportStage.FINISHED
+          ? () {
+        getIt<FileDao>()
+            .downloadFile(DownloadFileRequest(id: battleExecutionData.reportFileId!))
+            .then((value) => {
+          OnepieceAlert.getBasicAlertDialogFunc(
+              context, "battle", "download file success")
+        });
+      }: null,
+      disabledColor: Colors.grey,
+      splashRadius: 1,
+      icon: SvgPicture.asset(
+        'images/svgs/pdf.svg',
+        width: 500,
+        height: 500,
+      ),
+    );
   }
 }
 
