@@ -62,7 +62,7 @@ class HomePageState extends State<HomePage> {
         child: Scaffold(
           body: Row(
             children: [
-              _getSideMenu(context),
+              _getNavigationMenu(context),
               Expanded(
                 child: Column(
                   children: [
@@ -291,7 +291,7 @@ class HomePageState extends State<HomePage> {
         .toList();
   }
 
-  Widget _getSideMenu(BuildContext context) {
+  Widget _getNavigationMenu(BuildContext context) {
     return Container(
       width: 250,
       color: OnepieceColors.menuBackgroundColor,
@@ -392,37 +392,41 @@ class HomePageState extends State<HomePage> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.fromLTRB(8,15,8,8),
                       child: Text(
                         getIt<User>().name,
-                        style: OnepieceFonts.smallHeaderStyle,
+                        style: OnepieceFonts.smallHeaderStyleWhite,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: RichText(
-                        text: TextSpan(children: [
-                          const WidgetSpan(
-                              child: Icon(
-                            Icons.email,
-                            color: Colors.grey,
-                            size: 17,
-                          )),
-                          TextSpan(
-                            text: " ${getIt<User>().email!}",
+                    Row(
+                      children: [
+                        SizedBox(
+                          width: 30,
+                          height: 30,
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 8.0),
+                            child: ImageHelper.getSvgIcon('images/svgs/email.svg', 120,
+                                120,),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8.0),
+                          child: Text(
+                            getIt<User>().email!,
                             style: OnepieceFonts.emailFont,
-                          )
-                        ]),
-                      ),
-                    ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        )
+                      ],
+                    )
                   ],
                 )
               ],
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(2, 8, 2, 8),
+            padding: const EdgeInsets.fromLTRB(2, 18, 2, 8),
             child: Material(
               type: MaterialType.transparency,
               child: Container(
