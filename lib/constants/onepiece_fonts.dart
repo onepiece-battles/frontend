@@ -68,6 +68,11 @@ class OnepieceFonts {
       fontSize: OnepieceFonts.smallHeaderFontSize,
       fontWeight: OnepieceFonts.headerFontWeight);
 
+  static const TextStyle smallHeaderStyleWhite = TextStyle(
+      color: Colors.white,
+      fontSize: OnepieceFonts.smallHeaderFontSize,
+      fontWeight: OnepieceFonts.headerFontWeight);
+
   static const TextStyle tableHeaderStyle = TextStyle(
       color: OnepieceFonts.contentFontColor,
       fontSize: OnepieceFonts.tableHeaderFontSize,
@@ -81,9 +86,10 @@ class OnepieceFonts {
       fontSize: OnepieceFonts.dropDownFontSize);
 
   static const TextStyle emailFont = TextStyle(
+      decoration: TextDecoration.underline,
       color: Colors.white,
-      fontSize: 13,
-      fontWeight: FontWeight.bold,
+      fontSize: 14,
+      fontWeight: FontWeight.normal,
       fontStyle: FontStyle.italic);
 
   static const TextStyle navigationTopBarStyleClickable = TextStyle(
