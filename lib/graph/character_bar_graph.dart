@@ -1,7 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
-import 'package:one_piece_battles_flutter/views/battle/battle_detail_view.dart';
+import 'package:one_piece_battles_flutter/graph/character_data.dart';
 import '../constants/onepiece_colors.dart';
 import '../utils/image_helper.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';

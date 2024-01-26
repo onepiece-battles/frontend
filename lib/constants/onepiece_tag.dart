@@ -23,7 +23,7 @@ class OnepieceTag {
 
   static Map<Haki, Color> hakiToColor = {
     Haki.busoshoku: OnepieceColors.black,
-    Haki.kenbunshoku: OnepieceColors.liteFancyBlue,
+    Haki.kenbunshoku: OnepieceColors.fancyGreen,
     Haki.haoshoku: Colors.deepPurple
   };
 
