@@ -16,6 +16,10 @@ class UserDao {
     return await userApi.login(loginRequest);
   }
 
+  Future<LogoutResponse?> logout(LogoutRequest logoutRequest) async {
+    return await userApi.logout(logoutRequest);
+  }
+
   Future<User?> get(GetUserRequest getUserRequest) async {
     return await userApi.getUser(getUserRequest: getUserRequest);
   }

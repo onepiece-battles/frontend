@@ -199,5 +199,6 @@
   "worldGovernment": "World government",
   "yes": "YES",
   "zoanFruit": "Zoan",
-  "onceBelongTo": "ex-member-of"
+  "onceBelongTo": "ex-member-of",
+  "userProfile": "User Profile"
 }

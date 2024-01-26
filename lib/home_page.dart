@@ -11,6 +11,7 @@ import 'package:one_piece_battles_flutter/config/resource_permission_manager.dar
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:one_piece_battles_flutter/popup/search_popup.dart';
+import 'package:one_piece_battles_flutter/popup/user_navigation.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
 import 'package:one_piece_battles_flutter/utils/base64_helper.dart';
 import 'package:one_piece_battles_flutter/utils/data_validator.dart';
@@ -373,26 +374,13 @@ class HomePageState extends State<HomePage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Container(
-                  width: 70,
-                  height: 70,
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.all(Radius.circular(2.0)),
-                    border: Border.all(
-                        color: Colors.grey, width: 2, style: BorderStyle.solid),
-                  ),
-                  child: FittedBox(
-                    fit: BoxFit.fill,
-                    child: Image.memory(
-                        Base64Helper.decode(getIt<User>().profileImage!)),
-                  ),
-                ),
+                const UserNavigation(),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(8,15,8,8),
+                      padding: const EdgeInsets.fromLTRB(8, 15, 8, 8),
                       child: Text(
                         getIt<User>().name,
                         style: OnepieceFonts.smallHeaderStyleWhite,
@@ -406,8 +394,11 @@ class HomePageState extends State<HomePage> {
                           height: 30,
                           child: Padding(
                             padding: const EdgeInsets.only(left: 8.0),
-                            child: ImageHelper.getSvgIcon('images/svgs/email.svg', 120,
-                                120,),
+                            child: ImageHelper.getSvgIcon(
+                              'images/svgs/email.svg',
+                              120,
+                              120,
+                            ),
                           ),
                         ),
                         Padding(
