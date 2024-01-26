@@ -460,7 +460,7 @@ class HomePageState extends State<HomePage> {
       context: context,
       builder: ((context) {
         return const Dialog(
-          backgroundColor: OnepieceColors.liteFancyGreen,
+          backgroundColor: OnepieceColors.liteFancyBlue,
           alignment: AlignmentDirectional.topCenter,
           child: SearchPopup(),
         );

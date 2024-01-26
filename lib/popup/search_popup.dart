@@ -266,7 +266,10 @@ class _SearchPopupState extends State<SearchPopup> {
                           ),
                         ),
                       ),
-                      Text(I18nHelper.getDisplayNameFromI18n(character.name))
+                      Text(
+                        I18nHelper.getDisplayNameFromI18n(character.name),
+                        style: OnepieceFonts.smallContentStyleWhite,
+                      )
                     ],
                   ),
                   if (character.hakis.isNotEmpty)
@@ -332,7 +335,10 @@ class _SearchPopupState extends State<SearchPopup> {
                 title: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(I18nHelper.getDisplayNameFromI18n(fruit.name!)),
+                    Text(
+                      I18nHelper.getDisplayNameFromI18n(fruit.name!),
+                      style: OnepieceFonts.smallContentStyleWhite,
+                    ),
                     Padding(
                       padding: const EdgeInsets.only(right: 5),
                       child: OnepieceTag.getFruitTag(fruit.fruitType!,
@@ -352,7 +358,8 @@ class _SearchPopupState extends State<SearchPopup> {
       GroupCategory.marine: AppLocalizations.of(context)!.marine,
       GroupCategory.pirate: AppLocalizations.of(context)!.pirate,
       GroupCategory.underWorld: AppLocalizations.of(context)!.underworld,
-      GroupCategory.worldGovernment: AppLocalizations.of(context)!.worldGovernment,
+      GroupCategory.worldGovernment:
+          AppLocalizations.of(context)!.worldGovernment,
     };
     return ListView.builder(
         shrinkWrap: true,
@@ -411,7 +418,13 @@ class _SearchPopupState extends State<SearchPopup> {
                             ),
                           ),
                         ),
-                        Text(I18nHelper.getDisplayNameFromI18n(group.name))
+                        Padding(
+                          padding: const EdgeInsets.only(left: 5.0),
+                          child: Text(
+                            I18nHelper.getDisplayNameFromI18n(group.name),
+                            style: OnepieceFonts.smallContentStyleWhite,
+                          ),
+                        )
                       ],
                     ),
                     Padding(
