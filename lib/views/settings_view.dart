@@ -29,10 +29,10 @@ class SettingsView extends StatefulWidget {
 
 class _SettingsViewState extends State<SettingsView> {
   final TextEditingController _emailSettingController =
-      TextEditingController(text: getIt<User>().email);
+      TextEditingController(text: getIt<User>().username);
   bool _emailSettingEnabled = false;
   final TextEditingController _nameController =
-      TextEditingController(text: getIt<User>().name);
+      TextEditingController(text: getIt<User>().nickname);
   bool _nameSettingEnabled = false;
   bool _emailVerified = getIt<User>().emailVerified!;
   final SettingPageModel _originalData = SettingPageModel();
@@ -45,13 +45,13 @@ class _SettingsViewState extends State<SettingsView> {
     _originalData.setCurrentLocale(getIt<Locale>());
     _originalData
         .setProfileImage(Base64Helper.decode(getIt<User>().profileImage!));
-    _originalData.setEmail(getIt<User>().email!);
-    _originalData.setName(getIt<User>().name);
+    _originalData.setEmail(getIt<User>().username);
+    _originalData.setName(getIt<User>().nickname);
     _realtimeData.setCurrentLocale(getIt<Locale>());
     _realtimeData
         .setProfileImage(Base64Helper.decode(getIt<User>().profileImage!));
-    _realtimeData.setEmail(getIt<User>().email!);
-    _realtimeData.setName(getIt<User>().name);
+    _realtimeData.setEmail(getIt<User>().username);
+    _realtimeData.setName(getIt<User>().nickname);
   }
 
   @override
@@ -347,7 +347,7 @@ class _SettingsViewState extends State<SettingsView> {
                                   VerifyEmailRequest request =
                                       VerifyEmailRequest(
                                           id: getIt<User>().id,
-                                          email: getIt<User>().email);
+                                          email: getIt<User>().username);
                                   getIt<UserDao>().verifyEmail(request).then(
                                     (value) {
                                       String notification =
@@ -487,8 +487,7 @@ class _SettingsViewState extends State<SettingsView> {
         locale: _realtimeData.locale.languageCode == 'en'
             ? OnepieceLocale.enUS
             : OnepieceLocale.zhCN,
-        name: _realtimeData.name.trim(),
-        email: _realtimeData.email.trim(),
+        nickname: _realtimeData.name.trim(),
         id: getIt<User>().id);
     var updateUserResponse =
         await getIt<UserDao>().updateUser(updateUserRequest);
