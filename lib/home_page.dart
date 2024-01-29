@@ -382,7 +382,7 @@ class HomePageState extends State<HomePage> {
                     Padding(
                       padding: const EdgeInsets.fromLTRB(8, 15, 8, 8),
                       child: Text(
-                        getIt<User>().name,
+                        getIt<User>().nickname,
                         style: OnepieceFonts.smallHeaderStyleWhite,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -404,7 +404,7 @@ class HomePageState extends State<HomePage> {
                         Padding(
                           padding: const EdgeInsets.only(left: 8.0),
                           child: Text(
-                            getIt<User>().email!,
+                            getIt<User>().username,
                             style: OnepieceFonts.emailFont,
                             overflow: TextOverflow.ellipsis,
                           ),

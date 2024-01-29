@@ -438,7 +438,7 @@ class _UserViewState extends State<UserView> {
           (user) => DataRow(
             onSelectChanged: (value) {
               context.goNamed('userDetails',
-                  extra: user.id, pathParameters: {'name': user.name});
+                  extra: user.id, pathParameters: {'name': user.nickname});
             },
             cells: [
               DataCell(
@@ -465,11 +465,11 @@ class _UserViewState extends State<UserView> {
               ),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: Text(user.name.toString()),
+                child: Text(user.nickname.toString()),
               )),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: Text(user.email.toString()),
+                child: Text(user.username.toString()),
               )),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),

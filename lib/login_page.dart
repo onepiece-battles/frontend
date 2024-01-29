@@ -34,10 +34,8 @@ class _LoginPageState extends State<LoginPage> {
   bool _buttonEnabled = true;
   String verificationMessage = "";
   I18nText? verificationI18n = I18nText();
-  TextEditingController userNameController =
-      TextEditingController(text: 'Monkey John');
   TextEditingController emailController =
-      TextEditingController(text: 'abc@gmail.com');
+      TextEditingController(text: 'abc@qq.com');
   TextEditingController passwordController = TextEditingController(text: 'abc');
   Logger logger = Logger('_LoginPageState');
 
@@ -99,7 +97,7 @@ class _LoginPageState extends State<LoginPage> {
                       // isScroll: true,
                     )),
               ),
-              const SizedBox(height: 50),
+              const SizedBox(height: 150),
               const Image(
                 image: AssetImage(PathConstants.luffyFlag),
               ),
@@ -115,27 +113,6 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
               const SizedBox(height: 90),
-              SizedBox(
-                width: 300,
-                child: TextField(
-                  onChanged: (value) {
-                    setState(() {
-                      if (userNameController.text != "" &&
-                          emailController.text != "" &&
-                          passwordController.text != "") {
-                        _buttonEnabled = true;
-                      } else {
-                        _buttonEnabled = false;
-                      }
-                    });
-                  },
-                  controller: userNameController,
-                  autofocus: true,
-                  decoration: InputDecoration(
-                      labelText: AppLocalizations.of(context)?.userNameLabel,
-                      prefixIcon: const Icon(Icons.person)),
-                ),
-              ),
               const SizedBox(
                 height: 20,
               ),
@@ -144,8 +121,7 @@ class _LoginPageState extends State<LoginPage> {
                 child: TextField(
                   onChanged: (value) {
                     setState(() {
-                      if (userNameController.text != "" &&
-                          emailController.text != "" &&
+                      if (emailController.text != "" &&
                           passwordController.text != "") {
                         _buttonEnabled = true;
                       } else {
@@ -168,8 +144,7 @@ class _LoginPageState extends State<LoginPage> {
                 child: TextFormField(
                   onChanged: (value) {
                     setState(() {
-                      if (userNameController.text != "" &&
-                          emailController.text != "" &&
+                      if (emailController.text != "" &&
                           passwordController.text != "") {
                         _buttonEnabled = true;
                       } else {
@@ -246,9 +221,7 @@ class _LoginPageState extends State<LoginPage> {
 
   void _login(BuildContext context) {
     LoginRequest loginRequest = LoginRequest(
-        userName: userNameController.text,
-        email: emailController.text,
-        password: passwordController.text);
+        email: emailController.text, password: passwordController.text);
     Future<LoginResponse?> loginResponse = getIt<UserDao>().login(loginRequest);
     loginResponse.then((value) {
       if (value!.verification == null) {

@@ -242,7 +242,7 @@ class AppRouter {
     // debugLogDiagnostics: true,
     redirect: (context, state) {
       // if the user is not logged in, they need to login
-      final loggedIn = getIt<User>().name != '';
+      final loggedIn = getIt<User>().username != '';
       final loggingIn = state.matchedLocation == AppRouter.loginPath;
       final registering = state.matchedLocation == AppRouter.registerPath;
       final goingHome = state.matchedLocation == 'home';

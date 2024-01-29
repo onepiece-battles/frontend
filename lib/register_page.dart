@@ -38,14 +38,12 @@ class _RegisterPageState extends State<RegisterPage> {
   bool _isConfirmedPasswordHidden = true;
   bool _buttonEnabled = false;
   String verificationMessage = "";
-  TextEditingController userNameController =
+  TextEditingController nicknameController =
       TextEditingController(text: "Monkey John");
-  TextEditingController emailController =
+  TextEditingController usernameController =
       TextEditingController(text: "abc@qq.com");
   TextEditingController passwordController = TextEditingController(text: "abc");
   TextEditingController confirmedPasswordController =
-      TextEditingController(text: "abc");
-  TextEditingController organizationController =
       TextEditingController(text: "abc");
 
   @override
@@ -130,18 +128,17 @@ class _RegisterPageState extends State<RegisterPage> {
                 child: TextField(
                   onChanged: (value) {
                     setState(() {
-                      if (userNameController.text != "" &&
-                          emailController.text != "" &&
+                      if (nicknameController.text != "" &&
+                          usernameController.text != "" &&
                           passwordController.text != "" &&
-                          confirmedPasswordController.text != "" &&
-                          organizationController.text != "") {
+                          confirmedPasswordController.text != "") {
                         _buttonEnabled = true;
                       } else {
                         _buttonEnabled = false;
                       }
                     });
                   },
-                  controller: userNameController,
+                  controller: nicknameController,
                   autofocus: true,
                   decoration: InputDecoration(
                     labelText: AppLocalizations.of(context)?.userNameLabel,
@@ -158,11 +155,10 @@ class _RegisterPageState extends State<RegisterPage> {
                 child: TextField(
                   onChanged: (value) {
                     setState(() {
-                      if (userNameController.text != "" &&
-                          emailController.text != "" &&
+                      if (nicknameController.text != "" &&
+                          usernameController.text != "" &&
                           passwordController.text != "" &&
-                          confirmedPasswordController.text != "" &&
-                          organizationController.text != "") {
+                          confirmedPasswordController.text != "") {
                         _buttonEnabled = true;
                       } else {
                         _buttonEnabled = false;
@@ -170,7 +166,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     });
                   },
                   autofocus: true,
-                  controller: emailController,
+                  controller: usernameController,
                   decoration: InputDecoration(
                       labelText: AppLocalizations.of(context)?.emailAddress,
                       hintText: AppLocalizations.of(context)?.emailAddress,
@@ -182,41 +178,13 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               SizedBox(
                 width: 300,
-                child: TextField(
-                  onChanged: (value) {
-                    setState(() {
-                      if (userNameController.text != "" &&
-                          emailController.text != "" &&
-                          passwordController.text != "" &&
-                          confirmedPasswordController.text != "" &&
-                          organizationController.text != "") {
-                        _buttonEnabled = true;
-                      } else {
-                        _buttonEnabled = false;
-                      }
-                    });
-                  },
-                  autofocus: true,
-                  controller: organizationController,
-                  decoration: InputDecoration(
-                      labelText: AppLocalizations.of(context)?.organization,
-                      hintText: AppLocalizations.of(context)?.organization,
-                      prefixIcon: const Icon(Icons.group)),
-                ),
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              SizedBox(
-                width: 300,
                 child: TextFormField(
                   onChanged: (value) {
                     setState(() {
-                      if (userNameController.text != "" &&
-                          emailController.text != "" &&
+                      if (nicknameController.text != "" &&
+                          usernameController.text != "" &&
                           passwordController.text != "" &&
-                          confirmedPasswordController.text != "" &&
-                          organizationController.text != "") {
+                          confirmedPasswordController.text != "") {
                         _buttonEnabled = true;
                       } else {
                         _buttonEnabled = false;
@@ -255,11 +223,10 @@ class _RegisterPageState extends State<RegisterPage> {
                 child: TextFormField(
                   onChanged: (value) {
                     setState(() {
-                      if (userNameController.text != "" &&
-                          emailController.text != "" &&
+                      if (nicknameController.text != "" &&
+                          usernameController.text != "" &&
                           passwordController.text != "" &&
-                          confirmedPasswordController.text != "" &&
-                          organizationController.text != "") {
+                          confirmedPasswordController.text != "") {
                         _buttonEnabled = true;
                       } else {
                         _buttonEnabled = false;
@@ -346,9 +313,8 @@ class _RegisterPageState extends State<RegisterPage> {
 
   void _register(BuildContext context) {
     RegisterRequest request = RegisterRequest(
-        userName: userNameController.text,
-        email: emailController.text,
-        organization: organizationController.text,
+        nickname: nicknameController.text,
+        username: usernameController.text,
         password: passwordController.text,
         confirmedPassword: confirmedPasswordController.text,
         locale: I18nHelper.convertToOnepieceLocale(getIt<Locale>()));
@@ -369,9 +335,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
   void handleRegisterSuccess(BuildContext context) {
     LoginRequest loginRequest = LoginRequest(
-        userName: userNameController.text,
-        email: emailController.text,
-        password: passwordController.text);
+        email: usernameController.text, password: passwordController.text);
     Future<LoginResponse?> loginResponse = userDao.login(loginRequest);
     loginResponse.then((value) {
       ApiInitializer.initAuthInfo(value!.accessToken!);

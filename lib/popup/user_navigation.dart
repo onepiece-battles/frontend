@@ -64,7 +64,7 @@ class _UserNavigationState extends State<UserNavigation> {
                   onPressed: () {
                     getIt<UserDao>()
                         .logout(LogoutRequest(userId: getIt<User>().id));
-                    getIt.registerLazySingleton<User>(() => User(id: "", name: ""));
+                    getIt.registerLazySingleton<User>(() => User(id: "", username: "", nickname: ""));
                     context.go(AppRouter.loginPath);
                   },
                   style: OnepieceButtonStyle.getDefaultStyle(),
