@@ -11,6 +11,7 @@ import 'package:popover/popover.dart';
 import '../app_router.dart';
 import '../constants/button_style.dart';
 import '../utils/base64_helper.dart';
+import '../utils/i18n_helper.dart';
 import '../utils/image_helper.dart';
 
 GetIt getIt = GetIt.instance;
@@ -39,7 +40,11 @@ class _UserNavigationState extends State<UserNavigation> {
                 width: 140,
                 height: 35,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    context.goNamed('userProfile',
+                        extra: getIt<User>().id,
+                        pathParameters: {'name': getIt<User>().nickname});
+                  },
                   style: OnepieceButtonStyle.getDefaultStyle(),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
@@ -64,7 +69,8 @@ class _UserNavigationState extends State<UserNavigation> {
                   onPressed: () {
                     getIt<UserDao>()
                         .logout(LogoutRequest(userId: getIt<User>().id));
-                    getIt.registerLazySingleton<User>(() => User(id: "", username: "", nickname: ""));
+                    getIt.registerLazySingleton<User>(
+                        () => User(id: "", username: "", nickname: ""));
                     context.go(AppRouter.loginPath);
                   },
                   style: OnepieceButtonStyle.getDefaultStyle(),

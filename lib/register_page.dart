@@ -340,7 +340,9 @@ class _RegisterPageState extends State<RegisterPage> {
     loginResponse.then((value) {
       ApiInitializer.initAuthInfo(value!.accessToken!);
       ResourcePermissionManager.updateUserCache(value.user!);
-      context.go(AppRouter.homePath);
+      context.goNamed('userHome',
+          extra: getIt<User>().id,
+          pathParameters: {'name': getIt<User>().nickname});
     });
   }
 }
