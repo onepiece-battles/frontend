@@ -13,7 +13,6 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:one_piece_battles_flutter/popup/search_popup.dart';
 import 'package:one_piece_battles_flutter/popup/user_navigation.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
-import 'package:one_piece_battles_flutter/utils/base64_helper.dart';
 import 'package:one_piece_battles_flutter/utils/data_validator.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:one_piece_battles_flutter/utils/image_helper.dart';
@@ -71,7 +70,7 @@ class HomePageState extends State<HomePage> {
                       height: 55,
                       child: Padding(
                         padding: const EdgeInsets.all(5.0),
-                        child: _getHeader(context),
+                        child: getTopBar(context),
                       ),
                     ),
                     const Divider(
@@ -90,7 +89,7 @@ class HomePageState extends State<HomePage> {
   }
 
   // the first one route is fixed in this case, and the latter routes are clickable
-  Row _getHeader(BuildContext context) {
+  Row getTopBar(BuildContext context) {
     return Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -112,7 +111,9 @@ class HomePageState extends State<HomePage> {
       'battles': AppLocalizations.of(context)!.battle,
       'setting': AppLocalizations.of(context)!.settings,
       'issues': AppLocalizations.of(context)!.issue,
-      'create': AppLocalizations.of(context)!.create
+      'create': AppLocalizations.of(context)!.create,
+      'profile': AppLocalizations.of(context)!.userProfile,
+      'user': AppLocalizations.of(context)!.user
     };
     debugPrint(routes.toString());
     var list = <Widget>[];
@@ -135,7 +136,14 @@ class HomePageState extends State<HomePage> {
                   _getMiddleArrow(),
                   TextButton(
                     onPressed: () {
-                      context.go("$currentPath/${entry.value}");
+                      var decodedUri = Uri.decodeFull(entry.value);
+                      if (decodedUri==getIt<User>().nickname) {
+                        context.goNamed('userHome',
+                            extra: getIt<User>().id,
+                            pathParameters: {'name': getIt<User>().nickname});
+                      } else {
+                        context.go("$currentPath/$decodedUri");
+                      }
                     },
                     child: Text(
                       text!,
@@ -162,7 +170,9 @@ class HomePageState extends State<HomePage> {
         splashRadius: 0.1,
         onPressed: () {
           selectedResource = ResourceType.CHARACTER.toString();
-          context.go(AppRouter.homePath);
+          context.goNamed('userHome',
+              extra: getIt<User>().id,
+              pathParameters: {'name':  getIt<User>().nickname});
         },
         icon: const Icon(
           Icons.home,
@@ -491,7 +501,7 @@ class HomePageState extends State<HomePage> {
 
     Map<String, String> resourceToLocationMap = {
       ResourceType.FRUIT.toString(): AppRouter.fruitPath,
-      ResourceType.USER.toString(): AppRouter.userPath,
+      ResourceType.USER.toString(): AppRouter.userManagementPath,
       ResourceType.BATTLE.toString(): AppRouter.battlePath,
       ResourceType.CHARACTER.toString(): AppRouter.characterPath,
       ResourceType.ISSUE.toString(): AppRouter.issuePath,

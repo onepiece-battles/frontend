@@ -241,6 +241,8 @@ class _LoginPageState extends State<LoginPage> {
     // init apis with tokens
     ApiInitializer.initAuthInfo(token);
     ResourcePermissionManager.updateUserCache(user);
-    context.go(AppRouter.homePath);
+    context.goNamed('userHome',
+        extra: getIt<User>().id,
+        pathParameters: {'name': getIt<User>().nickname});
   }
 }

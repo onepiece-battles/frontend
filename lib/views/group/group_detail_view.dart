@@ -40,7 +40,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
         .getGroupFullView(GetGroupRequest(id: widget.groupId));
   }
 
-  void _updateData(GroupFullView group) {
+  void _prepareData(GroupFullView group) {
     groupFullView = group;
     characters = group.characters;
     selectedGroupCategory = group.groupCategory!;
@@ -53,7 +53,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
       future: _loadData(),
       builder: (context, AsyncSnapshot snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
-          _updateData(snapshot.data);
+          _prepareData(snapshot.data);
           return SingleChildScrollView(
             scrollDirection: Axis.vertical,
             child: Column(
