@@ -44,6 +44,7 @@ class _UserNavigationState extends State<UserNavigation> {
                     context.goNamed('userProfile',
                         extra: getIt<User>().id,
                         pathParameters: {'name': getIt<User>().nickname});
+                    Navigator.pop(context);
                   },
                   style: OnepieceButtonStyle.getDefaultStyle(),
                   child: Row(
@@ -71,7 +72,7 @@ class _UserNavigationState extends State<UserNavigation> {
                         .logout(LogoutRequest(userId: getIt<User>().id));
                     getIt.registerLazySingleton<User>(
                         () => User(id: "", username: "", nickname: ""));
-                    context.go(AppRouter.loginPath);
+                    context.replace(AppRouter.loginPath);
                   },
                   style: OnepieceButtonStyle.getDefaultStyle(),
                   child: Row(

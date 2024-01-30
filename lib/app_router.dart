@@ -15,7 +15,6 @@ import 'package:one_piece_battles_flutter/views/group/create_group_view.dart';
 import 'package:one_piece_battles_flutter/views/group/group_detail_view.dart';
 import 'package:one_piece_battles_flutter/views/group/group_view.dart';
 import 'package:one_piece_battles_flutter/views/issue_view.dart';
-import 'package:one_piece_battles_flutter/views/settings_view.dart';
 import 'package:one_piece_battles_flutter/views/user_detail_view.dart';
 import 'package:one_piece_battles_flutter/views/user_profile.dart';
 import 'package:one_piece_battles_flutter/views/user_view.dart';

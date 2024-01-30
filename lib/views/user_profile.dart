@@ -1,12 +1,17 @@
 import 'dart:typed_data';
 
+import 'package:go_router/go_router.dart';
+import 'package:one_piece_battles_flutter/utils/image_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:openapi/api.dart';
+import '../config/resource_permission_manager.dart';
 import '../constants/button_style.dart';
+import '../constants/onepiece_colors.dart';
 import '../constants/onepiece_fonts.dart';
+import '../repository/image_dao.dart';
 import '../repository/user_dao.dart';
 import '../utils/base64_helper.dart';
 import '../utils/compare_uint8list.dart';
@@ -23,10 +28,13 @@ class UserProfile extends StatefulWidget {
 }
 
 class _UserProfileState extends State<UserProfile> {
+  final TextEditingController _nicknameController = TextEditingController();
   late User user;
   final UserProfileModel _originalData = UserProfileModel();
   final UserProfileModel _realtimeData = UserProfileModel();
   String _chosenImageName = "";
+  ValueNotifier<bool> _nicknameEditable = ValueNotifier(false);
+  ValueNotifier<bool> _dataModified = ValueNotifier(false);
 
   _loadData() {
     return getIt<UserDao>().get(GetUserRequest(userId: widget.userId));
@@ -34,6 +42,7 @@ class _UserProfileState extends State<UserProfile> {
 
   _prepareData(User user) {
     this.user = user;
+    _nicknameController.text = user.nickname;
     _originalData
         .setProfileImage(Base64Helper.decode(getIt<User>().profileImage!));
     _originalData.setUsername(getIt<User>().username);
@@ -59,6 +68,12 @@ class _UserProfileState extends State<UserProfile> {
                 height: 10,
                 thickness: 1,
               ),
+              _getName(context),
+              const Divider(
+                height: 10,
+                thickness: 1,
+              ),
+              _getFootButtons(context)
             ],
           ));
         } else {
@@ -163,6 +178,138 @@ class _UserProfileState extends State<UserProfile> {
         )
       ]),
     );
+  }
+
+  Widget _getName(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(15.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(0, 0, 0, 15),
+            child: Text(
+              AppLocalizations.of(context)!.nickname,
+              style: OnepieceFonts.headerStyle,
+            ),
+          ),
+          ValueListenableBuilder(
+              valueListenable: _nicknameEditable,
+              builder: (context, value, _) {
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    SizedBox(
+                      width: 300,
+                      child: TextFormField(
+                        onChanged: (value) {
+                          _realtimeData.setNickname(value);
+                          _dataModified.value = _checkModified();
+                          if (_originalData.nickname == value) {
+                            _nicknameEditable.value = false;
+                          }
+                        },
+                        decoration:  const InputDecoration(
+                            contentPadding: EdgeInsets.fromLTRB(10, 0, 0, 0)),
+                        enabled: _nicknameEditable.value,
+                        controller: _nicknameController,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        _nicknameEditable.value = !_nicknameEditable.value;
+                      },
+                      splashRadius: 1,
+                      icon: SizedBox(
+                          width: 150,
+                          height: 150,
+                          child: !_nicknameEditable.value
+                              ? ImageHelper.getSvgIconWithColor(
+                                  'images/svgs/edit.svg',
+                                  150,
+                                  150,
+                                  OnepieceColors.fancyBlue)
+                              : ImageHelper.getSvgIconWithColor(
+                                  'images/svgs/check.svg',
+                                  150,
+                                  150,
+                                  OnepieceColors.fancyBlue)),
+                    ),
+                  ],
+                );
+              }),
+        ],
+      ),
+    );
+  }
+
+  Row _getFootButtons(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        ValueListenableBuilder(
+            valueListenable: _dataModified,
+            builder: (context, value, _) {
+              return ElevatedButton(
+                style: OnepieceButtonStyle.getDefaultStyle(),
+                onPressed: !_dataModified.value
+                    ? null
+                    : () {
+                        setState(() {
+                          _realtimeData
+                              .setProfileImage(_originalData.profileImage);
+                          _realtimeData.setUsername(_originalData.username);
+                          _realtimeData.setNickname(_originalData.nickname);
+                          _dataModified.value = false;
+                          _nicknameEditable.value = false;
+                        });
+                      },
+                child: Text(AppLocalizations.of(context)!.cancelPopUp),
+              );
+            }),
+        ValueListenableBuilder(
+            valueListenable: _dataModified,
+            builder: (context, value, _) {
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+                child: ElevatedButton(
+                    style: OnepieceButtonStyle.getDefaultStyle(),
+                    onPressed: !_dataModified.value
+                        ? null
+                        : () async {
+                            submitData(context);
+                          },
+                    child: Text(AppLocalizations.of(context)!.submitForm)),
+              );
+            }),
+      ],
+    );
+  }
+
+  void submitData(BuildContext context) async {
+    var encodedImage = Base64Helper.encode(_realtimeData.profileImage);
+    UploadImageRequest uploadImageRequest = UploadImageRequest(
+        resourceId: getIt<User>().id,
+        image: encodedImage,
+        type: ResourceType.USER);
+    getIt<ImageDao>().addImage(uploadImageRequest);
+    UpdateUserRequest updateUserRequest = UpdateUserRequest(
+        locale: OnepieceLocale.zhCN,
+        nickname: _realtimeData.nickname.trim(),
+        id: getIt<User>().id);
+    getIt<UserDao>().updateUser(updateUserRequest);
+    var user = getIt<User>();
+    user.nickname = _realtimeData.nickname.trim();
+    user.profileImage = encodedImage;
+    ResourcePermissionManager.updateUserCache(user);
+    context.goNamed('userProfile',
+        extra: getIt<User>().id,
+        pathParameters: {'name': getIt<User>().nickname});
+  }
+
+  bool _checkModified() {
+    return _dataModified.value = _originalData != _realtimeData;
   }
 }
 
