@@ -11,7 +11,6 @@ import 'package:popover/popover.dart';
 import '../app_router.dart';
 import '../constants/button_style.dart';
 import '../utils/base64_helper.dart';
-import '../utils/i18n_helper.dart';
 import '../utils/image_helper.dart';
 
 GetIt getIt = GetIt.instance;

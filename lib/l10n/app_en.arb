@@ -57,7 +57,7 @@
   "chooseFruit": "Choose",
   "clearAll": "Clear",
   "clearForm": "Clear",
-  "confirm": "Continue",
+  "confirm": "Confirm",
   "confirmHint": "Confirm",
   "create": "create",
   "createBattle": "Create Battle",
@@ -201,5 +201,7 @@
   "zoanFruit": "Zoan",
   "onceBelongTo": "ex-member-of",
   "userProfile": "User Profile",
-  "sendEmail": "send email"
+  "sendEmail": "Send Verification Email",
+  "emailVerification": "Email Verification",
+  "emailSent": "Mail Sent"
 }

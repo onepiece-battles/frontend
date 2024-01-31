@@ -411,12 +411,15 @@ class HomePageState extends State<HomePage> {
                             ),
                           ),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 8.0),
-                          child: Text(
-                            getIt<User>().username,
-                            style: OnepieceFonts.emailFont,
-                            overflow: TextOverflow.ellipsis,
+                        SizedBox(
+                          width: 120,
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 8.0),
+                            child: Text(
+                              getIt<User>().username,
+                              style: OnepieceFonts.emailFont,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                         )
                       ],

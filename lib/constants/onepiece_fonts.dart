@@ -20,6 +20,12 @@ class OnepieceFonts {
   static const TextStyle contentStyle = TextStyle(
       color: OnepieceFonts.contentFontColor,
       fontSize: OnepieceFonts.contentFontSize);
+  static const TextStyle contentStyleAlert = TextStyle(
+      color: Colors.red,
+      fontSize: OnepieceFonts.contentFontSize);
+  static const TextStyle contentStylePass = TextStyle(
+      color: Colors.green,
+      fontSize: OnepieceFonts.contentFontSize);
   static const TextStyle tagStyle = TextStyle(
       color: Colors.white,
       fontWeight: FontWeight.w400,

@@ -343,26 +343,26 @@ class _SettingsViewState extends State<SettingsView> {
                           onPressed: () {
                             setState(
                               () {
-                                if (!_emailVerified) {
-                                  VerifyEmailRequest request =
-                                      VerifyEmailRequest(
-                                          id: getIt<User>().id,
-                                          email: getIt<User>().username);
-                                  getIt<UserDao>().verifyEmail(request).then(
-                                    (value) {
-                                      String notification =
-                                          I18nHelper.getDisplayNameFromI18nByLocale(
-                                              value!.emailNotification,
-                                              _realtimeData.locale);
-                                      showDialog(
-                                        context: context,
-                                        builder: (context) => AlertDialog(
-                                          content: Text(notification),
-                                        ),
-                                      );
-                                    },
-                                  );
-                                }
+                                // if (!_emailVerified) {
+                                //   VerifyEmailRequest request =
+                                //       VerifyEmailRequest(
+                                //           id: getIt<User>().id,
+                                //           email: getIt<User>().username);
+                                //   getIt<UserDao>().sendEmail(request).then(
+                                //     (value) {
+                                //       String notification =
+                                //           I18nHelper.getDisplayNameFromI18nByLocale(
+                                //               value!.emailNotification,
+                                //               _realtimeData.locale);
+                                //       showDialog(
+                                //         context: context,
+                                //         builder: (context) => AlertDialog(
+                                //           content: Text(notification),
+                                //         ),
+                                //       );
+                                //     },
+                                //   );
+                                // }
                               },
                             );
                           },

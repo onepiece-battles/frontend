@@ -1,8 +1,8 @@
 import 'dart:typed_data';
+import 'dart:ui';
 
+import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
-import 'package:one_piece_battles_flutter/popup/onepiece_alert.dart';
-import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:one_piece_battles_flutter/utils/image_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -13,6 +13,7 @@ import '../config/resource_permission_manager.dart';
 import '../constants/button_style.dart';
 import '../constants/onepiece_colors.dart';
 import '../constants/onepiece_fonts.dart';
+import '../popup/email_verification.dart';
 import '../repository/image_dao.dart';
 import '../repository/user_dao.dart';
 import '../utils/base64_helper.dart';
@@ -39,7 +40,6 @@ class _UserProfileState extends State<UserProfile> {
   final ValueNotifier<bool> _nicknameEditable = ValueNotifier(false);
   final ValueNotifier<bool> _dataModified = ValueNotifier(false);
   bool _emailVerified = false;
-  final ValueNotifier<bool> _emailSent = ValueNotifier(false);
 
   _loadData() {
     return getIt<UserDao>().get(GetUserRequest(userId: widget.userId));
@@ -305,15 +305,21 @@ class _UserProfileState extends State<UserProfile> {
                   style: OnepieceButtonStyle.getDefaultStyle(),
                   onPressed: () {
                     getIt<UserDao>()
-                        .verifyEmail(VerifyEmailRequest(
-                            id: user.id, email: user.username))
+                        .sendEmail(
+                            SendEmailRequest(id: user.id, email: user.username))
                         .then((value) => {
-                              OnepieceAlert.getBasicAlertDialogFunc(
-                                  context,
-                                  "",
-                                  I18nHelper.getDisplayNameFromI18n(
-                                      value!.emailNotification)),
-                              _emailSent.value = true
+                              showCupertinoModalPopup(
+                                filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                                context: context,
+                                builder: ((context) {
+                                  return Dialog(
+                                    // backgroundColor: OnepieceColors.liteFancyBlue,
+                                    alignment: AlignmentDirectional.center,
+                                    child: EmailVerification(
+                                        userId: user.id, email: user.username),
+                                  );
+                                }),
+                              )
                             });
                   },
                   child: Text(AppLocalizations.of(context)!.sendEmail),
