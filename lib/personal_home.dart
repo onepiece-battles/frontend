@@ -5,9 +5,11 @@ import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/repository/battle_dao.dart';
 import 'package:one_piece_battles_flutter/repository/character_dao.dart';
 import 'package:one_piece_battles_flutter/repository/group_dao.dart';
+import 'package:one_piece_battles_flutter/utils/base64_helper.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
 
+import 'constants/onepiece_colors.dart';
 import 'constants/onepiece_fonts.dart';
 
 GetIt getIt = GetIt.instance;
@@ -29,13 +31,17 @@ class _UserHomeState extends State<UserHome> {
         pageSize: 30,
         pageIndex: 1,
         sortKeys: [],
-        characterFilter: CharacterFilter(languageCode: I18nHelper.getLanguageCode()));
+        characterFilter:
+            CharacterFilter(languageCode: I18nHelper.getLanguageCode()));
     return await getIt<CharacterDao>().listCharacter(listCharacterRequest);
   }
 
   Future<ListGroupResponse?> listGroups() async {
     ListGroupRequest listGroupRequest = ListGroupRequest(
-        pageSize: 10, pageIndex: 1, sortKeys: [], groupFilter: GroupFilter(languageCode: I18nHelper.getLanguageCode()));
+        pageSize: 10,
+        pageIndex: 1,
+        sortKeys: [],
+        groupFilter: GroupFilter(languageCode: I18nHelper.getLanguageCode()));
     return await getIt<GroupDao>().listGroups(listGroupRequest);
   }
 
@@ -55,7 +61,7 @@ class _UserHomeState extends State<UserHome> {
   Widget build(BuildContext context) {
     return FutureBuilder(
         future: Future.wait([listCharacters(), listGroups(), listBattles()]),
-        builder: (context, AsyncSnapshot<List<dynamic>> snapshot ) {
+        builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
             _updateData(snapshot.data!);
             return SingleChildScrollView(
@@ -66,7 +72,9 @@ class _UserHomeState extends State<UserHome> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      const SizedBox(height: 50,),
+                      const SizedBox(
+                        height: 50,
+                      ),
                       Padding(
                         padding: const EdgeInsets.only(bottom: 10.0),
                         child: Text(
@@ -106,7 +114,47 @@ class _UserHomeState extends State<UserHome> {
   }
 
   Widget _getCharacterWall(BuildContext context) {
-    return Container();
+    return Center(
+      child: GridView.builder(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: characters.length < 8 ? characters.length : 8,
+          mainAxisSpacing: 10,
+          crossAxisSpacing: 10,
+        ),
+        shrinkWrap: true,
+        itemBuilder: (context, i) => Tooltip(
+          message: I18nHelper.getDisplayNameFromI18n(characters[i].name),
+          child: InkWell(
+            onTap: () {
+              context.goNamed('characterDetails',
+                  extra: characters[i].id,
+                  pathParameters: {
+                    'name':
+                        I18nHelper.getDisplayNameFromI18n(characters[i].name)
+                  });
+            },
+            child: Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.all(Radius.circular(2.0)),
+                border: Border.all(
+                    color: OnepieceColors.fancyBlue,
+                    width: 2,
+                    style: BorderStyle.solid),
+              ),
+              child: FittedBox(
+                fit: BoxFit.fill,
+                child: characters[i].profileImage == null
+                    ? Container()
+                    : Image.memory(
+                        Base64Helper.decode(characters[i].profileImage!)),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _getGroupWall(BuildContext context) {
