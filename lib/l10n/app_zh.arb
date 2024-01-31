@@ -57,7 +57,7 @@
   "chooseFruit": "选择",
   "clearAll": "清除",
   "clearForm": "清除",
-  "confirm": "继续",
+  "confirm": "确认",
   "confirmHint": "确定",
   "create": " 创建",
   "createBattle": "创建战斗",
@@ -201,5 +201,7 @@
   "zoanFruit": "动物系",
   "onceBelongTo": "曾属于",
   "userProfile": "个人主页",
-  "sendEmail": "发送邮件"
+  "sendEmail": "发送验证邮件",
+  "emailVerification": "邮箱验证",
+  "emailSent": "邮件已发送"
 }
