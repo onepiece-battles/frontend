@@ -200,5 +200,6 @@
   "yes": "YES",
   "zoanFruit": "Zoan",
   "onceBelongTo": "ex-member-of",
-  "userProfile": "User Profile"
+  "userProfile": "User Profile",
+  "sendEmail": "send email"
 }

@@ -200,5 +200,6 @@
   "yes": "是",
   "zoanFruit": "动物系",
   "onceBelongTo": "曾属于",
-  "userProfile": "个人主页"
+  "userProfile": "个人主页",
+  "sendEmail": "发送邮件"
 }
