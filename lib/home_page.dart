@@ -403,7 +403,7 @@ class HomePageState extends State<HomePage> {
                           width: 30,
                           height: 30,
                           child: Padding(
-                            padding: const EdgeInsets.only(left: 8.0),
+                            padding: const EdgeInsets.only(left: 5.0),
                             child: ImageHelper.getSvgIcon(
                               'images/svgs/email.svg',
                               120,
@@ -414,12 +414,16 @@ class HomePageState extends State<HomePage> {
                         SizedBox(
                           width: 120,
                           child: Padding(
-                            padding: const EdgeInsets.only(left: 8.0),
-                            child: Text(
-                              getIt<User>().username,
-                              style: OnepieceFonts.emailFont,
-                              overflow: TextOverflow.ellipsis,
-                            ),
+                            padding: const EdgeInsets.only(left: 5.0),
+                            child:
+                                Tooltip(
+                                  message: getIt<User>().username,
+                                  child:  Text(
+                                  getIt<User>().username,
+                                  style: OnepieceFonts.emailFont,
+                                  overflow: TextOverflow.ellipsis,
+                                ),),
+
                           ),
                         )
                       ],

@@ -203,5 +203,8 @@
   "userProfile": "个人主页",
   "sendEmail": "发送验证邮件",
   "emailVerification": "邮箱验证",
-  "emailSent": "邮件已发送"
+  "emailSent": "邮件已发送",
+  "myCharacters": "我创建的角色",
+  "myGroups": "我创建的团体",
+  "myBattles": "我创建的战斗"
 }
