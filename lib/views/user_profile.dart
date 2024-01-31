@@ -1,6 +1,8 @@
 import 'dart:typed_data';
 
 import 'package:go_router/go_router.dart';
+import 'package:one_piece_battles_flutter/popup/onepiece_alert.dart';
+import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:one_piece_battles_flutter/utils/image_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -29,12 +31,15 @@ class UserProfile extends StatefulWidget {
 
 class _UserProfileState extends State<UserProfile> {
   final TextEditingController _nicknameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
   late User user;
   final UserProfileModel _originalData = UserProfileModel();
   final UserProfileModel _realtimeData = UserProfileModel();
   String _chosenImageName = "";
-  ValueNotifier<bool> _nicknameEditable = ValueNotifier(false);
-  ValueNotifier<bool> _dataModified = ValueNotifier(false);
+  final ValueNotifier<bool> _nicknameEditable = ValueNotifier(false);
+  final ValueNotifier<bool> _dataModified = ValueNotifier(false);
+  bool _emailVerified = false;
+  final ValueNotifier<bool> _emailSent = ValueNotifier(false);
 
   _loadData() {
     return getIt<UserDao>().get(GetUserRequest(userId: widget.userId));
@@ -43,6 +48,8 @@ class _UserProfileState extends State<UserProfile> {
   _prepareData(User user) {
     this.user = user;
     _nicknameController.text = user.nickname;
+    _emailController.text = user.username;
+    _emailVerified = user.emailVerified!;
     _originalData
         .setProfileImage(Base64Helper.decode(getIt<User>().profileImage!));
     _originalData.setUsername(getIt<User>().username);
@@ -69,6 +76,11 @@ class _UserProfileState extends State<UserProfile> {
                 thickness: 1,
               ),
               _getName(context),
+              const Divider(
+                height: 10,
+                thickness: 1,
+              ),
+              _getEmail(context),
               const Divider(
                 height: 10,
                 thickness: 1,
@@ -210,20 +222,20 @@ class _UserProfileState extends State<UserProfile> {
                             _nicknameEditable.value = false;
                           }
                         },
-                        decoration:  const InputDecoration(
+                        decoration: const InputDecoration(
                             contentPadding: EdgeInsets.fromLTRB(10, 0, 0, 0)),
                         enabled: _nicknameEditable.value,
                         controller: _nicknameController,
                       ),
                     ),
-                    IconButton(
-                      onPressed: () {
+                    InkWell(
+                      hoverColor: Colors.white,
+                      onTap: () {
                         _nicknameEditable.value = !_nicknameEditable.value;
                       },
-                      splashRadius: 1,
-                      icon: SizedBox(
-                          width: 150,
-                          height: 150,
+                      child: SizedBox(
+                          width: 25,
+                          height: 25,
                           child: !_nicknameEditable.value
                               ? ImageHelper.getSvgIconWithColor(
                                   'images/svgs/edit.svg',
@@ -239,6 +251,75 @@ class _UserProfileState extends State<UserProfile> {
                   ],
                 );
               }),
+        ],
+      ),
+    );
+  }
+
+  Widget _getEmail(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(15.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(0, 0, 0, 15),
+            child: Text(
+              AppLocalizations.of(context)!.email,
+              style: OnepieceFonts.headerStyle,
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              SizedBox(
+                width: 300,
+                child: TextFormField(
+                  onChanged: null,
+                  controller: _emailController,
+                  decoration: const InputDecoration(
+                      contentPadding: EdgeInsets.fromLTRB(10, 0, 0, 0)),
+                  enabled: false,
+                ),
+              ),
+              Tooltip(
+                message: _emailVerified
+                    ? AppLocalizations.of(context)!.verified
+                    : AppLocalizations.of(context)!.notVerified,
+                child: SizedBox(
+                  width: 30,
+                  height: 30,
+                  child: _emailVerified
+                      ? ImageHelper.getSvgIconWithColor(
+                          'images/svgs/check-circle.svg',
+                          150,
+                          150,
+                          Colors.green)
+                      : ImageHelper.getSvgIconWithColor(
+                          'images/svgs/alert.svg', 150, 150, Colors.red),
+                ),
+              ),
+              if (!_emailVerified)
+                ElevatedButton(
+                  style: OnepieceButtonStyle.getDefaultStyle(),
+                  onPressed: () {
+                    getIt<UserDao>()
+                        .verifyEmail(VerifyEmailRequest(
+                            id: user.id, email: user.username))
+                        .then((value) => {
+                              OnepieceAlert.getBasicAlertDialogFunc(
+                                  context,
+                                  "",
+                                  I18nHelper.getDisplayNameFromI18n(
+                                      value!.emailNotification)),
+                              _emailSent.value = true
+                            });
+                  },
+                  child: Text(AppLocalizations.of(context)!.sendEmail),
+                ),
+            ],
+          ),
         ],
       ),
     );
@@ -278,7 +359,15 @@ class _UserProfileState extends State<UserProfile> {
                     onPressed: !_dataModified.value
                         ? null
                         : () async {
-                            submitData(context);
+                            submitData(context).then((value) => {
+                                  ResourcePermissionManager.updateUserCache(
+                                      value!),
+                                  context.goNamed('userProfile',
+                                      extra: getIt<User>().id,
+                                      pathParameters: {
+                                        'name': getIt<User>().nickname
+                                      })
+                                });
                           },
                     child: Text(AppLocalizations.of(context)!.submitForm)),
               );
@@ -287,25 +376,19 @@ class _UserProfileState extends State<UserProfile> {
     );
   }
 
-  void submitData(BuildContext context) async {
+  Future<User?> submitData(BuildContext context) async {
     var encodedImage = Base64Helper.encode(_realtimeData.profileImage);
     UploadImageRequest uploadImageRequest = UploadImageRequest(
         resourceId: getIt<User>().id,
         image: encodedImage,
         type: ResourceType.USER);
-    getIt<ImageDao>().addImage(uploadImageRequest);
+    await getIt<ImageDao>().addImage(uploadImageRequest);
     UpdateUserRequest updateUserRequest = UpdateUserRequest(
         locale: OnepieceLocale.zhCN,
         nickname: _realtimeData.nickname.trim(),
         id: getIt<User>().id);
-    getIt<UserDao>().updateUser(updateUserRequest);
-    var user = getIt<User>();
-    user.nickname = _realtimeData.nickname.trim();
-    user.profileImage = encodedImage;
-    ResourcePermissionManager.updateUserCache(user);
-    context.goNamed('userProfile',
-        extra: getIt<User>().id,
-        pathParameters: {'name': getIt<User>().nickname});
+    var response = await getIt<UserDao>().updateUser(updateUserRequest);
+    return response?.user;
   }
 
   bool _checkModified() {
