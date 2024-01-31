@@ -203,5 +203,8 @@
   "userProfile": "User Profile",
   "sendEmail": "Send Verification Email",
   "emailVerification": "Email Verification",
-  "emailSent": "Mail Sent"
+  "emailSent": "Mail Sent",
+  "myCharacters": "My Characters",
+  "myGroups": "My Groups",
+  "myBattles": "My Battles"
 }

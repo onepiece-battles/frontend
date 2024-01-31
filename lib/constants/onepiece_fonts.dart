@@ -59,6 +59,11 @@ class OnepieceFonts {
       fontSize: OnepieceFonts.contentFontSize,
       fontWeight: FontWeight.w600);
 
+  static const TextStyle contentStyleBoldFancyBlue = TextStyle(
+      color: OnepieceColors.fancyBlue,
+      fontSize: OnepieceFonts.contentFontSize,
+      fontWeight: FontWeight.w600);
+
   static const TextStyle headerStyle = TextStyle(
       color: OnepieceFonts.headerFontColor,
       fontSize: OnepieceFonts.headerFontSize,
