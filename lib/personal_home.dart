@@ -32,7 +32,7 @@ class _UserHomeState extends State<UserHome> {
         pageIndex: 1,
         sortKeys: [],
         characterFilter:
-            CharacterFilter(languageCode: I18nHelper.getLanguageCode()));
+            CharacterFilter(languageCode: I18nHelper.getLanguageCode(), userId: widget.userId));
     return await getIt<CharacterDao>().listCharacter(listCharacterRequest);
   }
 
@@ -41,13 +41,13 @@ class _UserHomeState extends State<UserHome> {
         pageSize: 10,
         pageIndex: 1,
         sortKeys: [],
-        groupFilter: GroupFilter(languageCode: I18nHelper.getLanguageCode()));
+        groupFilter: GroupFilter(languageCode: I18nHelper.getLanguageCode(), userId: widget.userId));
     return await getIt<GroupDao>().listGroups(listGroupRequest);
   }
 
   Future<ListBattleResponse?> listBattles() async {
     ListBattleRequest request = ListBattleRequest(
-        pageSize: 10, pageIndex: 1, sortKeys: [], battleFilter: BattleFilter());
+        pageSize: 10, pageIndex: 1, sortKeys: [], battleFilter: BattleFilter(userId: widget.userId));
     return await getIt<BattleDao>().listBattles(request);
   }
 
@@ -114,28 +114,53 @@ class _UserHomeState extends State<UserHome> {
   }
 
   Widget _getCharacterWall(BuildContext context) {
-    return Center(
+    return SizedBox(
+      width: characters.length<=8? characters.length * 70: 560,
+      height: characters.length<=8? 80: 60 * (characters.length/8+1),
       child: GridView.builder(
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: characters.length < 8 ? characters.length : 8,
-          mainAxisSpacing: 10,
-          crossAxisSpacing: 10,
+        itemCount: characters.length,
+        gridDelegate:  SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: characters.length<=8? characters.length: 8,
+          mainAxisSpacing: 5,
+          crossAxisSpacing: 5,
         ),
-        shrinkWrap: true,
-        itemBuilder: (context, i) => Tooltip(
-          message: I18nHelper.getDisplayNameFromI18n(characters[i].name),
-          child: InkWell(
-            onTap: () {
-              context.goNamed('characterDetails',
-                  extra: characters[i].id,
-                  pathParameters: {
-                    'name':
-                        I18nHelper.getDisplayNameFromI18n(characters[i].name)
-                  });
-            },
-            child: Container(
-              width: 50,
-              height: 50,
+        // shrinkWrap: true,
+        itemBuilder: (BuildContext context, int index) =>
+        Card(child:  Container(
+          // width: 50,
+          // height: 50,
+          decoration: BoxDecoration(
+            borderRadius: const BorderRadius.all(Radius.circular(2.0)),
+            border: Border.all(
+                color: OnepieceColors.fancyBlue,
+                width: 2,
+                style: BorderStyle.solid),
+          ),
+          child: Image(
+            fit: BoxFit.cover,
+            image:
+            Image.memory(Base64Helper.decode(characters[index].profileImage!)).image,
+          ),
+        )),
+
+      ),
+    );
+  }
+
+  Widget _getGroupWall(BuildContext context) {
+    return SizedBox(
+      width: groups.length<=8? groups.length * 70: 560,
+      height: groups.length<=8? 80: 60 * (groups.length/8+1),
+      child: GridView.builder(
+        itemCount: groups.length,
+        gridDelegate:  SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: groups.length<=8? groups.length: 8,
+          mainAxisSpacing: 5,
+          crossAxisSpacing: 5,
+        ),
+        // shrinkWrap: true,
+        itemBuilder: (BuildContext context, int index) =>
+            Container(
               decoration: BoxDecoration(
                 borderRadius: const BorderRadius.all(Radius.circular(2.0)),
                 border: Border.all(
@@ -143,25 +168,112 @@ class _UserHomeState extends State<UserHome> {
                     width: 2,
                     style: BorderStyle.solid),
               ),
-              child: FittedBox(
-                fit: BoxFit.fill,
-                child: characters[i].profileImage == null
-                    ? Container()
-                    : Image.memory(
-                        Base64Helper.decode(characters[i].profileImage!)),
+              child: Image(
+                fit: BoxFit.cover,
+                image:
+                Image.memory(Base64Helper.decode(groups[index].profileImage!)).image,
               ),
             ),
-          ),
-        ),
+
       ),
     );
   }
 
-  Widget _getGroupWall(BuildContext context) {
-    return Container();
-  }
-
   Widget _getBattleWall(BuildContext context) {
-    return Container();
+    return SizedBox(
+      width: 800,
+      child: ListView.builder(
+          shrinkWrap: true,
+          itemCount: battles.length,
+          itemBuilder: (context, index){
+            var battle = battles[index];
+            return Material(
+              type: MaterialType.transparency,
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+                decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(5))),
+                child: ListTile(
+                  minLeadingWidth: 10,
+                  contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  onTap: () {
+                    setState(
+                          () {
+                            context.goNamed('battleDetails',
+                                extra: battle.id,
+                                pathParameters: {'id': battle.id});
+                      },
+                    );
+                  },
+                  hoverColor: OnepieceColors.liteFancyBlue,
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(3, 3, 6, 3),
+                            child: Container(
+                              width: 50,
+                              height: 50,
+                              decoration: BoxDecoration(
+                                borderRadius:
+                                const BorderRadius.all(Radius.circular(2.0)),
+                                border: Border.all(
+                                    color: Colors.grey,
+                                    width: 2,
+                                    style: BorderStyle.solid),
+                              ),
+                              child: FittedBox(
+                                fit: BoxFit.fill,
+                                child: Image.memory(
+                                    Base64Helper.decode(battle.starterImage!)),
+                              ),
+                            ),
+                          ),
+                          const Text(
+                            "vs",
+                            style: OnepieceFonts.contentStyleBoldFancyBlue,
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(3, 3, 6, 3),
+                            child: Container(
+                              width: 50,
+                              height: 50,
+                              decoration: BoxDecoration(
+                                borderRadius:
+                                const BorderRadius.all(Radius.circular(2.0)),
+                                border: Border.all(
+                                    color: Colors.grey,
+                                    width: 2,
+                                    style: BorderStyle.solid),
+                              ),
+                              child: FittedBox(
+                                fit: BoxFit.fill,
+                                child: Image.memory(
+                                    Base64Helper.decode(battle.receiverImage!)),
+                              ),
+                            ),
+                          ),
+
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Text(battle.battleStatus!.toString()),
+                          Text(battle.battleReportStage!.toString())
+                        ],
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            );
+      }),
+    );
   }
 }
