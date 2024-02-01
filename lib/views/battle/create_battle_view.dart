@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:html';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
@@ -10,7 +9,6 @@ import '../../constants/button_style.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_tag.dart';
 import 'package:one_piece_battles_flutter/graph/character_data.dart';
-import '../../constants/path_constants.dart';
 import '../../graph/character_bar_graph.dart';
 import '../../repository/battle_dao.dart';
 import '../../repository/character_dao.dart';
@@ -81,7 +79,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Padding(
-              padding: const EdgeInsets.only(top: 100.0),
+              padding: const EdgeInsets.only(top: 50.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [

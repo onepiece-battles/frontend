@@ -578,9 +578,6 @@ class _GroupViewState extends State<GroupView> {
         children: characters
             .map((character) => InkWell(
                   onTap: () {
-                    debugPrint("id ${character.id}");
-                    debugPrint("name ${character.name}");
-
                     context.goNamed('characterDetails',
                         extra: character.id,
                         pathParameters: {
