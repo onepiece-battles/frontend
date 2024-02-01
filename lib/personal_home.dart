@@ -31,8 +31,8 @@ class _UserHomeState extends State<UserHome> {
         pageSize: 30,
         pageIndex: 1,
         sortKeys: [],
-        characterFilter:
-            CharacterFilter(languageCode: I18nHelper.getLanguageCode(), userId: widget.userId));
+        characterFilter: CharacterFilter(
+            languageCode: I18nHelper.getLanguageCode(), userId: widget.userId));
     return await getIt<CharacterDao>().listCharacter(listCharacterRequest);
   }
 
@@ -41,13 +41,17 @@ class _UserHomeState extends State<UserHome> {
         pageSize: 10,
         pageIndex: 1,
         sortKeys: [],
-        groupFilter: GroupFilter(languageCode: I18nHelper.getLanguageCode(), userId: widget.userId));
+        groupFilter: GroupFilter(
+            languageCode: I18nHelper.getLanguageCode(), userId: widget.userId));
     return await getIt<GroupDao>().listGroups(listGroupRequest);
   }
 
   Future<ListBattleResponse?> listBattles() async {
     ListBattleRequest request = ListBattleRequest(
-        pageSize: 10, pageIndex: 1, sortKeys: [], battleFilter: BattleFilter(userId: widget.userId));
+        pageSize: 10,
+        pageIndex: 1,
+        sortKeys: [],
+        battleFilter: BattleFilter(userId: widget.userId));
     return await getIt<BattleDao>().listBattles(request);
   }
 
@@ -69,7 +73,7 @@ class _UserHomeState extends State<UserHome> {
               child: Padding(
                   padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       const SizedBox(
@@ -115,52 +119,27 @@ class _UserHomeState extends State<UserHome> {
 
   Widget _getCharacterWall(BuildContext context) {
     return SizedBox(
-      width: characters.length<=8? characters.length * 70: 560,
-      height: characters.length<=8? 80: 60 * (characters.length/8+1),
+      width: characters.length <= 8 ? characters.length * 70 : 560,
+      height: characters.length <= 8 ? 80 : 60 * (characters.length / 8 + 1),
       child: GridView.builder(
         itemCount: characters.length,
-        gridDelegate:  SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: characters.length<=8? characters.length: 8,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: characters.length <= 8 ? characters.length : 8,
           mainAxisSpacing: 5,
           crossAxisSpacing: 5,
         ),
-        // shrinkWrap: true,
-        itemBuilder: (BuildContext context, int index) =>
-        Card(child:  Container(
-          // width: 50,
-          // height: 50,
-          decoration: BoxDecoration(
-            borderRadius: const BorderRadius.all(Radius.circular(2.0)),
-            border: Border.all(
-                color: OnepieceColors.fancyBlue,
-                width: 2,
-                style: BorderStyle.solid),
-          ),
-          child: Image(
-            fit: BoxFit.cover,
-            image:
-            Image.memory(Base64Helper.decode(characters[index].profileImage!)).image,
-          ),
-        )),
-
-      ),
-    );
-  }
-
-  Widget _getGroupWall(BuildContext context) {
-    return SizedBox(
-      width: groups.length<=8? groups.length * 70: 560,
-      height: groups.length<=8? 80: 60 * (groups.length/8+1),
-      child: GridView.builder(
-        itemCount: groups.length,
-        gridDelegate:  SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: groups.length<=8? groups.length: 8,
-          mainAxisSpacing: 5,
-          crossAxisSpacing: 5,
-        ),
-        // shrinkWrap: true,
-        itemBuilder: (BuildContext context, int index) =>
-            Container(
+        itemBuilder: (BuildContext context, int index) => InkWell(
+          onTap: () {
+            context.goNamed('characterDetails',
+                extra: characters[index].id,
+                pathParameters: {
+                  'name':
+                      I18nHelper.getDisplayNameFromI18n(characters[index].name)
+                });
+          },
+          child: Tooltip(
+            message: I18nHelper.getDisplayNameFromI18n(characters[index].name),
+            child: Container(
               decoration: BoxDecoration(
                 borderRadius: const BorderRadius.all(Radius.circular(2.0)),
                 border: Border.all(
@@ -170,22 +149,81 @@ class _UserHomeState extends State<UserHome> {
               ),
               child: Image(
                 fit: BoxFit.cover,
-                image:
-                Image.memory(Base64Helper.decode(groups[index].profileImage!)).image,
+                image: Image.memory(
+                        Base64Helper.decode(characters[index].profileImage!))
+                    .image,
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
 
+  Widget _getGroupWall(BuildContext context) {
+    return SizedBox(
+      width: groups.length <= 8 ? groups.length * 70 : 560,
+      height: groups.length <= 8 ? 80 : 60 * (groups.length / 8 + 1),
+      child: GridView.builder(
+        itemCount: groups.length,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: groups.length <= 8 ? groups.length : 8,
+          mainAxisSpacing: 5,
+          crossAxisSpacing: 5,
+        ),
+        itemBuilder: (BuildContext context, int index) => InkWell(
+          onTap: () {
+            context.goNamed('groupDetails',
+                extra: groups[index].id,
+                pathParameters: {
+                  'name': I18nHelper.getDisplayNameFromI18n(groups[index].name)
+                });
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: const BorderRadius.all(Radius.circular(2.0)),
+              border: Border.all(
+                  color: OnepieceColors.fancyBlue,
+                  width: 2,
+                  style: BorderStyle.solid),
+            ),
+            child: Tooltip(
+              message: I18nHelper.getDisplayNameFromI18n(groups[index].name),
+              child: Image(
+                fit: BoxFit.cover,
+                image: Image.memory(
+                        Base64Helper.decode(groups[index].profileImage!))
+                    .image,
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
 
   Widget _getBattleWall(BuildContext context) {
+    Map<BattleStatus, String> battleStatusToDisplayName = {
+      BattleStatus.CREATED: AppLocalizations.of(context)!.battleStatusCreated,
+      BattleStatus.IN_PROGRESS:
+          AppLocalizations.of(context)!.battleStatusStarted,
+      BattleStatus.FAILED: AppLocalizations.of(context)!.battleStatusFailed,
+      BattleStatus.FINISHED: AppLocalizations.of(context)!.battleStatusFinished
+    };
+    Map<BattleReportStage, String> reportStatusToDisplayName = {
+      BattleReportStage.WAITING:
+          AppLocalizations.of(context)!.battleReportWaiting,
+      BattleReportStage.IN_PROGRESS:
+          AppLocalizations.of(context)!.battleReportInProgress,
+      BattleReportStage.FINISHED:
+          AppLocalizations.of(context)!.battleReportGenerated,
+    };
     return SizedBox(
-      width: 800,
+      width: 500,
       child: ListView.builder(
           shrinkWrap: true,
           itemCount: battles.length,
-          itemBuilder: (context, index){
+          itemBuilder: (context, index) {
             var battle = battles[index];
             return Material(
               type: MaterialType.transparency,
@@ -194,6 +232,7 @@ class _UserHomeState extends State<UserHome> {
                 decoration: const BoxDecoration(
                     borderRadius: BorderRadius.all(Radius.circular(5))),
                 child: ListTile(
+                  // tileColor: OnepieceColors.liteFancyBlue,
                   minLeadingWidth: 10,
                   contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
                   shape: RoundedRectangleBorder(
@@ -201,10 +240,10 @@ class _UserHomeState extends State<UserHome> {
                   ),
                   onTap: () {
                     setState(
-                          () {
-                            context.goNamed('battleDetails',
-                                extra: battle.id,
-                                pathParameters: {'id': battle.id});
+                      () {
+                        context.goNamed('battleDetails',
+                            extra: battle.id,
+                            pathParameters: {'id': battle.id});
                       },
                     );
                   },
@@ -220,10 +259,10 @@ class _UserHomeState extends State<UserHome> {
                               width: 50,
                               height: 50,
                               decoration: BoxDecoration(
-                                borderRadius:
-                                const BorderRadius.all(Radius.circular(2.0)),
+                                borderRadius: const BorderRadius.all(
+                                    Radius.circular(2.0)),
                                 border: Border.all(
-                                    color: Colors.grey,
+                                    color: OnepieceColors.fancyBlue,
                                     width: 2,
                                     style: BorderStyle.solid),
                               ),
@@ -244,10 +283,10 @@ class _UserHomeState extends State<UserHome> {
                               width: 50,
                               height: 50,
                               decoration: BoxDecoration(
-                                borderRadius:
-                                const BorderRadius.all(Radius.circular(2.0)),
+                                borderRadius: const BorderRadius.all(
+                                    Radius.circular(2.0)),
                                 border: Border.all(
-                                    color: Colors.grey,
+                                    color: OnepieceColors.fancyBlue,
                                     width: 2,
                                     style: BorderStyle.solid),
                               ),
@@ -258,22 +297,27 @@ class _UserHomeState extends State<UserHome> {
                               ),
                             ),
                           ),
-
                         ],
                       ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Text(battle.battleStatus!.toString()),
-                          Text(battle.battleReportStage!.toString())
-                        ],
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Text(
+                                battleStatusToDisplayName[battle.battleStatus!]!, style: OnepieceFonts.fancyBlueHintFont),
+                            const Text(" | ",  style: OnepieceFonts.fancyBlueHintFont),
+                            Text(reportStatusToDisplayName[
+                                battle.battleReportStage!]!,  style: OnepieceFonts.fancyBlueHintFont)
+                          ],
+                        ),
                       )
                     ],
                   ),
                 ),
               ),
             );
-      }),
+          }),
     );
   }
 }

@@ -36,13 +36,6 @@ class _BattleDetailViewState extends State<BattleDetailView> {
   late Character starter;
   late Character receiver;
 
-  Map<BattleStatus, int> statusOrderMap = {
-    BattleStatus.CREATED: 1,
-    BattleStatus.IN_PROGRESS: 2,
-    BattleStatus.FINISHED: 3,
-    BattleStatus.FAILED: 3
-  };
-
   @override
   void initState() {
     super.initState();
