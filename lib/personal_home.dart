@@ -76,11 +76,9 @@ class _UserHomeState extends State<UserHome> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      const SizedBox(
-                        height: 50,
-                      ),
+                      _getHeader(context),
                       Padding(
-                        padding: const EdgeInsets.only(bottom: 10.0),
+                        padding: const EdgeInsets.fromLTRB(0,20,0,10),
                         child: Text(
                           AppLocalizations.of(context)!.myCharacters,
                           style: OnepieceFonts.contentStyleBoldFancyBlue,
@@ -88,7 +86,7 @@ class _UserHomeState extends State<UserHome> {
                       ),
                       _getCharacterWall(context),
                       Padding(
-                        padding: const EdgeInsets.only(bottom: 10.0),
+                        padding: const EdgeInsets.fromLTRB(0,20,0,10),
                         child: Text(
                           AppLocalizations.of(context)!.myGroups,
                           style: OnepieceFonts.contentStyleBoldFancyBlue,
@@ -96,7 +94,7 @@ class _UserHomeState extends State<UserHome> {
                       ),
                       _getGroupWall(context),
                       Padding(
-                        padding: const EdgeInsets.only(bottom: 10.0),
+                        padding: const EdgeInsets.fromLTRB(0,20,0,10),
                         child: Text(
                           AppLocalizations.of(context)!.myBattles,
                           style: OnepieceFonts.contentStyleBoldFancyBlue,
@@ -117,10 +115,17 @@ class _UserHomeState extends State<UserHome> {
         });
   }
 
+  Widget _getHeader(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 18.0),
+      child: Text(AppLocalizations.of(context)!.homePage, style: OnepieceFonts.headerStyle,),
+    );
+  }
+
   Widget _getCharacterWall(BuildContext context) {
     return SizedBox(
-      width: characters.length <= 8 ? characters.length * 70 : 560,
-      height: characters.length <= 8 ? 80 : 60 * (characters.length / 8 + 1),
+      width: characters.length <= 8 ? characters.length * 100 : 800,
+      height: characters.length <= 8 ? 100 : 100.0 * (characters.length / 8).ceil(),
       child: GridView.builder(
         itemCount: characters.length,
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -162,8 +167,8 @@ class _UserHomeState extends State<UserHome> {
 
   Widget _getGroupWall(BuildContext context) {
     return SizedBox(
-      width: groups.length <= 8 ? groups.length * 70 : 560,
-      height: groups.length <= 8 ? 80 : 60 * (groups.length / 8 + 1),
+      width: groups.length <= 8 ? groups.length * 100 : 800,
+      height: groups.length <= 8 ? 100 : 100.0 * (groups.length / 8).ceil(),
       child: GridView.builder(
         itemCount: groups.length,
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(

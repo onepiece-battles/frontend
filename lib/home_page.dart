@@ -19,6 +19,7 @@ import 'package:one_piece_battles_flutter/utils/image_helper.dart';
 import 'package:one_piece_battles_flutter/views/create_feedback_view.dart';
 import 'package:openapi/api.dart';
 import 'package:flutter_toggle_tab/flutter_toggle_tab.dart';
+import 'package:provider/provider.dart';
 import 'constants/onepiece_colors.dart';
 import 'main.dart';
 
@@ -37,10 +38,10 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   final String setting = "setting";
   var _tabTextIndexSelected =
-      I18nHelper.convertToOnepieceLocale(getIt<Locale>()).toString() ==
-              (OnepieceLocale.zhCN.toString())
-          ? 0
-          : 1;
+  I18nHelper.convertToOnepieceLocale(getIt<Locale>()).toString() ==
+      (OnepieceLocale.zhCN.toString())
+      ? 0
+      : 1;
   UserRole selectedRole = getIt<User>().loginRole!;
   List<ResourceType> loginRoleResources = getIt<User>()
       .loginRoleResourcesPermissionMap
@@ -48,7 +49,6 @@ class HomePageState extends State<HomePage> {
       .toList()
       .where((e) => !notShownResources.contains(e))
       .toList();
-  String selectedResource = ResourceType.CHARACTER.toString();
 
   @override
   Widget build(BuildContext context) {
@@ -93,75 +93,75 @@ class HomePageState extends State<HomePage> {
     return Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
-        children: [_getRoutingBar(), _getRightControlPanel(context)]);
+        children: [_getRoutingBar(context), _getRightControlPanel(context)]);
   }
 
-  Widget _getRoutingBar() {
-    List<String> routes = GoRouterState.of(context)
+  Widget _getRoutingBar(BuildContext context) {
+    List<String> routes = GoRouterState
+        .of(context)
         .matchedLocation
         .split("/")
         .where((element) => element != '' && element != "home")
         .toList();
     Map<String, String> routePathToDisplayName = {
-      'home': AppLocalizations.of(context)!.home,
-      'characters': AppLocalizations.of(context)!.character,
-      'fruits': AppLocalizations.of(context)!.devilFruit,
-      'groups': AppLocalizations.of(context)!.group,
-      'users': AppLocalizations.of(context)!.userManagement,
-      'battles': AppLocalizations.of(context)!.battle,
-      'setting': AppLocalizations.of(context)!.settings,
-      'issues': AppLocalizations.of(context)!.issue,
+      ResourceType.CHARACTER.toString():
+      AppLocalizations.of(context)!.character,
+      ResourceType.FRUIT.toString(): AppLocalizations.of(context)!.devilFruit,
+      ResourceType.GROUP.toString(): AppLocalizations.of(context)!.group,
+      ResourceType.USER.toString():
+      AppLocalizations.of(context)!.userManagement,
+      ResourceType.BATTLE.toString(): AppLocalizations.of(context)!.battle,
+      // 'setting': AppLocalizations.of(context)!.settings,
+      ResourceType.ISSUE.toString(): AppLocalizations.of(context)!.issue,
       'create': AppLocalizations.of(context)!.create,
       'profile': AppLocalizations.of(context)!.userProfile,
-      'user': AppLocalizations.of(context)!.user
     };
-    debugPrint(routes.toString());
     var list = <Widget>[];
     int routeLength = routes.length;
-    var currentPath = "/home";
+    var currentPath = AppRouter.homePath;
     var detailList = routes
         .asMap()
         .entries
         .map((entry) {
-          String? text;
-          if (routePathToDisplayName.keys.contains(entry.value)) {
-            text = routePathToDisplayName[entry.value];
-          } else if (DataValidator.isUuid(entry.value)) {
-            text = AppLocalizations.of(context)!.detailInformation;
-          } else {
-            text = Uri.decodeFull(entry.value);
-          }
-          return routeLength != (entry.key + 1)
-              ? [
-                  _getMiddleArrow(),
-                  TextButton(
-                    onPressed: () {
-                      var decodedUri = Uri.decodeFull(entry.value);
-                      if (decodedUri==getIt<User>().nickname) {
-                        context.goNamed('userHome',
-                            extra: getIt<User>().id,
-                            pathParameters: {'name': getIt<User>().nickname});
-                      } else {
-                        context.go("$currentPath/$decodedUri");
-                      }
-                    },
-                    child: Text(
-                      text!,
-                      style: OnepieceFonts.navigationTopBarStyleClickable,
-                    ),
-                  )
-                ]
-              : [
-                  _getMiddleArrow(),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 5),
-                    child: Text(
-                      text!,
-                      style: OnepieceFonts.navigationTopBarStyleBold,
-                    ),
-                  )
-                ];
-        })
+      String? text;
+      if (routePathToDisplayName.keys.contains(entry.value)) {
+        text = routePathToDisplayName[entry.value];
+      } else if (DataValidator.isUuid(entry.value)) {
+        text = AppLocalizations.of(context)!.detailInformation;
+      } else {
+        text = Uri.decodeFull(entry.value);
+      }
+      return routeLength != (entry.key + 1)
+          ? [
+        _getMiddleArrow(),
+        TextButton(
+          onPressed: () {
+            var decodedUri = Uri.decodeFull(entry.value);
+            if (decodedUri == getIt<User>().nickname) {
+              context.goNamed('userHome',
+                  extra: getIt<User>().id,
+                  pathParameters: {'name': getIt<User>().nickname});
+            } else {
+              context.go("$currentPath/$decodedUri");
+            }
+          },
+          child: Text(
+            text!,
+            style: OnepieceFonts.navigationTopBarStyleClickable,
+          ),
+        )
+      ]
+          : [
+        _getMiddleArrow(),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 5),
+          child: Text(
+            text!,
+            style: OnepieceFonts.navigationTopBarStyleBold,
+          ),
+        )
+      ];
+    })
         .toList()
         .expand((element) => element);
     var home = Padding(
@@ -169,10 +169,9 @@ class HomePageState extends State<HomePage> {
       child: IconButton(
         splashRadius: 0.1,
         onPressed: () {
-          selectedResource = ResourceType.CHARACTER.toString();
           context.goNamed('userHome',
               extra: getIt<User>().id,
-              pathParameters: {'name':  getIt<User>().nickname});
+              pathParameters: {'name': getIt<User>().nickname});
         },
         icon: const Icon(
           Icons.home,
@@ -243,7 +242,7 @@ class HomePageState extends State<HomePage> {
                 onChanged: (UserRole? value) {
                   selectedRole = value!;
                   UpdateLoginRoleRequest request =
-                      UpdateLoginRoleRequest(role: selectedRole);
+                  UpdateLoginRoleRequest(role: selectedRole);
                   getIt<UserDao>().updateLoginRole(request).then((value) {
                     var currentUser = getIt<User>();
                     currentUser.loginRole = value!.currentRole;
@@ -251,13 +250,14 @@ class HomePageState extends State<HomePage> {
                         value.resourcePermissionMap;
                     ResourcePermissionManager.updateUserCache(currentUser);
                     setState(() {
-                      selectedResource = ResourceType.CHARACTER.toString();
                       loginRoleResources = getIt<User>()
                           .loginRoleResourcesPermissionMap
                           .map((e) => e.resourceType!)
                           .where((e) => !notShownResources.contains(e))
                           .toList();
-                      context.go(AppRouter.homePath);
+                      context.goNamed('userHome',
+                          extra: getIt<User>().id,
+                          pathParameters: {'name': getIt<User>().nickname});
                     });
                   });
                 },
@@ -291,14 +291,15 @@ class HomePageState extends State<HomePage> {
     return getIt<User>()
         .userRoles
         .map(
-          (UserRole userRole) => DropdownMenuItem<UserRole>(
+          (UserRole userRole) =>
+          DropdownMenuItem<UserRole>(
             value: userRole,
             child: Text(
               userRoleToDisplayNameMap[userRole]!,
               style: OnepieceFonts.dropDownItemStyle,
             ),
           ),
-        )
+    )
         .toList();
   }
 
@@ -415,15 +416,14 @@ class HomePageState extends State<HomePage> {
                           width: 120,
                           child: Padding(
                             padding: const EdgeInsets.only(left: 5.0),
-                            child:
-                                Tooltip(
-                                  message: getIt<User>().username,
-                                  child:  Text(
-                                  getIt<User>().username,
-                                  style: OnepieceFonts.emailFont,
-                                  overflow: TextOverflow.ellipsis,
-                                ),),
-
+                            child: Tooltip(
+                              message: getIt<User>().username,
+                              child: Text(
+                                getIt<User>().username,
+                                style: OnepieceFonts.emailFont,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
                           ),
                         )
                       ],
@@ -486,6 +486,16 @@ class HomePageState extends State<HomePage> {
   }
 
   Widget _getSideMenuList(BuildContext context) {
+    String currentResource = "";
+    List<String> routes = GoRouterState
+        .of(context)
+        .matchedLocation
+        .split("/")
+        .where((element) => element != '' && element != "home")
+        .toList();
+    if (routes.isNotEmpty) {
+      currentResource = routes[0];
+    }
     Map<String, Widget> resourceToIconMap = {
       ResourceType.FRUIT.toString(): ImageHelper.getSvgIcon(
         'images/svgs/fruit.svg',
@@ -499,7 +509,7 @@ class HomePageState extends State<HomePage> {
       ResourceType.BATTLE.toString(): const Icon(Icons.sports_mma_outlined,
           color: OnepieceColors.menuIconColor, size: 20),
       ResourceType.CHARACTER.toString():
-          const Icon(Icons.face, color: OnepieceColors.menuIconColor, size: 20),
+      const Icon(Icons.face, color: OnepieceColors.menuIconColor, size: 20),
       ResourceType.ISSUE.toString(): const Icon(Icons.add_alert,
           color: OnepieceColors.menuIconColor, size: 20),
       setting: const Icon(Icons.settings,
@@ -513,22 +523,19 @@ class HomePageState extends State<HomePage> {
       ResourceType.CHARACTER.toString(): AppRouter.characterPath,
       ResourceType.ISSUE.toString(): AppRouter.issuePath,
       ResourceType.GROUP.toString(): AppRouter.groupPath,
-      setting: AppRouter.settingPath
     };
     Map<String, String> resourceToDisplayTextMap = {
       ResourceType.FRUIT.toString(): AppLocalizations.of(context)!.devilFruit,
       ResourceType.GROUP.toString(): AppLocalizations.of(context)!.group,
       ResourceType.USER.toString():
-          AppLocalizations.of(context)!.userManagement,
+      AppLocalizations.of(context)!.userManagement,
       ResourceType.BATTLE.toString(): AppLocalizations.of(context)!.battle,
       ResourceType.CHARACTER.toString():
-          AppLocalizations.of(context)!.character,
+      AppLocalizations.of(context)!.character,
       ResourceType.ISSUE.toString(): AppLocalizations.of(context)!.feedback,
-      setting: AppLocalizations.of(context)!.settings
     };
     var currentLoginRoleResources =
-        loginRoleResources.map((e) => e.toString()).toList();
-    currentLoginRoleResources.add(setting);
+    loginRoleResources.map((e) => e.toString()).toList();
     return ListView.builder(
       shrinkWrap: true,
       itemCount: currentLoginRoleResources.length,
@@ -547,12 +554,15 @@ class HomePageState extends State<HomePage> {
                 borderRadius: BorderRadius.circular(5),
               ),
               leading: resourceToIconMap[resourceType],
-              selected: selectedResource == resourceType,
+              selected: currentResource ==
+                  resourceType.toLowerCase(),
               selectedTileColor: OnepieceColors.liteFancyBlue,
               onTap: () {
                 setState(
-                  () {
-                    selectedResource = resourceType;
+                      () {
+                    currentResource = resourceType.toLowerCase();
+                    // Provider.of<NavigationTileCondition>(context, listen: false)
+                    //     .changeSelectedResource(resourceType.toLowerCase());
                     GoRouter.of(context)
                         .go(resourceToLocationMap[resourceType]!);
                   },
