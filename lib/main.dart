@@ -26,8 +26,10 @@ void setup() {
   getIt.registerLazySingleton<FruitDao>(() => FruitDao.empty());
   getIt.registerLazySingleton<FileDao>(() => FileDao.empty());
   getIt.registerLazySingleton<GroupDao>(() => GroupDao.empty());
-  getIt.registerLazySingleton<User>(() => User(id: "", username: "", nickname: ""));
+  getIt.registerLazySingleton<User>(
+      () => User(id: "", username: "", nickname: ""));
 }
+
 void main() {
   setup();
   runApp(const MyApp());

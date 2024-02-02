@@ -33,13 +33,18 @@ class AppRouter {
   static const homePath = '/home';
   static const registerPath = '/register';
   // sub-paths
-  static const characterPath = '/home/characters';
-  static const fruitPath = '/home/fruits';
-  static const battlePath = '/home/battles';
-  static const groupPath = '/home/groups';
-  static const userManagementPath = '/home/users';
-  static const settingPath = '/home/setting';
-  static const issuePath = '/home/issues';
+  static final characterPath =
+      '/home/${ResourceType.CHARACTER.toString().toLowerCase()}';
+  static final fruitPath =
+      '/home/${ResourceType.FRUIT.toString().toLowerCase()}';
+  static final battlePath =
+      '/home/${ResourceType.BATTLE.toString().toLowerCase()}';
+  static final groupPath =
+      '/home/${ResourceType.GROUP.toString().toLowerCase()}';
+  static final userManagementPath =
+      '/home/${ResourceType.USER.toString().toLowerCase()}';
+  static final issuePath =
+      '/home/${ResourceType.ISSUE.toString().toLowerCase()}';
 
   static final router = GoRouter(
     navigatorKey: _rootNavigatorState,
