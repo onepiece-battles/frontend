@@ -14,9 +14,7 @@ import 'package:one_piece_battles_flutter/utils/image_helper.dart';
 import 'package:openapi/api.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:one_piece_battles_flutter/graph/character_data.dart';
-import '../../constants/button_style.dart';
 import '../../constants/onepiece_fonts.dart';
-import '../../graph/individual_bar.dart';
 import '../../utils/base64_helper.dart';
 
 GetIt getIt = GetIt.instance;
@@ -94,55 +92,61 @@ class _BattleDetailViewState extends State<BattleDetailView> {
             return Center(
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
-                child: ChangeNotifierProvider(
-                  create: (context) => BattleExecutionData(BattleStatus.CREATED,
-                      BattleReportStage.WAITING, null, null),
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 100),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        // _getHeader(context),
-                        _getStart(context),
-                        const SizedBox(
-                          width: 400,
-                          child: Divider(
-                            color: OnepieceColors.fancyBlue,
-                            thickness: 2,
-                            height: 20,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.vertical,
+                  child: ChangeNotifierProvider(
+                    create: (context) => BattleExecutionData(
+                        BattleStatus.CREATED,
+                        BattleReportStage.WAITING,
+                        null,
+                        null),
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 100),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          // _getHeader(context),
+                          _getStart(context),
+                          const SizedBox(
+                            width: 400,
+                            child: Divider(
+                              color: OnepieceColors.fancyBlue,
+                              thickness: 2,
+                              height: 20,
+                            ),
                           ),
-                        ),
-                        _getProgressBar(context, 40),
-                        const SizedBox(
-                          width: 400,
-                          child: Divider(
-                            color: OnepieceColors.fancyBlue,
-                            thickness: 2,
-                            height: 20,
+                          _getProgressBar(context, 40),
+                          const SizedBox(
+                            width: 400,
+                            child: Divider(
+                              color: OnepieceColors.fancyBlue,
+                              thickness: 2,
+                              height: 20,
+                            ),
                           ),
-                        ),
-                        _getWinnerTag(context),
-                        _getResult(context),
-                        const SizedBox(
-                          width: 400,
-                          child: Divider(
-                            color: OnepieceColors.fancyBlue,
-                            thickness: 2,
-                            height: 20,
+                          _getWinnerTag(context),
+                          _getResult(context),
+                          const SizedBox(
+                            width: 400,
+                            child: Divider(
+                              color: OnepieceColors.fancyBlue,
+                              thickness: 2,
+                              height: 20,
+                            ),
                           ),
-                        ),
-                        _getBattleReportProgress(context, 40),
-                        const SizedBox(
-                          width: 400,
-                          child: Divider(
-                            color: OnepieceColors.fancyBlue,
-                            thickness: 2,
-                            height: 20,
+                          _getBattleReportProgress(context, 40),
+                          const SizedBox(
+                            width: 400,
+                            child: Divider(
+                              color: OnepieceColors.fancyBlue,
+                              thickness: 2,
+                              height: 20,
+                            ),
                           ),
-                        ),
-                        _getBattleReportIcon(context)
-                      ],
+                          _getBattleReportIcon(context)
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -172,14 +176,13 @@ class _BattleDetailViewState extends State<BattleDetailView> {
   Widget _getWinnerTag(BuildContext context) {
     return Container(
       margin: const EdgeInsets.fromLTRB(0, 20, 0, 10),
-      child:  Text(
+      child: Text(
         AppLocalizations.of(context)!.winner,
         style: const TextStyle(
-          color: OnepieceColors.fancyGreen,
-          fontStyle: FontStyle.normal,
-          fontSize: 20,
-          fontWeight: FontWeight.bold
-        ),
+            color: OnepieceColors.fancyGreen,
+            fontStyle: FontStyle.normal,
+            fontSize: 20,
+            fontWeight: FontWeight.bold),
       ),
     );
   }
@@ -298,7 +301,6 @@ class _BattleDetailViewState extends State<BattleDetailView> {
       );
     });
   }
-
 
   Widget _getStart(BuildContext context) {
     return Row(
@@ -434,10 +436,10 @@ class _BattleDetailViewState extends State<BattleDetailView> {
     return Consumer<BattleExecutionData>(builder: (context, model, child) {
       return model.winnerId == null
           ? Padding(
-            padding: const EdgeInsets.only(bottom: 10.0),
-            child: ImageHelper.getSvgIconWithColor('images/svgs/question.svg', 120,
-                120, OnepieceColors.liteFancyBlue),
-          )
+              padding: const EdgeInsets.only(bottom: 10.0),
+              child: ImageHelper.getSvgIconWithColor('images/svgs/question.svg',
+                  120, 120, OnepieceColors.liteFancyBlue),
+            )
           : Container(
               width: 120,
               height: 120,
@@ -492,30 +494,30 @@ class _BattleDetailViewState extends State<BattleDetailView> {
             ),
             model.battleReportStage == BattleReportStage.WAITING
                 ? Row(
-              children: [
-                Icon(Icons.check_circle_outline,
-                    size: iconSize, color: OnepieceColors.liteFancyBlue),
-                Padding(
-                  padding: const EdgeInsets.only(left: 8.0),
-                  child: Text(
-                    AppLocalizations.of(context)!.battleReportInProgress,
-                    style: OnepieceFonts.liteFancyBlueHintFont,
-                  ),
-                )
-              ],
-            )
+                    children: [
+                      Icon(Icons.check_circle_outline,
+                          size: iconSize, color: OnepieceColors.liteFancyBlue),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8.0),
+                        child: Text(
+                          AppLocalizations.of(context)!.battleReportInProgress,
+                          style: OnepieceFonts.liteFancyBlueHintFont,
+                        ),
+                      )
+                    ],
+                  )
                 : Row(
-              children: [
-                Icon(Icons.check_circle, size: iconSize),
-                Padding(
-                  padding: const EdgeInsets.only(left: 8.0),
-                  child: Text(
-                    AppLocalizations.of(context)!.battleReportInProgress,
-                    style: OnepieceFonts.fancyBlueHintFont,
+                    children: [
+                      Icon(Icons.check_circle, size: iconSize),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8.0),
+                        child: Text(
+                          AppLocalizations.of(context)!.battleReportInProgress,
+                          style: OnepieceFonts.fancyBlueHintFont,
+                        ),
+                      )
+                    ],
                   ),
-                )
-              ],
-            ),
             const Padding(
               padding: EdgeInsets.only(left: 17.0),
               child: Text(
@@ -565,15 +567,18 @@ class _BattleDetailViewState extends State<BattleDetailView> {
     return IconButton(
       iconSize: 50,
       tooltip: AppLocalizations.of(context)!.downloadReport,
-      onPressed: battleExecutionData.battleReportStage   == BattleReportStage.FINISHED
-          ? () {
-        getIt<FileDao>()
-            .downloadFile(DownloadFileRequest(id: battleExecutionData.reportFileId!))
-            .then((value) => {
-          OnepieceAlert.getBasicAlertDialogFunc(
-              context, "battle", "download file success")
-        });
-      }: null,
+      onPressed:
+          battleExecutionData.battleReportStage == BattleReportStage.FINISHED
+              ? () {
+                  getIt<FileDao>()
+                      .downloadFile(DownloadFileRequest(
+                          id: battleExecutionData.reportFileId!))
+                      .then((value) => {
+                            OnepieceAlert.getBasicAlertDialogFunc(
+                                context, "battle", "download file success")
+                          });
+                }
+              : null,
       disabledColor: Colors.grey,
       splashRadius: 1,
       icon: SvgPicture.asset(
@@ -627,4 +632,3 @@ class BattleExecutionData extends ChangeNotifier {
     }
   }
 }
-

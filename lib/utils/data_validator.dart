@@ -16,9 +16,4 @@ class DataValidator {
     }
     return true;
   }
-
-  static bool isUuid(String uuid) {
-    RegExp uuidMatcher = RegExp(r'^#?([\da-fA-F]{3}|[\da-fA-F]{6})$');
-    return uuidMatcher.hasMatch(uuid);
-  }
 }

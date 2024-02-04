@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
+import 'package:string_validator/string_validator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/app_router.dart';
 import 'package:one_piece_battles_flutter/config/resource_permission_manager.dart';
@@ -13,13 +14,11 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:one_piece_battles_flutter/popup/search_popup.dart';
 import 'package:one_piece_battles_flutter/popup/user_navigation.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
-import 'package:one_piece_battles_flutter/utils/data_validator.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:one_piece_battles_flutter/utils/image_helper.dart';
 import 'package:one_piece_battles_flutter/views/create_feedback_view.dart';
 import 'package:openapi/api.dart';
 import 'package:flutter_toggle_tab/flutter_toggle_tab.dart';
-import 'package:provider/provider.dart';
 import 'constants/onepiece_colors.dart';
 import 'main.dart';
 
@@ -104,15 +103,15 @@ class HomePageState extends State<HomePage> {
         .where((element) => element != '' && element != "home")
         .toList();
     Map<String, String> routePathToDisplayName = {
-      ResourceType.CHARACTER.toString():
+      ResourceType.CHARACTER.toString().toLowerCase():
       AppLocalizations.of(context)!.character,
-      ResourceType.FRUIT.toString(): AppLocalizations.of(context)!.devilFruit,
-      ResourceType.GROUP.toString(): AppLocalizations.of(context)!.group,
-      ResourceType.USER.toString():
+      ResourceType.FRUIT.toString().toLowerCase(): AppLocalizations.of(context)!.devilFruit,
+      ResourceType.GROUP.toString().toLowerCase(): AppLocalizations.of(context)!.group,
+      ResourceType.USER.toString().toLowerCase():
       AppLocalizations.of(context)!.userManagement,
-      ResourceType.BATTLE.toString(): AppLocalizations.of(context)!.battle,
+      ResourceType.BATTLE.toString().toLowerCase(): AppLocalizations.of(context)!.battle,
       // 'setting': AppLocalizations.of(context)!.settings,
-      ResourceType.ISSUE.toString(): AppLocalizations.of(context)!.issue,
+      ResourceType.ISSUE.toString().toLowerCase(): AppLocalizations.of(context)!.issue,
       'create': AppLocalizations.of(context)!.create,
       'profile': AppLocalizations.of(context)!.userProfile,
     };
@@ -126,7 +125,7 @@ class HomePageState extends State<HomePage> {
       String? text;
       if (routePathToDisplayName.keys.contains(entry.value)) {
         text = routePathToDisplayName[entry.value];
-      } else if (DataValidator.isUuid(entry.value)) {
+      } else if (isUUID(entry.value)) {
         text = AppLocalizations.of(context)!.detailInformation;
       } else {
         text = Uri.decodeFull(entry.value);
@@ -561,8 +560,6 @@ class HomePageState extends State<HomePage> {
                 setState(
                       () {
                     currentResource = resourceType.toLowerCase();
-                    // Provider.of<NavigationTileCondition>(context, listen: false)
-                    //     .changeSelectedResource(resourceType.toLowerCase());
                     GoRouter.of(context)
                         .go(resourceToLocationMap[resourceType]!);
                   },

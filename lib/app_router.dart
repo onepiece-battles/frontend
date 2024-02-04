@@ -48,7 +48,7 @@ class AppRouter {
 
   static final router = GoRouter(
     navigatorKey: _rootNavigatorState,
-    initialLocation: loginPath,
+    initialLocation: homePath,
     routes: [
       ShellRoute(
         navigatorKey: _homeNavigatorState,
