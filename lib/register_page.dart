@@ -10,6 +10,7 @@ import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
 import 'config/api_initializer.dart';
 import 'config/resource_permission_manager.dart';
+import 'constants/button_style.dart';
 import 'constants/path_constants.dart';
 import 'main.dart';
 
@@ -270,6 +271,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 child: ElevatedButton(
                   autofocus: true,
                   onPressed: !_buttonEnabled ? null : () => _register(context),
+                  style: OnepieceButtonStyle.getDefaultStyle(),
                   child: Text(
                     AppLocalizations.of(context)!.signUp,
                     style: const TextStyle(
