@@ -543,13 +543,13 @@ class _CharacterViewState extends State<CharacterView> {
       border: const TableBorder(
           top: BorderSide(color: OnepieceColors.themeColor),
           bottom: BorderSide(color: OnepieceColors.themeColor)),
-      columns: _createColumns(),
+      columns: _createColumns(context),
       rows: _createRows(context),
       columnSpacing: 10,
     );
   }
 
-  List<DataColumn> _createColumns() {
+  List<DataColumn> _createColumns(BuildContext context) {
     return [
       DataColumn(
         label: Tooltip(
