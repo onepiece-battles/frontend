@@ -84,6 +84,16 @@ class OnepieceFonts {
       fontSize: OnepieceFonts.smallHeaderFontSize,
       fontWeight: OnepieceFonts.headerFontWeight);
 
+  static const TextStyle smallHeaderStyleFancyBlue = TextStyle(
+      color: OnepieceColors.fancyBlue,
+      fontSize: OnepieceFonts.smallHeaderFontSize,
+      fontWeight: OnepieceFonts.headerFontWeight);
+
+  static const TextStyle headerStyleWhite = TextStyle(
+      color: Colors.white,
+      fontSize: OnepieceFonts.headerFontSize,
+      fontWeight: OnepieceFonts.headerFontWeight);
+
   static const TextStyle tableHeaderStyle = TextStyle(
       color: OnepieceFonts.contentFontColor,
       fontSize: OnepieceFonts.tableHeaderFontSize,

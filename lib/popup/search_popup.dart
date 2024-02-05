@@ -24,6 +24,7 @@ class SearchPopup extends StatefulWidget {
 }
 
 class _SearchPopupState extends State<SearchPopup> {
+  ScrollController scrollController = ScrollController();
   TextEditingController searchBarController = TextEditingController();
   List<CharacterListView> characters =
       <CharacterListView>[].toList(growable: true);
@@ -85,14 +86,16 @@ class _SearchPopupState extends State<SearchPopup> {
 
   @override
   Widget build(BuildContext context) {
-    ScrollController scrollController = ScrollController();
     return SingleChildScrollView(
       controller: scrollController,
       scrollDirection: Axis.vertical,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          SizedBox(width: 800, child: _getSearchBar()),
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: _getSearchBar(context),
+          ),
           if (characters.isNotEmpty)
             SizedBox(
               width: 800,
@@ -178,17 +181,20 @@ class _SearchPopupState extends State<SearchPopup> {
     );
   }
 
-  Widget _getSearchBar() {
-    return Padding(
-      padding: const EdgeInsets.all(20.0),
+  Widget _getSearchBar(BuildContext context) {
+    return SizedBox(
+      width: 800,
       child: TextFormField(
         autofocus: true,
         controller: searchBarController,
         decoration: InputDecoration(
+          floatingLabelAlignment: FloatingLabelAlignment.center,
+          floatingLabelStyle: OnepieceFonts.smallHeaderStyleFancyBlue,
+          labelStyle: OnepieceFonts.contentStyleBold,
           disabledBorder: const OutlineInputBorder(
-              borderSide: BorderSide(color: OnepieceColors.menuHoverColor)),
+              borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
           enabledBorder: const OutlineInputBorder(
-              borderSide: BorderSide(color: OnepieceColors.menuHoverColor)),
+              borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
           focusedBorder: const OutlineInputBorder(
               borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
           prefixIcon: const Icon(Icons.search),
