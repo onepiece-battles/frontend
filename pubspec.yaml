@@ -44,7 +44,7 @@ dependencies:
   url_strategy: ^0.2.0
   go_router: ^10.1.2
   popover: ^0.2.8
-  openapi: 
+  openapi:
     path: generated
   image_picker_for_web: ^3.0.1
   image_picker: ^1.0.4
