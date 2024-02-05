@@ -524,7 +524,9 @@ class _CharacterViewState extends State<CharacterView> {
                     context.goNamed("createCharacter");
                   },
                   style: OnepieceButtonStyle.getDefaultStyle(),
-                  child: Text(AppLocalizations.of(context)!.createCharacter)),
+                  child: Text(
+                    AppLocalizations.of(context)!.createCharacter,
+                  )),
             ),
           )
         ],
@@ -679,7 +681,9 @@ class _CharacterViewState extends State<CharacterView> {
               debugPrint("name list ${character.name}");
               context.goNamed('characterDetails',
                   extra: character.id,
-                  pathParameters: {'name':  I18nHelper.getDisplayNameFromI18n(character.name)});
+                  pathParameters: {
+                    'name': I18nHelper.getDisplayNameFromI18n(character.name)
+                  });
             },
             cells: [
               DataCell(

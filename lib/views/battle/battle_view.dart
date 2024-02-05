@@ -106,34 +106,37 @@ class _BattleViewState extends State<BattleView> {
       padding: const EdgeInsets.all(15.0),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _getHeaderText(context),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                SizedBox(
-                  width: 1500,
-                  child: _getControlRow(context),
-                ),
-                SizedBox(
-                  width: 1500,
-                  child: FittedBox(
-                    fit: BoxFit.fitWidth,
-                    child: _getBattlesTable(context),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _getHeaderText(context),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: 1500,
+                    child: _getControlRow(context),
                   ),
-                ),
-                const SizedBox(
-                  height: 15,
-                ),
-                SizedBox(
-                  width: 1500,
-                  child: Center(child: _getPageFoot()),
-                )
-              ],
-            ),
-          ],
+                  SizedBox(
+                    width: 1500,
+                    child: FittedBox(
+                      fit: BoxFit.fitWidth,
+                      child: _getBattlesTable(context),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  SizedBox(
+                    width: 1500,
+                    child: Center(child: _getPageFoot()),
+                  )
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -374,7 +377,8 @@ class _BattleViewState extends State<BattleView> {
   Widget _getBattleStatusFilter(BuildContext context) {
     Map<BattleStatus, String> battleStatusToDisplayName = {
       BattleStatus.CREATED: AppLocalizations.of(context)!.battleStatusCreated,
-      BattleStatus.IN_PROGRESS: AppLocalizations.of(context)!.battleStatusStarted,
+      BattleStatus.IN_PROGRESS:
+          AppLocalizations.of(context)!.battleStatusStarted,
       BattleStatus.FINISHED: AppLocalizations.of(context)!.battleStatusFinished,
       BattleStatus.FAILED: AppLocalizations.of(context)!.battleStatusFailed,
     };
@@ -586,7 +590,8 @@ class _BattleViewState extends State<BattleView> {
   List<DataRow> _createRows(BuildContext context) {
     Map<BattleStatus, String> battleStatusToDisplayName = {
       BattleStatus.CREATED: AppLocalizations.of(context)!.battleStatusCreated,
-      BattleStatus.IN_PROGRESS: AppLocalizations.of(context)!.battleStatusStarted,
+      BattleStatus.IN_PROGRESS:
+          AppLocalizations.of(context)!.battleStatusStarted,
       BattleStatus.FINISHED: AppLocalizations.of(context)!.battleStatusFinished,
       BattleStatus.FAILED: AppLocalizations.of(context)!.battleStatusFailed,
     };
@@ -607,20 +612,25 @@ class _BattleViewState extends State<BattleView> {
             cells: [
               _getDataCell("${entry.key + 1}"),
               _getDataCell(entry.value.creator.toString()),
-              _getDataCell(I18nHelper.getDisplayNameFromI18n(entry.value.starterName)),
-              _getDataCell(I18nHelper.getDisplayNameFromI18n(entry.value.receiverName)),
+              _getDataCell(
+                  I18nHelper.getDisplayNameFromI18n(entry.value.starterName)),
+              _getDataCell(
+                  I18nHelper.getDisplayNameFromI18n(entry.value.receiverName)),
               _getDataCell(DateHelper.getLocalDateTimeFromTimestamp(
                       entry.value.creationTimestamp!)
                   .toString()),
               _getDataCell(DateHelper.getLocalDateTimeFromTimestamp(
                       entry.value.modificationTimestamp!)
                   .toString()),
-              _getDataCell(battleStatusToDisplayName[entry.value.battleStatus]!),
+              _getDataCell(
+                  battleStatusToDisplayName[entry.value.battleStatus]!),
               _getDataCell(entry.value.winnerId == null
                   ? "------"
                   : (entry.value.winnerId == entry.value.starterId
-                      ? I18nHelper.getDisplayNameFromI18n(entry.value.starterName!)
-                      : I18nHelper.getDisplayNameFromI18n(entry.value.receiverName!))),
+                      ? I18nHelper.getDisplayNameFromI18n(
+                          entry.value.starterName!)
+                      : I18nHelper.getDisplayNameFromI18n(
+                          entry.value.receiverName!))),
               _getDataCell(
                   booleanToDisplayName[entry.value.roleName == UserRole.NIKA]!),
             ],

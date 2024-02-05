@@ -14,6 +14,8 @@ import 'package:one_piece_battles_flutter/repository/user_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
 
+import 'constants/button_style.dart';
+
 GetIt getIt = GetIt.instance;
 const locales = [Locale('zh', 'CN'), Locale('en', 'US')];
 
@@ -181,6 +183,7 @@ class _LoginPageState extends State<LoginPage> {
                 width: 300,
                 child: ElevatedButton(
                   onPressed: !_buttonEnabled ? null : () => _login(context),
+                  style: OnepieceButtonStyle.getDefaultStyle(),
                   child: Text(
                     AppLocalizations.of(context)!.signIn,
                     style: const TextStyle(
