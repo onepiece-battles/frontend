@@ -315,7 +315,7 @@ class _BattleViewState extends State<BattleView> {
           buttonStyleData: ButtonStyleData(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             height: 35,
-            width: 180,
+            width: 200,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(3),
               color: OnepieceColors.menuBackgroundColor,
@@ -419,7 +419,7 @@ class _BattleViewState extends State<BattleView> {
           buttonStyleData: ButtonStyleData(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               height: 35,
-              width: 180,
+              width: 250,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(3),
                 color: OnepieceColors.menuBackgroundColor,
