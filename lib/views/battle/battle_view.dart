@@ -162,6 +162,19 @@ class _BattleViewState extends State<BattleView> {
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
+              SizedBox(
+                height: 35,
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 10),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      context.goNamed("createBattle");
+                    },
+                    style: OnepieceButtonStyle.getDefaultStyle(),
+                    child: Text(AppLocalizations.of(context)!.createBattle),
+                  ),
+                ),
+              ),
               _getBattleTypeFilter(context),
               _getBattleStatusFilter(context),
             ],
@@ -252,19 +265,6 @@ class _BattleViewState extends State<BattleView> {
                             ),
                     ),
                   ],
-                ),
-              ),
-              SizedBox(
-                height: 35,
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 10),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      context.goNamed("createBattle");
-                    },
-                    style: OnepieceButtonStyle.getDefaultStyle(),
-                    child: Text(AppLocalizations.of(context)!.createBattle),
-                  ),
                 ),
               ),
             ],
@@ -496,33 +496,36 @@ class _BattleViewState extends State<BattleView> {
   List<DataColumn> _createColumns() {
     return [
       DataColumn(
-        label: ElevatedButton(
-          style: OnepieceButtonStyle.getDefaultStyle(),
-          onPressed: () {
-            // filter will not be cleared
-            sortKeys = [];
-            sortableEnumToSortOrderMap = {
-              BattleSortableFieldsEnum.winnerName: null,
-              BattleSortableFieldsEnum.creationRecordId: null,
-              BattleSortableFieldsEnum.modificationRecordId: null,
-            };
-            _search();
-          },
-          child: Text(AppLocalizations.of(context)!.resetSort),
+        label: Tooltip(
+          message: AppLocalizations.of(context)!.resetSort,
+          child: ImageHelper.getIconButtonFromSvg(
+            'images/svgs/reset.svg',
+            OnepieceColors.fancyBlue,
+            25,
+            25,
+            () {
+              // filter will not be cleared
+              sortKeys = [];
+              sortableEnumToSortOrderMap = {
+                BattleSortableFieldsEnum.winnerName: null,
+                BattleSortableFieldsEnum.creationRecordId: null,
+                BattleSortableFieldsEnum.modificationRecordId: null,
+              };
+              _search();
+            },
+          ),
         ),
       ),
-      _createSingleColumn(AppLocalizations.of(context)!.creator, null, 80),
-      _createSingleColumn(AppLocalizations.of(context)!.initiator, null, 80),
-      _createSingleColumn(AppLocalizations.of(context)!.receiver, null, 80),
+      _createSingleColumn(AppLocalizations.of(context)!.creator, null, 150),
+      _createSingleColumn(AppLocalizations.of(context)!.initiator, null, 150),
+      _createSingleColumn(AppLocalizations.of(context)!.receiver, null, 150),
+      _createSingleColumn(AppLocalizations.of(context)!.status, null, 70),
+      _createSingleColumn(AppLocalizations.of(context)!.winner,
+          BattleSortableFieldsEnum.winnerName, 150),
       _createSingleColumn(AppLocalizations.of(context)!.creationTime,
           BattleSortableFieldsEnum.creationRecordId, 160),
       _createSingleColumn(AppLocalizations.of(context)!.modificationTime,
           BattleSortableFieldsEnum.modificationRecordId, 160),
-      _createSingleColumn(AppLocalizations.of(context)!.status, null, 70),
-      _createSingleColumn(AppLocalizations.of(context)!.winner,
-          BattleSortableFieldsEnum.winnerName, 80),
-      _createSingleColumn(
-          AppLocalizations.of(context)!.createdBySystem, null, 120),
     ];
   }
 
@@ -604,6 +607,14 @@ class _BattleViewState extends State<BattleView> {
         .entries
         .map(
           (entry) => DataRow(
+            color: MaterialStateProperty.resolveWith<Color?>(
+                (Set<MaterialState> states) {
+              if (entry.key.isEven) {
+                return OnepieceColors
+                    .liteFancyGreen; // Use whatever color you need for even rows
+              }
+              return null; // Use default (transparent) color for odd rows
+            }),
             onSelectChanged: (value) {
               context.goNamed('battleDetails',
                   extra: entry.value.id,
@@ -616,23 +627,21 @@ class _BattleViewState extends State<BattleView> {
                   I18nHelper.getDisplayNameFromI18n(entry.value.starterName)),
               _getDataCell(
                   I18nHelper.getDisplayNameFromI18n(entry.value.receiverName)),
+              _getDataCell(
+                  battleStatusToDisplayName[entry.value.battleStatus]!),
+              _getDataCell(entry.value.winnerId == null
+                  ? "?"
+                  : (entry.value.winnerId == entry.value.starterId
+                  ? I18nHelper.getDisplayNameFromI18n(
+                  entry.value.starterName!)
+                  : I18nHelper.getDisplayNameFromI18n(
+                  entry.value.receiverName!))),
               _getDataCell(DateHelper.getLocalDateTimeFromTimestamp(
                       entry.value.creationTimestamp!)
                   .toString()),
               _getDataCell(DateHelper.getLocalDateTimeFromTimestamp(
                       entry.value.modificationTimestamp!)
                   .toString()),
-              _getDataCell(
-                  battleStatusToDisplayName[entry.value.battleStatus]!),
-              _getDataCell(entry.value.winnerId == null
-                  ? "------"
-                  : (entry.value.winnerId == entry.value.starterId
-                      ? I18nHelper.getDisplayNameFromI18n(
-                          entry.value.starterName!)
-                      : I18nHelper.getDisplayNameFromI18n(
-                          entry.value.receiverName!))),
-              _getDataCell(
-                  booleanToDisplayName[entry.value.roleName == UserRole.NIKA]!),
             ],
           ),
         )
