@@ -2,6 +2,7 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:one_piece_battles_flutter/constants/onepiece_tag.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
 import '../../constants/button_style.dart';
@@ -160,6 +161,19 @@ class _FruitViewState extends State<FruitView> {
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
+              SizedBox(
+                height: 35,
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 10.0),
+                  child: ElevatedButton(
+                    style: OnepieceButtonStyle.getDefaultStyle(),
+                    onPressed: () {
+                      context.goNamed("createFruit");
+                    },
+                    child: Text(AppLocalizations.of(context)!.createDevilFruit),
+                  ),
+                ),
+              ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(0, 0, 6, 0),
                 child: SizedBox(
@@ -282,20 +296,7 @@ class _FruitViewState extends State<FruitView> {
                     ),
                   ],
                 ),
-              ),
-              SizedBox(
-                height: 35,
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 10.0),
-                  child: ElevatedButton(
-                    style: OnepieceButtonStyle.getDefaultStyle(),
-                    onPressed: () {
-                      context.goNamed("createFruit");
-                    },
-                    child: Text(AppLocalizations.of(context)!.createDevilFruit),
-                  ),
-                ),
-              ),
+              )
             ],
           ),
         ],
@@ -421,45 +422,48 @@ class _FruitViewState extends State<FruitView> {
   List<DataColumn> _createColumns() {
     return [
       DataColumn(
-        label: ElevatedButton(
-          style: OnepieceButtonStyle.getDefaultStyle(),
-          onPressed: () {
-            // filter will not be cleared
-            sortKeys = [];
-            sortableEnumToSortOrderMap = sortableEnumToSortOrderMap = {
-              FruitSortableFieldsEnum.fruitType: null,
-              FruitSortableFieldsEnum.attackStrengthen: null,
-              FruitSortableFieldsEnum.defenseStrengthen: null,
-              FruitSortableFieldsEnum.bloodStrengthen: null,
-              FruitSortableFieldsEnum.groupGainStrengthen: null,
-              FruitSortableFieldsEnum.intelligenceStrengthen: null,
-              FruitSortableFieldsEnum.magicConsume: null,
-              FruitSortableFieldsEnum.speedStrengthen: null,
-              FruitSortableFieldsEnum.name: null,
-            };
-            _search();
-          },
-          child: Text(AppLocalizations.of(context)!.resetSort),
+        label: Tooltip(
+          message: AppLocalizations.of(context)!.resetSort,
+          child: ImageHelper.getIconButtonFromSvg(
+            'images/svgs/reset.svg',
+            OnepieceColors.fancyBlue,
+            25,
+            25,
+            () {
+              // filter will not be cleared
+              sortKeys = [];
+              sortableEnumToSortOrderMap = sortableEnumToSortOrderMap = {
+                FruitSortableFieldsEnum.fruitType: null,
+                FruitSortableFieldsEnum.attackStrengthen: null,
+                FruitSortableFieldsEnum.defenseStrengthen: null,
+                FruitSortableFieldsEnum.bloodStrengthen: null,
+                FruitSortableFieldsEnum.groupGainStrengthen: null,
+                FruitSortableFieldsEnum.intelligenceStrengthen: null,
+                FruitSortableFieldsEnum.magicConsume: null,
+                FruitSortableFieldsEnum.speedStrengthen: null,
+                FruitSortableFieldsEnum.name: null,
+              };
+              _search();
+            },
+          ),
         ),
       ),
       _createSingleColumn(
-          AppLocalizations.of(context)!.name, FruitSortableFieldsEnum.name, 80),
-      _createSingleColumn(AppLocalizations.of(context)!.attackStrengthen,
-          FruitSortableFieldsEnum.attackStrengthen, null),
-      _createSingleColumn(AppLocalizations.of(context)!.defenseStrengthen,
-          FruitSortableFieldsEnum.defenseStrengthen, null),
-      _createSingleColumn(AppLocalizations.of(context)!.bloodStrengthen,
-          FruitSortableFieldsEnum.bloodStrengthen, null),
-      _createSingleColumn(AppLocalizations.of(context)!.intelligenceStrengthen,
-          FruitSortableFieldsEnum.intelligenceStrengthen, null),
-      _createSingleColumn(AppLocalizations.of(context)!.groupStrengthen,
-          FruitSortableFieldsEnum.groupGainStrengthen, null),
-      _createSingleColumn(AppLocalizations.of(context)!.speedStrengthen,
-          FruitSortableFieldsEnum.speedStrengthen, null),
+          AppLocalizations.of(context)!.name, null, 80),
       _createSingleColumn(AppLocalizations.of(context)!.fruitType,
           FruitSortableFieldsEnum.fruitType, 150),
-      _createSingleColumn(
-          AppLocalizations.of(context)!.createdBySystem, null, null),
+      _createSingleColumn(AppLocalizations.of(context)!.attackStrengthen,
+          FruitSortableFieldsEnum.attackStrengthen, 150),
+      _createSingleColumn(AppLocalizations.of(context)!.defenseStrengthen,
+          FruitSortableFieldsEnum.defenseStrengthen, 150),
+      _createSingleColumn(AppLocalizations.of(context)!.bloodStrengthen,
+          FruitSortableFieldsEnum.bloodStrengthen, 150),
+      _createSingleColumn(AppLocalizations.of(context)!.intelligenceStrengthen,
+          FruitSortableFieldsEnum.intelligenceStrengthen, 150),
+      _createSingleColumn(AppLocalizations.of(context)!.groupStrengthen,
+          FruitSortableFieldsEnum.groupGainStrengthen, 150),
+      _createSingleColumn(AppLocalizations.of(context)!.speedStrengthen,
+          FruitSortableFieldsEnum.speedStrengthen, 150),
     ];
   }
 
@@ -536,33 +540,41 @@ class _FruitViewState extends State<FruitView> {
           AppLocalizations.of(context)!.artificialZoanFruit,
       FruitType.paramecia: AppLocalizations.of(context)!.parameciaFruit,
     };
-    Map<bool, String> booleanToDisplayName = {
-      true: AppLocalizations.of(context)!.yes,
-      false: AppLocalizations.of(context)!.no
-    };
     List<DataRow> result = [];
     var dataList = currentFruitList
         .asMap()
         .entries
         .map(
           (entry) => DataRow(
+            color: MaterialStateProperty.resolveWith<Color?>(
+                (Set<MaterialState> states) {
+              if (entry.key.isEven) {
+                return OnepieceColors
+                    .liteFancyGreen; // Use whatever color you need for even rows
+              }
+              return null; // Use default (transparent) color for odd rows
+            }),
             onSelectChanged: (value) {
               context.goNamed('fruitDetails',
                   extra: entry.value.id,
-                  pathParameters: {'name': I18nHelper.getDisplayNameFromI18n(entry.value.name!)});
+                  pathParameters: {
+                    'name': I18nHelper.getDisplayNameFromI18n(entry.value.name!)
+                  });
             },
             cells: [
               _getDataCell("${entry.key + 1}"),
               _getDataCell(I18nHelper.getDisplayNameFromI18n(entry.value.name)),
+              DataCell(Padding(
+                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                child: OnepieceTag.getFruitTag(entry.value.fruitType!,
+                    fruitTypeToDisplayValue[entry.value.fruitType]!),
+              )),
               _getDataCell(entry.value.attackStrengthen.toString()),
               _getDataCell(entry.value.defenseStrengthen.toString()),
               _getDataCell(entry.value.bloodStrengthen.toString()),
               _getDataCell(entry.value.intelligenceStrengthen.toString()),
               _getDataCell(entry.value.groupGainStrengthen.toString()),
               _getDataCell(entry.value.speedStrengthen.toString()),
-              _getDataCell(fruitTypeToDisplayValue[entry.value.fruitType]!),
-              _getDataCell(
-                  booleanToDisplayName[entry.value.roleName == UserRole.NIKA]!),
             ],
           ),
         )

@@ -8,7 +8,7 @@ class MyInputTheme {
 
   UnderlineInputBorder _buildBorder(Color color) {
     return UnderlineInputBorder(
-      borderRadius: const BorderRadius.all(Radius.circular(10)),
+      borderRadius: const BorderRadius.all(Radius.circular(5)),
       borderSide: BorderSide(color: color, width: 1.0),
     );
   }

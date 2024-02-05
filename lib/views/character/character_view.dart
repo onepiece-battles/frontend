@@ -555,7 +555,8 @@ class _CharacterViewState extends State<CharacterView> {
         label: Tooltip(
           message: AppLocalizations.of(context)!.resetSort,
           child: ImageHelper.getIconButtonFromSvg(
-              'images/svgs/reset.svg', OnepieceColors.fancyBlue, 25, 25, () {
+              'images/svgs/reset.svg', OnepieceColors.fancyBlue, 25, 25,
+                  () {
             sortKeys = [];
             sortableEnumToSortOrderMap = {
               CharacterSortableFieldsEnum.name: null,

@@ -96,8 +96,8 @@ class _UserNavigationState extends State<UserNavigation> {
         ),
       ),
       child: Container(
-        width: 70,
-        height: 70,
+        width: 80,
+        height: 80,
         decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(10.0)),
           border: Border.all(
