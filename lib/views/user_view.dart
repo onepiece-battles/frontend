@@ -399,7 +399,7 @@ class _UserViewState extends State<UserView> {
     Map<AccountStatus, String> accountStatusEnumToDisplayValue = {
       AccountStatus.loggedIn: AppLocalizations.of(context)!.accountLoggedIn,
       AccountStatus.loggedOut: AppLocalizations.of(context)!.accountLoggedOut,
-      AccountStatus.stopped: AppLocalizations.of(context)!.accoutStopped,
+      AccountStatus.stopped: AppLocalizations.of(context)!.accountStopped,
       AccountStatus.closed: AppLocalizations.of(context)!.accountClosed,
     };
 

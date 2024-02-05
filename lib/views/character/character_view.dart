@@ -11,6 +11,7 @@ import 'package:one_piece_battles_flutter/utils/base64_helper.dart';
 import 'package:one_piece_battles_flutter/utils/data_validator.dart';
 import 'package:openapi/api.dart';
 import '../../constants/button_style.dart';
+import '../../constants/onepiece_tag.dart';
 import '../../utils/i18n_helper.dart';
 import '../../utils/image_helper.dart';
 
@@ -171,6 +172,20 @@ class _CharacterViewState extends State<CharacterView> {
       Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
+          SizedBox(
+            height: 35,
+            child: Padding(
+              padding: const EdgeInsets.only(right: 10.0),
+              child: ElevatedButton(
+                  onPressed: () {
+                    context.goNamed("createCharacter");
+                  },
+                  style: OnepieceButtonStyle.getDefaultStyle(),
+                  child: Text(
+                    AppLocalizations.of(context)!.createCharacter,
+                  )),
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.fromLTRB(0, 0, 6, 0),
             child: SizedBox(
@@ -515,20 +530,6 @@ class _CharacterViewState extends State<CharacterView> {
               ],
             ),
           ),
-          SizedBox(
-            height: 35,
-            child: Padding(
-              padding: const EdgeInsets.only(left: 10.0),
-              child: ElevatedButton(
-                  onPressed: () {
-                    context.goNamed("createCharacter");
-                  },
-                  style: OnepieceButtonStyle.getDefaultStyle(),
-                  child: Text(
-                    AppLocalizations.of(context)!.createCharacter,
-                  )),
-            ),
-          )
         ],
       ),
     ]);
@@ -551,49 +552,53 @@ class _CharacterViewState extends State<CharacterView> {
   List<DataColumn> _createColumns() {
     return [
       DataColumn(
-        label: ElevatedButton(
-            style: OnepieceButtonStyle.getDefaultStyle(),
-            onPressed: () {
-              sortKeys = [];
-              sortableEnumToSortOrderMap = {
-                CharacterSortableFieldsEnum.name: null,
-                CharacterSortableFieldsEnum.fruitLimit: null,
-                CharacterSortableFieldsEnum.groupGain: null,
-                CharacterSortableFieldsEnum.attack: null,
-                CharacterSortableFieldsEnum.defense: null,
-                CharacterSortableFieldsEnum.intelligence: null,
-                CharacterSortableFieldsEnum.blood: null,
-                CharacterSortableFieldsEnum.speed: null,
-              };
-              _search();
-            },
-            child: Text(AppLocalizations.of(context)!.resetSort)),
+        label: Tooltip(
+          message: AppLocalizations.of(context)!.resetSort,
+          child: ImageHelper.getIconButtonFromSvg(
+              'images/svgs/reset.svg', OnepieceColors.fancyBlue, 25, 25, () {
+            sortKeys = [];
+            sortableEnumToSortOrderMap = {
+              CharacterSortableFieldsEnum.name: null,
+              CharacterSortableFieldsEnum.fruitLimit: null,
+              CharacterSortableFieldsEnum.groupGain: null,
+              CharacterSortableFieldsEnum.attack: null,
+              CharacterSortableFieldsEnum.defense: null,
+              CharacterSortableFieldsEnum.intelligence: null,
+              CharacterSortableFieldsEnum.blood: null,
+              CharacterSortableFieldsEnum.speed: null,
+            };
+            _search();
+          }),
+        ),
       ),
-      _createSingleColumn(AppLocalizations.of(context)!.characterName,
-          CharacterSortableFieldsEnum.name, 120),
       _createSingleColumn(
-          AppLocalizations.of(context)!.characterTypeLabel, null, 120),
-      _createSingleColumn(AppLocalizations.of(context)!.fruitLimit,
-          CharacterSortableFieldsEnum.fruitLimit, null),
-      _createSingleColumn(AppLocalizations.of(context)!.groupGain,
-          CharacterSortableFieldsEnum.groupGain, null),
+          AppLocalizations.of(context)!.characterName, null, 120, false),
+      _createSingleColumn(
+          AppLocalizations.of(context)!.hakis, null, 120, false),
+      _createSingleColumn(
+          AppLocalizations.of(context)!.bounty, null, 120, false),
       _createSingleColumn(AppLocalizations.of(context)!.characterAttack,
-          CharacterSortableFieldsEnum.attack, null),
+          CharacterSortableFieldsEnum.attack, null, true),
       _createSingleColumn(AppLocalizations.of(context)!.characterDefense,
-          CharacterSortableFieldsEnum.defense, null),
+          CharacterSortableFieldsEnum.defense, null, true),
       _createSingleColumn(AppLocalizations.of(context)!.characterIntelligence,
-          CharacterSortableFieldsEnum.intelligence, null),
+          CharacterSortableFieldsEnum.intelligence, null, true),
       _createSingleColumn(AppLocalizations.of(context)!.characterBlood,
-          CharacterSortableFieldsEnum.blood, null),
+          CharacterSortableFieldsEnum.blood, null, true),
       _createSingleColumn(AppLocalizations.of(context)!.characterSpeed,
-          CharacterSortableFieldsEnum.speed, null),
-      _createSingleColumn(
-          AppLocalizations.of(context)!.createdBySystem, null, 130),
+          CharacterSortableFieldsEnum.speed, null, true),
+      _createSingleColumn(AppLocalizations.of(context)!.groupGain,
+          CharacterSortableFieldsEnum.groupGain, null, true),
+      _createSingleColumn(AppLocalizations.of(context)!.fruitLimit,
+          CharacterSortableFieldsEnum.fruitLimit, null, false),
     ];
   }
 
-  DataColumn _createSingleColumn(String displayText,
-      CharacterSortableFieldsEnum? characterSortableFieldsEnum, double? width) {
+  DataColumn _createSingleColumn(
+      String displayText,
+      CharacterSortableFieldsEnum? characterSortableFieldsEnum,
+      double? width,
+      bool? isBattleDigit) {
     return DataColumn(
       label: InkWell(
         onTap: characterSortableFieldsEnum == null
@@ -650,7 +655,10 @@ class _CharacterViewState extends State<CharacterView> {
                           ? Colors.grey
                           : OnepieceColors.themeColor,
                     ),
-                  )
+                  ),
+                if (isBattleDigit!)
+                  ImageHelper.getIconButtonFromSvg('images/svgs/battle.svg',
+                      OnepieceColors.fancyBlue, 30, 30, () => null)
               ],
             ),
           ),
@@ -669,20 +677,28 @@ class _CharacterViewState extends State<CharacterView> {
       CharacterType.KATANA: AppLocalizations.of(context)!.katana,
       CharacterType.SHOOTER: AppLocalizations.of(context)!.shoot
     };
-    Map<bool, String> booleanToDisplayName = {
-      true: AppLocalizations.of(context)!.yes,
-      false: AppLocalizations.of(context)!.no
+    Map<Haki, String> hakiEnumValueToDisplayValue = {
+      Haki.busoshoku: AppLocalizations.of(context)!.busoshoku,
+      Haki.haoshoku: AppLocalizations.of(context)!.haoshoku,
+      Haki.kenbunshoku: AppLocalizations.of(context)!.kenbunshoku,
     };
     return currentCharacterList
+        .asMap()
+        .entries
         .map(
-          (character) => DataRow(
+          (entry) => DataRow(
+            color: MaterialStateProperty.resolveWith<Color?>(
+                (Set<MaterialState> states) {
+              if (entry.key.isEven) {
+                return OnepieceColors.liteFancyGreen; // Use whatever color you need for even rows
+              }
+              return null; // Use default (transparent) color for odd rows
+            }),
             onSelectChanged: (value) {
-              debugPrint("id list ${character.id}");
-              debugPrint("name list ${character.name}");
               context.goNamed('characterDetails',
-                  extra: character.id,
+                  extra: entry.value.id,
                   pathParameters: {
-                    'name': I18nHelper.getDisplayNameFromI18n(character.name)
+                    'name': I18nHelper.getDisplayNameFromI18n(entry.value.name)
                   });
             },
             cells: [
@@ -702,56 +718,62 @@ class _CharacterViewState extends State<CharacterView> {
                     ),
                     child: FittedBox(
                       fit: BoxFit.fill,
-                      child: character.profileImage == null
+                      child: entry.value.profileImage == null
                           ? Container()
                           : Image.memory(
-                              Base64Helper.decode(character.profileImage!)),
+                              Base64Helper.decode(entry.value.profileImage!)),
                     ),
                   ),
                 ),
               ),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: Text(I18nHelper.getDisplayNameFromI18n(character.name)),
+                child:
+                    Text(I18nHelper.getDisplayNameFromI18n(entry.value.name)),
               )),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: Text(character.characterTypes
-                    .map((e) => enumValueToDisplayValue[e])
-                    .join(", ")),
+                child: Row(
+                  children: entry.value.hakis
+                      .map((e) => Padding(
+                            padding: const EdgeInsets.only(right: 5),
+                            child: OnepieceTag.getHakiTag(
+                                e, hakiEnumValueToDisplayValue[e]!),
+                          ))
+                      .toList(),
+                ),
               )),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: Text(character.maximumFruitCount.toString()),
+                child: Text("\$${entry.value.bounty.toString()}"),
               )),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: Text(character.groupGain.toString()),
+                child: Text(entry.value.attack.toString()),
               )),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: Text(character.attack.toString()),
+                child: Text(entry.value.defense.toString()),
               )),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: Text(character.defense.toString()),
+                child: Text(entry.value.intelligence.toString()),
               )),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: Text(character.intelligence.toString()),
+                child: Text(entry.value.blood.toString()),
               )),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: Text(character.blood.toString()),
+                child: Text(entry.value.speed.toString()),
               )),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: Text(character.speed.toString()),
+                child: Text(entry.value.groupGain.toString()),
               )),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: Text(
-                    booleanToDisplayName[character.roleName == UserRole.NIKA]!),
+                child: Text(entry.value.maximumFruitCount.toString()),
               )),
             ],
           ),
