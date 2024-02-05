@@ -157,6 +157,18 @@ class _GroupViewState extends State<GroupView> {
       Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
+          SizedBox(
+            height: 35,
+            child: Padding(
+              padding: const EdgeInsets.only(right: 10.0),
+              child: ElevatedButton(
+                  onPressed: () {
+                    context.goNamed("createGroup");
+                  },
+                  style: OnepieceButtonStyle.getDefaultStyle(),
+                  child: Text(AppLocalizations.of(context)!.createGroup)),
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.fromLTRB(0, 0, 6, 0),
             child: SizedBox(
@@ -368,18 +380,6 @@ class _GroupViewState extends State<GroupView> {
               ),
             ),
           ),
-          SizedBox(
-            height: 35,
-            child: Padding(
-              padding: const EdgeInsets.only(left: 10.0),
-              child: ElevatedButton(
-                  onPressed: () {
-                    context.goNamed("createGroup");
-                  },
-                  style: OnepieceButtonStyle.getDefaultStyle(),
-                  child: Text(AppLocalizations.of(context)!.createGroup)),
-            ),
-          )
         ],
       ),
     ]);
@@ -395,16 +395,22 @@ class _GroupViewState extends State<GroupView> {
           bottom: BorderSide(color: OnepieceColors.themeColor)),
       columns: _createColumns(),
       rows: _createRows(context),
-      columnSpacing: 10,
+      columnSpacing: 15,
     );
   }
 
   List<DataColumn> _createColumns() {
     return [
       DataColumn(
-        label: ElevatedButton(
-            style: OnepieceButtonStyle.getDefaultStyle(),
-            onPressed: () {
+        label: Tooltip(
+          message: AppLocalizations.of(context)!.resetSort,
+          child: ImageHelper.getIconButtonFromSvg(
+            'images/svgs/reset.svg',
+            OnepieceColors.fancyBlue,
+            25,
+            25,
+            () {
+              // filter will not be cleared
               sortKeys = [];
               sortableEnumToSortOrderMap = {
                 GroupSortableFieldsEnum.name: null,
@@ -412,16 +418,13 @@ class _GroupViewState extends State<GroupView> {
               };
               _search();
             },
-            child: Text(AppLocalizations.of(context)!.resetSort)),
+          ),
+        ),
       ),
-      _createSingleColumn(AppLocalizations.of(context)!.name,
-          GroupSortableFieldsEnum.name, 120),
-      _createSingleColumn(AppLocalizations.of(context)!.category,
-          GroupSortableFieldsEnum.category, 120),
+      _createSingleColumn(AppLocalizations.of(context)!.name, null, 120),
+      _createSingleColumn(AppLocalizations.of(context)!.category, null, 120),
       _createSingleColumn(AppLocalizations.of(context)!.creator, null, 100),
       _createSingleColumn(AppLocalizations.of(context)!.character, null, 600),
-      _createSingleColumn(
-          AppLocalizations.of(context)!.createdBySystem, null, 130),
     ];
   }
 
@@ -500,17 +503,25 @@ class _GroupViewState extends State<GroupView> {
       GroupCategory.worldGovernment:
           AppLocalizations.of(context)!.worldGovernment,
     };
-    Map<bool, String> booleanToDisplayName = {
-      true: AppLocalizations.of(context)!.yes,
-      false: AppLocalizations.of(context)!.no
-    };
     return currentGroupList
+        .asMap()
+        .entries
         .map(
-          (group) => DataRow(
+          (entry) => DataRow(
+            color: MaterialStateProperty.resolveWith<Color?>(
+                (Set<MaterialState> states) {
+              if (entry.key.isEven) {
+                return OnepieceColors
+                    .liteFancyGreen; // Use whatever color you need for even rows
+              }
+              return null; // Use default (transparent) color for odd rows
+            }),
             onSelectChanged: (value) {
-              context.goNamed('groupDetails', extra: group.id, pathParameters: {
-                'name': I18nHelper.getDisplayNameFromI18n(group.name)
-              });
+              context.goNamed('groupDetails',
+                  extra: entry.value.id,
+                  pathParameters: {
+                    'name': I18nHelper.getDisplayNameFromI18n(entry.value.name)
+                  });
             },
             cells: [
               DataCell(
@@ -529,39 +540,36 @@ class _GroupViewState extends State<GroupView> {
                     ),
                     child: FittedBox(
                       fit: BoxFit.fill,
-                      child: group.profileImage == null
+                      child: entry.value.profileImage == null
                           ? Container()
                           : Image.memory(
-                              Base64Helper.decode(group.profileImage!)),
+                              Base64Helper.decode(entry.value.profileImage!)),
                     ),
                   ),
                 ),
               ),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: Text(I18nHelper.getDisplayNameFromI18n(group.name)),
+                child:
+                    Text(I18nHelper.getDisplayNameFromI18n(entry.value.name)),
               )),
               DataCell(Padding(
                   padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                  child: Text(enumValueToDisplayValue[group.groupCategory!]!))),
+                  child: Text(
+                      enumValueToDisplayValue[entry.value.groupCategory!]!))),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: Text(group.creator!),
+                child: Text(entry.value.creator!),
               )),
               DataCell(
                 Padding(
                   padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
                   child: SizedBox(
                     width: 700,
-                    child: _createCharacterList(group.characters),
+                    child: _createCharacterList(entry.value.characters),
                   ),
                 ),
               ),
-              DataCell(Padding(
-                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: Text(
-                    booleanToDisplayName[group.roleName == UserRole.NIKA]!),
-              )),
             ],
           ),
         )
