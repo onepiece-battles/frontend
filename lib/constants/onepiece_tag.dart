@@ -14,6 +14,13 @@ class OnepieceTag {
     FruitType.artificialZoan: OnepieceColors.fruitArtificialZoan
   };
 
+  static Map<UserRole, Color> userRoleToColor = {
+    UserRole.NIKA: OnepieceColors.fancyBlue,
+    UserRole.ADMIN: OnepieceColors.fancyGreen,
+    UserRole.NORMAL: OnepieceColors.liteFancyBlue,
+    UserRole.VISITOR: OnepieceColors.liteFancyGreen,
+  };
+
   static Map<GroupCategory, Color> groupCategoryToColor = {
     GroupCategory.worldGovernment: OnepieceColors.fancyBlue,
     GroupCategory.pirate: OnepieceColors.black,
@@ -26,6 +33,20 @@ class OnepieceTag {
     Haki.kenbunshoku: OnepieceColors.fancyGreen,
     Haki.haoshoku: Colors.deepPurple
   };
+
+  static Widget getUserRoleTag(UserRole userRole, String text) {
+    return Container(
+      height: 25,
+      decoration: BoxDecoration(
+          borderRadius: const BorderRadius.all(Radius.circular(5)),
+          color: userRoleToColor[userRole]
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(4.0),
+        child: Text(text, style: OnepieceFonts.tagStyle,),
+      ),
+    );
+  }
 
   static Widget getHakiTag(Haki haki, String text) {
     return Container(

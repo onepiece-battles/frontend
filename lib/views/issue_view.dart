@@ -524,14 +524,12 @@ class _IssueViewState extends State<IssueView> {
               _getDataCell(
                   issueStatusToDisplayValue[entry.value.issueStatus]!, null),
               _getDataCell(
-                  DateHelper.getLocalDateTimeFromTimestamp(
-                          entry.value.creationTimestamp!)
-                      .toString(),
+                  DateHelper.getFormattedDatetimeFromTimestamp(
+                      entry.value.creationTimestamp!),
                   null),
               _getDataCell(
-                  DateHelper.getLocalDateTimeFromTimestamp(
-                          entry.value.modificationTimestamp!)
-                      .toString(),
+                  DateHelper.getFormattedDatetimeFromTimestamp(
+                      entry.value.modificationTimestamp!),
                   null),
             ],
           ),

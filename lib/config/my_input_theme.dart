@@ -16,6 +16,7 @@ class MyInputTheme {
   InputDecorationTheme theme() => InputDecorationTheme(
         contentPadding: const EdgeInsets.fromLTRB(0,5,0,3),
         floatingLabelBehavior: FloatingLabelBehavior.auto,
+        floatingLabelAlignment: FloatingLabelAlignment.start,
 
         // borders
         enabledBorder: _buildBorder(Colors.grey[600]!),

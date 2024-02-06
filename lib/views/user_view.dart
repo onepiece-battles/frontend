@@ -8,6 +8,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../constants/button_style.dart';
 import '../constants/onepiece_colors.dart';
 import '../constants/onepiece_fonts.dart';
+import '../constants/onepiece_tag.dart';
 import '../repository/user_dao.dart';
 import '../utils/base64_helper.dart';
 import '../utils/data_validator.dart';
@@ -293,9 +294,15 @@ class _UserViewState extends State<UserView> {
   List<DataColumn> _createColumns() {
     return [
       DataColumn(
-        label: ElevatedButton(
-            style: OnepieceButtonStyle.getDefaultStyle(),
-            onPressed: () {
+        label: Tooltip(
+          message: AppLocalizations.of(context)!.resetSort,
+          child: ImageHelper.getIconButtonFromSvg(
+            'images/svgs/reset.svg',
+            OnepieceColors.fancyBlue,
+            25,
+            25,
+            () {
+              // filter will not be cleared
               sortKeys = [];
               sortableEnumToSortOrderMap = {
                 UserSortableFieldsEnum.name: null,
@@ -304,16 +311,15 @@ class _UserViewState extends State<UserView> {
               };
               _search();
             },
-            child: Text(AppLocalizations.of(context)!.resetSort)),
+          ),
+        ),
       ),
-      _createSingleColumn(
-          AppLocalizations.of(context)!.name, UserSortableFieldsEnum.name, 120),
+      _createSingleColumn(AppLocalizations.of(context)!.name, null, 120),
       _createSingleColumn(AppLocalizations.of(context)!.email,
           UserSortableFieldsEnum.email, 130),
       _createSingleColumn(AppLocalizations.of(context)!.emailStatus, null, 80),
-      _createSingleColumn(AppLocalizations.of(context)!.loginRole,
-          UserSortableFieldsEnum.loginRole, null),
       _createSingleColumn(AppLocalizations.of(context)!.status, null, 80),
+      _createSingleColumn(AppLocalizations.of(context)!.loginRole, null, null),
       _createSingleColumn(
           AppLocalizations.of(context)!.allUserRoles, null, 150),
       _createSingleColumn(
@@ -444,17 +450,9 @@ class _UserViewState extends State<UserView> {
               DataCell(
                 Padding(
                   padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                  child: Container(
+                  child: SizedBox(
                     width: 50,
                     height: 50,
-                    decoration: BoxDecoration(
-                      borderRadius:
-                          const BorderRadius.all(Radius.circular(2.0)),
-                      border: Border.all(
-                          color: Colors.grey,
-                          width: 2,
-                          style: BorderStyle.solid),
-                    ),
                     child: FittedBox(
                       fit: BoxFit.fill,
                       child:
@@ -477,33 +475,37 @@ class _UserViewState extends State<UserView> {
               )),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: Text(userRoleToDisplayNameMap[user.loginRole]!),
-              )),
-              DataCell(Padding(
-                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
                 child:
                     Text(accountStatusEnumToDisplayValue[user.accountStatus]!),
               )),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: Text(
-                    user.userRoles
-                        .map((e) => userRoleToDisplayNameMap[e])
-                        .toSet()
-                        .join(', '),
-                    overflow: TextOverflow.ellipsis),
+                child: OnepieceTag.getUserRoleTag(
+                    user.loginRole!, userRoleToDisplayNameMap[user.loginRole]!),
+              )),
+              DataCell(
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                  child: Row(
+                    children: user.userRoles
+                        .map((e) => Padding(
+                              padding: const EdgeInsets.only(right: 5),
+                              child: OnepieceTag.getUserRoleTag(
+                                  e, userRoleToDisplayNameMap[e]!),
+                            ))
+                        .toList(),
+                  ),
+                ),
+              ),
+              DataCell(Padding(
+                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                child: Text(DateHelper.getFormattedDatetimeFromTimestamp(
+                    user.creationTimestamp!)),
               )),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: Text(DateHelper.getLocalDateTimeFromTimestamp(
-                        user.creationTimestamp!)
-                    .toString()),
-              )),
-              DataCell(Padding(
-                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: Text(DateHelper.getLocalDateTimeFromTimestamp(
-                        user.creationTimestamp!)
-                    .toString()),
+                child: Text(DateHelper.getFormattedDatetimeFromTimestamp(
+                    user.creationTimestamp!)),
               )),
             ],
           ),

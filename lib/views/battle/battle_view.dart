@@ -11,6 +11,7 @@ import 'package:openapi/api.dart';
 import 'package:logging/logging.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
+import '../../utils/base64_helper.dart';
 import '../../utils/data_validator.dart';
 import '../../utils/image_helper.dart';
 
@@ -516,12 +517,12 @@ class _BattleViewState extends State<BattleView> {
           ),
         ),
       ),
-      _createSingleColumn(AppLocalizations.of(context)!.creator, null, 150),
       _createSingleColumn(AppLocalizations.of(context)!.initiator, null, 150),
       _createSingleColumn(AppLocalizations.of(context)!.receiver, null, 150),
-      _createSingleColumn(AppLocalizations.of(context)!.status, null, 70),
       _createSingleColumn(AppLocalizations.of(context)!.winner,
           BattleSortableFieldsEnum.winnerName, 150),
+      _createSingleColumn(AppLocalizations.of(context)!.status, null, 70),
+      _createSingleColumn(AppLocalizations.of(context)!.creator, null, 150),
       _createSingleColumn(AppLocalizations.of(context)!.creationTime,
           BattleSortableFieldsEnum.creationRecordId, 160),
       _createSingleColumn(AppLocalizations.of(context)!.modificationTime,
@@ -598,10 +599,6 @@ class _BattleViewState extends State<BattleView> {
       BattleStatus.FINISHED: AppLocalizations.of(context)!.battleStatusFinished,
       BattleStatus.FAILED: AppLocalizations.of(context)!.battleStatusFailed,
     };
-    Map<bool, String> booleanToDisplayName = {
-      true: AppLocalizations.of(context)!.yes,
-      false: AppLocalizations.of(context)!.no
-    };
     return currentBattleList
         .asMap()
         .entries
@@ -622,26 +619,105 @@ class _BattleViewState extends State<BattleView> {
             },
             cells: [
               _getDataCell("${entry.key + 1}"),
-              _getDataCell(entry.value.creator.toString()),
-              _getDataCell(
-                  I18nHelper.getDisplayNameFromI18n(entry.value.starterName)),
-              _getDataCell(
-                  I18nHelper.getDisplayNameFromI18n(entry.value.receiverName)),
+              DataCell(
+                Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+                      child: Container(
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(2.0)),
+                          border: Border.all(
+                              color: OnepieceColors.fancyBlue,
+                              width: 2,
+                              style: BorderStyle.solid),
+                        ),
+                        child: FittedBox(
+                          fit: BoxFit.fill,
+                          child: Image.memory(
+                              Base64Helper.decode(entry.value.starterImage!)),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                      child: Text(I18nHelper.getDisplayNameFromI18n(
+                          entry.value.starterName)),
+                    )
+                  ],
+                ),
+              ),
+              DataCell(
+                Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+                      child: Container(
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(2.0)),
+                          border: Border.all(
+                              color: OnepieceColors.fancyBlue,
+                              width: 2,
+                              style: BorderStyle.solid),
+                        ),
+                        child: FittedBox(
+                          fit: BoxFit.fill,
+                          child: Image.memory(
+                              Base64Helper.decode(entry.value.receiverImage!)),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                      child: Text(I18nHelper.getDisplayNameFromI18n(
+                          entry.value.receiverName)),
+                    )
+                  ],
+                ),
+              ),
+              DataCell(
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+                  child: entry.value.winnerId == null
+                      ? ImageHelper.getSvgIconWithColor(
+                          'images/svgs/question.svg',
+                          70,
+                          70,
+                          OnepieceColors.liteFancyBlue)
+                      : Container(
+                          width: 50,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(2.0)),
+                            border: Border.all(
+                                color: OnepieceColors.fancyBlue,
+                                width: 2,
+                                style: BorderStyle.solid),
+                          ),
+                          child: FittedBox(
+                            fit: BoxFit.fill,
+                            child: Image.memory(Base64Helper.decode(
+                                entry.value.winnerId == entry.value.starterId
+                                    ? entry.value.starterImage!
+                                    : entry.value.receiverImage!)),
+                          ),
+                        ),
+                ),
+              ),
               _getDataCell(
                   battleStatusToDisplayName[entry.value.battleStatus]!),
-              _getDataCell(entry.value.winnerId == null
-                  ? "?"
-                  : (entry.value.winnerId == entry.value.starterId
-                  ? I18nHelper.getDisplayNameFromI18n(
-                  entry.value.starterName!)
-                  : I18nHelper.getDisplayNameFromI18n(
-                  entry.value.receiverName!))),
-              _getDataCell(DateHelper.getLocalDateTimeFromTimestamp(
-                      entry.value.creationTimestamp!)
-                  .toString()),
-              _getDataCell(DateHelper.getLocalDateTimeFromTimestamp(
-                      entry.value.modificationTimestamp!)
-                  .toString()),
+              _getDataCell(entry.value.creator.toString()),
+              _getDataCell(DateHelper.getFormattedDatetimeFromTimestamp(
+                  entry.value.creationTimestamp!)),
+              _getDataCell(DateHelper.getFormattedDatetimeFromTimestamp(
+                  entry.value.modificationTimestamp!)),
             ],
           ),
         )

@@ -205,7 +205,7 @@ class AppRouter {
             routes: [
               GoRoute(
                 path: ':name',
-                name: 'userDetail',
+                name: 'userDetails',
                 parentNavigatorKey: _homeNavigatorState,
                 pageBuilder: (context, state) {
                   String userId = state.extra as String;
