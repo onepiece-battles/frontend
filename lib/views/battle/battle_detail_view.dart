@@ -92,61 +92,63 @@ class _BattleDetailViewState extends State<BattleDetailView> {
             return
             SingleChildScrollView(
               scrollDirection: Axis.vertical,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: ChangeNotifierProvider(
-                  create: (context) => BattleExecutionData(BattleStatus.CREATED,
-                      BattleReportStage.WAITING, null, null),
-                  child:
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      const SizedBox(
-                        height: 100,
-                      ),
-                      _getStart(context),
-                      const SizedBox(
-                        width: 400,
-                        child: Divider(
-                          color: OnepieceColors.fancyBlue,
-                          thickness: 2,
-                          height: 20,
+              child: Center(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: ChangeNotifierProvider(
+                    create: (context) => BattleExecutionData(BattleStatus.CREATED,
+                        BattleReportStage.WAITING, null, null),
+                    child:
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const SizedBox(
+                          height: 100,
                         ),
-                      ),
-                      _getProgressBar(context, 40),
-                      const SizedBox(
-                        width: 400,
-                        child: Divider(
-                          color: OnepieceColors.fancyBlue,
-                          thickness: 2,
-                          height: 20,
+                        _getStart(context),
+                        const SizedBox(
+                          width: 400,
+                          child: Divider(
+                            color: OnepieceColors.fancyBlue,
+                            thickness: 2,
+                            height: 20,
+                          ),
                         ),
-                      ),
-                      _getWinnerTag(context),
-                      _getResult(context),
-                      const SizedBox(
-                        width: 400,
-                        child: Divider(
-                          color: OnepieceColors.fancyBlue,
-                          thickness: 2,
-                          height: 20,
+                        _getProgressBar(context, 40),
+                        const SizedBox(
+                          width: 400,
+                          child: Divider(
+                            color: OnepieceColors.fancyBlue,
+                            thickness: 2,
+                            height: 20,
+                          ),
                         ),
-                      ),
-                      _getBattleReportProgress(context, 40),
-                      const SizedBox(
-                        width: 400,
-                        child: Divider(
-                          color: OnepieceColors.fancyBlue,
-                          thickness: 2,
-                          height: 20,
+                        _getWinnerTag(context),
+                        _getResult(context),
+                        const SizedBox(
+                          width: 400,
+                          child: Divider(
+                            color: OnepieceColors.fancyBlue,
+                            thickness: 2,
+                            height: 20,
+                          ),
                         ),
-                      ),
-                      _getBattleReportIcon(context)
-                    ],
-                  ),
+                        _getBattleReportProgress(context, 40),
+                        const SizedBox(
+                          width: 400,
+                          child: Divider(
+                            color: OnepieceColors.fancyBlue,
+                            thickness: 2,
+                            height: 20,
+                          ),
+                        ),
+                        _getBattleReportIcon(context)
+                      ],
+                    ),
 
+                  ),
                 ),
               ),
             );
