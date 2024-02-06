@@ -16,7 +16,7 @@ import 'package:one_piece_battles_flutter/popup/user_navigation.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:one_piece_battles_flutter/utils/image_helper.dart';
-import 'package:one_piece_battles_flutter/views/create_feedback_view.dart';
+import 'package:one_piece_battles_flutter/popup/create_feedback_popup.dart';
 import 'package:openapi/api.dart';
 import 'package:flutter_toggle_tab/flutter_toggle_tab.dart';
 import 'constants/onepiece_colors.dart';
@@ -343,9 +343,13 @@ class HomePageState extends State<HomePage> {
                   showDialog(
                     context: context,
                     builder: ((context) {
-                      return const AlertDialog(
+                      return Dialog(
+                        surfaceTintColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
                         alignment: AlignmentDirectional.bottomStart,
-                        content: CreateFeedbackView(),
+                        child: const CreateFeedbackPopup(),
                       );
                     }),
                   );

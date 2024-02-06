@@ -500,12 +500,12 @@ class _UserViewState extends State<UserView> {
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
                 child: Text(DateHelper.getFormattedDatetimeFromTimestamp(
-                    user.creationTimestamp!)),
+                    user.creationTimestamp!, context)),
               )),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
                 child: Text(DateHelper.getFormattedDatetimeFromTimestamp(
-                    user.creationTimestamp!)),
+                    user.creationTimestamp!, context)),
               )),
             ],
           ),
