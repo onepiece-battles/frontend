@@ -27,7 +27,7 @@ class _UserNavigationState extends State<UserNavigation> {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () => showPopover(
-        width: 140,
+        width: 160,
         height: 70,
         arrowDxOffset: 3,
         direction: PopoverDirection.right,
@@ -36,7 +36,7 @@ class _UserNavigationState extends State<UserNavigation> {
         bodyBuilder: (context) => Column(
           children: [
             SizedBox(
-                width: 140,
+                width: 160,
                 height: 35,
                 child: ElevatedButton(
                   onPressed: () {
@@ -63,7 +63,7 @@ class _UserNavigationState extends State<UserNavigation> {
                 )),
             // const Divider(color: Colors.white),
             SizedBox(
-                width: 140,
+                width: 160,
                 height: 35,
                 child: ElevatedButton(
                   onPressed: () {

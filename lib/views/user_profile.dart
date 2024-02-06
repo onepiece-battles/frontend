@@ -120,12 +120,16 @@ class _UserProfileState extends State<UserProfile> {
         ),
         Row(
           children: [
-            IconButton(
-              onPressed: () {},
-              iconSize: 100,
-              splashRadius: 10,
-              splashColor: Colors.red,
-              icon: Image.memory(_realtimeData.profileImage),
+            SizedBox(
+              width: 80,
+              height: 80,
+              child: IconButton(
+                onPressed: null,
+                iconSize: 10,
+                splashRadius: 0.01,
+                splashColor: Colors.red,
+                icon: Image.memory(_realtimeData.profileImage),
+              ),
             ),
             const SizedBox(
               width: 10,
