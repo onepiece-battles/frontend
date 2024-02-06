@@ -195,43 +195,6 @@ class AppRouter {
                 ),
               ]),
           GoRoute(
-              path: "$homePath/:name",
-              name: "userHome",
-              parentNavigatorKey: _homeNavigatorState,
-              pageBuilder: (context, state) {
-                String userId = state.extra as String;
-                return NoTransitionPage(
-                    child: UserHome(userId: userId), key: UniqueKey());
-              },
-              routes: [
-                GoRoute(
-                  path: 'profile',
-                  name: 'userProfile',
-                  parentNavigatorKey: _homeNavigatorState,
-                  pageBuilder: (context, state) {
-                    String userId = state.extra as String;
-                    return NoTransitionPage(
-                        child: UserProfile(
-                          userId: userId,
-                        ),
-                        key: UniqueKey());
-                  },
-                ),
-                GoRoute(
-                  path: 'setting',
-                  name: 'userSetting',
-                  parentNavigatorKey: _homeNavigatorState,
-                  pageBuilder: (context, state) {
-                    String userId = state.extra as String;
-                    return NoTransitionPage(
-                      child: UserDetailView(
-                        userId: userId,
-                      ),
-                    );
-                  },
-                ),
-              ]),
-          GoRoute(
             path: userManagementPath,
             name: "userManagement",
             parentNavigatorKey: _homeNavigatorState,
@@ -264,6 +227,43 @@ class AppRouter {
                   child: const IssueView(), key: UniqueKey());
             },
           ),
+          GoRoute(
+              path: "${AppRouter.homePath}/:name",
+              name: "userHome",
+              parentNavigatorKey: _homeNavigatorState,
+              pageBuilder: (context, state) {
+                return NoTransitionPage(
+                    child: UserHome(userId: getIt<User>().id),
+                    key: UniqueKey());
+              },
+              routes: [
+                GoRoute(
+                  path: 'profile',
+                  name: 'userProfile',
+                  parentNavigatorKey: _homeNavigatorState,
+                  pageBuilder: (context, state) {
+                    String userId = state.extra as String;
+                    return NoTransitionPage(
+                        child: UserProfile(
+                          userId: userId,
+                        ),
+                        key: UniqueKey());
+                  },
+                ),
+                GoRoute(
+                  path: 'setting',
+                  name: 'userSetting',
+                  parentNavigatorKey: _homeNavigatorState,
+                  pageBuilder: (context, state) {
+                    String userId = state.extra as String;
+                    return NoTransitionPage(
+                      child: UserDetailView(
+                        userId: userId,
+                      ),
+                    );
+                  },
+                ),
+              ]),
         ],
       ),
       GoRoute(
@@ -275,12 +275,13 @@ class AppRouter {
           builder: (context, state) => const RegisterPage()),
     ],
     // debugLogDiagnostics: true,
-    redirect: (context, state) {
+    redirect: (BuildContext context, GoRouterState state) {
       // if the user is not logged in, they need to login
       final loggedIn = getIt<User>().username != '';
       final loggingIn = state.matchedLocation == AppRouter.loginPath;
       final registering = state.matchedLocation == AppRouter.registerPath;
-      final goingHome = state.matchedLocation == 'home';
+      List<String> homePaths = [AppRouter.homePath, "", "/"];
+      final goingHome = homePaths.contains(state.matchedLocation);
 
       if (registering) {
         return AppRouter.registerPath;
@@ -288,11 +289,12 @@ class AppRouter {
       if (!loggedIn && !loggingIn) {
         return AppRouter.loginPath;
       }
+      if (goingHome) {
+        return state.namedLocation("userHome",
+            pathParameters: {"name": getIt<User>().nickname});
+      }
       if (loggedIn) {
         return state.matchedLocation;
-      }
-      if (goingHome) {
-        return AppRouter.characterPath;
       }
       return null;
     },

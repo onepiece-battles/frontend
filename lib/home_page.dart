@@ -325,11 +325,15 @@ class HomePageState extends State<HomePage> {
             ],
           ),
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(5),
             child: Align(
               alignment: Alignment.bottomLeft,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
+                  shape:  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  padding: const EdgeInsets.all(5),
                   backgroundColor: OnepieceColors.menuBackgroundColor,
                   foregroundColor: OnepieceColors.menuIconColor,
                   elevation: 0.0,
