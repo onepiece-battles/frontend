@@ -84,9 +84,9 @@
   "featureSuggestion": "Feature related suggestion",
   "feedback": "Feedback",
   "feedbackContent": "Content",
-  "feedbackContentHint": "Please describe this issue in detail.",
+  "feedbackContentHint": "Describe in detail.",
   "feedbackTitle": "Title",
-  "feedbackTitleHint": "General description for this issue.",
+  "feedbackTitleHint": "General description.",
   "fieldMustBeInt": "Number must be Integer.",
   "fist": "Fist",
   "fruitLimit": "Fruit Limit",
@@ -207,5 +207,6 @@
   "myCharacters": "My Characters",
   "myGroups": "My Groups",
   "myBattles": "My Battles",
-  "homePage": "Personal Home"
+  "homePage": "Personal Home",
+  "selectTypeWarning": "Please select type！"
 }

@@ -1,3 +1,6 @@
+import 'dart:ui';
+
+import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 
 class DateHelper {
@@ -8,9 +11,13 @@ class DateHelper {
         datetime.minute);
   }
 
-  static String getFormattedDatetimeFromTimestamp(int timestamp) {
+  static String getFormattedDatetimeFromTimestamp(int timestamp, BuildContext context) {
     var datetime =
     DateTime.fromMicrosecondsSinceEpoch(timestamp * 1000).toLocal();
+    Locale myLocale = Localizations.localeOf(context);
+    if (myLocale.languageCode=="zh") {
+      return DateFormat('yyyy/MM/dd h:mm a').format(datetime);
+    }
     return DateFormat('MM/dd/yyyy h:mm a').format(datetime);
   }
 
