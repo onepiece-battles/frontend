@@ -9,6 +9,7 @@ class OnepieceFonts {
   static const FontWeight headerFontWeight = FontWeight.bold;
   static const Color headerFontColor = Colors.black;
   static const double contentFontSize = 18;
+  static const double bigContentFontSize = 22;
   static const double tableHeaderFontSize = 15;
   static const double dropDownFontSize = 16;
   static const double smallContentFontSize = 16;
@@ -61,7 +62,7 @@ class OnepieceFonts {
 
   static const TextStyle contentStyleBoldFancyBlue = TextStyle(
       color: OnepieceColors.fancyBlue,
-      fontSize: OnepieceFonts.contentFontSize,
+      fontSize: OnepieceFonts.bigContentFontSize,
       fontWeight: FontWeight.w600);
 
   static const TextStyle headerStyle = TextStyle(
