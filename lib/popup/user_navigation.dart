@@ -95,14 +95,9 @@ class _UserNavigationState extends State<UserNavigation> {
           ],
         ),
       ),
-      child: Container(
+      child: SizedBox(
         width: 80,
         height: 80,
-        decoration: BoxDecoration(
-          borderRadius: const BorderRadius.all(Radius.circular(10.0)),
-          border: Border.all(
-              color: Colors.grey, width: 2, style: BorderStyle.solid),
-        ),
         child: FittedBox(
           fit: BoxFit.cover,
           child: Image.memory(Base64Helper.decode(getIt<User>().profileImage!)),

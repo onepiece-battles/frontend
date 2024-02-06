@@ -121,8 +121,8 @@ class _UserProfileState extends State<UserProfile> {
         Row(
           children: [
             SizedBox(
-              width: 80,
-              height: 80,
+              width: 100,
+              height: 100,
               child: IconButton(
                 onPressed: null,
                 iconSize: 10,
