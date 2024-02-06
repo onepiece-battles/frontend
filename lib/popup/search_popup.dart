@@ -24,7 +24,6 @@ class SearchPopup extends StatefulWidget {
 }
 
 class _SearchPopupState extends State<SearchPopup> {
-  ScrollController scrollController = ScrollController();
   TextEditingController searchBarController = TextEditingController();
   List<CharacterListView> characters =
       <CharacterListView>[].toList(growable: true);
@@ -50,7 +49,7 @@ class _SearchPopupState extends State<SearchPopup> {
     characterFilter.name = name;
     fruitFilter.name = name;
     ListCharacterRequest listCharacterRequest = ListCharacterRequest(
-        pageSize: 6,
+        pageSize: 10,
         pageIndex: 1,
         sortKeys: [],
         characterFilter: characterFilter);
@@ -86,98 +85,108 @@ class _SearchPopupState extends State<SearchPopup> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      controller: scrollController,
-      scrollDirection: Axis.vertical,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: _getSearchBar(context),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: _getSearchBar(context),
+        ),
+        Expanded(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.vertical,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (characters.isNotEmpty)
+                  SizedBox(
+                    width: 800,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            AppLocalizations.of(context)!.character,
+                            style: OnepieceFonts.selectedTableHeaderStyle,
+                          ),
+                          const Divider(
+                            height: 3,
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                SizedBox(
+                  width: 800,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: _getCharacterList(context),
+                  ),
+                ),
+                if (fruits.isNotEmpty)
+                  SizedBox(
+                    width: 800,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            AppLocalizations.of(context)!.devilFruit,
+                            style: OnepieceFonts.selectedTableHeaderStyle,
+                          ),
+                          const Divider(
+                            height: 3,
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                SizedBox(
+                  width: 800,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: _getFruitList(context),
+                  ),
+                ),
+                if (groups.isNotEmpty)
+                  SizedBox(
+                    width: 800,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            AppLocalizations.of(context)!.group,
+                            style: OnepieceFonts.selectedTableHeaderStyle,
+                          ),
+                          const Divider(
+                            height: 3,
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                SizedBox(
+                  width: 800,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: _getGroupList(context),
+                  ),
+                ),
+              ],
+            ),
           ),
-          if (characters.isNotEmpty)
-            SizedBox(
-              width: 800,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      AppLocalizations.of(context)!.character,
-                      style: OnepieceFonts.selectedTableHeaderStyle,
-                    ),
-                    const Divider(
-                      height: 3,
-                    )
-                  ],
-                ),
-              ),
-            ),
-          SizedBox(
-              width: 800,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: _getCharacterList(context),
-              )),
-          if (fruits.isNotEmpty)
-            SizedBox(
-              width: 800,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      AppLocalizations.of(context)!.devilFruit,
-                      style: OnepieceFonts.selectedTableHeaderStyle,
-                    ),
-                    const Divider(
-                      height: 3,
-                    )
-                  ],
-                ),
-              ),
-            ),
-          SizedBox(
-              width: 800,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: _getFruitList(context),
-              )),
-          if (groups.isNotEmpty)
-            SizedBox(
-              width: 800,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      AppLocalizations.of(context)!.group,
-                      style: OnepieceFonts.selectedTableHeaderStyle,
-                    ),
-                    const Divider(
-                      height: 3,
-                    )
-                  ],
-                ),
-              ),
-            ),
-          SizedBox(
-              width: 800,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: _getGroupList(context),
-              )),
-          if (characters.isNotEmpty || fruits.isNotEmpty || groups.isNotEmpty)
-            const SizedBox(
-              width: 800,
-              height: 30,
-            )
-        ],
-      ),
+        ),
+        if (characters.isNotEmpty || fruits.isNotEmpty || groups.isNotEmpty)
+          const SizedBox(
+            width: 800,
+            height: 30,
+          )
+      ],
     );
   }
 

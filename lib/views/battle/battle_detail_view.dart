@@ -89,69 +89,68 @@ class _BattleDetailViewState extends State<BattleDetailView> {
           if (snapshot.connectionState == ConnectionState.done) {
             _updateData(snapshot.data);
             _getBattleExecution();
-            return Center(
+            return
+            SingleChildScrollView(
+              scrollDirection: Axis.vertical,
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.vertical,
-                  child: ChangeNotifierProvider(
-                    create: (context) => BattleExecutionData(
-                        BattleStatus.CREATED,
-                        BattleReportStage.WAITING,
-                        null,
-                        null),
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 100),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          // _getHeader(context),
-                          _getStart(context),
-                          const SizedBox(
-                            width: 400,
-                            child: Divider(
-                              color: OnepieceColors.fancyBlue,
-                              thickness: 2,
-                              height: 20,
-                            ),
-                          ),
-                          _getProgressBar(context, 40),
-                          const SizedBox(
-                            width: 400,
-                            child: Divider(
-                              color: OnepieceColors.fancyBlue,
-                              thickness: 2,
-                              height: 20,
-                            ),
-                          ),
-                          _getWinnerTag(context),
-                          _getResult(context),
-                          const SizedBox(
-                            width: 400,
-                            child: Divider(
-                              color: OnepieceColors.fancyBlue,
-                              thickness: 2,
-                              height: 20,
-                            ),
-                          ),
-                          _getBattleReportProgress(context, 40),
-                          const SizedBox(
-                            width: 400,
-                            child: Divider(
-                              color: OnepieceColors.fancyBlue,
-                              thickness: 2,
-                              height: 20,
-                            ),
-                          ),
-                          _getBattleReportIcon(context)
-                        ],
+                child: ChangeNotifierProvider(
+                  create: (context) => BattleExecutionData(BattleStatus.CREATED,
+                      BattleReportStage.WAITING, null, null),
+                  child:
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const SizedBox(
+                        height: 100,
                       ),
-                    ),
+                      _getStart(context),
+                      const SizedBox(
+                        width: 400,
+                        child: Divider(
+                          color: OnepieceColors.fancyBlue,
+                          thickness: 2,
+                          height: 20,
+                        ),
+                      ),
+                      _getProgressBar(context, 40),
+                      const SizedBox(
+                        width: 400,
+                        child: Divider(
+                          color: OnepieceColors.fancyBlue,
+                          thickness: 2,
+                          height: 20,
+                        ),
+                      ),
+                      _getWinnerTag(context),
+                      _getResult(context),
+                      const SizedBox(
+                        width: 400,
+                        child: Divider(
+                          color: OnepieceColors.fancyBlue,
+                          thickness: 2,
+                          height: 20,
+                        ),
+                      ),
+                      _getBattleReportProgress(context, 40),
+                      const SizedBox(
+                        width: 400,
+                        child: Divider(
+                          color: OnepieceColors.fancyBlue,
+                          thickness: 2,
+                          height: 20,
+                        ),
+                      ),
+                      _getBattleReportIcon(context)
+                    ],
                   ),
+
                 ),
               ),
             );
+
           } else {
             return Center(
               child: Text(
@@ -406,26 +405,27 @@ class _BattleDetailViewState extends State<BattleDetailView> {
     return Consumer<BattleExecutionData>(builder: (context, model, child) {
       return Padding(
         padding: const EdgeInsets.all(20.0),
-        child: IconButton(
-          iconSize: 50,
-          tooltip: AppLocalizations.of(context)!.startBattle,
-          onPressed: model.battleStatus == BattleStatus.CREATED
-              ? () {
-                  getIt<BattleDao>()
-                      .startBattle(StartBattleRequest(battleId: battle.id))
-                      .then((value) => {
-                            OnepieceAlert.getBasicAlertDialogFunc(
-                                context, "battle", "start success")
-                          });
-                }
-              : null,
-          disabledColor: Colors.grey,
-          splashRadius: 1,
-          icon: SvgPicture.asset(
-            'images/svgs/battle.svg',
-            color: OnepieceColors.fancyGreen,
-            width: 500,
-            height: 500,
+        child: Tooltip(
+          message: AppLocalizations.of(context)!.startBattle,
+          child: InkWell(
+            splashColor: Colors.transparent,
+            hoverColor: Colors.transparent,
+            onTap: model.battleStatus == BattleStatus.CREATED
+                ? () {
+                    getIt<BattleDao>()
+                        .startBattle(StartBattleRequest(battleId: battle.id))
+                        .then((value) => {
+                              OnepieceAlert.getBasicAlertDialogFunc(
+                                  context, "battle", "start success")
+                            });
+                  }
+                : null,
+            child: SvgPicture.asset(
+              'images/svgs/battle.svg',
+              color: OnepieceColors.fancyBlue,
+              width: 60,
+              height: 60,
+            ),
           ),
         ),
       );
@@ -583,8 +583,8 @@ class _BattleDetailViewState extends State<BattleDetailView> {
       splashRadius: 1,
       icon: SvgPicture.asset(
         'images/svgs/pdf.svg',
-        width: 500,
-        height: 500,
+        width: 100,
+        height: 100,
       ),
     );
   }
