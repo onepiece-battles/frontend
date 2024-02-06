@@ -107,7 +107,6 @@ class OnepieceFonts {
       fontSize: OnepieceFonts.dropDownFontSize);
 
   static const TextStyle emailFont = TextStyle(
-      decoration: TextDecoration.underline,
       color: Colors.white,
       fontSize: 14,
       fontWeight: FontWeight.normal,
