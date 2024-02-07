@@ -330,7 +330,7 @@ class HomePageState extends State<HomePage> {
               alignment: Alignment.bottomLeft,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  shape:  RoundedRectangleBorder(
+                  shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(6),
                   ),
                   padding: const EdgeInsets.all(5),
@@ -428,7 +428,6 @@ class HomePageState extends State<HomePage> {
                             child: Tooltip(
                               message: getIt<User>().username,
                               child: Text(
-                                
                                 getIt<User>().username,
                                 style: OnepieceFonts.emailFont,
                                 overflow: TextOverflow.ellipsis,
