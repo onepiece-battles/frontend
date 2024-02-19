@@ -574,6 +574,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                     enabled: fruitSearchEnabled,
                     controller: fruitNameController,
                     decoration: InputDecoration(
+                      floatingLabelBehavior: FloatingLabelBehavior.never,
                       label: Text(
                         AppLocalizations.of(context)!.fruitName,
                         style: OnepieceFonts.hintFont,
@@ -806,6 +807,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                     enabled: groupSearchEnabled,
                     controller: groupNameController,
                     decoration: InputDecoration(
+                      floatingLabelBehavior: FloatingLabelBehavior.never,
                       label: Text(
                         AppLocalizations.of(context)!.groupName,
                         style: OnepieceFonts.hintFont,

@@ -198,6 +198,7 @@ class _CharacterViewState extends State<CharacterView> {
                   _search();
                 },
                 decoration: InputDecoration(
+                  floatingLabelBehavior: FloatingLabelBehavior.never,
                   disabledBorder: const OutlineInputBorder(
                       borderSide:
                           BorderSide(color: OnepieceColors.menuHoverColor)),

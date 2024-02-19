@@ -169,6 +169,7 @@ class _UserViewState extends State<UserView> {
                   _search();
                 },
                 decoration: InputDecoration(
+                  floatingLabelBehavior: FloatingLabelBehavior.never,
                   disabledBorder: const OutlineInputBorder(
                       borderSide:
                           BorderSide(color: OnepieceColors.menuHoverColor)),
