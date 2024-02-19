@@ -6,7 +6,6 @@ import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_tag.dart';
 import 'package:one_piece_battles_flutter/repository/character_dao.dart';
 import 'package:one_piece_battles_flutter/repository/group_dao.dart';
-import 'package:one_piece_battles_flutter/utils/date_helper.dart';
 import 'package:one_piece_battles_flutter/utils/string_extensions.dart';
 import 'package:openapi/api.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -424,7 +423,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                               ),
                             ),
                             SizedBox(
-                              width: 150,
+                              width: 240,
                               child: Padding(
                                 padding: const EdgeInsets.only(left: 8.0),
                                 child: Row(
@@ -438,7 +437,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                         25,
                                         OnepieceColors.fancyBlue),
                                     SizedBox(
-                                      width: 30,
+                                      width: 60,
                                       child: TextFormField(
                                         controller: characterDateOfBirthMonth,
                                         enabled: basicInfoEditable,
@@ -468,7 +467,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                     ),
                                     Text(AppLocalizations.of(context)!.month),
                                     SizedBox(
-                                      width: 30,
+                                      width: 60,
                                       child: TextFormField(
                                         controller: characterDateOfBirthDay,
                                         enabled: basicInfoEditable,
@@ -972,37 +971,87 @@ class _CharacterDetailState extends State<CharacterDetail> {
   }
 
   Widget _getGroup(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Text(
-                AppLocalizations.of(context)!.group,
-                style: OnepieceFonts.headerStyle,
-              ),
-              const SizedBox(
-                width: 15,
-              ),
-            ],
+    return StatefulBuilder(builder: (context, groupSetState) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Text(
+                  AppLocalizations.of(context)!.group,
+                  style: OnepieceFonts.headerStyle,
+                ),
+                const SizedBox(
+                  width: 15,
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(8.0, 8, 8, 0),
+                  child: SizedBox(
+                    width: 300,
+                    child: TextFormField(
+                      enabled: groupSearchEnabled,
+                      controller: groupNameController,
+                      decoration: InputDecoration(
+                        floatingLabelBehavior: FloatingLabelBehavior.never,
+                        label: Text(
+                          AppLocalizations.of(context)!.groupName,
+                          style: OnepieceFonts.hintFont,
+                        ),
+                        disabledBorder: const OutlineInputBorder(
+                            borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
+                        enabledBorder: const OutlineInputBorder(
+                            borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
+                        focusedBorder: const OutlineInputBorder(
+                            borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
+                        prefixIcon: const Icon(Icons.search),
+                      ),
+                      onChanged: (value) {
+                        selectedGroupId = null;
+                        groupSetState(() {});
+                        if (value.isEmpty) {
+                          searchingGroupList = [];
+                          groupSetState(() {});
+                          return;
+                        }
+                        groupFilter.name = value;
+                        groupFilter.languageCode = I18nHelper.getLanguageCode();
+                        ListGroupRequest request = ListGroupRequest(
+                            pageSize: 5,
+                            pageIndex: 1,
+                            sortKeys: [],
+                            groupFilter: groupFilter);
+                        Future<ListGroupResponse?> response =
+                        getIt<GroupDao>().listGroups(request);
+                        response.then(
+                              (value) => {
+                            searchingGroupList = value!.groups,
+                            groupSetState(() {})
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: _getJoinGroup(context),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: _getGroupList(context),
-        )
-      ],
-    );
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: _getJoinGroup(context, groupSetState),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: _getGroupList(context),
+          )
+        ],
+      );
+    });
   }
 
-  Widget _getJoinGroup(BuildContext context) {
+  Widget _getJoinGroup(BuildContext context, Function groupSetState) {
     Map<GroupCategory, String> groupCategoryToDisplayValue = {
       GroupCategory.pirate: AppLocalizations.of(context)!.pirate,
       GroupCategory.worldGovernment:
@@ -1010,147 +1059,83 @@ class _CharacterDetailState extends State<CharacterDetail> {
       GroupCategory.marine: AppLocalizations.of(context)!.marine,
       GroupCategory.underWorld: AppLocalizations.of(context)!.underworld,
     };
-    return StatefulBuilder(builder: (context, groupSetState) {
-      return Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: const BorderRadius.all(Radius.circular(5.0)),
-          border: Border.all(
-              color: OnepieceColors.fancyBlue,
-              width: 3,
-              style: BorderStyle.solid),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(8.0, 8, 8, 0),
-                child: SizedBox(
-                  width: 300,
-                  child: TextFormField(
-                    enabled: groupSearchEnabled,
-                    controller: groupNameController,
-                    decoration: InputDecoration(
-                      floatingLabelBehavior: FloatingLabelBehavior.never,
-                      label: Text(
-                        AppLocalizations.of(context)!.groupName,
-                        style: OnepieceFonts.hintFont,
-                      ),
-                      disabledBorder: const OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: OnepieceColors.fancyGreen)),
-                      enabledBorder: const OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: OnepieceColors.fancyGreen)),
-                      focusedBorder: const OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: OnepieceColors.fancyGreen)),
-                      prefixIcon: const Icon(Icons.search),
-                    ),
-                    onChanged: (value) {
-                      selectedGroupId = null;
-                      groupSetState(() {});
-                      if (value.isEmpty) {
-                        searchingGroupList = [];
-                        groupSetState(() {});
-                        return;
-                      }
-                      groupFilter.name = value;
-                      groupFilter.languageCode = I18nHelper.getLanguageCode();
-                      ListGroupRequest request = ListGroupRequest(
-                          pageSize: 5,
-                          pageIndex: 1,
-                          sortKeys: [],
-                          groupFilter: groupFilter);
-                      Future<ListGroupResponse?> response =
-                          getIt<GroupDao>().listGroups(request);
-                      response.then(
-                        (value) => {
-                          searchingGroupList = value!.groups,
-                          groupSetState(() {})
-                        },
-                      );
-                    },
-                  ),
-                ),
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Container(
+              width: 300,
+              constraints: const BoxConstraints(maxHeight: 300),
+              decoration: const  BoxDecoration(
+                color: OnepieceColors.menuBackgroundColor,
+                borderRadius: BorderRadius.all(Radius.circular(8)),
               ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  width: 300,
-                  decoration: const BoxDecoration(
-                    color: OnepieceColors.menuBackgroundColor,
-                    borderRadius: BorderRadius.all(Radius.circular(8)),
-                  ),
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: searchingGroupList.length,
-                    itemBuilder: (context, index) {
-                      var currentGroup = searchingGroupList[index];
-                      return Material(
-                        type: MaterialType.transparency,
-                        child: Container(
-                          padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                          decoration: const BoxDecoration(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(5))),
-                          child: ListTile(
-                            minLeadingWidth: 10,
-                            contentPadding:
-                                const EdgeInsets.fromLTRB(8, 0, 0, 0),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                            selected: selectedGroupId == currentGroup.id,
-                            selectedTileColor: OnepieceColors.liteFancyBlue,
-                            onTap: () {
-                              groupSetState(() {
-                                selectedGroupId = currentGroup.id!;
-                              });
-                            },
-                            hoverColor: OnepieceColors.liteFancyBlue,
-                            title: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(I18nHelper.getDisplayNameFromI18n(
-                                    currentGroup.name!)),
-                                Padding(
-                                  padding: const EdgeInsets.only(right: 5),
-                                  child: OnepieceTag.getGroupTag(
-                                    currentGroup.groupCategory!,
-                                    groupCategoryToDisplayValue[
-                                        currentGroup.groupCategory!]!,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: searchingGroupList.length,
+                itemBuilder: (context, index) {
+                  var currentGroup = searchingGroupList[index];
+                  return Material(
+                    type: MaterialType.transparency,
+                    child: Container(
+                      padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+                      decoration: const BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(5))),
+                      child: ListTile(
+                        minLeadingWidth: 10,
+                        contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5),
                         ),
-                      );
-                    },
-                  ),
-                ),
+                        selected: selectedGroupId == currentGroup.id,
+                        selectedTileColor: OnepieceColors.liteFancyBlue,
+                        onTap: () {
+                          groupSetState(() {
+                            selectedGroupId = currentGroup.id!;
+                          });
+                        },
+                        hoverColor: OnepieceColors.liteFancyBlue,
+                        title: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(I18nHelper.getDisplayNameFromI18n(
+                                currentGroup.name!)),
+                            Padding(
+                              padding: const EdgeInsets.only(right: 5),
+                              child: OnepieceTag.getGroupTag(
+                                currentGroup.groupCategory!,
+                                groupCategoryToDisplayValue[
+                                    currentGroup.groupCategory!]!,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
-              if (searchingGroupList.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(left: 8.0),
-                  child: ElevatedButton(
-                      onPressed: selectedGroupId == null
-                          ? null
-                          : () {
-                              setState(() {
-                                _joinGroup();
-                              });
-                            },
-                      child: Text(AppLocalizations.of(context)!.join)),
-                )
-            ],
+            ),
           ),
-        ),
-      );
-    });
+          if (searchingGroupList.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: ElevatedButton(
+                  onPressed: selectedGroupId == null
+                      ? null
+                      : () {
+                          setState(() {
+                            _joinGroup();
+                          });
+                        },
+                  child: Text(AppLocalizations.of(context)!.join)),
+            )
+        ],
+      ),
+    );
   }
 
   Widget _getGroupList(BuildContext context) {
@@ -1168,7 +1153,6 @@ class _CharacterDetailState extends State<CharacterDetail> {
         children: [
           InkWell(
             onTap: () {
-              // todo(yichi): update left menu list selected tab
               context.goNamed('groupDetails', extra: group.id, pathParameters: {
                 'name': I18nHelper.getDisplayNameFromI18n(group.name!)
               });
@@ -1179,33 +1163,35 @@ class _CharacterDetailState extends State<CharacterDetail> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(3, 6, 3, 3),
-                    child: Container(
-                      width: 50,
-                      height: 50,
-                      decoration: BoxDecoration(
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(2.0)),
-                        border: Border.all(
-                            color: Colors.grey,
-                            width: 2,
-                            style: BorderStyle.solid),
+                  Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(6, 6, 6, 3),
+                        child: Container(
+                          width: 50,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(2.0)),
+                            border: Border.all(
+                                color: OnepieceColors.fancyBlue,
+                                width: 2,
+                                style: BorderStyle.solid),
+                          ),
+                          child: FittedBox(
+                            fit: BoxFit.fill,
+                            child: Image.memory(
+                                Base64Helper.decode(group.profileImage!)),
+                          ),
+                        ),
                       ),
-                      child: FittedBox(
-                        fit: BoxFit.fill,
-                        child: Image.memory(
-                            Base64Helper.decode(group.profileImage!)),
+                      Text(
+                        "${I18nHelper.getDisplayNameFromI18n(group.name!)} "
+                        "${group.onceBelongedTo! ? "(${AppLocalizations.of(context)!.onceBelongTo})" : ""}",
+                        style: OnepieceFonts.fancyBlueHintFont,
                       ),
-                    ),
+                    ],
                   ),
-                  Text(I18nHelper.getDisplayNameFromI18n(group.name!)),
-                  if (group.onceBelongedTo!)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 5),
-                      child: Text(
-                          "(${AppLocalizations.of(context)!.onceBelongTo})"),
-                    ),
                   Padding(
                     padding: const EdgeInsets.only(right: 5),
                     child: OnepieceTag.getGroupTag(

@@ -85,108 +85,105 @@ class _SearchPopupState extends State<SearchPopup> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: _getSearchBar(context),
-        ),
-        Expanded(
-          child: SingleChildScrollView(
-            scrollDirection: Axis.vertical,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (characters.isNotEmpty)
-                  SizedBox(
-                    width: 800,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            AppLocalizations.of(context)!.character,
-                            style: OnepieceFonts.selectedTableHeaderStyle,
-                          ),
-                          const Divider(
-                            height: 3,
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                SizedBox(
-                  width: 800,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: _getCharacterList(context),
-                  ),
-                ),
-                if (fruits.isNotEmpty)
-                  SizedBox(
-                    width: 800,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            AppLocalizations.of(context)!.devilFruit,
-                            style: OnepieceFonts.selectedTableHeaderStyle,
-                          ),
-                          const Divider(
-                            height: 3,
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                SizedBox(
-                  width: 800,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: _getFruitList(context),
-                  ),
-                ),
-                if (groups.isNotEmpty)
-                  SizedBox(
-                    width: 800,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            AppLocalizations.of(context)!.group,
-                            style: OnepieceFonts.selectedTableHeaderStyle,
-                          ),
-                          const Divider(
-                            height: 3,
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                SizedBox(
-                  width: 800,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: _getGroupList(context),
-                  ),
-                ),
-              ],
-            ),
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: _getSearchBar(context),
           ),
-        ),
-        if (characters.isNotEmpty || fruits.isNotEmpty || groups.isNotEmpty)
-          const SizedBox(
-            width: 800,
-            height: 30,
-          )
-      ],
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (characters.isNotEmpty)
+                SizedBox(
+                  width: 800,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          AppLocalizations.of(context)!.character,
+                          style: OnepieceFonts.selectedTableHeaderStyle,
+                        ),
+                        const Divider(
+                          height: 3,
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              SizedBox(
+                width: 800,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: _getCharacterList(context),
+                ),
+              ),
+              if (fruits.isNotEmpty)
+                SizedBox(
+                  width: 800,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          AppLocalizations.of(context)!.devilFruit,
+                          style: OnepieceFonts.selectedTableHeaderStyle,
+                        ),
+                        const Divider(
+                          height: 3,
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              SizedBox(
+                width: 800,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: _getFruitList(context),
+                ),
+              ),
+              if (groups.isNotEmpty)
+                SizedBox(
+                  width: 800,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          AppLocalizations.of(context)!.group,
+                          style: OnepieceFonts.selectedTableHeaderStyle,
+                        ),
+                        const Divider(
+                          height: 3,
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              SizedBox(
+                width: 800,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: _getGroupList(context),
+                ),
+              ),
+            ],
+          ),
+          if (characters.isNotEmpty || fruits.isNotEmpty || groups.isNotEmpty)
+            const SizedBox(
+              width: 800,
+              height: 30,
+            )
+        ],
+      ),
     );
   }
 
@@ -225,85 +222,89 @@ class _SearchPopupState extends State<SearchPopup> {
       Haki.haoshoku: AppLocalizations.of(context)!.haoshoku,
       Haki.kenbunshoku: AppLocalizations.of(context)!.kenbunshoku,
     };
-    return ListView.builder(
-      shrinkWrap: true,
-      itemCount: characters.length,
-      itemBuilder: (context, index) {
-        var character = characters[index];
-        return Material(
-          type: MaterialType.transparency,
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-            decoration: const BoxDecoration(
-                borderRadius: BorderRadius.all(Radius.circular(5))),
-            child: ListTile(
-              minLeadingWidth: 10,
-              contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(5),
-              ),
-              onTap: () {
-                setState(
-                  () {
-                    context.goNamed('characterDetails',
-                        extra: character.id,
-                        pathParameters: {
-                          'name':
-                              I18nHelper.getDisplayNameFromI18n(character.name)
-                        });
-                    Navigator.pop(context);
+    return ConstrainedBox(
+        constraints: const BoxConstraints(
+          maxHeight: 300.0, // Set your maximum height here
+        ),
+        child: ListView.builder(
+          shrinkWrap: true,
+          itemCount: characters.length,
+          itemBuilder: (context, index) {
+            var character = characters[index];
+            return Material(
+              type: MaterialType.transparency,
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+                decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(5))),
+                child: ListTile(
+                  minLeadingWidth: 10,
+                  contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  onTap: () {
+                    setState(
+                      () {
+                        context.goNamed('characterDetails',
+                            extra: character.id,
+                            pathParameters: {
+                              'name': I18nHelper.getDisplayNameFromI18n(
+                                  character.name)
+                            });
+                        Navigator.pop(context);
+                      },
+                    );
                   },
-                );
-              },
-              hoverColor: OnepieceColors.liteFancyBlue,
-              title: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
+                  hoverColor: OnepieceColors.liteFancyBlue,
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(3, 3, 6, 3),
-                        child: Container(
-                          width: 50,
-                          height: 50,
-                          decoration: BoxDecoration(
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(2.0)),
-                            border: Border.all(
-                                color: Colors.grey,
-                                width: 2,
-                                style: BorderStyle.solid),
+                      Row(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(3, 3, 6, 3),
+                            child: Container(
+                              width: 50,
+                              height: 50,
+                              decoration: BoxDecoration(
+                                borderRadius: const BorderRadius.all(
+                                    Radius.circular(2.0)),
+                                border: Border.all(
+                                    color: Colors.grey,
+                                    width: 2,
+                                    style: BorderStyle.solid),
+                              ),
+                              child: FittedBox(
+                                fit: BoxFit.fill,
+                                child: Image.memory(Base64Helper.decode(
+                                    character.profileImage!)),
+                              ),
+                            ),
                           ),
-                          child: FittedBox(
-                            fit: BoxFit.fill,
-                            child: Image.memory(
-                                Base64Helper.decode(character.profileImage!)),
-                          ),
-                        ),
+                          Text(
+                            I18nHelper.getDisplayNameFromI18n(character.name),
+                            style: OnepieceFonts.smallContentStyleWhite,
+                          )
+                        ],
                       ),
-                      Text(
-                        I18nHelper.getDisplayNameFromI18n(character.name),
-                        style: OnepieceFonts.smallContentStyleWhite,
-                      )
+                      if (character.hakis.isNotEmpty)
+                        Row(
+                          children: character.hakis
+                              .map((e) => Padding(
+                                    padding: const EdgeInsets.only(right: 5),
+                                    child: OnepieceTag.getHakiTag(
+                                        e, hakiEnumValueToDisplayValue[e]!),
+                                  ))
+                              .toList(),
+                        )
                     ],
                   ),
-                  if (character.hakis.isNotEmpty)
-                    Row(
-                      children: character.hakis
-                          .map((e) => Padding(
-                                padding: const EdgeInsets.only(right: 5),
-                                child: OnepieceTag.getHakiTag(
-                                    e, hakiEnumValueToDisplayValue[e]!),
-                              ))
-                          .toList(),
-                    )
-                ],
+                ),
               ),
-            ),
-          ),
-        );
-      },
-    );
+            );
+          },
+        ));
   }
 
   Widget _getFruitList(BuildContext context) {
@@ -316,55 +317,60 @@ class _SearchPopupState extends State<SearchPopup> {
           AppLocalizations.of(context)!.artificialZoanFruit,
       FruitType.paramecia: AppLocalizations.of(context)!.parameciaFruit,
     };
-    return ListView.builder(
-        shrinkWrap: true,
-        itemCount: fruits.length,
-        itemBuilder: (context, index) {
-          var fruit = fruits[index];
-          return Material(
-            type: MaterialType.transparency,
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-              decoration: const BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(5))),
-              child: ListTile(
-                minLeadingWidth: 10,
-                contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5),
-                ),
-                onTap: () {
-                  setState(
-                    () {
-                      context.goNamed('fruitDetails',
-                          extra: fruit.id,
-                          pathParameters: {
-                            'name':
-                                I18nHelper.getDisplayNameFromI18n(fruit.name!)
-                          });
-                      Navigator.pop(context);
-                    },
-                  );
-                },
-                hoverColor: OnepieceColors.liteFancyBlue,
-                title: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      I18nHelper.getDisplayNameFromI18n(fruit.name!),
-                      style: OnepieceFonts.smallContentStyleWhite,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(right: 5),
-                      child: OnepieceTag.getFruitTag(fruit.fruitType!,
-                          fruitTypeToDisplayValue[fruit.fruitType]!),
-                    )
-                  ],
+    return ConstrainedBox(
+      constraints: const BoxConstraints(
+        maxHeight: 300.0, // Set your maximum height here
+      ),
+      child: ListView.builder(
+          shrinkWrap: true,
+          itemCount: fruits.length,
+          itemBuilder: (context, index) {
+            var fruit = fruits[index];
+            return Material(
+              type: MaterialType.transparency,
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+                decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(5))),
+                child: ListTile(
+                  minLeadingWidth: 10,
+                  contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  onTap: () {
+                    setState(
+                      () {
+                        context.goNamed('fruitDetails',
+                            extra: fruit.id,
+                            pathParameters: {
+                              'name':
+                                  I18nHelper.getDisplayNameFromI18n(fruit.name!)
+                            });
+                        Navigator.pop(context);
+                      },
+                    );
+                  },
+                  hoverColor: OnepieceColors.liteFancyBlue,
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        I18nHelper.getDisplayNameFromI18n(fruit.name!),
+                        style: OnepieceFonts.smallContentStyleWhite,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 5),
+                        child: OnepieceTag.getFruitTag(fruit.fruitType!,
+                            fruitTypeToDisplayValue[fruit.fruitType]!),
+                      )
+                    ],
+                  ),
                 ),
               ),
-            ),
-          );
-        });
+            );
+          }),
+    );
   }
 
   Widget _getGroupList(BuildContext context) {
@@ -376,82 +382,88 @@ class _SearchPopupState extends State<SearchPopup> {
       GroupCategory.worldGovernment:
           AppLocalizations.of(context)!.worldGovernment,
     };
-    return ListView.builder(
-        shrinkWrap: true,
-        itemCount: groups.length,
-        itemBuilder: (context, index) {
-          var group = groups[index];
-          return Material(
-            type: MaterialType.transparency,
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-              decoration: const BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(5))),
-              child: ListTile(
-                minLeadingWidth: 10,
-                contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5),
-                ),
-                onTap: () {
-                  // todo(yichi): update left side menu
-                  setState(
-                    () {
-                      context.goNamed('groupDetails',
-                          extra: group.id,
-                          pathParameters: {
-                            'name':
-                                I18nHelper.getDisplayNameFromI18n(group.name)
-                          });
-                      Navigator.pop(context);
+    return ConstrainedBox(
+        constraints: const BoxConstraints(
+          maxHeight: 300.0, // Set your maximum height here
+        ),
+        child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: groups.length,
+            itemBuilder: (context, index) {
+              var group = groups[index];
+              return Material(
+                type: MaterialType.transparency,
+                child: Container(
+                  padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+                  decoration: const BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(5))),
+                  child: ListTile(
+                    minLeadingWidth: 10,
+                    contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    onTap: () {
+                      // todo(yichi): update left side menu
+                      setState(
+                        () {
+                          context.goNamed('groupDetails',
+                              extra: group.id,
+                              pathParameters: {
+                                'name': I18nHelper.getDisplayNameFromI18n(
+                                    group.name)
+                              });
+                          Navigator.pop(context);
+                        },
+                      );
                     },
-                  );
-                },
-                hoverColor: OnepieceColors.liteFancyBlue,
-                title: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
+                    hoverColor: OnepieceColors.liteFancyBlue,
+                    title: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(3, 6, 3, 3),
-                          child: Container(
-                            width: 50,
-                            height: 50,
-                            decoration: BoxDecoration(
-                              borderRadius:
-                                  const BorderRadius.all(Radius.circular(2.0)),
-                              border: Border.all(
-                                  color: Colors.grey,
-                                  width: 2,
-                                  style: BorderStyle.solid),
+                        Row(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(3, 6, 3, 3),
+                              child: Container(
+                                width: 50,
+                                height: 50,
+                                decoration: BoxDecoration(
+                                  borderRadius: const BorderRadius.all(
+                                      Radius.circular(2.0)),
+                                  border: Border.all(
+                                      color: Colors.grey,
+                                      width: 2,
+                                      style: BorderStyle.solid),
+                                ),
+                                child: FittedBox(
+                                  fit: BoxFit.fill,
+                                  child: Image.memory(
+                                      Base64Helper.decode(group.profileImage!)),
+                                ),
+                              ),
                             ),
-                            child: FittedBox(
-                              fit: BoxFit.fill,
-                              child: Image.memory(
-                                  Base64Helper.decode(group.profileImage!)),
-                            ),
-                          ),
+                            Padding(
+                              padding: const EdgeInsets.only(left: 5.0),
+                              child: Text(
+                                I18nHelper.getDisplayNameFromI18n(group.name),
+                                style: OnepieceFonts.smallContentStyleWhite,
+                              ),
+                            )
+                          ],
                         ),
                         Padding(
-                          padding: const EdgeInsets.only(left: 5.0),
-                          child: Text(
-                            I18nHelper.getDisplayNameFromI18n(group.name),
-                            style: OnepieceFonts.smallContentStyleWhite,
-                          ),
+                          padding: const EdgeInsets.only(right: 5),
+                          child: OnepieceTag.getGroupTag(
+                              group.groupCategory!,
+                              groupCategoryToDisplayValue[
+                                  group.groupCategory]!),
                         )
                       ],
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(right: 5),
-                      child: OnepieceTag.getGroupTag(group.groupCategory!,
-                          groupCategoryToDisplayValue[group.groupCategory]!),
-                    )
-                  ],
+                  ),
                 ),
-              ),
-            ),
-          );
-        });
+              );
+            }));
   }
 }
