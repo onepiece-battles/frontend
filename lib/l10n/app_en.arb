@@ -210,5 +210,8 @@
   "homePage": "Personal Home",
   "selectTypeWarning": "Please select type！",
   "notCreated": "Not created",
-  "goToCreationPage": "Go to creation page"
+  "goToCreationPage": "Go to creation page",
+  "characters": "characters",
+  "month": "month",
+  "day": "day"
 }

@@ -198,6 +198,7 @@ class _CharacterViewState extends State<CharacterView> {
                   _search();
                 },
                 decoration: InputDecoration(
+                  floatingLabelBehavior: FloatingLabelBehavior.never,
                   disabledBorder: const OutlineInputBorder(
                       borderSide:
                           BorderSide(color: OnepieceColors.menuHoverColor)),
@@ -669,15 +670,6 @@ class _CharacterViewState extends State<CharacterView> {
   }
 
   List<DataRow> _createRows(BuildContext context) {
-    Map<CharacterType, String> enumValueToDisplayValue =
-        <CharacterType, String>{
-      CharacterType.BODY: AppLocalizations.of(context)!.body,
-      CharacterType.FOOT: AppLocalizations.of(context)!.leg,
-      CharacterType.SCIENCE: AppLocalizations.of(context)!.science,
-      CharacterType.FIST: AppLocalizations.of(context)!.fist,
-      CharacterType.KATANA: AppLocalizations.of(context)!.katana,
-      CharacterType.SHOOTER: AppLocalizations.of(context)!.shoot
-    };
     Map<Haki, String> hakiEnumValueToDisplayValue = {
       Haki.busoshoku: AppLocalizations.of(context)!.busoshoku,
       Haki.haoshoku: AppLocalizations.of(context)!.haoshoku,

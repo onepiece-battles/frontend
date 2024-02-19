@@ -75,6 +75,7 @@ Class | Method | HTTP request | Description
 *CharacterApi* | [**getCharacterFullView**](doc//CharacterApi.md#getcharacterfullview) | **POST** /api/onepiece/character/get | 
 *CharacterApi* | [**joinGroup**](doc//CharacterApi.md#joingroup) | **POST** /api/onepiece/character/join_group | 
 *CharacterApi* | [**listCharacters**](doc//CharacterApi.md#listcharacters) | **POST** /api/onepiece/character/list | 
+*CharacterApi* | [**updateCharacter**](doc//CharacterApi.md#updatecharacter) | **POST** /api/onepiece/character/update | 
 *DataExportApi* | [**generatePdf**](doc//DataExportApi.md#generatepdf) | **POST** /api/onepiece/export/generate_pdf | 
 *FileApi* | [**downloadFile**](doc//FileApi.md#downloadfile) | **POST** /api/onepiece/file/download_file | 
 *FruitApi* | [**addFruit**](doc//FruitApi.md#addfruit) | **POST** /api/onepiece/fruit/add | 
@@ -220,6 +221,7 @@ Class | Method | HTTP request | Description
  - [SortOrder](doc//SortOrder.md)
  - [StartBattleRequest](doc//StartBattleRequest.md)
  - [StartBattleResponse](doc//StartBattleResponse.md)
+ - [UpdateCharacterResponse](doc//UpdateCharacterResponse.md)
  - [UpdateFruitRequest](doc//UpdateFruitRequest.md)
  - [UpdateLoginRoleRequest](doc//UpdateLoginRoleRequest.md)
  - [UpdateLoginRoleResponse](doc//UpdateLoginRoleResponse.md)

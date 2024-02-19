@@ -186,6 +186,7 @@ class _FruitViewState extends State<FruitView> {
                       _search();
                     },
                     decoration: InputDecoration(
+                      floatingLabelBehavior: FloatingLabelBehavior.never,
                       disabledBorder: const OutlineInputBorder(
                           borderSide:
                               BorderSide(color: OnepieceColors.menuHoverColor)),

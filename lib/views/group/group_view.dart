@@ -181,6 +181,7 @@ class _GroupViewState extends State<GroupView> {
                   _search();
                 },
                 decoration: InputDecoration(
+                  floatingLabelBehavior: FloatingLabelBehavior.never,
                   disabledBorder: const OutlineInputBorder(
                       borderSide:
                           BorderSide(color: OnepieceColors.menuHoverColor)),

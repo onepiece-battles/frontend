@@ -1,10 +1,6 @@
 # See https://dart.dev/guides/libraries/private-files
 
 .dart_tool/
-.openapi-generator/
-doc/
-lib/
-test/
 .packages
 build/
 pubspec.lock  # Except for application packages
@@ -19,5 +15,9 @@ doc/api/
 
 # Mac
 .DS_Store
+.openapi-generator/
+lib/
+test/
+doc/
 
 
