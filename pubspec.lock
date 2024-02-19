@@ -645,6 +645,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.0.0"
+  openapi:
+    dependency: "direct main"
+    description:
+      path: generated
+      relative: true
+    source: path
+    version: "1.0.0"
   openapi_generator:
     dependency: "direct dev"
     description:
