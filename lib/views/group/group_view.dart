@@ -232,7 +232,7 @@ class _GroupViewState extends State<GroupView> {
               buttonStyleData: ButtonStyleData(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 height: 35,
-                width: 200,
+                width: 240,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(3),
                   color: OnepieceColors.liteFancyGreen,
