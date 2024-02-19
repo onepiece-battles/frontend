@@ -6,11 +6,14 @@ import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_tag.dart';
 import 'package:one_piece_battles_flutter/repository/character_dao.dart';
 import 'package:one_piece_battles_flutter/repository/group_dao.dart';
+import 'package:one_piece_battles_flutter/utils/date_helper.dart';
 import 'package:one_piece_battles_flutter/utils/string_extensions.dart';
 import 'package:openapi/api.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../../popup/onepiece_alert.dart';
 import '../../repository/fruit_dao.dart';
 import '../../utils/base64_helper.dart';
+import '../../utils/data_converter.dart';
 import '../../utils/i18n_helper.dart';
 import '../../utils/image_helper.dart';
 
@@ -25,8 +28,14 @@ class CharacterDetail extends StatefulWidget {
 }
 
 class _CharacterDetailState extends State<CharacterDetail> {
+  // character details controller
   TextEditingController characterNameController = TextEditingController();
-
+  TextEditingController characterAge = TextEditingController();
+  TextEditingController characterHeight = TextEditingController();
+  TextEditingController characterBirthPlace = TextEditingController();
+  TextEditingController characterDateOfBirthMonth = TextEditingController();
+  TextEditingController characterDateOfBirthDay = TextEditingController();
+  TextEditingController characterBounty = TextEditingController();
   // battle data controller
   TextEditingController characterFruitLimitController = TextEditingController();
   TextEditingController characterGroupGainController = TextEditingController();
@@ -37,13 +46,6 @@ class _CharacterDetailState extends State<CharacterDetail> {
   TextEditingController characterBloodController = TextEditingController();
   TextEditingController characterSpeedController = TextEditingController();
   TextEditingController characterEnergyController = TextEditingController();
-
-  // character details controller
-  TextEditingController characterAge = TextEditingController();
-  TextEditingController characterHeight = TextEditingController();
-  TextEditingController characterBirthPlace = TextEditingController();
-  TextEditingController characterDateOfBirth = TextEditingController();
-  TextEditingController characterBounty = TextEditingController();
 
   // fruit search data
   TextEditingController fruitNameController = TextEditingController();
@@ -61,7 +63,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
   List<FruitListView> fruits = [];
   List<GroupForCharacterView> groups = [];
 
-  SliderData sliderData = SliderData();
+  CharacterBattleInfo characterBattleInfo = CharacterBattleInfo();
+  CharacterBasicInfo characterBasicInfo = CharacterBasicInfo();
 
   final _basicFormKey = GlobalKey<FormState>();
   final _digitFormKey = GlobalKey<FormState>();
@@ -114,18 +117,24 @@ class _CharacterDetailState extends State<CharacterDetail> {
     battles = characterFullView.battles;
     fruits = characterFullView.fruits;
     groups = characterFullView.groups;
-    // set initial slider value
-    sliderData.setAttack(characterFullView.attack.toDouble());
-    sliderData.setDefense(characterFullView.defense.toDouble());
-    sliderData.setBlood(characterFullView.blood.toDouble());
-    sliderData.setGroupGain(characterFullView.groupGain.toDouble());
-    sliderData.setIntelligence(characterFullView.intelligence.toDouble());
-    sliderData.setSpeed(characterFullView.speed.toDouble());
-    battles = characterFullView.battles;
-    fruits = characterFullView.fruits;
     if (fruits.length < character.maximumFruitCount) {
       fruitSearchEnabled = true;
     }
+    // set battle info
+    characterBattleInfo.setAttack(characterFullView.attack);
+    characterBattleInfo.setDefense(characterFullView.defense);
+    characterBattleInfo.setBlood(characterFullView.blood);
+    characterBattleInfo.setGroupGain(characterFullView.groupGain);
+    characterBattleInfo.setIntelligence(characterFullView.intelligence);
+    characterBattleInfo.setSpeed(characterFullView.speed);
+    // set basic info
+    characterBasicInfo.setAge(characterFullView.age);
+    characterBasicInfo.setBirthPlace(characterFullView.birthPlace);
+    characterBasicInfo.setBounty(characterFullView.bounty);
+    characterBasicInfo.setHeight(characterFullView.height);
+    characterBasicInfo
+        .setName(I18nHelper.getDisplayNameFromI18n(characterFullView.name));
+    characterBasicInfo.setProfileImage(characterFullView.profileImage);
   }
 
   void _updateControllerData() {
@@ -137,8 +146,12 @@ class _CharacterDetailState extends State<CharacterDetail> {
         character.height == null ? "" : character.height.toString();
     characterBirthPlace.text =
         character.birthPlace == null ? "" : character.birthPlace.toString();
-    characterDateOfBirth.text =
-        character.dateOfBirth == null ? "" : character.dateOfBirth.toString();
+    characterDateOfBirthMonth.text = character.dateOfBirth == null
+        ? ""
+        : character.dateOfBirth!.month.toString();
+    characterDateOfBirthDay.text = character.dateOfBirth == null
+        ? ""
+        : character.dateOfBirth!.day.toString();
     characterBounty.text =
         character.bounty == null ? "" : character.bounty.toString();
     // update combat information
@@ -218,6 +231,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
   Widget _getBasicInfo(BuildContext context) {
     return StatefulBuilder(builder: (context, basicState) {
       return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -231,58 +245,114 @@ class _CharacterDetailState extends State<CharacterDetail> {
                 const SizedBox(
                   width: 15,
                 ),
-                IconButton(
-                  splashRadius: 0.1,
-                  onPressed: () {
-                    basicState(() {
-                      basicInfoEditable = !basicInfoEditable;
-                    });
-                  },
-                  icon: basicInfoEditable
-                      ? const Icon(
-                          Icons.check,
-                          size: 25,
-                          color: OnepieceColors.fancyBlue,
-                        )
-                      : const Icon(
-                          Icons.edit,
-                          size: 25,
-                          color: OnepieceColors.fancyBlue,
-                        ),
-                )
+                Tooltip(
+                  message: basicInfoEditable
+                      ? AppLocalizations.of(context)!.submitForm
+                      : AppLocalizations.of(context)!.editHint,
+                  child: InkWell(
+                    hoverColor: Colors.white,
+                    onTap: () {
+                      basicState(() {
+                        basicInfoEditable = !basicInfoEditable;
+                        if (!basicInfoEditable) {
+                          var updatedCharacter = Character(
+                            id: character.id,
+                            maximumFruitCount: character.maximumFruitCount,
+                            groupGain: character.groupGain,
+                            attack: character.attack,
+                            defense: character.defense,
+                            intelligence: character.intelligence,
+                            blood: character.blood,
+                            speed: character.speed,
+                            energy: character.energy,
+                            // basic info
+                            name: I18nHelper.setI18nFromDisplayName(
+                                character.name, characterNameController.text),
+                            dateOfBirth: DateTime(
+                                1900,
+                                DataConverter.stringToInt(
+                                    characterDateOfBirthMonth.text),
+                                DataConverter.stringToInt(
+                                    characterDateOfBirthDay.text)),
+                            // todo(yichi): profile image update
+                            birthPlace: characterBirthPlace.text,
+                            age: DataConverter.stringToInt(
+                                characterAge.text.trim()),
+                            bounty: DataConverter.stringToInt(
+                                characterBounty.text.trim()),
+                            height: DataConverter.stringToInt(
+                                characterHeight.text.trim()),
+                          );
+                          getIt<CharacterDao>()
+                              .update(updatedCharacter)
+                              .then((value) {
+                            OnepieceAlert.getBasicAlertDialogFunc(
+                                context,
+                                AppLocalizations.of(context)!.hint,
+                                I18nHelper.getDisplayNameFromI18n(
+                                    value!.result));
+                            if (value.success) {
+                              context.goNamed('characterDetails',
+                                  extra: character.id,
+                                  pathParameters: {
+                                    'name': I18nHelper.getDisplayNameFromI18n(
+                                        character.name)
+                                  });
+                            }
+                          });
+                        }
+                      });
+                    },
+                    child: SizedBox(
+                        width: 25,
+                        height: 25,
+                        child: !basicInfoEditable
+                            ? ImageHelper.getSvgIconWithColor(
+                                'images/svgs/edit.svg',
+                                150,
+                                150,
+                                OnepieceColors.fancyBlue)
+                            : ImageHelper.getSvgIconWithColor(
+                                'images/svgs/check.svg',
+                                150,
+                                150,
+                                OnepieceColors.fancyBlue)),
+                  ),
+                ),
               ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Container(
+              width: 270,
+              height: 270,
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.all(Radius.circular(5.0)),
+                border: Border.all(
+                    color: OnepieceColors.fancyBlue,
+                    width: 5,
+                    style: BorderStyle.solid),
+              ),
+              child: FittedBox(
+                fit: BoxFit.fill,
+                child: character.profileImage == null
+                    ? Container()
+                    : Image.memory(
+                        Base64Helper.decode(character.profileImage!)),
+              ),
             ),
           ),
           Form(
             key: _basicFormKey,
-            child: Row(
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Container(
-                    width: 270,
-                    height: 270,
-                    decoration: BoxDecoration(
-                      borderRadius:
-                          const BorderRadius.all(Radius.circular(5.0)),
-                      border: Border.all(
-                          color: OnepieceColors.fancyBlue,
-                          width: 5,
-                          style: BorderStyle.solid),
-                    ),
-                    child: FittedBox(
-                      fit: BoxFit.fill,
-                      child: character.profileImage == null
-                          ? Container()
-                          : Image.memory(
-                              Base64Helper.decode(character.profileImage!)),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _getStringFormField(
                           context,
@@ -291,29 +361,9 @@ class _CharacterDetailState extends State<CharacterDetail> {
                           AppLocalizations.of(context)!.name,
                           20,
                           _getIcon('images/character_digits_icon/name.svg')),
-                      _getStringFormField(
-                          context,
-                          basicInfoEditable,
-                          characterBirthPlace,
-                          AppLocalizations.of(context)!.birthPlace,
-                          20,
-                          _getIcon(
-                              'images/character_digits_icon/birth_place.svg')),
-                      _getStringFormField(
-                          context,
-                          basicInfoEditable,
-                          characterDateOfBirth,
-                          AppLocalizations.of(context)!.birthDay,
-                          20,
-                          _getIcon(
-                              'images/character_digits_icon/birthday.svg')),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    children: [
+                      const SizedBox(
+                        width: 15,
+                      ),
                       _getDigitFormField(
                           context,
                           basicInfoEditable,
@@ -322,6 +372,25 @@ class _CharacterDetailState extends State<CharacterDetail> {
                           10,
                           100000000000,
                           _getIcon('images/character_digits_icon/bounty.svg')),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      _getStringFormField(
+                          context,
+                          basicInfoEditable,
+                          characterBirthPlace,
+                          AppLocalizations.of(context)!.birthPlace,
+                          20,
+                          _getIcon(
+                              'images/character_digits_icon/birth_place.svg')),
+                      const SizedBox(
+                        width: 15,
+                      ),
                       _getDigitFormField(
                           context,
                           basicInfoEditable,
@@ -330,6 +399,114 @@ class _CharacterDetailState extends State<CharacterDetail> {
                           0,
                           100000,
                           _getIcon('images/character_digits_icon/age.svg')),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(0, 20, 0, 10),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                              width: 300,
+                              child: Padding(
+                                padding: const EdgeInsets.only(left: 8),
+                                child: Text(
+                                  AppLocalizations.of(context)!.birthDay,
+                                  style: OnepieceFonts.deepBlackHintFont,
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 150,
+                              child: Padding(
+                                padding: const EdgeInsets.only(left: 8.0),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    ImageHelper.getSvgIconWithColor(
+                                        "images/character_digits_icon/birthday.svg",
+                                        25,
+                                        25,
+                                        OnepieceColors.fancyBlue),
+                                    SizedBox(
+                                      width: 30,
+                                      child: TextFormField(
+                                        controller: characterDateOfBirthMonth,
+                                        enabled: basicInfoEditable,
+                                        validator: (value) {
+                                          if (value!.isWhiteSpace()) {
+                                            return AppLocalizations.of(context)!
+                                                .requiredField;
+                                          } else if (!value.isValidInt()) {
+                                            return AppLocalizations.of(context)!
+                                                .fieldMustBeInt;
+                                          }
+                                          int valueInt = int.parse(value);
+                                          if (valueInt < 1 || valueInt > 12) {
+                                            return AppLocalizations.of(context)!
+                                                .valueExceedsLimit;
+                                          }
+                                          return null;
+                                        },
+                                        decoration: const InputDecoration(
+                                          floatingLabelBehavior:
+                                              FloatingLabelBehavior.never,
+                                          contentPadding:
+                                              EdgeInsets.fromLTRB(5, 15, 0, 0),
+                                          hintText: "1-12",
+                                        ),
+                                      ),
+                                    ),
+                                    Text(AppLocalizations.of(context)!.month),
+                                    SizedBox(
+                                      width: 30,
+                                      child: TextFormField(
+                                        controller: characterDateOfBirthDay,
+                                        enabled: basicInfoEditable,
+                                        validator: (value) {
+                                          if (value!.isWhiteSpace()) {
+                                            return AppLocalizations.of(context)!
+                                                .requiredField;
+                                          } else if (!value.isValidInt()) {
+                                            return AppLocalizations.of(context)!
+                                                .fieldMustBeInt;
+                                          }
+                                          int valueInt = int.parse(value);
+                                          if (valueInt < 1 || valueInt > 31) {
+                                            return AppLocalizations.of(context)!
+                                                .valueExceedsLimit;
+                                          }
+                                          return null;
+                                        },
+                                        decoration: const InputDecoration(
+                                          floatingLabelBehavior:
+                                              FloatingLabelBehavior.never,
+                                          contentPadding:
+                                              EdgeInsets.fromLTRB(5, 15, 0, 0),
+                                          hintText: "1-31",
+                                        ),
+                                      ),
+                                    ),
+                                    Text(AppLocalizations.of(context)!.day),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 15,
+                      ),
                       _getDigitFormField(
                           context,
                           basicInfoEditable,
@@ -379,25 +556,74 @@ class _CharacterDetailState extends State<CharacterDetail> {
                 const SizedBox(
                   width: 15,
                 ),
-                IconButton(
-                  splashRadius: 0.1,
-                  onPressed: () {
-                    combatState(() {
-                      combatInfoEditable = !combatInfoEditable;
-                    });
-                  },
-                  icon: combatInfoEditable
-                      ? const Icon(
-                          Icons.check,
-                          size: 25,
-                          color: OnepieceColors.fancyBlue,
-                        )
-                      : const Icon(
-                          Icons.edit,
-                          size: 25,
-                          color: OnepieceColors.fancyBlue,
-                        ),
-                )
+                Tooltip(
+                  message: combatInfoEditable
+                      ? AppLocalizations.of(context)!.submitForm
+                      : AppLocalizations.of(context)!.editHint,
+                  child: InkWell(
+                    hoverColor: Colors.white,
+                    onTap: () {
+                      combatState(() {
+                        combatInfoEditable = !combatInfoEditable;
+                        if (!combatInfoEditable) {
+                          var updatedCharacter = Character(
+                            id: character.id,
+                            // digit info
+                            maximumFruitCount: DataConverter.stringToInt(
+                                characterFruitLimitController.text),
+                            groupGain: DataConverter.stringToInt(
+                                characterGroupGainController.text),
+                            attack: DataConverter.stringToInt(
+                                characterAttackController.text),
+                            defense: DataConverter.stringToInt(
+                                characterDefenseController.text),
+                            intelligence: DataConverter.stringToInt(
+                                characterIntelligenceController.text),
+                            blood: DataConverter.stringToInt(
+                                characterBloodController.text),
+                            speed: DataConverter.stringToInt(
+                                characterSpeedController.text),
+                            energy: DataConverter.stringToInt(
+                                characterEnergyController.text),
+                            // basic info
+                            name: character.name,
+                          );
+                          getIt<CharacterDao>()
+                              .update(updatedCharacter)
+                              .then((value) {
+                            OnepieceAlert.getBasicAlertDialogFunc(
+                                context,
+                                AppLocalizations.of(context)!.hint,
+                                I18nHelper.getDisplayNameFromI18n(
+                                    value!.result));
+                            if (value.success) {
+                              context.goNamed('characterDetails',
+                                  extra: character.id,
+                                  pathParameters: {
+                                    'name': I18nHelper.getDisplayNameFromI18n(
+                                        character.name)
+                                  });
+                            }
+                          });
+                        }
+                      });
+                    },
+                    child: SizedBox(
+                        width: 25,
+                        height: 25,
+                        child: !basicInfoEditable
+                            ? ImageHelper.getSvgIconWithColor(
+                                'images/svgs/edit.svg',
+                                150,
+                                150,
+                                OnepieceColors.fancyBlue)
+                            : ImageHelper.getSvgIconWithColor(
+                                'images/svgs/check.svg',
+                                150,
+                                150,
+                                OnepieceColors.fancyBlue)),
+                  ),
+                ),
               ],
             ),
           ),
@@ -1124,7 +1350,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
       int length,
       Widget? icon) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(0, 20, 0, 10),
+      padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1144,11 +1370,25 @@ class _CharacterDetailState extends State<CharacterDetail> {
             child: TextFormField(
               controller: controller,
               enabled: editable,
-              // maxLength: length,
+              maxLength: length,
+              buildCounter: (
+                context, {
+                required currentLength,
+                required isFocused,
+                maxLength,
+              }) {
+                if (!isFocused) {
+                  return const Text("");
+                } else {
+                  return Text(
+                      "$currentLength/$maxLength ${AppLocalizations.of(context)!.characters}");
+                }
+              },
               decoration: InputDecoration(
-                  prefixIcon: icon,
-                  floatingLabelBehavior: FloatingLabelBehavior.auto,
-                  contentPadding: const EdgeInsets.fromLTRB(10, 2, 10, 2)),
+                prefixIcon: icon,
+                floatingLabelBehavior: FloatingLabelBehavior.never,
+                contentPadding: const EdgeInsets.fromLTRB(0, 15, 0, 0),
+              ),
             ),
           ),
         ],
@@ -1165,7 +1405,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
       int max,
       Widget? icon) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(0, 20, 0, 10),
+      padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1199,9 +1439,9 @@ class _CharacterDetailState extends State<CharacterDetail> {
               },
               decoration: InputDecoration(
                 prefixIcon: icon,
-                floatingLabelBehavior: FloatingLabelBehavior.auto,
-                contentPadding: const EdgeInsets.fromLTRB(10, 2, 10, 2),
-                labelText: "($min-$max)",
+                floatingLabelBehavior: FloatingLabelBehavior.never,
+                contentPadding: const EdgeInsets.fromLTRB(0, 15, 0, 0),
+                hintText: "$min-$max",
               ),
             ),
           ),
@@ -1211,42 +1451,88 @@ class _CharacterDetailState extends State<CharacterDetail> {
   }
 }
 
-class SliderData {
-  late double _currentAttack;
-  late double _currentDefense;
-  late double _currentBlood;
-  late double _currentIntelligence;
-  late double _currentSpeed;
-  late double _currentGroupGain;
+class CharacterBattleInfo {
+  late int _currentAttack;
+  late int _currentDefense;
+  late int _currentBlood;
+  late int _currentIntelligence;
+  late int _currentSpeed;
+  late int _currentGroupGain;
 
-  void setAttack(double attack) {
+  void setAttack(int attack) {
     _currentAttack = attack;
   }
 
-  void setDefense(double defense) {
+  void setDefense(int defense) {
     _currentDefense = defense;
   }
 
-  void setBlood(double blood) {
+  void setBlood(int blood) {
     _currentBlood = blood;
   }
 
-  void setIntelligence(double intelligence) {
+  void setIntelligence(int intelligence) {
     _currentIntelligence = intelligence;
   }
 
-  void setSpeed(double speed) {
+  void setSpeed(int speed) {
     _currentSpeed = speed;
   }
 
-  void setGroupGain(double groupGain) {
+  void setGroupGain(int groupGain) {
     _currentGroupGain = groupGain;
   }
 
-  double get attack => _currentAttack;
-  double get defense => _currentDefense;
-  double get blood => _currentBlood;
-  double get speed => _currentSpeed;
-  double get intelligence => _currentIntelligence;
-  double get groupGain => _currentGroupGain;
+  int get attack => _currentAttack;
+  int get defense => _currentDefense;
+  int get blood => _currentBlood;
+  int get speed => _currentSpeed;
+  int get intelligence => _currentIntelligence;
+  int get groupGain => _currentGroupGain;
+}
+
+class CharacterBasicInfo {
+  late String? _name;
+  late int? _age;
+  late String? _profileImage;
+  late int? _height;
+  late String? _birthPlace;
+  late DateTime? _dateOfBirth;
+  late int? _bounty;
+
+  void setName(String? name) {
+    _name = name;
+  }
+
+  void setAge(int? age) {
+    _age = age;
+  }
+
+  void setProfileImage(String? profileImage) {
+    _profileImage = profileImage;
+  }
+
+  void setHeight(int? height) {
+    _height = height;
+  }
+
+  void setBirthPlace(String? birthPlace) {
+    birthPlace = birthPlace;
+  }
+
+  void setDateOfBirth(DateTime? dateOfBirth) {
+    _dateOfBirth = dateOfBirth;
+  }
+
+  void setBounty(int? bounty) {
+    _bounty = bounty;
+  }
+
+  String? get name => _name;
+  int? get age => _age;
+  String? get profileImage => _profileImage;
+  int? get height => _height;
+  String? get birthPlace => _birthPlace;
+  DateTime? get dateOfBirth => _dateOfBirth;
+  int? get bounty => _bounty;
 }

@@ -28,4 +28,8 @@ class CharacterDao {
   Future<CharacterFullView?> getCharacter(GetCharacterFullViewRequest request) async {
     return await characterApi.getCharacterFullView(request);
   }
+
+  Future<UpdateCharacterResponse?> update(Character character) async {
+    return await characterApi.updateCharacter(character);
+  }
 }
