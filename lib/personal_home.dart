@@ -78,7 +78,7 @@ class _UserHomeState extends State<UserHome> {
                     children: [
                       _getHeader(context),
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(0,20,0,10),
+                        padding: const EdgeInsets.fromLTRB(0, 20, 0, 10),
                         child: Text(
                           AppLocalizations.of(context)!.myCharacters,
                           style: OnepieceFonts.contentStyleBoldFancyBlue,
@@ -86,7 +86,7 @@ class _UserHomeState extends State<UserHome> {
                       ),
                       _getCharacterWall(context),
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(0,20,0,10),
+                        padding: const EdgeInsets.fromLTRB(0, 20, 0, 10),
                         child: Text(
                           AppLocalizations.of(context)!.myGroups,
                           style: OnepieceFonts.contentStyleBoldFancyBlue,
@@ -94,7 +94,7 @@ class _UserHomeState extends State<UserHome> {
                       ),
                       _getGroupWall(context),
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(0,20,0,10),
+                        padding: const EdgeInsets.fromLTRB(0, 20, 0, 10),
                         child: Text(
                           AppLocalizations.of(context)!.myBattles,
                           style: OnepieceFonts.contentStyleBoldFancyBlue,
@@ -118,14 +118,34 @@ class _UserHomeState extends State<UserHome> {
   Widget _getHeader(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 18.0),
-      child: Text(AppLocalizations.of(context)!.homePage, style: OnepieceFonts.headerStyle,),
+      child: Text(
+        AppLocalizations.of(context)!.homePage,
+        style: OnepieceFonts.headerStyle,
+      ),
     );
   }
 
   Widget _getCharacterWall(BuildContext context) {
+    if (characters.isEmpty) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: Text(AppLocalizations.of(context)!.notCreated),
+          ),
+          TextButton(
+              onPressed: () {
+                context.goNamed("createCharacter");
+              },
+              child: Text(AppLocalizations.of(context)!.goToCreationPage))
+        ],
+      );
+    }
     return SizedBox(
       width: characters.length <= 8 ? characters.length * 100 : 800,
-      height: characters.length <= 8 ? 100 : 100.0 * (characters.length / 8).ceil(),
+      height:
+          characters.length <= 8 ? 100 : 100.0 * (characters.length / 8).ceil(),
       child: GridView.builder(
         itemCount: characters.length,
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -166,6 +186,22 @@ class _UserHomeState extends State<UserHome> {
   }
 
   Widget _getGroupWall(BuildContext context) {
+    if (groups.isEmpty) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: Text(AppLocalizations.of(context)!.notCreated),
+          ),
+          TextButton(
+              onPressed: () {
+                context.goNamed("createGroup");
+              },
+              child: Text(AppLocalizations.of(context)!.goToCreationPage))
+        ],
+      );
+    }
     return SizedBox(
       width: groups.length <= 8 ? groups.length * 100 : 800,
       height: groups.length <= 8 ? 100 : 100.0 * (groups.length / 8).ceil(),
@@ -223,6 +259,22 @@ class _UserHomeState extends State<UserHome> {
       BattleReportStage.FINISHED:
           AppLocalizations.of(context)!.battleReportGenerated,
     };
+    if (battles.isEmpty) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: Text(AppLocalizations.of(context)!.notCreated),
+          ),
+          TextButton(
+              onPressed: () {
+                context.goNamed("createBattle");
+              },
+              child: Text(AppLocalizations.of(context)!.goToCreationPage))
+        ],
+      );
+    }
     return SizedBox(
       width: 500,
       child: ListView.builder(
@@ -310,10 +362,15 @@ class _UserHomeState extends State<UserHome> {
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             Text(
-                                battleStatusToDisplayName[battle.battleStatus!]!, style: OnepieceFonts.fancyBlueHintFont),
-                            const Text(" | ",  style: OnepieceFonts.fancyBlueHintFont),
-                            Text(reportStatusToDisplayName[
-                                battle.battleReportStage!]!,  style: OnepieceFonts.fancyBlueHintFont)
+                                battleStatusToDisplayName[
+                                    battle.battleStatus!]!,
+                                style: OnepieceFonts.fancyBlueHintFont),
+                            const Text(" | ",
+                                style: OnepieceFonts.fancyBlueHintFont),
+                            Text(
+                                reportStatusToDisplayName[
+                                    battle.battleReportStage!]!,
+                                style: OnepieceFonts.fancyBlueHintFont)
                           ],
                         ),
                       )

@@ -208,5 +208,7 @@
   "myGroups": "My Groups",
   "myBattles": "My Battles",
   "homePage": "Personal Home",
-  "selectTypeWarning": "Please select type！"
+  "selectTypeWarning": "Please select type！",
+  "notCreated": "Not created",
+  "goToCreationPage": "Go to creation page"
 }

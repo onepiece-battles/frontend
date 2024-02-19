@@ -208,5 +208,7 @@
   "myGroups": "我创建的团体",
   "myBattles": "我创建的战斗",
   "homePage": "个人主页",
-  "selectTypeWarning": "请选择类型！"
+  "selectTypeWarning": "请选择类型！",
+  "notCreated": "未创建",
+  "goToCreationPage": "去创建"
 }
