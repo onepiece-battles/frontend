@@ -285,29 +285,28 @@ class _CharacterDetailState extends State<CharacterDetail> {
                   child: Column(
                     children: [
                       _getStringFormField(
-                        context,
-                        basicInfoEditable,
-                        characterNameController,
-                        AppLocalizations.of(context)!.name,
-                        20,
-                          _getIcon('images/character_digits_icon/name.svg')
-                      ),
+                          context,
+                          basicInfoEditable,
+                          characterNameController,
+                          AppLocalizations.of(context)!.name,
+                          20,
+                          _getIcon('images/character_digits_icon/name.svg')),
                       _getStringFormField(
-                        context,
-                        basicInfoEditable,
-                        characterBirthPlace,
-                        AppLocalizations.of(context)!.birthPlace,
-                        20,
-                          _getIcon('images/character_digits_icon/birth_place.svg')
-                      ),
+                          context,
+                          basicInfoEditable,
+                          characterBirthPlace,
+                          AppLocalizations.of(context)!.birthPlace,
+                          20,
+                          _getIcon(
+                              'images/character_digits_icon/birth_place.svg')),
                       _getStringFormField(
-                        context,
-                        basicInfoEditable,
-                        characterDateOfBirth,
-                        AppLocalizations.of(context)!.birthDay,
-                        20,
-                          _getIcon('images/character_digits_icon/birthday.svg')
-                      ),
+                          context,
+                          basicInfoEditable,
+                          characterDateOfBirth,
+                          AppLocalizations.of(context)!.birthDay,
+                          20,
+                          _getIcon(
+                              'images/character_digits_icon/birthday.svg')),
                     ],
                   ),
                 ),
@@ -316,32 +315,29 @@ class _CharacterDetailState extends State<CharacterDetail> {
                   child: Column(
                     children: [
                       _getDigitFormField(
-                        context,
-                        basicInfoEditable,
-                        characterBounty,
-                        AppLocalizations.of(context)!.bounty,
-                        10,
-                        100000000000,
-                        _getIcon('images/character_digits_icon/bounty.svg')
-                      ),
+                          context,
+                          basicInfoEditable,
+                          characterBounty,
+                          AppLocalizations.of(context)!.bounty,
+                          10,
+                          100000000000,
+                          _getIcon('images/character_digits_icon/bounty.svg')),
                       _getDigitFormField(
-                        context,
-                        basicInfoEditable,
-                        characterAge,
-                        AppLocalizations.of(context)!.age,
-                        0,
-                        100000,
-                          _getIcon('images/character_digits_icon/age.svg')
-                      ),
+                          context,
+                          basicInfoEditable,
+                          characterAge,
+                          AppLocalizations.of(context)!.age,
+                          0,
+                          100000,
+                          _getIcon('images/character_digits_icon/age.svg')),
                       _getDigitFormField(
-                        context,
-                        basicInfoEditable,
-                        characterHeight,
-                        AppLocalizations.of(context)!.height,
-                        1,
-                        100000,
-                          _getIcon('images/character_digits_icon/height.svg')
-                      ),
+                          context,
+                          basicInfoEditable,
+                          characterHeight,
+                          AppLocalizations.of(context)!.height,
+                          1,
+                          100000,
+                          _getIcon('images/character_digits_icon/height.svg')),
                     ],
                   ),
                 )
@@ -356,16 +352,18 @@ class _CharacterDetailState extends State<CharacterDetail> {
   Widget _getIcon(String path) {
     return Padding(
       padding: const EdgeInsets.all(10.0),
-      child: ImageHelper.getSvgIconWithColor(
-          path,
-          3,
-          3,
-          OnepieceColors.fancyBlue),
+      child:
+          ImageHelper.getSvgIconWithColor(path, 3, 3, OnepieceColors.fancyBlue),
     );
   }
 
 // show character combat information (editable if permitted)
   Widget _getCombatInfo(BuildContext context) {
+    Map<Haki, String> hakiEnumValueToDisplayValue = {
+      Haki.busoshoku: AppLocalizations.of(context)!.busoshoku,
+      Haki.haoshoku: AppLocalizations.of(context)!.haoshoku,
+      Haki.kenbunshoku: AppLocalizations.of(context)!.kenbunshoku,
+    };
     return StatefulBuilder(builder: (context, combatState) {
       return Column(
         children: [
@@ -403,6 +401,19 @@ class _CharacterDetailState extends State<CharacterDetail> {
               ],
             ),
           ),
+          if (character.hakis.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+              child: Row(
+                children: character.hakis
+                    .map((e) => Padding(
+                          padding: const EdgeInsets.only(right: 5),
+                          child: OnepieceTag.getHakiTag(
+                              e, hakiEnumValueToDisplayValue[e]!),
+                        ))
+                    .toList(),
+              ),
+            ),
           Form(
             key: _digitFormKey,
             child: Row(
@@ -413,41 +424,37 @@ class _CharacterDetailState extends State<CharacterDetail> {
                   child: Column(
                     children: [
                       _getDigitFormField(
-                        context,
-                        combatInfoEditable,
-                        characterAttackController,
-                        AppLocalizations.of(context)!.characterAttack,
-                        10,
-                        1000,
-                          _getIcon('images/character_digits_icon/attack.svg')
-                      ),
+                          context,
+                          combatInfoEditable,
+                          characterAttackController,
+                          AppLocalizations.of(context)!.characterAttack,
+                          10,
+                          1000,
+                          _getIcon('images/character_digits_icon/attack.svg')),
                       _getDigitFormField(
-                        context,
-                        combatInfoEditable,
-                        characterDefenseController,
-                        AppLocalizations.of(context)!.characterDefense,
-                        10,
-                        1000,
-                          _getIcon('images/character_digits_icon/defense.svg')
-                      ),
+                          context,
+                          combatInfoEditable,
+                          characterDefenseController,
+                          AppLocalizations.of(context)!.characterDefense,
+                          10,
+                          1000,
+                          _getIcon('images/character_digits_icon/defense.svg')),
                       _getDigitFormField(
-                        context,
-                        combatInfoEditable,
-                        characterBloodController,
-                        AppLocalizations.of(context)!.characterBlood,
-                        100,
-                        10000,
-                          _getIcon('images/character_digits_icon/blood.svg')
-                      ),
+                          context,
+                          combatInfoEditable,
+                          characterBloodController,
+                          AppLocalizations.of(context)!.characterBlood,
+                          100,
+                          10000,
+                          _getIcon('images/character_digits_icon/blood.svg')),
                       _getDigitFormField(
-                        context,
-                        combatInfoEditable,
-                        characterSpeedController,
-                        AppLocalizations.of(context)!.characterSpeed,
-                        10,
-                        200,
-                          _getIcon('images/character_digits_icon/speed.svg')
-                      ),
+                          context,
+                          combatInfoEditable,
+                          characterSpeedController,
+                          AppLocalizations.of(context)!.characterSpeed,
+                          10,
+                          200,
+                          _getIcon('images/character_digits_icon/speed.svg')),
                     ],
                   ),
                 ),
@@ -456,41 +463,40 @@ class _CharacterDetailState extends State<CharacterDetail> {
                   child: Column(
                     children: [
                       _getDigitFormField(
-                        context,
-                        combatInfoEditable,
-                        characterIntelligenceController,
-                        AppLocalizations.of(context)!.characterIntelligence,
-                        70,
-                        260,
-                          _getIcon('images/character_digits_icon/intelligence.svg')
-                      ),
+                          context,
+                          combatInfoEditable,
+                          characterIntelligenceController,
+                          AppLocalizations.of(context)!.characterIntelligence,
+                          70,
+                          260,
+                          _getIcon(
+                              'images/character_digits_icon/intelligence.svg')),
                       _getDigitFormField(
-                        context,
-                        combatInfoEditable,
-                        characterEnergyController,
-                        AppLocalizations.of(context)!.characterEnergy,
-                        10,
-                        50,
-                          _getIcon('images/character_digits_icon/energy.svg')
-                      ),
+                          context,
+                          combatInfoEditable,
+                          characterEnergyController,
+                          AppLocalizations.of(context)!.characterEnergy,
+                          10,
+                          50,
+                          _getIcon('images/character_digits_icon/energy.svg')),
                       _getDigitFormField(
-                        context,
-                        combatInfoEditable,
-                        characterGroupGainController,
-                        AppLocalizations.of(context)!.groupGain,
-                        1,
-                        5,
-                          _getIcon('images/character_digits_icon/group_gain.svg')
-                      ),
+                          context,
+                          combatInfoEditable,
+                          characterGroupGainController,
+                          AppLocalizations.of(context)!.groupGain,
+                          1,
+                          5,
+                          _getIcon(
+                              'images/character_digits_icon/group_gain.svg')),
                       _getDigitFormField(
-                        context,
-                        combatInfoEditable,
-                        characterFruitLimitController,
-                        AppLocalizations.of(context)!.fruitLimit,
-                        1,
-                        2,
-                          _getIcon('images/character_digits_icon/fruit_limit.svg')
-                      ),
+                          context,
+                          combatInfoEditable,
+                          characterFruitLimitController,
+                          AppLocalizations.of(context)!.fruitLimit,
+                          1,
+                          2,
+                          _getIcon(
+                              'images/character_digits_icon/fruit_limit.svg')),
                     ],
                   ),
                 )
@@ -921,11 +927,12 @@ class _CharacterDetailState extends State<CharacterDetail> {
 
   Widget _getGroupList(BuildContext context) {
     Map<GroupCategory, String> groupCategoryToDisplayValue =
-    <GroupCategory, String>{
+        <GroupCategory, String>{
       GroupCategory.marine: AppLocalizations.of(context)!.marine,
       GroupCategory.pirate: AppLocalizations.of(context)!.pirate,
       GroupCategory.underWorld: AppLocalizations.of(context)!.underworld,
-      GroupCategory.worldGovernment: AppLocalizations.of(context)!.worldGovernment,
+      GroupCategory.worldGovernment:
+          AppLocalizations.of(context)!.worldGovernment,
     };
     List<Widget> groupPart = [];
     for (var group in groups) {
@@ -951,7 +958,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                       height: 50,
                       decoration: BoxDecoration(
                         borderRadius:
-                        const BorderRadius.all(Radius.circular(2.0)),
+                            const BorderRadius.all(Radius.circular(2.0)),
                         border: Border.all(
                             color: Colors.grey,
                             width: 2,
@@ -965,10 +972,12 @@ class _CharacterDetailState extends State<CharacterDetail> {
                     ),
                   ),
                   Text(I18nHelper.getDisplayNameFromI18n(group.name!)),
-                  if(group.onceBelongedTo!)  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 5),
-                    child: Text("(${AppLocalizations.of(context)!.onceBelongTo})"),
-                  ),
+                  if (group.onceBelongedTo!)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 5),
+                      child: Text(
+                          "(${AppLocalizations.of(context)!.onceBelongTo})"),
+                    ),
                   Padding(
                     padding: const EdgeInsets.only(right: 5),
                     child: OnepieceTag.getGroupTag(
@@ -1105,8 +1114,13 @@ class _CharacterDetailState extends State<CharacterDetail> {
         : Text(value));
   }
 
-  Widget _getStringFormField(BuildContext context, bool editable,
-      TextEditingController controller, String label, int length, Widget? icon) {
+  Widget _getStringFormField(
+      BuildContext context,
+      bool editable,
+      TextEditingController controller,
+      String label,
+      int length,
+      Widget? icon) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 20, 0, 10),
       child: Column(
@@ -1129,8 +1143,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
               controller: controller,
               enabled: editable,
               // maxLength: length,
-              decoration:  InputDecoration(
-                prefixIcon: icon,
+              decoration: InputDecoration(
+                  prefixIcon: icon,
                   floatingLabelBehavior: FloatingLabelBehavior.auto,
                   contentPadding: const EdgeInsets.fromLTRB(10, 2, 10, 2)),
             ),
@@ -1140,8 +1154,14 @@ class _CharacterDetailState extends State<CharacterDetail> {
     );
   }
 
-  Widget _getDigitFormField(BuildContext context, bool editable,
-      TextEditingController controller, String label, int min, int max, Widget? icon) {
+  Widget _getDigitFormField(
+      BuildContext context,
+      bool editable,
+      TextEditingController controller,
+      String label,
+      int min,
+      int max,
+      Widget? icon) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 20, 0, 10),
       child: Column(
