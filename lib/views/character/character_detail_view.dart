@@ -792,7 +792,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(8.0, 8, 8, 0),
+                padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
                 child: SizedBox(
                   width: 300,
                   child: TextFormField(
@@ -933,7 +933,6 @@ class _CharacterDetailState extends State<CharacterDetail> {
         children: [
           InkWell(
             onTap: () {
-              // todo(yichi): update left menu list selected tab
               context.goNamed('fruitDetails', extra: fruit.id, pathParameters: {
                 'name': I18nHelper.getDisplayNameFromI18n(fruit.name!)
               });

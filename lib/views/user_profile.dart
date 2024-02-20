@@ -36,7 +36,7 @@ class _UserProfileState extends State<UserProfile> {
   late User user;
   final UserProfileModel _originalData = UserProfileModel();
   final UserProfileModel _realtimeData = UserProfileModel();
-  String _chosenImageName = "";
+  final ValueNotifier<String> _chosenImageName = ValueNotifier("");
   final ValueNotifier<bool> _nicknameEditable = ValueNotifier(false);
   final ValueNotifier<bool> _dataModified = ValueNotifier(false);
   bool _emailVerified = false;
@@ -118,80 +118,82 @@ class _UserProfileState extends State<UserProfile> {
         const SizedBox(
           height: 10,
         ),
-        Row(
-          children: [
-            SizedBox(
-              width: 100,
-              height: 100,
-              child: IconButton(
-                onPressed: null,
-                iconSize: 10,
-                splashRadius: 0.01,
-                splashColor: Colors.red,
-                icon: Image.memory(_realtimeData.profileImage),
-              ),
-            ),
-            const SizedBox(
-              width: 10,
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  AppLocalizations.of(context)!.uploadNewAvatar,
-                  style: const TextStyle(
-                      color: OnepieceFonts.headerFontColor,
-                      fontSize: OnepieceFonts.contentFontSize,
-                      fontWeight: OnepieceFonts.headerFontWeight),
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                Row(
-                  children: [
-                    ElevatedButton(
-                      style: OnepieceButtonStyle.getDefaultStyle(),
-                      onPressed: () async {
-                        XFile? pickedImage =
-                            await OnepieceImagePicker.pickWebImage();
-                        Uint8List imageInByte =
-                            await pickedImage!.readAsBytes();
-                        _realtimeData.setProfileImage(imageInByte);
-                        setState(() {
-                          if (CompareUint8List.equals(
-                              _realtimeData.profileImage,
-                              _originalData.profileImage)) {
-                            _chosenImageName =
-                                AppLocalizations.of(context)!.noFileChosen;
-                          } else {
-                            _chosenImageName = pickedImage.name;
-                          }
-                        });
-                      },
-                      child: Text(AppLocalizations.of(context)!.chooseFile),
+        ValueListenableBuilder(
+            valueListenable: _chosenImageName,
+            builder: (context, value, _) {
+              return Row(
+                children: [
+                  SizedBox(
+                    width: 100,
+                    height: 100,
+                    child: IconButton(
+                      onPressed: null,
+                      iconSize: 10,
+                      splashRadius: 0.01,
+                      splashColor: Colors.red,
+                      icon: Image.memory(_realtimeData.profileImage),
                     ),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    Text(
-                      _chosenImageName != ""
-                          ? _chosenImageName
-                          : AppLocalizations.of(context)!.noFileChosen,
-                      style: OnepieceFonts.contentStyle,
-                    )
-                  ],
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                Text(
-                  AppLocalizations.of(context)!.maxFileSizeDescription,
-                  style: OnepieceFonts.contentStyle,
-                )
-              ],
-            )
-          ],
-        )
+                  ),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        AppLocalizations.of(context)!.uploadNewAvatar,
+                        style: const TextStyle(
+                            color: OnepieceFonts.headerFontColor,
+                            fontSize: OnepieceFonts.contentFontSize,
+                            fontWeight: OnepieceFonts.headerFontWeight),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Row(
+                        children: [
+                          ElevatedButton(
+                            style: OnepieceButtonStyle.getDefaultStyle(),
+                            onPressed: () async {
+                              XFile? pickedImage =
+                                  await OnepieceImagePicker.pickWebImage();
+                              Uint8List imageInByte =
+                                  await pickedImage!.readAsBytes();
+                              _realtimeData.setProfileImage(imageInByte);
+                              if (!CompareUint8List.equals(
+                                  _realtimeData.profileImage,
+                                  _originalData.profileImage)) {
+                                _chosenImageName.value = pickedImage.name;
+                              }
+                              _dataModified.value = _checkModified();
+                            },
+                            child:
+                                Text(AppLocalizations.of(context)!.chooseFile),
+                          ),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Text(
+                            !CompareUint8List.equals(_realtimeData.profileImage,
+                                    _originalData.profileImage)
+                                ? _chosenImageName.value
+                                : AppLocalizations.of(context)!.noFileChosen,
+                            style: OnepieceFonts.contentStyle,
+                          )
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Text(
+                        AppLocalizations.of(context)!.maxFileSizeDescription,
+                        style: OnepieceFonts.contentStyle,
+                      )
+                    ],
+                  )
+                ],
+              );
+            })
       ]),
     );
   }
@@ -348,10 +350,7 @@ class _UserProfileState extends State<UserProfile> {
                     ? null
                     : () {
                         setState(() {
-                          _realtimeData
-                              .setProfileImage(_originalData.profileImage);
-                          _realtimeData.setUsername(_originalData.username);
-                          _realtimeData.setNickname(_originalData.nickname);
+                          _realtimeData.copy(_originalData);
                           _dataModified.value = false;
                           _nicknameEditable.value = false;
                         });
@@ -368,37 +367,43 @@ class _UserProfileState extends State<UserProfile> {
                     style: OnepieceButtonStyle.getDefaultStyle(),
                     onPressed: !_dataModified.value
                         ? null
-                        : () async {
-                            submitData(context).then((value) => {
-                                  ResourcePermissionManager.updateUserCache(
-                                      value!),
+                        : () {
+                            UpdateUserRequest updateUserRequest =
+                                UpdateUserRequest(
+                                    locale: OnepieceLocale.zhCN,
+                                    nickname: _realtimeData.nickname.trim(),
+                                    id: getIt<User>().id);
+                            var encodedImage =
+                                Base64Helper.encode(_realtimeData.profileImage);
+                            UploadImageRequest uploadImageRequest =
+                                UploadImageRequest(
+                                    resourceId: getIt<User>().id,
+                                    image: encodedImage,
+                                    type: ResourceType.USER);
+                            getIt<ImageDao>()
+                                .addImage(uploadImageRequest)
+                                .then((imageResponse) {
+                              getIt<UserDao>()
+                                  .updateUser(updateUserRequest)
+                                  .then((response) {
+                                ResourcePermissionManager.updateUserCache(
+                                    response!.user!);
+                                setState(() {
+                                  _dataModified.value = false;
                                   context.goNamed('userProfile',
                                       extra: getIt<User>().id,
                                       pathParameters: {
                                         'name': getIt<User>().nickname
-                                      })
+                                      });
                                 });
+                              });
+                            });
                           },
                     child: Text(AppLocalizations.of(context)!.submitForm)),
               );
             }),
       ],
     );
-  }
-
-  Future<User?> submitData(BuildContext context) async {
-    var encodedImage = Base64Helper.encode(_realtimeData.profileImage);
-    UploadImageRequest uploadImageRequest = UploadImageRequest(
-        resourceId: getIt<User>().id,
-        image: encodedImage,
-        type: ResourceType.USER);
-    await getIt<ImageDao>().addImage(uploadImageRequest);
-    UpdateUserRequest updateUserRequest = UpdateUserRequest(
-        locale: OnepieceLocale.zhCN,
-        nickname: _realtimeData.nickname.trim(),
-        id: getIt<User>().id);
-    var response = await getIt<UserDao>().updateUser(updateUserRequest);
-    return response?.user;
   }
 
   bool _checkModified() {

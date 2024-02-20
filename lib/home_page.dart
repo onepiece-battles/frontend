@@ -394,7 +394,7 @@ class HomePageState extends State<HomePage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const UserNavigation(),
+                UserNavigation(context: context,),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
