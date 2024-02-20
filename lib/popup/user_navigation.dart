@@ -16,7 +16,7 @@ import '../utils/image_helper.dart';
 GetIt getIt = GetIt.instance;
 
 class UserNavigation extends StatefulWidget {
-  const UserNavigation({super.key});
+  const UserNavigation({super.key, required BuildContext context});
 
   @override
   State<UserNavigation> createState() => _UserNavigationState();
@@ -68,10 +68,13 @@ class _UserNavigationState extends State<UserNavigation> {
                 child: ElevatedButton(
                   onPressed: () {
                     getIt<UserDao>()
-                        .logout(LogoutRequest(userId: getIt<User>().id));
-                    getIt.registerLazySingleton<User>(
-                        () => User(id: "", username: "", nickname: ""));
-                    context.replace(AppRouter.loginPath);
+                        .logout(LogoutRequest(userId: getIt<User>().id))
+                        .then((value) {
+                      getIt.registerLazySingleton<User>(
+                          () => User(id: "", username: "", nickname: ""));
+                      Navigator.pop(context);
+                      context.replace(AppRouter.loginPath);
+                    });
                   },
                   style: OnepieceButtonStyle.getDefaultStyle(),
                   child: Row(

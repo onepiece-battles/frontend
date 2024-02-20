@@ -17,6 +17,7 @@ class ResourcePermissionManager {
     // sort resource type value, the display order is dependent on this order map
     user.loginRoleResourcesPermissionMap
         .sort((a, b) => resourceOrderMap[a.resourceType]!.compareTo(resourceOrderMap[b.resourceType]!));
+
     getIt.registerLazySingleton(()=>user);
   }
 }
