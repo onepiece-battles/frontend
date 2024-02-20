@@ -94,11 +94,11 @@
   "fruitOwner": "恶魔果实能力者",
   "fruitType": "恶魔果实类型",
   "group": "团体",
-  "groupBattle": "团队战斗",
+  "groupBattle": "团体战斗",
   "groupCategory": "团体类别",
-  "groupEmblemRequired": "请上传团队徽章",
-  "groupGain": "团队增益",
-  "groupName": "团队名",
+  "groupEmblemRequired": "请上传团体徽章",
+  "groupGain": "团体增益",
+  "groupName": "团体名",
   "groupStrengthen": "合作能力增益",
   "hakis": "霸气",
   "haoshoku": "霸王色",
@@ -185,7 +185,7 @@
   "underworld": "地下世界",
   "unselected": "未选择",
   "updateUserSettings": "更新用户设置",
-  "uploadGroupEmblem": "上传团队徽章",
+  "uploadGroupEmblem": "上传团体徽章",
   "uploadNewAvatar": "上传头像",
   "user": "用户",
   "userManagement": "用户管理",
@@ -213,5 +213,7 @@
   "goToCreationPage": "去创建",
   "characters": "字符",
   "month": "月",
-  "day": "日"
+  "day": "日",
+  "joinedGroups": "已加入团体列表",
+  "searchList": "搜索列表"
 }

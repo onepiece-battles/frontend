@@ -975,7 +975,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
@@ -990,6 +990,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                   padding: const EdgeInsets.fromLTRB(8.0, 8, 8, 0),
                   child: SizedBox(
                     width: 300,
+                    height: 40,
                     child: TextFormField(
                       enabled: groupSearchEnabled,
                       controller: groupNameController,
@@ -1000,11 +1001,14 @@ class _CharacterDetailState extends State<CharacterDetail> {
                           style: OnepieceFonts.hintFont,
                         ),
                         disabledBorder: const OutlineInputBorder(
-                            borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
+                            borderSide:
+                                BorderSide(color: OnepieceColors.fancyGreen)),
                         enabledBorder: const OutlineInputBorder(
-                            borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
+                            borderSide:
+                                BorderSide(color: OnepieceColors.fancyGreen)),
                         focusedBorder: const OutlineInputBorder(
-                            borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
+                            borderSide:
+                                BorderSide(color: OnepieceColors.fancyGreen)),
                         prefixIcon: const Icon(Icons.search),
                       ),
                       onChanged: (value) {
@@ -1023,9 +1027,9 @@ class _CharacterDetailState extends State<CharacterDetail> {
                             sortKeys: [],
                             groupFilter: groupFilter);
                         Future<ListGroupResponse?> response =
-                        getIt<GroupDao>().listGroups(request);
+                            getIt<GroupDao>().listGroups(request);
                         response.then(
-                              (value) => {
+                          (value) => {
                             searchingGroupList = value!.groups,
                             groupSetState(() {})
                           },
@@ -1037,10 +1041,22 @@ class _CharacterDetailState extends State<CharacterDetail> {
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: _getJoinGroup(context, groupSetState),
-          ),
+          if (searchingGroupList.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(8
+                  ,8,8,0),
+              child: Text(
+                AppLocalizations.of(context)!.searchList,
+                style: OnepieceFonts.fancyBlueHintFont,
+              ),
+            ),
+          _getGroupSearchList(context, groupSetState),
+          if (groups.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Text(AppLocalizations.of(context)!.joinedGroups,
+                  style: OnepieceFonts.fancyBlueHintFont),
+            ),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: _getGroupList(context),
@@ -1050,7 +1066,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
     });
   }
 
-  Widget _getJoinGroup(BuildContext context, Function groupSetState) {
+  Widget _getGroupSearchList(BuildContext context, Function groupSetState) {
     Map<GroupCategory, String> groupCategoryToDisplayValue = {
       GroupCategory.pirate: AppLocalizations.of(context)!.pirate,
       GroupCategory.worldGovernment:
@@ -1066,9 +1082,9 @@ class _CharacterDetailState extends State<CharacterDetail> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Container(
-              width: 300,
+              width: 500,
               constraints: const BoxConstraints(maxHeight: 300),
-              decoration: const  BoxDecoration(
+              decoration: const BoxDecoration(
                 color: OnepieceColors.menuBackgroundColor,
                 borderRadius: BorderRadius.all(Radius.circular(8)),
               ),
@@ -1128,6 +1144,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
                       : () {
                           setState(() {
                             _joinGroup();
+                            groupNameController.text = "";
+                            searchingGroupList = [];
                           });
                         },
                   child: Text(AppLocalizations.of(context)!.join)),
@@ -1146,73 +1164,90 @@ class _CharacterDetailState extends State<CharacterDetail> {
       GroupCategory.worldGovernment:
           AppLocalizations.of(context)!.worldGovernment,
     };
-    List<Widget> groupPart = [];
-    for (var group in groups) {
-      var column = Column(
-        children: [
-          InkWell(
-            onTap: () {
-              context.goNamed('groupDetails', extra: group.id, pathParameters: {
-                'name': I18nHelper.getDisplayNameFromI18n(group.name!)
-              });
-            },
-            borderRadius: const BorderRadius.all(Radius.circular(5)),
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(6, 6, 6, 3),
-                        child: Container(
-                          width: 50,
-                          height: 50,
-                          decoration: BoxDecoration(
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(2.0)),
-                            border: Border.all(
-                                color: OnepieceColors.fancyBlue,
-                                width: 2,
-                                style: BorderStyle.solid),
-                          ),
-                          child: FittedBox(
-                            fit: BoxFit.fill,
-                            child: Image.memory(
-                                Base64Helper.decode(group.profileImage!)),
-                          ),
-                        ),
-                      ),
-                      Text(
-                        "${I18nHelper.getDisplayNameFromI18n(group.name!)} "
-                        "${group.onceBelongedTo! ? "(${AppLocalizations.of(context)!.onceBelongTo})" : ""}",
-                        style: OnepieceFonts.fancyBlueHintFont,
-                      ),
-                    ],
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 5),
-                    child: OnepieceTag.getGroupTag(
-                      group.category!,
-                      groupCategoryToDisplayValue[group.category!]!,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      );
-      groupPart.add(column);
-    }
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: SizedBox(
-          width: 300,
-          child: Column(
-            children: groupPart,
-          )),
+      child: Container(
+        width: 500,
+        constraints: const BoxConstraints(maxHeight: 300),
+        decoration: const BoxDecoration(
+          color: OnepieceColors.menuBackgroundColor,
+          borderRadius: BorderRadius.all(Radius.circular(8)),
+        ),
+        child: ListView.builder(
+          shrinkWrap: true,
+          itemCount: groups.length,
+          itemBuilder: (context, index) {
+            var currentGroup = groups[index];
+            return Material(
+              type: MaterialType.transparency,
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+                decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(5))),
+                child: ListTile(
+                  minLeadingWidth: 10,
+                  contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  selected: selectedGroupId == currentGroup.id,
+                  selectedTileColor: OnepieceColors.liteFancyBlue,
+                  onTap: () {
+                    context.goNamed('groupDetails',
+                        extra: currentGroup.id,
+                        pathParameters: {
+                          'name': I18nHelper.getDisplayNameFromI18n(
+                              currentGroup.name!)
+                        });
+                  },
+                  hoverColor: OnepieceColors.liteFancyBlue,
+                  title: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.only(right: 6),
+                              child: Container(
+                                width: 50,
+                                height: 50,
+                                decoration: BoxDecoration(
+                                  borderRadius: const BorderRadius.all(
+                                      Radius.circular(2.0)),
+                                  border: Border.all(
+                                      color: OnepieceColors.fancyBlue,
+                                      width: 2,
+                                      style: BorderStyle.solid),
+                                ),
+                                child: FittedBox(
+                                  fit: BoxFit.fill,
+                                  child: Image.memory(Base64Helper.decode(
+                                      currentGroup.profileImage!)),
+                                ),
+                              ),
+                            ),
+                            Text(
+                              "${I18nHelper.getDisplayNameFromI18n(currentGroup.name!)} "
+                              "${currentGroup.onceBelongedTo! ? "(${AppLocalizations.of(context)!.onceBelongTo})" : ""}",
+                              style: OnepieceFonts.fancyBlueHintFont,
+                            ),
+                          ],
+                        ),
+                        OnepieceTag.getGroupTag(
+                            currentGroup.category!,
+                            groupCategoryToDisplayValue[
+                                currentGroup.category!]!)
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 

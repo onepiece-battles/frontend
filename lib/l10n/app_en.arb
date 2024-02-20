@@ -213,5 +213,7 @@
   "goToCreationPage": "Go to creation page",
   "characters": "characters",
   "month": "MM",
-  "day": "DD"
+  "day": "DD",
+  "joinedGroups": "joined group list",
+  "searchList": "search list"
 }
