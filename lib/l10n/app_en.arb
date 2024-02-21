@@ -216,5 +216,6 @@
   "day": "DD",
   "joinedGroups": "Group List",
   "searchList": "Search List",
-  "eaten": "Eaten"
+  "eaten": "Eaten",
+  "verificationCode": "Verification Code"
 }
