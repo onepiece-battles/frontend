@@ -18,4 +18,8 @@ class GroupDao{
   Future<ListGroupResponse?> listGroups(ListGroupRequest request) async {
     return await groupApi.listGroups(request);
   }
+
+  Future<UpdateGroupResponse?> updateGroups(Group group) async {
+    return await groupApi.updateGroup(group);
+  }
 }
