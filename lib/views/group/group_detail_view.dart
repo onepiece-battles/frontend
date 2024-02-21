@@ -9,6 +9,7 @@ import 'package:openapi/api.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
+import '../../constants/onepiece_tag.dart';
 import '../../popup/onepiece_alert.dart';
 import '../../utils/base64_helper.dart';
 
@@ -70,7 +71,10 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                     thickness: 1,
                   ),
                 ),
-                // _getMembersPanel(context),
+                Padding(
+                  padding: const EdgeInsets.only(left: 15.0),
+                  child: _getMembersPanel(context),
+                ),
               ],
             ),
           );
@@ -97,7 +101,9 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                 AppLocalizations.of(context)!.basicInfo,
                 style: OnepieceFonts.headerStyle,
               ),
-              const SizedBox(width: 15,),
+              const SizedBox(
+                width: 15,
+              ),
               Tooltip(
                 message: _basicInfoEditable
                     ? AppLocalizations.of(context)!.submitForm
@@ -269,7 +275,84 @@ class _GroupDetailViewState extends State<GroupDetailView> {
     );
   }
 
-  // Widget _getMembersPanel(BuildContext context) {
-  //
-  // }
+  Widget _getMembersPanel(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8.0),
+          child: Text(
+            AppLocalizations.of(context)!.groupMember,
+            style: OnepieceFonts.headerStyle,
+          ),
+        ),
+        Container(
+          width: 300,
+          decoration: const BoxDecoration(
+            color: OnepieceColors.menuBackgroundColor,
+            borderRadius: BorderRadius.all(Radius.circular(8)),
+          ),
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: characters.length,
+            itemBuilder: (context, index) {
+              var character = characters[index];
+              return Material(
+                type: MaterialType.transparency,
+                child: Container(
+                  padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+                  decoration: const BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(5))),
+                  child: ExpansionTile(
+                    expandedCrossAxisAlignment: CrossAxisAlignment.start,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    onExpansionChanged: (value) {},
+                    title: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 50,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(2.0)),
+                            border: Border.all(
+                                color: OnepieceColors.fancyBlue,
+                                width: 2,
+                                style: BorderStyle.solid),
+                          ),
+                          child: FittedBox(
+                            fit: BoxFit.fill,
+                            child: Padding(
+                              padding: const EdgeInsets.all(1.0),
+                              child: Image.memory(
+                                  Base64Helper.decode(character.profileImage!)),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8.0),
+                          child: Text(
+                            I18nHelper.getDisplayNameFromI18n(character.name!),
+                          ),
+                        )
+                      ],
+                    ),
+                    children: [
+                      Text(character.position!),
+                      Text(character.onceBelongedTo == true
+                          ? AppLocalizations.of(context)!.exMember
+                          : AppLocalizations.of(context)!.currentMember)
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
 }

@@ -217,5 +217,8 @@
   "joinedGroups": "Group List",
   "searchList": "Search List",
   "eaten": "Eaten",
-  "verificationCode": "Verification Code"
+  "verificationCode": "Verification Code",
+  "currentMember": "Current member",
+  "exMember": "Ex-member",
+  "groupMember": "Group Member"
 }
