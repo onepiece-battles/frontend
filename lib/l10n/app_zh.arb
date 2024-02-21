@@ -215,5 +215,6 @@
   "month": "月",
   "day": "日",
   "joinedGroups": "已加入团体列表",
-  "searchList": "搜索列表"
+  "searchList": "搜索列表",
+  "eaten": "已食用"
 }

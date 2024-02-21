@@ -214,6 +214,7 @@
   "characters": "characters",
   "month": "MM",
   "day": "DD",
-  "joinedGroups": "joined group list",
-  "searchList": "search list"
+  "joinedGroups": "Group List",
+  "searchList": "Search List",
+  "eaten": "Eaten"
 }
