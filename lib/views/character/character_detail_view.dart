@@ -195,7 +195,18 @@ class _CharacterDetailState extends State<CharacterDetail> {
                         thickness: 1,
                       ),
                     ),
-                    _getEatFruit(context),
+                      _getFruitSearchBar(context),
+                    if (fruits.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Text(AppLocalizations.of(context)!.eaten,
+                            style: OnepieceFonts.fancyBlueHintFont),
+                      ),
+                    if (fruits.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: _getFruitList(context),
+                      ),
                     const Padding(
                       padding: EdgeInsets.all(8.0),
                       child: Divider(
@@ -203,7 +214,17 @@ class _CharacterDetailState extends State<CharacterDetail> {
                         thickness: 1,
                       ),
                     ),
-                    _getGroup(context),
+                    _getGroupSearchBar(context),
+                    if (groups.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Text(AppLocalizations.of(context)!.joinedGroups,
+                            style: OnepieceFonts.fancyBlueHintFont),
+                      ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: _getGroupList(context),
+                    ),
                     const Padding(
                       padding: EdgeInsets.all(8.0),
                       child: Divider(
@@ -407,7 +428,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 20, 0, 10),
+                        padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -733,40 +754,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
     });
   }
 
-  Widget _getEatFruit(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Text(
-                AppLocalizations.of(context)!.devilFruit,
-                style: OnepieceFonts.headerStyle,
-              ),
-              const SizedBox(
-                width: 15,
-              ),
-            ],
-          ),
-        ),
-        if (fruits.length < character.maximumFruitCount)
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: _getFruitEat(context),
-          ),
-        if (fruits.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: _getFruitList(context),
-          )
-      ],
-    );
-  }
-
-  Widget _getFruitEat(BuildContext context) {
+  Widget _getFruitSearchBar(BuildContext context) {
     Map<FruitType, String> fruitTypeToDisplayValue = {
       FruitType.logia: AppLocalizations.of(context)!.logiaFruit,
       FruitType.zoan: AppLocalizations.of(context)!.zoanFruit,
@@ -776,143 +764,165 @@ class _CharacterDetailState extends State<CharacterDetail> {
           AppLocalizations.of(context)!.artificialZoanFruit,
       FruitType.paramecia: AppLocalizations.of(context)!.parameciaFruit,
     };
-    return StatefulBuilder(builder: (context, fruitSetstate) {
-      return Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: const BorderRadius.all(Radius.circular(5.0)),
-          border: Border.all(
-              color: OnepieceColors.fancyBlue,
-              width: 3,
-              style: BorderStyle.solid),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-                child: SizedBox(
-                  width: 300,
-                  child: TextFormField(
-                    enabled: fruitSearchEnabled,
-                    controller: fruitNameController,
-                    decoration: InputDecoration(
-                      floatingLabelBehavior: FloatingLabelBehavior.never,
-                      label: Text(
-                        AppLocalizations.of(context)!.fruitName,
-                        style: OnepieceFonts.hintFont,
-                      ),
-                      disabledBorder: const OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: OnepieceColors.fancyGreen)),
-                      enabledBorder: const OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: OnepieceColors.fancyGreen)),
-                      focusedBorder: const OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: OnepieceColors.fancyGreen)),
-                      prefixIcon: const Icon(Icons.search),
-                    ),
-                    onChanged: (value) {
-                      selectedFruitId = null;
-                      fruitSetstate(() {});
-                      if (value.isEmpty) {
-                        searchingFruitList = [];
-                        fruitSetstate(() {});
-                        return;
-                      }
-                      fruitFilter.name = value;
-                      fruitFilter.languageCode = I18nHelper.getLanguageCode();
-                      ListFruitRequest request = ListFruitRequest(
-                          pageSize: 5,
-                          pageIndex: 1,
-                          sortKeys: [],
-                          fruitFilter: fruitFilter);
-                      Future<ListFruitResponse?> response =
-                          getIt<FruitDao>().list(request);
-                      response.then(
-                        (value) => {
-                          searchingFruitList = value!.fruits,
-                          fruitSetstate(() {})
-                        },
-                      );
-                    },
+    return StatefulBuilder(builder: (context, fruitSetState) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: 160,
+                  child: Text(
+                    AppLocalizations.of(context)!.devilFruit,
+                    style: OnepieceFonts.headerStyle,
                   ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  width: 300,
-                  decoration: const BoxDecoration(
-                    color: OnepieceColors.menuBackgroundColor,
-                    borderRadius: BorderRadius.all(Radius.circular(8)),
+                if (character.maximumFruitCount > fruits.length)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                  child: SizedBox(
+                    width: 300,
+                    height: 40,
+                    child: TextFormField(
+                      enabled: fruitSearchEnabled,
+                      controller: fruitNameController,
+                      decoration: InputDecoration(
+                        floatingLabelBehavior: FloatingLabelBehavior.never,
+                        label: Text(
+                          AppLocalizations.of(context)!.fruitName,
+                          style: OnepieceFonts.hintFont,
+                        ),
+                        disabledBorder: const OutlineInputBorder(
+                            borderSide:
+                                BorderSide(color: OnepieceColors.fancyGreen)),
+                        enabledBorder: const OutlineInputBorder(
+                            borderSide:
+                                BorderSide(color: OnepieceColors.fancyGreen)),
+                        focusedBorder: const OutlineInputBorder(
+                            borderSide:
+                                BorderSide(color: OnepieceColors.fancyGreen)),
+                        prefixIcon: const Icon(Icons.search),
+                      ),
+                      onChanged: (value) {
+                        selectedFruitId = null;
+                        fruitSetState(() {});
+                        if (value.isEmpty) {
+                          searchingFruitList = [];
+                          fruitSetState(() {});
+                          return;
+                        }
+                        fruitFilter.name = value;
+                        fruitFilter.languageCode = I18nHelper.getLanguageCode();
+                        ListFruitRequest request = ListFruitRequest(
+                            pageSize: 5,
+                            pageIndex: 1,
+                            sortKeys: [],
+                            fruitFilter: fruitFilter);
+                        Future<ListFruitResponse?> response =
+                            getIt<FruitDao>().list(request);
+                        response.then(
+                          (value) => {
+                            searchingFruitList = value!.fruits,
+                            fruitSetState(() {})
+                          },
+                        );
+                      },
+                    ),
                   ),
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: searchingFruitList.length,
-                    itemBuilder: (context, index) {
-                      var fruit = searchingFruitList[index];
-                      return Material(
-                        type: MaterialType.transparency,
-                        child: Container(
-                          padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                          decoration: const BoxDecoration(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(5))),
-                          child: ListTile(
-                            minLeadingWidth: 10,
-                            contentPadding:
-                                const EdgeInsets.fromLTRB(8, 0, 0, 0),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                            selected: selectedFruitId == fruit.id,
-                            selectedTileColor: OnepieceColors.liteFancyBlue,
-                            onTap: () {
-                              selectedFruitId = fruit.id!;
-                              fruitSetstate(() {});
-                            },
-                            hoverColor: OnepieceColors.liteFancyBlue,
-                            title: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(I18nHelper.getDisplayNameFromI18n(
-                                    fruit.name!)),
-                                Padding(
-                                  padding: const EdgeInsets.only(right: 5),
-                                  child: OnepieceTag.getFruitTag(
-                                    fruit.fruitType!,
-                                    fruitTypeToDisplayValue[fruit.fruitType!]!,
+                ),
+              ],
+            ),
+          ),
+          if (searchingGroupList.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+              child: Text(
+                AppLocalizations.of(context)!.searchList,
+                style: OnepieceFonts.fancyBlueHintFont,
+              ),
+            ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Container(
+                    width: 300,
+                    decoration: const BoxDecoration(
+                      color: OnepieceColors.menuBackgroundColor,
+                      borderRadius: BorderRadius.all(Radius.circular(8)),
+                    ),
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: searchingFruitList.length,
+                      itemBuilder: (context, index) {
+                        var fruit = searchingFruitList[index];
+                        return Material(
+                          type: MaterialType.transparency,
+                          child: Container(
+                            padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+                            decoration: const BoxDecoration(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(5))),
+                            child: ListTile(
+                              minLeadingWidth: 10,
+                              contentPadding:
+                                  const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                              selected: selectedFruitId == fruit.id,
+                              selectedTileColor: OnepieceColors.liteFancyBlue,
+                              onTap: () {
+                                selectedFruitId = fruit.id!;
+                                fruitSetState(() {});
+                              },
+                              hoverColor: OnepieceColors.liteFancyBlue,
+                              title: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(I18nHelper.getDisplayNameFromI18n(
+                                      fruit.name!)),
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 5),
+                                    child: OnepieceTag.getFruitTag(
+                                      fruit.fruitType!,
+                                      fruitTypeToDisplayValue[
+                                          fruit.fruitType!]!,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
                 ),
-              ),
-              if (searchingFruitList.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(left: 8.0),
-                  child: ElevatedButton(
-                      onPressed: selectedFruitId == null
-                          ? null
-                          : () {
-                              setState(() {
-                                _eatFruit();
-                              });
-                            },
-                      child: Text(AppLocalizations.of(context)!.eat)),
-                )
-            ],
+                if (searchingFruitList.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: ElevatedButton(
+                        onPressed: selectedFruitId == null
+                            ? null
+                            : () {
+                                setState(() {
+                                  _eatFruit();
+                                });
+                              },
+                        child: Text(AppLocalizations.of(context)!.eat)),
+                  )
+              ],
+            ),
           ),
-        ),
+        ],
       );
     });
   }
@@ -927,49 +937,63 @@ class _CharacterDetailState extends State<CharacterDetail> {
           AppLocalizations.of(context)!.artificialZoanFruit,
       FruitType.paramecia: AppLocalizations.of(context)!.parameciaFruit,
     };
-    List<Widget> fruitPart = [];
-    for (var fruit in fruits) {
-      var column = Column(
-        children: [
-          InkWell(
-            onTap: () {
-              context.goNamed('fruitDetails', extra: fruit.id, pathParameters: {
-                'name': I18nHelper.getDisplayNameFromI18n(fruit.name!)
-              });
-            },
-            borderRadius: const BorderRadius.all(Radius.circular(5)),
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(I18nHelper.getDisplayNameFromI18n(fruit.name!)),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 5),
-                    child: OnepieceTag.getFruitTag(
-                      fruit.fruitType!,
-                      fruitTypeToDisplayValue[fruit.fruitType!]!,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      );
-      fruitPart.add(column);
-    }
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: SizedBox(
-          width: 300,
-          child: Column(
-            children: fruitPart,
-          )),
+      child: Container(
+        width: 500,
+        decoration: const BoxDecoration(
+          color: OnepieceColors.menuBackgroundColor,
+          borderRadius: BorderRadius.all(Radius.circular(8)),
+        ),
+        child: ListView.builder(
+          shrinkWrap: true,
+          itemCount: fruits.length,
+          itemBuilder: (context, index) {
+            var fruit = fruits[index];
+            return Material(
+              type: MaterialType.transparency,
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+                decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(5))),
+                child: ListTile(
+                  minLeadingWidth: 10,
+                  contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  selectedTileColor: OnepieceColors.liteFancyBlue,
+                  onTap: () {
+                    context.goNamed('fruitDetails',
+                        extra: fruit.id,
+                        pathParameters: {
+                          'name': I18nHelper.getDisplayNameFromI18n(fruit.name!)
+                        });
+                  },
+                  hoverColor: OnepieceColors.liteFancyBlue,
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(I18nHelper.getDisplayNameFromI18n(fruit.name!)),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 5),
+                        child: OnepieceTag.getFruitTag(
+                          fruit.fruitType!,
+                          fruitTypeToDisplayValue[fruit.fruitType!]!,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 
-  Widget _getGroup(BuildContext context) {
+  Widget _getGroupSearchBar(BuildContext context) {
     return StatefulBuilder(builder: (context, groupSetState) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -979,12 +1003,12 @@ class _CharacterDetailState extends State<CharacterDetail> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Text(
-                  AppLocalizations.of(context)!.group,
-                  style: OnepieceFonts.headerStyle,
-                ),
-                const SizedBox(
-                  width: 15,
+                SizedBox(
+                  width: 160,
+                  child: Text(
+                    AppLocalizations.of(context)!.group,
+                    style: OnepieceFonts.headerStyle,
+                  ),
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(8.0, 8, 8, 0),
@@ -1043,24 +1067,13 @@ class _CharacterDetailState extends State<CharacterDetail> {
           ),
           if (searchingGroupList.isNotEmpty)
             Padding(
-              padding: const EdgeInsets.fromLTRB(8
-                  ,8,8,0),
+              padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
               child: Text(
                 AppLocalizations.of(context)!.searchList,
                 style: OnepieceFonts.fancyBlueHintFont,
               ),
             ),
           _getGroupSearchList(context, groupSetState),
-          if (groups.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Text(AppLocalizations.of(context)!.joinedGroups,
-                  style: OnepieceFonts.fancyBlueHintFont),
-            ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: _getGroupList(context),
-          )
         ],
       );
     });

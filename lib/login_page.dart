@@ -121,7 +121,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
             SizedBox(
               width: 300,
-              child: TextField(
+              child: TextFormField(
                 onChanged: (value) {
                   setState(() {
                     if (emailController.text != "" &&
