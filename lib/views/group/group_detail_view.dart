@@ -1,6 +1,7 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/repository/group_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:one_piece_battles_flutter/utils/image_helper.dart';
@@ -8,6 +9,8 @@ import 'package:openapi/api.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
+import '../../constants/onepiece_tag.dart';
+import '../../popup/onepiece_alert.dart';
 import '../../utils/base64_helper.dart';
 
 GetIt getIt = GetIt.instance;
@@ -26,8 +29,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
   late GroupFullView groupFullView;
   List<CharacterInGroupView> characters = [];
   late GroupCategory selectedGroupCategory;
-  bool groupCategoryEditable = false;
-  bool nameFieldEditable = false;
+  bool _basicInfoEditable = false;
 
   @override
   void initState() {
@@ -56,63 +58,22 @@ class _GroupDetailViewState extends State<GroupDetailView> {
           return SingleChildScrollView(
             scrollDirection: Axis.vertical,
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                  child: Container(
-                    width: 200,
-                    height: 200,
-                    decoration: BoxDecoration(
-                      borderRadius:
-                          const BorderRadius.all(Radius.circular(2.0)),
-                      border: Border.all(
-                          color: OnepieceColors.fancyBlue,
-                          width: 2,
-                          style: BorderStyle.solid),
-                    ),
-                    child: FittedBox(
-                      fit: BoxFit.fill,
-                      child: Image.memory(
-                          Base64Helper.decode(groupFullView.profileImage!)),
-                    ),
+                  padding: const EdgeInsets.only(left: 15.0),
+                  child: _getBasicInfo(context),
+                ),
+                const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Divider(
+                    color: OnepieceColors.fancyBlue,
+                    thickness: 1,
                   ),
                 ),
-                _getName(
-                    context,
-                    AppLocalizations.of(context)!.name,
-                    20,
-                    SizedBox(
-                      width: 30,
-                      height: 30,
-                      child: ImageHelper.getSvgIconWithColor(
-                          'images/character_digits_icon/name.svg',
-                          30,
-                          30,
-                          OnepieceColors.fancyBlue),
-                    )),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    _getDropDownList(context),
-                    IconButton(
-                      onPressed: () {
-                        setState(() {
-                          groupCategoryEditable = !groupCategoryEditable;
-                        });
-                      },
-                      splashRadius: 1,
-                      icon: SizedBox(
-                        width: 50,
-                        height: 50,
-                        child: ImageHelper.getSvgIconWithColor(
-                            'images/svgs/edit.svg',
-                            80,
-                            80,
-                            OnepieceColors.fancyBlue),
-                      ),
-                    ),
-                  ],
+                Padding(
+                  padding: const EdgeInsets.only(left: 15.0),
+                  child: _getMembersPanel(context),
                 ),
               ],
             ),
@@ -129,42 +90,124 @@ class _GroupDetailViewState extends State<GroupDetailView> {
     );
   }
 
-  Widget _getName(
-      BuildContext context, String label, int length, Widget? icon) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 200,
-          child: TextFormField(
-            controller: groupNameController,
-            enabled: nameFieldEditable,
-            // maxLength: length,
-            decoration: InputDecoration(
-                prefixIcon: icon,
-                floatingLabelBehavior: FloatingLabelBehavior.auto,
-                contentPadding: const EdgeInsets.fromLTRB(20, 2, 10, 2)),
+  Widget _getBasicInfo(BuildContext context) {
+    return StatefulBuilder(builder: (context, basicInfoState) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                AppLocalizations.of(context)!.basicInfo,
+                style: OnepieceFonts.headerStyle,
+              ),
+              const SizedBox(
+                width: 15,
+              ),
+              Tooltip(
+                message: _basicInfoEditable
+                    ? AppLocalizations.of(context)!.submitForm
+                    : AppLocalizations.of(context)!.editHint,
+                child: InkWell(
+                  hoverColor: Colors.white,
+                  onTap: () {
+                    basicInfoState(() {
+                      _basicInfoEditable = !_basicInfoEditable;
+                      if (!_basicInfoEditable) {
+                        Group group = Group(
+                            id: groupFullView.id,
+                            groupCategory: selectedGroupCategory,
+                            name: I18nHelper.setI18nFromDisplayName(
+                                groupFullView.name!, groupNameController.text));
+                        getIt<GroupDao>().updateGroups(group).then((value) {
+                          OnepieceAlert.getBasicAlertDialogFunc(
+                              context,
+                              AppLocalizations.of(context)!.hint,
+                              I18nHelper.getDisplayNameFromI18n(value!.result));
+                          if (value.success) {
+                            context.goNamed('groupDetails',
+                                extra: groupFullView.id,
+                                pathParameters: {
+                                  'name': I18nHelper.getDisplayNameFromI18n(
+                                      group.name)
+                                });
+                          }
+                        });
+                      }
+                    });
+                  },
+                  child: SizedBox(
+                      width: 25,
+                      height: 25,
+                      child: !_basicInfoEditable
+                          ? ImageHelper.getSvgIconWithColor(
+                              'images/svgs/edit.svg',
+                              150,
+                              150,
+                              OnepieceColors.fancyBlue)
+                          : ImageHelper.getSvgIconWithColor(
+                              'images/svgs/check.svg',
+                              150,
+                              150,
+                              OnepieceColors.fancyBlue)),
+                ),
+              ),
+            ],
           ),
-        ),
-        IconButton(
-          onPressed: () {
-            setState(() {
-              groupCategoryEditable = !groupCategoryEditable;
-            });
-          },
-          splashRadius: 1,
-          icon: SizedBox(
-            width: 50,
-            height: 50,
-            child: ImageHelper.getSvgIconWithColor(
-                'images/svgs/edit.svg', 80, 80, OnepieceColors.fancyBlue),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 5),
+            child: Container(
+              width: 200,
+              height: 200,
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.all(Radius.circular(2.0)),
+                border: Border.all(
+                    color: OnepieceColors.fancyBlue,
+                    width: 5,
+                    style: BorderStyle.solid),
+              ),
+              child: FittedBox(
+                fit: BoxFit.fill,
+                child: Padding(
+                  padding: const EdgeInsets.all(3.0),
+                  child: Image.memory(
+                      Base64Helper.decode(groupFullView.profileImage!)),
+                ),
+              ),
+            ),
           ),
-        ),
-      ],
-    );
+          SizedBox(
+            width: 300,
+            child: Text(
+              AppLocalizations.of(context)!.name,
+              style: OnepieceFonts.deepBlackHintFont,
+            ),
+          ),
+          SizedBox(
+            width: 300,
+            child: TextFormField(
+              controller: groupNameController,
+              enabled: _basicInfoEditable,
+              maxLength: 20,
+              decoration: const InputDecoration(
+                  floatingLabelBehavior: FloatingLabelBehavior.auto,
+                  contentPadding: EdgeInsets.fromLTRB(5, 20, 10, 2)),
+            ),
+          ),
+          SizedBox(
+            width: 300,
+            child: Text(
+              AppLocalizations.of(context)!.category,
+              style: OnepieceFonts.deepBlackHintFont,
+            ),
+          ),
+          _getDropDownList(context, basicInfoState),
+        ],
+      );
+    });
   }
 
-  Widget _getDropDownList(BuildContext context) {
+  Widget _getDropDownList(BuildContext context, Function basicInfoState) {
     Map<GroupCategory, String> groupCategoryToDisplayName = {
       GroupCategory.marine: AppLocalizations.of(context)!.marine,
       GroupCategory.pirate: AppLocalizations.of(context)!.pirate,
@@ -182,10 +225,10 @@ class _GroupDetailViewState extends State<GroupDetailView> {
             AppLocalizations.of(context)!.groupCategory,
             style: OnepieceFonts.dropDownItemStyle,
           ),
-          onChanged: groupCategoryEditable == false
+          onChanged: !_basicInfoEditable
               ? null
               : (value) {
-                  setState(() {
+                  basicInfoState(() {
                     selectedGroupCategory = value! as GroupCategory;
                   });
                 },
@@ -229,6 +272,87 @@ class _GroupDetailViewState extends State<GroupDetailView> {
           }).toList(),
         ),
       ),
+    );
+  }
+
+  Widget _getMembersPanel(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8.0),
+          child: Text(
+            AppLocalizations.of(context)!.groupMember,
+            style: OnepieceFonts.headerStyle,
+          ),
+        ),
+        Container(
+          width: 300,
+          decoration: const BoxDecoration(
+            color: OnepieceColors.menuBackgroundColor,
+            borderRadius: BorderRadius.all(Radius.circular(8)),
+          ),
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: characters.length,
+            itemBuilder: (context, index) {
+              var character = characters[index];
+              return Material(
+                type: MaterialType.transparency,
+                child: Container(
+                  padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+                  decoration: const BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(5))),
+                  child: ExpansionTile(
+                    expandedCrossAxisAlignment: CrossAxisAlignment.start,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    onExpansionChanged: (value) {},
+                    title: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 50,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(2.0)),
+                            border: Border.all(
+                                color: OnepieceColors.fancyBlue,
+                                width: 2,
+                                style: BorderStyle.solid),
+                          ),
+                          child: FittedBox(
+                            fit: BoxFit.fill,
+                            child: Padding(
+                              padding: const EdgeInsets.all(1.0),
+                              child: Image.memory(
+                                  Base64Helper.decode(character.profileImage!)),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8.0),
+                          child: Text(
+                            I18nHelper.getDisplayNameFromI18n(character.name!),
+                          ),
+                        )
+                      ],
+                    ),
+                    children: [
+                      Text(character.position!),
+                      Text(character.onceBelongedTo == true
+                          ? AppLocalizations.of(context)!.exMember
+                          : AppLocalizations.of(context)!.currentMember)
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }

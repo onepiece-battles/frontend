@@ -84,6 +84,7 @@ Class | Method | HTTP request | Description
 *GroupApi* | [**createGroup**](doc//GroupApi.md#creategroup) | **POST** /api/onepiece/group/create | 
 *GroupApi* | [**getGroupFullView**](doc//GroupApi.md#getgroupfullview) | **POST** /api/onepiece/group/get | 
 *GroupApi* | [**listGroups**](doc//GroupApi.md#listgroups) | **POST** /api/onepiece/group/list | 
+*GroupApi* | [**updateGroup**](doc//GroupApi.md#updategroup) | **POST** /api/onepiece/group/update | 
 *ImageApi* | [**getImage**](doc//ImageApi.md#getimage) | **POST** /api/onepiece/image/get_by_target_id/{id} | 
 *ImageApi* | [**uploadImage**](doc//ImageApi.md#uploadimage) | **POST** /api/onepiece/image/add | 
 *IssueApi* | [**batchUpdateIssue**](doc//IssueApi.md#batchupdateissue) | **POST** /api/onepiece/issue/batch_update | 
@@ -223,6 +224,7 @@ Class | Method | HTTP request | Description
  - [StartBattleResponse](doc//StartBattleResponse.md)
  - [UpdateCharacterResponse](doc//UpdateCharacterResponse.md)
  - [UpdateFruitRequest](doc//UpdateFruitRequest.md)
+ - [UpdateGroupResponse](doc//UpdateGroupResponse.md)
  - [UpdateLoginRoleRequest](doc//UpdateLoginRoleRequest.md)
  - [UpdateLoginRoleResponse](doc//UpdateLoginRoleResponse.md)
  - [UpdateUserRequest](doc//UpdateUserRequest.md)
