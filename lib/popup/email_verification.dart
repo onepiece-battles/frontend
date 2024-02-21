@@ -63,30 +63,39 @@ class _EmailVerificationState extends State<EmailVerification> {
             ),
           if (!verificationSuccess)
             Padding(
-              padding: const EdgeInsets.all(30.0),
+              padding: const EdgeInsets.fromLTRB(30,30,30,0),
               child: SizedBox(
                 width: 500,
                 child: TextFormField(
                   controller: verificationCode,
                   onChanged: (value) {},
-                  decoration: const InputDecoration(
-                      contentPadding: EdgeInsets.fromLTRB(5, 0, 0, 3),
-                      focusedBorder: OutlineInputBorder(
+                  decoration: InputDecoration(
+                      hintText: AppLocalizations.of(context)!.verificationCode,
+                      contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                      focusedBorder: const OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(10)),
                         borderSide: BorderSide(
                             color: OnepieceColors.fancyBlue, width: 2.0),
                       ),
-                      enabledBorder: OutlineInputBorder(
+                      enabledBorder: const OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(10)),
                         borderSide: BorderSide(
                             color: OnepieceColors.fancyBlue, width: 2.0),
                       ),
-                      disabledBorder: OutlineInputBorder(
+                      disabledBorder: const OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(10)),
                         borderSide: BorderSide(
                             color: OnepieceColors.fancyBlue, width: 2.0),
                       )),
                 ),
+              ),
+            ),
+          if (!verificationSuccess)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 2.0),
+              child: Text(
+                verificationMessage,
+                style: OnepieceFonts.contentStyleAlert,
               ),
             ),
           if (!verificationSuccess)
@@ -134,11 +143,6 @@ class _EmailVerificationState extends State<EmailVerification> {
                 )
               ],
             ),
-          if (!verificationSuccess)
-            Text(
-              verificationMessage,
-              style: OnepieceFonts.contentStyleAlert,
-            ),
           if (verificationSuccess)
             const Divider(
               height: 10,
@@ -152,10 +156,12 @@ class _EmailVerificationState extends State<EmailVerification> {
                   padding: const EdgeInsets.fromLTRB(0, 10, 10, 10),
                   child: ElevatedButton(
                       onPressed: () {
-                        context.goNamed('userProfile',
-                            extra: getIt<User>().id,
-                            pathParameters: {'name': getIt<User>().nickname});
-                        Navigator.pop(context);
+                        setState(() {
+                          Navigator.pop(context);
+                          context.pushReplacementNamed('userProfile',
+                              extra: getIt<User>().id,
+                              pathParameters: {'name': getIt<User>().nickname});
+                        });
                       },
                       style: OnepieceButtonStyle.getDefaultStyle(),
                       child: Text(AppLocalizations.of(context)!.confirm)),

@@ -85,7 +85,10 @@ class _UserProfileState extends State<UserProfile> {
                 height: 10,
                 thickness: 1,
               ),
-              _getFootButtons(context)
+              Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: _getFootButtons(context),
+              )
             ],
           ));
         } else {
@@ -270,45 +273,45 @@ class _UserProfileState extends State<UserProfile> {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(0, 0, 0, 15),
-            child: Text(
-              AppLocalizations.of(context)!.email,
-              style: OnepieceFonts.headerStyle,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  AppLocalizations.of(context)!.email,
+                  style: OnepieceFonts.headerStyle,
+                ),
+                const SizedBox(width: 10,),
+                Tooltip(
+                  message: _emailVerified
+                      ? AppLocalizations.of(context)!.verified
+                      : AppLocalizations.of(context)!.notVerified,
+                  child: SizedBox(
+                    width: 30,
+                    height: 30,
+                    child: _emailVerified
+                        ? ImageHelper.getSvgIconWithColor(
+                        'images/svgs/check-circle.svg',
+                        150,
+                        150,
+                        Colors.green)
+                        : ImageHelper.getSvgIconWithColor(
+                        'images/svgs/alert.svg', 150, 150, Colors.red),
+                  ),
+                ),
+              ],
             ),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              SizedBox(
-                width: 300,
-                child: TextFormField(
-                  onChanged: null,
-                  controller: _emailController,
-                  decoration: const InputDecoration(
-                      contentPadding: EdgeInsets.fromLTRB(10, 0, 0, 0)),
-                  enabled: false,
-                ),
-              ),
-              Tooltip(
-                message: _emailVerified
-                    ? AppLocalizations.of(context)!.verified
-                    : AppLocalizations.of(context)!.notVerified,
-                child: SizedBox(
-                  width: 30,
-                  height: 30,
-                  child: _emailVerified
-                      ? ImageHelper.getSvgIconWithColor(
-                          'images/svgs/check-circle.svg',
-                          150,
-                          150,
-                          Colors.green)
-                      : ImageHelper.getSvgIconWithColor(
-                          'images/svgs/alert.svg', 150, 150, Colors.red),
-                ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                child: Text(user.username, style: OnepieceFonts.contentStyle,),
               ),
               if (!_emailVerified)
                 ElevatedButton(
-                  style: OnepieceButtonStyle.getDefaultStyle(),
                   onPressed: () {
                     getIt<UserDao>()
                         .sendEmail(
@@ -345,7 +348,6 @@ class _UserProfileState extends State<UserProfile> {
             valueListenable: _dataModified,
             builder: (context, value, _) {
               return ElevatedButton(
-                style: OnepieceButtonStyle.getDefaultStyle(),
                 onPressed: !_dataModified.value
                     ? null
                     : () {
@@ -364,7 +366,7 @@ class _UserProfileState extends State<UserProfile> {
               return Padding(
                 padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
                 child: ElevatedButton(
-                    style: OnepieceButtonStyle.getDefaultStyle(),
+                    // style: OnepieceButtonStyle.getDefaultStyle(),
                     onPressed: !_dataModified.value
                         ? null
                         : () {

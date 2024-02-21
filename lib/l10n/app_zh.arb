@@ -216,5 +216,6 @@
   "day": "日",
   "joinedGroups": "已加入团体列表",
   "searchList": "搜索列表",
-  "eaten": "已食用"
+  "eaten": "已食用",
+  "verificationCode": "验证码"
 }
