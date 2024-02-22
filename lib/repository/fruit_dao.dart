@@ -16,7 +16,11 @@ class FruitDao {
     return await fruitApi.addFruit(request);
   }
 
-  Future<Fruit?> update(UpdateFruitRequest request) async {
+  Future<UpdateFruitResponse?> update(UpdateFruitRequest request) async {
     return await fruitApi.updateFruit(request);
+  }
+
+  Future<FruitFullView?> get(GetFruitRequest request) async {
+    return await fruitApi.getFruit(request);
   }
 }

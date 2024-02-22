@@ -286,7 +286,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                             speed: character.speed,
                             energy: character.energy,
                             // basic info
-                            name: I18nHelper.setI18nFromDisplayName(
+                            name: I18nHelper.getI18nFromDisplayName(
                                 character.name, characterNameController.text),
                             dateOfBirth: DateTime(
                                 1900,
@@ -1122,7 +1122,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                         selectedTileColor: OnepieceColors.liteFancyBlue,
                         onTap: () {
                           groupSetState(() {
-                            selectedGroupId = currentGroup.id!;
+                            selectedGroupId = currentGroup.id;
                           });
                         },
                         hoverColor: OnepieceColors.liteFancyBlue,

@@ -9,7 +9,6 @@ import 'package:openapi/api.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
-import '../../constants/onepiece_tag.dart';
 import '../../popup/onepiece_alert.dart';
 import '../../utils/base64_helper.dart';
 
@@ -117,7 +116,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                         Group group = Group(
                             id: groupFullView.id,
                             groupCategory: selectedGroupCategory,
-                            name: I18nHelper.setI18nFromDisplayName(
+                            name: I18nHelper.getI18nFromDisplayName(
                                 groupFullView.name!, groupNameController.text));
                         getIt<GroupDao>().updateGroups(group).then((value) {
                           OnepieceAlert.getBasicAlertDialogFunc(

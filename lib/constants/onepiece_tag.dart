@@ -34,6 +34,13 @@ class OnepieceTag {
     Haki.haoshoku: Colors.deepPurple
   };
 
+  static Color getWakeUpColor(bool wakeUp) {
+    if (wakeUp) {
+      return OnepieceColors.fancyBlue;
+    }
+    return OnepieceColors.liteFancyBlue;
+  }
+
   static Widget getUserRoleTag(UserRole userRole, String text) {
     return Container(
       height: 25,
@@ -68,6 +75,20 @@ class OnepieceTag {
       decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(5)),
           color: fruitTypeToColor[fruitType]
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(4.0),
+        child: Text(text, style: OnepieceFonts.tagStyle,),
+      ),
+    );
+  }
+
+  static getWakeUpTag(bool wakeUp, String text) {
+    return Container(
+      height: 25,
+      decoration: BoxDecoration(
+          borderRadius: const BorderRadius.all(Radius.circular(5)),
+          color: getWakeUpColor(wakeUp)
       ),
       child: Padding(
         padding: const EdgeInsets.all(4.0),

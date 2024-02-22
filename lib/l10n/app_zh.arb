@@ -220,5 +220,9 @@
   "verificationCode": "验证码",
   "currentMember": "现成员",
   "exMember": "非现成员",
-  "groupMember": "团队成员"
+  "groupMember": "团队成员",
+  "wakeUp": "已觉醒",
+  "sleep": "沉睡中",
+  "owner": "拥有者",
+  "currentlyNone": "暂无"
 }
