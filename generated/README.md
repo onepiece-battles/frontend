@@ -79,6 +79,7 @@ Class | Method | HTTP request | Description
 *DataExportApi* | [**generatePdf**](doc//DataExportApi.md#generatepdf) | **POST** /api/onepiece/export/generate_pdf | 
 *FileApi* | [**downloadFile**](doc//FileApi.md#downloadfile) | **POST** /api/onepiece/file/download_file | 
 *FruitApi* | [**addFruit**](doc//FruitApi.md#addfruit) | **POST** /api/onepiece/fruit/add | 
+*FruitApi* | [**getFruit**](doc//FruitApi.md#getfruit) | **POST** /api/onepiece/fruit/get | 
 *FruitApi* | [**listFruit**](doc//FruitApi.md#listfruit) | **POST** /api/onepiece/fruit/list | 
 *FruitApi* | [**updateFruit**](doc//FruitApi.md#updatefruit) | **POST** /api/onepiece/fruit/update | 
 *GroupApi* | [**createGroup**](doc//GroupApi.md#creategroup) | **POST** /api/onepiece/group/create | 
@@ -135,6 +136,7 @@ Class | Method | HTTP request | Description
  - [CharacterFilter](doc//CharacterFilter.md)
  - [CharacterFullView](doc//CharacterFullView.md)
  - [CharacterFullViewAllOf](doc//CharacterFullViewAllOf.md)
+ - [CharacterInFruitView](doc//CharacterInFruitView.md)
  - [CharacterInGroupLite](doc//CharacterInGroupLite.md)
  - [CharacterInGroupView](doc//CharacterInGroupView.md)
  - [CharacterListView](doc//CharacterListView.md)
@@ -154,6 +156,8 @@ Class | Method | HTTP request | Description
  - [EatFruitResponse](doc//EatFruitResponse.md)
  - [Fruit](doc//Fruit.md)
  - [FruitFilter](doc//FruitFilter.md)
+ - [FruitFullView](doc//FruitFullView.md)
+ - [FruitFullViewAllOf](doc//FruitFullViewAllOf.md)
  - [FruitInCharacter](doc//FruitInCharacter.md)
  - [FruitListView](doc//FruitListView.md)
  - [FruitListViewAllOf](doc//FruitListViewAllOf.md)
@@ -165,6 +169,7 @@ Class | Method | HTTP request | Description
  - [GetBattleExecutionRequest](doc//GetBattleExecutionRequest.md)
  - [GetBattleFullViewRequest](doc//GetBattleFullViewRequest.md)
  - [GetCharacterFullViewRequest](doc//GetCharacterFullViewRequest.md)
+ - [GetFruitRequest](doc//GetFruitRequest.md)
  - [GetGroupRequest](doc//GetGroupRequest.md)
  - [GetImageRequest](doc//GetImageRequest.md)
  - [GetImageResponse](doc//GetImageResponse.md)
@@ -224,6 +229,7 @@ Class | Method | HTTP request | Description
  - [StartBattleResponse](doc//StartBattleResponse.md)
  - [UpdateCharacterResponse](doc//UpdateCharacterResponse.md)
  - [UpdateFruitRequest](doc//UpdateFruitRequest.md)
+ - [UpdateFruitResponse](doc//UpdateFruitResponse.md)
  - [UpdateGroupResponse](doc//UpdateGroupResponse.md)
  - [UpdateLoginRoleRequest](doc//UpdateLoginRoleRequest.md)
  - [UpdateLoginRoleResponse](doc//UpdateLoginRoleResponse.md)

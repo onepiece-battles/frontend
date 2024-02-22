@@ -28,7 +28,7 @@ class I18nHelper {
     }
   }
 
-  static I18nText setI18nFromDisplayName(I18nText i18nText, String displayName) {
+  static I18nText getI18nFromDisplayName(I18nText i18nText, String displayName) {
     var locale = getIt<Locale>();
     if (locale.languageCode == 'en') {
        i18nText.enUS = displayName;
