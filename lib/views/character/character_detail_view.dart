@@ -210,6 +210,12 @@ class _CharacterDetailState extends State<CharacterDetail> {
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
                         child: _getFruitList(context),
                       ),
+                    if(fruits.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Text(AppLocalizations.of(context)!.none,
+                            style: OnepieceFonts.fancyBlueHintFont),
+                      ),
                     const Padding(
                       padding: EdgeInsets.all(8.0),
                       child: Divider(
@@ -224,10 +230,17 @@ class _CharacterDetailState extends State<CharacterDetail> {
                         child: Text(AppLocalizations.of(context)!.joinedGroups,
                             style: OnepieceFonts.fancyBlueHintFont),
                       ),
+                    if (groups.isNotEmpty)
                     Padding(
-                      padding: const EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       child: _getGroupList(context),
                     ),
+                    if(groups.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Text(AppLocalizations.of(context)!.none,
+                            style: OnepieceFonts.fancyBlueHintFont),
+                      ),
                     const Padding(
                       padding: EdgeInsets.all(8.0),
                       child: Divider(
