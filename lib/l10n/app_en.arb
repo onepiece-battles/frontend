@@ -238,5 +238,7 @@
   "worldNobel": "World Nobel (Human)",
   "dwarves": "Dwarves Tribe",
   "race": "Race",
-  "none": "None"
+  "none": "None",
+  "starterName": "starter name",
+  "receiverName": "receiver name"
 }

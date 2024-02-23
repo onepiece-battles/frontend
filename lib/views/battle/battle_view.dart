@@ -27,6 +27,8 @@ class BattleView extends StatefulWidget {
 class _BattleViewState extends State<BattleView> {
   Logger logger = Logger('BattleView');
   TextEditingController pageNumberController = TextEditingController(text: "0");
+  TextEditingController starterNameController = TextEditingController();
+  TextEditingController receiverNameController = TextEditingController();
   // base full data
   List<BattleListView> currentBattleList = [];
 
@@ -69,11 +71,17 @@ class _BattleViewState extends State<BattleView> {
   }
 
   void _search() {
+    battleFilter.languageCode = I18nHelper.getLanguageCode();
+    battleFilter.starterName = starterNameController.text;
+    battleFilter.receiverName= receiverNameController.text;
+
     ListBattleRequest request = ListBattleRequest(
         pageSize: pageSize,
         pageIndex: selectedPageIndex,
         sortKeys: sortKeys,
         battleFilter: battleFilter);
+    debugPrint('battle filter');
+    debugPrint(battleFilter.toString());
     Future<ListBattleResponse?> response =
         getIt<BattleDao>().listBattles(request);
     response.then((value) => {
@@ -172,6 +180,60 @@ class _BattleViewState extends State<BattleView> {
                     },
                     style: OnepieceButtonStyle.getDefaultStyle(),
                     child: Text(AppLocalizations.of(context)!.createBattle),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 0, 6, 0),
+                child: SizedBox(
+                  width: 200,
+                  height: 35,
+                  child: TextFormField(
+                    controller: starterNameController,
+                    onChanged: (value) {
+                      battleFilter.starterName = value.trim();
+                      _search();
+                    },
+                    decoration: InputDecoration(
+                      floatingLabelBehavior: FloatingLabelBehavior.never,
+                      disabledBorder: const OutlineInputBorder(
+                          borderSide:
+                          BorderSide(color: OnepieceColors.menuHoverColor)),
+                      enabledBorder: const OutlineInputBorder(
+                          borderSide:
+                          BorderSide(color: OnepieceColors.menuHoverColor)),
+                      focusedBorder: const OutlineInputBorder(
+                          borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
+                      prefixIcon: const Icon(Icons.search),
+                      labelText: AppLocalizations.of(context)!.starterName,
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 0, 6, 0),
+                child: SizedBox(
+                  width: 200,
+                  height: 35,
+                  child: TextFormField(
+                    controller: receiverNameController,
+                    onChanged: (value) {
+                      battleFilter.receiverName = value.trim();
+                      _search();
+                    },
+                    decoration: InputDecoration(
+                      floatingLabelBehavior: FloatingLabelBehavior.never,
+                      disabledBorder: const OutlineInputBorder(
+                          borderSide:
+                          BorderSide(color: OnepieceColors.menuHoverColor)),
+                      enabledBorder: const OutlineInputBorder(
+                          borderSide:
+                          BorderSide(color: OnepieceColors.menuHoverColor)),
+                      focusedBorder: const OutlineInputBorder(
+                          borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
+                      prefixIcon: const Icon(Icons.search),
+                      labelText: AppLocalizations.of(context)!.receiverName,
+                    ),
                   ),
                 ),
               ),

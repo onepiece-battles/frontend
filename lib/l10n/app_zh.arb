@@ -238,5 +238,7 @@
   "worldNobel": "天龙人（人类）",
   "dwarves": "小人族",
   "race": "种族",
-  "none": "无"
+  "none": "无",
+  "starterName": "发起者名字",
+  "receiverName": "接收者名字"
 }
