@@ -32,8 +32,8 @@ class CreateCharacterView extends StatefulWidget {
 class _CreateCharacterViewState extends State<CreateCharacterView> {
   TextEditingController characterNameEnController =
       TextEditingController(text: RandomStringGenerator.generateRandomName(8));
-  TextEditingController characterNameCnController =
-      TextEditingController(text: RandomStringGenerator.generateRandomChineseName(3));
+  TextEditingController characterNameCnController = TextEditingController(
+      text: RandomStringGenerator.generateRandomChineseName(3));
 
   // battle data controller
   TextEditingController characterFruitLimitController = TextEditingController(
@@ -105,7 +105,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
   Uint8List _pickedImage = Uint8List(0);
   bool _newImagePicked = false;
   String _chosenImageName = "";
-  List<CharacterType> selectedCharacterTypes = [];
+  BattleStyle selectedBattleStyle = BattleStyle.BODY;
   List<Haki> selectedHakis = [];
 
   final _formKey = GlobalKey<FormState>();
@@ -152,28 +152,29 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                 const SizedBox(
                   width: 25,
                 ),
-                if(getIt<User>().loginRole==UserRole.NIKA) SizedBox(
-                  width: 280,
-                  child: TextFormField(
-                    controller: characterNameEnController,
-                    validator: (value) {
-                      if (value!.isWhiteSpace()) {
-                        return AppLocalizations.of(context)!.requiredField;
-                      }
-                      if (!DataValidator.validName(value)) {
-                        return AppLocalizations.of(context)!.invalidName;
-                      }
-                      return null;
-                    },
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                    maxLength: 10,
-                    maxLengthEnforcement: MaxLengthEnforcement.enforced,
-                    decoration: InputDecoration(
-                      labelText: AppLocalizations.of(context)!.characterName,
-                      prefixIcon: const Icon(Icons.people),
+                if (getIt<User>().loginRole == UserRole.NIKA)
+                  SizedBox(
+                    width: 280,
+                    child: TextFormField(
+                      controller: characterNameEnController,
+                      validator: (value) {
+                        if (value!.isWhiteSpace()) {
+                          return AppLocalizations.of(context)!.requiredField;
+                        }
+                        if (!DataValidator.validName(value)) {
+                          return AppLocalizations.of(context)!.invalidName;
+                        }
+                        return null;
+                      },
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                      maxLength: 10,
+                      maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                      decoration: InputDecoration(
+                        labelText: AppLocalizations.of(context)!.characterName,
+                        prefixIcon: const Icon(Icons.people),
+                      ),
                     ),
                   ),
-                ),
               ],
             ),
             Row(
@@ -221,56 +222,64 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                           context,
                           characterFruitLimitController,
                           AppLocalizations.of(context)!.fruitLimit,
-                          _getIcon('images/character_digits_icon/fruit_limit.svg')),
+                          _getIcon(
+                              'images/character_digits_icon/fruit_limit.svg')),
                       _getFormField(
                           1,
                           5,
                           context,
                           characterGroupGainController,
                           AppLocalizations.of(context)!.groupGain,
-                        _getIcon('images/character_digits_icon/group_gain.svg')),
+                          _getIcon(
+                              'images/character_digits_icon/group_gain.svg')),
                       _getFormField(
                           10,
                           1000,
                           context,
                           characterAttackController,
                           AppLocalizations.of(context)!.characterAttack,
-                        _getIcon('images/character_digits_icon/attack.svg')),
+                          _getIcon('images/character_digits_icon/attack.svg')),
                       _getFormField(
-                          10,
-                          1000,
-                          context,
-                          characterDefenseController,
-                          AppLocalizations.of(context)!.characterDefense,
-                        _getIcon('images/character_digits_icon/defense.svg'),),
+                        10,
+                        1000,
+                        context,
+                        characterDefenseController,
+                        AppLocalizations.of(context)!.characterDefense,
+                        _getIcon('images/character_digits_icon/defense.svg'),
+                      ),
                       _getFormField(
-                          70,
-                          260,
-                          context,
-                          characterIntelligenceController,
-                          AppLocalizations.of(context)!.characterIntelligence,
-                        _getIcon('images/character_digits_icon/intelligence.svg'),),
+                        70,
+                        260,
+                        context,
+                        characterIntelligenceController,
+                        AppLocalizations.of(context)!.characterIntelligence,
+                        _getIcon(
+                            'images/character_digits_icon/intelligence.svg'),
+                      ),
                       _getFormField(
-                          100,
-                          10000,
-                          context,
-                          characterBloodController,
-                          AppLocalizations.of(context)!.characterBlood,
-                        _getIcon('images/character_digits_icon/blood.svg'),),
+                        100,
+                        10000,
+                        context,
+                        characterBloodController,
+                        AppLocalizations.of(context)!.characterBlood,
+                        _getIcon('images/character_digits_icon/blood.svg'),
+                      ),
                       _getFormField(
-                          10,
-                          200,
-                          context,
-                          characterSpeedController,
-                          AppLocalizations.of(context)!.characterSpeed,
-                        _getIcon('images/character_digits_icon/speed.svg'),),
+                        10,
+                        200,
+                        context,
+                        characterSpeedController,
+                        AppLocalizations.of(context)!.characterSpeed,
+                        _getIcon('images/character_digits_icon/speed.svg'),
+                      ),
                       _getFormField(
-                          10,
-                          50,
-                          context,
-                          characterEnergyController,
-                          AppLocalizations.of(context)!.characterEnergy,
-                        _getIcon('images/character_digits_icon/energy.svg'),),
+                        10,
+                        50,
+                        context,
+                        characterEnergyController,
+                        AppLocalizations.of(context)!.characterEnergy,
+                        _getIcon('images/character_digits_icon/energy.svg'),
+                      ),
                     ],
                   ),
                   const SizedBox(
@@ -296,38 +305,44 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                         ),
                       ),
                       _getFormField(
-                          0,
-                          100000,
-                          context,
-                          characterAge,
-                          AppLocalizations.of(context)!.age,
-                        _getIcon('images/character_digits_icon/age.svg'),),
+                        0,
+                        100000,
+                        context,
+                        characterAge,
+                        AppLocalizations.of(context)!.age,
+                        _getIcon('images/character_digits_icon/age.svg'),
+                      ),
                       _getFormField(
-                          1,
-                          100000,
-                          context,
-                          characterHeight,
-                          AppLocalizations.of(context)!.height,
-                        _getIcon('images/character_digits_icon/height.svg'),),
+                        1,
+                        100000,
+                        context,
+                        characterHeight,
+                        AppLocalizations.of(context)!.height,
+                        _getIcon('images/character_digits_icon/height.svg'),
+                      ),
                       _getStringFormField(
-                          20,
-                          context,
-                          characterBirthPlace,
-                          AppLocalizations.of(context)!.birthPlace,
-                        _getIcon('images/character_digits_icon/birth_place.svg'),),
+                        20,
+                        context,
+                        characterBirthPlace,
+                        AppLocalizations.of(context)!.birthPlace,
+                        _getIcon(
+                            'images/character_digits_icon/birth_place.svg'),
+                      ),
                       _getStringFormField(
-                          20,
-                          context,
-                          characterDateOfBirth,
-                          AppLocalizations.of(context)!.birthDay,
-                        _getIcon('images/character_digits_icon/birthday.svg'),),
+                        20,
+                        context,
+                        characterDateOfBirth,
+                        AppLocalizations.of(context)!.birthDay,
+                        _getIcon('images/character_digits_icon/birthday.svg'),
+                      ),
                       _getFormField(
-                          10,
-                          100000000000,
-                          context,
-                          characterBounty,
-                          AppLocalizations.of(context)!.bounty,
-                        _getIcon('images/character_digits_icon/bounty.svg'),),
+                        10,
+                        100000000000,
+                        context,
+                        characterBounty,
+                        AppLocalizations.of(context)!.bounty,
+                        _getIcon('images/character_digits_icon/bounty.svg'),
+                      ),
                     ],
                   ),
                 ],
@@ -423,39 +438,30 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
   }
 
   Widget _getTypeList(BuildContext context) {
-    Map<CharacterType, String> enumValueToDisplayValue = {
-      CharacterType.BODY: AppLocalizations.of(context)!.body,
-      CharacterType.FOOT: AppLocalizations.of(context)!.leg,
-      CharacterType.SCIENCE: AppLocalizations.of(context)!.science,
-      CharacterType.FIST: AppLocalizations.of(context)!.fist,
-      CharacterType.KATANA: AppLocalizations.of(context)!.katana,
-      CharacterType.SHOOTER: AppLocalizations.of(context)!.shoot
+    Map<BattleStyle, String> enumValueToDisplayValue = {
+      BattleStyle.BODY: AppLocalizations.of(context)!.body,
+      BattleStyle.SCIENCE: AppLocalizations.of(context)!.science,
+      BattleStyle.KATANA: AppLocalizations.of(context)!.katana,
+      BattleStyle.SHOOTER: AppLocalizations.of(context)!.shoot
     };
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 0, 0, 2),
       child: DropdownButtonHideUnderline(
         child: DropdownButton2(
           isExpanded: true,
-          value: selectedCharacterTypes.isEmpty
-              ? null
-              : selectedCharacterTypes.last,
+          value: selectedBattleStyle,
           hint: Text(
-            AppLocalizations.of(context)!.characterTypeLabel,
+            AppLocalizations.of(context)!.battleStyle,
             style: OnepieceFonts.dropDownItemStyle,
           ),
           onChanged: (value) {},
           selectedItemBuilder: (context) {
-            return CharacterType.values.map(
+            return BattleStyle.values.map(
               (item) {
                 return Container(
                   alignment: AlignmentDirectional.center,
                   child: Text(
-                    selectedCharacterTypes
-                        .map((selectedType) {
-                          return enumValueToDisplayValue[selectedType];
-                        })
-                        .toSet()
-                        .join(', '),
+                    enumValueToDisplayValue[selectedBattleStyle]!,
                     style: const TextStyle(
                       fontSize: 16,
                       overflow: TextOverflow.ellipsis,
@@ -478,48 +484,12 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
           menuItemStyleData: const MenuItemStyleData(
             height: 35,
           ),
-          items: CharacterType.values.map((CharacterType characterType) {
-            return DropdownMenuItem<CharacterType>(
-              value: characterType,
+          items: BattleStyle.values.map((BattleStyle battleStyle) {
+            return DropdownMenuItem<BattleStyle>(
+              value: battleStyle,
               enabled: false,
-              child: StatefulBuilder(
-                builder: (context, menuSetState) {
-                  final isSelected =
-                      selectedCharacterTypes.contains(characterType);
-                  return InkWell(
-                    onTap: () {
-                      isSelected
-                          ? selectedCharacterTypes.remove(characterType)
-                          : selectedCharacterTypes.add(characterType);
-                      // //This rebuilds the StatefulWidget to update the button's text
-                      setState(() {});
-                      //This rebuilds the dropdownMenu Widget to update the check mark
-                      menuSetState(() {});
-                    },
-                    child: Container(
-                      height: double.infinity,
-                      padding: const EdgeInsets.symmetric(horizontal: 3.0),
-                      child: Row(
-                        children: [
-                          if (isSelected)
-                            const Icon(Icons.check_box_outlined)
-                          else
-                            const Icon(Icons.check_box_outline_blank),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              enumValueToDisplayValue[characterType]!,
-                              style: const TextStyle(
-                                fontSize: 16,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
+              child: Text(enumValueToDisplayValue[battleStyle]!,
+                  style: OnepieceFonts.dropDownItemStyle),
             );
           }).toList(),
         ),
@@ -677,14 +647,12 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
       ),
     );
   }
+
   Widget _getIcon(String path) {
     return Padding(
       padding: const EdgeInsets.all(10.0),
-      child: ImageHelper.getSvgIconWithColor(
-          path,
-          3,
-          3,
-          OnepieceColors.fancyBlue),
+      child:
+          ImageHelper.getSvgIconWithColor(path, 3, 3, OnepieceColors.fancyBlue),
     );
   }
 
@@ -728,7 +696,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                         .toList();
                     CreateCharacterRequest addCharacterRequest =
                         CreateCharacterRequest(
-                      characterTypes: selectedCharacterTypes,
+                      battleStyle: selectedBattleStyle,
                       hakis: selectedHakis,
                       name: RandomStringGenerator.generateI18n(
                           characterNameEnController.text,

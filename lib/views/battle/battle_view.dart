@@ -395,7 +395,7 @@ class _BattleViewState extends State<BattleView> {
           ),
           onChanged: (value) {},
           selectedItemBuilder: (context) {
-            return CharacterType.values.map(
+            return BattleStatus.values.map(
               (item) {
                 return Container(
                   alignment: AlignmentDirectional.center,

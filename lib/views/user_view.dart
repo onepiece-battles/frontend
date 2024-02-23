@@ -194,7 +194,7 @@ class _UserViewState extends State<UserView> {
               ),
               onChanged: (value) {},
               selectedItemBuilder: (context) {
-                return CharacterType.values.map(
+                return UserRole.values.map(
                   (item) {
                     return Container(
                       alignment: AlignmentDirectional.center,

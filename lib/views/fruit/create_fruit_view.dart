@@ -238,7 +238,7 @@ class _CreateFruitViewState extends State<CreateFruitView> {
           isExpanded: true,
           value: selectedFruitType,
           hint: Text(
-            AppLocalizations.of(context)!.characterTypeLabel,
+            AppLocalizations.of(context)!.fruitType,
             style: OnepieceFonts.dropDownItemStyle,
           ),
           onChanged: (value) {

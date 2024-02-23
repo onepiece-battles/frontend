@@ -51,7 +51,7 @@
   "characterIntelligence": "智力",
   "characterName": "角色名",
   "characterSpeed": "速度",
-  "characterTypeLabel": "战斗方式",
+  "battleStyle": "战斗方式",
   "chinese": "中文",
   "chooseFile": "选择文件 ...",
   "chooseFruit": "选择",
@@ -224,5 +224,17 @@
   "wakeUp": "已觉醒",
   "sleep": "沉睡中",
   "owner": "拥有者",
-  "currentlyNone": "暂无"
+  "currentlyNone": "暂无",
+  "human": "人类",
+  "fishman": "鱼人",
+  "merfolk": "人鱼",
+  "giant": "巨人族",
+  "longArm": "长手族",
+  "longLeg": "长腿族",
+  "snakeNeck": "长颈族",
+  "threeEye": "三眼族",
+  "lunarian": "月球族",
+  "mink": "毛皮族",
+  "worldNobel": "天龙人（人类）",
+  "dwarves": "小人族"
 }
