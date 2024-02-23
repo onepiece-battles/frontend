@@ -208,7 +208,7 @@ class _GroupViewState extends State<GroupView> {
               ),
               onChanged: (value) {},
               selectedItemBuilder: (context) {
-                return CharacterType.values.map(
+                return GroupCategory.values.map(
                   (item) {
                     return Container(
                       alignment: AlignmentDirectional.center,

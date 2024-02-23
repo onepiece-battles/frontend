@@ -10,6 +10,7 @@ import 'package:one_piece_battles_flutter/repository/character_dao.dart';
 import 'package:one_piece_battles_flutter/utils/base64_helper.dart';
 import 'package:one_piece_battles_flutter/utils/data_validator.dart';
 import 'package:openapi/api.dart';
+import 'package:openapi/api.dart';
 import '../../constants/button_style.dart';
 import '../../constants/onepiece_tag.dart';
 import '../../utils/i18n_helper.dart';
@@ -48,7 +49,7 @@ class _CharacterViewState extends State<CharacterView> {
     CharacterSortableFieldsEnum.blood: null,
     CharacterSortableFieldsEnum.speed: null,
   };
-  List<CharacterType> selectedCharacterTypes = [];
+  List<BattleStyle> selectedBattleStyles = [];
   List<Haki> selectedHakis = [];
   ScrollController scrollController = ScrollController();
 
@@ -154,14 +155,26 @@ class _CharacterViewState extends State<CharacterView> {
   }
 
   Widget _createControlPanel(BuildContext context) {
-    Map<CharacterType, String> enumValueToDisplayValue =
-        <CharacterType, String>{
-      CharacterType.BODY: AppLocalizations.of(context)!.body,
-      CharacterType.FOOT: AppLocalizations.of(context)!.leg,
-      CharacterType.SCIENCE: AppLocalizations.of(context)!.science,
-      CharacterType.FIST: AppLocalizations.of(context)!.fist,
-      CharacterType.KATANA: AppLocalizations.of(context)!.katana,
-      CharacterType.SHOOTER: AppLocalizations.of(context)!.shoot
+    Map<BattleStyle, String> enumValueToDisplayValue =
+        <BattleStyle, String>{
+      BattleStyle.BODY: AppLocalizations.of(context)!.body,
+      BattleStyle.SCIENCE: AppLocalizations.of(context)!.science,
+      BattleStyle.KATANA: AppLocalizations.of(context)!.katana,
+      BattleStyle.SHOOTER: AppLocalizations.of(context)!.shoot
+    };
+    Map<Race, String> raceEnumToDisplayName = {
+      Race.HUMAN: AppLocalizations.of(context)!.human,
+      Race.FISH_MAN:AppLocalizations.of(context)!.fishman,
+      Race.MERFOLK:AppLocalizations.of(context)!.merfolk,
+      Race.GIANT:AppLocalizations.of(context)!.giant,
+      Race.LONG_ARM: AppLocalizations.of(context)!.longArm,
+      Race.LONG_LEG: AppLocalizations.of(context)!.longLeg,
+      Race.SNAKE_NECK: AppLocalizations.of(context)!.snakeNeck,
+      Race.THREE_EYE: AppLocalizations.of(context)!.threeEye,
+      Race.LUNARIAN: AppLocalizations.of(context)!.lunarian,
+      Race.MINK: AppLocalizations.of(context)!.mink,
+      Race.WORLD_NOBEL: AppLocalizations.of(context)!.worldNobel,
+      Race.DWARVES: AppLocalizations.of(context)!.dwarves
     };
     Map<Haki, String> hakiEnumValueToDisplayValue = {
       Haki.busoshoku: AppLocalizations.of(context)!.busoshoku,
@@ -216,21 +229,21 @@ class _CharacterViewState extends State<CharacterView> {
           DropdownButtonHideUnderline(
             child: DropdownButton2(
               isExpanded: true,
-              value: selectedCharacterTypes.isEmpty
+              value: selectedBattleStyles.isEmpty
                   ? null
-                  : selectedCharacterTypes.last,
+                  : selectedBattleStyles.last,
               hint: Text(
-                AppLocalizations.of(context)!.characterTypeLabel,
+                AppLocalizations.of(context)!.battleStyle,
                 style: OnepieceFonts.dropDownItemStyle,
               ),
               onChanged: (value) {},
               selectedItemBuilder: (context) {
-                return CharacterType.values.map(
+                return BattleStyle.values.map(
                   (item) {
                     return Container(
                       alignment: AlignmentDirectional.center,
                       child: Text(
-                        selectedCharacterTypes
+                        selectedBattleStyles
                             .map((selectedType) {
                               return enumValueToDisplayValue[selectedType];
                             })
@@ -258,21 +271,21 @@ class _CharacterViewState extends State<CharacterView> {
               menuItemStyleData: const MenuItemStyleData(
                 height: 35,
               ),
-              items: CharacterType.values.map((CharacterType characterType) {
-                return DropdownMenuItem<CharacterType>(
-                  value: characterType,
+              items: BattleStyle.values.map((BattleStyle battleStyle) {
+                return DropdownMenuItem<BattleStyle>(
+                  value: battleStyle,
                   enabled: false,
                   child: StatefulBuilder(
                     builder: (context, menuSetState) {
                       final isSelected =
-                          selectedCharacterTypes.contains(characterType);
+                          selectedBattleStyles.contains(battleStyle);
                       return InkWell(
                         onTap: () {
                           isSelected
-                              ? selectedCharacterTypes.remove(characterType)
-                              : selectedCharacterTypes.add(characterType);
-                          characterFilter.characterTypes =
-                              selectedCharacterTypes;
+                              ? selectedBattleStyles.remove(battleStyle)
+                              : selectedBattleStyles.add(battleStyle);
+                          characterFilter.battleStyles =
+                              selectedBattleStyles;
                           // //This rebuilds the StatefulWidget to update the button's text
                           setState(() {});
                           //This rebuilds the dropdownMenu Widget to update the check mark
@@ -291,7 +304,7 @@ class _CharacterViewState extends State<CharacterView> {
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
-                                  enumValueToDisplayValue[characterType]!,
+                                  enumValueToDisplayValue[BattleStyle]!,
                                   style: const TextStyle(
                                     fontSize: 16,
                                   ),
@@ -320,7 +333,7 @@ class _CharacterViewState extends State<CharacterView> {
               ),
               onChanged: (value) {},
               selectedItemBuilder: (context) {
-                return CharacterType.values.map(
+                return BattleStyle.values.map(
                   (item) {
                     return Container(
                       alignment: AlignmentDirectional.center,

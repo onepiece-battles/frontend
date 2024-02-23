@@ -51,7 +51,7 @@
   "characterIntelligence": "Intelligence",
   "characterName": "Name",
   "characterSpeed": "Speed",
-  "characterTypeLabel": "Battle Style",
+  "battleStyle": "Battle Style",
   "chinese": "Chinese",
   "chooseFile": "Choose file ...",
   "chooseFruit": "Choose",
@@ -224,5 +224,17 @@
   "wakeUp": "WakeUp",
   "sleep": "Sleeping",
   "owner": "Owners",
-  "currentlyNone": "None at the moment"
+  "currentlyNone": "None at the moment",
+  "human": "Human",
+  "fishman": "Fish-Men",
+  "merfolk": "Merfolk",
+  "giant": "Giant",
+  "longArm": "Long Arm Tribe",
+  "longLeg": "Long Leg Tribe",
+  "snakeNeck": "Snake Neck Tribe",
+  "threeEye": "Three-Eye Tribe",
+  "lunarian": "Lunarian",
+  "mink": "Mink Tribe",
+  "worldNobel": "World Nobel (Human)",
+  "dwarves": "Dwarves Tribe"
 }

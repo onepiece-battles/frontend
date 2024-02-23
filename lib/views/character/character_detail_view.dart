@@ -65,6 +65,9 @@ class _CharacterDetailState extends State<CharacterDetail> {
   CharacterBattleInfo characterBattleInfo = CharacterBattleInfo();
   CharacterBasicInfo characterBasicInfo = CharacterBasicInfo();
 
+  BattleStyle selectedBattleStyle = BattleStyle.BODY;
+  Race selectedRace = Race.HUMAN;
+
   final _basicFormKey = GlobalKey<FormState>();
   final _digitFormKey = GlobalKey<FormState>();
 
@@ -195,7 +198,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                         thickness: 1,
                       ),
                     ),
-                      _getFruitSearchBar(context),
+                    _getFruitSearchBar(context),
                     if (fruits.isNotEmpty)
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -285,6 +288,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
                             blood: character.blood,
                             speed: character.speed,
                             energy: character.energy,
+                            battleStyle: selectedBattleStyle,
+                            race: selectedRace,
                             // basic info
                             name: I18nHelper.getI18nFromDisplayName(
                                 character.name, characterNameController.text),
@@ -587,7 +592,10 @@ class _CharacterDetailState extends State<CharacterDetail> {
                         combatInfoEditable = !combatInfoEditable;
                         if (!combatInfoEditable) {
                           var updatedCharacter = Character(
+                            // basic info keep consistent with original value
                             id: character.id,
+                            battleStyle: character.battleStyle,
+                            race: character.race,
                             // digit info
                             maximumFruitCount: DataConverter.stringToInt(
                                 characterFruitLimitController.text),
@@ -781,58 +789,59 @@ class _CharacterDetailState extends State<CharacterDetail> {
                   ),
                 ),
                 if (character.maximumFruitCount > fruits.length)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-                  child: SizedBox(
-                    width: 300,
-                    height: 40,
-                    child: TextFormField(
-                      enabled: fruitSearchEnabled,
-                      controller: fruitNameController,
-                      decoration: InputDecoration(
-                        floatingLabelBehavior: FloatingLabelBehavior.never,
-                        label: Text(
-                          AppLocalizations.of(context)!.fruitName,
-                          style: OnepieceFonts.hintFont,
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                    child: SizedBox(
+                      width: 300,
+                      height: 40,
+                      child: TextFormField(
+                        enabled: fruitSearchEnabled,
+                        controller: fruitNameController,
+                        decoration: InputDecoration(
+                          floatingLabelBehavior: FloatingLabelBehavior.never,
+                          label: Text(
+                            AppLocalizations.of(context)!.fruitName,
+                            style: OnepieceFonts.hintFont,
+                          ),
+                          disabledBorder: const OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: OnepieceColors.fancyGreen)),
+                          enabledBorder: const OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: OnepieceColors.fancyGreen)),
+                          focusedBorder: const OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: OnepieceColors.fancyGreen)),
+                          prefixIcon: const Icon(Icons.search),
                         ),
-                        disabledBorder: const OutlineInputBorder(
-                            borderSide:
-                                BorderSide(color: OnepieceColors.fancyGreen)),
-                        enabledBorder: const OutlineInputBorder(
-                            borderSide:
-                                BorderSide(color: OnepieceColors.fancyGreen)),
-                        focusedBorder: const OutlineInputBorder(
-                            borderSide:
-                                BorderSide(color: OnepieceColors.fancyGreen)),
-                        prefixIcon: const Icon(Icons.search),
-                      ),
-                      onChanged: (value) {
-                        selectedFruitId = null;
-                        fruitSetState(() {});
-                        if (value.isEmpty) {
-                          searchingFruitList = [];
+                        onChanged: (value) {
+                          selectedFruitId = null;
                           fruitSetState(() {});
-                          return;
-                        }
-                        fruitFilter.name = value;
-                        fruitFilter.languageCode = I18nHelper.getLanguageCode();
-                        ListFruitRequest request = ListFruitRequest(
-                            pageSize: 5,
-                            pageIndex: 1,
-                            sortKeys: [],
-                            fruitFilter: fruitFilter);
-                        Future<ListFruitResponse?> response =
-                            getIt<FruitDao>().list(request);
-                        response.then(
-                          (value) => {
-                            searchingFruitList = value!.fruits,
-                            fruitSetState(() {})
-                          },
-                        );
-                      },
+                          if (value.isEmpty) {
+                            searchingFruitList = [];
+                            fruitSetState(() {});
+                            return;
+                          }
+                          fruitFilter.name = value;
+                          fruitFilter.languageCode =
+                              I18nHelper.getLanguageCode();
+                          ListFruitRequest request = ListFruitRequest(
+                              pageSize: 5,
+                              pageIndex: 1,
+                              sortKeys: [],
+                              fruitFilter: fruitFilter);
+                          Future<ListFruitResponse?> response =
+                              getIt<FruitDao>().list(request);
+                          response.then(
+                            (value) => {
+                              searchingFruitList = value!.fruits,
+                              fruitSetState(() {})
+                            },
+                          );
+                        },
+                      ),
                     ),
                   ),
-                ),
               ],
             ),
           ),
