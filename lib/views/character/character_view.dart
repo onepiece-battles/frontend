@@ -50,6 +50,7 @@ class _CharacterViewState extends State<CharacterView> {
     CharacterSortableFieldsEnum.speed: null,
   };
   List<BattleStyle> selectedBattleStyles = [];
+  List<Race> selectedRaces = [];
   List<Haki> selectedHakis = [];
   ScrollController scrollController = ScrollController();
 
@@ -119,12 +120,15 @@ class _CharacterViewState extends State<CharacterView> {
             children: [
               _createHeader(context),
               SizedBox(
-                width: 1500,
+                width: 2000,
                 height: 50,
-                child: _createControlPanel(context),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: _createControlPanel(context),
+                ),
               ),
               SizedBox(
-                width: 1500,
+                width: 2000,
                 child: FittedBox(
                   fit: BoxFit.fitWidth,
                   child: _createCharacterTable(context),
@@ -134,7 +138,7 @@ class _CharacterViewState extends State<CharacterView> {
                 height: 15,
               ),
               SizedBox(
-                width: 1500,
+                width: 2000,
                 child: Center(child: _getPageFoot(context)),
               )
             ],
@@ -155,8 +159,7 @@ class _CharacterViewState extends State<CharacterView> {
   }
 
   Widget _createControlPanel(BuildContext context) {
-    Map<BattleStyle, String> enumValueToDisplayValue =
-        <BattleStyle, String>{
+    Map<BattleStyle, String> battleStyleToDisplayValue = <BattleStyle, String>{
       BattleStyle.BODY: AppLocalizations.of(context)!.body,
       BattleStyle.SCIENCE: AppLocalizations.of(context)!.science,
       BattleStyle.KATANA: AppLocalizations.of(context)!.katana,
@@ -164,9 +167,9 @@ class _CharacterViewState extends State<CharacterView> {
     };
     Map<Race, String> raceEnumToDisplayName = {
       Race.HUMAN: AppLocalizations.of(context)!.human,
-      Race.FISH_MAN:AppLocalizations.of(context)!.fishman,
-      Race.MERFOLK:AppLocalizations.of(context)!.merfolk,
-      Race.GIANT:AppLocalizations.of(context)!.giant,
+      Race.FISH_MAN: AppLocalizations.of(context)!.fishman,
+      Race.MERFOLK: AppLocalizations.of(context)!.merfolk,
+      Race.GIANT: AppLocalizations.of(context)!.giant,
       Race.LONG_ARM: AppLocalizations.of(context)!.longArm,
       Race.LONG_LEG: AppLocalizations.of(context)!.longLeg,
       Race.SNAKE_NECK: AppLocalizations.of(context)!.snakeNeck,
@@ -245,7 +248,7 @@ class _CharacterViewState extends State<CharacterView> {
                       child: Text(
                         selectedBattleStyles
                             .map((selectedType) {
-                              return enumValueToDisplayValue[selectedType];
+                              return battleStyleToDisplayValue[selectedType];
                             })
                             .toSet()
                             .join(', '),
@@ -284,8 +287,7 @@ class _CharacterViewState extends State<CharacterView> {
                           isSelected
                               ? selectedBattleStyles.remove(battleStyle)
                               : selectedBattleStyles.add(battleStyle);
-                          characterFilter.battleStyles =
-                              selectedBattleStyles;
+                          characterFilter.battleStyles = selectedBattleStyles;
                           // //This rebuilds the StatefulWidget to update the button's text
                           setState(() {});
                           //This rebuilds the dropdownMenu Widget to update the check mark
@@ -304,7 +306,7 @@ class _CharacterViewState extends State<CharacterView> {
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
-                                  enumValueToDisplayValue[BattleStyle]!,
+                                  battleStyleToDisplayValue[battleStyle]!,
                                   style: const TextStyle(
                                     fontSize: 16,
                                   ),
@@ -414,8 +416,102 @@ class _CharacterViewState extends State<CharacterView> {
               }).toList(),
             ),
           ),
+          const SizedBox(
+            width: 6,
+          ),
+          DropdownButtonHideUnderline(
+            child: DropdownButton2(
+              isExpanded: true,
+              value: selectedRaces.isEmpty ? null : selectedRaces.last,
+              hint: Text(
+                AppLocalizations.of(context)!.race,
+                style: OnepieceFonts.dropDownItemStyle,
+              ),
+              onChanged: (value) {},
+              selectedItemBuilder: (context) {
+                return Race.values.map(
+                  (item) {
+                    return Container(
+                      alignment: AlignmentDirectional.center,
+                      child: Text(
+                        selectedRaces
+                            .map((selectedRace) {
+                              return raceEnumToDisplayName[selectedRace];
+                            })
+                            .toSet()
+                            .join(', '),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        maxLines: 1,
+                      ),
+                    );
+                  },
+                ).toList();
+              },
+              buttonStyleData: ButtonStyleData(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                height: 35,
+                width: 200,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(3),
+                  color: OnepieceColors.liteFancyGreen,
+                ),
+              ),
+              menuItemStyleData: const MenuItemStyleData(
+                height: 35,
+              ),
+              items: Race.values.map((Race race) {
+                return DropdownMenuItem<Race>(
+                  value: race,
+                  enabled: false,
+                  child: StatefulBuilder(
+                    builder: (context, menuSetState) {
+                      final isSelected = selectedRaces.contains(race);
+                      return InkWell(
+                        onTap: () {
+                          isSelected
+                              ? selectedRaces.remove(race)
+                              : selectedRaces.add(race);
+                          characterFilter.races = selectedRaces;
+                          // //This rebuilds the StatefulWidget to update the button's text
+                          setState(() {});
+                          //This rebuilds the dropdownMenu Widget to update the check mark
+                          menuSetState(() {});
+                          _search();
+                        },
+                        child: Container(
+                          height: double.infinity,
+                          padding: const EdgeInsets.symmetric(horizontal: 3.0),
+                          child: Row(
+                            children: [
+                              if (isSelected)
+                                const Icon(Icons.check_box_outlined)
+                              else
+                                const Icon(Icons.check_box_outline_blank),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  raceEnumToDisplayName[race]!,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
         ],
       ),
+      const SizedBox(width: 60,),
       Row(
         children: [
           Padding(
@@ -569,8 +665,7 @@ class _CharacterViewState extends State<CharacterView> {
         label: Tooltip(
           message: AppLocalizations.of(context)!.resetSort,
           child: ImageHelper.getIconButtonFromSvg(
-              'images/svgs/reset.svg', OnepieceColors.fancyBlue, 25, 25,
-                  () {
+              'images/svgs/reset.svg', OnepieceColors.fancyBlue, 25, 25, () {
             sortKeys = [];
             sortableEnumToSortOrderMap = {
               CharacterSortableFieldsEnum.name: null,
@@ -590,6 +685,10 @@ class _CharacterViewState extends State<CharacterView> {
           AppLocalizations.of(context)!.characterName, null, 120, false),
       _createSingleColumn(
           AppLocalizations.of(context)!.hakis, null, 120, false),
+      _createSingleColumn(
+          AppLocalizations.of(context)!.race, null, 120, false),
+      _createSingleColumn(
+          AppLocalizations.of(context)!.battleStyle, null, 120, false),
       _createSingleColumn(
           AppLocalizations.of(context)!.bounty, null, 120, false),
       _createSingleColumn(AppLocalizations.of(context)!.characterAttack,
@@ -688,6 +787,26 @@ class _CharacterViewState extends State<CharacterView> {
       Haki.haoshoku: AppLocalizations.of(context)!.haoshoku,
       Haki.kenbunshoku: AppLocalizations.of(context)!.kenbunshoku,
     };
+    Map<BattleStyle, String> battleStyleToDisplayValue = <BattleStyle, String>{
+      BattleStyle.BODY: AppLocalizations.of(context)!.body,
+      BattleStyle.SCIENCE: AppLocalizations.of(context)!.science,
+      BattleStyle.KATANA: AppLocalizations.of(context)!.katana,
+      BattleStyle.SHOOTER: AppLocalizations.of(context)!.shoot
+    };
+    Map<Race, String> raceEnumToDisplayName = {
+      Race.HUMAN: AppLocalizations.of(context)!.human,
+      Race.FISH_MAN: AppLocalizations.of(context)!.fishman,
+      Race.MERFOLK: AppLocalizations.of(context)!.merfolk,
+      Race.GIANT: AppLocalizations.of(context)!.giant,
+      Race.LONG_ARM: AppLocalizations.of(context)!.longArm,
+      Race.LONG_LEG: AppLocalizations.of(context)!.longLeg,
+      Race.SNAKE_NECK: AppLocalizations.of(context)!.snakeNeck,
+      Race.THREE_EYE: AppLocalizations.of(context)!.threeEye,
+      Race.LUNARIAN: AppLocalizations.of(context)!.lunarian,
+      Race.MINK: AppLocalizations.of(context)!.mink,
+      Race.WORLD_NOBEL: AppLocalizations.of(context)!.worldNobel,
+      Race.DWARVES: AppLocalizations.of(context)!.dwarves
+    };
     return currentCharacterList
         .asMap()
         .entries
@@ -696,7 +815,8 @@ class _CharacterViewState extends State<CharacterView> {
             color: MaterialStateProperty.resolveWith<Color?>(
                 (Set<MaterialState> states) {
               if (entry.key.isEven) {
-                return OnepieceColors.liteFancyGreen; // Use whatever color you need for even rows
+                return OnepieceColors
+                    .liteFancyGreen; // Use whatever color you need for even rows
               }
               return null; // Use default (transparent) color for odd rows
             }),
@@ -751,6 +871,16 @@ class _CharacterViewState extends State<CharacterView> {
               )),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                child:
+                Text(raceEnumToDisplayName[entry.value.race]!),
+              )),
+              DataCell(Padding(
+                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                child:
+                Text(battleStyleToDisplayValue[entry.value.battleStyle]!),
+              )),
+              DataCell(Padding(
+                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
                 child: Text("\$${entry.value.bounty.toString()}"),
               )),
               DataCell(Padding(
@@ -790,105 +920,102 @@ class _CharacterViewState extends State<CharacterView> {
   Widget _getPageFoot(BuildContext context) {
     return StatefulBuilder(
         builder: (BuildContext context, StateSetter footState) {
-          List<Widget> widgetList = [];
-          ElevatedButton prePage = ElevatedButton(
-              style: OnepieceButtonStyle.getDefaultStyle(),
-              onPressed: !preButtonEnabled
-                  ? null
-                  : () {
-                selectedPageIndex = selectedPageIndex - 1;
-                _search();
-              },
-              child: const Icon(Icons.arrow_back));
-          ElevatedButton nextPage = ElevatedButton(
-              style: OnepieceButtonStyle.getDefaultStyle(),
-              onPressed: !nextButtonEnabled
-                  ? null
-                  : () {
-                selectedPageIndex = selectedPageIndex + 1;
-                _search();
-              },
-              child: const Icon(Icons.arrow_forward));
-          Widget pageNumber = SizedBox(
-            width: 35,
-            height: 28,
-            child: TextFormField(
-                style: OnepieceFonts.pageInputStyle,
-                textAlign: TextAlign.center,
-                textAlignVertical: TextAlignVertical.center,
-                decoration: const InputDecoration(
-                  contentPadding: EdgeInsets.fromLTRB(0, 0, 0, 20),
-                  enabledBorder: UnderlineInputBorder(),
-                  focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: OnepieceColors.themeColor)),
-                ),
-                controller: pageNumberController,
-                onChanged: (value) {
-                  footState(() {
-                    if (!DataValidator.isInt(pageNumberController.text.trim())) {
-                      confirmButtonEnabled = false;
-                    } else {
-                      int currentTypedPage =
+      List<Widget> widgetList = [];
+      ElevatedButton prePage = ElevatedButton(
+          style: OnepieceButtonStyle.getDefaultStyle(),
+          onPressed: !preButtonEnabled
+              ? null
+              : () {
+                  selectedPageIndex = selectedPageIndex - 1;
+                  _search();
+                },
+          child: const Icon(Icons.arrow_back));
+      ElevatedButton nextPage = ElevatedButton(
+          style: OnepieceButtonStyle.getDefaultStyle(),
+          onPressed: !nextButtonEnabled
+              ? null
+              : () {
+                  selectedPageIndex = selectedPageIndex + 1;
+                  _search();
+                },
+          child: const Icon(Icons.arrow_forward));
+      Widget pageNumber = SizedBox(
+        width: 35,
+        height: 28,
+        child: TextFormField(
+            style: OnepieceFonts.pageInputStyle,
+            textAlign: TextAlign.center,
+            textAlignVertical: TextAlignVertical.center,
+            decoration: const InputDecoration(
+              contentPadding: EdgeInsets.fromLTRB(0, 0, 0, 20),
+              enabledBorder: UnderlineInputBorder(),
+              focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: OnepieceColors.themeColor)),
+            ),
+            controller: pageNumberController,
+            onChanged: (value) {
+              footState(() {
+                if (!DataValidator.isInt(pageNumberController.text.trim())) {
+                  confirmButtonEnabled = false;
+                } else {
+                  int currentTypedPage =
                       int.parse(pageNumberController.text.trim());
-                      if (currentTypedPage < 1 ||
-                          currentTypedPage > pageNum ||
-                          currentTypedPage == selectedPageIndex) {
-                        confirmButtonEnabled = false;
-                      } else {
-                        confirmButtonEnabled = true;
-                      }
-                    }
-                  });
-                }),
-          );
-          ElevatedButton confirmPage = ElevatedButton(
-              style: OnepieceButtonStyle.getDefaultStyle(),
-              onPressed: !confirmButtonEnabled
-                  ? null
-                  : () {
-                selectedPageIndex = int.parse(pageNumberController.text);
-                confirmButtonEnabled = false;
-                _search();
-              },
+                  if (currentTypedPage < 1 ||
+                      currentTypedPage > pageNum ||
+                      currentTypedPage == selectedPageIndex) {
+                    confirmButtonEnabled = false;
+                  } else {
+                    confirmButtonEnabled = true;
+                  }
+                }
+              });
+            }),
+      );
+      ElevatedButton confirmPage = ElevatedButton(
+          style: OnepieceButtonStyle.getDefaultStyle(),
+          onPressed: !confirmButtonEnabled
+              ? null
+              : () {
+                  selectedPageIndex = int.parse(pageNumberController.text);
+                  confirmButtonEnabled = false;
+                  _search();
+                },
+          child: Text(
+            AppLocalizations.of(context)!.jumpToPage,
+            textAlign: TextAlign.left,
+          ));
+      widgetList.add(Padding(
+        padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
+        child: prePage,
+      ));
+      widgetList.add(pageNumber);
+      var totalPageCount = ClipRRect(
+        borderRadius: BorderRadius.circular(3),
+        child: Container(
+            height: 28,
+            color: OnepieceColors.menuBackgroundColor,
+            alignment: AlignmentDirectional.center,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(3, 0, 3, 3),
               child: Text(
-                AppLocalizations.of(context)!.jumpToPage,
-                textAlign: TextAlign.left,
-              ));
-          widgetList.add(Padding(
-            padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
-            child: prePage,
-          ));
-          widgetList.add(pageNumber);
-          var totalPageCount = ClipRRect(
-            borderRadius: BorderRadius.circular(3),
-            child: Container(
-                height: 28,
-                color: OnepieceColors.menuBackgroundColor,
-                alignment: AlignmentDirectional.center,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(3, 0, 3, 3),
-                  child: Text(
-                    "/$pageNum",
-                    style: OnepieceFonts.contentStyle,
-                  ),
-                )),
-          );
-          widgetList.add(totalPageCount);
-          widgetList.add(Padding(
-            padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-            child: confirmPage,
-          ));
-          widgetList.add(Padding(
-            padding: const EdgeInsets.fromLTRB(8.0, 0, 0, 0),
-            child: nextPage,
-          ));
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: widgetList,
-          );
-        }
-    );
-
-
+                "/$pageNum",
+                style: OnepieceFonts.contentStyle,
+              ),
+            )),
+      );
+      widgetList.add(totalPageCount);
+      widgetList.add(Padding(
+        padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+        child: confirmPage,
+      ));
+      widgetList.add(Padding(
+        padding: const EdgeInsets.fromLTRB(8.0, 0, 0, 0),
+        child: nextPage,
+      ));
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: widgetList,
+      );
+    });
   }
 }
