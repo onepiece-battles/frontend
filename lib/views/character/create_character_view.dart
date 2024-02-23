@@ -106,6 +106,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
   bool _newImagePicked = false;
   String _chosenImageName = "";
   BattleStyle selectedBattleStyle = BattleStyle.BODY;
+  Race selectedRace = Race.HUMAN;
   List<Haki> selectedHakis = [];
 
   final _formKey = GlobalKey<FormState>();
@@ -125,38 +126,14 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
               ),
             ),
             _getAvatar(context),
-            Row(
-              children: [
-                SizedBox(
-                  width: 280,
-                  child: TextFormField(
-                    controller: characterNameCnController,
-                    validator: (value) {
-                      if (value!.isWhiteSpace()) {
-                        return AppLocalizations.of(context)!.requiredField;
-                      }
-                      if (!DataValidator.validName(value)) {
-                        return AppLocalizations.of(context)!.invalidName;
-                      }
-                      return null;
-                    },
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                    maxLength: 10,
-                    maxLengthEnforcement: MaxLengthEnforcement.enforced,
-                    decoration: InputDecoration(
-                      labelText: AppLocalizations.of(context)!.characterName,
-                      prefixIcon: const Icon(Icons.people),
-                    ),
-                  ),
-                ),
-                const SizedBox(
-                  width: 25,
-                ),
-                if (getIt<User>().loginRole == UserRole.NIKA)
+            Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
                   SizedBox(
                     width: 280,
                     child: TextFormField(
-                      controller: characterNameEnController,
+                      controller: characterNameCnController,
                       validator: (value) {
                         if (value!.isWhiteSpace()) {
                           return AppLocalizations.of(context)!.requiredField;
@@ -175,17 +152,61 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                       ),
                     ),
                   ),
-              ],
-            ),
-            Row(
-              children: [
-                _getTypeList(context),
-                const SizedBox(
-                  width: 30,
-                ),
-                _getHakiList(context),
-              ],
-            ),
+                  const SizedBox(
+                    width: 25,
+                  ),
+                  if (getIt<User>().loginRole == UserRole.NIKA)
+                    SizedBox(
+                      width: 280,
+                      child: TextFormField(
+                        controller: characterNameEnController,
+                        validator: (value) {
+                          if (value!.isWhiteSpace()) {
+                            return AppLocalizations.of(context)!.requiredField;
+                          }
+                          if (!DataValidator.validName(value)) {
+                            return AppLocalizations.of(context)!.invalidName;
+                          }
+                          return null;
+                        },
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        maxLength: 10,
+                        maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                        decoration: InputDecoration(
+                          labelText:
+                              AppLocalizations.of(context)!.characterName,
+                          prefixIcon: const Icon(Icons.people),
+                        ),
+                      ),
+                    ),
+                  const SizedBox(
+                    width: 50,
+                  ),
+                  Text(
+                    AppLocalizations.of(context)!.battleStyle,
+                    style: OnepieceFonts.fancyBlueHintFont,
+                  ),
+                  _getBattleStyle(context),
+                  const SizedBox(
+                    width: 30,
+                  ),
+                  Text(
+                    AppLocalizations.of(context)!.race,
+                    style: OnepieceFonts.fancyBlueHintFont,
+                  ),
+                  _getRace(context),
+                  const SizedBox(
+                    width: 30,
+                  ),
+                  Text(
+                    AppLocalizations.of(context)!.hakis,
+                    style: OnepieceFonts.fancyBlueHintFont,
+                  ),
+                  _getHakiList(context),
+                  const SizedBox(
+                    height: 30,
+                  ),
+                ]),
             const Padding(
               padding: EdgeInsets.fromLTRB(0, 0, 0, 8),
               child: Divider(
@@ -437,8 +458,8 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
     );
   }
 
-  Widget _getTypeList(BuildContext context) {
-    Map<BattleStyle, String> enumValueToDisplayValue = {
+  Widget _getBattleStyle(BuildContext context) {
+    Map<BattleStyle, String> battleStyleToDisplayValue = {
       BattleStyle.BODY: AppLocalizations.of(context)!.body,
       BattleStyle.SCIENCE: AppLocalizations.of(context)!.science,
       BattleStyle.KATANA: AppLocalizations.of(context)!.katana,
@@ -454,14 +475,18 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
             AppLocalizations.of(context)!.battleStyle,
             style: OnepieceFonts.dropDownItemStyle,
           ),
-          onChanged: (value) {},
+          onChanged: (value) {
+            setState(() {
+              selectedBattleStyle = value as BattleStyle;
+            });
+          },
           selectedItemBuilder: (context) {
             return BattleStyle.values.map(
               (item) {
                 return Container(
                   alignment: AlignmentDirectional.center,
                   child: Text(
-                    enumValueToDisplayValue[selectedBattleStyle]!,
+                    battleStyleToDisplayValue[selectedBattleStyle]!,
                     style: const TextStyle(
                       fontSize: 16,
                       overflow: TextOverflow.ellipsis,
@@ -487,8 +512,80 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
           items: BattleStyle.values.map((BattleStyle battleStyle) {
             return DropdownMenuItem<BattleStyle>(
               value: battleStyle,
-              enabled: false,
-              child: Text(enumValueToDisplayValue[battleStyle]!,
+              enabled: true,
+              child: Text(battleStyleToDisplayValue[battleStyle]!,
+                  style: OnepieceFonts.dropDownItemStyle),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  Widget _getRace(BuildContext context) {
+    Map<Race, String> raceEnumToDisplayName = {
+      Race.HUMAN: AppLocalizations.of(context)!.human,
+      Race.FISH_MAN: AppLocalizations.of(context)!.fishman,
+      Race.MERFOLK: AppLocalizations.of(context)!.merfolk,
+      Race.GIANT: AppLocalizations.of(context)!.giant,
+      Race.LONG_ARM: AppLocalizations.of(context)!.longArm,
+      Race.LONG_LEG: AppLocalizations.of(context)!.longLeg,
+      Race.SNAKE_NECK: AppLocalizations.of(context)!.snakeNeck,
+      Race.THREE_EYE: AppLocalizations.of(context)!.threeEye,
+      Race.LUNARIAN: AppLocalizations.of(context)!.lunarian,
+      Race.MINK: AppLocalizations.of(context)!.mink,
+      Race.WORLD_NOBEL: AppLocalizations.of(context)!.worldNobel,
+      Race.DWARVES: AppLocalizations.of(context)!.dwarves
+    };
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0, 0, 0, 2),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton2(
+          isExpanded: true,
+          value: selectedRace,
+          hint: Text(
+            AppLocalizations.of(context)!.race,
+            style: OnepieceFonts.dropDownItemStyle,
+          ),
+          onChanged: (value) {
+            setState(() {
+              selectedRace = value as Race;
+            });
+          },
+          selectedItemBuilder: (context) {
+            return BattleStyle.values.map(
+              (item) {
+                return Container(
+                  alignment: AlignmentDirectional.center,
+                  child: Text(
+                    raceEnumToDisplayName[selectedRace]!,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    maxLines: 1,
+                  ),
+                );
+              },
+            ).toList();
+          },
+          buttonStyleData: ButtonStyleData(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            height: 35,
+            width: 280,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(3),
+              color: OnepieceColors.liteFancyGreen,
+            ),
+          ),
+          menuItemStyleData: const MenuItemStyleData(
+            height: 35,
+          ),
+          items: Race.values.map((Race race) {
+            return DropdownMenuItem<Race>(
+              value: race,
+              enabled: true,
+              child: Text(raceEnumToDisplayName[race]!,
                   style: OnepieceFonts.dropDownItemStyle),
             );
           }).toList(),
@@ -503,7 +600,6 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
       Haki.haoshoku: AppLocalizations.of(context)!.haoshoku,
       Haki.kenbunshoku: AppLocalizations.of(context)!.kenbunshoku,
     };
-
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 0, 0, 2),
       child: DropdownButtonHideUnderline(
@@ -697,6 +793,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                     CreateCharacterRequest addCharacterRequest =
                         CreateCharacterRequest(
                       battleStyle: selectedBattleStyle,
+                      race: selectedRace,
                       hakis: selectedHakis,
                       name: RandomStringGenerator.generateI18n(
                           characterNameEnController.text,
