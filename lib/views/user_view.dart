@@ -40,9 +40,9 @@ class _UserViewState extends State<UserView> {
     SortOrder.DESC: 'images/svgs/sort-down-solid.svg'
   };
   Map<UserSortableFieldsEnum, SortOrder?> sortableEnumToSortOrderMap = {
-    UserSortableFieldsEnum.name: null,
+    UserSortableFieldsEnum.username: null,
     UserSortableFieldsEnum.loginRole: null,
-    UserSortableFieldsEnum.email: null,
+    UserSortableFieldsEnum.nickname: null,
   };
   List<UserRole> selectedUserRoles = [];
   ScrollController scrollController = ScrollController();
@@ -306,9 +306,9 @@ class _UserViewState extends State<UserView> {
               // filter will not be cleared
               sortKeys = [];
               sortableEnumToSortOrderMap = {
-                UserSortableFieldsEnum.name: null,
+                UserSortableFieldsEnum.nickname: null,
+                UserSortableFieldsEnum.username: null,
                 UserSortableFieldsEnum.loginRole: null,
-                UserSortableFieldsEnum.email: null,
               };
               _search();
             },
@@ -317,9 +317,9 @@ class _UserViewState extends State<UserView> {
       ),
       _createSingleColumn(AppLocalizations.of(context)!.name, null, 120),
       _createSingleColumn(AppLocalizations.of(context)!.email,
-          UserSortableFieldsEnum.email, 130),
-      _createSingleColumn(AppLocalizations.of(context)!.emailStatus, null, 80),
-      _createSingleColumn(AppLocalizations.of(context)!.status, null, 80),
+          UserSortableFieldsEnum.username, 130),
+      _createSingleColumn(AppLocalizations.of(context)!.emailStatus, null, 120),
+      _createSingleColumn(AppLocalizations.of(context)!.loginStatus, null, 80),
       _createSingleColumn(AppLocalizations.of(context)!.loginRole, null, null),
       _createSingleColumn(
           AppLocalizations.of(context)!.allUserRoles, null, 150),
@@ -402,17 +402,15 @@ class _UserViewState extends State<UserView> {
       UserRole.VISITOR: AppLocalizations.of(context)!.roleVisitor,
       UserRole.ADMIN: AppLocalizations.of(context)!.roleAdmin
     };
-
     Map<AccountStatus, String> accountStatusEnumToDisplayValue = {
       AccountStatus.loggedIn: AppLocalizations.of(context)!.accountLoggedIn,
       AccountStatus.loggedOut: AppLocalizations.of(context)!.accountLoggedOut,
       AccountStatus.stopped: AppLocalizations.of(context)!.accountStopped,
       AccountStatus.closed: AppLocalizations.of(context)!.accountClosed,
     };
-
     Map<bool, Widget> boolToEmailRowMap = {
       true: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Text(
             AppLocalizations.of(context)!.verified,
@@ -426,7 +424,7 @@ class _UserViewState extends State<UserView> {
         ],
       ),
       false: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Text(
             AppLocalizations.of(context)!.notVerified,
