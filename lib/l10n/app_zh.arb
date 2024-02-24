@@ -173,6 +173,7 @@
   "speedStrengthen": "速度增益",
   "startBattle": "开始战斗",
   "status": "状态",
+  "loginStatus": "登陆状态",
   "statusBackLogged": "暂不处理",
   "statusCreated": "已创建",
   "statusInProgress": "处理中",

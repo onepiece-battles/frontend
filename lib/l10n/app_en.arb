@@ -240,5 +240,6 @@
   "race": "Race",
   "none": "None",
   "starterName": "starter name",
-  "receiverName": "receiver name"
+  "receiverName": "receiver name",
+  "loginStatus": "登陆状态"
 }
