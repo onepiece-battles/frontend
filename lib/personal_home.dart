@@ -8,7 +8,6 @@ import 'package:one_piece_battles_flutter/repository/group_dao.dart';
 import 'package:one_piece_battles_flutter/utils/base64_helper.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
-
 import 'constants/onepiece_colors.dart';
 import 'constants/onepiece_fonts.dart';
 
@@ -23,6 +22,7 @@ class UserHome extends StatefulWidget {
 }
 
 class _UserHomeState extends State<UserHome> {
+  late final Future myFuture;
   List<CharacterListView> characters = [];
   List<GroupListView> groups = [];
   List<BattleListView> battles = [];
@@ -56,17 +56,25 @@ class _UserHomeState extends State<UserHome> {
   }
 
   _updateData(List<dynamic> widgets) {
+    debugPrint("start updating data");
     characters = (widgets[0] as ListCharacterResponse).characters;
     groups = (widgets[1] as ListGroupResponse).groups;
     battles = (widgets[2] as ListBattleResponse).battles;
   }
 
   @override
+  void initState() {
+    super.initState();
+    myFuture = Future.wait([listCharacters(), listGroups(), listBattles()]);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: Future.wait([listCharacters(), listGroups(), listBattles()]),
+        future: myFuture as Future<List<dynamic>>,
         builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
+            debugPrint("build main page");
             _updateData(snapshot.data!);
             return SingleChildScrollView(
               scrollDirection: Axis.vertical,
