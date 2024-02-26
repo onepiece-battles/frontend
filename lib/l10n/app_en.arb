@@ -241,5 +241,6 @@
   "none": "None",
   "starterName": "starter name",
   "receiverName": "receiver name",
-  "loginStatus": "登陆状态"
+  "loginStatus": "登陆状态",
+  "showAllRoleResources": "Show resources created by all user roles"
 }
