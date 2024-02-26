@@ -165,7 +165,7 @@ class _UserViewState extends State<UserView> {
               child: TextFormField(
                 controller: searchNameController,
                 onChanged: (value) {
-                  userFilter.name = value;
+                  userFilter.nickname = value;
                   _search();
                 },
                 decoration: InputDecoration(
@@ -180,6 +180,33 @@ class _UserViewState extends State<UserView> {
                       borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
                   prefixIcon: const Icon(Icons.search),
                   labelText: AppLocalizations.of(context)!.name,
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(0, 0, 6, 0),
+            child: SizedBox(
+              width: 230,
+              height: 35,
+              child: TextFormField(
+                controller: searchEmailController,
+                onChanged: (value) {
+                  userFilter.username = value;
+                  _search();
+                },
+                decoration: InputDecoration(
+                  floatingLabelBehavior: FloatingLabelBehavior.never,
+                  disabledBorder: const OutlineInputBorder(
+                      borderSide:
+                      BorderSide(color: OnepieceColors.menuHoverColor)),
+                  enabledBorder: const OutlineInputBorder(
+                      borderSide:
+                      BorderSide(color: OnepieceColors.menuHoverColor)),
+                  focusedBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
+                  prefixIcon: const Icon(Icons.search),
+                  labelText: AppLocalizations.of(context)!.email,
                 ),
               ),
             ),
@@ -499,12 +526,12 @@ class _UserViewState extends State<UserView> {
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
                 child: Text(DateHelper.getFormattedDatetimeFromTimestamp(
-                    user.creationTimestamp!, context)),
+                    user.modificationRecord!.actionTimestamp!, context)),
               )),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
                 child: Text(DateHelper.getFormattedDatetimeFromTimestamp(
-                    user.creationTimestamp!, context)),
+                    user.creationRecord!.actionTimestamp!, context)),
               )),
             ],
           ),

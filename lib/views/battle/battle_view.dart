@@ -80,8 +80,6 @@ class _BattleViewState extends State<BattleView> {
         pageIndex: selectedPageIndex,
         sortKeys: sortKeys,
         battleFilter: battleFilter);
-    debugPrint('battle filter');
-    debugPrint(battleFilter.toString());
     Future<ListBattleResponse?> response =
         getIt<BattleDao>().listBattles(request);
     response.then((value) => {
@@ -699,14 +697,14 @@ class _BattleViewState extends State<BattleView> {
                         child: FittedBox(
                           fit: BoxFit.fill,
                           child: Image.memory(
-                              Base64Helper.decode(entry.value.starterImage!)),
+                              Base64Helper.decode(entry.value.starter!.profileImage!)),
                         ),
                       ),
                     ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
                       child: Text(I18nHelper.getDisplayNameFromI18n(
-                          entry.value.starterName)),
+                          entry.value.starter!.name)),
                     )
                   ],
                 ),
@@ -730,14 +728,14 @@ class _BattleViewState extends State<BattleView> {
                         child: FittedBox(
                           fit: BoxFit.fill,
                           child: Image.memory(
-                              Base64Helper.decode(entry.value.receiverImage!)),
+                              Base64Helper.decode(entry.value.receiver!.profileImage!)),
                         ),
                       ),
                     ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
                       child: Text(I18nHelper.getDisplayNameFromI18n(
-                          entry.value.receiverName)),
+                          entry.value.receiver!.name)),
                     )
                   ],
                 ),
@@ -766,19 +764,19 @@ class _BattleViewState extends State<BattleView> {
                             fit: BoxFit.fill,
                             child: Image.memory(Base64Helper.decode(
                                 entry.value.winnerId == entry.value.starterId
-                                    ? entry.value.starterImage!
-                                    : entry.value.receiverImage!)),
+                                    ? entry.value.starter!.profileImage!
+                                    : entry.value.receiver!.profileImage!)),
                           ),
                         ),
                 ),
               ),
               _getDataCell(
                   battleStatusToDisplayName[entry.value.battleStatus]!),
-              _getDataCell(entry.value.creator.toString()),
+              _getDataCell(entry.value.creationRecord!.nickname.toString()),
               _getDataCell(DateHelper.getFormattedDatetimeFromTimestamp(
-                  entry.value.creationTimestamp!, context)),
+                  entry.value.creationRecord!.actionTimestamp!, context)),
               _getDataCell(DateHelper.getFormattedDatetimeFromTimestamp(
-                  entry.value.modificationTimestamp!, context)),
+                  entry.value.modificationRecord!.actionTimestamp!, context)),
             ],
           ),
         )

@@ -164,16 +164,6 @@ class _BattleDetailViewState extends State<BattleDetailView> {
         });
   }
 
-  Widget _getHeader(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(0, 0, 0, 20),
-      child: Text(
-        AppLocalizations.of(context)!.battleProcess,
-        style: OnepieceFonts.headerStyle,
-      ),
-    );
-  }
-
   Widget _getWinnerTag(BuildContext context) {
     return Container(
       margin: const EdgeInsets.fromLTRB(0, 20, 0, 10),

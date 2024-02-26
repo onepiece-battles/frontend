@@ -1366,19 +1366,19 @@ class _CharacterDetailState extends State<CharacterDetail> {
                   _getDataCell("${entry.key + 1}", false),
                   _getDataCell(
                       I18nHelper.getDisplayNameFromI18n(
-                          entry.value.starterName),
+                          entry.value.starter!.name),
                       character.id == entry.value.starterId),
                   _getDataCell(
                       I18nHelper.getDisplayNameFromI18n(
-                          entry.value.receiverName),
+                          entry.value.receiver!.name),
                       character.id == entry.value.receiverId),
                   _getDataCell(
                       entry.value.winnerId != null
                           ? (entry.value.winnerId == entry.value.starterId
                               ? I18nHelper.getDisplayNameFromI18n(
-                                  entry.value.starterName)
+                                  entry.value.starter!.name)
                               : I18nHelper.getDisplayNameFromI18n(
-                                  entry.value.receiverName))
+                                  entry.value.receiver!.name))
                           : "",
                       false),
                   _getDataCell(

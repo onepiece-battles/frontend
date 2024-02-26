@@ -74,7 +74,6 @@ class _UserHomeState extends State<UserHome> {
         future: myFuture as Future<List<dynamic>>,
         builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
-            debugPrint("build main page");
             _updateData(snapshot.data!);
             return SingleChildScrollView(
               scrollDirection: Axis.vertical,
@@ -334,7 +333,7 @@ class _UserHomeState extends State<UserHome> {
                               child: FittedBox(
                                 fit: BoxFit.fill,
                                 child: Image.memory(
-                                    Base64Helper.decode(battle.starterImage!)),
+                                    Base64Helper.decode(battle.starter!.profileImage!)),
                               ),
                             ),
                           ),
@@ -358,7 +357,7 @@ class _UserHomeState extends State<UserHome> {
                               child: FittedBox(
                                 fit: BoxFit.fill,
                                 child: Image.memory(
-                                    Base64Helper.decode(battle.receiverImage!)),
+                                    Base64Helper.decode(battle.receiver!.profileImage!)),
                               ),
                             ),
                           ),

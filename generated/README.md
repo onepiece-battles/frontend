@@ -109,6 +109,7 @@ Class | Method | HTTP request | Description
 ## Documentation For Models
 
  - [AccountStatus](doc//AccountStatus.md)
+ - [ActionRecord](doc//ActionRecord.md)
  - [AddBattleRequest](doc//AddBattleRequest.md)
  - [AddRoleRequest](doc//AddRoleRequest.md)
  - [AddRoleResponse](doc//AddRoleResponse.md)
@@ -189,6 +190,7 @@ Class | Method | HTTP request | Description
  - [ImageMeta](doc//ImageMeta.md)
  - [Issue](doc//Issue.md)
  - [IssueFilter](doc//IssueFilter.md)
+ - [IssueListView](doc//IssueListView.md)
  - [IssueSortableField](doc//IssueSortableField.md)
  - [IssueSortableFieldEnum](doc//IssueSortableFieldEnum.md)
  - [IssueStatus](doc//IssueStatus.md)
