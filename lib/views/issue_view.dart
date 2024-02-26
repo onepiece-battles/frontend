@@ -25,7 +25,7 @@ class _IssueViewState extends State<IssueView> {
   TextEditingController searchHeaderController = TextEditingController();
   TextEditingController pageNumberController = TextEditingController(text: "0");
   IssueFilter issueFilter = IssueFilter();
-  List<Issue> currentIssueList = [];
+  List<IssueListView> currentIssueList = [];
   List<IssueSortableField> sortKeys = [];
 
   // sorting related fields
@@ -525,11 +525,11 @@ class _IssueViewState extends State<IssueView> {
                   issueStatusToDisplayValue[entry.value.issueStatus]!, null),
               _getDataCell(
                   DateHelper.getFormattedDatetimeFromTimestamp(
-                      entry.value.creationTimestamp!, context),
+                      entry.value.creationRecord!.actionTimestamp!, context),
                   null),
               _getDataCell(
                   DateHelper.getFormattedDatetimeFromTimestamp(
-                      entry.value.modificationTimestamp!, context),
+                      entry.value.modificationRecord!.actionTimestamp!, context),
                   null),
             ],
           ),

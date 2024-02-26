@@ -560,14 +560,14 @@ class _GroupViewState extends State<GroupView> {
                       enumValueToDisplayValue[entry.value.groupCategory!]!))),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: Text(entry.value.creator!),
+                child: Text(entry.value.creationRecord!.nickname!),
               )),
               DataCell(
                 Padding(
                   padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
                   child: SizedBox(
                     width: 700,
-                    child: _createCharacterList(entry.value.characters),
+                    child: _createCharacterList(entry.value.characterInGroup),
                   ),
                 ),
               ),
