@@ -247,7 +247,8 @@ class HomePageState extends State<HomePage> {
                       UpdateLoginRoleRequest(role: selectedRole);
                   getIt<UserDao>().updateLoginRole(request).then((value) {
                     var currentUser = getIt<User>();
-                    currentUser.loginRole = value!.currentRole;
+                    currentUser.loginRoleId = value!.currentRoleId;
+                    currentUser.loginRole = value.currentRole;
                     currentUser.loginRoleResourcesPermissionMap =
                         value.resourcePermissionMap;
                     ResourcePermissionManager.updateUserCache(currentUser);
@@ -257,10 +258,10 @@ class HomePageState extends State<HomePage> {
                           .map((e) => e.resourceType!)
                           .where((e) => !notShownResources.contains(e))
                           .toList();
-                      context.goNamed('userHome',
-                          extra: getIt<User>().id,
-                          pathParameters: {'name': getIt<User>().nickname});
                     });
+                    context.replaceNamed('userHome',
+                        extra: getIt<User>().id,
+                        pathParameters: {'name': getIt<User>().nickname});
                   });
                 },
                 buttonStyleData: ButtonStyleData(

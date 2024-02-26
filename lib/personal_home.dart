@@ -22,7 +22,8 @@ class UserHome extends StatefulWidget {
 }
 
 class _UserHomeState extends State<UserHome> {
-  late final Future myFuture;
+  late Future myFuture;
+  bool currentRoleOnly = true;
   List<CharacterListView> characters = [];
   List<GroupListView> groups = [];
   List<BattleListView> battles = [];
@@ -32,7 +33,9 @@ class _UserHomeState extends State<UserHome> {
         pageIndex: 1,
         sortKeys: [],
         characterFilter: CharacterFilter(
-            languageCode: I18nHelper.getLanguageCode(), userId: widget.userId));
+            languageCode: I18nHelper.getLanguageCode(),
+            userId: widget.userId,
+            roleId: currentRoleOnly ? getIt<User>().loginRoleId : null));
     return await getIt<CharacterDao>().listCharacter(listCharacterRequest);
   }
 
@@ -42,7 +45,9 @@ class _UserHomeState extends State<UserHome> {
         pageIndex: 1,
         sortKeys: [],
         groupFilter: GroupFilter(
-            languageCode: I18nHelper.getLanguageCode(), userId: widget.userId));
+            languageCode: I18nHelper.getLanguageCode(),
+            userId: widget.userId,
+            roleId: currentRoleOnly ? getIt<User>().loginRoleId : null));
     return await getIt<GroupDao>().listGroups(listGroupRequest);
   }
 
@@ -51,7 +56,9 @@ class _UserHomeState extends State<UserHome> {
         pageSize: 10,
         pageIndex: 1,
         sortKeys: [],
-        battleFilter: BattleFilter(userId: widget.userId));
+        battleFilter: BattleFilter(
+            userId: widget.userId,
+            roleId: currentRoleOnly ? getIt<User>().loginRoleId : null));
     return await getIt<BattleDao>().listBattles(request);
   }
 
@@ -84,6 +91,45 @@ class _UserHomeState extends State<UserHome> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       _getHeader(context),
+                      // show only if this user has more than one role
+                      if (getIt<User>().userRoles.length > 1)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: SizedBox(
+                            height: 35,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Text(
+                                  AppLocalizations.of(context)!
+                                      .showAllRoleResources,
+                                  style: OnepieceFonts.smallContentStyle,
+                                ),
+                                IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      currentRoleOnly = !currentRoleOnly;
+                                      myFuture = Future.wait([listCharacters(), listGroups(), listBattles()]);
+                                    });
+                                  },
+                                  splashRadius: 1,
+                                  icon: !currentRoleOnly
+                                      ? const Icon(
+                                          Icons.check_box,
+                                          color: OnepieceColors.fancyBlue,
+                                          size: 20,
+                                        )
+                                      : const Icon(
+                                          Icons.check_box_outline_blank,
+                                          color: OnepieceColors.fancyBlue,
+                                          size: 20,
+                                        ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       Padding(
                         padding: const EdgeInsets.fromLTRB(0, 20, 0, 10),
                         child: Text(
@@ -332,8 +378,8 @@ class _UserHomeState extends State<UserHome> {
                               ),
                               child: FittedBox(
                                 fit: BoxFit.fill,
-                                child: Image.memory(
-                                    Base64Helper.decode(battle.starter!.profileImage!)),
+                                child: Image.memory(Base64Helper.decode(
+                                    battle.starter!.profileImage!)),
                               ),
                             ),
                           ),
@@ -356,8 +402,8 @@ class _UserHomeState extends State<UserHome> {
                               ),
                               child: FittedBox(
                                 fit: BoxFit.fill,
-                                child: Image.memory(
-                                    Base64Helper.decode(battle.receiver!.profileImage!)),
+                                child: Image.memory(Base64Helper.decode(
+                                    battle.receiver!.profileImage!)),
                               ),
                             ),
                           ),

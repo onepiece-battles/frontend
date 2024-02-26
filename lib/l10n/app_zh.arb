@@ -241,5 +241,6 @@
   "race": "种族",
   "none": "无",
   "starterName": "发起者名字",
-  "receiverName": "接收者名字"
+  "receiverName": "接收者名字",
+  "showAllRoleResources": "显示用户所有角色资源"
 }
