@@ -51,6 +51,7 @@ class HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    // todo(yichi): replace RawKeyboardListener with un-deprecated ones.
     return RawKeyboardListener(
         focusNode: FocusNode(),
         onKey: (event) {
@@ -395,7 +396,9 @@ class HomePageState extends State<HomePage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                UserNavigation(context: context,),
+                UserNavigation(
+                  context: context,
+                ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -548,6 +551,11 @@ class HomePageState extends State<HomePage> {
     };
     var currentLoginRoleResources =
         loginRoleResources.map((e) => e.toString()).toList();
+    // filter out user resource if the role is not nika/admin
+    if (getIt<User>().loginRole != UserRole.NIKA &&
+        getIt<User>().loginRole != UserRole.ADMIN) {
+      currentLoginRoleResources.remove(ResourceType.USER.toString());
+    }
     return ListView.builder(
       shrinkWrap: true,
       itemCount: currentLoginRoleResources.length,
