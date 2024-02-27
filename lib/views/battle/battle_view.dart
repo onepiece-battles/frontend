@@ -53,10 +53,10 @@ class _BattleViewState extends State<BattleView> {
 
   List<BattleSortableField> sortKeys = [];
 
-  int selectedPageIndex = 1;
-  int pageNum = 0;
-  int pageSize = 10;
-  int totalSize = 0;
+  int selectedPageNum = 1;
+  int totalPageNum = 0;
+  int itemCountPerPage = 10;
+  int totalItemCount = 0;
   bool preButtonEnabled = false;
   bool nextButtonEnabled = false;
   bool confirmButtonEnabled = false;
@@ -73,11 +73,11 @@ class _BattleViewState extends State<BattleView> {
   void _search() {
     battleFilter.languageCode = I18nHelper.getLanguageCode();
     battleFilter.starterName = starterNameController.text;
-    battleFilter.receiverName= receiverNameController.text;
+    battleFilter.receiverName = receiverNameController.text;
 
     ListBattleRequest request = ListBattleRequest(
-        pageSize: pageSize,
-        pageIndex: selectedPageIndex,
+        pageSize: itemCountPerPage,
+        pageIndex: selectedPageNum,
         sortKeys: sortKeys,
         battleFilter: battleFilter);
     Future<ListBattleResponse?> response =
@@ -88,16 +88,16 @@ class _BattleViewState extends State<BattleView> {
             if (currentBattleList.isEmpty) {
               pageNumberController.text = "0";
             } else {
-              pageNumberController.text = selectedPageIndex.toString();
+              pageNumberController.text = selectedPageNum.toString();
             }
-            totalSize = value.totalSize!;
-            pageNum = (totalSize / 10).ceil();
-            if (selectedPageIndex <= 1) {
+            totalItemCount = value.totalSize!;
+            totalPageNum = (totalItemCount / itemCountPerPage).ceil();
+            if (selectedPageNum <= 1) {
               preButtonEnabled = false;
             } else {
               preButtonEnabled = true;
             }
-            if (selectedPageIndex >= pageNum) {
+            if (selectedPageNum >= totalPageNum) {
               nextButtonEnabled = false;
             } else {
               nextButtonEnabled = true;
@@ -135,10 +135,11 @@ class _BattleViewState extends State<BattleView> {
                   const SizedBox(
                     height: 15,
                   ),
-                  SizedBox(
-                    width: 1500,
-                    child: Center(child: _getPageFoot(context)),
-                  )
+                  if (totalPageNum > 1)
+                    SizedBox(
+                      width: 1500,
+                      child: Center(child: _getPageFoot(context)),
+                    )
                 ],
               ),
             ],
@@ -196,12 +197,13 @@ class _BattleViewState extends State<BattleView> {
                       floatingLabelBehavior: FloatingLabelBehavior.never,
                       disabledBorder: const OutlineInputBorder(
                           borderSide:
-                          BorderSide(color: OnepieceColors.menuHoverColor)),
+                              BorderSide(color: OnepieceColors.menuHoverColor)),
                       enabledBorder: const OutlineInputBorder(
                           borderSide:
-                          BorderSide(color: OnepieceColors.menuHoverColor)),
+                              BorderSide(color: OnepieceColors.menuHoverColor)),
                       focusedBorder: const OutlineInputBorder(
-                          borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
+                          borderSide:
+                              BorderSide(color: OnepieceColors.fancyGreen)),
                       prefixIcon: const Icon(Icons.search),
                       labelText: AppLocalizations.of(context)!.starterName,
                     ),
@@ -223,12 +225,13 @@ class _BattleViewState extends State<BattleView> {
                       floatingLabelBehavior: FloatingLabelBehavior.never,
                       disabledBorder: const OutlineInputBorder(
                           borderSide:
-                          BorderSide(color: OnepieceColors.menuHoverColor)),
+                              BorderSide(color: OnepieceColors.menuHoverColor)),
                       enabledBorder: const OutlineInputBorder(
                           borderSide:
-                          BorderSide(color: OnepieceColors.menuHoverColor)),
+                              BorderSide(color: OnepieceColors.menuHoverColor)),
                       focusedBorder: const OutlineInputBorder(
-                          borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
+                          borderSide:
+                              BorderSide(color: OnepieceColors.fancyGreen)),
                       prefixIcon: const Icon(Icons.search),
                       labelText: AppLocalizations.of(context)!.receiverName,
                     ),
@@ -696,8 +699,8 @@ class _BattleViewState extends State<BattleView> {
                         ),
                         child: FittedBox(
                           fit: BoxFit.fill,
-                          child: Image.memory(
-                              Base64Helper.decode(entry.value.starter!.profileImage!)),
+                          child: Image.memory(Base64Helper.decode(
+                              entry.value.starter!.profileImage!)),
                         ),
                       ),
                     ),
@@ -727,8 +730,8 @@ class _BattleViewState extends State<BattleView> {
                         ),
                         child: FittedBox(
                           fit: BoxFit.fill,
-                          child: Image.memory(
-                              Base64Helper.decode(entry.value.receiver!.profileImage!)),
+                          child: Image.memory(Base64Helper.decode(
+                              entry.value.receiver!.profileImage!)),
                         ),
                       ),
                     ),
@@ -770,8 +773,8 @@ class _BattleViewState extends State<BattleView> {
                         ),
                 ),
               ),
-              _getDataCell(
-                  battleStatusToDisplayName[entry.value.battleExecution!.battleStatus]!),
+              _getDataCell(battleStatusToDisplayName[
+                  entry.value.battleExecution!.battleStatus]!),
               _getDataCell(entry.value.creationRecord!.nickname.toString()),
               _getDataCell(DateHelper.getFormattedDatetimeFromTimestamp(
                   entry.value.creationRecord!.actionTimestamp!, context)),
@@ -799,7 +802,7 @@ class _BattleViewState extends State<BattleView> {
           onPressed: !preButtonEnabled
               ? null
               : () {
-                  selectedPageIndex = selectedPageIndex - 1;
+                  selectedPageNum = selectedPageNum - 1;
                   _search();
                 },
           child: const Icon(Icons.arrow_back));
@@ -808,7 +811,7 @@ class _BattleViewState extends State<BattleView> {
           onPressed: !nextButtonEnabled
               ? null
               : () {
-                  selectedPageIndex = selectedPageIndex + 1;
+                  selectedPageNum = selectedPageNum + 1;
                   _search();
                 },
           child: const Icon(Icons.arrow_forward));
@@ -834,8 +837,8 @@ class _BattleViewState extends State<BattleView> {
                   int currentTypedPage =
                       int.parse(pageNumberController.text.trim());
                   if (currentTypedPage < 1 ||
-                      currentTypedPage > pageNum ||
-                      currentTypedPage == selectedPageIndex) {
+                      currentTypedPage > totalPageNum ||
+                      currentTypedPage == selectedPageNum) {
                     confirmButtonEnabled = false;
                   } else {
                     confirmButtonEnabled = true;
@@ -849,7 +852,7 @@ class _BattleViewState extends State<BattleView> {
           onPressed: !confirmButtonEnabled
               ? null
               : () {
-                  selectedPageIndex = int.parse(pageNumberController.text);
+                  selectedPageNum = int.parse(pageNumberController.text);
                   _search();
                   confirmButtonEnabled = false;
                 },
@@ -871,7 +874,7 @@ class _BattleViewState extends State<BattleView> {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(3, 0, 3, 3),
               child: Text(
-                "/$pageNum",
+                "/$totalPageNum",
                 style: OnepieceFonts.contentStyle,
               ),
             )),

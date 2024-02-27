@@ -50,10 +50,10 @@ class _FruitViewState extends State<FruitView> {
     SortOrder.ASC: 'images/svgs/sort-up-solid.svg',
     SortOrder.DESC: 'images/svgs/sort-down-solid.svg'
   };
-  int selectedPageIndex = 1;
-  int pageNum = 0;
-  int pageSize = 10;
-  int totalSize = 0;
+  int selectedPageNum = 1;
+  int totalPageNum = 0;
+  int itemCountPerPage = 10;
+  int totalItemCount = 0;
   bool preButtonEnabled = false;
   bool nextButtonEnabled = false;
   bool confirmButtonEnabled = false;
@@ -70,8 +70,8 @@ class _FruitViewState extends State<FruitView> {
   void _search() {
     fruitFilter.languageCode = I18nHelper.getLanguageCode();
     ListFruitRequest request = ListFruitRequest(
-        pageSize: pageSize,
-        pageIndex: selectedPageIndex,
+        pageSize: itemCountPerPage,
+        pageIndex: selectedPageNum,
         sortKeys: sortKeys,
         fruitFilter: fruitFilter);
     Future<ListFruitResponse?> response = getIt<FruitDao>().list(request);
@@ -83,16 +83,16 @@ class _FruitViewState extends State<FruitView> {
             if (currentFruitList.isEmpty) {
               pageNumberController.text = "0";
             } else {
-              pageNumberController.text = selectedPageIndex.toString();
+              pageNumberController.text = selectedPageNum.toString();
             }
-            totalSize = value.totalSize!;
-            pageNum = (totalSize / 10).ceil();
-            if (selectedPageIndex <= 1) {
+            totalItemCount = value.totalSize!;
+            totalPageNum = (totalItemCount / itemCountPerPage).ceil();
+            if (selectedPageNum <= 1) {
               preButtonEnabled = false;
             } else {
               preButtonEnabled = true;
             }
-            if (selectedPageIndex >= pageNum) {
+            if (selectedPageNum >= totalPageNum) {
               nextButtonEnabled = false;
             } else {
               nextButtonEnabled = true;
@@ -130,10 +130,11 @@ class _FruitViewState extends State<FruitView> {
               const SizedBox(
                 height: 15,
               ),
-              SizedBox(
-                width: 1500,
-                child: Center(child: _getPageFoot(context)),
-              )
+              if (totalPageNum > 1)
+                SizedBox(
+                  width: 1500,
+                  child: Center(child: _getPageFoot(context)),
+                )
             ],
           ),
         ),
@@ -449,8 +450,7 @@ class _FruitViewState extends State<FruitView> {
           ),
         ),
       ),
-      _createSingleColumn(
-          AppLocalizations.of(context)!.name, null, 80),
+      _createSingleColumn(AppLocalizations.of(context)!.name, null, 80),
       _createSingleColumn(AppLocalizations.of(context)!.fruitType,
           FruitSortableFieldsEnum.fruitType, 150),
       _createSingleColumn(AppLocalizations.of(context)!.attackStrengthen,
@@ -594,105 +594,102 @@ class _FruitViewState extends State<FruitView> {
   Widget _getPageFoot(BuildContext context) {
     return StatefulBuilder(
         builder: (BuildContext context, StateSetter footState) {
-          List<Widget> widgetList = [];
-          ElevatedButton prePage = ElevatedButton(
-              style: OnepieceButtonStyle.getDefaultStyle(),
-              onPressed: !preButtonEnabled
-                  ? null
-                  : () {
-                selectedPageIndex = selectedPageIndex - 1;
-                _search();
-              },
-              child: const Icon(Icons.arrow_back));
-          ElevatedButton nextPage = ElevatedButton(
-              style: OnepieceButtonStyle.getDefaultStyle(),
-              onPressed: !nextButtonEnabled
-                  ? null
-                  : () {
-                selectedPageIndex = selectedPageIndex + 1;
-                _search();
-              },
-              child: const Icon(Icons.arrow_forward));
-          Widget pageNumber = SizedBox(
-            width: 35,
-            height: 28,
-            child: TextFormField(
-                style: OnepieceFonts.pageInputStyle,
-                textAlign: TextAlign.center,
-                textAlignVertical: TextAlignVertical.center,
-                decoration: const InputDecoration(
-                  contentPadding: EdgeInsets.fromLTRB(0, 0, 0, 20),
-                  enabledBorder: UnderlineInputBorder(),
-                  focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: OnepieceColors.themeColor)),
-                ),
-                controller: pageNumberController,
-                onChanged: (value) {
-                  footState(() {
-                    if (!DataValidator.isInt(pageNumberController.text.trim())) {
-                      confirmButtonEnabled = false;
-                    } else {
-                      int currentTypedPage =
+      List<Widget> widgetList = [];
+      ElevatedButton prePage = ElevatedButton(
+          style: OnepieceButtonStyle.getDefaultStyle(),
+          onPressed: !preButtonEnabled
+              ? null
+              : () {
+                  selectedPageNum = selectedPageNum - 1;
+                  _search();
+                },
+          child: const Icon(Icons.arrow_back));
+      ElevatedButton nextPage = ElevatedButton(
+          style: OnepieceButtonStyle.getDefaultStyle(),
+          onPressed: !nextButtonEnabled
+              ? null
+              : () {
+                  selectedPageNum = selectedPageNum + 1;
+                  _search();
+                },
+          child: const Icon(Icons.arrow_forward));
+      Widget pageNumber = SizedBox(
+        width: 35,
+        height: 28,
+        child: TextFormField(
+            style: OnepieceFonts.pageInputStyle,
+            textAlign: TextAlign.center,
+            textAlignVertical: TextAlignVertical.center,
+            decoration: const InputDecoration(
+              contentPadding: EdgeInsets.fromLTRB(0, 0, 0, 20),
+              enabledBorder: UnderlineInputBorder(),
+              focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: OnepieceColors.themeColor)),
+            ),
+            controller: pageNumberController,
+            onChanged: (value) {
+              footState(() {
+                if (!DataValidator.isInt(pageNumberController.text.trim())) {
+                  confirmButtonEnabled = false;
+                } else {
+                  int currentTypedPage =
                       int.parse(pageNumberController.text.trim());
-                      if (currentTypedPage < 1 ||
-                          currentTypedPage > pageNum ||
-                          currentTypedPage == selectedPageIndex) {
-                        confirmButtonEnabled = false;
-                      } else {
-                        confirmButtonEnabled = true;
-                      }
-                    }
-                  });
-                }),
-          );
-          ElevatedButton confirmPage = ElevatedButton(
-              style: OnepieceButtonStyle.getDefaultStyle(),
-              onPressed: !confirmButtonEnabled
-                  ? null
-                  : () {
-                selectedPageIndex = int.parse(pageNumberController.text);
-                confirmButtonEnabled=false;
-                _search();
-              },
+                  if (currentTypedPage < 1 ||
+                      currentTypedPage > totalPageNum ||
+                      currentTypedPage == selectedPageNum) {
+                    confirmButtonEnabled = false;
+                  } else {
+                    confirmButtonEnabled = true;
+                  }
+                }
+              });
+            }),
+      );
+      ElevatedButton confirmPage = ElevatedButton(
+          style: OnepieceButtonStyle.getDefaultStyle(),
+          onPressed: !confirmButtonEnabled
+              ? null
+              : () {
+                  selectedPageNum = int.parse(pageNumberController.text);
+                  confirmButtonEnabled = false;
+                  _search();
+                },
+          child: Text(
+            AppLocalizations.of(context)!.jumpToPage,
+            textAlign: TextAlign.left,
+          ));
+      widgetList.add(Padding(
+        padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
+        child: prePage,
+      ));
+      widgetList.add(pageNumber);
+      var totalPageCount = ClipRRect(
+        borderRadius: BorderRadius.circular(3),
+        child: Container(
+            height: 28,
+            color: OnepieceColors.menuBackgroundColor,
+            alignment: AlignmentDirectional.center,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(3, 0, 3, 3),
               child: Text(
-                AppLocalizations.of(context)!.jumpToPage,
-                textAlign: TextAlign.left,
-              ));
-          widgetList.add(Padding(
-            padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
-            child: prePage,
-          ));
-          widgetList.add(pageNumber);
-          var totalPageCount = ClipRRect(
-            borderRadius: BorderRadius.circular(3),
-            child: Container(
-                height: 28,
-                color: OnepieceColors.menuBackgroundColor,
-                alignment: AlignmentDirectional.center,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(3, 0, 3, 3),
-                  child: Text(
-                    "/$pageNum",
-                    style: OnepieceFonts.contentStyle,
-                  ),
-                )),
-          );
-          widgetList.add(totalPageCount);
-          widgetList.add(Padding(
-            padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-            child: confirmPage,
-          ));
-          widgetList.add(Padding(
-            padding: const EdgeInsets.fromLTRB(8.0, 0, 0, 0),
-            child: nextPage,
-          ));
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: widgetList,
-          );
-        }
-    );
-
-
+                "/$totalPageNum",
+                style: OnepieceFonts.contentStyle,
+              ),
+            )),
+      );
+      widgetList.add(totalPageCount);
+      widgetList.add(Padding(
+        padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+        child: confirmPage,
+      ));
+      widgetList.add(Padding(
+        padding: const EdgeInsets.fromLTRB(8.0, 0, 0, 0),
+        child: nextPage,
+      ));
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: widgetList,
+      );
+    });
   }
 }
