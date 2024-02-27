@@ -99,8 +99,8 @@ class _UserNavigationState extends State<UserNavigation> {
         ),
       ),
       child: SizedBox(
-        width: 80,
-        height: 80,
+        width: 70,
+        height: 70,
         child: FittedBox(
           fit: BoxFit.cover,
           child: Image.memory(Base64Helper.decode(getIt<User>().profileImage!)),

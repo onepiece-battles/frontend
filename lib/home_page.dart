@@ -396,8 +396,11 @@ class HomePageState extends State<HomePage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                UserNavigation(
-                  context: context,
+                Padding(
+                  padding: const EdgeInsets.only(left: 5.0),
+                  child: UserNavigation(
+                    context: context,
+                  ),
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
