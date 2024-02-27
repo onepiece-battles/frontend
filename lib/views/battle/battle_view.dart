@@ -771,7 +771,7 @@ class _BattleViewState extends State<BattleView> {
                 ),
               ),
               _getDataCell(
-                  battleStatusToDisplayName[entry.value.battleStatus]!),
+                  battleStatusToDisplayName[entry.value.battleExecution!.battleStatus]!),
               _getDataCell(entry.value.creationRecord!.nickname.toString()),
               _getDataCell(DateHelper.getFormattedDatetimeFromTimestamp(
                   entry.value.creationRecord!.actionTimestamp!, context)),

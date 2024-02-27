@@ -416,13 +416,13 @@ class _UserHomeState extends State<UserHome> {
                           children: [
                             Text(
                                 battleStatusToDisplayName[
-                                    battle.battleStatus!]!,
+                                    battle.battleExecution!.battleStatus!]!,
                                 style: OnepieceFonts.fancyBlueHintFont),
                             const Text(" | ",
                                 style: OnepieceFonts.fancyBlueHintFont),
                             Text(
                                 reportStatusToDisplayName[
-                                    battle.battleReportStage!]!,
+                                    battle.battleExecution!.battleReportStage!]!,
                                 style: OnepieceFonts.fancyBlueHintFont)
                           ],
                         ),

@@ -30,7 +30,6 @@ class _UserDetailViewState extends State<UserDetailView> {
   }
 
   _prepareData(User user) {
-    debugPrint("user ${user}");
     this.user = user;
   }
 
@@ -114,35 +113,35 @@ class _UserDetailViewState extends State<UserDetailView> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 0, 15),
+              padding: const EdgeInsets.fromLTRB(8, 0, 0, 15),
               child: Text(
                 AppLocalizations.of(context)!.nickname,
-                style: OnepieceFonts.headerStyle,
+                style: OnepieceFonts.contentStyle,
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 0, 15),
+              padding: const EdgeInsets.fromLTRB(8, 0, 0, 15),
               child: Text(
                 user.nickname,
-                style: OnepieceFonts.contentStyleBoldFancyBlue,
+                style: OnepieceFonts.fancyBlueHintFont,
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(bottom: 15.0),
+              padding: const EdgeInsets.fromLTRB(8,0,0, 15),
               child: Text(
                 AppLocalizations.of(context)!.email,
-                style: OnepieceFonts.headerStyle,
+                style: OnepieceFonts.contentStyle,
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 0, 15),
+              padding: const EdgeInsets.fromLTRB(8, 0, 0, 15),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
                     user.username,
-                    style: OnepieceFonts.contentStyleBoldFancyBlue,
+                    style: OnepieceFonts.fancyBlueHintFont,
                   ),
                   Tooltip(
                     message: user.emailVerified!
@@ -167,6 +166,16 @@ class _UserDetailViewState extends State<UserDetailView> {
           ],
         );
       },
+    );
+  }
+
+  Widget _getLoginStatus() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // login role/ last login role
+        // login status
+      ],
     );
   }
 
