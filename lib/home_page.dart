@@ -253,13 +253,11 @@ class HomePageState extends State<HomePage> {
                     currentUser.loginRoleResourcesPermissionMap =
                         value.resourcePermissionMap;
                     ResourcePermissionManager.updateUserCache(currentUser);
-                    setState(() {
-                      loginRoleResources = getIt<User>()
-                          .loginRoleResourcesPermissionMap
-                          .map((e) => e.resourceType!)
-                          .where((e) => !notShownResources.contains(e))
-                          .toList();
-                    });
+                    loginRoleResources = getIt<User>()
+                        .loginRoleResourcesPermissionMap
+                        .map((e) => e.resourceType!)
+                        .where((e) => !notShownResources.contains(e))
+                        .toList();
                     context.replaceNamed('userHome',
                         extra: getIt<User>().id,
                         pathParameters: {'name': getIt<User>().nickname});
