@@ -245,5 +245,7 @@
   "receiverName": "接收者名字",
   "showAllRoleResources": "显示用户所有角色资源",
   "creatorEmail": "创建人邮箱",
-  "creatorNickname": "创建人昵称"
+  "creatorNickname": "创建人昵称",
+  "forgotPassword": "忘记密码？",
+  "retrievePassword": "找回密码"
 }
