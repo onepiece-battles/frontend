@@ -1382,7 +1382,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                           : "",
                       false),
                   _getDataCell(
-                      battleStatusToDisplayName[entry.value.battleStatus]!,
+                      battleStatusToDisplayName[entry.value.battleExecution!.battleStatus]!,
                       false),
                 ]))
         .toList();
