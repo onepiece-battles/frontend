@@ -46,10 +46,11 @@ class _IssueViewState extends State<IssueView> {
   List<IssueType> selectedIssueTypes = [];
   List<IssueStatus> selectedIssueStatuses = [];
   ScrollController scrollController = ScrollController();
-  int selectedPageIndex = 1;
-  int pageNum = 0;
-  int pageSize = 10;
-  int totalSize = 0;
+
+  int selectedPageNum = 1;
+  int totalPageNum = 0;
+  int itemCountPerPage = 10;
+  int totalItemCount = 0;
   bool preButtonEnabled = false;
   bool nextButtonEnabled = false;
   bool confirmButtonEnabled = false;
@@ -62,8 +63,8 @@ class _IssueViewState extends State<IssueView> {
 
   void _search() {
     ListIssueRequest listIssueRequest = ListIssueRequest(
-        pageSize: pageSize,
-        pageIndex: selectedPageIndex,
+        pageSize: itemCountPerPage,
+        pageIndex: selectedPageNum,
         sortKeys: sortKeys,
         issueFilter: issueFilter);
     Future<ListIssueResponse?> listIssueResponse =
@@ -74,16 +75,16 @@ class _IssueViewState extends State<IssueView> {
         if (currentIssueList.isEmpty) {
           pageNumberController.text = "0";
         } else {
-          pageNumberController.text = selectedPageIndex.toString();
+          pageNumberController.text = selectedPageNum.toString();
         }
-        totalSize = value.totalSize!;
-        pageNum = (totalSize / 10).ceil();
-        if (selectedPageIndex <= 1) {
+        totalItemCount = value.totalSize!;
+        totalPageNum = (totalItemCount / 10).ceil();
+        if (selectedPageNum <= 1) {
           preButtonEnabled = false;
         } else {
           preButtonEnabled = true;
         }
-        if (selectedPageIndex >= pageNum) {
+        if (selectedPageNum >= totalPageNum) {
           nextButtonEnabled = false;
         } else {
           nextButtonEnabled = true;
@@ -120,7 +121,7 @@ class _IssueViewState extends State<IssueView> {
               const SizedBox(
                 height: 15,
               ),
-              SizedBox(
+              if (totalPageNum>1) SizedBox(
                 width: 1500,
                 child: Center(child: _getPageFoot(context)),
               )
@@ -174,10 +175,10 @@ class _IssueViewState extends State<IssueView> {
                   floatingLabelBehavior: FloatingLabelBehavior.never,
                   disabledBorder: const OutlineInputBorder(
                       borderSide:
-                      BorderSide(color: OnepieceColors.menuHoverColor)),
+                          BorderSide(color: OnepieceColors.menuHoverColor)),
                   enabledBorder: const OutlineInputBorder(
                       borderSide:
-                      BorderSide(color: OnepieceColors.menuHoverColor)),
+                          BorderSide(color: OnepieceColors.menuHoverColor)),
                   focusedBorder: const OutlineInputBorder(
                       borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
                   prefixIcon: const Icon(Icons.search),
@@ -201,10 +202,10 @@ class _IssueViewState extends State<IssueView> {
                   floatingLabelBehavior: FloatingLabelBehavior.never,
                   disabledBorder: const OutlineInputBorder(
                       borderSide:
-                      BorderSide(color: OnepieceColors.menuHoverColor)),
+                          BorderSide(color: OnepieceColors.menuHoverColor)),
                   enabledBorder: const OutlineInputBorder(
                       borderSide:
-                      BorderSide(color: OnepieceColors.menuHoverColor)),
+                          BorderSide(color: OnepieceColors.menuHoverColor)),
                   focusedBorder: const OutlineInputBorder(
                       borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
                   prefixIcon: const Icon(Icons.search),
@@ -228,10 +229,10 @@ class _IssueViewState extends State<IssueView> {
                   floatingLabelBehavior: FloatingLabelBehavior.never,
                   disabledBorder: const OutlineInputBorder(
                       borderSide:
-                      BorderSide(color: OnepieceColors.menuHoverColor)),
+                          BorderSide(color: OnepieceColors.menuHoverColor)),
                   enabledBorder: const OutlineInputBorder(
                       borderSide:
-                      BorderSide(color: OnepieceColors.menuHoverColor)),
+                          BorderSide(color: OnepieceColors.menuHoverColor)),
                   focusedBorder: const OutlineInputBorder(
                       borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
                   prefixIcon: const Icon(Icons.search),
@@ -584,7 +585,8 @@ class _IssueViewState extends State<IssueView> {
                   null),
               _getDataCell(
                   DateHelper.getFormattedDatetimeFromTimestamp(
-                      entry.value.modificationRecord!.actionTimestamp!, context),
+                      entry.value.modificationRecord!.actionTimestamp!,
+                      context),
                   null),
             ],
           ),
@@ -622,7 +624,7 @@ class _IssueViewState extends State<IssueView> {
           onPressed: !preButtonEnabled
               ? null
               : () {
-                  selectedPageIndex = selectedPageIndex - 1;
+                  selectedPageNum = selectedPageNum - 1;
                   _search();
                 },
           child: const Icon(Icons.arrow_back));
@@ -631,7 +633,7 @@ class _IssueViewState extends State<IssueView> {
           onPressed: !nextButtonEnabled
               ? null
               : () {
-                  selectedPageIndex = selectedPageIndex + 1;
+                  selectedPageNum = selectedPageNum + 1;
                   _search();
                 },
           child: const Icon(Icons.arrow_forward));
@@ -657,8 +659,8 @@ class _IssueViewState extends State<IssueView> {
                   int currentTypedPage =
                       int.parse(pageNumberController.text.trim());
                   if (currentTypedPage < 1 ||
-                      currentTypedPage > pageNum ||
-                      currentTypedPage == selectedPageIndex) {
+                      currentTypedPage > totalPageNum ||
+                      currentTypedPage == selectedPageNum) {
                     confirmButtonEnabled = false;
                   } else {
                     confirmButtonEnabled = true;
@@ -672,7 +674,7 @@ class _IssueViewState extends State<IssueView> {
           onPressed: !confirmButtonEnabled
               ? null
               : () {
-                  selectedPageIndex = int.parse(pageNumberController.text);
+                  selectedPageNum = int.parse(pageNumberController.text);
                   confirmButtonEnabled = false;
                   _search();
                 },
@@ -694,7 +696,7 @@ class _IssueViewState extends State<IssueView> {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(3, 0, 3, 3),
               child: Text(
-                "/$pageNum",
+                "/$totalPageNum",
                 style: OnepieceFonts.contentStyle,
               ),
             )),

@@ -47,10 +47,10 @@ class _UserViewState extends State<UserView> {
   List<UserRole> selectedUserRoles = [];
   ScrollController scrollController = ScrollController();
 
-  int selectedPageIndex = 1;
-  int pageNum = 0;
-  int pageSize = 10;
-  int totalSize = 0;
+  int selectedPageNum = 1;
+  int totalPageNum = 0;
+  int itemCountPerPage = 10;
+  int totalItemCount = 0;
   bool preButtonEnabled = false;
   bool nextButtonEnabled = false;
   bool confirmButtonEnabled = false;
@@ -66,8 +66,8 @@ class _UserViewState extends State<UserView> {
 
   void _search() {
     ListUsersRequest listUserRequest = ListUsersRequest(
-        pageSize: pageSize,
-        pageIndex: selectedPageIndex,
+        pageSize: itemCountPerPage,
+        pageIndex: selectedPageNum,
         sortKeys: sortKeys,
         userFilter: userFilter);
     Future<ListUsersResponse?> listUserResponse =
@@ -79,16 +79,16 @@ class _UserViewState extends State<UserView> {
         if (currentUserList.isEmpty) {
           pageNumberController.text = "0";
         } else {
-          pageNumberController.text = selectedPageIndex.toString();
+          pageNumberController.text = selectedPageNum.toString();
         }
-        totalSize = value.totalSize!;
-        pageNum = (totalSize / 10).ceil();
-        if (selectedPageIndex <= 1) {
+        totalItemCount = value.totalSize!;
+        totalPageNum = (totalItemCount / 10).ceil();
+        if (selectedPageNum <= 1) {
           preButtonEnabled = false;
         } else {
           preButtonEnabled = true;
         }
-        if (selectedPageIndex >= pageNum) {
+        if (selectedPageNum >= totalPageNum) {
           nextButtonEnabled = false;
         } else {
           nextButtonEnabled = true;
@@ -125,10 +125,11 @@ class _UserViewState extends State<UserView> {
               const SizedBox(
                 height: 15,
               ),
-              SizedBox(
-                width: 1500,
-                child: Center(child: _getPageFoot(context)),
-              )
+              if (totalPageNum > 1)
+                SizedBox(
+                  width: 1500,
+                  child: Center(child: _getPageFoot(context)),
+                )
             ],
           ),
         ),
@@ -199,10 +200,10 @@ class _UserViewState extends State<UserView> {
                   floatingLabelBehavior: FloatingLabelBehavior.never,
                   disabledBorder: const OutlineInputBorder(
                       borderSide:
-                      BorderSide(color: OnepieceColors.menuHoverColor)),
+                          BorderSide(color: OnepieceColors.menuHoverColor)),
                   enabledBorder: const OutlineInputBorder(
                       borderSide:
-                      BorderSide(color: OnepieceColors.menuHoverColor)),
+                          BorderSide(color: OnepieceColors.menuHoverColor)),
                   focusedBorder: const OutlineInputBorder(
                       borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
                   prefixIcon: const Icon(Icons.search),
@@ -548,7 +549,7 @@ class _UserViewState extends State<UserView> {
           onPressed: !preButtonEnabled
               ? null
               : () {
-                  selectedPageIndex = selectedPageIndex - 1;
+                  selectedPageNum = selectedPageNum - 1;
                   _search();
                 },
           child: const Icon(Icons.arrow_back));
@@ -557,7 +558,7 @@ class _UserViewState extends State<UserView> {
           onPressed: !nextButtonEnabled
               ? null
               : () {
-                  selectedPageIndex = selectedPageIndex + 1;
+                  selectedPageNum = selectedPageNum + 1;
                   _search();
                 },
           child: const Icon(Icons.arrow_forward));
@@ -583,8 +584,8 @@ class _UserViewState extends State<UserView> {
                   int currentTypedPage =
                       int.parse(pageNumberController.text.trim());
                   if (currentTypedPage < 1 ||
-                      currentTypedPage > pageNum ||
-                      currentTypedPage == selectedPageIndex) {
+                      currentTypedPage > totalPageNum ||
+                      currentTypedPage == selectedPageNum) {
                     confirmButtonEnabled = false;
                   } else {
                     confirmButtonEnabled = true;
@@ -598,7 +599,7 @@ class _UserViewState extends State<UserView> {
           onPressed: !confirmButtonEnabled
               ? null
               : () {
-                  selectedPageIndex = int.parse(pageNumberController.text);
+                  selectedPageNum = int.parse(pageNumberController.text);
                   _search();
                   confirmButtonEnabled = false;
                 },
@@ -620,7 +621,7 @@ class _UserViewState extends State<UserView> {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(3, 0, 3, 3),
               child: Text(
-                "/$pageNum",
+                "/$totalPageNum",
                 style: OnepieceFonts.contentStyle,
               ),
             )),

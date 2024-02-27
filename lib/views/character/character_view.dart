@@ -53,10 +53,10 @@ class _CharacterViewState extends State<CharacterView> {
   List<Haki> selectedHakis = [];
   ScrollController scrollController = ScrollController();
 
-  int selectedPageIndex = 1;
-  int pageNum = 0;
-  int pageSize = 10;
-  int totalSize = 0;
+  int selectedPageNum = 1;
+  int totalPageNum = 0;
+  int itemCountPerPage = 10;
+  int totalItemCount = 0;
   bool preButtonEnabled = false;
   bool nextButtonEnabled = false;
   bool confirmButtonEnabled = false;
@@ -74,8 +74,8 @@ class _CharacterViewState extends State<CharacterView> {
   void _search() {
     characterFilter.languageCode = I18nHelper.getLanguageCode();
     ListCharacterRequest listCharacterRequest = ListCharacterRequest(
-        pageSize: pageSize,
-        pageIndex: selectedPageIndex,
+        pageSize: itemCountPerPage,
+        pageIndex: selectedPageNum,
         sortKeys: sortKeys,
         characterFilter: characterFilter);
     Future<ListCharacterResponse?> listCharacterResponse =
@@ -87,16 +87,16 @@ class _CharacterViewState extends State<CharacterView> {
         if (currentCharacterList.isEmpty) {
           pageNumberController.text = "0";
         } else {
-          pageNumberController.text = selectedPageIndex.toString();
+          pageNumberController.text = selectedPageNum.toString();
         }
-        totalSize = value.totalSize!;
-        pageNum = (totalSize / 10).ceil();
-        if (selectedPageIndex <= 1) {
+        totalItemCount = value.totalSize!;
+        totalPageNum = (totalItemCount / itemCountPerPage).ceil();
+        if (selectedPageNum <= 1) {
           preButtonEnabled = false;
         } else {
           preButtonEnabled = true;
         }
-        if (selectedPageIndex >= pageNum) {
+        if (selectedPageNum >= totalPageNum) {
           nextButtonEnabled = false;
         } else {
           nextButtonEnabled = true;
@@ -136,10 +136,11 @@ class _CharacterViewState extends State<CharacterView> {
               const SizedBox(
                 height: 15,
               ),
-              SizedBox(
-                width: 2000,
-                child: Center(child: _getPageFoot(context)),
-              )
+              if (totalPageNum > 1)
+                SizedBox(
+                  width: 2000,
+                  child: Center(child: _getPageFoot(context)),
+                )
             ],
           ),
         ),
@@ -510,7 +511,9 @@ class _CharacterViewState extends State<CharacterView> {
           ),
         ],
       ),
-      const SizedBox(width: 60,),
+      const SizedBox(
+        width: 60,
+      ),
       Row(
         children: [
           Padding(
@@ -684,8 +687,7 @@ class _CharacterViewState extends State<CharacterView> {
           AppLocalizations.of(context)!.characterName, null, 120, false),
       _createSingleColumn(
           AppLocalizations.of(context)!.hakis, null, 120, false),
-      _createSingleColumn(
-          AppLocalizations.of(context)!.race, null, 120, false),
+      _createSingleColumn(AppLocalizations.of(context)!.race, null, 120, false),
       _createSingleColumn(
           AppLocalizations.of(context)!.battleStyle, null, 120, false),
       _createSingleColumn(
@@ -870,13 +872,12 @@ class _CharacterViewState extends State<CharacterView> {
               )),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child:
-                Text(raceEnumToDisplayName[entry.value.race]!),
+                child: Text(raceEnumToDisplayName[entry.value.race]!),
               )),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
                 child:
-                Text(battleStyleToDisplayValue[entry.value.battleStyle]!),
+                    Text(battleStyleToDisplayValue[entry.value.battleStyle]!),
               )),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
@@ -925,7 +926,7 @@ class _CharacterViewState extends State<CharacterView> {
           onPressed: !preButtonEnabled
               ? null
               : () {
-                  selectedPageIndex = selectedPageIndex - 1;
+                  selectedPageNum = selectedPageNum - 1;
                   _search();
                 },
           child: const Icon(Icons.arrow_back));
@@ -934,7 +935,7 @@ class _CharacterViewState extends State<CharacterView> {
           onPressed: !nextButtonEnabled
               ? null
               : () {
-                  selectedPageIndex = selectedPageIndex + 1;
+                  selectedPageNum = selectedPageNum + 1;
                   _search();
                 },
           child: const Icon(Icons.arrow_forward));
@@ -960,8 +961,8 @@ class _CharacterViewState extends State<CharacterView> {
                   int currentTypedPage =
                       int.parse(pageNumberController.text.trim());
                   if (currentTypedPage < 1 ||
-                      currentTypedPage > pageNum ||
-                      currentTypedPage == selectedPageIndex) {
+                      currentTypedPage > totalPageNum ||
+                      currentTypedPage == selectedPageNum) {
                     confirmButtonEnabled = false;
                   } else {
                     confirmButtonEnabled = true;
@@ -975,7 +976,7 @@ class _CharacterViewState extends State<CharacterView> {
           onPressed: !confirmButtonEnabled
               ? null
               : () {
-                  selectedPageIndex = int.parse(pageNumberController.text);
+                  selectedPageNum = int.parse(pageNumberController.text);
                   confirmButtonEnabled = false;
                   _search();
                 },
@@ -997,7 +998,7 @@ class _CharacterViewState extends State<CharacterView> {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(3, 0, 3, 3),
               child: Text(
-                "/$pageNum",
+                "/$totalPageNum",
                 style: OnepieceFonts.contentStyle,
               ),
             )),
