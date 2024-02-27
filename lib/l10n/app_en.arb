@@ -244,5 +244,6 @@
   "loginStatus": "登陆状态",
   "showAllRoleResources": "Show resources created by all user roles",
   "creatorEmail": "Creator Email",
-  "creatorNickname": "Creator Nickname"
+  "creatorNickname": "Creator Nickname",
+  "joined": "Joined"
 }
