@@ -215,7 +215,7 @@
   "characters": "字符",
   "month": "月",
   "day": "日",
-  "joinedGroups": "已加入团体列表",
+  "historyGroups": "历史团体列表",
   "searchList": "搜索列表",
   "eaten": "已食用",
   "joined": "已加入",
@@ -247,5 +247,18 @@
   "creatorEmail": "创建人邮箱",
   "creatorNickname": "创建人昵称",
   "forgotPassword": "忘记密码？",
-  "retrievePassword": "找回密码"
+  "retrievePassword": "找回密码",
+  "member": "船员",
+  "caption": "船长",
+  "combatant": "战斗员",
+  "cook": "厨师",
+  "doctor": "医生",
+  "firstMate": "副船长",
+  "helmsman": "舵手",
+  "intern": "见习生",
+  "musician": "音乐家",
+  "navigator": "航海士",
+  "scholar": "学者",
+  "shipwright": "船匠",
+  "positionList": "职位列表"
 }

@@ -746,7 +746,7 @@ class _BattleViewState extends State<BattleView> {
               DataCell(
                 Padding(
                   padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                  child: entry.value.winnerId == null
+                  child: entry.value.battleExecution!.winnerId == null
                       ? ImageHelper.getSvgIconWithColor(
                           'images/svgs/question.svg',
                           70,
@@ -766,7 +766,8 @@ class _BattleViewState extends State<BattleView> {
                           child: FittedBox(
                             fit: BoxFit.fill,
                             child: Image.memory(Base64Helper.decode(
-                                entry.value.winnerId == entry.value.starterId
+                                entry.value.battleExecution!.winnerId ==
+                                        entry.value.starterId
                                     ? entry.value.starter!.profileImage!
                                     : entry.value.receiver!.profileImage!)),
                           ),

@@ -1,3 +1,4 @@
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
@@ -66,6 +67,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
   CharacterBasicInfo characterBasicInfo = CharacterBasicInfo();
 
   BattleStyle selectedBattleStyle = BattleStyle.BODY;
+  GroupPosition selectedGroupPosition = GroupPosition.member;
   Race selectedRace = Race.HUMAN;
 
   final _basicFormKey = GlobalKey<FormState>();
@@ -101,8 +103,10 @@ class _CharacterDetailState extends State<CharacterDetail> {
   }
 
   _joinGroup() {
-    JoinGroupRequest request =
-        JoinGroupRequest(characterId: character.id, groupId: selectedGroupId!);
+    JoinGroupRequest request = JoinGroupRequest(
+        characterId: character.id,
+        groupId: selectedGroupId!,
+        position: selectedGroupPosition);
     Future<JoinGroupResponse?> response =
         getIt<CharacterDao>().joinGroup(request);
     response.then(
@@ -227,7 +231,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                     if (groups.isNotEmpty)
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Text(AppLocalizations.of(context)!.joinedGroups,
+                        child: Text(AppLocalizations.of(context)!.historyGroups,
                             style: OnepieceFonts.fancyBlueHintFont),
                       ),
                     if (groups.isNotEmpty)
@@ -1035,6 +1039,20 @@ class _CharacterDetailState extends State<CharacterDetail> {
       GroupCategory.marine: AppLocalizations.of(context)!.marine,
       GroupCategory.underWorld: AppLocalizations.of(context)!.underworld,
     };
+    Map<GroupPosition, String> groupPositionToDisplayValue = {
+      GroupPosition.member: AppLocalizations.of(context)!.member,
+      GroupPosition.captain: AppLocalizations.of(context)!.caption,
+      GroupPosition.combatant: AppLocalizations.of(context)!.combatant,
+      GroupPosition.cook: AppLocalizations.of(context)!.cook,
+      GroupPosition.doctor: AppLocalizations.of(context)!.doctor,
+      GroupPosition.firstMate: AppLocalizations.of(context)!.firstMate,
+      GroupPosition.helmsman: AppLocalizations.of(context)!.helmsman,
+      GroupPosition.intern: AppLocalizations.of(context)!.intern,
+      GroupPosition.musician: AppLocalizations.of(context)!.musician,
+      GroupPosition.navigator: AppLocalizations.of(context)!.navigator,
+      GroupPosition.scholar: AppLocalizations.of(context)!.scholar,
+      GroupPosition.shipwright: AppLocalizations.of(context)!.shipwright,
+    };
     return StatefulBuilder(builder: (context, groupSetState) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1077,6 +1095,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                         prefixIcon: const Icon(Icons.search),
                       ),
                       onChanged: (value) {
+                        debugPrint(value);
                         selectedGroupId = null;
                         groupSetState(() {});
                         if (value.isEmpty) {
@@ -1177,12 +1196,67 @@ class _CharacterDetailState extends State<CharacterDetail> {
                     ),
                   ),
                 ),
+                if (selectedGroupId != null)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 8, 8, 0),
+                    child: Text(
+                      AppLocalizations.of(context)!.positionList,
+                      style: OnepieceFonts.fancyBlueHintFont,
+                    ),
+                  ),
+                if (selectedGroupId != null)
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: SizedBox(
+                      width: 500,
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton2(
+                          isExpanded: true,
+                          value: selectedGroupPosition,
+                          onChanged: groups
+                                  .where((element) =>
+                                      element.onceBelongedTo == false)
+                                  .map((e) => e.groupId)
+                                  .toList()
+                                  .contains(selectedGroupId)
+                              ? null
+                              : (GroupPosition? value) {
+                                  selectedGroupPosition = value!;
+                                  groupSetState(() {});
+                                },
+                          buttonStyleData: ButtonStyleData(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(3),
+                                color: OnepieceColors.liteFancyGreen),
+                            height: 40,
+                            width: 500,
+                          ),
+                          menuItemStyleData: const MenuItemStyleData(
+                            height: 30,
+                          ),
+                          items: GroupPosition.values
+                              .map((GroupPosition groupPosition) {
+                            return DropdownMenuItem<GroupPosition>(
+                              value: groupPosition,
+                              child: Text(
+                                groupPositionToDisplayValue[groupPosition]!,
+                                style: OnepieceFonts.contentStyle,
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ),
+                  ),
                 if (searchingGroupList.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.only(left: 8.0),
                     child: ElevatedButton(
                         onPressed: selectedGroupId == null ||
                                 groups
+                                    .where((element) =>
+                                        element.onceBelongedTo == false)
                                     .map((e) => e.groupId)
                                     .toList()
                                     .contains(selectedGroupId)
@@ -1195,6 +1269,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                 groupSetState(() {});
                               },
                         child: groups
+                                .where((element) =>
+                                    element.onceBelongedTo == false)
                                 .map((e) => e.groupId)
                                 .toList()
                                 .contains(selectedGroupId)
@@ -1397,8 +1473,9 @@ class _CharacterDetailState extends State<CharacterDetail> {
                           entry.value.receiver!.name),
                       character.id == entry.value.receiverId),
                   _getDataCell(
-                      entry.value.winnerId != null
-                          ? (entry.value.winnerId == entry.value.starterId
+                      entry.value.battleExecution!.winnerId != null
+                          ? (entry.value.battleExecution!.winnerId ==
+                                  entry.value.starterId
                               ? I18nHelper.getDisplayNameFromI18n(
                                   entry.value.starter!.name)
                               : I18nHelper.getDisplayNameFromI18n(

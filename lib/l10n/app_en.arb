@@ -214,7 +214,7 @@
   "characters": "characters",
   "month": "MM",
   "day": "DD",
-  "joinedGroups": "Group List",
+  "historyGroups": "History Group List",
   "searchList": "Search List",
   "eaten": "Eaten",
   "verificationCode": "Verification Code",
@@ -247,5 +247,18 @@
   "creatorNickname": "Creator Nickname",
   "joined": "Joined",
   "forgotPassword": "Forgot password?",
-  "retrievePassword": "Retrieve Password"
+  "retrievePassword": "Retrieve Password",
+  "member": "Crew",
+  "caption": "Captain",
+  "combatant": "Combatant",
+  "cook": "Cook",
+  "doctor": "Doctor",
+  "firstMate": "First mate",
+  "helmsman": "Helmsman",
+  "intern": "Intern",
+  "musician": "Musician",
+  "navigator": "Navigator",
+  "scholar": "Scholar",
+  "shipwright": "Shipwright",
+  "positionList": "Position List"
 }
