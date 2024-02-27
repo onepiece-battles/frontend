@@ -210,7 +210,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
                         child: _getFruitList(context),
                       ),
-                    if(fruits.isEmpty)
+                    if (fruits.isEmpty)
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
                         child: Text(AppLocalizations.of(context)!.none,
@@ -231,11 +231,11 @@ class _CharacterDetailState extends State<CharacterDetail> {
                             style: OnepieceFonts.fancyBlueHintFont),
                       ),
                     if (groups.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: _getGroupList(context),
-                    ),
-                    if(groups.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: _getGroupList(context),
+                      ),
+                    if (groups.isEmpty)
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
                         child: Text(AppLocalizations.of(context)!.none,
@@ -935,9 +935,9 @@ class _CharacterDetailState extends State<CharacterDetail> {
                         onPressed: selectedFruitId == null
                             ? null
                             : () {
-                                setState(() {
-                                  _eatFruit();
-                                });
+                                _eatFruit();
+                                selectedFruitId = null;
+                                fruitSetState(() {});
                               },
                         child: Text(AppLocalizations.of(context)!.eat)),
                   )
@@ -1382,7 +1382,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
                           : "",
                       false),
                   _getDataCell(
-                      battleStatusToDisplayName[entry.value.battleExecution!.battleStatus]!,
+                      battleStatusToDisplayName[
+                          entry.value.battleExecution!.battleStatus]!,
                       false),
                 ]))
         .toList();
