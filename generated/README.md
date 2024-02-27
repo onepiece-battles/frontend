@@ -183,6 +183,7 @@ Class | Method | HTTP request | Description
  - [GroupFullViewAllOf](doc//GroupFullViewAllOf.md)
  - [GroupListView](doc//GroupListView.md)
  - [GroupListViewAllOf](doc//GroupListViewAllOf.md)
+ - [GroupPosition](doc//GroupPosition.md)
  - [GroupSortableField](doc//GroupSortableField.md)
  - [GroupSortableFieldsEnum](doc//GroupSortableFieldsEnum.md)
  - [Haki](doc//Haki.md)
