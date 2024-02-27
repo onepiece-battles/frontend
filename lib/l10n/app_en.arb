@@ -242,5 +242,7 @@
   "starterName": "starter name",
   "receiverName": "receiver name",
   "loginStatus": "登陆状态",
-  "showAllRoleResources": "Show resources created by all user roles"
+  "showAllRoleResources": "Show resources created by all user roles",
+  "creatorEmail": "Creator Email",
+  "creatorNickname": "Creator Nickname"
 }

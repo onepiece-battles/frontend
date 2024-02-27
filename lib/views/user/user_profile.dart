@@ -9,16 +9,16 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:openapi/api.dart';
-import '../config/resource_permission_manager.dart';
-import '../constants/button_style.dart';
-import '../constants/onepiece_colors.dart';
-import '../constants/onepiece_fonts.dart';
-import '../popup/email_verification.dart';
-import '../repository/image_dao.dart';
-import '../repository/user_dao.dart';
-import '../utils/base64_helper.dart';
-import '../utils/compare_uint8list.dart';
-import '../utils/onepiece_image_picker.dart';
+import '../../config/resource_permission_manager.dart';
+import '../../constants/button_style.dart';
+import '../../constants/onepiece_colors.dart';
+import '../../constants/onepiece_fonts.dart';
+import '../../popup/email_verification.dart';
+import '../../repository/image_dao.dart';
+import '../../repository/user_dao.dart';
+import '../../utils/base64_helper.dart';
+import '../../utils/compare_uint8list.dart';
+import '../../utils/onepiece_image_picker.dart';
 
 GetIt getIt = GetIt.instance;
 
