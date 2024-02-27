@@ -245,5 +245,7 @@
   "showAllRoleResources": "Show resources created by all user roles",
   "creatorEmail": "Creator Email",
   "creatorNickname": "Creator Nickname",
-  "joined": "Joined"
+  "joined": "Joined",
+  "forgotPassword": "Forgot password?",
+  "retrievePassword": "Retrieve Password"
 }

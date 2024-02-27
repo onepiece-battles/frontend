@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_toggle_tab/flutter_toggle_tab.dart';
 import 'package:get_it/get_it.dart';
@@ -190,16 +189,45 @@ class _LoginPageState extends State<LoginPage> {
           SizedBox(
             width: 300,
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Text(
-                  AppLocalizations.of(context)!.noAccount,
-                  style: const TextStyle(
-                      fontSize: 12, fontWeight: FontWeight.bold),
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Text(
+                      AppLocalizations.of(context)!.noAccount,
+                      style: const TextStyle(
+                          fontSize: 12, fontWeight: FontWeight.bold),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        context.go(AppRouter.registerPath);
+                      },
+                      style: ButtonStyle(
+                        overlayColor: MaterialStateProperty.resolveWith<Color?>(
+                          (Set<MaterialState> states) {
+                            return Colors.transparent; // No splash color
+                          },
+                        ),
+                        padding: MaterialStateProperty.all<EdgeInsets>(
+                            const EdgeInsets.symmetric(horizontal: 2.0)),
+                        // OR Use NoSplash.splashFactory to remove splash effect altogether
+                        splashFactory: NoSplash.splashFactory,
+                      ),
+                      child: Text(
+                        AppLocalizations.of(context)!.registerAccount,
+                        style: const TextStyle(
+                          color: OnepieceColors.fancyBlue,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    )
+                  ],
                 ),
                 TextButton(
                   onPressed: () {
-                    context.go(AppRouter.registerPath);
+                    context.go(AppRouter.retrievePassword);
                   },
                   style: ButtonStyle(
                     overlayColor: MaterialStateProperty.resolveWith<Color?>(
@@ -213,7 +241,7 @@ class _LoginPageState extends State<LoginPage> {
                     splashFactory: NoSplash.splashFactory,
                   ),
                   child: Text(
-                    AppLocalizations.of(context)!.registerAccount,
+                    AppLocalizations.of(context)!.forgotPassword,
                     style: const TextStyle(
                       color: OnepieceColors.fancyBlue,
                       fontSize: 12,

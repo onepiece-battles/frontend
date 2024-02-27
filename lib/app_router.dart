@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/personal_home.dart';
+import 'package:one_piece_battles_flutter/retrieve_password.dart';
 import 'package:one_piece_battles_flutter/views/battle/battle_detail_view.dart';
 import 'package:one_piece_battles_flutter/views/battle/battle_view.dart';
 import 'package:one_piece_battles_flutter/views/character/character_detail_view.dart';
@@ -32,6 +33,7 @@ class AppRouter {
   static const loginPath = '/login';
   static const homePath = '/home';
   static const registerPath = '/register';
+  static const retrievePassword = '/retrievePassword';
   // sub-paths
   static final characterPath =
       '/home/${ResourceType.CHARACTER.toString().toLowerCase()}';
@@ -271,8 +273,13 @@ class AppRouter {
         builder: (context, state) => const LoginPage(),
       ),
       GoRoute(
-          path: registerPath,
-          builder: (context, state) => const RegisterPage()),
+        path: registerPath,
+        builder: (context, state) => const RegisterPage(),
+      ),
+      GoRoute(
+        path: retrievePassword,
+        builder: (context, state) => const RetrievePassword(),
+      ),
     ],
     // debugLogDiagnostics: true,
     redirect: (BuildContext context, GoRouterState state) {
@@ -280,11 +287,15 @@ class AppRouter {
       final loggedIn = getIt<User>().username != '';
       final loggingIn = state.matchedLocation == AppRouter.loginPath;
       final registering = state.matchedLocation == AppRouter.registerPath;
+      final retrievePassword =
+          state.matchedLocation == AppRouter.retrievePassword;
       List<String> homePaths = [AppRouter.homePath, "", "/"];
       final goingHome = homePaths.contains(state.matchedLocation);
-
       if (registering) {
         return AppRouter.registerPath;
+      }
+      if (retrievePassword) {
+        return AppRouter.retrievePassword;
       }
       if (!loggedIn && !loggingIn) {
         return AppRouter.loginPath;
