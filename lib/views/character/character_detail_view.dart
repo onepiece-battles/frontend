@@ -1285,11 +1285,6 @@ class _CharacterDetailState extends State<CharacterDetail> {
     });
   }
 
-  // Widget _getGroupSearchList(BuildContext context, Function groupSetState) {
-  //
-  //   return
-  // }
-
   Widget _getGroupList(BuildContext context) {
     Map<GroupCategory, String> groupCategoryToDisplayValue =
         <GroupCategory, String>{
@@ -1325,11 +1320,10 @@ class _CharacterDetailState extends State<CharacterDetail> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(5),
                   ),
-                  selected: selectedGroupId == currentGroup.id,
                   selectedTileColor: OnepieceColors.liteFancyBlue,
                   onTap: () {
                     context.goNamed('groupDetails',
-                        extra: currentGroup.id,
+                        extra: currentGroup.groupId,
                         pathParameters: {
                           'name': I18nHelper.getDisplayNameFromI18n(
                               currentGroup.name!)
