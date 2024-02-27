@@ -858,7 +858,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
               ],
             ),
           ),
-          if (searchingGroupList.isNotEmpty)
+          if (searchingFruitList.isNotEmpty)
             Padding(
               padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
               child: Text(
@@ -874,7 +874,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Container(
-                    width: 300,
+                    width: 500,
+                    constraints: const BoxConstraints(maxHeight: 300),
                     decoration: const BoxDecoration(
                       color: OnepieceColors.menuBackgroundColor,
                       borderRadius: BorderRadius.all(Radius.circular(8)),
@@ -932,14 +933,25 @@ class _CharacterDetailState extends State<CharacterDetail> {
                   Padding(
                     padding: const EdgeInsets.only(left: 8.0),
                     child: ElevatedButton(
-                        onPressed: selectedFruitId == null
+                        onPressed: selectedFruitId == null ||
+                                fruits
+                                    .map((e) => e.id)
+                                    .toList()
+                                    .contains(selectedFruitId)
                             ? null
                             : () {
                                 _eatFruit();
+                                fruitNameController.text = '';
                                 selectedFruitId = null;
+                                searchingFruitList = [];
                                 fruitSetState(() {});
                               },
-                        child: Text(AppLocalizations.of(context)!.eat)),
+                        child: fruits
+                                .map((e) => e.id)
+                                .toList()
+                                .contains(selectedFruitId)
+                            ? Text(AppLocalizations.of(context)!.eaten)
+                            : Text(AppLocalizations.of(context)!.eat)),
                   )
               ],
             ),
@@ -1016,6 +1028,13 @@ class _CharacterDetailState extends State<CharacterDetail> {
   }
 
   Widget _getGroupSearchBar(BuildContext context) {
+    Map<GroupCategory, String> groupCategoryToDisplayValue = {
+      GroupCategory.pirate: AppLocalizations.of(context)!.pirate,
+      GroupCategory.worldGovernment:
+          AppLocalizations.of(context)!.worldGovernment,
+      GroupCategory.marine: AppLocalizations.of(context)!.marine,
+      GroupCategory.underWorld: AppLocalizations.of(context)!.underworld,
+    };
     return StatefulBuilder(builder: (context, groupSetState) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1095,100 +1114,105 @@ class _CharacterDetailState extends State<CharacterDetail> {
                 style: OnepieceFonts.fancyBlueHintFont,
               ),
             ),
-          _getGroupSearchList(context, groupSetState),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Container(
+                    width: 500,
+                    constraints: const BoxConstraints(maxHeight: 300),
+                    decoration: const BoxDecoration(
+                      color: OnepieceColors.menuBackgroundColor,
+                      borderRadius: BorderRadius.all(Radius.circular(8)),
+                    ),
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: searchingGroupList.length,
+                      itemBuilder: (context, index) {
+                        var group = searchingGroupList[index];
+                        return Material(
+                          type: MaterialType.transparency,
+                          child: Container(
+                            padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+                            decoration: const BoxDecoration(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(5))),
+                            child: ListTile(
+                              minLeadingWidth: 10,
+                              contentPadding:
+                                  const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                              selected: selectedGroupId == group.id,
+                              selectedTileColor: OnepieceColors.liteFancyBlue,
+                              onTap: () {
+                                selectedGroupId = group.id;
+                                groupSetState(() {});
+                              },
+                              hoverColor: OnepieceColors.liteFancyBlue,
+                              title: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(I18nHelper.getDisplayNameFromI18n(
+                                      group.name!)),
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 5),
+                                    child: OnepieceTag.getGroupTag(
+                                      group.groupCategory!,
+                                      groupCategoryToDisplayValue[
+                                          group.groupCategory!]!,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                if (searchingGroupList.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: ElevatedButton(
+                        onPressed: selectedGroupId == null ||
+                                groups
+                                    .map((e) => e.groupId)
+                                    .toList()
+                                    .contains(selectedGroupId)
+                            ? null
+                            : () {
+                                _joinGroup();
+                                selectedGroupId = null;
+                                groupNameController.text = "";
+                                searchingGroupList = [];
+                                groupSetState(() {});
+                              },
+                        child: groups
+                                .map((e) => e.groupId)
+                                .toList()
+                                .contains(selectedGroupId)
+                            ? Text(AppLocalizations.of(context)!.joined)
+                            : Text(AppLocalizations.of(context)!.join)),
+                  )
+              ],
+            ),
+          )
         ],
       );
     });
   }
 
-  Widget _getGroupSearchList(BuildContext context, Function groupSetState) {
-    Map<GroupCategory, String> groupCategoryToDisplayValue = {
-      GroupCategory.pirate: AppLocalizations.of(context)!.pirate,
-      GroupCategory.worldGovernment:
-          AppLocalizations.of(context)!.worldGovernment,
-      GroupCategory.marine: AppLocalizations.of(context)!.marine,
-      GroupCategory.underWorld: AppLocalizations.of(context)!.underworld,
-    };
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Container(
-              width: 500,
-              constraints: const BoxConstraints(maxHeight: 300),
-              decoration: const BoxDecoration(
-                color: OnepieceColors.menuBackgroundColor,
-                borderRadius: BorderRadius.all(Radius.circular(8)),
-              ),
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: searchingGroupList.length,
-                itemBuilder: (context, index) {
-                  var currentGroup = searchingGroupList[index];
-                  return Material(
-                    type: MaterialType.transparency,
-                    child: Container(
-                      padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                      decoration: const BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(5))),
-                      child: ListTile(
-                        minLeadingWidth: 10,
-                        contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        selected: selectedGroupId == currentGroup.id,
-                        selectedTileColor: OnepieceColors.liteFancyBlue,
-                        onTap: () {
-                          groupSetState(() {
-                            selectedGroupId = currentGroup.id;
-                          });
-                        },
-                        hoverColor: OnepieceColors.liteFancyBlue,
-                        title: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(I18nHelper.getDisplayNameFromI18n(
-                                currentGroup.name!)),
-                            Padding(
-                              padding: const EdgeInsets.only(right: 5),
-                              child: OnepieceTag.getGroupTag(
-                                currentGroup.groupCategory!,
-                                groupCategoryToDisplayValue[
-                                    currentGroup.groupCategory!]!,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-          if (searchingGroupList.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(left: 8.0),
-              child: ElevatedButton(
-                  onPressed: selectedGroupId == null
-                      ? null
-                      : () {
-                          setState(() {
-                            _joinGroup();
-                            groupNameController.text = "";
-                            searchingGroupList = [];
-                          });
-                        },
-                  child: Text(AppLocalizations.of(context)!.join)),
-            )
-        ],
-      ),
-    );
-  }
+  // Widget _getGroupSearchList(BuildContext context, Function groupSetState) {
+  //
+  //   return
+  // }
 
   Widget _getGroupList(BuildContext context) {
     Map<GroupCategory, String> groupCategoryToDisplayValue =
