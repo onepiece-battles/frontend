@@ -1,16 +1,17 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/repository/issue_dao.dart';
 import 'package:openapi/api.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import '../constants/button_style.dart';
-import '../constants/onepiece_colors.dart';
-import '../constants/onepiece_fonts.dart';
-import '../utils/data_validator.dart';
-import '../utils/date_helper.dart';
-import '../utils/image_helper.dart';
+import '../../constants/button_style.dart';
+import '../../constants/onepiece_colors.dart';
+import '../../constants/onepiece_fonts.dart';
+import '../../utils/data_validator.dart';
+import '../../utils/date_helper.dart';
+import '../../utils/image_helper.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -23,6 +24,8 @@ class IssueView extends StatefulWidget {
 
 class _IssueViewState extends State<IssueView> {
   TextEditingController searchHeaderController = TextEditingController();
+  TextEditingController searchEmailController = TextEditingController();
+  TextEditingController searchNicknameController = TextEditingController();
   TextEditingController pageNumberController = TextEditingController(text: "0");
   IssueFilter issueFilter = IssueFilter();
   List<IssueListView> currentIssueList = [];
@@ -162,26 +165,76 @@ class _IssueViewState extends State<IssueView> {
               width: 200,
               height: 35,
               child: TextFormField(
+                controller: searchEmailController,
+                onChanged: (value) {
+                  issueFilter.username = value;
+                  _search();
+                },
+                decoration: InputDecoration(
+                  floatingLabelBehavior: FloatingLabelBehavior.never,
+                  disabledBorder: const OutlineInputBorder(
+                      borderSide:
+                      BorderSide(color: OnepieceColors.menuHoverColor)),
+                  enabledBorder: const OutlineInputBorder(
+                      borderSide:
+                      BorderSide(color: OnepieceColors.menuHoverColor)),
+                  focusedBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
+                  prefixIcon: const Icon(Icons.search),
+                  labelText: AppLocalizations.of(context)!.creatorEmail,
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(0, 0, 6, 0),
+            child: SizedBox(
+              width: 200,
+              height: 35,
+              child: TextFormField(
+                controller: searchNicknameController,
+                onChanged: (value) {
+                  issueFilter.nickname = value;
+                  _search();
+                },
+                decoration: InputDecoration(
+                  floatingLabelBehavior: FloatingLabelBehavior.never,
+                  disabledBorder: const OutlineInputBorder(
+                      borderSide:
+                      BorderSide(color: OnepieceColors.menuHoverColor)),
+                  enabledBorder: const OutlineInputBorder(
+                      borderSide:
+                      BorderSide(color: OnepieceColors.menuHoverColor)),
+                  focusedBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
+                  prefixIcon: const Icon(Icons.search),
+                  labelText: AppLocalizations.of(context)!.creatorNickname,
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(0, 0, 6, 0),
+            child: SizedBox(
+              width: 200,
+              height: 35,
+              child: TextFormField(
                 controller: searchHeaderController,
                 onChanged: (value) {
                   issueFilter.issueHeader = value;
                   _search();
                 },
                 decoration: InputDecoration(
+                  floatingLabelBehavior: FloatingLabelBehavior.never,
                   disabledBorder: const OutlineInputBorder(
                       borderSide:
-                          BorderSide(color: OnepieceColors.menuHoverColor)),
+                      BorderSide(color: OnepieceColors.menuHoverColor)),
                   enabledBorder: const OutlineInputBorder(
                       borderSide:
-                          BorderSide(color: OnepieceColors.menuHoverColor)),
+                      BorderSide(color: OnepieceColors.menuHoverColor)),
                   focusedBorder: const OutlineInputBorder(
                       borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
-                  prefixIcon: IconButton(
-                      onPressed: () {
-                        issueFilter.issueHeader = searchHeaderController.text;
-                        _search();
-                      },
-                      icon: const Icon(Icons.search)),
+                  prefixIcon: const Icon(Icons.search),
                   labelText: AppLocalizations.of(context)!.title,
                 ),
               ),
@@ -411,7 +464,9 @@ class _IssueViewState extends State<IssueView> {
             child: Text(AppLocalizations.of(context)!.resetSort)),
       ),
       _createSingleColumn(
-          AppLocalizations.of(context)!.userNameLabel, null, 180),
+          AppLocalizations.of(context)!.creatorEmail, null, 180),
+      _createSingleColumn(
+          AppLocalizations.of(context)!.creatorNickname, null, 150),
       _createSingleColumn(
           AppLocalizations.of(context)!.feedbackTitle, null, 220),
       _createSingleColumn(AppLocalizations.of(context)!.issueType,
@@ -516,8 +571,8 @@ class _IssueViewState extends State<IssueView> {
             },
             cells: [
               _getDataCell("${entry.key + 1}", null),
-              // todo(yichi): need to add username to issue api
-              _getDataCell("created user", null),
+              _getDataCell(entry.value.creationRecord!.username!, null),
+              _getDataCell(entry.value.creationRecord!.nickname!, null),
               _getDataCell(entry.value.issueHeader.toString(), 200),
               _getDataCell(
                   issueTypeToDisplayValue[entry.value.issueType]!, null),
@@ -584,6 +639,7 @@ class _IssueViewState extends State<IssueView> {
         width: 35,
         height: 28,
         child: TextFormField(
+            style: OnepieceFonts.pageInputStyle,
             textAlign: TextAlign.center,
             textAlignVertical: TextAlignVertical.center,
             decoration: const InputDecoration(

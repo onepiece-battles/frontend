@@ -558,6 +558,7 @@ class HomePageState extends State<HomePage> {
     if (getIt<User>().loginRole != UserRole.NIKA &&
         getIt<User>().loginRole != UserRole.ADMIN) {
       currentLoginRoleResources.remove(ResourceType.USER.toString());
+      currentLoginRoleResources.remove(ResourceType.ISSUE.toString());
     }
     return ListView.builder(
       shrinkWrap: true,
