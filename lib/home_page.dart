@@ -60,6 +60,7 @@ class HomePageState extends State<HomePage> {
           }
         },
         child: Scaffold(
+          backgroundColor: Colors.grey[50],
           body: Row(
             children: [
               _getNavigationMenu(context),
