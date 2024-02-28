@@ -45,4 +45,12 @@ class UserDao {
       UpdateLoginRoleRequest request) async {
     return await userApi.updateRole(request);
   }
+
+  Future<PasswordRetrievalResponse?> sendRetrievalEmail(PasswordRetrievalRequest request) async {
+    return await userApi.sendRetrievalEmail(request);
+  }
+
+  Future<UpdatePasswordResponse?> updatePassword(UpdatePasswordRequest request) async {
+    return await userApi.updatePassword(request);
+  }
 }

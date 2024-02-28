@@ -99,8 +99,10 @@ Class | Method | HTTP request | Description
 *UserApi* | [**login**](doc//UserApi.md#login) | **POST** /api/onepiece/user/login | 
 *UserApi* | [**logout**](doc//UserApi.md#logout) | **POST** /api/onepiece/user/logout | 
 *UserApi* | [**register**](doc//UserApi.md#register) | **POST** /api/onepiece/user/register | 
+*UserApi* | [**sendRetrievalEmail**](doc//UserApi.md#sendretrievalemail) | **POST** /api/onepiece/user/send_password_retrieval_email | 
 *UserApi* | [**sendVerificationEmail**](doc//UserApi.md#sendverificationemail) | **POST** /api/onepiece/user/verify_user_email | 
 *UserApi* | [**shareResource**](doc//UserApi.md#shareresource) | **POST** /api/onepiece/user/share_resource | 
+*UserApi* | [**updatePassword**](doc//UserApi.md#updatepassword) | **POST** /api/onepiece/user/update_password_with_verification | 
 *UserApi* | [**updateRole**](doc//UserApi.md#updaterole) | **POST** /api/onepiece/user/update_login_role | 
 *UserApi* | [**updateUser**](doc//UserApi.md#updateuser) | **POST** /api/onepiece/user/update_user | 
 *UserApi* | [**verifyByEmailCode**](doc//UserApi.md#verifybyemailcode) | **POST** /api/onepiece/user/verify_by_email_code | 
@@ -218,6 +220,8 @@ Class | Method | HTTP request | Description
  - [LogoutRequest](doc//LogoutRequest.md)
  - [LogoutResponse](doc//LogoutResponse.md)
  - [OnepieceLocale](doc//OnepieceLocale.md)
+ - [PasswordRetrievalRequest](doc//PasswordRetrievalRequest.md)
+ - [PasswordRetrievalResponse](doc//PasswordRetrievalResponse.md)
  - [Permission](doc//Permission.md)
  - [Race](doc//Race.md)
  - [RegisterRequest](doc//RegisterRequest.md)
@@ -237,6 +241,8 @@ Class | Method | HTTP request | Description
  - [UpdateGroupResponse](doc//UpdateGroupResponse.md)
  - [UpdateLoginRoleRequest](doc//UpdateLoginRoleRequest.md)
  - [UpdateLoginRoleResponse](doc//UpdateLoginRoleResponse.md)
+ - [UpdatePasswordRequest](doc//UpdatePasswordRequest.md)
+ - [UpdatePasswordResponse](doc//UpdatePasswordResponse.md)
  - [UpdateUserRequest](doc//UpdateUserRequest.md)
  - [UpdateUserResponse](doc//UpdateUserResponse.md)
  - [UploadImageRequest](doc//UploadImageRequest.md)
