@@ -692,6 +692,8 @@ class _CharacterViewState extends State<CharacterView> {
           AppLocalizations.of(context)!.battleStyle, null, 120, false),
       _createSingleColumn(
           AppLocalizations.of(context)!.bounty, null, 120, false),
+      _createSingleColumn(AppLocalizations.of(context)!.combatPower,
+          CharacterSortableFieldsEnum.score, 120, false),
       _createSingleColumn(AppLocalizations.of(context)!.characterAttack,
           CharacterSortableFieldsEnum.attack, null, true),
       _createSingleColumn(AppLocalizations.of(context)!.characterDefense,
@@ -882,6 +884,10 @@ class _CharacterViewState extends State<CharacterView> {
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
                 child: Text("\$${entry.value.bounty.toString()}"),
+              )),
+              DataCell(Padding(
+                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                child: Text(entry.value.score.toString()),
               )),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),

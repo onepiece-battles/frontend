@@ -107,12 +107,12 @@ class _IssueViewState extends State<IssueView> {
             children: [
               _createHeader(context),
               SizedBox(
-                width: 1500,
+                width: 1600,
                 height: 50,
                 child: _createControlPanel(context),
               ),
               SizedBox(
-                width: 1500,
+                width: 1600,
                 child: FittedBox(
                   fit: BoxFit.fitWidth,
                   child: _createIssueTable(context),
@@ -122,7 +122,7 @@ class _IssueViewState extends State<IssueView> {
                 height: 15,
               ),
               if (totalPageNum>1) SizedBox(
-                width: 1500,
+                width: 1600,
                 child: Center(child: _getPageFoot(context)),
               )
             ],
@@ -469,15 +469,15 @@ class _IssueViewState extends State<IssueView> {
       _createSingleColumn(
           AppLocalizations.of(context)!.creatorNickname, null, 150),
       _createSingleColumn(
-          AppLocalizations.of(context)!.feedbackTitle, null, 220),
+          AppLocalizations.of(context)!.feedbackTitle, null, 200),
       _createSingleColumn(AppLocalizations.of(context)!.issueType,
           IssueSortableFieldEnum.issueType, null),
       _createSingleColumn(AppLocalizations.of(context)!.status,
           IssueSortableFieldEnum.issueStatus, null),
       _createSingleColumn(AppLocalizations.of(context)!.creationTime,
-          IssueSortableFieldEnum.creationTimestamp, 200),
+          IssueSortableFieldEnum.creationTimestamp, 180),
       _createSingleColumn(AppLocalizations.of(context)!.modificationTime,
-          IssueSortableFieldEnum.modificationTimestamp, 200),
+          IssueSortableFieldEnum.modificationTimestamp, 180),
     ];
   }
 
