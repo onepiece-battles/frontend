@@ -4,9 +4,13 @@ import 'package:flutter_toggle_tab/flutter_toggle_tab.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/app_router.dart';
+import 'package:one_piece_battles_flutter/popup/email_verification.dart';
+import 'package:one_piece_battles_flutter/popup/onepiece_alert.dart';
+import 'package:one_piece_battles_flutter/repository/user_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
 
+import 'constants/button_style.dart';
 import 'constants/onepiece_colors.dart';
 import 'constants/path_constants.dart';
 import 'main.dart';
@@ -30,6 +34,7 @@ class _RetrievePasswordState extends State<RetrievePassword> {
   String verificationMessage = "";
   I18nText? verificationI18n = I18nText();
   bool verificationCodeSent = false;
+  bool _verificationCodeButtonEnabled = false;
 
   TextEditingController emailController =
       TextEditingController(text: 'zhangyichiwind@163.com');
@@ -110,7 +115,62 @@ class _RetrievePasswordState extends State<RetrievePassword> {
   }
 
   Widget _getSendVerificationCode(BuildContext context) {
-    return Column();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        SizedBox(
+          width: 300,
+          child: TextField(
+            onChanged: (value) {
+              setState(() {
+                if (emailController.text != "") {
+                  _verificationCodeButtonEnabled = true;
+                } else {
+                  _verificationCodeButtonEnabled = false;
+                }
+              });
+            },
+            autofocus: true,
+            controller: emailController,
+            decoration: InputDecoration(
+                labelText: AppLocalizations.of(context)?.emailAddress,
+                hintText: AppLocalizations.of(context)?.emailAddress,
+                prefixIcon: const Icon(Icons.email)),
+          ),
+        ),
+        const SizedBox(
+          height: 20,
+        ),
+        SizedBox(
+          width: 300,
+          child: ElevatedButton(
+            autofocus: true,
+            onPressed: !_verificationCodeButtonEnabled
+                ? null
+                : () {
+                    getIt<UserDao>()
+                        .sendRetrievalEmail(PasswordRetrievalRequest(
+                            email: emailController.text))
+                        .then((value) => {
+                              OnepieceAlert.getBasicAlertDialogFunc(
+                                  context,
+                                  AppLocalizations.of(context)!.hint,
+                                  I18nHelper.getDisplayNameFromI18n(
+                                      value!.notification!))
+                            });
+                  },
+            style: OnepieceButtonStyle.getDefaultStyle(),
+            child: Text(
+              AppLocalizations.of(context)!.sendEmail,
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 17),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _getVerifyVerificationCode(BuildContext context) {
