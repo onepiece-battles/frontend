@@ -244,17 +244,13 @@ class _SearchPopupState extends State<SearchPopup> {
                     borderRadius: BorderRadius.circular(5),
                   ),
                   onTap: () {
-                    setState(
-                      () {
-                        context.goNamed('characterDetails',
-                            extra: character.id,
-                            pathParameters: {
-                              'name': I18nHelper.getDisplayNameFromI18n(
-                                  character.name)
-                            });
-                        Navigator.pop(context);
-                      },
-                    );
+                    Navigator.pop(context);
+                    context.goNamed('characterDetails',
+                        extra: character.id,
+                        pathParameters: {
+                          'name':
+                              I18nHelper.getDisplayNameFromI18n(character.name)
+                        });
                   },
                   hoverColor: OnepieceColors.liteFancyBlue,
                   title: Row(
@@ -339,17 +335,12 @@ class _SearchPopupState extends State<SearchPopup> {
                     borderRadius: BorderRadius.circular(5),
                   ),
                   onTap: () {
-                    setState(
-                      () {
-                        context.goNamed('fruitDetails',
-                            extra: fruit.id,
-                            pathParameters: {
-                              'name':
-                                  I18nHelper.getDisplayNameFromI18n(fruit.name!)
-                            });
-                        Navigator.pop(context);
-                      },
-                    );
+                    Navigator.pop(context);
+                    context.goNamed('fruitDetails',
+                        extra: fruit.id,
+                        pathParameters: {
+                          'name': I18nHelper.getDisplayNameFromI18n(fruit.name!)
+                        });
                   },
                   hoverColor: OnepieceColors.liteFancyBlue,
                   title: Row(
@@ -404,18 +395,13 @@ class _SearchPopupState extends State<SearchPopup> {
                       borderRadius: BorderRadius.circular(5),
                     ),
                     onTap: () {
-                      // todo(yichi): update left side menu
-                      setState(
-                        () {
-                          context.goNamed('groupDetails',
-                              extra: group.id,
-                              pathParameters: {
-                                'name': I18nHelper.getDisplayNameFromI18n(
-                                    group.name)
-                              });
-                          Navigator.pop(context);
-                        },
-                      );
+                      Navigator.pop(context);
+                      context.goNamed('groupDetails',
+                          extra: group.id,
+                          pathParameters: {
+                            'name':
+                                I18nHelper.getDisplayNameFromI18n(group.name)
+                          });
                     },
                     hoverColor: OnepieceColors.liteFancyBlue,
                     title: Row(
