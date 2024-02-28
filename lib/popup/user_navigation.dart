@@ -72,9 +72,8 @@ class _UserNavigationState extends State<UserNavigation> {
                         .then((value) {
                       getIt.registerLazySingleton<User>(
                           () => User(id: "", username: "", nickname: ""));
-                      Navigator.pop(context);
-                      context.replace(AppRouter.loginPath);
                     });
+                    context.replace(AppRouter.loginPath);
                   },
                   style: OnepieceButtonStyle.getDefaultStyle(),
                   child: Row(
