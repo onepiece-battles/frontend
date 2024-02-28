@@ -261,5 +261,7 @@
   "scholar": "Scholar",
   "shipwright": "Shipwright",
   "positionList": "Position List",
-  "updatePassword": "Update Password"
+  "updatePassword": "Update Password",
+  "combatPower": "Comprehensive Combat Capability",
+  "getByJoinCombat": "Improve by joining combats"
 }

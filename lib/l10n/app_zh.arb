@@ -261,5 +261,7 @@
   "scholar": "学者",
   "shipwright": "船匠",
   "positionList": "职位列表",
-  "updatePassword": "更新密码"
+  "updatePassword": "更新密码",
+  "combatPower": "综合战斗力",
+  "getByJoinCombat": "通过参加对战提升"
 }
