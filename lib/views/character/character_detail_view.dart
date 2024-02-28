@@ -296,35 +296,35 @@ class _CharacterDetailState extends State<CharacterDetail> {
                         basicInfoEditable = !basicInfoEditable;
                         if (!basicInfoEditable) {
                           var updatedCharacter = Character(
-                            id: character.id,
-                            maximumFruitCount: character.maximumFruitCount,
-                            groupGain: character.groupGain,
-                            attack: character.attack,
-                            defense: character.defense,
-                            intelligence: character.intelligence,
-                            blood: character.blood,
-                            speed: character.speed,
-                            energy: character.energy,
-                            battleStyle: selectedBattleStyle,
-                            race: selectedRace,
-                            // basic info
-                            name: I18nHelper.getI18nFromDisplayName(
-                                character.name, characterNameController.text),
-                            dateOfBirth: DateTime(
-                                1900,
-                                DataConverter.stringToInt(
-                                    characterDateOfBirthMonth.text),
-                                DataConverter.stringToInt(
-                                    characterDateOfBirthDay.text)),
-                            // todo(yichi): profile image update
-                            birthPlace: characterBirthPlace.text,
-                            age: DataConverter.stringToInt(
-                                characterAge.text.trim()),
-                            bounty: DataConverter.stringToInt(
-                                characterBounty.text.trim()),
-                            height: DataConverter.stringToInt(
-                                characterHeight.text.trim()),
-                          );
+                              id: character.id,
+                              maximumFruitCount: character.maximumFruitCount,
+                              groupGain: character.groupGain,
+                              attack: character.attack,
+                              defense: character.defense,
+                              intelligence: character.intelligence,
+                              blood: character.blood,
+                              speed: character.speed,
+                              energy: character.energy,
+                              battleStyle: selectedBattleStyle,
+                              race: selectedRace,
+                              // basic info
+                              name: I18nHelper.getI18nFromDisplayName(
+                                  character.name, characterNameController.text),
+                              dateOfBirth: DateTime(
+                                  1900,
+                                  DataConverter.stringToInt(
+                                      characterDateOfBirthMonth.text),
+                                  DataConverter.stringToInt(
+                                      characterDateOfBirthDay.text)),
+                              // todo(yichi): profile image update
+                              birthPlace: characterBirthPlace.text,
+                              age: DataConverter.stringToInt(
+                                  characterAge.text.trim()),
+                              bounty: DataConverter.stringToInt(
+                                  characterBounty.text.trim()),
+                              height: DataConverter.stringToInt(
+                                  characterHeight.text.trim()),
+                              score: character.score);
                           getIt<CharacterDao>()
                               .update(updatedCharacter)
                               .then((value) {
@@ -613,6 +613,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                             id: character.id,
                             battleStyle: character.battleStyle,
                             race: character.race,
+                            score: character.score,
                             // digit info
                             maximumFruitCount: DataConverter.stringToInt(
                                 characterFruitLimitController.text),
@@ -685,6 +686,27 @@ class _CharacterDetailState extends State<CharacterDetail> {
                     .toList(),
               ),
             ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(10, 20, 0, 0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Tooltip(
+                  message:
+                  AppLocalizations.of(context)!.getByJoinCombat,
+                  child: Text(
+                    AppLocalizations.of(context)!.combatPower,
+                    style: OnepieceFonts.contentStyleBold,
+                  ),
+                ),
+                Text(
+                  " ${character.score}",
+                  style: OnepieceFonts.contentStyleBoldFancyBlue,
+                )
+              ],
+            ),
+          ),
           Form(
             key: _digitFormKey,
             child: Row(
