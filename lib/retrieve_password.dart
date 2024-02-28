@@ -282,13 +282,12 @@ class _RetrievePasswordState extends State<RetrievePassword> {
             controller: verificationCodeController,
             keyboardType: TextInputType.text,
             decoration: InputDecoration(
-              hintText: AppLocalizations.of(context)?.verificationCode,
-              labelText: AppLocalizations.of(context)?.verificationCode,
-              prefixIcon: Icon(
-                Icons.verified,
-                color: Theme.of(context).primaryColorDark,
-              )
-            ),
+                hintText: AppLocalizations.of(context)?.verificationCode,
+                labelText: AppLocalizations.of(context)?.verificationCode,
+                prefixIcon: Icon(
+                  Icons.verified,
+                  color: Theme.of(context).primaryColorDark,
+                )),
           ),
         ),
         const SizedBox(
@@ -302,10 +301,12 @@ class _RetrievePasswordState extends State<RetrievePassword> {
                 ? null
                 : () {
                     UpdatePasswordRequest request = UpdatePasswordRequest(
-                        username: emailController.text,
-                        password: passwordController.text,
-                        confirmedPassword: confirmedPasswordController.text,
-                        verificationCode: verificationCodeController.text);
+                        username: emailController.text.trim(),
+                        password: passwordController.text.trim(),
+                        confirmedPassword:
+                            confirmedPasswordController.text.trim(),
+                        verificationCode:
+                            verificationCodeController.text.trim());
                     getIt<UserDao>().updatePassword(request).then((value) {
                       OnepieceAlert.getBasicAlertDialogFunc(
                           context,
