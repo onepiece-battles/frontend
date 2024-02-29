@@ -100,12 +100,12 @@ Class | Method | HTTP request | Description
 *UserApi* | [**logout**](doc//UserApi.md#logout) | **POST** /api/onepiece/user/logout | 
 *UserApi* | [**register**](doc//UserApi.md#register) | **POST** /api/onepiece/user/register | 
 *UserApi* | [**sendRetrievalEmail**](doc//UserApi.md#sendretrievalemail) | **POST** /api/onepiece/user/send_password_retrieval_email | 
-*UserApi* | [**sendVerificationEmail**](doc//UserApi.md#sendverificationemail) | **POST** /api/onepiece/user/verify_user_email | 
 *UserApi* | [**shareResource**](doc//UserApi.md#shareresource) | **POST** /api/onepiece/user/share_resource | 
 *UserApi* | [**updatePassword**](doc//UserApi.md#updatepassword) | **POST** /api/onepiece/user/update_password_with_verification | 
 *UserApi* | [**updateRole**](doc//UserApi.md#updaterole) | **POST** /api/onepiece/user/update_login_role | 
 *UserApi* | [**updateUser**](doc//UserApi.md#updateuser) | **POST** /api/onepiece/user/update_user | 
 *UserApi* | [**verifyByEmailCode**](doc//UserApi.md#verifybyemailcode) | **POST** /api/onepiece/user/verify_by_email_code | 
+*UserApi* | [**verifyEmailAddress**](doc//UserApi.md#verifyemailaddress) | **POST** /api/onepiece/user/verify_email_address | 
 
 
 ## Documentation For Models
@@ -228,8 +228,6 @@ Class | Method | HTTP request | Description
  - [RegisterResponse](doc//RegisterResponse.md)
  - [ResourcePermissionMap](doc//ResourcePermissionMap.md)
  - [ResourceType](doc//ResourceType.md)
- - [SendEmailRequest](doc//SendEmailRequest.md)
- - [SendEmailResponse](doc//SendEmailResponse.md)
  - [ShareResourceRequest](doc//ShareResourceRequest.md)
  - [ShareResourceResponse](doc//ShareResourceResponse.md)
  - [SortOrder](doc//SortOrder.md)
@@ -254,6 +252,8 @@ Class | Method | HTTP request | Description
  - [UserSortableFieldsEnum](doc//UserSortableFieldsEnum.md)
  - [VerifyByEmailCodeRequest](doc//VerifyByEmailCodeRequest.md)
  - [VerifyByEmailCodeResponse](doc//VerifyByEmailCodeResponse.md)
+ - [VerifyEmailAddressRequest](doc//VerifyEmailAddressRequest.md)
+ - [VerifyEmailAddressResponse](doc//VerifyEmailAddressResponse.md)
 
 
 ## Documentation For Authorization
