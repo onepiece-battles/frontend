@@ -314,8 +314,8 @@ class _UserProfileState extends State<UserProfile> {
                 ElevatedButton(
                   onPressed: () {
                     getIt<UserDao>()
-                        .sendEmail(
-                            SendEmailRequest(id: user.id, email: user.username))
+                        .verifyEmailAddress(
+                            VerifyEmailAddressRequest(id: user.id, email: user.username))
                         .then((value) => {
                               showCupertinoModalPopup(
                                 filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
