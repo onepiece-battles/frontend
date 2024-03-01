@@ -74,11 +74,11 @@ class _BattleDetailViewState extends State<BattleDetailView> {
   }
 
   void _updateBattleExecution(BattleExecution battleExecution) {
-    battleExecutionData.battleStatus = battle.battleExecution!.battleStatus!;
+    battleExecutionData.battleStatus = battleExecution.battleStatus!;
     battleExecutionData.battleReportStage =
-        battle.battleExecution!.battleReportStage!;
-    battleExecutionData.winnerId = battle.battleExecution!.winnerId;
-    battleExecutionData.reportFileId = battle.battleExecution!.reportFileId;
+    battleExecution.battleReportStage!;
+    battleExecutionData.winnerId = battleExecution.winnerId;
+    battleExecutionData.reportFileId = battleExecution.reportFileId;
   }
 
   @override
@@ -89,17 +89,14 @@ class _BattleDetailViewState extends State<BattleDetailView> {
           if (snapshot.connectionState == ConnectionState.done) {
             _updateData(snapshot.data);
             _getBattleExecution();
-            return
-            SingleChildScrollView(
+            return SingleChildScrollView(
               scrollDirection: Axis.vertical,
               child: Center(
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: ChangeNotifierProvider(
-                    create: (context) => BattleExecutionData(BattleStatus.CREATED,
-                        BattleReportStage.WAITING, null, null),
-                    child:
-                    Column(
+                    create: (context) => battleExecutionData,
+                    child: Column(
                       mainAxisSize: MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -147,12 +144,10 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                         _getBattleReportIcon(context)
                       ],
                     ),
-
                   ),
                 ),
               ),
             );
-
           } else {
             return Center(
               child: Text(
