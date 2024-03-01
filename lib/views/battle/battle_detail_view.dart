@@ -55,7 +55,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
     _timer?.cancel();
     GetBattleExecutionRequest request =
         GetBattleExecutionRequest(battleId: battle.id);
-    _timer = Timer.periodic(const Duration(seconds: 3), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       getIt<BattleDao>()
           .getBattleExecution(request)
           .then((value) => _updateBattleExecution(value!));
@@ -75,8 +75,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
 
   void _updateBattleExecution(BattleExecution battleExecution) {
     battleExecutionData.battleStatus = battleExecution.battleStatus!;
-    battleExecutionData.battleReportStage =
-    battleExecution.battleReportStage!;
+    battleExecutionData.battleReportStage = battleExecution.battleReportStage!;
     battleExecutionData.winnerId = battleExecution.winnerId;
     battleExecutionData.reportFileId = battleExecution.reportFileId;
   }
@@ -393,7 +392,9 @@ class _BattleDetailViewState extends State<BattleDetailView> {
       return Padding(
         padding: const EdgeInsets.all(20.0),
         child: Tooltip(
-          message: AppLocalizations.of(context)!.startBattle,
+          message: model.battleStatus == BattleStatus.CREATED
+              ? AppLocalizations.of(context)!.startBattle
+              : "",
           child: InkWell(
             splashColor: Colors.transparent,
             hoverColor: Colors.transparent,
@@ -459,15 +460,21 @@ class _BattleDetailViewState extends State<BattleDetailView> {
             Row(
               children: [
                 Icon(
-                  Icons.check_circle,
+                  model.winnerId != null
+                      ? Icons.check_circle
+                      : Icons.check_circle_outline,
                   size: iconSize,
-                  color: OnepieceColors.fancyBlue,
+                  color: model.winnerId != null
+                      ? OnepieceColors.fancyBlue
+                      : OnepieceColors.liteFancyBlue,
                 ),
                 Padding(
                   padding: const EdgeInsets.only(left: 8.0),
                   child: Text(
                     AppLocalizations.of(context)!.battleReportWaiting,
-                    style: OnepieceFonts.fancyBlueHintFont,
+                    style: model.winnerId != null
+                        ? OnepieceFonts.fancyBlueHintFont
+                        : OnepieceFonts.liteFancyBlueHintFont,
                   ),
                 )
               ],
@@ -539,7 +546,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                     padding: const EdgeInsets.only(left: 8.0),
                     child: Text(
                       AppLocalizations.of(context)!.battleReportGenerated,
-                      style: OnepieceFonts.liteFancyBlueHintFont,
+                      style: OnepieceFonts.fancyBlueHintFont,
                     ),
                   )
                 ],
@@ -551,29 +558,41 @@ class _BattleDetailViewState extends State<BattleDetailView> {
   }
 
   Widget _getBattleReportIcon(BuildContext context) {
-    return IconButton(
-      iconSize: 50,
-      tooltip: AppLocalizations.of(context)!.downloadReport,
-      onPressed:
-          battleExecutionData.battleReportStage == BattleReportStage.FINISHED
-              ? () {
-                  getIt<FileDao>()
-                      .downloadFile(DownloadFileRequest(
-                          id: battleExecutionData.reportFileId!))
-                      .then((value) => {
-                            OnepieceAlert.getBasicAlertDialogFunc(
-                                context, "battle", "download file success")
-                          });
-                }
-              : null,
-      disabledColor: Colors.grey,
-      splashRadius: 1,
-      icon: SvgPicture.asset(
-        'images/svgs/pdf.svg',
-        width: 100,
-        height: 100,
-      ),
-    );
+    return Consumer<BattleExecutionData>(builder: (context, model, child) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(0, 8, 0, 100),
+        child: Tooltip(
+          message: model.battleReportStage == BattleReportStage.FINISHED
+              ? AppLocalizations.of(context)!.downloadReport
+              : "",
+          child: InkWell(
+            onTap: model.battleReportStage == BattleReportStage.FINISHED
+                ? () {
+                    getIt<FileDao>()
+                        .downloadFile(DownloadFileRequest(
+                            id: battleExecutionData.reportFileId!))
+                        .then((value) => {
+                              OnepieceAlert.getBasicAlertDialogFunc(
+                                  context, "battle", "download file success")
+                            });
+                  }
+                : null,
+            child: model.battleReportStage == BattleReportStage.FINISHED
+                ? SvgPicture.asset(
+                    'images/svgs/pdf.svg',
+                    width: 100,
+                    height: 100,
+                  )
+                : SvgPicture.asset(
+                    'images/svgs/pdf_black.svg',
+                    width: 100,
+                    height: 100,
+                    color: Colors.grey,
+                  ),
+          ),
+        ),
+      );
+    });
   }
 }
 
