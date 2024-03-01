@@ -1,5 +1,12 @@
 import 'dart:async';
+import 'dart:io';
+// import 'package:flutter_pdfview/flutter_pdfview.dart';
+// import 'package:http/http.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:flutter/foundation.dart';
 
+// import 'package:path/path.dart' as path;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get_it/get_it.dart';
@@ -390,7 +397,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
   Widget _getStartButton(BuildContext context) {
     return Consumer<BattleExecutionData>(builder: (context, model, child) {
       return Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(40.0),
         child: Tooltip(
           message: model.battleStatus == BattleStatus.CREATED
               ? AppLocalizations.of(context)!.startBattle
@@ -411,8 +418,8 @@ class _BattleDetailViewState extends State<BattleDetailView> {
             child: SvgPicture.asset(
               'images/svgs/battle.svg',
               color: OnepieceColors.fancyBlue,
-              width: 60,
-              height: 60,
+              width: 40,
+              height: 40,
             ),
           ),
         ),
@@ -571,10 +578,12 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                     getIt<FileDao>()
                         .downloadFile(DownloadFileRequest(
                             id: battleExecutionData.reportFileId!))
-                        .then((value) => {
-                              OnepieceAlert.getBasicAlertDialogFunc(
-                                  context, "battle", "download file success")
-                            });
+                        .then((value) {
+                      debugPrint("start store file...");
+                      //todo(yichi): download file from aliCloud oss.
+                      OnepieceAlert.getBasicAlertDialogFunc(
+                          context, "battle", "download file success");
+                    });
                   }
                 : null,
             child: model.battleReportStage == BattleReportStage.FINISHED

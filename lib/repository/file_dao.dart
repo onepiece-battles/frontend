@@ -9,7 +9,7 @@ class FileDao{
     fileApi = FileApi(apiClient);
   }
 
-  Future<MultipartFile?> downloadFile(DownloadFileRequest request) async {
+  Future<String?> downloadFile(DownloadFileRequest request) async {
     return await fileApi.downloadFile(request);
   }
 }
