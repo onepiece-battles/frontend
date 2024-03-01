@@ -1,12 +1,5 @@
 import 'dart:async';
-import 'dart:io';
-// import 'package:flutter_pdfview/flutter_pdfview.dart';
-// import 'package:http/http.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:flutter/foundation.dart';
-
-// import 'package:path/path.dart' as path;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get_it/get_it.dart';
@@ -23,6 +16,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:one_piece_battles_flutter/graph/character_data.dart';
 import '../../constants/onepiece_fonts.dart';
 import '../../utils/base64_helper.dart';
+import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -35,11 +29,14 @@ class BattleDetailView extends StatefulWidget {
 }
 
 class _BattleDetailViewState extends State<BattleDetailView> {
+  final GlobalKey<SfPdfViewerState> _pdfViewerKey = GlobalKey();
+
   Timer? _timer;
   late BattleFullView battle;
   late BattleExecutionData battleExecutionData;
   late Character starter;
   late Character receiver;
+  ValueNotifier<Uint8List?> pdfData = ValueNotifier(null);
 
   @override
   void initState() {
@@ -147,7 +144,12 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                             height: 20,
                           ),
                         ),
-                        _getBattleReportIcon(context)
+                        _getBattleReportIcon(context),
+                       if (pdfData.value!=null)
+                         SizedBox(
+                           width: 1000,
+                             height: 1000,
+                             child: _getPdfView(context))
                       ],
                     ),
                   ),
@@ -579,7 +581,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                         .downloadFile(DownloadFileRequest(
                             id: battleExecutionData.reportFileId!))
                         .then((value) {
-                      debugPrint("start store file...");
+                      pdfData.value = Uint8List.fromList(value!.codeUnits);
                       //todo(yichi): download file from aliCloud oss.
                       OnepieceAlert.getBasicAlertDialogFunc(
                           context, "battle", "download file success");
@@ -602,6 +604,17 @@ class _BattleDetailViewState extends State<BattleDetailView> {
         ),
       );
     });
+  }
+
+  Widget _getPdfView(BuildContext context) {
+    return ValueListenableBuilder<Uint8List?>(
+        valueListenable: pdfData,
+        builder: (context, value, _) {
+          return SfPdfViewer.memory(
+            value!,
+            key: _pdfViewerKey,
+          );
+        });
   }
 }
 
