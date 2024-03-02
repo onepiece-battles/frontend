@@ -47,13 +47,13 @@ import 'package:openapi/api.dart';
 //defaultApiClient.getAuthentication<HttpBearerAuth>('bearerAuth').setAccessToken(yourTokenGeneratorFunction);
 
 final api_instance = BattleApi();
-final addBattleRequest = AddBattleRequest(); // AddBattleRequest | request to create a battle
+final createBattleRequest = CreateBattleRequest(); // CreateBattleRequest | request to create a battle
 
 try {
-    final result = api_instance.addBattle(addBattleRequest);
+    final result = api_instance.createBattle(createBattleRequest);
     print(result);
 } catch (e) {
-    print('Exception when calling BattleApi->addBattle: $e\n');
+    print('Exception when calling BattleApi->createBattle: $e\n');
 }
 
 ```
@@ -64,7 +64,7 @@ All URIs are relative to *http://localhost:8080*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
-*BattleApi* | [**addBattle**](doc//BattleApi.md#addbattle) | **POST** /api/onepiece/battle/add | 
+*BattleApi* | [**createBattle**](doc//BattleApi.md#createbattle) | **POST** /api/onepiece/battle/add | 
 *BattleApi* | [**getBattleExecution**](doc//BattleApi.md#getbattleexecution) | **POST** /api/onepiece/battle/get_battle_execution | get new information about one battle
 *BattleApi* | [**getBattleFullView**](doc//BattleApi.md#getbattlefullview) | **POST** /api/onepiece/battle/get_battle_full_view | 
 *BattleApi* | [**listBattleByIds**](doc//BattleApi.md#listbattlebyids) | **POST** /api/onepiece/battle/list_battle_by_ids | 
@@ -112,7 +112,6 @@ Class | Method | HTTP request | Description
 
  - [AccountStatus](doc//AccountStatus.md)
  - [ActionRecord](doc//ActionRecord.md)
- - [AddBattleRequest](doc//AddBattleRequest.md)
  - [AddRoleRequest](doc//AddRoleRequest.md)
  - [AddRoleResponse](doc//AddRoleResponse.md)
  - [AssignResourcePermissionsToRoleRequest](doc//AssignResourcePermissionsToRoleRequest.md)
@@ -147,6 +146,8 @@ Class | Method | HTTP request | Description
  - [CharacterListViewAllOf](doc//CharacterListViewAllOf.md)
  - [CharacterSortableField](doc//CharacterSortableField.md)
  - [CharacterSortableFieldsEnum](doc//CharacterSortableFieldsEnum.md)
+ - [CreateBattleRequest](doc//CreateBattleRequest.md)
+ - [CreateBattleResponse](doc//CreateBattleResponse.md)
  - [CreateCharacterRequest](doc//CreateCharacterRequest.md)
  - [CreateFruitRequest](doc//CreateFruitRequest.md)
  - [CreateGroupRequest](doc//CreateGroupRequest.md)

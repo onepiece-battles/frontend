@@ -714,11 +714,11 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                                 receiverSelectedId.isEmpty)
                             ? null
                             : () {
-                                AddBattleRequest request = AddBattleRequest(
+                                CreateBattleRequest request = CreateBattleRequest(
                                     userId: getIt<User>().id,
                                     starterId: starterSelectedId,
                                     receiverId: receiverSelectedId);
-                                getIt<BattleDao>().addBattle(request);
+                                getIt<BattleDao>().createBattle(request);
                                 context.goNamed("battle");
                               },
                         child: Text(AppLocalizations.of(context)!.create),

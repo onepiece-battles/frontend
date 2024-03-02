@@ -16,8 +16,8 @@ class BattleDao{
     return await battleApi.listBattles(request);
   }
 
-  Future<Battle?> addBattle(AddBattleRequest request) async {
-    return await battleApi.addBattle(request);
+  Future<CreateBattleResponse?> createBattle(CreateBattleRequest request) async {
+    return await battleApi.createBattle(request);
   }
 
   Future<StartBattleResponse?> startBattle(StartBattleRequest request) async {
