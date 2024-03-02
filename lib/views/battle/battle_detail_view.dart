@@ -145,11 +145,11 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                           ),
                         ),
                         _getBattleReportIcon(context),
-                       if (pdfData.value!=null)
-                         SizedBox(
-                           width: 1000,
-                             height: 1000,
-                             child: _getPdfView(context))
+                        if (pdfData.value != null)
+                          SizedBox(
+                              width: 1000,
+                              height: 1000,
+                              child: _getPdfView(context))
                       ],
                     ),
                   ),
@@ -227,7 +227,8 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                   )
                 : Row(
                     children: [
-                      Icon(Icons.check_circle, size: iconSize),
+                      Icon(Icons.check_circle,
+                          size: iconSize, color: OnepieceColors.fancyBlue),
                       Padding(
                         padding: const EdgeInsets.only(left: 8.0),
                         child: Text(
@@ -511,7 +512,8 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                   )
                 : Row(
                     children: [
-                      Icon(Icons.check_circle, size: iconSize),
+                      Icon(Icons.check_circle,
+                          size: iconSize, color: OnepieceColors.fancyBlue),
                       Padding(
                         padding: const EdgeInsets.only(left: 8.0),
                         child: Text(
