@@ -56,7 +56,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
 
   void searchOnStart() {
     ListCharacterRequest listCharacterRequest = ListCharacterRequest(
-        pageSize: 5,
+        pageSize: 30,
         pageIndex: 1,
         // do not need to sort in this case.
         sortKeys: [],
@@ -166,24 +166,37 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                     ),
                     starterSelectedItem.value == null
                         ? const SizedBox(
-                            height: 50,
+                            height: 80,
                             child: Text(
                               "",
                               style: OnepieceFonts.headerStyle,
                             ),
                           )
                         : SizedBox(
-                            height: 50,
+                            height: 80,
                             child: Padding(
-                              padding: const EdgeInsets.only(top: 10.0),
-                              child: Text(
-                                I18nHelper.getDisplayNameFromI18n(
-                                    starterSelectedItem.value!.name),
-                                style: const TextStyle(
-                                    color: OnepieceColors.fancyGreen,
-                                    fontStyle: FontStyle.normal,
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold),
+                              padding: const EdgeInsets.symmetric(vertical: 10.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    I18nHelper.getDisplayNameFromI18n(
+                                        starterSelectedItem.value!.name),
+                                    style: const TextStyle(
+                                        color: OnepieceColors.fancyGreen,
+                                        fontStyle: FontStyle.normal,
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  Text(
+                                      "${AppLocalizations.of(context)!.combatPower} ${starterSelectedItem.value!.score}",
+                                      style: const TextStyle(
+                                          color: OnepieceColors.fancyGreen,
+                                          fontStyle: FontStyle.normal,
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold),
+                                  )
+                                ],
                               ),
                             )),
                   ],
@@ -240,7 +253,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                           I18nHelper.getLanguageCode();
                       ListCharacterRequest listCharacterRequest =
                           ListCharacterRequest(
-                              pageSize: 5,
+                              pageSize: 20,
                               pageIndex: 1,
                               // do not need to sort in this case.
                               sortKeys: [],
@@ -262,6 +275,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
               padding: const EdgeInsets.only(bottom: 10.0),
               child: SizedBox(
                 width: 400,
+                height: 400,
                 child: ListView.builder(
                   shrinkWrap: true,
                   physics: const AlwaysScrollableScrollPhysics(),
@@ -439,9 +453,10 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                                           OnepieceColors.liteFancyBlue)
                                       : Padding(
                                           padding: const EdgeInsets.all(20.0),
-                                          child: Image.memory(Base64Helper.decode(
-                                              receiverSelectedItem
-                                                  .value!.profileImage!)),
+                                          child: Image.memory(
+                                              Base64Helper.decode(
+                                                  receiverSelectedItem
+                                                      .value!.profileImage!)),
                                         ),
                                 ),
                               ),
@@ -450,24 +465,37 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                         ),
                         receiverSelectedItem.value == null
                             ? const SizedBox(
-                                height: 50,
+                                height: 80,
                                 child: Text(
                                   "",
                                   style: OnepieceFonts.headerStyle,
                                 ),
                               )
                             : SizedBox(
-                                height: 50,
+                                height: 80,
                                 child: Padding(
                                   padding: const EdgeInsets.only(top: 10.0),
-                                  child: Text(
-                                    I18nHelper.getDisplayNameFromI18n(
-                                        receiverSelectedItem.value!.name),
-                                    style: const TextStyle(
-                                        color: OnepieceColors.fancyGreen,
-                                        fontStyle: FontStyle.normal,
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        I18nHelper.getDisplayNameFromI18n(
+                                            receiverSelectedItem.value!.name),
+                                        style: const TextStyle(
+                                            color: OnepieceColors.fancyGreen,
+                                            fontStyle: FontStyle.normal,
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      Text(
+                                        "${AppLocalizations.of(context)!.combatPower} ${receiverSelectedItem.value!.score}",
+                                        style: const TextStyle(
+                                            color: OnepieceColors.fancyGreen,
+                                            fontStyle: FontStyle.normal,
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold),
+                                      )
+                                    ],
                                   ),
                                 ),
                               ),
@@ -523,7 +551,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                             I18nHelper.getLanguageCode();
                         ListCharacterRequest listCharacterRequest =
                             ListCharacterRequest(
-                                pageSize: 5,
+                                pageSize: 20,
                                 pageIndex: receiverSelectedPageIndex,
                                 // do not need to sort in this case.
                                 sortKeys: [],
@@ -545,6 +573,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                 padding: const EdgeInsets.only(bottom: 10.0),
                 child: SizedBox(
                   width: 400,
+                  height: 400,
                   child: ListView.builder(
                     shrinkWrap: true,
                     physics: const AlwaysScrollableScrollPhysics(),
@@ -714,10 +743,11 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                                 receiverSelectedId.isEmpty)
                             ? null
                             : () {
-                                CreateBattleRequest request = CreateBattleRequest(
-                                    userId: getIt<User>().id,
-                                    starterId: starterSelectedId,
-                                    receiverId: receiverSelectedId);
+                                CreateBattleRequest request =
+                                    CreateBattleRequest(
+                                        userId: getIt<User>().id,
+                                        starterId: starterSelectedId,
+                                        receiverId: receiverSelectedId);
                                 getIt<BattleDao>().createBattle(request);
                                 context.goNamed("battle");
                               },
