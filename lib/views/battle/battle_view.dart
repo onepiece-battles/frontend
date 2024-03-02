@@ -747,11 +747,22 @@ class _BattleViewState extends State<BattleView> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
                   child: entry.value.battleExecution!.winnerId == null
-                      ? ImageHelper.getSvgIconWithColor(
-                          'images/svgs/question.svg',
-                          70,
-                          70,
-                          OnepieceColors.liteFancyBlue)
+                      ? Container(
+                          width: 50,
+                          height: 50,
+                          decoration: const BoxDecoration(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(2.0)),
+                          ),
+                          child: FittedBox(
+                            fit: BoxFit.fill,
+                            child: ImageHelper.getSvgIconWithColor(
+                                'images/svgs/question.svg',
+                                100,
+                                100,
+                                OnepieceColors.liteFancyBlue),
+                          ),
+                        )
                       : Container(
                           width: 50,
                           height: 50,

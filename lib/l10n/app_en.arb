@@ -262,6 +262,6 @@
   "shipwright": "Shipwright",
   "positionList": "Position List",
   "updatePassword": "Update Password",
-  "combatPower": "Comprehensive Combat Capability",
+  "combatPower": "Combat Score",
   "getByJoinCombat": "Improve by joining combats"
 }

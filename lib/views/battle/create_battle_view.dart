@@ -175,7 +175,8 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                         : SizedBox(
                             height: 80,
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 10.0),
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 10.0),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
@@ -183,18 +184,18 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                                     I18nHelper.getDisplayNameFromI18n(
                                         starterSelectedItem.value!.name),
                                     style: const TextStyle(
-                                        color: OnepieceColors.fancyGreen,
+                                        color: OnepieceColors.fancyBlue,
                                         fontStyle: FontStyle.normal,
-                                        fontSize: 20,
+                                        fontSize: 22,
                                         fontWeight: FontWeight.bold),
                                   ),
                                   Text(
-                                      "${AppLocalizations.of(context)!.combatPower} ${starterSelectedItem.value!.score}",
-                                      style: const TextStyle(
-                                          color: OnepieceColors.fancyGreen,
-                                          fontStyle: FontStyle.normal,
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold),
+                                    "${AppLocalizations.of(context)!.combatPower} ${starterSelectedItem.value!.score}",
+                                    style: const TextStyle(
+                                        color: OnepieceColors.fancyGreen,
+                                        fontStyle: FontStyle.normal,
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w200),
                                   )
                                 ],
                               ),
@@ -233,17 +234,18 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                 child: TextFormField(
                   controller: starterTextController,
                   decoration: InputDecoration(
-                    label: Text(
-                      AppLocalizations.of(context)!.searchStarter,
-                      style: OnepieceFonts.hintFont,
-                    ),
+                    floatingLabelBehavior: FloatingLabelBehavior.never,
+                    disabledBorder: const OutlineInputBorder(
+                        borderSide:
+                            BorderSide(color: OnepieceColors.menuHoverColor)),
                     enabledBorder: const OutlineInputBorder(
                         borderSide:
-                            BorderSide(color: OnepieceColors.fancyGreen)),
+                            BorderSide(color: OnepieceColors.menuHoverColor)),
                     focusedBorder: const OutlineInputBorder(
                         borderSide:
                             BorderSide(color: OnepieceColors.fancyGreen)),
                     prefixIcon: const Icon(Icons.search),
+                    labelText: AppLocalizations.of(context)!.characterName,
                   ),
                   onChanged: (value) {
                     if (_timer?.isActive ?? false) _timer?.cancel();
@@ -476,15 +478,16 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                                 child: Padding(
                                   padding: const EdgeInsets.only(top: 10.0),
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
                                     children: [
                                       Text(
                                         I18nHelper.getDisplayNameFromI18n(
                                             receiverSelectedItem.value!.name),
                                         style: const TextStyle(
-                                            color: OnepieceColors.fancyGreen,
+                                            color: OnepieceColors.fancyBlue,
                                             fontStyle: FontStyle.normal,
-                                            fontSize: 20,
+                                            fontSize: 22,
                                             fontWeight: FontWeight.bold),
                                       ),
                                       Text(
@@ -492,8 +495,8 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                                         style: const TextStyle(
                                             color: OnepieceColors.fancyGreen,
                                             fontStyle: FontStyle.normal,
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.bold),
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w200),
                                       )
                                     ],
                                   ),
@@ -531,17 +534,18 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                   child: TextFormField(
                     controller: receiverTextController,
                     decoration: InputDecoration(
-                      label: Text(
-                        AppLocalizations.of(context)!.searchReceiver,
-                        style: OnepieceFonts.hintFont,
-                      ),
+                      floatingLabelBehavior: FloatingLabelBehavior.never,
+                      disabledBorder: const OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: OnepieceColors.menuHoverColor)),
                       enabledBorder: const OutlineInputBorder(
                           borderSide:
-                              BorderSide(color: OnepieceColors.fancyGreen)),
+                              BorderSide(color: OnepieceColors.menuHoverColor)),
                       focusedBorder: const OutlineInputBorder(
                           borderSide:
                               BorderSide(color: OnepieceColors.fancyGreen)),
                       prefixIcon: const Icon(Icons.search),
+                      labelText: AppLocalizations.of(context)!.characterName,
                     ),
                     onChanged: (value) {
                       if (_timer?.isActive ?? false) _timer?.cancel();
