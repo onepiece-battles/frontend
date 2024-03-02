@@ -11,6 +11,7 @@ import '../../constants/onepiece_fonts.dart';
 import '../../repository/fruit_dao.dart';
 import '../../utils/data_converter.dart';
 import '../../utils/data_validator.dart';
+import '../../utils/image_helper.dart';
 import '../../utils/random_string_generator.dart';
 
 GetIt getIt = GetIt.instance;
@@ -165,49 +166,51 @@ class _CreateFruitViewState extends State<CreateFruitView> {
                       context,
                       fruitAttackStrengthenController,
                       AppLocalizations.of(context)!.attackStrengthen,
-                      const Icon(Icons.ac_unit)),
+                      _getIcon('images/character_digits_icon/attack.svg')),
                   _getFormField(
                       1,
                       5,
                       context,
                       fruitDefenseStrengthenController,
                       AppLocalizations.of(context)!.defenseStrengthen,
-                      const Icon(Icons.face)),
+                      _getIcon('images/character_digits_icon/defense.svg')),
                   _getFormField(
                       1,
                       5,
                       context,
                       fruitIntelligenceStrengthenController,
                       AppLocalizations.of(context)!.intelligenceStrengthen,
-                      const Icon(Icons.face)),
+                      _getIcon(
+                          'images/character_digits_icon/intelligence.svg')),
                   _getFormField(
                       1,
                       8,
                       context,
                       fruitSpeedStrengthenController,
                       AppLocalizations.of(context)!.speedStrengthen,
-                      const Icon(Icons.face)),
+                      _getIcon('images/character_digits_icon/speed.svg')),
                   _getFormField(
                       1,
                       5,
                       context,
                       fruitBloodStrengthenController,
                       AppLocalizations.of(context)!.bloodStrengthen,
-                      const Icon(Icons.face)),
+                      _getIcon('images/character_digits_icon/blood.svg')),
                   _getFormField(
                       1,
                       5,
                       context,
                       fruitGroupGainStrengthenController,
                       AppLocalizations.of(context)!.groupStrengthen,
-                      const Icon(Icons.face)),
+                      _getIcon(
+                          'images/character_digits_icon/group_gain.svg')),
                   _getFormField(
                       1,
                       10,
                       context,
                       fruitEnergyConsumeController,
                       AppLocalizations.of(context)!.energyConsume,
-                      const Icon(Icons.face)),
+                      _getIcon('images/character_digits_icon/energy.svg')),
                 ],
               ),
             ),
@@ -218,6 +221,14 @@ class _CreateFruitViewState extends State<CreateFruitView> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _getIcon(String path) {
+    return Padding(
+      padding: const EdgeInsets.all(10.0),
+      child:
+      ImageHelper.getSvgIconWithColor(path, 3, 3, OnepieceColors.fancyBlue),
     );
   }
 
@@ -290,7 +301,7 @@ class _CreateFruitViewState extends State<CreateFruitView> {
   }
 
   Widget _getFormField(int min, int max, BuildContext context,
-      TextEditingController controller, String label, Icon icon) {
+      TextEditingController controller, String label, Widget icon) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 20, 0, 10),
       child: SizedBox(
