@@ -262,6 +262,6 @@
   "shipwright": "船匠",
   "positionList": "职位列表",
   "updatePassword": "更新密码",
-  "combatPower": "综合战斗分",
+  "combatPower": "战斗分",
   "getByJoinCombat": "通过参加对战提升"
 }

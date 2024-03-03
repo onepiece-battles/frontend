@@ -657,7 +657,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                     child: SizedBox(
                         width: 25,
                         height: 25,
-                        child: !basicInfoEditable
+                        child: !combatInfoEditable
                             ? ImageHelper.getSvgIconWithColor(
                                 'images/svgs/edit.svg',
                                 150,
@@ -693,8 +693,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Tooltip(
-                  message:
-                  AppLocalizations.of(context)!.getByJoinCombat,
+                  message: AppLocalizations.of(context)!.getByJoinCombat,
                   child: Text(
                     AppLocalizations.of(context)!.combatPower,
                     style: OnepieceFonts.contentStyleBold,
