@@ -123,7 +123,10 @@ class _BattleViewState extends State<BattleView> {
                 children: [
                   SizedBox(
                     width: 1500,
-                    child: _getControlRow(context),
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: _getControlRow(context),
+                    ),
                   ),
                   SizedBox(
                     width: 1500,
