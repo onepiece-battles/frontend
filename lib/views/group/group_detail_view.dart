@@ -1,4 +1,5 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
@@ -24,7 +25,7 @@ class GroupDetailView extends StatefulWidget {
 
 class _GroupDetailViewState extends State<GroupDetailView> {
   TextEditingController groupNameController = TextEditingController();
-
+  ScrollController scrollController = ScrollController();
   late GroupFullView groupFullView;
   List<CharacterInGroupView> characters = [];
   late GroupCategory selectedGroupCategory;
@@ -54,28 +55,91 @@ class _GroupDetailViewState extends State<GroupDetailView> {
       builder: (context, AsyncSnapshot snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           _prepareData(snapshot.data);
-          return SingleChildScrollView(
-            scrollDirection: Axis.vertical,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 15.0),
-                  child: _getBasicInfo(context),
+          return Stack(
+            alignment: Alignment.bottomCenter,
+            children: [
+              SingleChildScrollView(
+                controller: scrollController,
+                scrollDirection: Axis.vertical,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 15.0),
+                      child: _getBasicInfo(context),
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Divider(
+                        color: OnepieceColors.fancyBlue,
+                        thickness: 1,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 15.0),
+                      child: _getMembersPanel(context),
+                    ),
+                    // bottom space
+                    const SizedBox(
+                      height: 60,
+                    )
+                  ],
                 ),
-                const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Divider(
-                    color: OnepieceColors.fancyBlue,
-                    thickness: 1,
+              ),
+              Container(
+                color: Colors.white,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Tooltip(
+                        message: groupFullView.previousGroup == null
+                            ? ""
+                            : I18nHelper.getDisplayNameFromI18n(
+                                groupFullView.previousGroup!.name),
+                        child: ElevatedButton(
+                          onPressed: groupFullView.previousGroup == null
+                              ? null
+                              : () {
+                                  context.goNamed('groupDetails',
+                                      extra: groupFullView.previousGroup!.id,
+                                      pathParameters: {
+                                        'name':
+                                            I18nHelper.getDisplayNameFromI18n(
+                                                groupFullView
+                                                    .previousGroup!.name)
+                                      });
+                                },
+                          child: const Icon(Icons.arrow_back),
+                        ),
+                      ),
+                      Tooltip(
+                        message: groupFullView.nextGroup == null
+                            ? ""
+                            : I18nHelper.getDisplayNameFromI18n(
+                                groupFullView.nextGroup!.name),
+                        child: ElevatedButton(
+                          onPressed: groupFullView.nextGroup == null
+                              ? null
+                              : () {
+                                  context.goNamed('groupDetails',
+                                      extra: groupFullView.nextGroup!.id,
+                                      pathParameters: {
+                                        'name':
+                                            I18nHelper.getDisplayNameFromI18n(
+                                                groupFullView.nextGroup!.name)
+                                      });
+                                },
+                          child: const Icon(Icons.arrow_forward),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 15.0),
-                  child: _getMembersPanel(context),
-                ),
-              ],
-            ),
+              ),
+            ],
           );
         } else {
           return Center(

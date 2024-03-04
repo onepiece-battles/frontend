@@ -263,62 +263,13 @@ class _CharacterDetailState extends State<CharacterDetail> {
                           ),
                         ),
                         _getBattle(context),
+                        // bottom space
+                        const SizedBox(height: 60,)
                       ],
                     ),
                   ),
                 ),
-                Container(
-                  color: Colors.white,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Tooltip(
-                          message: character.previousCharacter == null
-                              ? ""
-                              : I18nHelper.getDisplayNameFromI18n(
-                                  character.previousCharacter!.name),
-                          child: ElevatedButton(
-                            onPressed: character.previousCharacter == null
-                                ? null
-                                : () {
-                                    context.goNamed('characterDetails',
-                                        extra: character.previousCharacter!.id,
-                                        pathParameters: {
-                                          'name':
-                                              I18nHelper.getDisplayNameFromI18n(
-                                                  character
-                                                      .previousCharacter!.name)
-                                        });
-                                  },
-                            child: const Icon(Icons.arrow_back),
-                          ),
-                        ),
-                        Tooltip(
-                          message: character.nextCharacter == null
-                              ? ""
-                              : I18nHelper.getDisplayNameFromI18n(
-                                  character.nextCharacter!.name),
-                          child: ElevatedButton(
-                            onPressed: character.nextCharacter == null
-                                ? null
-                                : () {
-                                    context.goNamed('characterDetails',
-                                        extra: character.nextCharacter!.id,
-                                        pathParameters: {
-                                          'name':
-                                              I18nHelper.getDisplayNameFromI18n(
-                                                  character.nextCharacter!.name)
-                                        });
-                                  },
-                            child: const Icon(Icons.arrow_forward),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+
               ],
             );
           } else {
