@@ -274,25 +274,46 @@ class _CharacterDetailState extends State<CharacterDetail> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        ElevatedButton(
-                          onPressed: character.previousCharacterId == null
-                              ? null
-                              : () {
-                                  context.goNamed('characterDetails',
-                                      extra: character.previousCharacterId,
-                                      pathParameters: {'name': "temp name"});
-                                },
-                          child: const Icon(Icons.arrow_back),
+                        Tooltip(
+                          message: character.previousCharacter == null
+                              ? ""
+                              : I18nHelper.getDisplayNameFromI18n(
+                                  character.previousCharacter!.name),
+                          child: ElevatedButton(
+                            onPressed: character.previousCharacter == null
+                                ? null
+                                : () {
+                                    context.goNamed('characterDetails',
+                                        extra: character.previousCharacter!.id,
+                                        pathParameters: {
+                                          'name':
+                                              I18nHelper.getDisplayNameFromI18n(
+                                                  character
+                                                      .previousCharacter!.name)
+                                        });
+                                  },
+                            child: const Icon(Icons.arrow_back),
+                          ),
                         ),
-                        ElevatedButton(
-                          onPressed: character.nextCharacterId == null
-                              ? null
-                              : () {
-                                  context.goNamed('characterDetails',
-                                      extra: character.nextCharacterId,
-                                      pathParameters: {'name': "temp name"});
-                                },
-                          child: const Icon(Icons.arrow_forward),
+                        Tooltip(
+                          message: character.nextCharacter == null
+                              ? ""
+                              : I18nHelper.getDisplayNameFromI18n(
+                                  character.nextCharacter!.name),
+                          child: ElevatedButton(
+                            onPressed: character.nextCharacter == null
+                                ? null
+                                : () {
+                                    context.goNamed('characterDetails',
+                                        extra: character.nextCharacter!.id,
+                                        pathParameters: {
+                                          'name':
+                                              I18nHelper.getDisplayNameFromI18n(
+                                                  character.nextCharacter!.name)
+                                        });
+                                  },
+                            child: const Icon(Icons.arrow_forward),
+                          ),
                         ),
                       ],
                     ),
