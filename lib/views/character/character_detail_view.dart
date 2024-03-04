@@ -179,83 +179,126 @@ class _CharacterDetailState extends State<CharacterDetail> {
           if (snapshot.connectionState == ConnectionState.done) {
             _updateData(snapshot.data);
             _updateControllerData();
-            return SingleChildScrollView(
-              scrollDirection: Axis.vertical,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _getBasicInfo(context),
-                    const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Divider(
-                        color: OnepieceColors.fancyBlue,
-                        thickness: 1,
-                      ),
+            return Stack(
+              alignment: Alignment.bottomCenter,
+              children: [
+                SingleChildScrollView(
+                  scrollDirection: Axis.vertical,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _getBasicInfo(context),
+                        const Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Divider(
+                            color: OnepieceColors.fancyBlue,
+                            thickness: 1,
+                          ),
+                        ),
+                        _getCombatInfo(context),
+                        const Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Divider(
+                            color: OnepieceColors.fancyBlue,
+                            thickness: 1,
+                          ),
+                        ),
+                        _getFruitSearchBar(context),
+                        if (fruits.isNotEmpty)
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 8.0),
+                            child: Text(AppLocalizations.of(context)!.eaten,
+                                style: OnepieceFonts.fancyBlueHintFont),
+                          ),
+                        if (fruits.isNotEmpty)
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 8.0),
+                            child: _getFruitList(context),
+                          ),
+                        if (fruits.isEmpty)
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 8.0),
+                            child: Text(AppLocalizations.of(context)!.none,
+                                style: OnepieceFonts.fancyBlueHintFont),
+                          ),
+                        const Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Divider(
+                            color: OnepieceColors.fancyBlue,
+                            thickness: 1,
+                          ),
+                        ),
+                        _getGroupSearchBar(context),
+                        if (groups.isNotEmpty)
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 8.0),
+                            child: Text(
+                                AppLocalizations.of(context)!.historyGroups,
+                                style: OnepieceFonts.fancyBlueHintFont),
+                          ),
+                        if (groups.isNotEmpty)
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 8.0),
+                            child: _getGroupList(context),
+                          ),
+                        if (groups.isEmpty)
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 8.0),
+                            child: Text(AppLocalizations.of(context)!.none,
+                                style: OnepieceFonts.fancyBlueHintFont),
+                          ),
+                        const Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Divider(
+                            color: OnepieceColors.fancyBlue,
+                            thickness: 1,
+                          ),
+                        ),
+                        _getBattle(context),
+                      ],
                     ),
-                    _getCombatInfo(context),
-                    const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Divider(
-                        color: OnepieceColors.fancyBlue,
-                        thickness: 1,
-                      ),
-                    ),
-                    _getFruitSearchBar(context),
-                    if (fruits.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Text(AppLocalizations.of(context)!.eaten,
-                            style: OnepieceFonts.fancyBlueHintFont),
-                      ),
-                    if (fruits.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: _getFruitList(context),
-                      ),
-                    if (fruits.isEmpty)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Text(AppLocalizations.of(context)!.none,
-                            style: OnepieceFonts.fancyBlueHintFont),
-                      ),
-                    const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Divider(
-                        color: OnepieceColors.fancyBlue,
-                        thickness: 1,
-                      ),
-                    ),
-                    _getGroupSearchBar(context),
-                    if (groups.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Text(AppLocalizations.of(context)!.historyGroups,
-                            style: OnepieceFonts.fancyBlueHintFont),
-                      ),
-                    if (groups.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: _getGroupList(context),
-                      ),
-                    if (groups.isEmpty)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Text(AppLocalizations.of(context)!.none,
-                            style: OnepieceFonts.fancyBlueHintFont),
-                      ),
-                    const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Divider(
-                        color: OnepieceColors.fancyBlue,
-                        thickness: 1,
-                      ),
-                    ),
-                    _getBattle(context),
-                  ],
+                  ),
                 ),
-              ),
+                Container(
+                  color: Colors.white,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        ElevatedButton(
+                          onPressed: character.previousCharacterId == null
+                              ? null
+                              : () {
+                                  context.goNamed('characterDetails',
+                                      extra: character.previousCharacterId,
+                                      pathParameters: {'name': "temp name"});
+                                },
+                          child: const Icon(Icons.arrow_back),
+                        ),
+                        ElevatedButton(
+                          onPressed: character.nextCharacterId == null
+                              ? null
+                              : () {
+                                  context.goNamed('characterDetails',
+                                      extra: character.nextCharacterId,
+                                      pathParameters: {'name': "temp name"});
+                                },
+                          child: const Icon(Icons.arrow_forward),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             );
           } else {
             return Center(

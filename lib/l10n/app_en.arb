@@ -263,5 +263,7 @@
   "positionList": "Position List",
   "updatePassword": "Update Password",
   "combatPower": "Combat Score",
-  "getByJoinCombat": "Improve by joining combats"
+  "getByJoinCombat": "Improve by joining combats",
+  "next": "Next",
+  "previous": "Previous"
 }
