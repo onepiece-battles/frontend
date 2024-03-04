@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get_it/get_it.dart';
+import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:one_piece_battles_flutter/graph/character_bar_graph.dart';
 import 'package:one_piece_battles_flutter/popup/onepiece_alert.dart';
@@ -92,69 +93,123 @@ class _BattleDetailViewState extends State<BattleDetailView> {
           if (snapshot.connectionState == ConnectionState.done) {
             _updateData(snapshot.data);
             _getBattleExecution();
-            return SingleChildScrollView(
-              scrollDirection: Axis.vertical,
-              child: Center(
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: ChangeNotifierProvider(
-                    create: (context) => battleExecutionData,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.center,
+            return Stack(
+              alignment: Alignment.bottomCenter,
+              children: [
+                SingleChildScrollView(
+                  scrollDirection: Axis.vertical,
+                  child: Center(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: ChangeNotifierProvider(
+                        create: (context) => battleExecutionData,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            const SizedBox(
+                              height: 100,
+                            ),
+                            _getStart(context),
+                            const SizedBox(
+                              width: 400,
+                              child: Divider(
+                                color: OnepieceColors.fancyBlue,
+                                thickness: 2,
+                                height: 20,
+                              ),
+                            ),
+                            _getProgressBar(context, 40),
+                            const SizedBox(
+                              width: 400,
+                              child: Divider(
+                                color: OnepieceColors.fancyBlue,
+                                thickness: 2,
+                                height: 20,
+                              ),
+                            ),
+                            _getWinnerTag(context),
+                            _getResult(context),
+                            const SizedBox(
+                              width: 400,
+                              child: Divider(
+                                color: OnepieceColors.fancyBlue,
+                                thickness: 2,
+                                height: 20,
+                              ),
+                            ),
+                            _getBattleReportProgress(context, 40),
+                            const SizedBox(
+                              width: 400,
+                              child: Divider(
+                                color: OnepieceColors.fancyBlue,
+                                thickness: 2,
+                                height: 20,
+                              ),
+                            ),
+                            _getBattleReportIcon(context),
+                            if (pdfData.value != null)
+                              SizedBox(
+                                  width: 1000,
+                                  height: 1000,
+                                  child: _getPdfView(context)),
+                            // bottom space
+                            const SizedBox(
+                              height: 60,
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Container(
+                  color: Colors.white,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const SizedBox(
-                          height: 100,
-                        ),
-                        _getStart(context),
-                        const SizedBox(
-                          width: 400,
-                          child: Divider(
-                            color: OnepieceColors.fancyBlue,
-                            thickness: 2,
-                            height: 20,
+                        Tooltip(
+                          message: battle.previousBattle == null
+                              ? ""
+                              : "${I18nHelper.getDisplayNameFromI18n(battle.previousBattle!.starter!.name)} vs ${I18nHelper.getDisplayNameFromI18n(battle.previousBattle!.receiver!.name)}",
+                          child: ElevatedButton(
+                            onPressed: battle.previousBattle == null
+                                ? null
+                                : () {
+                                    context.goNamed('battleDetails',
+                                        extra: battle.previousBattle!.id,
+                                        pathParameters: {
+                                          'id': battle.previousBattle!.id
+                                        });
+                                  },
+                            child: const Icon(Icons.arrow_back),
                           ),
                         ),
-                        _getProgressBar(context, 40),
-                        const SizedBox(
-                          width: 400,
-                          child: Divider(
-                            color: OnepieceColors.fancyBlue,
-                            thickness: 2,
-                            height: 20,
+                        Tooltip(
+                          message: battle.nextBattle == null
+                              ? ""
+                              : "${I18nHelper.getDisplayNameFromI18n(battle.nextBattle!.starter!.name)} vs ${I18nHelper.getDisplayNameFromI18n(battle.nextBattle!.receiver!.name)}",
+                          child: ElevatedButton(
+                            onPressed: battle.nextBattle == null
+                                ? null
+                                : () {
+                                    context.goNamed('battleDetails',
+                                        extra: battle.nextBattle!.id,
+                                        pathParameters: {
+                                          'id': battle.nextBattle!.id
+                                        });
+                                  },
+                            child: const Icon(Icons.arrow_forward),
                           ),
                         ),
-                        _getWinnerTag(context),
-                        _getResult(context),
-                        const SizedBox(
-                          width: 400,
-                          child: Divider(
-                            color: OnepieceColors.fancyBlue,
-                            thickness: 2,
-                            height: 20,
-                          ),
-                        ),
-                        _getBattleReportProgress(context, 40),
-                        const SizedBox(
-                          width: 400,
-                          child: Divider(
-                            color: OnepieceColors.fancyBlue,
-                            thickness: 2,
-                            height: 20,
-                          ),
-                        ),
-                        _getBattleReportIcon(context),
-                        if (pdfData.value != null)
-                          SizedBox(
-                              width: 1000,
-                              height: 1000,
-                              child: _getPdfView(context))
                       ],
                     ),
                   ),
                 ),
-              ),
+              ],
             );
           } else {
             return Center(

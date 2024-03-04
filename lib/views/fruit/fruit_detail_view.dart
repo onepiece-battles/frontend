@@ -1,4 +1,5 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
@@ -28,6 +29,7 @@ class _FruitDetailViewState extends State<FruitDetailView> {
   late FruitFullView fruitFullView;
   late FruitType selectedFruitType;
   List<CharacterInFruitView> characters = [];
+  ScrollController scrollController = ScrollController();
 
   // controllers
   // 1. basic info
@@ -82,36 +84,95 @@ class _FruitDetailViewState extends State<FruitDetailView> {
         builder: (context, AsyncSnapshot snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
             _updateData(snapshot.data);
-            return SingleChildScrollView(
-              scrollDirection: Axis.vertical,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _getBasicInfo(context),
-                    const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Divider(
-                        color: OnepieceColors.fancyBlue,
-                        thickness: 1,
-                      ),
+            return Stack(
+              alignment: Alignment.bottomCenter,
+              children: [
+                SingleChildScrollView(
+                  controller: scrollController,
+                  scrollDirection: Axis.vertical,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _getBasicInfo(context),
+                        const Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Divider(
+                            color: OnepieceColors.fancyBlue,
+                            thickness: 1,
+                          ),
+                        ),
+                        _getCombatInfo(context),
+                        const Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Divider(
+                            color: OnepieceColors.fancyBlue,
+                            thickness: 1,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: _getCharacterList(context),
+                        ),
+                        const SizedBox(height: 60,)
+                      ],
                     ),
-                    _getCombatInfo(context),
-                    const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Divider(
-                        color: OnepieceColors.fancyBlue,
-                        thickness: 1,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: _getCharacterList(context),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
+                Container(
+                  color: Colors.white,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Tooltip(
+                          message: fruitFullView.previousFruit == null
+                              ? ""
+                              : I18nHelper.getDisplayNameFromI18n(
+                                  fruitFullView.previousFruit!.name),
+                          child: ElevatedButton(
+                            onPressed: fruitFullView.previousFruit == null
+                                ? null
+                                : () {
+                                    context.goNamed('fruitDetails',
+                                        extra: fruitFullView.previousFruit!.id,
+                                        pathParameters: {
+                                          'name':
+                                              I18nHelper.getDisplayNameFromI18n(
+                                                  fruitFullView
+                                                      .previousFruit!.name)
+                                        });
+                                  },
+                            child: const Icon(Icons.arrow_back),
+                          ),
+                        ),
+                        Tooltip(
+                          message: fruitFullView.nextFruit == null
+                              ? ""
+                              : I18nHelper.getDisplayNameFromI18n(
+                                  fruitFullView.nextFruit!.name),
+                          child: ElevatedButton(
+                            onPressed: fruitFullView.nextFruit == null
+                                ? null
+                                : () {
+                                    context.goNamed('fruitDetails',
+                                        extra: fruitFullView.nextFruit!.id,
+                                        pathParameters: {
+                                          'name':
+                                              I18nHelper.getDisplayNameFromI18n(
+                                                  fruitFullView.nextFruit!.name)
+                                        });
+                                  },
+                            child: const Icon(Icons.arrow_forward),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             );
           } else {
             return Center(
@@ -211,11 +272,14 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                     contentPadding: EdgeInsets.fromLTRB(5, 20, 10, 2)),
               ),
             ),
-            SizedBox(
-              width: 300,
-              child: Text(
-                AppLocalizations.of(context)!.category,
-                style: OnepieceFonts.deepBlackHintFont,
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: SizedBox(
+                width: 300,
+                child: Text(
+                  AppLocalizations.of(context)!.category,
+                  style: OnepieceFonts.deepBlackHintFont,
+                ),
               ),
             ),
             _getDropDownList(context, basicState),
