@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -94,7 +95,6 @@ class _BattleDetailViewState extends State<BattleDetailView> {
             _updateData(snapshot.data);
             _getBattleExecution();
             return Stack(
-              alignment: Alignment.bottomCenter,
               children: [
                 SingleChildScrollView(
                   scrollDirection: Axis.vertical,
@@ -164,48 +164,53 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                     ),
                   ),
                 ),
-                Container(
-                  color: Colors.white,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Tooltip(
-                          message: battle.previousBattle == null
-                              ? ""
-                              : "${I18nHelper.getDisplayNameFromI18n(battle.previousBattle!.starter!.name)} vs ${I18nHelper.getDisplayNameFromI18n(battle.previousBattle!.receiver!.name)}",
-                          child: ElevatedButton(
-                            onPressed: battle.previousBattle == null
-                                ? null
-                                : () {
-                                    context.goNamed('battleDetails',
-                                        extra: battle.previousBattle!.id,
-                                        pathParameters: {
-                                          'id': battle.previousBattle!.id
-                                        });
-                                  },
-                            child: const Icon(Icons.arrow_back),
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    color: Colors.white,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Tooltip(
+                            message: battle.previousBattle == null
+                                ? ""
+                                : "${I18nHelper.getDisplayNameFromI18n(battle.previousBattle!.starter!.name)} vs ${I18nHelper.getDisplayNameFromI18n(battle.previousBattle!.receiver!.name)}",
+                            child: ElevatedButton(
+                              onPressed: battle.previousBattle == null
+                                  ? null
+                                  : () {
+                                      context.goNamed('battleDetails',
+                                          extra: battle.previousBattle!.id,
+                                          pathParameters: {
+                                            'id': battle.previousBattle!.id
+                                          });
+                                    },
+                              child: const Icon(Icons.arrow_back),
+                            ),
                           ),
-                        ),
-                        Tooltip(
-                          message: battle.nextBattle == null
-                              ? ""
-                              : "${I18nHelper.getDisplayNameFromI18n(battle.nextBattle!.starter!.name)} vs ${I18nHelper.getDisplayNameFromI18n(battle.nextBattle!.receiver!.name)}",
-                          child: ElevatedButton(
-                            onPressed: battle.nextBattle == null
-                                ? null
-                                : () {
-                                    context.goNamed('battleDetails',
-                                        extra: battle.nextBattle!.id,
-                                        pathParameters: {
-                                          'id': battle.nextBattle!.id
-                                        });
-                                  },
-                            child: const Icon(Icons.arrow_forward),
+                          Tooltip(
+                            message: battle.nextBattle == null
+                                ? ""
+                                : "${I18nHelper.getDisplayNameFromI18n(battle.nextBattle!.starter!.name)} vs ${I18nHelper.getDisplayNameFromI18n(battle.nextBattle!.receiver!.name)}",
+                            child: ElevatedButton(
+                              onPressed: battle.nextBattle == null
+                                  ? null
+                                  : () {
+                                      context.goNamed('battleDetails',
+                                          extra: battle.nextBattle!.id,
+                                          pathParameters: {
+                                            'id': battle.nextBattle!.id
+                                          });
+                                    },
+                              child: const Icon(Icons.arrow_forward),
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),

@@ -56,7 +56,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
         if (snapshot.connectionState == ConnectionState.done) {
           _prepareData(snapshot.data);
           return Stack(
-            alignment: Alignment.bottomCenter,
+            // alignment: Alignment.bottomCenter,
             children: [
               SingleChildScrollView(
                 controller: scrollController,
@@ -87,58 +87,63 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                   ],
                 ),
               ),
-              Container(
-                color: Colors.white,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Tooltip(
-                        message: groupFullView.previousGroup == null
-                            ? ""
-                            : I18nHelper.getDisplayNameFromI18n(
-                                groupFullView.previousGroup!.name),
-                        child: ElevatedButton(
-                          onPressed: groupFullView.previousGroup == null
-                              ? null
-                              : () {
-                                  context.goNamed('groupDetails',
-                                      extra: groupFullView.previousGroup!.id,
-                                      pathParameters: {
-                                        'name':
-                                            I18nHelper.getDisplayNameFromI18n(
-                                                groupFullView
-                                                    .previousGroup!.name)
-                                      });
-                                },
-                          child: const Icon(Icons.arrow_back),
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  color: Colors.white,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Tooltip(
+                          message: groupFullView.previousGroup == null
+                              ? ""
+                              : I18nHelper.getDisplayNameFromI18n(
+                                  groupFullView.previousGroup!.name),
+                          child: ElevatedButton(
+                            onPressed: groupFullView.previousGroup == null
+                                ? null
+                                : () {
+                                    context.goNamed('groupDetails',
+                                        extra: groupFullView.previousGroup!.id,
+                                        pathParameters: {
+                                          'name':
+                                              I18nHelper.getDisplayNameFromI18n(
+                                                  groupFullView
+                                                      .previousGroup!.name)
+                                        });
+                                  },
+                            child: const Icon(Icons.arrow_back),
+                          ),
                         ),
-                      ),
-                      Tooltip(
-                        message: groupFullView.nextGroup == null
-                            ? ""
-                            : I18nHelper.getDisplayNameFromI18n(
-                                groupFullView.nextGroup!.name),
-                        child: ElevatedButton(
-                          onPressed: groupFullView.nextGroup == null
-                              ? null
-                              : () {
-                                  context.goNamed('groupDetails',
-                                      extra: groupFullView.nextGroup!.id,
-                                      pathParameters: {
-                                        'name':
-                                            I18nHelper.getDisplayNameFromI18n(
-                                                groupFullView.nextGroup!.name)
-                                      });
-                                },
-                          child: const Icon(Icons.arrow_forward),
+                        Tooltip(
+                          message: groupFullView.nextGroup == null
+                              ? ""
+                              : I18nHelper.getDisplayNameFromI18n(
+                                  groupFullView.nextGroup!.name),
+                          child: ElevatedButton(
+                            onPressed: groupFullView.nextGroup == null
+                                ? null
+                                : () {
+                                    context.goNamed('groupDetails',
+                                        extra: groupFullView.nextGroup!.id,
+                                        pathParameters: {
+                                          'name':
+                                              I18nHelper.getDisplayNameFromI18n(
+                                                  groupFullView.nextGroup!.name)
+                                        });
+                                  },
+                            child: const Icon(Icons.arrow_forward),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
+              )
             ],
           );
         } else {
@@ -279,7 +284,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
           AppLocalizations.of(context)!.worldGovernment,
     };
     return Padding(
-      padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
+      padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
       child: DropdownButtonHideUnderline(
         child: DropdownButton2(
           isExpanded: true,
