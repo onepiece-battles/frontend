@@ -85,7 +85,6 @@ class _FruitDetailViewState extends State<FruitDetailView> {
           if (snapshot.connectionState == ConnectionState.done) {
             _updateData(snapshot.data);
             return Stack(
-              alignment: Alignment.bottomCenter,
               children: [
                 SingleChildScrollView(
                   controller: scrollController,
@@ -115,63 +114,71 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           child: _getCharacterList(context),
                         ),
-                        const SizedBox(height: 60,)
+                        const SizedBox(
+                          height: 60,
+                        )
                       ],
                     ),
                   ),
                 ),
-                Container(
-                  color: Colors.white,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Tooltip(
-                          message: fruitFullView.previousFruit == null
-                              ? ""
-                              : I18nHelper.getDisplayNameFromI18n(
-                                  fruitFullView.previousFruit!.name),
-                          child: ElevatedButton(
-                            onPressed: fruitFullView.previousFruit == null
-                                ? null
-                                : () {
-                                    context.goNamed('fruitDetails',
-                                        extra: fruitFullView.previousFruit!.id,
-                                        pathParameters: {
-                                          'name':
-                                              I18nHelper.getDisplayNameFromI18n(
-                                                  fruitFullView
-                                                      .previousFruit!.name)
-                                        });
-                                  },
-                            child: const Icon(Icons.arrow_back),
-                          ),
+                Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Container(
+                      color: Colors.white,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Tooltip(
+                              message: fruitFullView.previousFruit == null
+                                  ? ""
+                                  : I18nHelper.getDisplayNameFromI18n(
+                                      fruitFullView.previousFruit!.name),
+                              child: ElevatedButton(
+                                onPressed: fruitFullView.previousFruit == null
+                                    ? null
+                                    : () {
+                                        context.goNamed('fruitDetails',
+                                            extra:
+                                                fruitFullView.previousFruit!.id,
+                                            pathParameters: {
+                                              'name': I18nHelper
+                                                  .getDisplayNameFromI18n(
+                                                      fruitFullView
+                                                          .previousFruit!.name)
+                                            });
+                                      },
+                                child: const Icon(Icons.arrow_back),
+                              ),
+                            ),
+                            Tooltip(
+                              message: fruitFullView.nextFruit == null
+                                  ? ""
+                                  : I18nHelper.getDisplayNameFromI18n(
+                                      fruitFullView.nextFruit!.name),
+                              child: ElevatedButton(
+                                onPressed: fruitFullView.nextFruit == null
+                                    ? null
+                                    : () {
+                                        context.goNamed('fruitDetails',
+                                            extra: fruitFullView.nextFruit!.id,
+                                            pathParameters: {
+                                              'name': I18nHelper
+                                                  .getDisplayNameFromI18n(
+                                                      fruitFullView
+                                                          .nextFruit!.name)
+                                            });
+                                      },
+                                child: const Icon(Icons.arrow_forward),
+                              ),
+                            ),
+                          ],
                         ),
-                        Tooltip(
-                          message: fruitFullView.nextFruit == null
-                              ? ""
-                              : I18nHelper.getDisplayNameFromI18n(
-                                  fruitFullView.nextFruit!.name),
-                          child: ElevatedButton(
-                            onPressed: fruitFullView.nextFruit == null
-                                ? null
-                                : () {
-                                    context.goNamed('fruitDetails',
-                                        extra: fruitFullView.nextFruit!.id,
-                                        pathParameters: {
-                                          'name':
-                                              I18nHelper.getDisplayNameFromI18n(
-                                                  fruitFullView.nextFruit!.name)
-                                        });
-                                  },
-                            child: const Icon(Icons.arrow_forward),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                      ),
+                    )),
               ],
             );
           } else {

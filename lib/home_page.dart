@@ -62,6 +62,7 @@ class HomePageState extends State<HomePage> {
         child: Scaffold(
           backgroundColor: Colors.grey[50],
           body: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               _getNavigationMenu(context),
               Expanded(
@@ -311,72 +312,84 @@ class HomePageState extends State<HomePage> {
       color: OnepieceColors.menuBackgroundColor,
       child: Stack(
         children: [
-          Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _getDrawerHeader(context),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(18, 10, 0, 10),
-                child: Text(AppLocalizations.of(context)!.route,
-                    style: const TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.w800)),
-              ),
-              _getSideMenuList(context),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.all(5),
-            child: Align(
-              alignment: Alignment.bottomLeft,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  padding: const EdgeInsets.all(5),
-                  backgroundColor: OnepieceColors.menuBackgroundColor,
-                  foregroundColor: OnepieceColors.menuIconColor,
-                  elevation: 0.0,
-                  shadowColor: Colors.transparent,
+          SingleChildScrollView(
+            scrollDirection: Axis.vertical,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _getDrawerHeader(context),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(18, 10, 0, 10),
+                  child: Text(AppLocalizations.of(context)!.route,
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.w800)),
                 ),
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: ((context) {
-                      return Dialog(
-                        surfaceTintColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.0),
+                _getSideMenuList(context),
+              ],
+            ),
+          ),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              decoration: const BoxDecoration(
+                  color: OnepieceColors.menuBackgroundColor,
+                  border: Border(
+                      top: BorderSide(
+                          color: OnepieceColors.liteFancyBlue, width: 1))),
+              child: Padding(
+                padding: const EdgeInsets.all(5.0),
+                child: TextButton(
+                  style: TextButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    padding: const EdgeInsets.all(5),
+                    backgroundColor: OnepieceColors.menuBackgroundColor,
+                    foregroundColor: OnepieceColors.menuIconColor,
+                    elevation: 0.0,
+                    shadowColor: Colors.transparent,
+                  ),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: ((context) {
+                        return Dialog(
+                          surfaceTintColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          alignment: AlignmentDirectional.bottomStart,
+                          child: const CreateFeedbackPopup(),
+                        );
+                      }),
+                    );
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        ImageHelper.getSvgIcon(
+                          'images/svgs/menu_question.svg',
+                          21,
+                          21,
                         ),
-                        alignment: AlignmentDirectional.bottomStart,
-                        child: const CreateFeedbackPopup(),
-                      );
-                    }),
-                  );
-                },
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      ImageHelper.getSvgIcon(
-                        'images/svgs/menu_question.svg',
-                        21,
-                        21,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(AppLocalizations.of(context)!.feedback,
-                          style: const TextStyle(
-                              color: OnepieceColors.menuTextColor,
-                              fontSize: 17,
-                              fontWeight: FontWeight.w500))
-                    ],
+                        const SizedBox(width: 6),
+                        Text(AppLocalizations.of(context)!.feedback,
+                            style: const TextStyle(
+                                color: OnepieceColors.menuTextColor,
+                                fontSize: 17,
+                                fontWeight: FontWeight.w500))
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
+          )
         ],
       ),
     );
