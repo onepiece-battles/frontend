@@ -48,74 +48,76 @@ class _RetrievePasswordState extends State<RetrievePassword> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[300],
-      body: Column(
-        children: [
-          Align(
-            alignment: Alignment.topRight,
-            child: Padding(
-                padding: const EdgeInsets.all(30),
-                child: FlutterToggleTab(
-                  width: 4,
-                  height: 30,
-                  borderRadius: 20,
-                  selectedBackgroundColors: const [
-                    OnepieceColors.fancyBlue,
-                    OnepieceColors.fancyBlue,
-                  ],
-                  labels: const ["文", "EN"],
-                  selectedLabelIndex: (index) {
-                    setState(() {
-                      _tabTextIndexSelected = index;
-                      Locale locale;
-                      if (index == 0) {
-                        locale = locales.first;
-                      } else {
-                        locale = locales.last;
-                      }
-                      MyApp.setLocale(context, locale);
-                      verificationMessage =
-                          I18nHelper.getDisplayNameFromI18nByLocale(
-                              verificationI18n, locale);
-                    });
-                  },
-                  selectedTextStyle: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700),
-                  unSelectedTextStyle: const TextStyle(
-                      color: Colors.black87,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600),
-                  unSelectedBackgroundColors: const [
-                    Color.fromARGB(255, 182, 180, 180)
-                  ],
-                  marginSelected: const EdgeInsets.all(3),
-                  selectedIndex: _tabTextIndexSelected,
-                  // isScroll: true,
-                )),
-          ),
-          const SizedBox(height: 150),
-          const Image(
-            image: AssetImage(PathConstants.luffyFlag),
-          ),
-          const SizedBox(height: 12),
-          SizedBox(
-            height: 40,
-            child: Text(
-              AppLocalizations.of(context)!.retrievePassword,
-              style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 24,
-                  color: OnepieceColors.fancyBlue),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Align(
+              alignment: Alignment.topRight,
+              child: Padding(
+                  padding: const EdgeInsets.all(30),
+                  child: FlutterToggleTab(
+                    width: 4,
+                    height: 30,
+                    borderRadius: 20,
+                    selectedBackgroundColors: const [
+                      OnepieceColors.fancyBlue,
+                      OnepieceColors.fancyBlue,
+                    ],
+                    labels: const ["文", "EN"],
+                    selectedLabelIndex: (index) {
+                      setState(() {
+                        _tabTextIndexSelected = index;
+                        Locale locale;
+                        if (index == 0) {
+                          locale = locales.first;
+                        } else {
+                          locale = locales.last;
+                        }
+                        MyApp.setLocale(context, locale);
+                        verificationMessage =
+                            I18nHelper.getDisplayNameFromI18nByLocale(
+                                verificationI18n, locale);
+                      });
+                    },
+                    selectedTextStyle: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700),
+                    unSelectedTextStyle: const TextStyle(
+                        color: Colors.black87,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600),
+                    unSelectedBackgroundColors: const [
+                      Color.fromARGB(255, 182, 180, 180)
+                    ],
+                    marginSelected: const EdgeInsets.all(3),
+                    selectedIndex: _tabTextIndexSelected,
+                    // isScroll: true,
+                  )),
             ),
-          ),
-          const SizedBox(height: 90),
-          const SizedBox(
-            height: 20,
-          ),
-          if (!verificationCodeSent) _getSendVerificationCode(context),
-          if (verificationCodeSent) _getVerifyVerificationCode(context)
-        ],
+            const SizedBox(height: 150),
+            const Image(
+              image: AssetImage(PathConstants.luffyFlag),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              height: 40,
+              child: Text(
+                AppLocalizations.of(context)!.retrievePassword,
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 24,
+                    color: OnepieceColors.fancyBlue),
+              ),
+            ),
+            const SizedBox(height: 90),
+            const SizedBox(
+              height: 20,
+            ),
+            if (!verificationCodeSent) _getSendVerificationCode(context),
+            if (verificationCodeSent) _getVerifyVerificationCode(context)
+          ],
+        ),
       ),
     );
   }
