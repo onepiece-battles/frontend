@@ -394,20 +394,29 @@ class _BattleDetailViewState extends State<BattleDetailView> {
         ),
         Column(
           children: [
-            Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                borderRadius: const BorderRadius.all(Radius.circular(8)),
-                border: Border.all(
-                    color: OnepieceColors.fancyBlue,
-                    width: 5,
-                    style: BorderStyle.solid),
-              ),
-              child: FittedBox(
-                fit: BoxFit.fill,
-                child: Image.memory(
-                    Base64Helper.decode(battle.starter!.profileImage!)),
+            InkWell(
+              onTap: () {
+                context.goNamed('characterDetails',
+                    extra: starter.id,
+                    pathParameters: {
+                      'name': I18nHelper.getDisplayNameFromI18n(starter.name)
+                    });
+              },
+              child: Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.all(Radius.circular(8)),
+                  border: Border.all(
+                      color: OnepieceColors.fancyBlue,
+                      width: 5,
+                      style: BorderStyle.solid),
+                ),
+                child: FittedBox(
+                  fit: BoxFit.fill,
+                  child: Image.memory(
+                      Base64Helper.decode(battle.starter!.profileImage!)),
+                ),
               ),
             ),
             Consumer<BattleExecutionData>(builder: (context, model, child) {
@@ -443,20 +452,29 @@ class _BattleDetailViewState extends State<BattleDetailView> {
         _getStartButton(context),
         Column(
           children: [
-            Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                borderRadius: const BorderRadius.all(Radius.circular(8)),
-                border: Border.all(
-                    color: OnepieceColors.fancyBlue,
-                    width: 5,
-                    style: BorderStyle.solid),
-              ),
-              child: FittedBox(
-                fit: BoxFit.fill,
-                child: Image.memory(
-                    Base64Helper.decode(battle.receiver!.profileImage!)),
+            InkWell(
+              onTap: () {
+                context.goNamed('characterDetails',
+                    extra: receiver.id,
+                    pathParameters: {
+                      'name': I18nHelper.getDisplayNameFromI18n(receiver.name)
+                    });
+              },
+              child: Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.all(Radius.circular(8)),
+                  border: Border.all(
+                      color: OnepieceColors.fancyBlue,
+                      width: 5,
+                      style: BorderStyle.solid),
+                ),
+                child: FittedBox(
+                  fit: BoxFit.fill,
+                  child: Image.memory(
+                      Base64Helper.decode(battle.receiver!.profileImage!)),
+                ),
               ),
             ),
             Consumer<BattleExecutionData>(builder: (context, model, child) {
