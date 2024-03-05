@@ -221,7 +221,7 @@
   "joined": "已加入",
   "verificationCode": "验证码",
   "currentMember": "现成员",
-  "exMember": "非现成员",
+  "exMember": "前成员",
   "groupMember": "团队成员",
   "wakeUp": "已觉醒",
   "sleep": "沉睡中",
@@ -266,5 +266,6 @@
   "getByJoinCombat": "通过参加对战提升",
   "next": "下一个",
   "previous": "上一个",
-  "combatScoreChange": "战斗分变化"
+  "combatScoreChange": "战斗分变化",
+  "position": "职位"
 }

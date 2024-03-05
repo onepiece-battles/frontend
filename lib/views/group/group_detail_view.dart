@@ -1,5 +1,6 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
@@ -30,6 +31,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
   List<CharacterInGroupView> characters = [];
   late GroupCategory selectedGroupCategory;
   bool _basicInfoEditable = false;
+  final ValueNotifier<bool> _onlyCurrentMember = ValueNotifier(false);
 
   @override
   void initState() {
@@ -358,84 +360,132 @@ class _GroupDetailViewState extends State<GroupDetailView> {
       GroupPosition.scholar: AppLocalizations.of(context)!.scholar,
       GroupPosition.shipwright: AppLocalizations.of(context)!.shipwright,
     };
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: 8.0),
-          child: Text(
-            AppLocalizations.of(context)!.groupMember,
-            style: OnepieceFonts.headerStyle,
+    var charactersInside = characters;
+    return StatefulBuilder(
+        builder: (BuildContext context, StateSetter listState) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Text(
+              AppLocalizations.of(context)!.groupMember,
+              style: OnepieceFonts.headerStyle,
+            ),
           ),
-        ),
-        Container(
-          width: 300,
-          decoration: const BoxDecoration(
-            color: OnepieceColors.menuBackgroundColor,
-            borderRadius: BorderRadius.all(Radius.circular(8)),
+          Row(
+            children: [
+              Text(AppLocalizations.of(context)!.currentMember),
+              IconButton(
+                onPressed: () {
+                  listState(() {
+                    _onlyCurrentMember.value = !_onlyCurrentMember.value;
+                    if (_onlyCurrentMember.value) {
+                      charactersInside = characters
+                          .where((element) => element.onceBelongedTo == false)
+                          .toList();
+                    } else {
+                      charactersInside = characters;
+                    }
+                  });
+                },
+                splashRadius: 1,
+                icon: _onlyCurrentMember.value
+                    ? const Icon(
+                        Icons.check_box,
+                        color: OnepieceColors.fancyBlue,
+                        size: 20,
+                      )
+                    : const Icon(
+                        Icons.check_box_outline_blank,
+                        color: OnepieceColors.fancyBlue,
+                        size: 20,
+                      ),
+              ),
+            ],
           ),
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: characters.length,
-            itemBuilder: (context, index) {
-              var character = characters[index];
-              return Material(
-                type: MaterialType.transparency,
-                child: Container(
-                  padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                  decoration: const BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(5))),
-                  child: ExpansionTile(
-                    expandedAlignment: Alignment.centerLeft,
-                    expandedCrossAxisAlignment: CrossAxisAlignment.start,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    onExpansionChanged: (value) {},
-                    title: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Container(
-                          width: 50,
-                          height: 50,
-                          decoration: BoxDecoration(
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(2.0)),
-                            border: Border.all(
-                                color: OnepieceColors.fancyBlue,
-                                width: 2,
-                                style: BorderStyle.solid),
-                          ),
-                          child: FittedBox(
-                            fit: BoxFit.fill,
-                            child: Padding(
-                              padding: const EdgeInsets.all(1.0),
-                              child: Image.memory(
-                                  Base64Helper.decode(character.profileImage!)),
+          Container(
+            width: 300,
+            decoration: const BoxDecoration(
+              color: OnepieceColors.menuBackgroundColor,
+              borderRadius: BorderRadius.all(Radius.circular(8)),
+            ),
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: charactersInside.length,
+              itemBuilder: (context, index) {
+                var character = charactersInside[index];
+                return Material(
+                  type: MaterialType.transparency,
+                  child: Container(
+                    padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+                    decoration: const BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(5))),
+                    child: ExpansionTile(
+                      expandedAlignment: Alignment.centerLeft,
+                      expandedCrossAxisAlignment: CrossAxisAlignment.start,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      onExpansionChanged: (value) {},
+                      title: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: 50,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(2.0)),
+                              border: Border.all(
+                                  color: OnepieceColors.fancyBlue,
+                                  width: 2,
+                                  style: BorderStyle.solid),
+                            ),
+                            child: FittedBox(
+                              fit: BoxFit.fill,
+                              child: Padding(
+                                padding: const EdgeInsets.all(1.0),
+                                child: Image.memory(Base64Helper.decode(
+                                    character.profileImage!)),
+                              ),
                             ),
                           ),
-                        ),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8.0),
+                            child: Text(
+                              I18nHelper.getDisplayNameFromI18n(
+                                  character.name!),
+                            ),
+                          )
+                        ],
+                      ),
+                      children: [
                         Padding(
-                          padding: const EdgeInsets.only(left: 8.0),
-                          child: Text(
-                            I18nHelper.getDisplayNameFromI18n(character.name!),
+                          padding: const EdgeInsets.fromLTRB(20, 3, 0, 3),
+                          child: Row(
+                            children: [
+                              Text(
+                                "${AppLocalizations.of(context)!.position}: ",
+                                style: OnepieceFonts.contentStyle,
+                              ),
+                              Text(
+                                groupPositionToDisplayValue[
+                                    character.position!]!,
+                                style: OnepieceFonts.contentStyle,
+                              ),
+                            ],
                           ),
-                        )
+                        ),
                       ],
                     ),
-                    children: [
-                      Text(groupPositionToDisplayValue[character.position!]!),
-                      Text(character.onceBelongedTo == true
-                          ? AppLocalizations.of(context)!.exMember
-                          : AppLocalizations.of(context)!.currentMember)
-                    ],
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
-        ),
-      ],
-    );
+        ],
+      );
+    });
   }
 }
