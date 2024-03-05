@@ -1389,6 +1389,20 @@ class _CharacterDetailState extends State<CharacterDetail> {
       GroupCategory.worldGovernment:
           AppLocalizations.of(context)!.worldGovernment,
     };
+    Map<GroupPosition, String> groupPositionToDisplayValue = {
+      GroupPosition.member: AppLocalizations.of(context)!.member,
+      GroupPosition.captain: AppLocalizations.of(context)!.caption,
+      GroupPosition.combatant: AppLocalizations.of(context)!.combatant,
+      GroupPosition.cook: AppLocalizations.of(context)!.cook,
+      GroupPosition.doctor: AppLocalizations.of(context)!.doctor,
+      GroupPosition.firstMate: AppLocalizations.of(context)!.firstMate,
+      GroupPosition.helmsman: AppLocalizations.of(context)!.helmsman,
+      GroupPosition.intern: AppLocalizations.of(context)!.intern,
+      GroupPosition.musician: AppLocalizations.of(context)!.musician,
+      GroupPosition.navigator: AppLocalizations.of(context)!.navigator,
+      GroupPosition.scholar: AppLocalizations.of(context)!.scholar,
+      GroupPosition.shipwright: AppLocalizations.of(context)!.shipwright,
+    };
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Container(
@@ -1452,10 +1466,17 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                 ),
                               ),
                             ),
-                            Text(
-                              "${I18nHelper.getDisplayNameFromI18n(currentGroup.name!)} "
-                              "${currentGroup.onceBelongedTo! ? "(${AppLocalizations.of(context)!.onceBelongTo})" : ""}",
-                              style: OnepieceFonts.fancyBlueHintFont,
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "${I18nHelper.getDisplayNameFromI18n(currentGroup.name!)} "
+                                  "${currentGroup.onceBelongedTo! ? "(${AppLocalizations.of(context)!.onceBelongTo})" : ""}",
+                                  style: OnepieceFonts.fancyBlueSmallTitle,
+                                ),
+                                Text(groupPositionToDisplayValue[currentGroup.position!]!)
+                              ],
                             ),
                           ],
                         ),
