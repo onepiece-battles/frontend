@@ -344,6 +344,20 @@ class _GroupDetailViewState extends State<GroupDetailView> {
   }
 
   Widget _getMembersPanel(BuildContext context) {
+    Map<GroupPosition, String> groupPositionToDisplayValue = {
+      GroupPosition.member: AppLocalizations.of(context)!.member,
+      GroupPosition.captain: AppLocalizations.of(context)!.caption,
+      GroupPosition.combatant: AppLocalizations.of(context)!.combatant,
+      GroupPosition.cook: AppLocalizations.of(context)!.cook,
+      GroupPosition.doctor: AppLocalizations.of(context)!.doctor,
+      GroupPosition.firstMate: AppLocalizations.of(context)!.firstMate,
+      GroupPosition.helmsman: AppLocalizations.of(context)!.helmsman,
+      GroupPosition.intern: AppLocalizations.of(context)!.intern,
+      GroupPosition.musician: AppLocalizations.of(context)!.musician,
+      GroupPosition.navigator: AppLocalizations.of(context)!.navigator,
+      GroupPosition.scholar: AppLocalizations.of(context)!.scholar,
+      GroupPosition.shipwright: AppLocalizations.of(context)!.shipwright,
+    };
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -372,6 +386,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                   decoration: const BoxDecoration(
                       borderRadius: BorderRadius.all(Radius.circular(5))),
                   child: ExpansionTile(
+                    expandedAlignment: Alignment.centerLeft,
                     expandedCrossAxisAlignment: CrossAxisAlignment.start,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(5),
@@ -409,7 +424,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                       ],
                     ),
                     children: [
-                      Text(character.position!),
+                      Text(groupPositionToDisplayValue[character.position!]!),
                       Text(character.onceBelongedTo == true
                           ? AppLocalizations.of(context)!.exMember
                           : AppLocalizations.of(context)!.currentMember)

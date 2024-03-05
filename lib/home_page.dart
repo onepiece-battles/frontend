@@ -336,9 +336,7 @@ class HomePageState extends State<HomePage> {
             child: Container(
               decoration: const BoxDecoration(
                   color: OnepieceColors.menuBackgroundColor,
-                  border: Border(
-                      top: BorderSide(
-                          color: OnepieceColors.liteFancyBlue, width: 1))),
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(5.0),
                 child: TextButton(
