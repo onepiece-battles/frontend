@@ -5,6 +5,7 @@ import 'package:openapi/api.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
+import '../../constants/onepiece_tag.dart';
 import '../../utils/base64_helper.dart';
 import '../../utils/image_helper.dart';
 
@@ -49,13 +50,13 @@ class _UserDetailViewState extends State<UserDetailView> {
                 children: [
                   _getBasicInfo(context),
                   const Padding(
-                    padding: EdgeInsets.all(8.0),
+                    padding: EdgeInsets.all(3.0),
                     child: Divider(
                       color: OnepieceColors.fancyBlue,
                       thickness: 1,
                     ),
                   ),
-                  _getPermissionInfo(context),
+                  _getLoginStatus(context),
                   const Padding(
                     padding: EdgeInsets.all(8.0),
                     child: Divider(
@@ -63,6 +64,7 @@ class _UserDetailViewState extends State<UserDetailView> {
                       thickness: 1,
                     ),
                   ),
+                  _getPermissionInfo(context),
                 ],
               ),
             ),
@@ -80,13 +82,17 @@ class _UserDetailViewState extends State<UserDetailView> {
   }
 
   Widget _getBasicInfo(BuildContext context) {
-    return StatefulBuilder(builder: (context, basicState) {
+    return StatefulBuilder(
+      builder: (context, basicState) {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              AppLocalizations.of(context)!.basicInfo,
-              style: OnepieceFonts.headerStyle,
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                AppLocalizations.of(context)!.basicInfo,
+                style: OnepieceFonts.headerStyle,
+              ),
             ),
             const SizedBox(
               width: 15,
@@ -107,8 +113,7 @@ class _UserDetailViewState extends State<UserDetailView> {
                   fit: BoxFit.fill,
                   child: user.profileImage == null
                       ? Container()
-                      : Image.memory(
-                      Base64Helper.decode(user.profileImage!)),
+                      : Image.memory(Base64Helper.decode(user.profileImage!)),
                 ),
               ),
             ),
@@ -127,7 +132,7 @@ class _UserDetailViewState extends State<UserDetailView> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(8,0,0, 15),
+              padding: const EdgeInsets.fromLTRB(8, 0, 0, 15),
               child: Text(
                 AppLocalizations.of(context)!.email,
                 style: OnepieceFonts.contentStyle,
@@ -152,12 +157,12 @@ class _UserDetailViewState extends State<UserDetailView> {
                       height: 30,
                       child: user.emailVerified!
                           ? ImageHelper.getSvgIconWithColor(
-                          'images/svgs/check-circle.svg',
-                          150,
-                          150,
-                          Colors.green)
+                              'images/svgs/check-circle.svg',
+                              150,
+                              150,
+                              Colors.green)
                           : ImageHelper.getSvgIconWithColor(
-                          'images/svgs/alert.svg', 150, 150, Colors.red),
+                              'images/svgs/alert.svg', 150, 150, Colors.red),
                     ),
                   )
                 ],
@@ -169,17 +174,94 @@ class _UserDetailViewState extends State<UserDetailView> {
     );
   }
 
-  Widget _getLoginStatus() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // login role/ last login role
-        // login status
-      ],
+  Widget _getLoginStatus(BuildContext context) {
+    Map<UserRole, String> userRoleToDisplayNameMap = {
+      UserRole.NIKA: AppLocalizations.of(context)!.roleNika,
+      UserRole.NORMAL: AppLocalizations.of(context)!.roleNormal,
+      UserRole.VISITOR: AppLocalizations.of(context)!.roleVisitor,
+      UserRole.ADMIN: AppLocalizations.of(context)!.roleAdmin
+    };
+    Map<AccountStatus, String> accountStatusEnumToDisplayValue = {
+      AccountStatus.loggedIn: AppLocalizations.of(context)!.accountLoggedIn,
+      AccountStatus.loggedOut: AppLocalizations.of(context)!.accountLoggedOut,
+      AccountStatus.stopped: AppLocalizations.of(context)!.accountStopped,
+      AccountStatus.closed: AppLocalizations.of(context)!.accountClosed,
+    };
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 18.0),
+            child: Text(
+              AppLocalizations.of(context)!.loginInfo,
+              style: OnepieceFonts.headerStyle,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Text(
+              AppLocalizations.of(context)!.loginRoleOrLastLoginRole,
+              style: OnepieceFonts.contentStyle,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 18.0),
+            child: OnepieceTag.getUserRoleTag(
+                user.loginRole!, userRoleToDisplayNameMap[user.loginRole]!),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Text(
+              AppLocalizations.of(context)!.allUserRoles,
+              style: OnepieceFonts.contentStyle,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 18.0),
+            child: Row(
+              children: user.userRoles
+                  .map((e) => Padding(
+                        padding: const EdgeInsets.only(right: 5),
+                        child: OnepieceTag.getUserRoleTag(
+                            e, userRoleToDisplayNameMap[e]!),
+                      ))
+                  .toList(),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Text(
+              AppLocalizations.of(context)!.loginStatus,
+              style: OnepieceFonts.contentStyle,
+            ),
+          ),
+          Text(
+            accountStatusEnumToDisplayValue[user.accountStatus]!,
+            style: OnepieceFonts.fancyBlueHintFont,
+          ),
+        ],
+      ),
     );
   }
 
   Widget _getPermissionInfo(BuildContext context) {
-    return Container();
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 18.0),
+            child: Text(
+              AppLocalizations.of(context)!.permissionInfo,
+              style: OnepieceFonts.headerStyle,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

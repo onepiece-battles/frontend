@@ -132,7 +132,7 @@
   "name": "Name",
   "nickname": "Nickname",
   "no": "NO",
-  "noAccount": "Don't have an account?",
+  "noAccount": "No account?",
   "noFileChosen": "No file chosen",
   "noSystemResource": "Exclude System Resource",
   "notVerified": "Not Verified",
@@ -267,5 +267,8 @@
   "next": "Next",
   "previous": "Previous",
   "combatScoreChange": "Combat Score Change",
-  "position": "Position"
+  "position": "Position",
+  "loginInfo": "Login Information",
+  "loginRoleOrLastLoginRole": "Login role/Last login role",
+  "permissionInfo": "Permission Information"
 }
