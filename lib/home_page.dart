@@ -396,8 +396,8 @@ class HomePageState extends State<HomePage> {
   Widget _getDrawerHeader(BuildContext context) {
     return Container(
       width: 300,
-      height: 180,
-      color: OnepieceColors.fancyBlue,
+      height: 170,
+      color: OnepieceColors.deepFancyBlue,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [

@@ -9,6 +9,7 @@ class OnepieceColors {
   static const black = Colors.black;
   static var backgroundColor = Colors.blue[300];
   static const fancyBlue = Color.fromARGB(255, 16, 85, 154);
+  static const deepFancyBlue = Color.fromARGB(255, 7, 48, 88);
   static const liteFancyBlue = Color.fromARGB(80, 16, 85, 154);
   static const fancyGreen = Color.fromARGB(255, 60, 126, 200);
   static const liteFancyGreen = Color.fromARGB(40, 60, 126, 200);

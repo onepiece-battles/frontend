@@ -265,5 +265,6 @@
   "combatPower": "Combat Score",
   "getByJoinCombat": "Improve by joining combats",
   "next": "Next",
-  "previous": "Previous"
+  "previous": "Previous",
+  "combatScoreChange": "Combat score change"
 }
