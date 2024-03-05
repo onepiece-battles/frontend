@@ -265,5 +265,6 @@
   "combatPower": "战斗分",
   "getByJoinCombat": "通过参加对战提升",
   "next": "下一个",
-  "previous": "上一个"
+  "previous": "上一个",
+  "combatScoreChange": "战斗分变化"
 }

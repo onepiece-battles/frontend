@@ -40,6 +40,9 @@ class OnepieceFonts {
       fontSize: OnepieceFonts.contentFontSize);
   static const TextStyle fancyBlueHintFont = TextStyle(
       color: OnepieceColors.fancyBlue, fontSize: OnepieceFonts.contentFontSize);
+
+  static const TextStyle boldFancyBlueHintFont = TextStyle(
+      color: OnepieceColors.fancyBlue, fontSize: OnepieceFonts.contentFontSize, fontWeight: FontWeight.w600);
   static const TextStyle fancyBlueSmallTitle = TextStyle(
       color: OnepieceColors.fancyBlue, fontSize: OnepieceFonts.bigContentFontSize);
   static const TextStyle liteFancyBlueHintFont = TextStyle(
@@ -52,6 +55,9 @@ class OnepieceFonts {
   static const TextStyle smallContentStyle = TextStyle(
       color: OnepieceFonts.contentFontColor,
       fontSize: OnepieceFonts.smallContentFontSize);
+  static const TextStyle superSmallContentStyle = TextStyle(
+      color: OnepieceFonts.contentFontColor,
+      fontSize: OnepieceFonts.superSmallContentFontSize);
   static const TextStyle smallContentStyleWhite = TextStyle(
       color: Colors.white, fontSize: OnepieceFonts.smallContentFontSize);
   static const TextStyle superSmallContentStyleWhite = TextStyle(

@@ -1475,7 +1475,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                   "${currentGroup.onceBelongedTo! ? "(${AppLocalizations.of(context)!.onceBelongTo})" : ""}",
                                   style: OnepieceFonts.fancyBlueSmallTitle,
                                 ),
-                                Text(groupPositionToDisplayValue[currentGroup.position!]!)
+                                Text(groupPositionToDisplayValue[
+                                    currentGroup.position!]!)
                               ],
                             ),
                           ],
@@ -1531,25 +1532,30 @@ class _CharacterDetailState extends State<CharacterDetail> {
   }
 
   List<DataColumn> _createColumns(String currentCharacterId) {
+    var headerStyle= OnepieceFonts.tableHeaderStyle;
     return [
       const DataColumn(
         label: Text(""),
       ),
       DataColumn(
         label: SizedBox(
-            width: 150, child: Text(AppLocalizations.of(context)!.initiator)),
+            width: 150, child: Text(AppLocalizations.of(context)!.initiator, style: headerStyle,)),
       ),
       DataColumn(
         label: SizedBox(
-            width: 150, child: Text(AppLocalizations.of(context)!.receiver)),
+            width: 150, child: Text(AppLocalizations.of(context)!.receiver, style: headerStyle)),
       ),
       DataColumn(
         label: SizedBox(
-            width: 150, child: Text(AppLocalizations.of(context)!.winner)),
+            width: 150, child: Text(AppLocalizations.of(context)!.winner, style: headerStyle)),
       ),
       DataColumn(
         label: SizedBox(
-            width: 80, child: Text(AppLocalizations.of(context)!.status)),
+            width: 80, child: Text(AppLocalizations.of(context)!.status, style: headerStyle)),
+      ),
+      DataColumn(
+        label: SizedBox(
+            width: 150, child: Text(AppLocalizations.of(context)!.combatScoreChange, style: headerStyle)),
       ),
     ];
   }
@@ -1596,8 +1602,38 @@ class _CharacterDetailState extends State<CharacterDetail> {
                       battleStatusToDisplayName[
                           entry.value.battleExecution!.battleStatus]!,
                       false),
+                  DataCell(
+                    Row(
+                      children: [
+                        entry.value.battleExecution!.winnerId != null
+                            ? Text(
+                                style: OnepieceFonts.boldFancyBlueHintFont,
+                                character.id ==
+                                        entry.value.battleExecution!.winnerId
+                                    ? getScoreText(entry
+                                    .value.battleExecution!.winnerScoreChange!)
+                                    : getScoreText(entry
+                                    .value.battleExecution!.loserScoreChange!))
+                            : const Text(""),
+                        const SizedBox(width: 10,),
+                        entry.value.battleExecution!.winnerId != null
+                            ? Text(
+                                style: OnepieceFonts.superSmallContentStyle,
+                                character.id == entry.value.starterId
+                                    ? "(${entry.value.battleExecution!.starterScoreBefore!} -> ${entry.value.battleExecution!.starterScoreAfter!})"
+                                    : "(${entry.value.battleExecution!.receiverScoreBefore!} ->${entry.value.battleExecution!.receiverScoreAfter!})")
+                            : const Text(""),
+                      ],
+                    ),
+                  ),
                 ]))
         .toList();
+  }
+
+  String getScoreText(int scoreChange) {
+    return scoreChange>=0?
+    "+ $scoreChange":
+    "- ${(0-scoreChange)}";
   }
 
   DataCell _getDataCell(String value, bool heightLight) {
