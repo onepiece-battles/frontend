@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -74,7 +73,13 @@ class _BattleDetailViewState extends State<BattleDetailView> {
         battle.battleExecution!.battleStatus!,
         battle.battleExecution!.battleReportStage!,
         battle.battleExecution!.reportFileId,
-        battle.battleExecution!.winnerId);
+        battle.battleExecution!.winnerId,
+        battle.battleExecution!.winnerScoreChange,
+        battle.battleExecution!.loserScoreChange,
+        battle.battleExecution!.starterScoreBefore,
+        battle.battleExecution!.starterScoreAfter,
+        battle.battleExecution!.receiverScoreBefore,
+        battle.battleExecution!.receiverScoreAfter);
     starter = battleFullView.starter!;
     receiver = battleFullView.receiver!;
   }
@@ -84,6 +89,11 @@ class _BattleDetailViewState extends State<BattleDetailView> {
     battleExecutionData.battleReportStage = battleExecution.battleReportStage!;
     battleExecutionData.winnerId = battleExecution.winnerId;
     battleExecutionData.reportFileId = battleExecution.reportFileId;
+    battleExecutionData.starterScoreBefore = battleExecution.starterScoreBefore;
+    battleExecutionData.starterScoreAfter = battleExecution.starterScoreAfter;
+    battleExecutionData.receiverScoreBefore =
+        battleExecution.receiverScoreBefore;
+    battleExecutionData.receiverScoreAfter = battleExecution.receiverScoreAfter;
   }
 
   @override
@@ -384,51 +394,117 @@ class _BattleDetailViewState extends State<BattleDetailView> {
         ),
         Column(
           children: [
-            Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                borderRadius: const BorderRadius.all(Radius.circular(8)),
-                border: Border.all(
-                    color: OnepieceColors.fancyBlue,
-                    width: 5,
-                    style: BorderStyle.solid),
-              ),
-              child: FittedBox(
-                fit: BoxFit.fill,
-                child: Image.memory(
-                    Base64Helper.decode(battle.starter!.profileImage!)),
+            InkWell(
+              onTap: () {
+                context.goNamed('characterDetails',
+                    extra: starter.id,
+                    pathParameters: {
+                      'name': I18nHelper.getDisplayNameFromI18n(starter.name)
+                    });
+              },
+              child: Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.all(Radius.circular(8)),
+                  border: Border.all(
+                      color: OnepieceColors.fancyBlue,
+                      width: 5,
+                      style: BorderStyle.solid),
+                ),
+                child: FittedBox(
+                  fit: BoxFit.fill,
+                  child: Image.memory(
+                      Base64Helper.decode(battle.starter!.profileImage!)),
+                ),
               ),
             ),
-            Text(
-              I18nHelper.getDisplayNameFromI18n(starter.name),
-              style: OnepieceFonts.fancyBlueHintFont,
-            )
+            Consumer<BattleExecutionData>(builder: (context, model, child) {
+              return Column(
+                children: [
+                  Text(
+                    I18nHelper.getDisplayNameFromI18n(starter.name),
+                    style: OnepieceFonts.fancyBlueHintFont,
+                  ),
+                  if (model.winnerId != null)
+                    Row(
+                      children: [
+                        Text(
+                          model.starterScoreBefore.toString(),
+                          style: OnepieceFonts.liteFancyBlueHintFont,
+                        ),
+                        const Text(" -> ",
+                            style: OnepieceFonts.liteFancyBlueHintFont),
+                        Text(model.starterScoreAfter.toString(),
+                            style: OnepieceFonts.fancyBlueHintFont),
+                      ],
+                    ),
+                  if (model.winnerId == null)
+                    Text(
+                      battle.starter!.score.toString(),
+                      style: OnepieceFonts.boldFancyBlueHintFont,
+                    )
+                ],
+              );
+            })
           ],
         ),
         _getStartButton(context),
         Column(
           children: [
-            Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                borderRadius: const BorderRadius.all(Radius.circular(8)),
-                border: Border.all(
-                    color: OnepieceColors.fancyBlue,
-                    width: 5,
-                    style: BorderStyle.solid),
-              ),
-              child: FittedBox(
-                fit: BoxFit.fill,
-                child: Image.memory(
-                    Base64Helper.decode(battle.receiver!.profileImage!)),
+            InkWell(
+              onTap: () {
+                context.goNamed('characterDetails',
+                    extra: receiver.id,
+                    pathParameters: {
+                      'name': I18nHelper.getDisplayNameFromI18n(receiver.name)
+                    });
+              },
+              child: Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.all(Radius.circular(8)),
+                  border: Border.all(
+                      color: OnepieceColors.fancyBlue,
+                      width: 5,
+                      style: BorderStyle.solid),
+                ),
+                child: FittedBox(
+                  fit: BoxFit.fill,
+                  child: Image.memory(
+                      Base64Helper.decode(battle.receiver!.profileImage!)),
+                ),
               ),
             ),
-            Text(
-              I18nHelper.getDisplayNameFromI18n(receiver.name),
-              style: OnepieceFonts.fancyBlueHintFont,
-            )
+            Consumer<BattleExecutionData>(builder: (context, model, child) {
+              return Column(
+                children: [
+                  Text(
+                    I18nHelper.getDisplayNameFromI18n(receiver.name),
+                    style: OnepieceFonts.fancyBlueHintFont,
+                  ),
+                  if (model.winnerId != null)
+                    Row(
+                      children: [
+                        Text(
+                          model.receiverScoreBefore.toString(),
+                          style: OnepieceFonts.liteFancyBlueHintFont,
+                        ),
+                        const Text(" -> ",
+                            style: OnepieceFonts.liteFancyBlueHintFont),
+                        Text(model.receiverScoreAfter.toString(),
+                            style: OnepieceFonts.fancyBlueHintFont),
+                      ],
+                    ),
+                  if (model.winnerId == null)
+                    Text(
+                      battle.receiver!.score.toString(),
+                      style: OnepieceFonts.boldFancyBlueHintFont,
+                    )
+                ],
+              );
+            })
           ],
         ),
         Padding(
@@ -518,6 +594,10 @@ class _BattleDetailViewState extends State<BattleDetailView> {
               ),
             );
     });
+  }
+
+  String getScoreText(int scoreChange) {
+    return scoreChange >= 0 ? "+ $scoreChange" : "- ${(0 - scoreChange)}";
   }
 
   Widget _getBattleReportProgress(BuildContext context, double iconSize) {
@@ -685,14 +765,36 @@ class BattleExecutionData extends ChangeNotifier {
   BattleReportStage _battleReportStage;
   String? _reportFileId;
   String? _winnerId;
+  int? _winnerScoreChange;
+  int? _loserScoreChange;
 
-  BattleExecutionData(this._battleStatus, this._battleReportStage,
-      this._reportFileId, this._winnerId);
+  int? _starterScoreBefore;
+  int? _starterScoreAfter;
+  int? _receiverScoreBefore;
+  int? _receiverScoreAfter;
+
+  BattleExecutionData(
+      this._battleStatus,
+      this._battleReportStage,
+      this._reportFileId,
+      this._winnerId,
+      this._winnerScoreChange,
+      this._loserScoreChange,
+      this._starterScoreBefore,
+      this._starterScoreAfter,
+      this._receiverScoreBefore,
+      this._receiverScoreAfter);
 
   BattleStatus get battleStatus => _battleStatus;
   BattleReportStage get battleReportStage => _battleReportStage;
   String? get reportFileId => _reportFileId;
   String? get winnerId => _winnerId;
+  int? get winnerScoreChange => _winnerScoreChange;
+  int? get loserScoreChange => _loserScoreChange;
+  int? get receiverScoreBefore => _receiverScoreBefore;
+  int? get receiverScoreAfter => _receiverScoreAfter;
+  int? get starterScoreBefore => _starterScoreBefore;
+  int? get starterScoreAfter => _starterScoreAfter;
 
   set battleStatus(BattleStatus battleStatus) {
     if (_battleStatus != battleStatus) {
@@ -718,6 +820,48 @@ class BattleExecutionData extends ChangeNotifier {
   set winnerId(String? winnerId) {
     if (_winnerId != winnerId) {
       _winnerId = winnerId;
+      notifyListeners();
+    }
+  }
+
+  set winnerScoreChange(int? winnerScoreChange) {
+    if (_winnerScoreChange != winnerScoreChange) {
+      _winnerScoreChange = winnerScoreChange;
+      notifyListeners();
+    }
+  }
+
+  set loserScoreChange(int? loserScoreChange) {
+    if (_loserScoreChange != loserScoreChange) {
+      _loserScoreChange = loserScoreChange;
+      notifyListeners();
+    }
+  }
+
+  set starterScoreBefore(int? starterScoreBefore) {
+    if (_starterScoreBefore != starterScoreBefore) {
+      _starterScoreBefore = starterScoreBefore;
+      notifyListeners();
+    }
+  }
+
+  set starterScoreAfter(int? starterScoreAfter) {
+    if (_starterScoreAfter != starterScoreAfter) {
+      _starterScoreAfter = starterScoreAfter;
+      notifyListeners();
+    }
+  }
+
+  set receiverScoreBefore(int? receiverScoreBefore) {
+    if (_receiverScoreBefore != receiverScoreBefore) {
+      _receiverScoreBefore = receiverScoreBefore;
+      notifyListeners();
+    }
+  }
+
+  set receiverScoreAfter(int? receiverScoreAfter) {
+    if (_receiverScoreAfter != receiverScoreAfter) {
+      _receiverScoreAfter = receiverScoreAfter;
       notifyListeners();
     }
   }
