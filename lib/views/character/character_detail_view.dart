@@ -33,8 +33,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
   TextEditingController characterAge = TextEditingController();
   TextEditingController characterHeight = TextEditingController();
   TextEditingController characterBirthPlace = TextEditingController();
-  TextEditingController characterDateOfBirthMonth = TextEditingController();
-  TextEditingController characterDateOfBirthDay = TextEditingController();
+  // TextEditingController characterDateOfBirthMonth = TextEditingController();
+  // TextEditingController characterDateOfBirthDay = TextEditingController();
   TextEditingController characterBounty = TextEditingController();
   // battle data controller
   TextEditingController characterFruitLimitController = TextEditingController();
@@ -69,6 +69,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
   BattleStyle selectedBattleStyle = BattleStyle.BODY;
   GroupPosition selectedGroupPosition = GroupPosition.member;
   Race selectedRace = Race.HUMAN;
+  String? selectedDay;
+  String? selectedMonth;
 
   final _basicFormKey = GlobalKey<FormState>();
   final _digitFormKey = GlobalKey<FormState>();
@@ -152,12 +154,12 @@ class _CharacterDetailState extends State<CharacterDetail> {
         character.height == null ? "" : character.height.toString();
     characterBirthPlace.text =
         character.birthPlace == null ? "" : character.birthPlace.toString();
-    characterDateOfBirthMonth.text = character.dateOfBirth == null
-        ? ""
-        : character.dateOfBirth!.month.toString();
-    characterDateOfBirthDay.text = character.dateOfBirth == null
-        ? ""
-        : character.dateOfBirth!.day.toString();
+    selectedMonth = character.dateOfBirth == null
+        ? null
+        : character.dateOfBirth!.split("-")[0].toString();
+    selectedDay = character.dateOfBirth == null
+        ? null
+        : character.dateOfBirth!.split("-")[1].toString();
     characterBounty.text =
         character.bounty == null ? "" : character.bounty.toString();
     // update combat information
@@ -384,12 +386,10 @@ class _CharacterDetailState extends State<CharacterDetail> {
                               // basic info
                               name: I18nHelper.getI18nFromDisplayName(
                                   character.name, characterNameController.text),
-                              dateOfBirth: DateTime(
-                                  1900,
-                                  DataConverter.stringToInt(
-                                      characterDateOfBirthMonth.text),
-                                  DataConverter.stringToInt(
-                                      characterDateOfBirthDay.text)),
+                              dateOfBirth:
+                                  selectedDay == null || selectedMonth == null
+                                      ? null
+                                      : "$selectedMonth-$selectedDay",
                               // todo(yichi): profile image update
                               birthPlace: characterBirthPlace.text,
                               age: DataConverter.stringToInt(
@@ -532,7 +532,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                             SizedBox(
                               width: 300,
                               child: Padding(
-                                padding: const EdgeInsets.only(left: 8),
+                                padding: const EdgeInsets.fromLTRB( 8,0,0,16),
                                 child: Text(
                                   AppLocalizations.of(context)!.birthDay,
                                   style: OnepieceFonts.deepBlackHintFont,
@@ -555,64 +555,144 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                         OnepieceColors.fancyBlue),
                                     SizedBox(
                                       width: 60,
-                                      child: TextFormField(
-                                        controller: characterDateOfBirthMonth,
-                                        enabled: basicInfoEditable,
-                                        validator: (value) {
-                                          if (value!.isWhiteSpace()) {
-                                            return AppLocalizations.of(context)!
-                                                .requiredField;
-                                          } else if (!value.isValidInt()) {
-                                            return AppLocalizations.of(context)!
-                                                .fieldMustBeInt;
-                                          }
-                                          int valueInt = int.parse(value);
-                                          if (valueInt < 1 || valueInt > 12) {
-                                            return AppLocalizations.of(context)!
-                                                .valueExceedsLimit;
-                                          }
-                                          return null;
-                                        },
-                                        decoration: const InputDecoration(
-                                          floatingLabelBehavior:
-                                              FloatingLabelBehavior.never,
-                                          contentPadding:
-                                              EdgeInsets.fromLTRB(5, 15, 0, 0),
-                                          hintText: "1-12",
+                                      child: DropdownButtonHideUnderline(
+                                        child: DropdownButton2(
+                                          isExpanded: true,
+                                          value: selectedMonth,
+                                          onChanged: basicInfoEditable
+                                              ? (String? month) {
+                                                  basicState(() {
+                                                    selectedMonth = month!;
+                                                  });
+                                                }
+                                              : null,
+                                          buttonStyleData: ButtonStyleData(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 5),
+                                            decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(3),
+                                                color: OnepieceColors
+                                                    .liteFancyGreen),
+                                            height: 30,
+                                            width: 60,
+                                          ),
+                                          menuItemStyleData:
+                                              const MenuItemStyleData(
+                                            height: 30,
+                                          ),
+                                          selectedItemBuilder: (context) {
+                                            return List<String>.generate(
+                                                    12,
+                                                    (int index) =>
+                                                        (index + 1).toString())
+                                                .map((String month) {
+                                              return Container(
+                                                alignment:
+                                                    AlignmentDirectional.center,
+                                                child: Text(
+                                                  month,
+                                                  style: const TextStyle(
+                                                    fontSize: 16,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                ),
+                                              );
+                                            }).toList();
+                                          },
+                                          items: List<String>.generate(
+                                                  12,
+                                                  (int index) =>
+                                                      (index + 1).toString())
+                                              .map((String month) {
+                                            return DropdownMenuItem<String>(
+                                              value: month,
+                                              child: Text(
+                                                month,
+                                                style: const TextStyle(
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                            );
+                                          }).toList(),
                                         ),
                                       ),
                                     ),
-                                    Text(AppLocalizations.of(context)!.month),
+                                    Text(
+                                      AppLocalizations.of(context)!.month,
+                                      style: OnepieceFonts.contentStyle,
+                                    ),
                                     SizedBox(
                                       width: 60,
-                                      child: TextFormField(
-                                        controller: characterDateOfBirthDay,
-                                        enabled: basicInfoEditable,
-                                        validator: (value) {
-                                          if (value!.isWhiteSpace()) {
-                                            return AppLocalizations.of(context)!
-                                                .requiredField;
-                                          } else if (!value.isValidInt()) {
-                                            return AppLocalizations.of(context)!
-                                                .fieldMustBeInt;
-                                          }
-                                          int valueInt = int.parse(value);
-                                          if (valueInt < 1 || valueInt > 31) {
-                                            return AppLocalizations.of(context)!
-                                                .valueExceedsLimit;
-                                          }
-                                          return null;
-                                        },
-                                        decoration: const InputDecoration(
-                                          floatingLabelBehavior:
-                                              FloatingLabelBehavior.never,
-                                          contentPadding:
-                                              EdgeInsets.fromLTRB(5, 15, 0, 0),
-                                          hintText: "1-31",
+                                      child: DropdownButtonHideUnderline(
+                                        child: DropdownButton2(
+                                          isExpanded: true,
+                                          value: selectedDay,
+                                          onChanged: basicInfoEditable
+                                              ? (String? day) {
+                                                  basicState(() {
+                                                    selectedDay = day!;
+                                                  });
+                                                }
+                                              : null,
+                                          buttonStyleData: ButtonStyleData(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 6),
+                                            decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(3),
+                                                color: OnepieceColors
+                                                    .liteFancyGreen),
+                                            height: 30,
+                                            width: 60,
+                                          ),
+                                          menuItemStyleData:
+                                              const MenuItemStyleData(
+                                            height: 30,
+                                          ),
+                                          selectedItemBuilder: (context) {
+                                            return List<String>.generate(
+                                                    31,
+                                                    (int index) =>
+                                                        (index + 1).toString())
+                                                .map((String day) {
+                                              return Container(
+                                                alignment:
+                                                    AlignmentDirectional.center,
+                                                child: Text(
+                                                  day,
+                                                  style: const TextStyle(
+                                                    fontSize: 16,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                ),
+                                              );
+                                            }).toList();
+                                          },
+                                          items: List<String>.generate(
+                                                  31,
+                                                  (int index) =>
+                                                      (index + 1).toString())
+                                              .map((String day) {
+                                            return DropdownMenuItem<String>(
+                                              value: day,
+                                              child: Text(
+                                                day,
+                                                style: const TextStyle(
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                            );
+                                          }).toList(),
                                         ),
                                       ),
                                     ),
-                                    Text(AppLocalizations.of(context)!.day),
+                                    Text(
+                                      AppLocalizations.of(context)!.day,
+                                      style: OnepieceFonts.contentStyle,
+                                    ),
                                   ],
                                 ),
                               ),
@@ -1532,30 +1612,42 @@ class _CharacterDetailState extends State<CharacterDetail> {
   }
 
   List<DataColumn> _createColumns(String currentCharacterId) {
-    var headerStyle= OnepieceFonts.tableHeaderStyle;
+    var headerStyle = OnepieceFonts.tableHeaderStyle;
     return [
       const DataColumn(
         label: Text(""),
       ),
       DataColumn(
         label: SizedBox(
-            width: 150, child: Text(AppLocalizations.of(context)!.initiator, style: headerStyle,)),
+            width: 150,
+            child: Text(
+              AppLocalizations.of(context)!.initiator,
+              style: headerStyle,
+            )),
       ),
       DataColumn(
         label: SizedBox(
-            width: 150, child: Text(AppLocalizations.of(context)!.receiver, style: headerStyle)),
+            width: 150,
+            child: Text(AppLocalizations.of(context)!.receiver,
+                style: headerStyle)),
       ),
       DataColumn(
         label: SizedBox(
-            width: 150, child: Text(AppLocalizations.of(context)!.winner, style: headerStyle)),
+            width: 150,
+            child:
+                Text(AppLocalizations.of(context)!.winner, style: headerStyle)),
       ),
       DataColumn(
         label: SizedBox(
-            width: 80, child: Text(AppLocalizations.of(context)!.status, style: headerStyle)),
+            width: 80,
+            child:
+                Text(AppLocalizations.of(context)!.status, style: headerStyle)),
       ),
       DataColumn(
         label: SizedBox(
-            width: 150, child: Text(AppLocalizations.of(context)!.combatScoreChange, style: headerStyle)),
+            width: 150,
+            child: Text(AppLocalizations.of(context)!.combatScoreChange,
+                style: headerStyle)),
       ),
     ];
   }
@@ -1610,12 +1702,14 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                 style: OnepieceFonts.boldFancyBlueHintFont,
                                 character.id ==
                                         entry.value.battleExecution!.winnerId
-                                    ? getScoreText(entry
-                                    .value.battleExecution!.winnerScoreChange!)
-                                    : getScoreText(entry
-                                    .value.battleExecution!.loserScoreChange!))
+                                    ? getScoreText(entry.value.battleExecution!
+                                        .winnerScoreChange!)
+                                    : getScoreText(entry.value.battleExecution!
+                                        .loserScoreChange!))
                             : const Text(""),
-                        const SizedBox(width: 10,),
+                        const SizedBox(
+                          width: 10,
+                        ),
                         entry.value.battleExecution!.winnerId != null
                             ? Text(
                                 style: OnepieceFonts.superSmallContentStyle,
@@ -1631,9 +1725,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
   }
 
   String getScoreText(int scoreChange) {
-    return scoreChange>=0?
-    "+ $scoreChange":
-    "- ${(0-scoreChange)}";
+    return scoreChange >= 0 ? "+ $scoreChange" : "- ${(0 - scoreChange)}";
   }
 
   DataCell _getDataCell(String value, bool heightLight) {
