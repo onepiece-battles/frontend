@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/repository/issue_dao.dart';
 import 'package:openapi/api.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:string_validator/string_validator.dart';
 import '../../app_router.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
@@ -38,7 +37,7 @@ class _IssueDetailViewState extends State<IssueDetailView> {
     Map<IssueType, String> issueTypeToDisplayValue = <IssueType, String>{
       IssueType.OTHER: AppLocalizations.of(context)!.otherType,
       IssueType.FEATURE_SUGGESTION:
-      AppLocalizations.of(context)!.featureSuggestion,
+          AppLocalizations.of(context)!.featureSuggestion,
       IssueType.BUG_REPORT: AppLocalizations.of(context)!.bugReport,
     };
     Map<IssueStatus, String> issueStatusToDisplayValue = <IssueStatus, String>{
@@ -140,102 +139,124 @@ class _IssueDetailViewState extends State<IssueDetailView> {
                       style: OnepieceFonts.headerStyle,
                     ),
                   ),
-                  StatefulBuilder(builder: (context, basicState) {
-                    return Row(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
-                          child: DropdownButtonHideUnderline(
-                            child: DropdownButton2(
-                              isExpanded: true,
-                              value: _selectedIssueStatus,
-                              hint: Text(
-                                AppLocalizations.of(context)!.groupCategory,
-                                style: OnepieceFonts.dropDownItemStyle,
-                              ),
-                              onChanged: !_issueStatusEditable
-                                  ? null
-                                  : (value) {
-                                basicState(() {
-                                  _selectedIssueStatus = value! as IssueStatus;
-                                });
-                              },
-                              selectedItemBuilder: (context) {
-                                return IssueStatus.values.map(
-                                      (item) {
-                                    return Container(
-                                      alignment: AlignmentDirectional.center,
-                                      child: Text(
-                                        issueStatusToDisplayValue[
-                                        _selectedIssueStatus]!,
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          overflow: TextOverflow.ellipsis,
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      issueTypeToDisplayValue[issue.issueType]!,
+                      style: OnepieceFonts.fancyBlueSmallTitle,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: StatefulBuilder(builder: (context, basicState) {
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton2(
+                                isExpanded: true,
+                                value: _selectedIssueStatus,
+                                hint: Text(
+                                  AppLocalizations.of(context)!.groupCategory,
+                                  style: OnepieceFonts.dropDownItemStyle,
+                                ),
+                                onChanged: !_issueStatusEditable
+                                    ? null
+                                    : (value) {
+                                        basicState(() {
+                                          _selectedIssueStatus =
+                                              value! as IssueStatus;
+                                        });
+                                      },
+                                selectedItemBuilder: (context) {
+                                  return IssueStatus.values.map(
+                                    (item) {
+                                      return Container(
+                                        alignment: AlignmentDirectional.center,
+                                        child: Text(
+                                          issueStatusToDisplayValue[
+                                              _selectedIssueStatus]!,
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
                                         ),
+                                      );
+                                    },
+                                  ).toList();
+                                },
+                                buttonStyleData: ButtonStyleData(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16),
+                                    height: 34,
+                                    width: 210,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(3),
+                                      color: OnepieceColors.menuBackgroundColor,
+                                    )),
+                                menuItemStyleData: const MenuItemStyleData(
+                                  height: 35,
+                                ),
+                                items: IssueStatus.values
+                                    .map((IssueStatus issueStatus) {
+                                  return DropdownMenuItem<IssueStatus>(
+                                    value: issueStatus,
+                                    child: Text(
+                                      issueStatusToDisplayValue[issueStatus]!,
+                                      style: const TextStyle(
+                                        fontSize: 14,
                                       ),
-                                    );
-                                  },
-                                ).toList();
-                              },
-                              buttonStyleData: ButtonStyleData(
-                                  padding:
-                                  const EdgeInsets.symmetric(horizontal: 16),
-                                  height: 34,
-                                  width: 210,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(3),
-                                    color: OnepieceColors.menuBackgroundColor,
-                                  )),
-                              menuItemStyleData: const MenuItemStyleData(
-                                height: 35,
-                              ),
-                              items: IssueStatus.values.map((IssueStatus issueStatus) {
-                                return DropdownMenuItem<IssueStatus>(
-                                  value: issueStatus,
-                                  child: Text(
-                                    issueStatusToDisplayValue[issueStatus]!,
-                                    style: const TextStyle(
-                                      fontSize: 14,
                                     ),
-                                  ),
-                                );
-                              }).toList(),
+                                  );
+                                }).toList(),
+                              ),
                             ),
                           ),
-                        ),
-                        Tooltip(
-                          message: _issueStatusEditable
-                              ? AppLocalizations.of(context)!.submitForm
-                              : AppLocalizations.of(context)!.editHint,
-                          child: InkWell(
-                            hoverColor: Colors.white,
-                            onTap: () {
-                              basicState(() {
-                                _issueStatusEditable = !_issueStatusEditable;
-                                if (!_issueStatusEditable) {
-                                  //todo(update issue)
-                                }
-                              });
-                            },
-                            child: SizedBox(
-                                width: 25,
-                                height: 25,
-                                child: !_issueStatusEditable
-                                    ? ImageHelper.getSvgIconWithColor(
-                                        'images/svgs/edit.svg',
-                                        150,
-                                        150,
-                                        OnepieceColors.fancyBlue)
-                                    : ImageHelper.getSvgIconWithColor(
-                                        'images/svgs/check.svg',
-                                        150,
-                                        150,
-                                        OnepieceColors.fancyBlue)),
+                          Tooltip(
+                            message: _issueStatusEditable
+                                ? AppLocalizations.of(context)!.submitForm
+                                : AppLocalizations.of(context)!.editHint,
+                            child: InkWell(
+                              hoverColor: Colors.white,
+                              onTap: () {
+                                basicState(() {
+                                  _issueStatusEditable = !_issueStatusEditable;
+                                  if (!_issueStatusEditable) {
+                                    BatchUpdateIssueRequest request =
+                                        BatchUpdateIssueRequest(updatedIssues: [
+                                      Issue(
+                                          id: issue.id,
+                                          issueStatus: _selectedIssueStatus)
+                                    ]);
+                                    getIt<IssueDao>()
+                                        .batchUpdateIssue(request)
+                                        .then((value) => setState(() {}));
+                                  }
+                                });
+                              },
+                              child: SizedBox(
+                                  width: 30,
+                                  height: 30,
+                                  child: !_issueStatusEditable
+                                      ? ImageHelper.getSvgIconWithColor(
+                                          'images/svgs/edit.svg',
+                                          150,
+                                          150,
+                                          OnepieceColors.fancyBlue)
+                                      : ImageHelper.getSvgIconWithColor(
+                                          'images/svgs/check.svg',
+                                          150,
+                                          150,
+                                          OnepieceColors.fancyBlue)),
+                            ),
                           ),
-                        ),
-                      ],
-                    );
-                  }),
+                        ],
+                      );
+                    }),
+                  ),
                   Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Container(
