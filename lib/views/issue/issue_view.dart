@@ -1,5 +1,4 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
@@ -568,7 +567,9 @@ class _IssueViewState extends State<IssueView> {
         .map(
           (entry) => DataRow(
             onSelectChanged: (value) {
-              context.goNamed('issueDetails');
+              context.goNamed('issueDetails',
+                  extra: entry.value.id,
+                  pathParameters: {'id': entry.value.id!});
             },
             cells: [
               _getDataCell("${entry.key + 1}", null),

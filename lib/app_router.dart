@@ -15,6 +15,7 @@ import 'package:one_piece_battles_flutter/views/fruit/fruit_view.dart';
 import 'package:one_piece_battles_flutter/views/group/create_group_view.dart';
 import 'package:one_piece_battles_flutter/views/group/group_detail_view.dart';
 import 'package:one_piece_battles_flutter/views/group/group_view.dart';
+import 'package:one_piece_battles_flutter/views/issue/issue_detail_view.dart';
 import 'package:one_piece_battles_flutter/views/issue/issue_view.dart';
 import 'package:one_piece_battles_flutter/views/user/user_detail_view.dart';
 import 'package:one_piece_battles_flutter/views/user/user_profile.dart';
@@ -228,6 +229,21 @@ class AppRouter {
               return NoTransitionPage(
                   child: const IssueView(), key: UniqueKey());
             },
+            routes: [
+              GoRoute(
+                path: ':id',
+                name: 'issueDetails',
+                parentNavigatorKey: _homeNavigatorState,
+                pageBuilder: (context, state) {
+                  String issueId = state.extra as String;
+                  return NoTransitionPage(
+                    child: IssueDetailView(
+                      issueId: issueId,
+                    ),
+                  );
+                },
+              ),
+            ]
           ),
           GoRoute(
               path: "${AppRouter.homePath}/:name",
