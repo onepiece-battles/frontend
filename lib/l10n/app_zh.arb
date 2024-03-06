@@ -270,5 +270,6 @@
   "position": "职位",
   "loginInfo": "登陆信息",
   "loginRoleOrLastLoginRole": "登陆角色/上次登陆角色",
-  "permissionInfo": "权限信息"
+  "permissionInfo": "权限信息",
+  "role": "角色"
 }

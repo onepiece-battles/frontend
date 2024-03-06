@@ -21,6 +21,16 @@ class OnepieceTag {
     UserRole.VISITOR: OnepieceColors.liteFancyGreen,
   };
 
+  static Map<ResourceType, Color> resourceTypeToColor = {
+    ResourceType.CHARACTER: OnepieceColors.fancyBlue,
+    ResourceType.BATTLE: OnepieceColors.fancyGreen,
+    ResourceType.GROUP: OnepieceColors.deepBlue,
+    ResourceType.ROLE: OnepieceColors.menuHoverColor,
+    ResourceType.FRUIT: OnepieceColors.liteFancyBlue,
+    ResourceType.ISSUE: OnepieceColors.liteFancyGreen,
+    ResourceType.USER: OnepieceColors.menuSelectedTileColor,
+  };
+
   static Map<GroupCategory, Color> groupCategoryToColor = {
     GroupCategory.worldGovernment: OnepieceColors.fancyBlue,
     GroupCategory.pirate: OnepieceColors.black,
@@ -47,6 +57,20 @@ class OnepieceTag {
       decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(5)),
           color: userRoleToColor[userRole]
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(4.0),
+        child: Text(text, style: OnepieceFonts.tagStyle,),
+      ),
+    );
+  }
+
+  static Widget getResourceTag(ResourceType resourceType, String text) {
+    return Container(
+      height: 25,
+      decoration: BoxDecoration(
+          borderRadius: const BorderRadius.all(Radius.circular(5)),
+          color: resourceTypeToColor[resourceType]
       ),
       child: Padding(
         padding: const EdgeInsets.all(4.0),

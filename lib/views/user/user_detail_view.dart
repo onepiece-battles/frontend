@@ -247,6 +247,15 @@ class _UserDetailViewState extends State<UserDetailView> {
   }
 
   Widget _getPermissionInfo(BuildContext context) {
+    Map<ResourceType, String> resourceTypeToDisplayName = {
+      ResourceType.USER: AppLocalizations.of(context)!.user,
+      ResourceType.CHARACTER: AppLocalizations.of(context)!.character,
+      ResourceType.ISSUE: AppLocalizations.of(context)!.issue,
+      ResourceType.GROUP: AppLocalizations.of(context)!.group,
+      ResourceType.BATTLE: AppLocalizations.of(context)!.battle,
+      ResourceType.FRUIT: AppLocalizations.of(context)!.devilFruit,
+      ResourceType.ROLE: AppLocalizations.of(context)!.role,
+    };
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
@@ -259,6 +268,43 @@ class _UserDetailViewState extends State<UserDetailView> {
               AppLocalizations.of(context)!.permissionInfo,
               style: OnepieceFonts.headerStyle,
             ),
+          ),
+          ListView.builder(
+            shrinkWrap: true,
+            itemCount: user.loginRoleResourcesPermissionMap.length,
+            itemBuilder: (context, index) {
+              var permission = user.loginRoleResourcesPermissionMap[index];
+              return Material(
+                type: MaterialType.transparency,
+                child: ListTile(
+                  minLeadingWidth: 10,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  // selected: selectedFruitId == fruit.id,
+                  selectedTileColor: OnepieceColors.liteFancyBlue,
+                  onTap: () {
+                    // selectedFruitId = fruit.id!;
+                    // fruitSetState(() {});
+                  },
+                  hoverColor: OnepieceColors.liteFancyBlue,
+                  title: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 5),
+                        child: OnepieceTag.getResourceTag(
+                            permission.resourceType!,
+                            resourceTypeToDisplayName[
+                                permission.resourceType]!),
+                      ),
+                      Text(permission.permissions.join(", "), style: OnepieceFonts.contentStyle,)
+                    ],
+                  ),
+                ),
+              );
+            },
           ),
         ],
       ),

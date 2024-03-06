@@ -270,5 +270,6 @@
   "position": "Position",
   "loginInfo": "Login Information",
   "loginRoleOrLastLoginRole": "Login role/Last login role",
-  "permissionInfo": "Permission Information"
+  "permissionInfo": "Permission Information",
+  "role": "Role"
 }
