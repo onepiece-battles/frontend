@@ -73,31 +73,30 @@ class _CreateBattleViewState extends State<CreateBattleView> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-        padding: const EdgeInsets.all(15.0),
+    return SingleChildScrollView(
         child: Center(
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    getLeftPanel(context),
-                    const SizedBox(
-                      width: 100,
-                    ),
-                    getRightPanel(context)
-                  ],
+                getLeftPanel(context),
+                const SizedBox(
+                  width: 100,
                 ),
-                const Divider(height: 3),
-                _getFoot(context)
+                getRightPanel(context)
               ],
             ),
-          ),
-        ));
+            const Divider(height: 3),
+            _getFoot(context)
+          ],
+        ),
+      ),
+    ));
   }
 
   Widget getLeftPanel(BuildContext context) {
