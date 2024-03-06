@@ -18,4 +18,8 @@ class IssueDao {
   Future<void> batchUpdateIssue(BatchUpdateIssueRequest request) async {
     return await issueApi.batchUpdateIssue(request);
   }
+
+  Future<IssueFullView?> getIssueFullView(GetIssueFullViewRequest request) async {
+    return await issueApi.getIssueFullView(request);
+  }
 }

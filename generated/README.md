@@ -90,6 +90,7 @@ Class | Method | HTTP request | Description
 *ImageApi* | [**uploadImage**](doc//ImageApi.md#uploadimage) | **POST** /api/onepiece/image/add | 
 *IssueApi* | [**batchUpdateIssue**](doc//IssueApi.md#batchupdateissue) | **POST** /api/onepiece/issue/batch_update | 
 *IssueApi* | [**createIssue**](doc//IssueApi.md#createissue) | **POST** /api/onepiece/issue/create | 
+*IssueApi* | [**getIssueFullView**](doc//IssueApi.md#getissuefullview) | **POST** /api/onepiece/issue/get_issue_full_view | 
 *IssueApi* | [**listIssue**](doc//IssueApi.md#listissue) | **POST** /api/onepiece/issue/list | 
 *RoleApi* | [**addRole**](doc//RoleApi.md#addrole) | **POST** /api/onepiece/iam/add_role | 
 *RoleApi* | [**assignResourceToRole**](doc//RoleApi.md#assignresourcetorole) | **POST** /api/onepiece/iam/assign_resource_permissions_to_role | 
@@ -177,6 +178,7 @@ Class | Method | HTTP request | Description
  - [GetGroupRequest](doc//GetGroupRequest.md)
  - [GetImageRequest](doc//GetImageRequest.md)
  - [GetImageResponse](doc//GetImageResponse.md)
+ - [GetIssueFullViewRequest](doc//GetIssueFullViewRequest.md)
  - [GetUserRequest](doc//GetUserRequest.md)
  - [Group](doc//Group.md)
  - [GroupCategory](doc//GroupCategory.md)
@@ -194,6 +196,8 @@ Class | Method | HTTP request | Description
  - [ImageMeta](doc//ImageMeta.md)
  - [Issue](doc//Issue.md)
  - [IssueFilter](doc//IssueFilter.md)
+ - [IssueFullView](doc//IssueFullView.md)
+ - [IssueFullViewAllOf](doc//IssueFullViewAllOf.md)
  - [IssueListView](doc//IssueListView.md)
  - [IssueSortableField](doc//IssueSortableField.md)
  - [IssueSortableFieldEnum](doc//IssueSortableFieldEnum.md)

@@ -271,5 +271,6 @@
   "loginInfo": "登陆信息",
   "loginRoleOrLastLoginRole": "登陆角色/上次登陆角色",
   "permissionInfo": "权限信息",
-  "role": "角色"
+  "role": "角色",
+  "issueDetail": "问题详情"
 }
