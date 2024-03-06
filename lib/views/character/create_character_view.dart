@@ -60,8 +60,8 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
       text: RandomStringGenerator.generateRandomNumber(1, 100000));
   TextEditingController characterBirthPlace = TextEditingController(
       text: RandomStringGenerator.generateRandomString(10));
-  TextEditingController characterDateOfBirth =
-      TextEditingController(text: RandomStringGenerator.generateDateString());
+  TextEditingController characterDateOfBirthMonth = TextEditingController();
+  TextEditingController characterDateOfBirthDay = TextEditingController();
   TextEditingController characterBounty = TextEditingController(
       text: RandomStringGenerator.generateRandomNumber(10, 100000));
 
@@ -96,7 +96,8 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
       characterEnergyController,
       characterAge,
       characterHeight,
-      characterDateOfBirth,
+      characterDateOfBirthMonth,
+      characterDateOfBirthDay,
       characterBirthPlace,
       characterBounty
     ];
@@ -108,6 +109,8 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
   BattleStyle selectedBattleStyle = BattleStyle.BODY;
   Race selectedRace = Race.HUMAN;
   List<Haki> selectedHakis = [];
+  String selectedDay = "1";
+  String selectedMonth = "1";
 
   final _formKey = GlobalKey<FormState>();
   @override
@@ -349,12 +352,152 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                         _getIcon(
                             'images/character_digits_icon/birth_place.svg'),
                       ),
-                      _getStringFormField(
-                        20,
-                        context,
-                        characterDateOfBirth,
-                        AppLocalizations.of(context)!.birthDay,
-                        _getIcon('images/character_digits_icon/birthday.svg'),
+                      SizedBox(
+                        width: 240,
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              ImageHelper.getSvgIconWithColor(
+                                  "images/character_digits_icon/birthday.svg",
+                                  25,
+                                  25,
+                                  OnepieceColors.fancyBlue),
+                              SizedBox(
+                                width: 60,
+                                child: DropdownButtonHideUnderline(
+                                  child: DropdownButton2(
+                                    isExpanded: true,
+                                    value: selectedMonth,
+                                    onChanged: (String? month) {
+                                      setState(() {
+                                        selectedMonth = month!;
+                                      });
+                                    },
+                                    buttonStyleData: ButtonStyleData(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 5),
+                                      decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(3),
+                                          color: OnepieceColors.liteFancyGreen),
+                                      height: 30,
+                                      width: 60,
+                                    ),
+                                    menuItemStyleData: const MenuItemStyleData(
+                                      height: 30,
+                                    ),
+                                    selectedItemBuilder: (context) {
+                                      return List<String>.generate(
+                                              12,
+                                              (int index) =>
+                                                  (index + 1).toString())
+                                          .map((String month) {
+                                        return Container(
+                                          alignment:
+                                              AlignmentDirectional.center,
+                                          child: Text(
+                                            month,
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                        );
+                                      }).toList();
+                                    },
+                                    items: List<String>.generate(
+                                            12,
+                                            (int index) =>
+                                                (index + 1).toString())
+                                        .map((String month) {
+                                      return DropdownMenuItem<String>(
+                                        value: month,
+                                        child: Text(
+                                          month,
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ),
+                                ),
+                              ),
+                              Text(
+                                AppLocalizations.of(context)!.month,
+                                style: OnepieceFonts.contentStyle,
+                              ),
+                              SizedBox(
+                                width: 60,
+                                child: DropdownButtonHideUnderline(
+                                  child: DropdownButton2(
+                                    isExpanded: true,
+                                    value: selectedDay,
+                                    onChanged: (String? day) {
+                                      setState(() {
+                                        selectedDay = day!;
+                                      });
+                                    },
+                                    buttonStyleData: ButtonStyleData(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 6),
+                                      decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(3),
+                                          color: OnepieceColors.liteFancyGreen),
+                                      height: 30,
+                                      width: 60,
+                                    ),
+                                    menuItemStyleData: const MenuItemStyleData(
+                                      height: 30,
+                                    ),
+                                    selectedItemBuilder: (context) {
+                                      return List<String>.generate(
+                                          31,
+                                              (int index) =>
+                                              (index + 1).toString())
+                                          .map((String day) {
+                                        return Container(
+                                          alignment:
+                                          AlignmentDirectional.center,
+                                          child: Text(
+                                            day,
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                        );
+                                      }).toList();
+                                    },
+                                    items: List<String>.generate(
+                                            31,
+                                            (int index) =>
+                                                (index + 1).toString())
+                                        .map((String day) {
+                                      return DropdownMenuItem<String>(
+                                        value: day,
+                                        child: Text(
+                                          day,
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ),
+                                ),
+                              ),
+                              Text(
+                                AppLocalizations.of(context)!.day,
+                                style: OnepieceFonts.contentStyle,
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                       _getFormField(
                         10,
@@ -786,10 +929,6 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                           AppLocalizations.of(context)!.characterImageRequired);
                       return;
                     }
-                    var monthDay = characterDateOfBirth.text
-                        .split("/")
-                        .map((e) => DataConverter.stringToInt(e))
-                        .toList();
                     CreateCharacterRequest addCharacterRequest =
                         CreateCharacterRequest(
                       battleStyle: selectedBattleStyle,
@@ -818,7 +957,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                           characterHeight.text.trim()),
                       age: DataConverter.stringToInt(characterAge.text.trim()),
                       birthPlace: characterBirthPlace.text.trim(),
-                      dateOfBirth: DateTime(monthDay.first, monthDay.last),
+                      dateOfBirth: "$selectedMonth-$selectedDay",
                       bounty: DataConverter.stringToInt(
                           characterBounty.text.trim()),
                     );
