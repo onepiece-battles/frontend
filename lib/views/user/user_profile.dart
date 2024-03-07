@@ -126,17 +126,8 @@ class _UserProfileState extends State<UserProfile> {
             builder: (context, value, _) {
               return Row(
                 children: [
-                  SizedBox(
-                    width: 100,
-                    height: 100,
-                    child: IconButton(
-                      onPressed: null,
-                      iconSize: 10,
-                      splashRadius: 0.01,
-                      splashColor: Colors.red,
-                      icon: Image.memory(_realtimeData.profileImage),
-                    ),
-                  ),
+                  ImageHelper.getRoundImageFrame(
+                      100, 100, 3, OnepieceColors.liteFancyBlue,100, _realtimeData.profileImage),
                   const SizedBox(
                     width: 10,
                   ),
@@ -281,7 +272,9 @@ class _UserProfileState extends State<UserProfile> {
                   AppLocalizations.of(context)!.email,
                   style: OnepieceFonts.headerStyle,
                 ),
-                const SizedBox(width: 10,),
+                const SizedBox(
+                  width: 10,
+                ),
                 Tooltip(
                   message: _emailVerified
                       ? AppLocalizations.of(context)!.verified
@@ -291,12 +284,12 @@ class _UserProfileState extends State<UserProfile> {
                     height: 30,
                     child: _emailVerified
                         ? ImageHelper.getSvgIconWithColor(
-                        'images/svgs/check-circle.svg',
-                        150,
-                        150,
-                        Colors.green)
+                            'images/svgs/check-circle.svg',
+                            150,
+                            150,
+                            Colors.green)
                         : ImageHelper.getSvgIconWithColor(
-                        'images/svgs/alert.svg', 150, 150, Colors.red),
+                            'images/svgs/alert.svg', 150, 150, Colors.red),
                   ),
                 ),
               ],
@@ -308,14 +301,17 @@ class _UserProfileState extends State<UserProfile> {
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 6.0),
-                child: Text(user.username, style: OnepieceFonts.contentStyle,),
+                child: Text(
+                  user.username,
+                  style: OnepieceFonts.contentStyle,
+                ),
               ),
               if (!_emailVerified)
                 ElevatedButton(
                   onPressed: () {
                     getIt<UserDao>()
-                        .verifyEmailAddress(
-                            VerifyEmailAddressRequest(id: user.id, email: user.username))
+                        .verifyEmailAddress(VerifyEmailAddressRequest(
+                            id: user.id, email: user.username))
                         .then((value) => {
                               showCupertinoModalPopup(
                                 filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),

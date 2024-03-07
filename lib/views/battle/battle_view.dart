@@ -689,23 +689,14 @@ class _BattleViewState extends State<BattleView> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                      child: Container(
-                        width: 50,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          borderRadius:
-                              const BorderRadius.all(Radius.circular(2.0)),
-                          border: Border.all(
-                              color: OnepieceColors.fancyBlue,
-                              width: 2,
-                              style: BorderStyle.solid),
-                        ),
-                        child: FittedBox(
-                          fit: BoxFit.fill,
-                          child: Image.memory(Base64Helper.decode(
+                      child: ImageHelper.getRoundImageFrame(
+                          50,
+                          50,
+                          1.5,
+                          OnepieceColors.liteFancyBlue,
+                          5,
+                          Base64Helper.decode(
                               entry.value.starter!.profileImage!)),
-                        ),
-                      ),
                     ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
@@ -720,23 +711,14 @@ class _BattleViewState extends State<BattleView> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                      child: Container(
-                        width: 50,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          borderRadius:
-                              const BorderRadius.all(Radius.circular(2.0)),
-                          border: Border.all(
-                              color: OnepieceColors.fancyBlue,
-                              width: 2,
-                              style: BorderStyle.solid),
-                        ),
-                        child: FittedBox(
-                          fit: BoxFit.fill,
-                          child: Image.memory(Base64Helper.decode(
+                      child: ImageHelper.getRoundImageFrame(
+                          50,
+                          50,
+                          1.5,
+                          OnepieceColors.liteFancyBlue,
+                          5,
+                          Base64Helper.decode(
                               entry.value.receiver!.profileImage!)),
-                        ),
-                      ),
                     ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
@@ -766,26 +748,17 @@ class _BattleViewState extends State<BattleView> {
                                 OnepieceColors.liteFancyBlue),
                           ),
                         )
-                      : Container(
-                          width: 50,
-                          height: 50,
-                          decoration: BoxDecoration(
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(2.0)),
-                            border: Border.all(
-                                color: OnepieceColors.fancyBlue,
-                                width: 2,
-                                style: BorderStyle.solid),
-                          ),
-                          child: FittedBox(
-                            fit: BoxFit.fill,
-                            child: Image.memory(Base64Helper.decode(
-                                entry.value.battleExecution!.winnerId ==
-                                        entry.value.starterId
-                                    ? entry.value.starter!.profileImage!
-                                    : entry.value.receiver!.profileImage!)),
-                          ),
-                        ),
+                      : ImageHelper.getRoundImageFrame(
+                          50,
+                          50,
+                          1.5,
+                          OnepieceColors.liteFancyBlue,
+                          5,
+                          Base64Helper.decode(
+                              entry.value.battleExecution!.winnerId ==
+                                      entry.value.starterId
+                                  ? entry.value.starter!.profileImage!
+                                  : entry.value.receiver!.profileImage!)),
                 ),
               ),
               _getDataCell(battleStatusToDisplayName[

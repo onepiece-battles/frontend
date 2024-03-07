@@ -529,25 +529,14 @@ class _GroupViewState extends State<GroupView> {
               DataCell(
                 Padding(
                   padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                  child: Container(
-                    width: 50,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      borderRadius:
-                          const BorderRadius.all(Radius.circular(2.0)),
-                      border: Border.all(
-                          color: OnepieceColors.fancyBlue,
-                          width: 2,
-                          style: BorderStyle.solid),
-                    ),
-                    child: FittedBox(
-                      fit: BoxFit.fill,
-                      child: entry.value.profileImage == null
-                          ? Container()
-                          : Image.memory(
-                              Base64Helper.decode(entry.value.profileImage!)),
-                    ),
-                  ),
+                  child:  ImageHelper.getRoundImageFrame(
+                      50,
+                      50,
+                      1.5,
+                      OnepieceColors.liteFancyBlue,
+                      5,
+                      Base64Helper.decode(
+                          entry.value.profileImage!))
                 ),
               ),
               DataCell(Padding(
@@ -597,23 +586,14 @@ class _GroupViewState extends State<GroupView> {
                   },
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                    child: Container(
-                      width: 50,
-                      height: 50,
-                      decoration: BoxDecoration(
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(2.0)),
-                        border: Border.all(
-                            color: OnepieceColors.fancyBlue,
-                            width: 2,
-                            style: BorderStyle.solid),
-                      ),
-                      child: FittedBox(
-                        fit: BoxFit.fill,
-                        child: Image.memory(
-                            Base64Helper.decode(character.profileImage!)),
-                      ),
-                    ),
+                    child: ImageHelper.getRoundImageFrame(
+                        50,
+                        50,
+                        1.5,
+                        OnepieceColors.liteFancyBlue,
+                        5,
+                        Base64Helper.decode(
+                            character.profileImage!))
                   ),
                 ))
             .toList(),

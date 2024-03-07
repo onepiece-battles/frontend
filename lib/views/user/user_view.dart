@@ -477,15 +477,8 @@ class _UserViewState extends State<UserView> {
               DataCell(
                 Padding(
                   padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                  child: SizedBox(
-                    width: 50,
-                    height: 50,
-                    child: FittedBox(
-                      fit: BoxFit.fill,
-                      child:
-                          Image.memory(Base64Helper.decode(user.profileImage!)),
-                    ),
-                  ),
+                  child:
+                  ImageHelper.getRoundImageFrame(50, 50, 1.5, OnepieceColors.liteFancyBlue, 50, Base64Helper.decode(user.profileImage!)),
                 ),
               ),
               DataCell(Padding(

@@ -684,16 +684,16 @@ class _CharacterViewState extends State<CharacterView> {
         ),
       ),
       _createSingleColumn(
-          AppLocalizations.of(context)!.characterName, null, 120, false),
+          AppLocalizations.of(context)!.characterName, null, null, false),
       _createSingleColumn(
-          AppLocalizations.of(context)!.hakis, null, 120, false),
-      _createSingleColumn(AppLocalizations.of(context)!.race, null, 120, false),
+          AppLocalizations.of(context)!.hakis, null, null, false),
+      _createSingleColumn(AppLocalizations.of(context)!.race, null, null, false),
       _createSingleColumn(
-          AppLocalizations.of(context)!.battleStyle, null, 120, false),
+          AppLocalizations.of(context)!.battleStyle, null, null, false),
       _createSingleColumn(
-          AppLocalizations.of(context)!.bounty, null, 120, false),
+          AppLocalizations.of(context)!.bounty, null, null, false),
       _createSingleColumn(AppLocalizations.of(context)!.combatPower,
-          CharacterSortableFieldsEnum.score, 120, false),
+          CharacterSortableFieldsEnum.score, null, false),
       _createSingleColumn(AppLocalizations.of(context)!.characterAttack,
           CharacterSortableFieldsEnum.attack, null, true),
       _createSingleColumn(AppLocalizations.of(context)!.characterDefense,
@@ -833,27 +833,15 @@ class _CharacterViewState extends State<CharacterView> {
             cells: [
               DataCell(
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                  child: Container(
-                    width: 50,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      borderRadius:
-                          const BorderRadius.all(Radius.circular(2.0)),
-                      border: Border.all(
-                          color: OnepieceColors.fancyBlue,
-                          width: 2,
-                          style: BorderStyle.solid),
+                    padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+                    child: ImageHelper.getRoundImageFrame(
+                        40,
+                        40,
+                        1.5,
+                        OnepieceColors.liteFancyBlue,
+                        40,
+                        Base64Helper.decode(entry.value.profileImage!))
                     ),
-                    child: FittedBox(
-                      fit: BoxFit.fill,
-                      child: entry.value.profileImage == null
-                          ? Container()
-                          : Image.memory(
-                              Base64Helper.decode(entry.value.profileImage!)),
-                    ),
-                  ),
-                ),
               ),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
