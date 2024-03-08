@@ -1,15 +1,17 @@
+import 'package:flutter/cupertino.dart';
 import 'package:openapi/api.dart';
 import 'package:http/http.dart';
 
-class FileDao{
-  FileApi fileApi= FileApi();
+class FileDao {
+  FileApi fileApi = FileApi();
   FileDao.empty();
 
   FileDao(ApiClient apiClient) {
     fileApi = FileApi(apiClient);
   }
 
-  Future<String?> downloadFile(DownloadFileRequest request) async {
+  Future<MultipartFile?> downloadFile(DownloadFileRequest request) async {
+    debugPrint('start downloading pdf');
     return await fileApi.downloadFile(request);
   }
 }
