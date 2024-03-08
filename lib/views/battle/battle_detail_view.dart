@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:html' as html;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -18,6 +19,7 @@ import 'package:one_piece_battles_flutter/graph/character_data.dart';
 import '../../constants/onepiece_fonts.dart';
 import '../../utils/base64_helper.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
+import 'package:url_launcher_web/url_launcher_web.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -61,6 +63,9 @@ class _BattleDetailViewState extends State<BattleDetailView> {
     GetBattleExecutionRequest request =
         GetBattleExecutionRequest(battleId: battle.id);
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (battleExecutionData.reportFileId!=null) {
+        return;
+      }
       getIt<BattleDao>()
           .getBattleExecution(request)
           .then((value) => _updateBattleExecution(value!));
@@ -699,12 +704,36 @@ class _BattleDetailViewState extends State<BattleDetailView> {
               : "",
           child: InkWell(
             onTap: model.battleReportStage == BattleReportStage.FINISHED
-                ? () {
+                ? ()  {
                     getIt<FileDao>()
                         .downloadFile(DownloadFileRequest(
                             id: battleExecutionData.reportFileId!))
-                        .then((value) {
-                      pdfData.value = Uint8List.fromList(value!.codeUnits);
+                        .then((value) async {
+                          debugPrint('pdf downloading finish');
+                      List<int> dataBytes = [];
+                      // Listen for data transmitted and gather all bytes
+                      await for (List<int> bytes in value!.finalize()) {
+                        dataBytes.addAll(bytes);
+                      }
+                      pdfData.value = Uint8List.fromList(dataBytes);
+                      final blob = html.Blob(dataBytes, 'application/pdf');
+                      final url = html.Url.createObjectUrlFromBlob(blob);
+                      final anchor = html.AnchorElement()
+                        ..href = url
+                        ..style.display = 'none' // Ensure the element is not visible
+                        ..download = "${value.filename}.pdf"; //
+
+                      // Add the anchor element to the document body.
+                      html.document.body?.append(anchor);
+
+                      // Programmatically click the anchor element to start the download.
+                      anchor.click();
+
+                      // Remove the anchor element after the download has started.
+                      anchor.remove();
+
+                      // Release the object URL to free up resources.
+                      html.Url.revokeObjectUrl(url);
                       //todo(yichi): download file from aliCloud oss.
                       OnepieceAlert.getBasicAlertDialogFunc(
                           context, "battle", "download file success");
