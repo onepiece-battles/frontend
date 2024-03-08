@@ -211,25 +211,26 @@ class _UserHomeState extends State<UserHome> {
           mainAxisSpacing: 5,
           crossAxisSpacing: 5,
         ),
-        itemBuilder: (BuildContext context, int index) => InkWell(
-          onTap: () {
-            context.goNamed('characterDetails',
-                extra: characters[index].id,
-                pathParameters: {
-                  'name':
-                      I18nHelper.getDisplayNameFromI18n(characters[index].name)
-                });
-          },
-          child: Tooltip(
-              message:
-                  I18nHelper.getDisplayNameFromI18n(characters[index].name),
-              child: ImageHelper.getRoundImageFrame(
-                  100,
-                  100,
-                  3,
-                  OnepieceColors.liteFancyBlue,
-                  20,
-                  Base64Helper.decode(characters[index].profileImage!))),
+        itemBuilder: (BuildContext context, int index) => Tooltip(
+          message: I18nHelper.getDisplayNameFromI18n(characters[index].name),
+          child: InkWell(
+            hoverColor: Colors.transparent,
+            onTap: () {
+              context.goNamed('characterDetails',
+                  extra: characters[index].id,
+                  pathParameters: {
+                    'name': I18nHelper.getDisplayNameFromI18n(
+                        characters[index].name)
+                  });
+            },
+            child: ImageHelper.getRoundImageFrame(
+                100,
+                100,
+                3,
+                OnepieceColors.liteFancyBlue,
+                20,
+                Base64Helper.decode(characters[index].profileImage!)),
+          ),
         ),
       ),
     );
@@ -262,41 +263,26 @@ class _UserHomeState extends State<UserHome> {
           mainAxisSpacing: 5,
           crossAxisSpacing: 5,
         ),
-        itemBuilder: (BuildContext context, int index) => InkWell(
-            onTap: () {
-              context.goNamed('groupDetails',
-                  extra: groups[index].id,
-                  pathParameters: {
-                    'name':
-                        I18nHelper.getDisplayNameFromI18n(groups[index].name)
-                  });
-            },
-            child: ImageHelper.getRoundImageFrame(
-                100,
-                100,
-                3,
-                OnepieceColors.liteFancyBlue,
-                20,
-                Base64Helper.decode(groups[index].profileImage!))
-            // Container(
-            //   decoration: BoxDecoration(
-            //     borderRadius: const BorderRadius.all(Radius.circular(2.0)),
-            //     border: Border.all(
-            //         color: OnepieceColors.fancyBlue,
-            //         width: 2,
-            //         style: BorderStyle.solid),
-            //   ),
-            //   child: Tooltip(
-            //     message: I18nHelper.getDisplayNameFromI18n(groups[index].name),
-            //     child: Image(
-            //       fit: BoxFit.cover,
-            //       image: Image.memory(
-            //               Base64Helper.decode(groups[index].profileImage!))
-            //           .image,
-            //     ),
-            //   ),
-            // ),
-            ),
+        itemBuilder: (BuildContext context, int index) => Tooltip(
+          message: I18nHelper.getDisplayNameFromI18n(groups[index].name),
+          child: InkWell(
+              hoverColor: Colors.transparent,
+              onTap: () {
+                context.goNamed('groupDetails',
+                    extra: groups[index].id,
+                    pathParameters: {
+                      'name':
+                          I18nHelper.getDisplayNameFromI18n(groups[index].name)
+                    });
+              },
+              child: ImageHelper.getRoundImageFrame(
+                  100,
+                  100,
+                  3,
+                  OnepieceColors.liteFancyBlue,
+                  20,
+                  Base64Helper.decode(groups[index].profileImage!))),
+        ),
       ),
     );
   }
@@ -369,23 +355,13 @@ class _UserHomeState extends State<UserHome> {
                         children: [
                           Padding(
                             padding: const EdgeInsets.fromLTRB(3, 3, 6, 3),
-                            child: Container(
-                              width: 50,
-                              height: 50,
-                              decoration: BoxDecoration(
-                                borderRadius: const BorderRadius.all(
-                                    Radius.circular(2.0)),
-                                border: Border.all(
-                                    color: OnepieceColors.fancyBlue,
-                                    width: 2,
-                                    style: BorderStyle.solid),
-                              ),
-                              child: FittedBox(
-                                fit: BoxFit.fill,
-                                child: Image.memory(Base64Helper.decode(
+                            child: ImageHelper.getCircleImageFrame(
+                                50,
+                                50,
+                                2,
+                                OnepieceColors.liteFancyBlue,
+                                Base64Helper.decode(
                                     battle.starter!.profileImage!)),
-                              ),
-                            ),
                           ),
                           const Text(
                             "vs",
@@ -393,23 +369,13 @@ class _UserHomeState extends State<UserHome> {
                           ),
                           Padding(
                             padding: const EdgeInsets.fromLTRB(3, 3, 6, 3),
-                            child: Container(
-                              width: 50,
-                              height: 50,
-                              decoration: BoxDecoration(
-                                borderRadius: const BorderRadius.all(
-                                    Radius.circular(2.0)),
-                                border: Border.all(
-                                    color: OnepieceColors.fancyBlue,
-                                    width: 2,
-                                    style: BorderStyle.solid),
-                              ),
-                              child: FittedBox(
-                                fit: BoxFit.fill,
-                                child: Image.memory(Base64Helper.decode(
-                                    battle.receiver!.profileImage!)),
-                              ),
-                            ),
+                            child: ImageHelper.getCircleImageFrame(
+                              50,
+                              50,
+                              2,
+                              OnepieceColors.liteFancyBlue,
+                              Base64Helper.decode(
+                                  battle.receiver!.profileImage!)),
                           ),
                         ],
                       ),

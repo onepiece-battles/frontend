@@ -109,23 +109,17 @@ class _GroupViewState extends State<GroupView> {
             children: [
               _createHeader(context),
               SizedBox(
-                width: 1500,
+                width: 1200,
                 height: 50,
                 child: _createControlPanel(context),
               ),
-              SizedBox(
-                width: 1500,
-                child: FittedBox(
-                  fit: BoxFit.fitWidth,
-                  child: _createGroupTable(context),
-                ),
-              ),
+              _createGroupTable(context),
               const SizedBox(
                 height: 15,
               ),
               if (totalPageNum > 1)
                 SizedBox(
-                  width: 1500,
+                  width: 1200,
                   child: Center(child: _getPageFoot(context)),
                 )
             ],
@@ -426,7 +420,7 @@ class _GroupViewState extends State<GroupView> {
       _createSingleColumn(AppLocalizations.of(context)!.name, null, 120),
       _createSingleColumn(AppLocalizations.of(context)!.category, null, 120),
       _createSingleColumn(AppLocalizations.of(context)!.creator, null, 100),
-      _createSingleColumn(AppLocalizations.of(context)!.character, null, 600),
+      _createSingleColumn(AppLocalizations.of(context)!.member, null, 600),
     ];
   }
 
@@ -528,16 +522,14 @@ class _GroupViewState extends State<GroupView> {
             cells: [
               DataCell(
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                  child:  ImageHelper.getRoundImageFrame(
-                      40,
-                      40,
-                      1.5,
-                      OnepieceColors.liteFancyBlue,
-                      40,
-                      Base64Helper.decode(
-                          entry.value.profileImage!))
-                ),
+                    padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+                    child: ImageHelper.getRoundImageFrame(
+                        40,
+                        40,
+                        1.5,
+                        OnepieceColors.liteFancyBlue,
+                        40,
+                        Base64Helper.decode(entry.value.profileImage!))),
               ),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
@@ -576,6 +568,7 @@ class _GroupViewState extends State<GroupView> {
       child: Row(
         children: characters
             .map((character) => InkWell(
+          hoverColor: Colors.transparent,
                   onTap: () {
                     context.goNamed('characterDetails',
                         extra: character.id,
@@ -584,16 +577,19 @@ class _GroupViewState extends State<GroupView> {
                               I18nHelper.getDisplayNameFromI18n(character.name!)
                         });
                   },
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                    child: ImageHelper.getRoundImageFrame(
-                        40,
-                        40,
-                        1.5,
-                        OnepieceColors.liteFancyBlue,
-                        40,
-                        Base64Helper.decode(
-                            character.profileImage!))
+                  child: Tooltip(
+                    message: I18nHelper.getDisplayNameFromI18n(character.name),
+                    preferBelow: false,
+                    showDuration: const Duration(seconds: 1),
+                    child: Padding(
+                        padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+                        child: ImageHelper.getRoundImageFrame(
+                            40,
+                            40,
+                            1.5,
+                            OnepieceColors.liteFancyBlue,
+                            40,
+                            Base64Helper.decode(character.profileImage!))),
                   ),
                 ))
             .toList(),

@@ -13,6 +13,7 @@ import 'package:one_piece_battles_flutter/repository/user_dao.dart';
 import 'package:openapi/api.dart';
 import 'app_router.dart';
 import 'config/my_input_theme.dart';
+import 'constants/onepiece_colors.dart';
 
 final getIt = GetIt.instance;
 
@@ -62,7 +63,20 @@ class _MyAppState extends State<MyApp> {
     getIt.registerLazySingleton<Locale>(() => _locale);
     return MaterialApp.router(
       locale: _locale,
-      theme: ThemeData(inputDecorationTheme: MyInputTheme().theme()),
+      theme: ThemeData(
+          inputDecorationTheme: MyInputTheme().theme(),
+          tooltipTheme: TooltipThemeData(
+            showDuration: const Duration(seconds: 1),
+            preferBelow: false,
+            decoration: BoxDecoration(
+              color: OnepieceColors.fancyBlue, // Background color
+              borderRadius: BorderRadius.circular(8), // Rounded corners
+              border: Border.all(
+                color: Colors.white, // Border color
+                width: 1, // Border width
+              ),
+            ),
+          )),
       debugShowCheckedModeBanner: false,
       localizationsDelegates: const [
         AppLocalizations.delegate,

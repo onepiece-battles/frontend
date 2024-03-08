@@ -120,7 +120,7 @@ class _CharacterViewState extends State<CharacterView> {
             children: [
               _createHeader(context),
               SizedBox(
-                width: 1800,
+                width: 2000,
                 height: 50,
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
@@ -136,7 +136,7 @@ class _CharacterViewState extends State<CharacterView> {
               ),
               if (totalPageNum > 1)
                 SizedBox(
-                  width: 1800,
+                  width: 2000,
                   child: Center(child: _getPageFoot(context)),
                 )
             ],

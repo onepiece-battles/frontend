@@ -110,13 +110,7 @@ class _IssueViewState extends State<IssueView> {
                 height: 50,
                 child: _createControlPanel(context),
               ),
-              SizedBox(
-                width: 1600,
-                child: FittedBox(
-                  fit: BoxFit.fitWidth,
-                  child: _createIssueTable(context),
-                ),
-              ),
+              _createIssueTable(context),
               const SizedBox(
                 height: 15,
               ),
@@ -449,30 +443,36 @@ class _IssueViewState extends State<IssueView> {
   List<DataColumn> _createColumns() {
     return [
       DataColumn(
-        label: ElevatedButton(
-            style: OnepieceButtonStyle.getDefaultStyle(),
-            onPressed: () {
-              sortKeys = [];
-              sortableEnumToSortOrderMap = {
-                IssueSortableFieldEnum.issueStatus: null,
-                IssueSortableFieldEnum.issueType: null,
-                IssueSortableFieldEnum.creationTimestamp: null,
-                IssueSortableFieldEnum.modificationTimestamp: null,
-              };
-              _search();
+        label: Tooltip(
+          message: AppLocalizations.of(context)!.resetSort,
+          child: ImageHelper.getIconButtonFromSvg(
+            'images/svgs/reset.svg',
+            OnepieceColors.fancyBlue,
+            25,
+            25,
+                () {
+                  sortKeys = [];
+                  sortableEnumToSortOrderMap = {
+                    IssueSortableFieldEnum.issueStatus: null,
+                    IssueSortableFieldEnum.issueType: null,
+                    IssueSortableFieldEnum.creationTimestamp: null,
+                    IssueSortableFieldEnum.modificationTimestamp: null,
+                  };
+                  _search();
             },
-            child: Text(AppLocalizations.of(context)!.resetSort)),
+          ),
+        ),
       ),
       _createSingleColumn(
-          AppLocalizations.of(context)!.creatorEmail, null, 180),
+          AppLocalizations.of(context)!.creatorEmail, null, 220),
       _createSingleColumn(
-          AppLocalizations.of(context)!.creatorNickname, null, 150),
+          AppLocalizations.of(context)!.creatorNickname, null, 220),
       _createSingleColumn(
           AppLocalizations.of(context)!.feedbackTitle, null, 200),
       _createSingleColumn(AppLocalizations.of(context)!.issueType,
-          IssueSortableFieldEnum.issueType, null),
+          IssueSortableFieldEnum.issueType, 200),
       _createSingleColumn(AppLocalizations.of(context)!.status,
-          IssueSortableFieldEnum.issueStatus, null),
+          IssueSortableFieldEnum.issueStatus, 180),
       _createSingleColumn(AppLocalizations.of(context)!.creationTime,
           IssueSortableFieldEnum.creationTimestamp, 180),
       _createSingleColumn(AppLocalizations.of(context)!.modificationTime,

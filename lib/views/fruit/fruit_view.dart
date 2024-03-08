@@ -116,23 +116,17 @@ class _FruitViewState extends State<FruitView> {
             children: [
               _getHeaderText(context),
               SizedBox(
-                width: 1500,
+                width: 1400,
                 height: 50,
                 child: _getControlRow(context),
               ),
-              SizedBox(
-                width: 1500,
-                child: FittedBox(
-                  fit: BoxFit.fitWidth,
-                  child: _getFruitsTable(context),
-                ),
-              ),
+              _getFruitsTable(context),
               const SizedBox(
                 height: 15,
               ),
               if (totalPageNum > 1)
                 SizedBox(
-                  width: 1500,
+                  width: 1400,
                   child: Center(child: _getPageFoot(context)),
                 )
             ],

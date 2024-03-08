@@ -366,7 +366,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                       ? AppLocalizations.of(context)!.submitForm
                       : AppLocalizations.of(context)!.editHint,
                   child: InkWell(
-                    hoverColor: Colors.white,
+                    hoverColor: Colors.transparent,
                     onTap: () {
                       basicState(() {
                         basicInfoEditable = !basicInfoEditable;
@@ -440,24 +440,13 @@ class _CharacterDetailState extends State<CharacterDetail> {
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Container(
-              width: 270,
-              height: 270,
-              decoration: BoxDecoration(
-                borderRadius: const BorderRadius.all(Radius.circular(5.0)),
-                border: Border.all(
-                    color: OnepieceColors.fancyBlue,
-                    width: 5,
-                    style: BorderStyle.solid),
-              ),
-              child: FittedBox(
-                fit: BoxFit.fill,
-                child: character.profileImage == null
-                    ? Container()
-                    : Image.memory(
-                        Base64Helper.decode(character.profileImage!)),
-              ),
-            ),
+            child: ImageHelper.getRoundImageFrame(
+                250,
+                250,
+                3,
+                OnepieceColors.liteFancyBlue,
+                10,
+                Base64Helper.decode(character.profileImage!)),
           ),
           Form(
             key: _basicFormKey,
@@ -532,7 +521,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                             SizedBox(
                               width: 300,
                               child: Padding(
-                                padding: const EdgeInsets.fromLTRB( 8,0,0,16),
+                                padding: const EdgeInsets.fromLTRB(8, 0, 0, 16),
                                 child: Text(
                                   AppLocalizations.of(context)!.birthDay,
                                   style: OnepieceFonts.deepBlackHintFont,

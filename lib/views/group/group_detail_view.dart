@@ -226,25 +226,13 @@ class _GroupDetailViewState extends State<GroupDetailView> {
           ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 5),
-            child: Container(
-              width: 200,
-              height: 200,
-              decoration: BoxDecoration(
-                borderRadius: const BorderRadius.all(Radius.circular(2.0)),
-                border: Border.all(
-                    color: OnepieceColors.fancyBlue,
-                    width: 5,
-                    style: BorderStyle.solid),
-              ),
-              child: FittedBox(
-                fit: BoxFit.fill,
-                child: Padding(
-                  padding: const EdgeInsets.all(3.0),
-                  child: Image.memory(
-                      Base64Helper.decode(groupFullView.profileImage!)),
-                ),
-              ),
-            ),
+            child: ImageHelper.getRoundImageFrame(
+                200,
+                200,
+                3,
+                OnepieceColors.liteFancyBlue,
+                20,
+                Base64Helper.decode(groupFullView.profileImage!)),
           ),
           SizedBox(
             width: 300,
