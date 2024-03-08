@@ -7,6 +7,7 @@ import 'package:one_piece_battles_flutter/repository/character_dao.dart';
 import 'package:one_piece_battles_flutter/repository/group_dao.dart';
 import 'package:one_piece_battles_flutter/utils/base64_helper.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
+import 'package:one_piece_battles_flutter/utils/image_helper.dart';
 import 'package:openapi/api.dart';
 import 'constants/onepiece_colors.dart';
 import 'constants/onepiece_fonts.dart';
@@ -110,7 +111,11 @@ class _UserHomeState extends State<UserHome> {
                                   onPressed: () {
                                     setState(() {
                                       currentRoleOnly = !currentRoleOnly;
-                                      myFuture = Future.wait([listCharacters(), listGroups(), listBattles()]);
+                                      myFuture = Future.wait([
+                                        listCharacters(),
+                                        listGroups(),
+                                        listBattles()
+                                      ]);
                                     });
                                   },
                                   splashRadius: 1,
@@ -216,23 +221,15 @@ class _UserHomeState extends State<UserHome> {
                 });
           },
           child: Tooltip(
-            message: I18nHelper.getDisplayNameFromI18n(characters[index].name),
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: const BorderRadius.all(Radius.circular(2.0)),
-                border: Border.all(
-                    color: OnepieceColors.fancyBlue,
-                    width: 2,
-                    style: BorderStyle.solid),
-              ),
-              child: Image(
-                fit: BoxFit.cover,
-                image: Image.memory(
-                        Base64Helper.decode(characters[index].profileImage!))
-                    .image,
-              ),
-            ),
-          ),
+              message:
+                  I18nHelper.getDisplayNameFromI18n(characters[index].name),
+              child: ImageHelper.getRoundImageFrame(
+                  100,
+                  100,
+                  3,
+                  OnepieceColors.liteFancyBlue,
+                  20,
+                  Base64Helper.decode(characters[index].profileImage!))),
         ),
       ),
     );
@@ -266,32 +263,40 @@ class _UserHomeState extends State<UserHome> {
           crossAxisSpacing: 5,
         ),
         itemBuilder: (BuildContext context, int index) => InkWell(
-          onTap: () {
-            context.goNamed('groupDetails',
-                extra: groups[index].id,
-                pathParameters: {
-                  'name': I18nHelper.getDisplayNameFromI18n(groups[index].name)
-                });
-          },
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: const BorderRadius.all(Radius.circular(2.0)),
-              border: Border.all(
-                  color: OnepieceColors.fancyBlue,
-                  width: 2,
-                  style: BorderStyle.solid),
+            onTap: () {
+              context.goNamed('groupDetails',
+                  extra: groups[index].id,
+                  pathParameters: {
+                    'name':
+                        I18nHelper.getDisplayNameFromI18n(groups[index].name)
+                  });
+            },
+            child: ImageHelper.getRoundImageFrame(
+                100,
+                100,
+                3,
+                OnepieceColors.liteFancyBlue,
+                20,
+                Base64Helper.decode(groups[index].profileImage!))
+            // Container(
+            //   decoration: BoxDecoration(
+            //     borderRadius: const BorderRadius.all(Radius.circular(2.0)),
+            //     border: Border.all(
+            //         color: OnepieceColors.fancyBlue,
+            //         width: 2,
+            //         style: BorderStyle.solid),
+            //   ),
+            //   child: Tooltip(
+            //     message: I18nHelper.getDisplayNameFromI18n(groups[index].name),
+            //     child: Image(
+            //       fit: BoxFit.cover,
+            //       image: Image.memory(
+            //               Base64Helper.decode(groups[index].profileImage!))
+            //           .image,
+            //     ),
+            //   ),
+            // ),
             ),
-            child: Tooltip(
-              message: I18nHelper.getDisplayNameFromI18n(groups[index].name),
-              child: Image(
-                fit: BoxFit.cover,
-                image: Image.memory(
-                        Base64Helper.decode(groups[index].profileImage!))
-                    .image,
-              ),
-            ),
-          ),
-        ),
       ),
     );
   }
@@ -342,7 +347,6 @@ class _UserHomeState extends State<UserHome> {
                 decoration: const BoxDecoration(
                     borderRadius: BorderRadius.all(Radius.circular(5))),
                 child: ListTile(
-                  // tileColor: OnepieceColors.liteFancyBlue,
                   minLeadingWidth: 10,
                   contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
                   shape: RoundedRectangleBorder(
@@ -421,8 +425,8 @@ class _UserHomeState extends State<UserHome> {
                             const Text(" | ",
                                 style: OnepieceFonts.fancyBlueHintFont),
                             Text(
-                                reportStatusToDisplayName[
-                                    battle.battleExecution!.battleReportStage!]!,
+                                reportStatusToDisplayName[battle
+                                    .battleExecution!.battleReportStage!]!,
                                 style: OnepieceFonts.fancyBlueHintFont)
                           ],
                         ),

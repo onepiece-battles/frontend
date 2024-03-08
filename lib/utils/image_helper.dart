@@ -1,7 +1,94 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
 class ImageHelper {
+  static Widget getSquareImageFrame(double width, double height,
+      double? borderWidth, Color? borderColor, Uint8List imageData) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: borderWidth == null || borderColor == null
+          ? null
+          : BoxDecoration(
+              borderRadius: const BorderRadius.all(Radius.circular(2.0)),
+              border: Border.all(
+                  color: borderColor,
+                  width: borderWidth,
+                  style: BorderStyle.solid),
+            ),
+      child: ClipRect(
+        child: AspectRatio(
+          aspectRatio: 1,
+          child: FittedBox(
+            fit: BoxFit.cover,
+            child: Image.memory(imageData),
+          ),
+        ),
+      ),
+    );
+  }
+
+  static Widget getCircleImageFrame(double width, double height,
+      double? borderWidth, Color? borderColor, Uint8List imageData) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: borderWidth == null || borderColor == null
+          ? null
+          : BoxDecoration(
+              borderRadius: const BorderRadius.all(Radius.circular(2.0)),
+              border: Border.all(
+                  color: borderColor,
+                  width: borderWidth,
+                  style: BorderStyle.solid),
+            ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(width),
+        child: AspectRatio(
+          aspectRatio: 1,
+          child: FittedBox(
+            fit: BoxFit.cover,
+            child: Image.memory(imageData),
+          ),
+        ),
+      ),
+    );
+  }
+
+  static Widget getRoundImageFrame(
+      double width,
+      double height,
+      double? borderWidth,
+      Color? borderColor,
+      double borderRadios,
+      Uint8List imageData) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: borderWidth == null || borderColor == null
+          ? null
+          : BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(borderRadios)),
+              border: Border.all(
+                  color: borderColor,
+                  width: borderWidth,
+                  style: BorderStyle.solid),
+            ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(
+            borderRadios - (borderWidth ?? 0)),
+        child: AspectRatio(
+          aspectRatio: 1,
+          child: FittedBox(
+            fit: BoxFit.cover,
+            child: Image.memory(imageData),
+          ),
+        ),
+      ),
+    );
+  }
+
   static IconButton getIconButtonFromSvg(
     String svgPath,
     Color svgColor,
@@ -28,22 +115,7 @@ class ImageHelper {
     );
   }
 
-  static IconButton getIconButtonFromImage(
-    String path,
-    double iconSize,
-    EdgeInsets padding,
-    Function() onPressed,
-  ) {
-    return IconButton(
-      onPressed: onPressed,
-      icon: getImageFromPath(path),
-      iconSize: iconSize,
-      padding: padding,
-    );
-  }
-
-  static Widget getSvgIcon(
-      String svgPath, double width, double height) {
+  static Widget getSvgIcon(String svgPath, double width, double height) {
     return SvgPicture.asset(
       svgPath,
       // color: svgColor,
