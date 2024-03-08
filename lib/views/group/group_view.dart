@@ -530,11 +530,11 @@ class _GroupViewState extends State<GroupView> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
                   child:  ImageHelper.getRoundImageFrame(
-                      50,
-                      50,
+                      40,
+                      40,
                       1.5,
                       OnepieceColors.liteFancyBlue,
-                      5,
+                      40,
                       Base64Helper.decode(
                           entry.value.profileImage!))
                 ),
@@ -587,11 +587,11 @@ class _GroupViewState extends State<GroupView> {
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
                     child: ImageHelper.getRoundImageFrame(
-                        50,
-                        50,
+                        40,
+                        40,
                         1.5,
                         OnepieceColors.liteFancyBlue,
-                        5,
+                        40,
                         Base64Helper.decode(
                             character.profileImage!))
                   ),

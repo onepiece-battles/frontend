@@ -31,6 +31,7 @@ class _CharacterViewState extends State<CharacterView> {
   CharacterFilter characterFilter = CharacterFilter();
   List<CharacterListView> currentCharacterList = [];
   List<CharacterSortableField> sortKeys = [];
+  GlobalKey _tableKey = GlobalKey();
 
   // sorting related fields
   Map<SortOrder?, String> sortOrderToPath = const {
@@ -119,26 +120,23 @@ class _CharacterViewState extends State<CharacterView> {
             children: [
               _createHeader(context),
               SizedBox(
-                width: 2000,
+                width: 1800,
                 height: 50,
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
-                  child: _createControlPanel(context),
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 5.0),
+                    child: _createControlPanel(context),
+                  ),
                 ),
               ),
-              SizedBox(
-                width: 2000,
-                child: FittedBox(
-                  fit: BoxFit.fitWidth,
-                  child: _createCharacterTable(context),
-                ),
-              ),
+              _createCharacterTable(context),
               const SizedBox(
                 height: 15,
               ),
               if (totalPageNum > 1)
                 SizedBox(
-                  width: 2000,
+                  width: 1800,
                   child: Center(child: _getPageFoot(context)),
                 )
             ],
@@ -453,7 +451,7 @@ class _CharacterViewState extends State<CharacterView> {
               buttonStyleData: ButtonStyleData(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 height: 35,
-                width: 200,
+                width: 250,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(3),
                   color: OnepieceColors.liteFancyGreen,
@@ -649,6 +647,7 @@ class _CharacterViewState extends State<CharacterView> {
 
   DataTable _createCharacterTable(BuildContext context) {
     return DataTable(
+      key: _tableKey,
       showCheckboxColumn: false,
       showBottomBorder: true,
       headingRowHeight: 50,
@@ -684,30 +683,30 @@ class _CharacterViewState extends State<CharacterView> {
         ),
       ),
       _createSingleColumn(
-          AppLocalizations.of(context)!.characterName, null, null, false),
+          AppLocalizations.of(context)!.characterName, null, 80, false),
       _createSingleColumn(
-          AppLocalizations.of(context)!.hakis, null, null, false),
-      _createSingleColumn(AppLocalizations.of(context)!.race, null, null, false),
+          AppLocalizations.of(context)!.hakis, null, 250, false),
+      _createSingleColumn(AppLocalizations.of(context)!.race, null, 150, false),
       _createSingleColumn(
-          AppLocalizations.of(context)!.battleStyle, null, null, false),
+          AppLocalizations.of(context)!.battleStyle, null, 100, false),
       _createSingleColumn(
-          AppLocalizations.of(context)!.bounty, null, null, false),
+          AppLocalizations.of(context)!.bounty, null, 100, false),
       _createSingleColumn(AppLocalizations.of(context)!.combatPower,
-          CharacterSortableFieldsEnum.score, null, false),
+          CharacterSortableFieldsEnum.score, 120, false),
       _createSingleColumn(AppLocalizations.of(context)!.characterAttack,
-          CharacterSortableFieldsEnum.attack, null, true),
+          CharacterSortableFieldsEnum.attack, 110, true),
       _createSingleColumn(AppLocalizations.of(context)!.characterDefense,
-          CharacterSortableFieldsEnum.defense, null, true),
+          CharacterSortableFieldsEnum.defense, 110, true),
       _createSingleColumn(AppLocalizations.of(context)!.characterIntelligence,
-          CharacterSortableFieldsEnum.intelligence, null, true),
+          CharacterSortableFieldsEnum.intelligence, 130, true),
       _createSingleColumn(AppLocalizations.of(context)!.characterBlood,
-          CharacterSortableFieldsEnum.blood, null, true),
+          CharacterSortableFieldsEnum.blood, 110, true),
       _createSingleColumn(AppLocalizations.of(context)!.characterSpeed,
-          CharacterSortableFieldsEnum.speed, null, true),
+          CharacterSortableFieldsEnum.speed, 110, true),
       _createSingleColumn(AppLocalizations.of(context)!.groupGain,
-          CharacterSortableFieldsEnum.groupGain, null, true),
+          CharacterSortableFieldsEnum.groupGain, 130, true),
       _createSingleColumn(AppLocalizations.of(context)!.fruitLimit,
-          CharacterSortableFieldsEnum.fruitLimit, null, false),
+          CharacterSortableFieldsEnum.fruitLimit, 115, false),
     ];
   }
 
@@ -774,8 +773,15 @@ class _CharacterViewState extends State<CharacterView> {
                     ),
                   ),
                 if (isBattleDigit!)
-                  ImageHelper.getIconButtonFromSvg('images/svgs/battle.svg',
-                      OnepieceColors.fancyBlue, 30, 30, () => null)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: ImageHelper.getSvgIconWithColor(
+                      'images/svgs/battle.svg',
+                      20,
+                      20,
+                      OnepieceColors.fancyBlue,
+                    ),
+                  )
               ],
             ),
           ),
@@ -840,8 +846,7 @@ class _CharacterViewState extends State<CharacterView> {
                         1.5,
                         OnepieceColors.liteFancyBlue,
                         40,
-                        Base64Helper.decode(entry.value.profileImage!))
-                    ),
+                        Base64Helper.decode(entry.value.profileImage!))),
               ),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),

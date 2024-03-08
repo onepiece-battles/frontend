@@ -690,11 +690,11 @@ class _BattleViewState extends State<BattleView> {
                     Padding(
                       padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
                       child: ImageHelper.getRoundImageFrame(
-                          50,
-                          50,
+                          40,
+                          40,
                           1.5,
                           OnepieceColors.liteFancyBlue,
-                          5,
+                          40,
                           Base64Helper.decode(
                               entry.value.starter!.profileImage!)),
                     ),
@@ -712,11 +712,11 @@ class _BattleViewState extends State<BattleView> {
                     Padding(
                       padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
                       child: ImageHelper.getRoundImageFrame(
-                          50,
-                          50,
+                          40,
+                          40,
                           1.5,
                           OnepieceColors.liteFancyBlue,
-                          5,
+                          40,
                           Base64Helper.decode(
                               entry.value.receiver!.profileImage!)),
                     ),
@@ -733,8 +733,8 @@ class _BattleViewState extends State<BattleView> {
                   padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
                   child: entry.value.battleExecution!.winnerId == null
                       ? Container(
-                          width: 50,
-                          height: 50,
+                          width: 40,
+                          height: 40,
                           decoration: const BoxDecoration(
                             borderRadius:
                                 BorderRadius.all(Radius.circular(2.0)),
@@ -749,11 +749,11 @@ class _BattleViewState extends State<BattleView> {
                           ),
                         )
                       : ImageHelper.getRoundImageFrame(
-                          50,
-                          50,
+                          40,
+                          40,
                           1.5,
                           OnepieceColors.liteFancyBlue,
-                          5,
+                          40,
                           Base64Helper.decode(
                               entry.value.battleExecution!.winnerId ==
                                       entry.value.starterId
