@@ -402,42 +402,38 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                       'name': I18nHelper.getDisplayNameFromI18n(starter.name)
                     });
               },
-              child: Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.all(Radius.circular(8)),
-                  border: Border.all(
-                      color: OnepieceColors.fancyBlue,
-                      width: 5,
-                      style: BorderStyle.solid),
-                ),
-                child: FittedBox(
-                  fit: BoxFit.fill,
-                  child: Image.memory(
-                      Base64Helper.decode(battle.starter!.profileImage!)),
-                ),
-              ),
+              child: ImageHelper.getCircleImageFrame(
+                  120,
+                  120,
+                  3,
+                  OnepieceColors.liteFancyBlue,
+                  Base64Helper.decode(battle.starter!.profileImage!)),
             ),
             Consumer<BattleExecutionData>(builder: (context, model, child) {
               return Column(
                 children: [
                   Text(
                     I18nHelper.getDisplayNameFromI18n(starter.name),
-                    style: OnepieceFonts.fancyBlueHintFont,
+                    style: OnepieceFonts.boldFancySmallFont,
                   ),
                   if (model.winnerId != null)
-                    Row(
-                      children: [
-                        Text(
-                          model.starterScoreBefore.toString(),
-                          style: OnepieceFonts.liteFancyBlueHintFont,
-                        ),
-                        const Text(" -> ",
-                            style: OnepieceFonts.liteFancyBlueHintFont),
-                        Text(model.starterScoreAfter.toString(),
-                            style: OnepieceFonts.fancyBlueHintFont),
-                      ],
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        children: [
+                          Text(
+                            model.starterScoreBefore.toString(),
+                            style: OnepieceFonts.boldLiteFancySmallFont,
+                          ),
+                          const Icon(
+                            Icons.arrow_forward,
+                            color: OnepieceColors.fancyBlue,
+                            size: 10,
+                          ),
+                          Text(model.starterScoreAfter.toString(),
+                              style: OnepieceFonts.boldFancySmallFont),
+                        ],
+                      ),
                     ),
                   if (model.winnerId == null)
                     Text(
@@ -460,42 +456,38 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                       'name': I18nHelper.getDisplayNameFromI18n(receiver.name)
                     });
               },
-              child: Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.all(Radius.circular(8)),
-                  border: Border.all(
-                      color: OnepieceColors.fancyBlue,
-                      width: 5,
-                      style: BorderStyle.solid),
-                ),
-                child: FittedBox(
-                  fit: BoxFit.fill,
-                  child: Image.memory(
-                      Base64Helper.decode(battle.receiver!.profileImage!)),
-                ),
-              ),
+              child: ImageHelper.getCircleImageFrame(
+                  120,
+                  120,
+                  3,
+                  OnepieceColors.liteFancyBlue,
+                  Base64Helper.decode(battle.receiver!.profileImage!)),
             ),
             Consumer<BattleExecutionData>(builder: (context, model, child) {
               return Column(
                 children: [
                   Text(
                     I18nHelper.getDisplayNameFromI18n(receiver.name),
-                    style: OnepieceFonts.fancyBlueHintFont,
+                    style: OnepieceFonts.boldFancySmallFont,
                   ),
                   if (model.winnerId != null)
-                    Row(
-                      children: [
-                        Text(
-                          model.receiverScoreBefore.toString(),
-                          style: OnepieceFonts.liteFancyBlueHintFont,
-                        ),
-                        const Text(" -> ",
-                            style: OnepieceFonts.liteFancyBlueHintFont),
-                        Text(model.receiverScoreAfter.toString(),
-                            style: OnepieceFonts.fancyBlueHintFont),
-                      ],
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        children: [
+                          Text(
+                            model.receiverScoreBefore.toString(),
+                            style: OnepieceFonts.boldLiteFancySmallFont,
+                          ),
+                          const Icon(
+                            Icons.arrow_forward,
+                            color: OnepieceColors.fancyBlue,
+                            size: 10,
+                          ),
+                          Text(model.receiverScoreAfter.toString(),
+                              style: OnepieceFonts.boldFancySmallFont),
+                        ],
+                      ),
                     ),
                   if (model.winnerId == null)
                     Text(
@@ -574,25 +566,14 @@ class _BattleDetailViewState extends State<BattleDetailView> {
               child: ImageHelper.getSvgIconWithColor('images/svgs/question.svg',
                   120, 120, OnepieceColors.liteFancyBlue),
             )
-          : Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                borderRadius: const BorderRadius.all(Radius.circular(8)),
-                border: Border.all(
-                    color: OnepieceColors.fancyBlue,
-                    width: 5,
-                    style: BorderStyle.solid),
-              ),
-              child: FittedBox(
-                fit: BoxFit.fill,
-                child: Image.memory(
-                  Base64Helper.decode(battle.starter!.id == model.winnerId
-                      ? battle.starter!.profileImage!
-                      : battle.receiver!.profileImage!),
-                ),
-              ),
-            );
+          : ImageHelper.getCircleImageFrame(
+              120,
+              120,
+              3,
+              OnepieceColors.liteFancyBlue,
+              Base64Helper.decode(battle.starter!.id == model.winnerId
+                  ? battle.starter!.profileImage!
+                  : battle.receiver!.profileImage!));
     });
   }
 

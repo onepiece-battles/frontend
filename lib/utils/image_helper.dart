@@ -37,14 +37,14 @@ class ImageHelper {
       decoration: borderWidth == null || borderColor == null
           ? null
           : BoxDecoration(
-              borderRadius: const BorderRadius.all(Radius.circular(2.0)),
+              borderRadius: BorderRadius.all(Radius.circular(width<height?width:height)),
               border: Border.all(
                   color: borderColor,
                   width: borderWidth,
                   style: BorderStyle.solid),
             ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(width),
+        borderRadius: BorderRadius.circular(width<height?width:height),
         child: AspectRatio(
           aspectRatio: 1,
           child: FittedBox(

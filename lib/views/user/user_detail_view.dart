@@ -99,23 +99,13 @@ class _UserDetailViewState extends State<UserDetailView> {
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Container(
-                width: 270,
-                height: 270,
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.all(Radius.circular(5.0)),
-                  border: Border.all(
-                      color: OnepieceColors.fancyBlue,
-                      width: 5,
-                      style: BorderStyle.solid),
-                ),
-                child: FittedBox(
-                  fit: BoxFit.fill,
-                  child: user.profileImage == null
-                      ? Container()
-                      : Image.memory(Base64Helper.decode(user.profileImage!)),
-                ),
-              ),
+              child: ImageHelper.getRoundImageFrame(
+                  200,
+                  200,
+                  3,
+                  OnepieceColors.liteFancyBlue,
+                  20,
+                  Base64Helper.decode(user.profileImage!)),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(8, 0, 0, 15),
@@ -233,7 +223,7 @@ class _UserDetailViewState extends State<UserDetailView> {
           Padding(
             padding: const EdgeInsets.only(bottom: 8.0),
             child: Text(
-              AppLocalizations.of(context)!.loginStatus,
+              AppLocalizations.of(context)!.accountStatus,
               style: OnepieceFonts.contentStyle,
             ),
           ),
@@ -299,7 +289,10 @@ class _UserDetailViewState extends State<UserDetailView> {
                             resourceTypeToDisplayName[
                                 permission.resourceType]!),
                       ),
-                      Text(permission.permissions.join(", "), style: OnepieceFonts.contentStyle,)
+                      Text(
+                        permission.permissions.join(", "),
+                        style: OnepieceFonts.contentStyle,
+                      )
                     ],
                   ),
                 ),

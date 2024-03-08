@@ -6,6 +6,7 @@ import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_tag.dart';
 import 'package:one_piece_battles_flutter/repository/group_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
+import 'package:one_piece_battles_flutter/utils/image_helper.dart';
 import 'package:openapi/api.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../constants/onepiece_colors.dart';
@@ -260,23 +261,13 @@ class _SearchPopupState extends State<SearchPopup> {
                         children: [
                           Padding(
                             padding: const EdgeInsets.fromLTRB(3, 3, 6, 3),
-                            child: Container(
-                              width: 50,
-                              height: 50,
-                              decoration: BoxDecoration(
-                                borderRadius: const BorderRadius.all(
-                                    Radius.circular(2.0)),
-                                border: Border.all(
-                                    color: Colors.grey,
-                                    width: 2,
-                                    style: BorderStyle.solid),
-                              ),
-                              child: FittedBox(
-                                fit: BoxFit.fill,
-                                child: Image.memory(Base64Helper.decode(
-                                    character.profileImage!)),
-                              ),
-                            ),
+                            child: ImageHelper.getRoundImageFrame(
+                                50,
+                                50,
+                                2,
+                                OnepieceColors.liteFancyBlue,
+                                10,
+                                Base64Helper.decode(character.profileImage!)),
                           ),
                           Text(
                             I18nHelper.getDisplayNameFromI18n(character.name),
@@ -411,23 +402,13 @@ class _SearchPopupState extends State<SearchPopup> {
                           children: [
                             Padding(
                               padding: const EdgeInsets.fromLTRB(3, 6, 3, 3),
-                              child: Container(
-                                width: 50,
-                                height: 50,
-                                decoration: BoxDecoration(
-                                  borderRadius: const BorderRadius.all(
-                                      Radius.circular(2.0)),
-                                  border: Border.all(
-                                      color: Colors.grey,
-                                      width: 2,
-                                      style: BorderStyle.solid),
-                                ),
-                                child: FittedBox(
-                                  fit: BoxFit.fill,
-                                  child: Image.memory(
-                                      Base64Helper.decode(group.profileImage!)),
-                                ),
-                              ),
+                              child: ImageHelper.getRoundImageFrame(
+                                  50,
+                                  50,
+                                  2,
+                                  OnepieceColors.liteFancyBlue,
+                                  10,
+                                  Base64Helper.decode(group.profileImage!)),
                             ),
                             Padding(
                               padding: const EdgeInsets.only(left: 5.0),

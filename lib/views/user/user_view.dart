@@ -115,13 +115,7 @@ class _UserViewState extends State<UserView> {
                 height: 50,
                 child: _createControlPanel(context),
               ),
-              SizedBox(
-                width: 1500,
-                child: FittedBox(
-                  fit: BoxFit.fitWidth,
-                  child: _createUserTable(context),
-                ),
-              ),
+              _createUserTable(context),
               const SizedBox(
                 height: 15,
               ),
@@ -347,10 +341,11 @@ class _UserViewState extends State<UserView> {
       _createSingleColumn(AppLocalizations.of(context)!.email,
           UserSortableFieldsEnum.username, 130),
       _createSingleColumn(AppLocalizations.of(context)!.emailStatus, null, 120),
-      _createSingleColumn(AppLocalizations.of(context)!.loginStatus, null, 80),
+      _createSingleColumn(
+          AppLocalizations.of(context)!.accountStatus, null, 150),
       _createSingleColumn(AppLocalizations.of(context)!.loginRole, null, null),
       _createSingleColumn(
-          AppLocalizations.of(context)!.allUserRoles, null, 150),
+          AppLocalizations.of(context)!.allUserRoles, null, 280),
       _createSingleColumn(
           AppLocalizations.of(context)!.creationTime, null, 150),
       _createSingleColumn(
@@ -477,8 +472,13 @@ class _UserViewState extends State<UserView> {
               DataCell(
                 Padding(
                   padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                  child:
-                  ImageHelper.getRoundImageFrame(50, 50, 1.5, OnepieceColors.liteFancyBlue, 50, Base64Helper.decode(user.profileImage!)),
+                  child: ImageHelper.getRoundImageFrame(
+                      40,
+                      40,
+                      1.5,
+                      OnepieceColors.liteFancyBlue,
+                      40,
+                      Base64Helper.decode(user.profileImage!)),
                 ),
               ),
               DataCell(Padding(

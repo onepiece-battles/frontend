@@ -119,28 +119,25 @@ class _BattleViewState extends State<BattleView> {
             children: [
               _getHeaderText(context),
               Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(
-                    width: 1500,
+                    width: 1220,
                     child: SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
-                      child: _getControlRow(context),
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: _getControlRow(context),
+                      ),
                     ),
                   ),
-                  SizedBox(
-                    width: 1500,
-                    child: FittedBox(
-                      fit: BoxFit.fitWidth,
-                      child: _getBattlesTable(context),
-                    ),
-                  ),
+                  _getBattlesTable(context),
                   const SizedBox(
                     height: 15,
                   ),
                   if (totalPageNum > 1)
                     SizedBox(
-                      width: 1500,
+                      width: 1220,
                       child: Center(child: _getPageFoot(context)),
                     )
                 ],
@@ -585,7 +582,7 @@ class _BattleViewState extends State<BattleView> {
       _createSingleColumn(AppLocalizations.of(context)!.initiator, null, 150),
       _createSingleColumn(AppLocalizations.of(context)!.receiver, null, 150),
       _createSingleColumn(AppLocalizations.of(context)!.winner,
-          BattleSortableFieldsEnum.winnerName, 150),
+          BattleSortableFieldsEnum.winnerName, 120),
       _createSingleColumn(AppLocalizations.of(context)!.status, null, 70),
       _createSingleColumn(AppLocalizations.of(context)!.creator, null, 150),
       _createSingleColumn(AppLocalizations.of(context)!.creationTime,
@@ -698,11 +695,24 @@ class _BattleViewState extends State<BattleView> {
                           Base64Helper.decode(
                               entry.value.starter!.profileImage!)),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                      child: Text(I18nHelper.getDisplayNameFromI18n(
-                          entry.value.starter!.name)),
-                    )
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                          child: Text(I18nHelper.getDisplayNameFromI18n(
+                              entry.value.starter!.name)),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 5.0),
+                          child: Text(
+                              entry.value.battleExecution!.starterScoreBefore!
+                                  .toString(),
+                              style: OnepieceFonts.boldFancySmallFont),
+                        )
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -720,11 +730,24 @@ class _BattleViewState extends State<BattleView> {
                           Base64Helper.decode(
                               entry.value.receiver!.profileImage!)),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                      child: Text(I18nHelper.getDisplayNameFromI18n(
-                          entry.value.receiver!.name)),
-                    )
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                          child: Text(I18nHelper.getDisplayNameFromI18n(
+                              entry.value.receiver!.name)),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 5.0),
+                          child: Text(
+                              entry.value.battleExecution!.receiverScoreBefore!
+                                  .toString(),
+                              style: OnepieceFonts.boldFancySmallFont),
+                        )
+                      ],
+                    ),
                   ],
                 ),
               ),
