@@ -10,7 +10,7 @@ class FileDao {
     fileApi = FileApi(apiClient);
   }
 
-  Future<MultipartFile?> downloadFile(DownloadFileRequest request) async {
+  Future<DownloadFileResponse?> downloadFile(DownloadFileRequest request) async {
     debugPrint('start downloading pdf');
     return await fileApi.downloadFile(request);
   }

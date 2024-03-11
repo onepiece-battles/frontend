@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:html' as html;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -63,7 +64,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
     GetBattleExecutionRequest request =
         GetBattleExecutionRequest(battleId: battle.id);
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (battleExecutionData.reportFileId!=null) {
+      if (battleExecutionData.reportFileId != null) {
         return;
       }
       getIt<BattleDao>()
@@ -704,39 +705,29 @@ class _BattleDetailViewState extends State<BattleDetailView> {
               : "",
           child: InkWell(
             onTap: model.battleReportStage == BattleReportStage.FINISHED
-                ? ()  {
+                ? () {
                     getIt<FileDao>()
                         .downloadFile(DownloadFileRequest(
                             id: battleExecutionData.reportFileId!))
-                        .then((value) async {
-                          debugPrint('pdf downloading finish');
-                      List<int> dataBytes = [];
-                      // Listen for data transmitted and gather all bytes
-                      await for (List<int> bytes in value!.finalize()) {
-                        dataBytes.addAll(bytes);
-                      }
-                      pdfData.value = Uint8List.fromList(dataBytes);
-                      final blob = html.Blob(dataBytes, 'application/pdf');
+                        .then((response) async {
+                      debugPrint('pdf downloading finish');
+                      var pdf = base64Decode(response!.fileData!);
+                      // pdfData.value = Uint8List.fromList(value!);
+                      final blob = html.Blob([pdf], response.httpMimeType);
                       final url = html.Url.createObjectUrlFromBlob(blob);
                       final anchor = html.AnchorElement()
                         ..href = url
-                        ..style.display = 'none' // Ensure the element is not visible
-                        ..download = "${value.filename}.pdf"; //
-
+                        ..setAttribute('target', '_blank')
+                        ..download="${response.fileName}.pdf"
+                        ..style.display = 'none';
                       // Add the anchor element to the document body.
                       html.document.body?.append(anchor);
-
                       // Programmatically click the anchor element to start the download.
                       anchor.click();
-
                       // Remove the anchor element after the download has started.
                       anchor.remove();
-
                       // Release the object URL to free up resources.
                       html.Url.revokeObjectUrl(url);
-                      //todo(yichi): download file from aliCloud oss.
-                      OnepieceAlert.getBasicAlertDialogFunc(
-                          context, "battle", "download file success");
                     });
                   }
                 : null,
