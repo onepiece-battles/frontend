@@ -157,6 +157,7 @@ Class | Method | HTTP request | Description
  - [CreateIssueResponse](doc//CreateIssueResponse.md)
  - [CurrentCharacter](doc//CurrentCharacter.md)
  - [DownloadFileRequest](doc//DownloadFileRequest.md)
+ - [DownloadFileResponse](doc//DownloadFileResponse.md)
  - [EatFruitRequest](doc//EatFruitRequest.md)
  - [EatFruitResponse](doc//EatFruitResponse.md)
  - [Fruit](doc//Fruit.md)

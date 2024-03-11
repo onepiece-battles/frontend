@@ -272,5 +272,6 @@
   "loginRoleOrLastLoginRole": "Login role/Last login role",
   "permissionInfo": "Permission Information",
   "role": "Role",
-  "issueDetail": "Issue Detail"
+  "issueDetail": "Issue Detail",
+  "viewReport": "View Report"
 }
