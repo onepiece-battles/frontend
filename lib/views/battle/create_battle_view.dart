@@ -705,7 +705,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
               valueListenable: receiverSelectedItem,
               builder: (context, value, _) {
                 return Padding(
-                  padding: const EdgeInsets.only(top: 50),
+                  padding: const EdgeInsets.symmetric(vertical: 50),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
