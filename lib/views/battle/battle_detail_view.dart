@@ -19,7 +19,6 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:one_piece_battles_flutter/graph/character_data.dart';
 import '../../constants/onepiece_fonts.dart';
 import '../../utils/base64_helper.dart';
-import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import 'package:url_launcher_web/url_launcher_web.dart';
 
 GetIt getIt = GetIt.instance;
@@ -33,8 +32,6 @@ class BattleDetailView extends StatefulWidget {
 }
 
 class _BattleDetailViewState extends State<BattleDetailView> {
-  final GlobalKey<SfPdfViewerState> _pdfViewerKey = GlobalKey();
-
   Timer? _timer;
   late BattleFullView battle;
   late BattleExecutionData battleExecutionData;
@@ -165,11 +162,6 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                               ),
                             ),
                             _getBattleReportIcon(context),
-                            if (pdfData.value != null)
-                              SizedBox(
-                                  width: 1000,
-                                  height: 1000,
-                                  child: _getPdfView(context)),
                             // bottom space
                             const SizedBox(
                               height: 60,
@@ -747,17 +739,6 @@ class _BattleDetailViewState extends State<BattleDetailView> {
         ),
       );
     });
-  }
-
-  Widget _getPdfView(BuildContext context) {
-    return ValueListenableBuilder<Uint8List?>(
-        valueListenable: pdfData,
-        builder: (context, value, _) {
-          return SfPdfViewer.memory(
-            value!,
-            key: _pdfViewerKey,
-          );
-        });
   }
 }
 
