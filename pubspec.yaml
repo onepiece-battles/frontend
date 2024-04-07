@@ -37,7 +37,7 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  intl: ^0.18.0
+  intl: 0.18.1
   material_design_icons_flutter: 5.0.6996
   flutter_toggle_tab: ^1.4.1
   flutter_svg: ^2.0.7
@@ -96,9 +96,14 @@ flutter:
   generate: true
 
   # To add assets to your application, add an assets section, like this:
-assets:
-  - images/
-  #   - images/a_dot_ham.jpeg
+  assets:
+    - asset/images/common/
+    - asset/images/hat/
+    - asset/images/luffy-flag/
+    - asset/images/luffy-head/
+    - asset/images/sunny/
+    - asset/images/svgs/
+    - asset/images/character_digits_icon/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
