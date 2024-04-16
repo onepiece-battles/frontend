@@ -545,6 +545,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                   }
                 : null,
             child: SvgPicture.asset(
+              package: "asset",
               'images/svgs/battle.svg',
               color: OnepieceColors.fancyBlue,
               width: 40,
@@ -710,7 +711,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                       final anchor = html.AnchorElement()
                         ..href = url
                         ..setAttribute('target', '_blank')
-                        ..download="${response.fileName}.pdf"
+                        ..download = "${response.fileName}.pdf"
                         ..style.display = 'none';
                       // Add the anchor element to the document body.
                       html.document.body?.append(anchor);
@@ -725,11 +726,13 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                 : null,
             child: model.battleReportStage == BattleReportStage.FINISHED
                 ? SvgPicture.asset(
+                    package: "asset",
                     'images/svgs/pdf.svg',
                     width: 100,
                     height: 100,
                   )
                 : SvgPicture.asset(
+                    package: "asset",
                     'images/svgs/pdf_black.svg',
                     width: 100,
                     height: 100,

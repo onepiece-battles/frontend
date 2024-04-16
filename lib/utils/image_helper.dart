@@ -100,7 +100,7 @@ class ImageHelper {
       onPressed: onPressed,
       splashRadius: 1,
       icon: SvgPicture.asset(
-        svgPath,
+        "asset/$svgPath",
         color: svgColor,
         width: width,
         height: height,
@@ -117,7 +117,7 @@ class ImageHelper {
 
   static Widget getSvgIcon(String svgPath, double width, double height) {
     return SvgPicture.asset(
-      svgPath,
+      "asset/$svgPath",
       // color: svgColor,
       width: width,
       height: height,
@@ -127,7 +127,7 @@ class ImageHelper {
   static Widget getSvgIconWithColor(
       String svgPath, double width, double height, Color color) {
     return SvgPicture.asset(
-      svgPath,
+      "asset/$svgPath",
       color: color,
       width: width,
       height: height,
