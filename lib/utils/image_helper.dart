@@ -133,4 +133,11 @@ class ImageHelper {
       height: height,
     );
   }
+
+  static bool isValidImageSize(double maxSize, Uint8List image) {
+    if (image.lengthInBytes>maxSize) {
+      return false;
+    }
+    return true;
+  }
 }

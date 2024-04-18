@@ -79,6 +79,11 @@ class OnepieceFonts {
       fontSize: OnepieceFonts.contentFontSize,
       fontWeight: FontWeight.w600);
 
+  static const TextStyle alertTitle = TextStyle(
+      color: Colors.red,
+      fontSize: OnepieceFonts.contentFontSize,
+      fontWeight: FontWeight.w600);
+
   static const TextStyle contentStyleBoldWhite = TextStyle(
       color: Colors.white,
       fontSize: OnepieceFonts.contentFontSize,

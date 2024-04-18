@@ -118,6 +118,7 @@ class _UserHomeState extends State<UserHome> {
                                       ]);
                                     });
                                   },
+                                  hoverColor: Colors.transparent,
                                   splashRadius: 1,
                                   icon: !currentRoleOnly
                                       ? const Icon(
