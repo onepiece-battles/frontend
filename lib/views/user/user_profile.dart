@@ -14,6 +14,7 @@ import '../../constants/button_style.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
 import '../../popup/email_verification.dart';
+import '../../popup/onepiece_alert.dart';
 import '../../repository/image_dao.dart';
 import '../../repository/user_dao.dart';
 import '../../utils/base64_helper.dart';
@@ -127,7 +128,12 @@ class _UserProfileState extends State<UserProfile> {
               return Row(
                 children: [
                   ImageHelper.getRoundImageFrame(
-                      100, 100, 3, OnepieceColors.liteFancyBlue,100, _realtimeData.profileImage),
+                      100,
+                      100,
+                      3,
+                      OnepieceColors.liteFancyBlue,
+                      100,
+                      _realtimeData.profileImage),
                   const SizedBox(
                     width: 10,
                   ),
@@ -153,6 +159,15 @@ class _UserProfileState extends State<UserProfile> {
                                   await OnepieceImagePicker.pickWebImage();
                               Uint8List imageInByte =
                                   await pickedImage!.readAsBytes();
+                              if (!ImageHelper.isValidImageSize(
+                                  200 * 1024, imageInByte)) {
+                                 OnepieceAlert.getBasicAlertDialogFunc(
+                                    context,
+                                    AppLocalizations.of(context)!.alert,
+                                    AppLocalizations.of(context)!
+                                        .imageSizeExceedsLimit);
+                                 return;
+                              }
                               _realtimeData.setProfileImage(imageInByte);
                               if (!CompareUint8List.equals(
                                   _realtimeData.profileImage,

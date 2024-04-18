@@ -564,6 +564,15 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                         Uint8List imageInByte =
                             await pickedImage!.readAsBytes();
                         _pickedImage = imageInByte;
+                        if (!ImageHelper.isValidImageSize(
+                            200 * 1024, imageInByte)) {
+                          OnepieceAlert.getBasicAlertDialogFunc(
+                              context,
+                              AppLocalizations.of(context)!.alert,
+                              AppLocalizations.of(context)!
+                                  .imageSizeExceedsLimit);
+                          return;
+                        }
                         setState(() {
                           _chosenImageName = pickedImage.name;
                           _newImagePicked = true;

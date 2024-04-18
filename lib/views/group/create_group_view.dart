@@ -12,6 +12,7 @@ import '../../popup/onepiece_alert.dart';
 import '../../repository/image_dao.dart';
 import '../../utils/base64_helper.dart';
 import '../../utils/data_validator.dart';
+import '../../utils/image_helper.dart';
 import '../../utils/onepiece_image_picker.dart';
 import '../../utils/random_string_generator.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -187,6 +188,15 @@ class _CreateGroupViewState extends State<CreateGroupView> {
                         Uint8List imageInByte =
                         await pickedImage!.readAsBytes();
                         _pickedImage = imageInByte;
+                        if (!ImageHelper.isValidImageSize(
+                            200 * 1024, imageInByte)) {
+                          OnepieceAlert.getBasicAlertDialogFunc(
+                              context,
+                              AppLocalizations.of(context)!.alert,
+                              AppLocalizations.of(context)!
+                                  .imageSizeExceedsLimit);
+                          return;
+                        }
                         setState(() {
                           _chosenImageName = pickedImage.name;
                           _newImagePicked = true;

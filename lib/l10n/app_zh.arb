@@ -273,5 +273,7 @@
   "permissionInfo": "权限信息",
   "role": "角色",
   "issueDetail": "问题详情",
-  "viewReport": "查看战斗报告"
+  "viewReport": "查看战斗报告",
+  "imageSizeExceedsLimit": "图片大小超出限制!",
+  "alert": "⚠️"
 }

@@ -273,5 +273,7 @@
   "permissionInfo": "Permission Information",
   "role": "Role",
   "issueDetail": "Issue Detail",
-  "viewReport": "View Report"
+  "viewReport": "View Report",
+  "imageSizeExceedsLimit": "Image size exceeds limit!",
+  "alert": "⚠️"
 }
