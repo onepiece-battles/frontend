@@ -86,7 +86,7 @@ class _CreateGroupViewState extends State<CreateGroupView> {
                       maxLength: 10,
                       maxLengthEnforcement: MaxLengthEnforcement.enforced,
                       decoration: InputDecoration(
-                        labelText: AppLocalizations.of(context)!.fruitName,
+                        labelText: AppLocalizations.of(context)!.groupName,
                         prefixIcon: const Icon(Icons.people),
                       ),
                     ),

@@ -320,7 +320,7 @@ class _UserViewState extends State<UserView> {
         label: Tooltip(
           message: AppLocalizations.of(context)!.resetSort,
           child: ImageHelper.getIconButtonFromSvg(
-            'asset/images/svgs/reset.svg',
+            'images/svgs/reset.svg',
             OnepieceColors.fancyBlue,
             25,
             25,

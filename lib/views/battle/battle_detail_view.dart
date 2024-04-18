@@ -393,6 +393,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
         Column(
           children: [
             InkWell(
+              hoverColor: Colors.transparent,
               onTap: () {
                 context.goNamed('characterDetails',
                     extra: starter.id,
@@ -447,6 +448,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
         Column(
           children: [
             InkWell(
+              hoverColor: Colors.transparent,
               onTap: () {
                 context.goNamed('characterDetails',
                     extra: receiver.id,
@@ -545,8 +547,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                   }
                 : null,
             child: SvgPicture.asset(
-              package: "asset",
-              'images/svgs/battle.svg',
+              'asset/images/svgs/battle.svg',
               color: OnepieceColors.fancyBlue,
               width: 40,
               height: 40,
@@ -697,6 +698,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
               ? AppLocalizations.of(context)!.downloadReport
               : "",
           child: InkWell(
+            hoverColor: Colors.transparent,
             onTap: model.battleReportStage == BattleReportStage.FINISHED
                 ? () {
                     getIt<FileDao>()
@@ -726,14 +728,12 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                 : null,
             child: model.battleReportStage == BattleReportStage.FINISHED
                 ? SvgPicture.asset(
-                    package: "asset",
-                    'images/svgs/pdf.svg',
+                    'asset/images/svgs/pdf.svg',
                     width: 100,
                     height: 100,
                   )
                 : SvgPicture.asset(
-                    package: "asset",
-                    'images/svgs/pdf_black.svg',
+                    'asset/images/svgs/pdf_black.svg',
                     width: 100,
                     height: 100,
                     color: Colors.grey,
