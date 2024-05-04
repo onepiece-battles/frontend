@@ -17,3 +17,6 @@ samples, guidance on mobile development, and a full API reference.
 
 start flutter app on local: 
 flutter run -d web-server --web-port 1234 --web-hostname local.onepiece-battles.com
+
+
+docker buildx build --platform linux/amd64,linux/arm64 -t 743018522/onepiece-frontend:latest --push .
