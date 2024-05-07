@@ -1,6 +1,4 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
@@ -13,6 +11,7 @@ import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
 import '../../popup/onepiece_alert.dart';
 import '../../utils/base64_helper.dart';
+import '../../utils/permission_check.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -32,6 +31,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
   late GroupCategory selectedGroupCategory;
   bool _basicInfoEditable = false;
   final ValueNotifier<bool> _onlyCurrentMember = ValueNotifier(false);
+  bool _editButtonVisible = false;
 
   @override
   void initState() {
@@ -48,6 +48,19 @@ class _GroupDetailViewState extends State<GroupDetailView> {
     characters = group.characters;
     selectedGroupCategory = group.groupCategory!;
     groupNameController.text = I18nHelper.getDisplayNameFromI18n(group.name!);
+    _editButtonVisible = PermissionCheck.checkPermission(
+        getIt<User>().loginRoleResourcesPermissionMap,
+        ResourceType.CHARACTER,
+        Permission.UPDATE) &&
+        PermissionCheck.isMyResource(
+            groupFullView.creationRecord!.userId!,
+            groupFullView.creationRecord!.roleId!,
+            getIt<User>().id,
+            getIt<User>().loginRoleId!);
+    // nika role has the edit permission for all resources
+    if (getIt<User>().loginRole == UserRole.NIKA) {
+      _editButtonVisible = true;
+    }
   }
 
   @override
@@ -174,7 +187,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
               const SizedBox(
                 width: 15,
               ),
-              Tooltip(
+              if (_editButtonVisible) Tooltip(
                 message: _basicInfoEditable
                     ? AppLocalizations.of(context)!.submitForm
                     : AppLocalizations.of(context)!.editHint,
