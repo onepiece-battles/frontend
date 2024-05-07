@@ -3,12 +3,18 @@ import 'dart:math';
 import 'package:openapi/api.dart';
 
 class RandomStringGenerator{
-  static String generateRandomString(int length) {
+  static String generateRandomString(int length, bool isNika) {
+    if (!isNika) {
+      return "";
+    }
     var r = Random();
     return String.fromCharCodes(List.generate(length, (index) => r.nextInt(33) + 89));
   }
 
-  static String generateRandomName(int length) {
+  static String generateRandomName(int length, bool isNika) {
+    if (!isNika) {
+      return "";
+    }
     final random = Random();
     const availableChars =
         'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
@@ -17,7 +23,10 @@ class RandomStringGenerator{
     return randomString;
   }
 
-  static String generateRandomChineseName(int length) {
+  static String generateRandomChineseName(int length, bool isNika) {
+    if (!isNika) {
+      return "";
+    }
     final random = Random();
     const availableChars =
         '发货就撒开返回克拉夫等级考试垃圾大量贷记卡浪费了开始了的激昂奋进斯拉夫看我发了';
@@ -30,7 +39,10 @@ class RandomStringGenerator{
     return I18nText(enUS: enString, zhCN: cnString);
   }
 
-  static String generateRandomNumber(int min, int max) {
+  static String generateRandomNumber(int min, int max, bool isNika) {
+      if (!isNika) {
+        return "";
+      }
       return (min + Random().nextInt(max - min)).toString();
   }
 

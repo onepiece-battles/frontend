@@ -20,6 +20,7 @@ import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 
 GetIt getIt = GetIt.instance;
+
 class CreateGroupView extends StatefulWidget {
   const CreateGroupView({Key? key}) : super(key: key);
 
@@ -29,10 +30,12 @@ class CreateGroupView extends StatefulWidget {
 
 class _CreateGroupViewState extends State<CreateGroupView> {
   // name controller
-  TextEditingController groupNameEnController =
-  TextEditingController(text: RandomStringGenerator.generateRandomName(8));
-  TextEditingController groupNameChController =
-  TextEditingController(text: RandomStringGenerator.generateRandomChineseName(3));
+  TextEditingController groupNameEnController = TextEditingController(
+      text: RandomStringGenerator.generateRandomName(
+          8, getIt<User>().loginRole == UserRole.NIKA));
+  TextEditingController groupNameChController = TextEditingController(
+      text: RandomStringGenerator.generateRandomChineseName(
+          3, getIt<User>().loginRole == UserRole.NIKA));
 
   GroupCategory selectedGroupCategory = GroupCategory.pirate;
 
@@ -42,15 +45,18 @@ class _CreateGroupViewState extends State<CreateGroupView> {
       groupNameChController,
     ];
   }
+
   Uint8List _pickedImage = Uint8List(0);
   bool _newImagePicked = false;
   String _chosenImageName = "";
   @override
   Widget build(BuildContext context) {
-    TextEditingController groupNameEnController =
-    TextEditingController(text: RandomStringGenerator.generateRandomName(8));
-    TextEditingController characterNameChController =
-    TextEditingController(text: RandomStringGenerator.generateRandomChineseName(3));
+    TextEditingController groupNameEnController = TextEditingController(
+        text: RandomStringGenerator.generateRandomName(
+            8, getIt<User>().loginRole == UserRole.NIKA));
+    TextEditingController characterNameChController = TextEditingController(
+        text: RandomStringGenerator.generateRandomChineseName(
+            3, getIt<User>().loginRole == UserRole.NIKA));
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
       child: Padding(
@@ -92,29 +98,32 @@ class _CreateGroupViewState extends State<CreateGroupView> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 25,),
-                  SizedBox(
-                    width: 300,
-                    child: TextFormField(
-                      controller: groupNameEnController,
-                      validator: (value) {
-                        if (value!.isWhiteSpace()) {
-                          return AppLocalizations.of(context)!.requiredField;
-                        }
-                        if (!DataValidator.validName(value)) {
-                          return AppLocalizations.of(context)!.invalidName;
-                        }
-                        return null;
-                      },
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      maxLength: 10,
-                      maxLengthEnforcement: MaxLengthEnforcement.enforced,
-                      decoration: InputDecoration(
-                        labelText: AppLocalizations.of(context)!.groupName,
-                        prefixIcon: const Icon(Icons.people),
+                  const SizedBox(
+                    width: 25,
+                  ),
+                  if (getIt<User>().loginRole == UserRole.NIKA)
+                    SizedBox(
+                      width: 300,
+                      child: TextFormField(
+                        controller: groupNameEnController,
+                        validator: (value) {
+                          if (value!.isWhiteSpace()) {
+                            return AppLocalizations.of(context)!.requiredField;
+                          }
+                          if (!DataValidator.validName(value)) {
+                            return AppLocalizations.of(context)!.invalidName;
+                          }
+                          return null;
+                        },
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        maxLength: 10,
+                        maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                        decoration: InputDecoration(
+                          labelText: AppLocalizations.of(context)!.groupName,
+                          prefixIcon: const Icon(Icons.people),
+                        ),
                       ),
-                    ),
-                  )
+                    )
                 ],
               ),
             ),
@@ -157,11 +166,11 @@ class _CreateGroupViewState extends State<CreateGroupView> {
               height: 80,
               child: _pickedImage.isEmpty
                   ? ClipOval(
-                child: Image.asset(PathConstants.luffyFlag),
-              )
+                      child: Image.asset(PathConstants.luffyFlag),
+                    )
                   : ClipOval(
-                child: Image.memory(_pickedImage),
-              ),
+                      child: Image.memory(_pickedImage),
+                    ),
             ),
             const SizedBox(
               width: 10,
@@ -184,9 +193,9 @@ class _CreateGroupViewState extends State<CreateGroupView> {
                     ElevatedButton(
                       onPressed: () async {
                         XFile? pickedImage =
-                        await OnepieceImagePicker.pickWebImage();
+                            await OnepieceImagePicker.pickWebImage();
                         Uint8List imageInByte =
-                        await pickedImage!.readAsBytes();
+                            await pickedImage!.readAsBytes();
                         _pickedImage = imageInByte;
                         if (!ImageHelper.isValidImageSize(
                             200 * 1024, imageInByte)) {
@@ -239,7 +248,8 @@ class _CreateGroupViewState extends State<CreateGroupView> {
       GroupCategory.marine: AppLocalizations.of(context)!.marine,
       GroupCategory.pirate: AppLocalizations.of(context)!.pirate,
       GroupCategory.underWorld: AppLocalizations.of(context)!.underworld,
-      GroupCategory.worldGovernment: AppLocalizations.of(context)!.worldGovernment,
+      GroupCategory.worldGovernment:
+          AppLocalizations.of(context)!.worldGovernment,
     };
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
@@ -258,7 +268,7 @@ class _CreateGroupViewState extends State<CreateGroupView> {
           },
           selectedItemBuilder: (context) {
             return GroupCategory.values.map(
-                  (item) {
+              (item) {
                 return Container(
                   alignment: AlignmentDirectional.center,
                   child: Text(
@@ -326,15 +336,13 @@ class _CreateGroupViewState extends State<CreateGroupView> {
               }
               CreateGroupRequest createGroupRequest = CreateGroupRequest(
                 name: RandomStringGenerator.generateI18n(
-                    groupNameEnController.text,
-                    groupNameChController.text),
+                    groupNameEnController.text, groupNameChController.text),
                 groupCategory: selectedGroupCategory,
               );
 
               getIt<GroupDao>().createGroup(createGroupRequest).then((value) {
                 var encodedImage = Base64Helper.encode(_pickedImage);
-                UploadImageRequest uploadImageRequest =
-                UploadImageRequest(
+                UploadImageRequest uploadImageRequest = UploadImageRequest(
                     resourceId: value!.id.toString(),
                     image: encodedImage,
                     type: ResourceType.GROUP);

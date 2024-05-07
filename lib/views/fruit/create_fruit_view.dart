@@ -24,27 +24,36 @@ class CreateFruitView extends StatefulWidget {
 }
 
 class _CreateFruitViewState extends State<CreateFruitView> {
-  TextEditingController fruitNameEnController =
-      TextEditingController(text: RandomStringGenerator.generateRandomName(8));
-  TextEditingController fruitNameChController =
-      TextEditingController(text: RandomStringGenerator.generateRandomChineseName(3));
+  TextEditingController fruitNameEnController = TextEditingController(
+      text: RandomStringGenerator.generateRandomName(
+          8, getIt<User>().loginRole == UserRole.NIKA));
+  TextEditingController fruitNameChController = TextEditingController(
+      text: RandomStringGenerator.generateRandomChineseName(
+          3, getIt<User>().loginRole == UserRole.NIKA));
   TextEditingController fruitAttackStrengthenController = TextEditingController(
-      text: RandomStringGenerator.generateRandomNumber(1, 5));
+      text: RandomStringGenerator.generateRandomNumber(
+          1, 5, getIt<User>().loginRole == UserRole.NIKA));
   TextEditingController fruitDefenseStrengthenController =
       TextEditingController(
-          text: RandomStringGenerator.generateRandomNumber(1, 5));
+          text: RandomStringGenerator.generateRandomNumber(
+              1, 5, getIt<User>().loginRole == UserRole.NIKA));
   TextEditingController fruitIntelligenceStrengthenController =
       TextEditingController(
-          text: RandomStringGenerator.generateRandomNumber(1, 5));
+          text: RandomStringGenerator.generateRandomNumber(
+              1, 5, getIt<User>().loginRole == UserRole.NIKA));
   TextEditingController fruitBloodStrengthenController = TextEditingController(
-      text: RandomStringGenerator.generateRandomNumber(1, 5));
+      text: RandomStringGenerator.generateRandomNumber(
+          1, 5, getIt<User>().loginRole == UserRole.NIKA));
   TextEditingController fruitSpeedStrengthenController = TextEditingController(
-      text: RandomStringGenerator.generateRandomNumber(1, 8));
+      text: RandomStringGenerator.generateRandomNumber(
+          1, 8, getIt<User>().loginRole == UserRole.NIKA));
   TextEditingController fruitGroupGainStrengthenController =
       TextEditingController(
-          text: RandomStringGenerator.generateRandomNumber(1, 5));
+          text: RandomStringGenerator.generateRandomNumber(
+              1, 5, getIt<User>().loginRole == UserRole.NIKA));
   TextEditingController fruitEnergyConsumeController = TextEditingController(
-      text: RandomStringGenerator.generateRandomNumber(1, 10));
+      text: RandomStringGenerator.generateRandomNumber(
+          1, 10, getIt<User>().loginRole == UserRole.NIKA));
   List<TextEditingController> fruitControllerList() {
     return <TextEditingController>[
       fruitNameEnController,
@@ -105,29 +114,32 @@ class _CreateFruitViewState extends State<CreateFruitView> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 25,),
-                  SizedBox(
-                    width: 300,
-                    child: TextFormField(
-                      controller: fruitNameEnController,
-                      validator: (value) {
-                        if (value!.isWhiteSpace()) {
-                          return AppLocalizations.of(context)!.requiredField;
-                        }
-                        if (!DataValidator.validName(value)) {
-                          return AppLocalizations.of(context)!.invalidName;
-                        }
-                        return null;
-                      },
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      maxLength: 10,
-                      maxLengthEnforcement: MaxLengthEnforcement.enforced,
-                      decoration: InputDecoration(
-                        labelText: AppLocalizations.of(context)!.fruitName,
-                        prefixIcon: const Icon(Icons.people),
+                  const SizedBox(
+                    width: 25,
+                  ),
+                  if (getIt<User>().loginRole == UserRole.NIKA)
+                    SizedBox(
+                      width: 300,
+                      child: TextFormField(
+                        controller: fruitNameEnController,
+                        validator: (value) {
+                          if (value!.isWhiteSpace()) {
+                            return AppLocalizations.of(context)!.requiredField;
+                          }
+                          if (!DataValidator.validName(value)) {
+                            return AppLocalizations.of(context)!.invalidName;
+                          }
+                          return null;
+                        },
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        maxLength: 10,
+                        maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                        decoration: InputDecoration(
+                          labelText: AppLocalizations.of(context)!.fruitName,
+                          prefixIcon: const Icon(Icons.people),
+                        ),
                       ),
-                    ),
-                  )
+                    )
                 ],
               ),
             ),
@@ -202,8 +214,7 @@ class _CreateFruitViewState extends State<CreateFruitView> {
                       context,
                       fruitGroupGainStrengthenController,
                       AppLocalizations.of(context)!.groupStrengthen,
-                      _getIcon(
-                          'images/character_digits_icon/group_gain.svg')),
+                      _getIcon('images/character_digits_icon/group_gain.svg')),
                   _getFormField(
                       1,
                       10,
@@ -228,7 +239,7 @@ class _CreateFruitViewState extends State<CreateFruitView> {
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child:
-      ImageHelper.getSvgIconWithColor(path, 3, 3, OnepieceColors.fancyBlue),
+          ImageHelper.getSvgIconWithColor(path, 3, 3, OnepieceColors.fancyBlue),
     );
   }
 
@@ -355,8 +366,7 @@ class _CreateFruitViewState extends State<CreateFruitView> {
               }
               CreateFruitRequest addFruitRequest = CreateFruitRequest(
                 name: RandomStringGenerator.generateI18n(
-                   fruitNameEnController.text,
-                    fruitNameChController.text),
+                    fruitNameEnController.text, fruitNameChController.text),
                 fruitType: selectedFruitType,
                 attackStrengthen: DataConverter.stringToInt(
                     fruitAttackStrengthenController.text.trim()),
