@@ -40,13 +40,10 @@ class _RegisterPageState extends State<RegisterPage> {
   bool _isConfirmedPasswordHidden = true;
   bool _buttonEnabled = false;
   String verificationMessage = "";
-  TextEditingController nicknameController =
-      TextEditingController(text: "Monkey John");
-  TextEditingController usernameController =
-      TextEditingController(text: "abc@qq.com");
-  TextEditingController passwordController = TextEditingController(text: "abc");
-  TextEditingController confirmedPasswordController =
-      TextEditingController(text: "abc");
+  TextEditingController nicknameController = TextEditingController();
+  TextEditingController usernameController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  TextEditingController confirmedPasswordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {

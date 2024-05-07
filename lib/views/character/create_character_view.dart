@@ -30,40 +30,54 @@ class CreateCharacterView extends StatefulWidget {
 }
 
 class _CreateCharacterViewState extends State<CreateCharacterView> {
-  TextEditingController characterNameEnController =
-      TextEditingController(text: RandomStringGenerator.generateRandomName(8));
+  TextEditingController characterNameEnController = TextEditingController(
+      text: RandomStringGenerator.generateRandomName(
+          8, getIt<User>().loginRole == UserRole.NIKA));
   TextEditingController characterNameCnController = TextEditingController(
-      text: RandomStringGenerator.generateRandomChineseName(3));
+      text: RandomStringGenerator.generateRandomChineseName(
+          3, getIt<User>().loginRole == UserRole.NIKA));
 
   // battle data controller
   TextEditingController characterFruitLimitController = TextEditingController(
-      text: RandomStringGenerator.generateRandomNumber(1, 2));
+      text: RandomStringGenerator.generateRandomNumber(
+          1, 2, getIt<User>().loginRole == UserRole.NIKA));
   TextEditingController characterGroupGainController = TextEditingController(
-      text: RandomStringGenerator.generateRandomNumber(1, 5));
+      text: RandomStringGenerator.generateRandomNumber(
+          1, 5, getIt<User>().loginRole == UserRole.NIKA));
   TextEditingController characterAttackController = TextEditingController(
-      text: RandomStringGenerator.generateRandomNumber(10, 1000));
+      text: RandomStringGenerator.generateRandomNumber(
+          10, 1000, getIt<User>().loginRole == UserRole.NIKA));
   TextEditingController characterDefenseController = TextEditingController(
-      text: RandomStringGenerator.generateRandomNumber(10, 1000));
+      text: RandomStringGenerator.generateRandomNumber(
+          10, 1000, getIt<User>().loginRole == UserRole.NIKA));
   TextEditingController characterIntelligenceController = TextEditingController(
-      text: RandomStringGenerator.generateRandomNumber(70, 260));
+      text: RandomStringGenerator.generateRandomNumber(
+          70, 260, getIt<User>().loginRole == UserRole.NIKA));
   TextEditingController characterBloodController = TextEditingController(
-      text: RandomStringGenerator.generateRandomNumber(100, 10000));
+      text: RandomStringGenerator.generateRandomNumber(
+          100, 10000, getIt<User>().loginRole == UserRole.NIKA));
   TextEditingController characterSpeedController = TextEditingController(
-      text: RandomStringGenerator.generateRandomNumber(10, 200));
+      text: RandomStringGenerator.generateRandomNumber(
+          10, 200, getIt<User>().loginRole == UserRole.NIKA));
   TextEditingController characterEnergyController = TextEditingController(
-      text: RandomStringGenerator.generateRandomNumber(10, 50));
+      text: RandomStringGenerator.generateRandomNumber(
+          10, 50, getIt<User>().loginRole == UserRole.NIKA));
 
   // character details controller
   TextEditingController characterAge = TextEditingController(
-      text: RandomStringGenerator.generateRandomNumber(0, 100000));
+      text: RandomStringGenerator.generateRandomNumber(
+          0, 100000, getIt<User>().loginRole == UserRole.NIKA));
   TextEditingController characterHeight = TextEditingController(
-      text: RandomStringGenerator.generateRandomNumber(1, 100000));
+      text: RandomStringGenerator.generateRandomNumber(
+          1, 100000, getIt<User>().loginRole == UserRole.NIKA));
   TextEditingController characterBirthPlace = TextEditingController(
-      text: RandomStringGenerator.generateRandomString(10));
+      text: RandomStringGenerator.generateRandomString(
+          10, getIt<User>().loginRole == UserRole.NIKA));
   TextEditingController characterDateOfBirthMonth = TextEditingController();
   TextEditingController characterDateOfBirthDay = TextEditingController();
   TextEditingController characterBounty = TextEditingController(
-      text: RandomStringGenerator.generateRandomNumber(10, 100000));
+      text: RandomStringGenerator.generateRandomNumber(
+          10, 100000, getIt<User>().loginRole == UserRole.NIKA));
 
   List<TextEditingController> characterControllerListRequired() {
     return <TextEditingController>[
@@ -456,13 +470,13 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                                     ),
                                     selectedItemBuilder: (context) {
                                       return List<String>.generate(
-                                          31,
+                                              31,
                                               (int index) =>
-                                              (index + 1).toString())
+                                                  (index + 1).toString())
                                           .map((String day) {
                                         return Container(
                                           alignment:
-                                          AlignmentDirectional.center,
+                                              AlignmentDirectional.center,
                                           child: Text(
                                             day,
                                             style: const TextStyle(

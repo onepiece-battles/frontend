@@ -239,7 +239,7 @@ class HomePageState extends State<HomePage> {
             ),
           ),
           SizedBox(
-            width: 150,
+            width: 180,
             child: DropdownButtonHideUnderline(
               child: DropdownButton2(
                 isExpanded: true,
