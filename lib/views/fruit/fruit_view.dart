@@ -12,6 +12,7 @@ import '../../repository/fruit_dao.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../utils/data_validator.dart';
 import '../../utils/image_helper.dart';
+import '../../utils/permission_check.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -156,7 +157,10 @@ class _FruitViewState extends State<FruitView> {
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              SizedBox(
+              if (PermissionCheck.checkPermission(
+                  getIt<User>().loginRoleResourcesPermissionMap,
+                  ResourceType.FRUIT,
+                  Permission.CREATE)) SizedBox(
                 height: 35,
                 child: Padding(
                   padding: const EdgeInsets.only(right: 10.0),

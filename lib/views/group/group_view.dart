@@ -13,6 +13,7 @@ import '../../utils/base64_helper.dart';
 import '../../utils/data_validator.dart';
 import '../../utils/i18n_helper.dart';
 import '../../utils/image_helper.dart';
+import '../../utils/permission_check.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -152,18 +153,22 @@ class _GroupViewState extends State<GroupView> {
       Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          SizedBox(
-            height: 35,
-            child: Padding(
-              padding: const EdgeInsets.only(right: 10.0),
-              child: ElevatedButton(
-                  onPressed: () {
-                    context.goNamed("createGroup");
-                  },
-                  style: OnepieceButtonStyle.getDefaultStyle(),
-                  child: Text(AppLocalizations.of(context)!.createGroup)),
+          if (PermissionCheck.checkPermission(
+              getIt<User>().loginRoleResourcesPermissionMap,
+              ResourceType.GROUP,
+              Permission.CREATE))
+            SizedBox(
+              height: 35,
+              child: Padding(
+                padding: const EdgeInsets.only(right: 10.0),
+                child: ElevatedButton(
+                    onPressed: () {
+                      context.goNamed("createGroup");
+                    },
+                    style: OnepieceButtonStyle.getDefaultStyle(),
+                    child: Text(AppLocalizations.of(context)!.createGroup)),
+              ),
             ),
-          ),
           Padding(
             padding: const EdgeInsets.fromLTRB(0, 0, 6, 0),
             child: SizedBox(
@@ -568,7 +573,7 @@ class _GroupViewState extends State<GroupView> {
       child: Row(
         children: characters
             .map((character) => InkWell(
-          hoverColor: Colors.transparent,
+                  hoverColor: Colors.transparent,
                   onTap: () {
                     context.goNamed('characterDetails',
                         extra: character.id,

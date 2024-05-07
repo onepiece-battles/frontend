@@ -14,6 +14,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../constants/onepiece_tag.dart';
 import '../../popup/onepiece_alert.dart';
 import '../../utils/image_helper.dart';
+import '../../utils/permission_check.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -46,6 +47,7 @@ class _FruitDetailViewState extends State<FruitDetailView> {
   final _battleFormKey = GlobalKey<FormState>();
   bool _basicInfoEditable = false;
   bool _combatInfoEditable = false;
+  bool _editButtonVisible = false;
 
   _loadData() {
     return getIt<FruitDao>().get(GetFruitRequest(fruitId: widget.fruitId));
@@ -57,11 +59,27 @@ class _FruitDetailViewState extends State<FruitDetailView> {
     this.fruitFullView = fruitFullView;
     characters = fruitFullView.characters;
     selectedFruitType = fruitFullView.fruitType!;
+
     // 2. reset state
     _basicInfoEditable = false;
     _combatInfoEditable = false;
     // 3. update controller data
     _updateControllerData();
+
+    // update visibility info
+    _editButtonVisible = PermissionCheck.checkPermission(
+        getIt<User>().loginRoleResourcesPermissionMap,
+        ResourceType.FRUIT,
+        Permission.UPDATE) &&
+        PermissionCheck.isMyResource(
+            fruitFullView.creationRecord!.userId!,
+            fruitFullView.creationRecord!.roleId!,
+            getIt<User>().id,
+            getIt<User>().loginRoleId!);
+    // nika role has the edit permission for all resources
+    if (getIt<User>().loginRole == UserRole.NIKA) {
+      _editButtonVisible = true;
+    }
   }
 
   void _updateControllerData() {

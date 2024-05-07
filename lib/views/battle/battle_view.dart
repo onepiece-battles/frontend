@@ -14,6 +14,7 @@ import '../../constants/onepiece_fonts.dart';
 import '../../utils/base64_helper.dart';
 import '../../utils/data_validator.dart';
 import '../../utils/image_helper.dart';
+import '../../utils/permission_check.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -169,19 +170,23 @@ class _BattleViewState extends State<BattleView> {
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              SizedBox(
-                height: 35,
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 10),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      context.goNamed("createBattle");
-                    },
-                    style: OnepieceButtonStyle.getDefaultStyle(),
-                    child: Text(AppLocalizations.of(context)!.createBattle),
+              if (PermissionCheck.checkPermission(
+                  getIt<User>().loginRoleResourcesPermissionMap,
+                  ResourceType.BATTLE,
+                  Permission.CREATE))
+                SizedBox(
+                  height: 35,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 10),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        context.goNamed("createBattle");
+                      },
+                      style: OnepieceButtonStyle.getDefaultStyle(),
+                      child: Text(AppLocalizations.of(context)!.createBattle),
+                    ),
                   ),
                 ),
-              ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(0, 0, 6, 0),
                 child: SizedBox(

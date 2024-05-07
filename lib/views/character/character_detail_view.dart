@@ -16,6 +16,7 @@ import '../../utils/base64_helper.dart';
 import '../../utils/data_converter.dart';
 import '../../utils/i18n_helper.dart';
 import '../../utils/image_helper.dart';
+import '../../utils/permission_check.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -75,6 +76,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
   final _basicFormKey = GlobalKey<FormState>();
   final _digitFormKey = GlobalKey<FormState>();
 
+  bool _editButtonVisible = false;
+
   bool basicInfoEditable = false;
   bool combatInfoEditable = false;
   bool fruitSearchEnabled = false;
@@ -125,6 +128,19 @@ class _CharacterDetailState extends State<CharacterDetail> {
     battles = characterFullView.battles;
     fruits = characterFullView.fruits;
     groups = characterFullView.groups;
+    _editButtonVisible = PermissionCheck.checkPermission(
+            getIt<User>().loginRoleResourcesPermissionMap,
+            ResourceType.CHARACTER,
+            Permission.UPDATE) &&
+        PermissionCheck.isMyResource(
+            character.creationRecord!.userId!,
+            character.creationRecord!.roleId!,
+            getIt<User>().id,
+            getIt<User>().loginRoleId!);
+    // nika role has the edit permission for all resources
+    if (getIt<User>().loginRole == UserRole.NIKA) {
+      _editButtonVisible = true;
+    }
     if (fruits.length < character.maximumFruitCount) {
       fruitSearchEnabled = true;
     }
@@ -361,80 +377,82 @@ class _CharacterDetailState extends State<CharacterDetail> {
                 const SizedBox(
                   width: 15,
                 ),
-                Tooltip(
-                  message: basicInfoEditable
-                      ? AppLocalizations.of(context)!.submitForm
-                      : AppLocalizations.of(context)!.editHint,
-                  child: InkWell(
-                    hoverColor: Colors.transparent,
-                    onTap: () {
-                      basicState(() {
-                        basicInfoEditable = !basicInfoEditable;
-                        if (!basicInfoEditable) {
-                          var updatedCharacter = Character(
-                              id: character.id,
-                              maximumFruitCount: character.maximumFruitCount,
-                              groupGain: character.groupGain,
-                              attack: character.attack,
-                              defense: character.defense,
-                              intelligence: character.intelligence,
-                              blood: character.blood,
-                              speed: character.speed,
-                              energy: character.energy,
-                              battleStyle: selectedBattleStyle,
-                              race: selectedRace,
-                              // basic info
-                              name: I18nHelper.getI18nFromDisplayName(
-                                  character.name, characterNameController.text),
-                              dateOfBirth:
-                                  selectedDay == null || selectedMonth == null
-                                      ? null
-                                      : "$selectedMonth-$selectedDay",
-                              // todo(yichi): profile image update
-                              birthPlace: characterBirthPlace.text,
-                              age: DataConverter.stringToInt(
-                                  characterAge.text.trim()),
-                              bounty: DataConverter.stringToInt(
-                                  characterBounty.text.trim()),
-                              height: DataConverter.stringToInt(
-                                  characterHeight.text.trim()),
-                              score: character.score);
-                          getIt<CharacterDao>()
-                              .update(updatedCharacter)
-                              .then((value) {
-                            OnepieceAlert.getBasicAlertDialogFunc(
-                                context,
-                                AppLocalizations.of(context)!.hint,
-                                I18nHelper.getDisplayNameFromI18n(
-                                    value!.result));
-                            if (value.success) {
-                              context.goNamed('characterDetails',
-                                  extra: character.id,
-                                  pathParameters: {
-                                    'name': I18nHelper.getDisplayNameFromI18n(
-                                        character.name)
-                                  });
-                            }
-                          });
-                        }
-                      });
-                    },
-                    child: SizedBox(
-                        width: 25,
-                        height: 25,
-                        child: !basicInfoEditable
-                            ? ImageHelper.getSvgIconWithColor(
-                                'images/svgs/edit.svg',
-                                150,
-                                150,
-                                OnepieceColors.fancyBlue)
-                            : ImageHelper.getSvgIconWithColor(
-                                'images/svgs/check.svg',
-                                150,
-                                150,
-                                OnepieceColors.fancyBlue)),
+                if (_editButtonVisible)
+                  Tooltip(
+                    message: basicInfoEditable
+                        ? AppLocalizations.of(context)!.submitForm
+                        : AppLocalizations.of(context)!.editHint,
+                    child: InkWell(
+                      hoverColor: Colors.transparent,
+                      onTap: () {
+                        basicState(() {
+                          basicInfoEditable = !basicInfoEditable;
+                          if (!basicInfoEditable) {
+                            var updatedCharacter = Character(
+                                id: character.id,
+                                maximumFruitCount: character.maximumFruitCount,
+                                groupGain: character.groupGain,
+                                attack: character.attack,
+                                defense: character.defense,
+                                intelligence: character.intelligence,
+                                blood: character.blood,
+                                speed: character.speed,
+                                energy: character.energy,
+                                battleStyle: selectedBattleStyle,
+                                race: selectedRace,
+                                // basic info
+                                name: I18nHelper.getI18nFromDisplayName(
+                                    character.name,
+                                    characterNameController.text),
+                                dateOfBirth:
+                                    selectedDay == null || selectedMonth == null
+                                        ? null
+                                        : "$selectedMonth-$selectedDay",
+                                // todo(yichi): profile image update
+                                birthPlace: characterBirthPlace.text,
+                                age: DataConverter.stringToInt(
+                                    characterAge.text.trim()),
+                                bounty: DataConverter.stringToInt(
+                                    characterBounty.text.trim()),
+                                height: DataConverter.stringToInt(
+                                    characterHeight.text.trim()),
+                                score: character.score);
+                            getIt<CharacterDao>()
+                                .update(updatedCharacter)
+                                .then((value) {
+                              OnepieceAlert.getBasicAlertDialogFunc(
+                                  context,
+                                  AppLocalizations.of(context)!.hint,
+                                  I18nHelper.getDisplayNameFromI18n(
+                                      value!.result));
+                              if (value.success) {
+                                context.goNamed('characterDetails',
+                                    extra: character.id,
+                                    pathParameters: {
+                                      'name': I18nHelper.getDisplayNameFromI18n(
+                                          character.name)
+                                    });
+                              }
+                            });
+                          }
+                        });
+                      },
+                      child: SizedBox(
+                          width: 25,
+                          height: 25,
+                          child: !basicInfoEditable
+                              ? ImageHelper.getSvgIconWithColor(
+                                  'images/svgs/edit.svg',
+                                  150,
+                                  150,
+                                  OnepieceColors.fancyBlue)
+                              : ImageHelper.getSvgIconWithColor(
+                                  'images/svgs/check.svg',
+                                  150,
+                                  150,
+                                  OnepieceColors.fancyBlue)),
+                    ),
                   ),
-                ),
               ],
             ),
           ),
@@ -741,7 +759,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                 const SizedBox(
                   width: 15,
                 ),
-                Tooltip(
+                if (_editButtonVisible) Tooltip(
                   message: combatInfoEditable
                       ? AppLocalizations.of(context)!.submitForm
                       : AppLocalizations.of(context)!.editHint,
