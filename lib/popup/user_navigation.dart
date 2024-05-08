@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
@@ -16,7 +17,8 @@ import '../utils/image_helper.dart';
 GetIt getIt = GetIt.instance;
 
 class UserNavigation extends StatefulWidget {
-  const UserNavigation({super.key, required BuildContext context});
+  final BoxConstraints constraints;
+  const UserNavigation({super.key, required BuildContext context, required this.constraints});
 
   @override
   State<UserNavigation> createState() => _UserNavigationState();
@@ -97,8 +99,12 @@ class _UserNavigationState extends State<UserNavigation> {
           ],
         ),
       ),
-      child: ImageHelper.getRoundImageFrame(
-          70, 70, 3, OnepieceColors.liteFancyBlue, 70, Base64Helper.decode(getIt<User>().profileImage!)),
+      child:
+      widget.constraints.maxWidth>800?
+      ImageHelper.getRoundImageFrame(
+          70, 70, 3, OnepieceColors.liteFancyBlue, 70, Base64Helper.decode(getIt<User>().profileImage!)):
+      ImageHelper.getRoundImageFrame(
+            60, 60, 3, OnepieceColors.liteFancyBlue, 60, Base64Helper.decode(getIt<User>().profileImage!)),
     );
   }
 }

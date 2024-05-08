@@ -142,6 +142,12 @@ class OnepieceFonts {
       fontWeight: FontWeight.normal,
       fontStyle: FontStyle.italic);
 
+  static const TextStyle contentStyleWhite = TextStyle(
+      color: Colors.white,
+      fontSize: 10,
+      fontWeight: FontWeight.normal,
+      fontStyle: FontStyle.italic);
+
   static const TextStyle navigationTopBarStyleClickable = TextStyle(
       color: OnepieceColors.fancyBlue,
       fontSize: 16,
