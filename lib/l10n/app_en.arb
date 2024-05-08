@@ -275,5 +275,6 @@
   "issueDetail": "Issue Detail",
   "viewReport": "View Report",
   "imageSizeExceedsLimit": "Image size exceeds limit!",
-  "alert": "⚠️"
+  "alert": "⚠️",
+  "search": "Search..."
 }

@@ -275,5 +275,6 @@
   "issueDetail": "问题详情",
   "viewReport": "查看战斗报告",
   "imageSizeExceedsLimit": "图片大小超出限制!",
-  "alert": "⚠️"
+  "alert": "⚠️",
+  "search": "搜索..."
 }

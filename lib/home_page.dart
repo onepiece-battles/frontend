@@ -53,46 +53,52 @@ class HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     // todo(yichi): replace RawKeyboardListener with un-deprecated ones.
     return RawKeyboardListener(
-        focusNode: FocusNode(),
-        onKey: (event) {
-          if (event.isKeyPressed(LogicalKeyboardKey.slash)) {
-            _showDialog(context);
-          }
-        },
-        child: Scaffold(
-          backgroundColor: Colors.grey[50],
-          body: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _getNavigationMenu(context),
-              Expanded(
-                child: Column(
-                  children: [
-                    SizedBox(
-                      height: 55,
-                      child: Padding(
-                        padding: const EdgeInsets.all(5.0),
-                        child: getTopBar(context),
+      focusNode: FocusNode(),
+      onKey: (event) {
+        if (event.isKeyPressed(LogicalKeyboardKey.slash)) {
+          _showDialog(context);
+        }
+      },
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return Scaffold(
+            backgroundColor: Colors.grey[50],
+            body: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _getNavigationMenu(context, constraints),
+                Expanded(
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        height: 55,
+                        child: Padding(
+                          padding: const EdgeInsets.all(5.0),
+                          child: getTopBar(context),
+                        ),
                       ),
-                    ),
-                    const Divider(
-                      height: 10,
-                      thickness: 1.5,
-                    ),
-                    Expanded(
-                      child: widget.mainScreen,
-                    )
-                  ],
-                ),
-              )
-            ],
-          ),
-        ));
+                      const Divider(
+                        height: 10,
+                        thickness: 1.5,
+                      ),
+                      Expanded(
+                        child: widget.mainScreen,
+                      )
+                    ],
+                  ),
+                )
+              ],
+            ),
+          );
+        },
+      ),
+    );
   }
 
   // the first one route is fixed in this case, and the latter routes are clickable
-  Row getTopBar(BuildContext context) {
+  Widget getTopBar(BuildContext context) {
     return Row(
+        mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [_getRoutingBar(context), _getRightControlPanel(context)]);
@@ -198,44 +204,48 @@ class HomePageState extends State<HomePage> {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
-            child: FlutterToggleTab(
-              width: 4,
-              height: 50,
-              borderRadius: 20,
-              selectedBackgroundColors: const [
-                OnepieceColors.fancyBlue,
-                // Colors.blueAccent
-              ],
-              labels: const ["文", "EN"],
-              selectedLabelIndex: (index) {
-                setState(() {
-                  _tabTextIndexSelected = index;
-                  Locale locale;
-                  if (index == 0) {
-                    locale = locales.first;
-                  } else {
-                    locale = locales.last;
-                  }
-                  MyApp.setLocale(context, locale);
-                });
-              },
-              selectedTextStyle: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700),
-              unSelectedTextStyle: const TextStyle(
-                  color: Colors.black87,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600),
-              unSelectedBackgroundColors: const [
-                Color.fromARGB(255, 182, 180, 180)
-              ],
-              selectedIndex: _tabTextIndexSelected,
-              isScroll: false,
-              marginSelected: const EdgeInsets.all(3),
+          SizedBox(
+            width: 50,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
+              child: FlutterToggleTab(
+                width: 4,
+                height: 50,
+                borderRadius: 20,
+                selectedBackgroundColors: const [
+                  OnepieceColors.fancyBlue,
+                ],
+                labels: const ["文", "EN"],
+                selectedLabelIndex: (index) {
+                  setState(() {
+                    _tabTextIndexSelected = index;
+                    Locale locale;
+                    if (index == 0) {
+                      locale = locales.first;
+                    } else {
+                      locale = locales.last;
+                    }
+                    MyApp.setLocale(context, locale);
+                  });
+                },
+                selectedTextStyle: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700),
+                unSelectedTextStyle: const TextStyle(
+                    color: Colors.black87,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600),
+                unSelectedBackgroundColors: const [
+                  Color.fromARGB(255, 182, 180, 180)
+                ],
+                selectedIndex: _tabTextIndexSelected,
+                isScroll: false,
+                iconSize: 10,
+                marginSelected: const EdgeInsets.all(3),
+              ),
             ),
           ),
           SizedBox(
@@ -306,9 +316,9 @@ class HomePageState extends State<HomePage> {
         .toList();
   }
 
-  Widget _getNavigationMenu(BuildContext context) {
+  Widget _getNavigationMenu(BuildContext context, BoxConstraints constraints) {
     return Container(
-      width: 300,
+      width: constraints.maxWidth > 800 ? 300 : 80,
       color: OnepieceColors.menuBackgroundColor,
       child: Stack(
         children: [
@@ -318,14 +328,14 @@ class HomePageState extends State<HomePage> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _getDrawerHeader(context),
+                _getDrawerHeader(context, constraints),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(18, 10, 0, 10),
+                  padding: const EdgeInsets.fromLTRB(8, 10, 0, 10),
                   child: Text(AppLocalizations.of(context)!.route,
                       style: const TextStyle(
                           fontSize: 18, fontWeight: FontWeight.w800)),
                 ),
-                _getSideMenuList(context),
+                _getSideMenuList(context, constraints),
               ],
             ),
           ),
@@ -335,7 +345,7 @@ class HomePageState extends State<HomePage> {
             right: 0,
             child: Container(
               decoration: const BoxDecoration(
-                  color: OnepieceColors.menuBackgroundColor,
+                color: OnepieceColors.menuBackgroundColor,
               ),
               child: Padding(
                 padding: const EdgeInsets.all(5.0),
@@ -376,11 +386,12 @@ class HomePageState extends State<HomePage> {
                           21,
                         ),
                         const SizedBox(width: 6),
-                        Text(AppLocalizations.of(context)!.feedback,
-                            style: const TextStyle(
-                                color: OnepieceColors.menuTextColor,
-                                fontSize: 17,
-                                fontWeight: FontWeight.w500))
+                        if (constraints.maxWidth > 800)
+                          Text(AppLocalizations.of(context)!.feedback,
+                              style: const TextStyle(
+                                  color: OnepieceColors.menuTextColor,
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w500))
                       ],
                     ),
                   ),
@@ -393,9 +404,9 @@ class HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _getDrawerHeader(BuildContext context) {
+  Widget _getDrawerHeader(BuildContext context, BoxConstraints constraints) {
     return Container(
-      width: 300,
+      width: constraints.maxWidth > 800 ? 300 : 80,
       height: 170,
       color: OnepieceColors.deepFancyBlue,
       child: Column(
@@ -407,64 +418,136 @@ class HomePageState extends State<HomePage> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(left: 5.0),
+                  padding: constraints.maxWidth > 800
+                      ? const EdgeInsets.only(left: 5.0)
+                      : const EdgeInsets.fromLTRB(3.5, 8, 0, 0),
                   child: UserNavigation(
-                    context: context,
-                  ),
+                      context: context, constraints: constraints),
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(8, 5, 8, 8),
-                      child: Text(
-                        getIt<User>().nickname,
-                        style: OnepieceFonts.headerStyleWhite,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        SizedBox(
-                          width: 30,
-                          height: 30,
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 5.0),
-                            child: ImageHelper.getSvgIcon(
-                              'images/svgs/email.svg',
-                              120,
-                              120,
-                            ),
-                          ),
+                if (constraints.maxWidth > 800)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(8, 5, 8, 8),
+                        child: Text(
+                          getIt<User>().nickname,
+                          style: OnepieceFonts.headerStyleWhite,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        SizedBox(
-                          width: 170,
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 5.0),
-                            child: Tooltip(
-                              message: getIt<User>().username,
-                              child: Text(
-                                getIt<User>().username,
-                                style: OnepieceFonts.emailFont,
-                                overflow: TextOverflow.ellipsis,
+                      ),
+                      Row(
+                        children: [
+                          SizedBox(
+                            width: 30,
+                            height: 30,
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 5.0),
+                              child: ImageHelper.getSvgIcon(
+                                'images/svgs/email.svg',
+                                120,
+                                120,
                               ),
                             ),
                           ),
-                        )
-                      ],
-                    )
-                  ],
-                )
+                          SizedBox(
+                            width: 170,
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 5.0),
+                              child: Tooltip(
+                                message: getIt<User>().username,
+                                child: Text(
+                                  getIt<User>().username,
+                                  style: OnepieceFonts.emailFont,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ),
+                          )
+                        ],
+                      )
+                    ],
+                  )
               ],
             ),
           ),
+          if (constraints.maxWidth <= 800)
+            const SizedBox(
+              height: 10,
+            ),
+          if (constraints.maxWidth <= 800)
+            Padding(
+              padding: const EdgeInsets.only(left: 5.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                    child: SizedBox(
+                      width: 13,
+                      height: 13,
+                      child: ImageHelper.getSvgIcon(
+                        'images/svgs/user.svg',
+                        15,
+                        15,
+                      ),
+                    ),
+                  ),
+                  Tooltip(
+                    message: getIt<User>().nickname,
+                    child: SizedBox(
+                      width: 50,
+                      child: Text(
+                        getIt<User>().nickname,
+                        style: OnepieceFonts.contentStyleWhite,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          if (constraints.maxWidth <= 800)
+            Padding(
+              padding: const EdgeInsets.only(left: 5.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 2.0),
+                    child: SizedBox(
+                      width: 15,
+                      height: 15,
+                      child: ImageHelper.getSvgIcon(
+                        'images/svgs/email.svg',
+                        15,
+                        15,
+                      ),
+                    ),
+                  ),
+                  Tooltip(
+                    message: getIt<User>().username,
+                    child: SizedBox(
+                      width: 50,
+                      child: Text(
+                        getIt<User>().username,
+                        style: OnepieceFonts.contentStyleWhite,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(2, 18, 2, 8),
+            padding: constraints.maxWidth > 800
+                ? const EdgeInsets.fromLTRB(2, 8, 2, 8)
+                : const EdgeInsets.fromLTRB(8, 8, 8, 8),
             child: Material(
               type: MaterialType.transparency,
               child: Container(
-                width: 280,
+                width: constraints.maxWidth > 800 ? 280 : 80,
                 height: 33,
                 decoration: const BoxDecoration(
                   color: OnepieceColors.fancyGreen,
@@ -472,17 +555,20 @@ class HomePageState extends State<HomePage> {
                 ),
                 child: TextButton(
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisAlignment: constraints.maxWidth > 800
+                        ? MainAxisAlignment.start
+                        : MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       const Icon(
                         Icons.search,
                         color: OnepieceColors.fancyBlue,
                       ),
-                      Text(
-                        AppLocalizations.of(context)!.searchResource,
-                        style: OnepieceFonts.smallContentStyle,
-                      )
+                      if (constraints.maxWidth > 800)
+                        Text(
+                          AppLocalizations.of(context)!.searchResource,
+                          style: OnepieceFonts.smallContentStyle,
+                        ),
                     ],
                   ),
                   onPressed: () {
@@ -514,7 +600,7 @@ class HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _getSideMenuList(BuildContext context) {
+  Widget _getSideMenuList(BuildContext context, BoxConstraints constraints) {
     String currentResource = "";
     List<String> routes = GoRouterState.of(context)
         .matchedLocation
@@ -610,16 +696,18 @@ class HomePageState extends State<HomePage> {
                 ),
               ),
               hoverColor: OnepieceColors.liteFancyBlue,
-              title: Text(
-                resourceToDisplayTextMap[resourceType]!,
-                textAlign: TextAlign.left,
-                style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: OnepieceFonts.sideMenuFontWeight,
-                    color: currentResource == resourceType.toLowerCase()
-                        ? OnepieceColors.fancyBlue
-                        : OnepieceColors.menuTextColor),
-              ),
+              title: constraints.maxWidth > 800
+                  ? Text(
+                      resourceToDisplayTextMap[resourceType]!,
+                      textAlign: TextAlign.left,
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: OnepieceFonts.sideMenuFontWeight,
+                          color: currentResource == resourceType.toLowerCase()
+                              ? OnepieceColors.fancyBlue
+                              : OnepieceColors.menuTextColor),
+                    )
+                  : const Text(""),
             ),
           ),
         );
