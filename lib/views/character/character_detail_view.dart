@@ -201,91 +201,88 @@ class _CharacterDetailState extends State<CharacterDetail> {
               children: [
                 SingleChildScrollView(
                   scrollDirection: Axis.vertical,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _getBasicInfo(context),
-                        const Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Divider(
-                            color: OnepieceColors.fancyBlue,
-                            thickness: 1,
-                          ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _getBasicInfo(context),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8.0),
+                        child: Divider(
+                          color: Colors.grey,
+                          thickness: 1,
                         ),
-                        _getCombatInfo(context),
-                        const Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Divider(
-                            color: OnepieceColors.fancyBlue,
-                            thickness: 1,
-                          ),
+                      ),
+                      _getCombatInfo(context),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8.0),
+                        child: Divider(
+                          color: Colors.grey,
+                          thickness: 1,
                         ),
-                        _getFruitSearchBar(context),
-                        if (fruits.isNotEmpty)
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Text(AppLocalizations.of(context)!.eaten,
-                                style: OnepieceFonts.fancyBlueHintFont),
-                          ),
-                        if (fruits.isNotEmpty)
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: _getFruitList(context),
-                          ),
-                        if (fruits.isEmpty)
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Text(AppLocalizations.of(context)!.none,
-                                style: OnepieceFonts.fancyBlueHintFont),
-                          ),
-                        const Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Divider(
-                            color: OnepieceColors.fancyBlue,
-                            thickness: 1,
-                          ),
+                      ),
+                      _getFruitSearchBar(context),
+                      if (fruits.isNotEmpty)
+                        Padding(
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Text(AppLocalizations.of(context)!.eaten,
+                              style: OnepieceFonts.fancyBlueHintFont),
                         ),
-                        _getGroupSearchBar(context),
-                        if (groups.isNotEmpty)
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Text(
-                                AppLocalizations.of(context)!.historyGroups,
-                                style: OnepieceFonts.fancyBlueHintFont),
-                          ),
-                        if (groups.isNotEmpty)
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: _getGroupList(context),
-                          ),
-                        if (groups.isEmpty)
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Text(AppLocalizations.of(context)!.none,
-                                style: OnepieceFonts.fancyBlueHintFont),
-                          ),
-                        const Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Divider(
-                            color: OnepieceColors.fancyBlue,
-                            thickness: 1,
-                          ),
+                      if (fruits.isNotEmpty)
+                        Padding(
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: _getFruitList(context),
                         ),
-                        _getBattle(context),
-                        // bottom space
-                        const SizedBox(
-                          height: 60,
-                        )
-                      ],
-                    ),
+                      if (fruits.isEmpty)
+                        Padding(
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Text(AppLocalizations.of(context)!.none,
+                              style: OnepieceFonts.fancyBlueHintFont),
+                        ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8.0),
+                        child: Divider(
+                          color: Colors.grey,
+                          thickness: 1,
+                        ),
+                      ),
+                      _getGroupSearchBar(context),
+                      if (groups.isNotEmpty)
+                        Padding(
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Text(
+                              AppLocalizations.of(context)!.historyGroups,
+                              style: OnepieceFonts.fancyBlueHintFont),
+                        ),
+                      if (groups.isNotEmpty)
+                        Padding(
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: _getGroupList(context),
+                        ),
+                      if (groups.isEmpty)
+                        Padding(
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Text(AppLocalizations.of(context)!.none,
+                              style: OnepieceFonts.fancyBlueHintFont),
+                        ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8.0),
+                        child: Divider(
+                          color: Colors.grey,
+                          thickness: 1,
+                        ),
+                      ),
+                      _getBattle(context),
+                      // bottom space
+                      const SizedBox(
+                        height: 60,
+                      )
+                    ],
                   ),
                 ),
                 Positioned(

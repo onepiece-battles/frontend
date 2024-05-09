@@ -107,36 +107,33 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                 SingleChildScrollView(
                   controller: scrollController,
                   scrollDirection: Axis.vertical,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _getBasicInfo(context),
-                        const Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Divider(
-                            color: OnepieceColors.fancyBlue,
-                            thickness: 1,
-                          ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _getBasicInfo(context),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8.0),
+                        child: Divider(
+                          color: Colors.grey,
+                          thickness: 1,
                         ),
-                        _getCombatInfo(context),
-                        const Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Divider(
-                            color: OnepieceColors.fancyBlue,
-                            thickness: 1,
-                          ),
+                      ),
+                      _getCombatInfo(context),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8.0),
+                        child: Divider(
+                          color: Colors.grey,
+                          thickness: 1,
                         ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: _getCharacterList(context),
-                        ),
-                        const SizedBox(
-                          height: 60,
-                        )
-                      ],
-                    ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: _getCharacterList(context),
+                      ),
+                      const SizedBox(
+                        height: 60,
+                      )
+                    ],
                   ),
                 ),
                 Positioned(

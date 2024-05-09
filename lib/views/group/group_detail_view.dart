@@ -71,7 +71,6 @@ class _GroupDetailViewState extends State<GroupDetailView> {
         if (snapshot.connectionState == ConnectionState.done) {
           _prepareData(snapshot.data);
           return Stack(
-            // alignment: Alignment.bottomCenter,
             children: [
               SingleChildScrollView(
                 controller: scrollController,
@@ -85,9 +84,9 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                       child: _getBasicInfo(context),
                     ),
                     const Padding(
-                      padding: EdgeInsets.all(8.0),
+                      padding: EdgeInsets.symmetric(vertical: 8.0),
                       child: Divider(
-                        color: OnepieceColors.fancyBlue,
+                        color: Colors.grey,
                         thickness: 1,
                       ),
                     ),

@@ -43,29 +43,26 @@ class _UserDetailViewState extends State<UserDetailView> {
           _prepareData(snapshot.data);
           return SingleChildScrollView(
             scrollDirection: Axis.vertical,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _getBasicInfo(context),
-                  const Padding(
-                    padding: EdgeInsets.all(3.0),
-                    child: Divider(
-                      color: OnepieceColors.fancyBlue,
-                      thickness: 1,
-                    ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _getBasicInfo(context),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 8.0),
+                  child: Divider(
+                    color: Colors.grey,
+                    thickness: 1,
                   ),
-                  _getLoginStatus(context),
-                  const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Divider(
-                      color: OnepieceColors.fancyBlue,
-                      thickness: 1,
-                    ),
+                ),
+                _getLoginStatus(context),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 8.0),
+                  child: Divider(
+                    color: Colors.grey,
+                    thickness: 1,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           );
         } else {
@@ -99,11 +96,11 @@ class _UserDetailViewState extends State<UserDetailView> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: ImageHelper.getRoundImageFrame(
-                  200,
-                  200,
+                  150,
+                  150,
                   3,
                   OnepieceColors.liteFancyBlue,
-                  20,
+                  150,
                   Base64Helper.decode(user.profileImage!)),
             ),
             Padding(
