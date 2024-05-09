@@ -1,7 +1,7 @@
+import 'package:animated_toggle_switch/animated_toggle_switch.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutter_toggle_tab/flutter_toggle_tab.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/app_router.dart';
@@ -13,6 +13,7 @@ import 'config/api_initializer.dart';
 import 'config/resource_permission_manager.dart';
 import 'constants/button_style.dart';
 import 'constants/path_constants.dart';
+import 'home_page.dart';
 import 'main.dart';
 
 GetIt getIt = GetIt.instance;
@@ -68,44 +69,81 @@ class _RegisterPageState extends State<RegisterPage> {
                   alignment: Alignment.topRight,
                   child: Padding(
                     padding: const EdgeInsets.all(30),
-                    child: FlutterToggleTab(
-                      width: 4,
+                    child: SizedBox(
+                      width: 70,
                       height: 30,
-                      borderRadius: 20,
-                      selectedBackgroundColors: const [
-                        OnepieceColors.fancyBlue,
-                        OnepieceColors.fancyBlue,
-                      ],
-                      labels: const ["文", "EN"],
-                      selectedLabelIndex: (index) {
-                        setState(() {
-                          _tabTextIndexSelected = index;
-                          Locale locale;
-                          if (index == 0) {
-                            locale = localesMap.values.first;
-                          } else {
-                            locale = localesMap.values.last;
-                          }
-                          MyApp.setLocale(context, locale);
-                          verificationMessage =
-                              I18nHelper.getDisplayNameFromI18nByLocale(
-                                  verificationI18n, locale);
-                        });
-                      },
-                      selectedTextStyle: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700),
-                      unSelectedTextStyle: const TextStyle(
-                          color: Colors.black87,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600),
-                      unSelectedBackgroundColors: const [
-                        Color.fromARGB(255, 182, 180, 180)
-                      ],
-                      selectedIndex: _tabTextIndexSelected,
-                      marginSelected: const EdgeInsets.all(3),
-                      isScroll: false,
+                      child: AnimatedToggleSwitch<bool>.dual(
+                        current: _tabTextIndexSelected == 1,
+                        first: false,
+                        second: true,
+                        spacing: 1.0,
+                        style: const ToggleStyle(
+                          borderColor: Colors.transparent,
+                          backgroundColor: Color.fromARGB(255, 182, 180, 180),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black26,
+                              spreadRadius: 1,
+                              blurRadius: 2,
+                              offset: Offset(0, 1.5),
+                            ),
+                          ],
+                        ),
+                        borderWidth: 3.0,
+                        height: 35,
+                        onChanged: (b) => setState(() {
+                          setState(() {
+                            _tabTextIndexSelected =
+                            _tabTextIndexSelected == 0 ? 1 : 0;
+                            Locale locale;
+                            if (_tabTextIndexSelected == 0) {
+                              locale = locales.first;
+                            } else {
+                              locale = locales.last;
+                            }
+                            MyApp.setLocale(context, locale);
+                            verificationMessage =
+                                I18nHelper.getDisplayNameFromI18nByLocale(
+                                    verificationI18n, locale);
+                          });
+                        }),
+                        styleBuilder: (b) => ToggleStyle(
+                            indicatorColor: b
+                                ? OnepieceColors.fancyBlue
+                                : OnepieceColors.fancyBlue),
+                        iconBuilder: (value) => value
+                            ? const Text(
+                          "En",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600),
+                        )
+                            : const Text(
+                          "文",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600),
+                        ),
+                        textBuilder: (value) => value
+                            ? const Center(
+                            child: Text(
+                              '文',
+                              style: TextStyle(
+                                  color: Colors.black87,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600),
+                            ))
+                            : const Center(
+                            child: Text(
+                              'En',
+                              style: TextStyle(
+                                  color: Colors.black87,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600),
+                            )),
+                      ),
                     ),
                   ),
                 ),
