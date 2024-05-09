@@ -1,3 +1,4 @@
+import 'package:animated_toggle_switch/animated_toggle_switch.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_toggle_tab/flutter_toggle_tab.dart';
@@ -11,6 +12,7 @@ import 'package:one_piece_battles_flutter/constants/path_constants.dart';
 import 'package:one_piece_battles_flutter/main.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
+import 'package:one_piece_battles_flutter/utils/image_helper.dart';
 import 'package:openapi/api.dart';
 import 'constants/button_style.dart';
 import 'constants/onepiece_colors.dart';
@@ -35,7 +37,8 @@ class _LoginPageState extends State<LoginPage> {
   bool _buttonEnabled = true;
   String verificationMessage = "";
   I18nText? verificationI18n = I18nText();
-  TextEditingController emailController = TextEditingController(text: "onepiecebattles@163.com");
+  TextEditingController emailController =
+      TextEditingController(text: "onepiecebattles@163.com");
   TextEditingController passwordController = TextEditingController(text: "abc");
   Logger logger = Logger('_LoginPageState');
 
@@ -51,21 +54,35 @@ class _LoginPageState extends State<LoginPage> {
             Align(
               alignment: Alignment.topRight,
               child: Padding(
-                  padding: const EdgeInsets.all(30),
-                  child: FlutterToggleTab(
-                    width: 4,
-                    height: 30,
-                    borderRadius: 20,
-                    selectedBackgroundColors: const [
-                      OnepieceColors.fancyBlue,
-                      OnepieceColors.fancyBlue,
-                    ],
-                    labels: const ["文", "EN"],
-                    selectedLabelIndex: (index) {
+                padding: const EdgeInsets.all(30),
+                child: SizedBox(
+                  width: 70,
+                  height: 30,
+                  child: AnimatedToggleSwitch<bool>.dual(
+                    current: _tabTextIndexSelected == 1,
+                    first: false,
+                    second: true,
+                    spacing: 1.0,
+                    style: const ToggleStyle(
+                      borderColor: Colors.transparent,
+                      backgroundColor: Color.fromARGB(255, 182, 180, 180),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black26,
+                          spreadRadius: 1,
+                          blurRadius: 2,
+                          offset: Offset(0, 1.5),
+                        ),
+                      ],
+                    ),
+                    borderWidth: 3.0,
+                    height: 35,
+                    onChanged: (b) => setState(() {
                       setState(() {
-                        _tabTextIndexSelected = index;
+                        _tabTextIndexSelected =
+                            _tabTextIndexSelected == 0 ? 1 : 0;
                         Locale locale;
-                        if (index == 0) {
+                        if (_tabTextIndexSelected == 0) {
                           locale = locales.first;
                         } else {
                           locale = locales.last;
@@ -75,22 +92,46 @@ class _LoginPageState extends State<LoginPage> {
                             I18nHelper.getDisplayNameFromI18nByLocale(
                                 verificationI18n, locale);
                       });
-                    },
-                    selectedTextStyle: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700),
-                    unSelectedTextStyle: const TextStyle(
-                        color: Colors.black87,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600),
-                    unSelectedBackgroundColors: const [
-                      Color.fromARGB(255, 182, 180, 180)
-                    ],
-                    marginSelected: const EdgeInsets.all(3),
-                    selectedIndex: _tabTextIndexSelected,
-                    // isScroll: true,
-                  )),
+                    }),
+                    styleBuilder: (b) => ToggleStyle(
+                        indicatorColor: b
+                            ? OnepieceColors.fancyBlue
+                            : OnepieceColors.fancyBlue),
+                    iconBuilder: (value) => value
+                        ? const Text(
+                            "En",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600),
+                          )
+                        : const Text(
+                            "文",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600),
+                          ),
+                    textBuilder: (value) => value
+                        ? const Center(
+                            child: Text(
+                            '文',
+                            style: TextStyle(
+                                color: Colors.black87,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600),
+                          ))
+                        : const Center(
+                            child: Text(
+                            'En',
+                            style: TextStyle(
+                                color: Colors.black87,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600),
+                          )),
+                  ),
+                ),
+              ),
             ),
             const SizedBox(height: 150),
             const Image(

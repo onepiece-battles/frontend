@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:animated_toggle_switch/animated_toggle_switch.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -207,47 +208,79 @@ class HomePageState extends State<HomePage> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           SizedBox(
-            width: 50,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
-              child: FlutterToggleTab(
-                width: 4,
-                height: 50,
-                borderRadius: 20,
-                selectedBackgroundColors: const [
-                  OnepieceColors.fancyBlue,
+            width: 68,
+            height: 32,
+            child: AnimatedToggleSwitch<bool>.dual(
+              current: _tabTextIndexSelected == 1,
+              first: false,
+              second: true,
+              spacing: 1.0,
+              style:  const ToggleStyle(
+                borderColor: Colors.transparent,
+                backgroundColor: OnepieceColors.menuSelectedTileColor,
+                boxShadow: [
+                   BoxShadow(
+                    color: Colors.black26,
+                    spreadRadius: 1,
+                    blurRadius: 2,
+                    offset: Offset(0, 1.5),
+                  ),
                 ],
-                labels: const ["文", "EN"],
-                selectedLabelIndex: (index) {
-                  setState(() {
-                    _tabTextIndexSelected = index;
-                    Locale locale;
-                    if (index == 0) {
-                      locale = locales.first;
-                    } else {
-                      locale = locales.last;
-                    }
-                    MyApp.setLocale(context, locale);
-                  });
-                },
-                selectedTextStyle: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700),
-                unSelectedTextStyle: const TextStyle(
-                    color: Colors.black87,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600),
-                unSelectedBackgroundColors: const [
-                  Color.fromARGB(255, 182, 180, 180)
-                ],
-                selectedIndex: _tabTextIndexSelected,
-                isScroll: false,
-                iconSize: 10,
-                marginSelected: const EdgeInsets.all(3),
               ),
+              borderWidth: 3.0,
+              height: 35,
+              onChanged: (b) => setState(() {
+                setState(() {
+                  _tabTextIndexSelected =
+                  _tabTextIndexSelected == 0 ? 1 : 0;
+                  Locale locale;
+                  if (_tabTextIndexSelected == 0) {
+                    locale = locales.first;
+                  } else {
+                    locale = locales.last;
+                  }
+                  MyApp.setLocale(context, locale);
+                });
+              }),
+              styleBuilder: (b) => ToggleStyle(
+                  indicatorColor: b
+                      ? OnepieceColors.fancyBlue
+                      : OnepieceColors.fancyBlue),
+              iconBuilder: (value) => value
+                  ? const Text(
+                "En",
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600),
+              )
+                  : const Text(
+                "文",
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600),
+              ),
+              textBuilder: (value) => value
+                  ? const Center(
+                  child: Text(
+                    '文',
+                    style: TextStyle(
+                        color: Colors.black87,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600),
+                  ))
+                  : const Center(
+                  child: Text(
+                    'En',
+                    style: TextStyle(
+                        color: Colors.black87,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600),
+                  )),
             ),
           ),
+          const SizedBox(width: 30,),
           SizedBox(
             width: 180,
             child: DropdownButtonHideUnderline(
@@ -277,9 +310,10 @@ class HomePageState extends State<HomePage> {
                 },
                 buttonStyleData: ButtonStyleData(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
+                  elevation: 2,
                   decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(3),
-                      color: OnepieceColors.liteFancyGreen),
+                      borderRadius: BorderRadius.circular(8),
+                      color: OnepieceColors.menuSelectedTileColor),
                   height: 40,
                   width: 240,
                 ),
