@@ -85,9 +85,6 @@ class _CreateBattleViewState extends State<CreateBattleView> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 getLeftPanel(context),
-                const SizedBox(
-                  width: 100,
-                ),
                 getRightPanel(context)
               ],
             ),
@@ -105,7 +102,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(60, 10, 60, 10),
+          padding: const EdgeInsets.fromLTRB(60, 10, 30, 10),
           child: ValueListenableBuilder<CharacterListView?>(
             valueListenable: starterSelectedItem,
             builder: (context, value, _) {
@@ -139,13 +136,15 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                           ),
                           if (starterSelectedItem.value != null)
                             SizedBox(
-                              width: 260,
+                              width: 200,
                               height: 180,
                               child: Padding(
-                                padding: const EdgeInsets.only(left: 80.0),
-                                child: RotatedBox(
+                                padding: const EdgeInsets.only(left: 30.0),
+                                child:
+                                RotatedBox(
                                   quarterTurns: 1,
                                   child: CharacterBarGraph(
+                                    symmetric: false,
                                       characterData: CharacterData(
                                     starterSelectedItem.value!.attack,
                                     starterSelectedItem.value!.defense,
@@ -403,7 +402,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Padding(
-            padding: const EdgeInsets.fromLTRB(60, 10, 60, 10),
+            padding: const EdgeInsets.fromLTRB(30, 10, 60, 10),
             child: ValueListenableBuilder<CharacterListView?>(
                 valueListenable: receiverSelectedItem,
                 builder: (context, value, _) {
@@ -419,24 +418,27 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                             children: [
                               if (receiverSelectedItem.value != null)
                                 SizedBox(
-                                  width: 260,
+                                  width: 200,
                                   height: 180,
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(right: 80.0),
+                                  child: 
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 30.0),
                                     child: RotatedBox(
                                       quarterTurns: 1,
                                       child: CharacterBarGraph(
                                           characterData: CharacterData(
-                                        receiverSelectedItem.value!.attack,
-                                        receiverSelectedItem.value!.defense,
-                                        receiverSelectedItem
-                                            .value!.intelligence,
-                                        receiverSelectedItem.value!.speed,
-                                        receiverSelectedItem.value!.blood,
-                                        receiverSelectedItem.value!.energy,
-                                      )),
+                                            receiverSelectedItem.value!.attack,
+                                            receiverSelectedItem.value!.defense,
+                                            receiverSelectedItem
+                                                .value!.intelligence,
+                                            receiverSelectedItem.value!.speed,
+                                            receiverSelectedItem.value!.blood,
+                                            receiverSelectedItem.value!.energy,
+                                          ),
+                                      symmetric: false,),
                                     ),
                                   ),
+                                  
                                 ),
                               SizedBox(
                                 width: 180,
@@ -450,7 +452,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                                           60,
                                           OnepieceColors.liteFancyBlue)
                                       : Padding(
-                                          padding: const EdgeInsets.all(20.0),
+                                          padding: const EdgeInsets.symmetric(vertical: 20.0),
                                           child: Image.memory(
                                               Base64Helper.decode(
                                                   receiverSelectedItem

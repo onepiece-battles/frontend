@@ -76,26 +76,50 @@ class _CreateFruitViewState extends State<CreateFruitView> {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 0, 15),
-              child: Text(
-                AppLocalizations.of(context)!.basicInfo,
-                style: OnepieceFonts.headerStyle,
-              ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(15, 0, 0, 15),
+            child: Text(
+              AppLocalizations.of(context)!.basicInfo,
+              style: OnepieceFonts.headerStyle,
             ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8.0),
-              child: Row(
-                children: [
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 15.0),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 300,
+                  child: TextFormField(
+                    controller: fruitNameChController,
+                    validator: (value) {
+                      if (value!.isWhiteSpace()) {
+                        return AppLocalizations.of(context)!.requiredField;
+                      }
+                      if (!DataValidator.validName(value)) {
+                        return AppLocalizations.of(context)!.invalidName;
+                      }
+                      return null;
+                    },
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    maxLength: 10,
+                    maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                    decoration: InputDecoration(
+                      labelText: AppLocalizations.of(context)!.fruitName,
+                      prefixIcon: const Icon(Icons.people),
+                    ),
+                  ),
+                ),
+                const SizedBox(
+                  width: 25,
+                ),
+                if (getIt<User>().loginRole == UserRole.NIKA)
                   SizedBox(
                     width: 300,
                     child: TextFormField(
-                      controller: fruitNameChController,
+                      controller: fruitNameEnController,
                       validator: (value) {
                         if (value!.isWhiteSpace()) {
                           return AppLocalizations.of(context)!.requiredField;
@@ -113,62 +137,39 @@ class _CreateFruitViewState extends State<CreateFruitView> {
                         prefixIcon: const Icon(Icons.people),
                       ),
                     ),
-                  ),
-                  const SizedBox(
-                    width: 25,
-                  ),
-                  if (getIt<User>().loginRole == UserRole.NIKA)
-                    SizedBox(
-                      width: 300,
-                      child: TextFormField(
-                        controller: fruitNameEnController,
-                        validator: (value) {
-                          if (value!.isWhiteSpace()) {
-                            return AppLocalizations.of(context)!.requiredField;
-                          }
-                          if (!DataValidator.validName(value)) {
-                            return AppLocalizations.of(context)!.invalidName;
-                          }
-                          return null;
-                        },
-                        autovalidateMode: AutovalidateMode.onUserInteraction,
-                        maxLength: 10,
-                        maxLengthEnforcement: MaxLengthEnforcement.enforced,
-                        decoration: InputDecoration(
-                          labelText: AppLocalizations.of(context)!.fruitName,
-                          prefixIcon: const Icon(Icons.people),
-                        ),
-                      ),
-                    )
-                ],
-              ),
+                  )
+              ],
             ),
-            Row(
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(15, 10, 0, 0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 0, 8, 10),
-                  child: Text(
-                    AppLocalizations.of(context)!.fruitType,
-                    style: OnepieceFonts.tableHeaderStyle,
-                  ),
+                Text(
+                  AppLocalizations.of(context)!.fruitType,
+                  style: OnepieceFonts.smallHeaderStyle,
                 ),
+                const SizedBox(width: 10,),
                 _getDropDownList(context),
               ],
             ),
-            const Padding(
-              padding: EdgeInsets.fromLTRB(0, 0, 0, 8),
-              child: Divider(
-                height: 2,
-              ),
+          ),
+          const Divider(
+            color: Colors.grey,
+            height: 2,
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(15, 10, 0, 0),
+            child: Text(
+              AppLocalizations.of(context)!.battleInfo,
+              style: OnepieceFonts.headerStyle,
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 0, 15),
-              child: Text(
-                AppLocalizations.of(context)!.battleInfo,
-                style: OnepieceFonts.headerStyle,
-              ),
-            ),
-            Form(
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 15.0),
+            child: Form(
               key: _formKey,
               child: Column(
                 children: <Widget>[
@@ -225,12 +226,13 @@ class _CreateFruitViewState extends State<CreateFruitView> {
                 ],
               ),
             ),
-            const Divider(
-              height: 2,
-            ),
-            _getFootBar(context)
-          ],
-        ),
+          ),
+          const Divider(
+            height: 2,
+            color: Colors.grey,
+          ),
+          _getFootBar(context)
+        ],
       ),
     );
   }

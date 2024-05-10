@@ -130,20 +130,23 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 0, 15),
-              child: Text(
-                AppLocalizations.of(context)!.basicInfo,
-                style: OnepieceFonts.headerStyle,
-              ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(15, 0, 0, 15),
+            child: Text(
+              AppLocalizations.of(context)!.basicInfo,
+              style: OnepieceFonts.headerStyle,
             ),
-            _getAvatar(context),
-            Column(
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 15.0),
+            child: _getAvatar(context),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 15.0),
+            child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
@@ -224,13 +227,14 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                     height: 30,
                   ),
                 ]),
-            const Padding(
-              padding: EdgeInsets.fromLTRB(0, 0, 0, 8),
-              child: Divider(
-                height: 2,
-              ),
-            ),
-            Form(
+          ),
+          const Divider(
+            height: 2,
+            color: Colors.grey,
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(15, 10, 0, 0),
+            child: Form(
               key: _formKey,
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -526,12 +530,13 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                 ],
               ),
             ),
-            const Divider(
-              height: 2,
-            ),
-            _getFootBar(context)
-          ],
-        ),
+          ),
+          const Divider(
+            height: 2,
+            color: Colors.grey,
+          ),
+          _getFootBar(context)
+        ],
       ),
     );
   }

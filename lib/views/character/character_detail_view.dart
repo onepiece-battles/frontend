@@ -456,11 +456,11 @@ class _CharacterDetailState extends State<CharacterDetail> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: ImageHelper.getRoundImageFrame(
-                250,
-                250,
+                200,
+                200,
                 3,
                 OnepieceColors.liteFancyBlue,
-                10,
+                90,
                 Base64Helper.decode(character.profileImage!)),
           ),
           Form(
