@@ -378,14 +378,15 @@ class _BattleDetailViewState extends State<BattleDetailView> {
               child: RotatedBox(
                 quarterTurns: 1,
                 child: CharacterBarGraph(
+                    symmetric: false,
                     characterData: CharacterData(
-                  battle.starter!.attack,
-                  battle.starter!.defense,
-                  battle.starter!.intelligence,
-                  battle.starter!.speed,
-                  battle.starter!.blood,
-                  battle.starter!.energy,
-                )),
+                      battle.starter!.attack,
+                      battle.starter!.defense,
+                      battle.starter!.intelligence,
+                      battle.starter!.speed,
+                      battle.starter!.blood,
+                      battle.starter!.energy,
+                    )),
               ),
             ),
           ),
@@ -509,14 +510,15 @@ class _BattleDetailViewState extends State<BattleDetailView> {
               child: RotatedBox(
                 quarterTurns: 1,
                 child: CharacterBarGraph(
+                    symmetric: false,
                     characterData: CharacterData(
-                  battle.receiver!.attack,
-                  battle.receiver!.defense,
-                  battle.receiver!.intelligence,
-                  battle.receiver!.speed,
-                  battle.receiver!.blood,
-                  battle.receiver!.energy,
-                )),
+                      battle.receiver!.attack,
+                      battle.receiver!.defense,
+                      battle.receiver!.intelligence,
+                      battle.receiver!.speed,
+                      battle.receiver!.blood,
+                      battle.receiver!.energy,
+                    )),
               ),
             ),
           ),
@@ -528,31 +530,30 @@ class _BattleDetailViewState extends State<BattleDetailView> {
   Widget _getStartButton(BuildContext context) {
     return Consumer<BattleExecutionData>(builder: (context, model, child) {
       return Padding(
-        padding: const EdgeInsets.all(40.0),
+        padding: const EdgeInsets.all(30.0),
         child: Tooltip(
           message: model.battleStatus == BattleStatus.CREATED
               ? AppLocalizations.of(context)!.startBattle
               : "",
           child: InkWell(
-            splashColor: Colors.transparent,
-            hoverColor: Colors.transparent,
-            onTap: model.battleStatus == BattleStatus.CREATED
-                ? () {
-                    getIt<BattleDao>()
-                        .startBattle(StartBattleRequest(battleId: battle.id))
-                        .then((value) => {
-                              OnepieceAlert.getBasicAlertDialogFunc(
-                                  context, "battle", "start success")
-                            });
-                  }
-                : null,
-            child: SvgPicture.asset(
-              'asset/images/svgs/battle.svg',
-              color: OnepieceColors.fancyBlue,
-              width: 40,
-              height: 40,
-            ),
-          ),
+              splashColor: Colors.transparent,
+              hoverColor: Colors.transparent,
+              onTap: model.battleStatus == BattleStatus.CREATED
+                  ? () {
+                      getIt<BattleDao>()
+                          .startBattle(StartBattleRequest(battleId: battle.id))
+                          .then((value) => {
+                                OnepieceAlert.getBasicAlertDialogFunc(
+                                    context, "battle", "start success")
+                              });
+                    }
+                  : null,
+              child: SvgPicture.asset(
+                'asset/images/svgs/battle.svg',
+                color: OnepieceColors.liteFancyBlue,
+                width: 80,
+                height: 80,
+              )),
         ),
       );
     });

@@ -19,7 +19,6 @@ import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:one_piece_battles_flutter/utils/image_helper.dart';
 import 'package:one_piece_battles_flutter/popup/create_feedback_popup.dart';
 import 'package:openapi/api.dart';
-import 'package:flutter_toggle_tab/flutter_toggle_tab.dart';
 import 'constants/onepiece_colors.dart';
 import 'main.dart';
 
@@ -37,6 +36,7 @@ class HomePage extends StatefulWidget {
 
 class HomePageState extends State<HomePage> {
   final String setting = "setting";
+  final int screenChangeBar = 800;
   var _tabTextIndexSelected =
       I18nHelper.convertToOnepieceLocale(getIt<Locale>()).toString() ==
               (OnepieceLocale.zhCN.toString())
@@ -179,13 +179,22 @@ class HomePageState extends State<HomePage> {
     var home = Padding(
       padding: const EdgeInsets.fromLTRB(0, 0, 0, 4),
       child: IconButton(
-        splashRadius: 0.1,
+        style: ButtonStyle(
+          overlayColor: MaterialStateProperty.all(Colors.transparent),
+        ),
         onPressed: () {
           context.goNamed('userHome',
               extra: getIt<User>().id,
               pathParameters: {'name': getIt<User>().nickname});
         },
         icon: const Icon(
+          shadows: [
+            Shadow(
+              offset: Offset(2.0, 2.0),
+              blurRadius: 3.0,
+              color: Colors.grey,
+            ),
+          ],
           Icons.home,
           color: OnepieceColors.fancyBlue,
           size: 30,
@@ -215,11 +224,11 @@ class HomePageState extends State<HomePage> {
               first: false,
               second: true,
               spacing: 1.0,
-              style:  const ToggleStyle(
+              style: const ToggleStyle(
                 borderColor: Colors.transparent,
                 backgroundColor: OnepieceColors.menuSelectedTileColor,
                 boxShadow: [
-                   BoxShadow(
+                  BoxShadow(
                     color: Colors.black26,
                     spreadRadius: 1,
                     blurRadius: 2,
@@ -231,8 +240,7 @@ class HomePageState extends State<HomePage> {
               height: 35,
               onChanged: (b) => setState(() {
                 setState(() {
-                  _tabTextIndexSelected =
-                  _tabTextIndexSelected == 0 ? 1 : 0;
+                  _tabTextIndexSelected = _tabTextIndexSelected == 0 ? 1 : 0;
                   Locale locale;
                   if (_tabTextIndexSelected == 0) {
                     locale = locales.first;
@@ -243,44 +251,45 @@ class HomePageState extends State<HomePage> {
                 });
               }),
               styleBuilder: (b) => ToggleStyle(
-                  indicatorColor: b
-                      ? OnepieceColors.fancyBlue
-                      : OnepieceColors.fancyBlue),
+                  indicatorColor:
+                      b ? OnepieceColors.fancyBlue : OnepieceColors.fancyBlue),
               iconBuilder: (value) => value
                   ? const Text(
-                "En",
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600),
-              )
+                      "En",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600),
+                    )
                   : const Text(
-                "文",
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600),
-              ),
+                      "文",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600),
+                    ),
               textBuilder: (value) => value
                   ? const Center(
-                  child: Text(
-                    '文',
-                    style: TextStyle(
-                        color: Colors.black87,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600),
-                  ))
+                      child: Text(
+                      '文',
+                      style: TextStyle(
+                          color: Colors.black87,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600),
+                    ))
                   : const Center(
-                  child: Text(
-                    'En',
-                    style: TextStyle(
-                        color: Colors.black87,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600),
-                  )),
+                      child: Text(
+                      'En',
+                      style: TextStyle(
+                          color: Colors.black87,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600),
+                    )),
             ),
           ),
-          const SizedBox(width: 30,),
+          const SizedBox(
+            width: 30,
+          ),
           SizedBox(
             width: 180,
             child: DropdownButtonHideUnderline(
@@ -352,7 +361,7 @@ class HomePageState extends State<HomePage> {
 
   Widget _getNavigationMenu(BuildContext context, BoxConstraints constraints) {
     return Container(
-      width: constraints.maxWidth > 800 ? 300 : 80,
+      width: constraints.maxWidth > screenChangeBar ? 300 : 80,
       color: OnepieceColors.menuBackgroundColor,
       child: Stack(
         children: [
@@ -390,9 +399,9 @@ class HomePageState extends State<HomePage> {
                     ),
                     padding: const EdgeInsets.all(5),
                     backgroundColor: OnepieceColors.menuBackgroundColor,
-                    foregroundColor: OnepieceColors.menuIconColor,
-                    elevation: 0.0,
-                    shadowColor: Colors.transparent,
+                    foregroundColor: OnepieceColors.menuHoverColor,
+                    elevation: 1.0,
+                    // shadowColor: Colors.transparent,
                   ),
                   onPressed: () {
                     showDialog(
@@ -420,7 +429,7 @@ class HomePageState extends State<HomePage> {
                           21,
                         ),
                         const SizedBox(width: 6),
-                        if (constraints.maxWidth > 800)
+                        if (constraints.maxWidth > screenChangeBar)
                           Text(AppLocalizations.of(context)!.feedback,
                               style: const TextStyle(
                                   color: OnepieceColors.menuTextColor,
@@ -440,7 +449,7 @@ class HomePageState extends State<HomePage> {
 
   Widget _getDrawerHeader(BuildContext context, BoxConstraints constraints) {
     return Container(
-      width: constraints.maxWidth > 800 ? 300 : 80,
+      width: constraints.maxWidth > screenChangeBar ? 300 : 80,
       height: 170,
       color: OnepieceColors.deepFancyBlue,
       child: Column(
@@ -452,13 +461,13 @@ class HomePageState extends State<HomePage> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Padding(
-                  padding: constraints.maxWidth > 800
+                  padding: constraints.maxWidth > screenChangeBar
                       ? const EdgeInsets.only(left: 5.0)
                       : const EdgeInsets.fromLTRB(3.5, 8, 0, 0),
                   child: UserNavigation(
                       context: context, constraints: constraints),
                 ),
-                if (constraints.maxWidth > 800)
+                if (constraints.maxWidth > screenChangeBar)
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -506,11 +515,11 @@ class HomePageState extends State<HomePage> {
               ],
             ),
           ),
-          if (constraints.maxWidth <= 800)
+          if (constraints.maxWidth <= screenChangeBar)
             const SizedBox(
               height: 10,
             ),
-          if (constraints.maxWidth <= 800)
+          if (constraints.maxWidth <= screenChangeBar)
             Padding(
               padding: const EdgeInsets.only(left: 5.0),
               child: Row(
@@ -542,7 +551,7 @@ class HomePageState extends State<HomePage> {
                 ],
               ),
             ),
-          if (constraints.maxWidth <= 800)
+          if (constraints.maxWidth <= screenChangeBar)
             Padding(
               padding: const EdgeInsets.only(left: 5.0),
               child: Row(
@@ -575,13 +584,13 @@ class HomePageState extends State<HomePage> {
               ),
             ),
           Padding(
-            padding: constraints.maxWidth > 800
+            padding: constraints.maxWidth > screenChangeBar
                 ? const EdgeInsets.fromLTRB(2, 8, 2, 8)
                 : const EdgeInsets.fromLTRB(8, 8, 8, 8),
             child: Material(
               type: MaterialType.transparency,
               child: Container(
-                width: constraints.maxWidth > 800 ? 280 : 80,
+                width: constraints.maxWidth > screenChangeBar ? 280 : 80,
                 height: 33,
                 decoration: const BoxDecoration(
                   color: OnepieceColors.fancyGreen,
@@ -589,7 +598,7 @@ class HomePageState extends State<HomePage> {
                 ),
                 child: TextButton(
                   child: Row(
-                    mainAxisAlignment: constraints.maxWidth > 800
+                    mainAxisAlignment: constraints.maxWidth > screenChangeBar
                         ? MainAxisAlignment.start
                         : MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -598,7 +607,7 @@ class HomePageState extends State<HomePage> {
                         Icons.search,
                         color: OnepieceColors.fancyBlue,
                       ),
-                      if (constraints.maxWidth > 800)
+                      if (constraints.maxWidth > screenChangeBar)
                         Text(
                           AppLocalizations.of(context)!.searchResource,
                           style: OnepieceFonts.smallContentStyle,
@@ -730,7 +739,7 @@ class HomePageState extends State<HomePage> {
                 ),
               ),
               hoverColor: OnepieceColors.liteFancyBlue,
-              title: constraints.maxWidth > 800
+              title: constraints.maxWidth > screenChangeBar
                   ? Text(
                       resourceToDisplayTextMap[resourceType]!,
                       textAlign: TextAlign.left,

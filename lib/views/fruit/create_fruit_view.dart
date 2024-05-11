@@ -74,54 +74,28 @@ class _CreateFruitViewState extends State<CreateFruitView> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.vertical,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 0, 15),
-              child: Text(
-                AppLocalizations.of(context)!.basicInfo,
-                style: OnepieceFonts.headerStyle,
+    return Stack(
+      children: [
+        SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(15, 0, 0, 15),
+                child: Text(
+                  AppLocalizations.of(context)!.basicInfo,
+                  style: OnepieceFonts.headerStyle,
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8.0),
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: 300,
-                    child: TextFormField(
-                      controller: fruitNameChController,
-                      validator: (value) {
-                        if (value!.isWhiteSpace()) {
-                          return AppLocalizations.of(context)!.requiredField;
-                        }
-                        if (!DataValidator.validName(value)) {
-                          return AppLocalizations.of(context)!.invalidName;
-                        }
-                        return null;
-                      },
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      maxLength: 10,
-                      maxLengthEnforcement: MaxLengthEnforcement.enforced,
-                      decoration: InputDecoration(
-                        labelText: AppLocalizations.of(context)!.fruitName,
-                        prefixIcon: const Icon(Icons.people),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 25,
-                  ),
-                  if (getIt<User>().loginRole == UserRole.NIKA)
+              Padding(
+                padding: const EdgeInsets.only(left: 15.0),
+                child: Row(
+                  children: [
                     SizedBox(
                       width: 300,
                       child: TextFormField(
-                        controller: fruitNameEnController,
+                        controller: fruitNameChController,
                         validator: (value) {
                           if (value!.isWhiteSpace()) {
                             return AppLocalizations.of(context)!.requiredField;
@@ -139,99 +113,134 @@ class _CreateFruitViewState extends State<CreateFruitView> {
                           prefixIcon: const Icon(Icons.people),
                         ),
                       ),
-                    )
-                ],
-              ),
-            ),
-            Row(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 0, 8, 10),
-                  child: Text(
-                    AppLocalizations.of(context)!.fruitType,
-                    style: OnepieceFonts.tableHeaderStyle,
-                  ),
+                    ),
+                    const SizedBox(
+                      width: 25,
+                    ),
+                    if (getIt<User>().loginRole == UserRole.NIKA)
+                      SizedBox(
+                        width: 300,
+                        child: TextFormField(
+                          controller: fruitNameEnController,
+                          validator: (value) {
+                            if (value!.isWhiteSpace()) {
+                              return AppLocalizations.of(context)!
+                                  .requiredField;
+                            }
+                            if (!DataValidator.validName(value)) {
+                              return AppLocalizations.of(context)!.invalidName;
+                            }
+                            return null;
+                          },
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
+                          maxLength: 10,
+                          maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                          decoration: InputDecoration(
+                            labelText: AppLocalizations.of(context)!.fruitName,
+                            prefixIcon: const Icon(Icons.people),
+                          ),
+                        ),
+                      )
+                  ],
                 ),
-                _getDropDownList(context),
-              ],
-            ),
-            const Padding(
-              padding: EdgeInsets.fromLTRB(0, 0, 0, 8),
-              child: Divider(
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(15, 10, 0, 0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      AppLocalizations.of(context)!.fruitType,
+                      style: OnepieceFonts.smallHeaderStyle,
+                    ),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    _getDropDownList(context),
+                  ],
+                ),
+              ),
+              const Divider(
+                color: Colors.grey,
                 height: 2,
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 0, 15),
-              child: Text(
-                AppLocalizations.of(context)!.battleInfo,
-                style: OnepieceFonts.headerStyle,
+              Padding(
+                padding: const EdgeInsets.fromLTRB(15, 10, 0, 0),
+                child: Text(
+                  AppLocalizations.of(context)!.battleInfo,
+                  style: OnepieceFonts.headerStyle,
+                ),
               ),
-            ),
-            Form(
-              key: _formKey,
-              child: Column(
-                children: <Widget>[
-                  _getFormField(
-                      1,
-                      5,
-                      context,
-                      fruitAttackStrengthenController,
-                      AppLocalizations.of(context)!.attackStrengthen,
-                      _getIcon('images/character_digits_icon/attack.svg')),
-                  _getFormField(
-                      1,
-                      5,
-                      context,
-                      fruitDefenseStrengthenController,
-                      AppLocalizations.of(context)!.defenseStrengthen,
-                      _getIcon('images/character_digits_icon/defense.svg')),
-                  _getFormField(
-                      1,
-                      5,
-                      context,
-                      fruitIntelligenceStrengthenController,
-                      AppLocalizations.of(context)!.intelligenceStrengthen,
-                      _getIcon(
-                          'images/character_digits_icon/intelligence.svg')),
-                  _getFormField(
-                      1,
-                      8,
-                      context,
-                      fruitSpeedStrengthenController,
-                      AppLocalizations.of(context)!.speedStrengthen,
-                      _getIcon('images/character_digits_icon/speed.svg')),
-                  _getFormField(
-                      1,
-                      5,
-                      context,
-                      fruitBloodStrengthenController,
-                      AppLocalizations.of(context)!.bloodStrengthen,
-                      _getIcon('images/character_digits_icon/blood.svg')),
-                  _getFormField(
-                      1,
-                      5,
-                      context,
-                      fruitGroupGainStrengthenController,
-                      AppLocalizations.of(context)!.groupStrengthen,
-                      _getIcon('images/character_digits_icon/group_gain.svg')),
-                  _getFormField(
-                      1,
-                      10,
-                      context,
-                      fruitEnergyConsumeController,
-                      AppLocalizations.of(context)!.energyConsume,
-                      _getIcon('images/character_digits_icon/energy.svg')),
-                ],
+              Padding(
+                padding: const EdgeInsets.only(left: 15.0),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: <Widget>[
+                      _getFormField(
+                          1,
+                          5,
+                          context,
+                          fruitAttackStrengthenController,
+                          AppLocalizations.of(context)!.attackStrengthen,
+                          _getIcon('images/character_digits_icon/attack.svg')),
+                      _getFormField(
+                          1,
+                          5,
+                          context,
+                          fruitDefenseStrengthenController,
+                          AppLocalizations.of(context)!.defenseStrengthen,
+                          _getIcon('images/character_digits_icon/defense.svg')),
+                      _getFormField(
+                          1,
+                          5,
+                          context,
+                          fruitIntelligenceStrengthenController,
+                          AppLocalizations.of(context)!.intelligenceStrengthen,
+                          _getIcon(
+                              'images/character_digits_icon/intelligence.svg')),
+                      _getFormField(
+                          1,
+                          8,
+                          context,
+                          fruitSpeedStrengthenController,
+                          AppLocalizations.of(context)!.speedStrengthen,
+                          _getIcon('images/character_digits_icon/speed.svg')),
+                      _getFormField(
+                          1,
+                          5,
+                          context,
+                          fruitBloodStrengthenController,
+                          AppLocalizations.of(context)!.bloodStrengthen,
+                          _getIcon('images/character_digits_icon/blood.svg')),
+                      _getFormField(
+                          1,
+                          5,
+                          context,
+                          fruitGroupGainStrengthenController,
+                          AppLocalizations.of(context)!.groupStrengthen,
+                          _getIcon(
+                              'images/character_digits_icon/group_gain.svg')),
+                      _getFormField(
+                          1,
+                          10,
+                          context,
+                          fruitEnergyConsumeController,
+                          AppLocalizations.of(context)!.energyConsume,
+                          _getIcon('images/character_digits_icon/energy.svg')),
+                    ],
+                  ),
+                ),
               ),
-            ),
-            const Divider(
-              height: 2,
-            ),
-            _getFootBar(context)
-          ],
+              const SizedBox(
+                height: 40,
+              )
+            ],
+          ),
         ),
-      ),
+        _getFootBar(context)
+      ],
     );
   }
 
@@ -343,55 +352,63 @@ class _CreateFruitViewState extends State<CreateFruitView> {
   }
 
   Widget _getFootBar(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          ElevatedButton(
-            child: Text(AppLocalizations.of(context)!.clearForm),
-            onPressed: () {
-              setState(() {
-                fruitControllerList().forEach((element) {
-                  element.clear();
-                });
-              });
-            },
-          ),
-          ElevatedButton(
-            onPressed: () {
-              final isValid = _formKey.currentState!.validate();
-              if (!isValid) {
-                return;
-              }
-              CreateFruitRequest addFruitRequest = CreateFruitRequest(
-                name: RandomStringGenerator.generateI18n(
-                    fruitNameEnController.text, fruitNameChController.text),
-                fruitType: selectedFruitType,
-                attackStrengthen: DataConverter.stringToInt(
-                    fruitAttackStrengthenController.text.trim()),
-                defenseStrengthen: DataConverter.stringToInt(
-                    fruitDefenseStrengthenController.text.trim()),
-                bloodStrengthen: DataConverter.stringToInt(
-                    fruitBloodStrengthenController.text.trim()),
-                intelligenceStrengthen: DataConverter.stringToInt(
-                    fruitIntelligenceStrengthenController.text.trim()),
-                speedStrengthen: DataConverter.stringToInt(
-                    fruitSpeedStrengthenController.text.trim()),
-                energyConsume: DataConverter.stringToInt(
-                    fruitEnergyConsumeController.text),
-                groupGainStrengthen: DataConverter.stringToInt(
-                    fruitGroupGainStrengthenController.text.trim()),
-              );
+    return Positioned(
+        bottom: 0,
+        left: 0,
+        right: 0,
+        child: Container(
+          color: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ElevatedButton(
+                  child: Text(AppLocalizations.of(context)!.clearForm),
+                  onPressed: () {
+                    setState(() {
+                      fruitControllerList().forEach((element) {
+                        element.clear();
+                      });
+                    });
+                  },
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    final isValid = _formKey.currentState!.validate();
+                    if (!isValid) {
+                      return;
+                    }
+                    CreateFruitRequest addFruitRequest = CreateFruitRequest(
+                      name: RandomStringGenerator.generateI18n(
+                          fruitNameEnController.text,
+                          fruitNameChController.text),
+                      fruitType: selectedFruitType,
+                      attackStrengthen: DataConverter.stringToInt(
+                          fruitAttackStrengthenController.text.trim()),
+                      defenseStrengthen: DataConverter.stringToInt(
+                          fruitDefenseStrengthenController.text.trim()),
+                      bloodStrengthen: DataConverter.stringToInt(
+                          fruitBloodStrengthenController.text.trim()),
+                      intelligenceStrengthen: DataConverter.stringToInt(
+                          fruitIntelligenceStrengthenController.text.trim()),
+                      speedStrengthen: DataConverter.stringToInt(
+                          fruitSpeedStrengthenController.text.trim()),
+                      energyConsume: DataConverter.stringToInt(
+                          fruitEnergyConsumeController.text),
+                      groupGainStrengthen: DataConverter.stringToInt(
+                          fruitGroupGainStrengthenController.text.trim()),
+                    );
 
-              getIt<FruitDao>().add(addFruitRequest).then((value) {
-                context.goNamed("fruit");
-              });
-            },
-            child: Text(AppLocalizations.of(context)!.submitForm),
+                    getIt<FruitDao>().add(addFruitRequest).then((value) {
+                      context.goNamed("fruit");
+                    });
+                  },
+                  child: Text(AppLocalizations.of(context)!.submitForm),
+                ),
+              ],
+            ),
           ),
-        ],
-      ),
-    );
+        ));
   }
 }

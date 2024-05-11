@@ -8,7 +8,8 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class CharacterBarGraph extends StatelessWidget {
   final CharacterData characterData;
-  const CharacterBarGraph({super.key, required this.characterData});
+  final bool symmetric;
+  const CharacterBarGraph({super.key, required this.characterData, required this.symmetric});
 
   @override
   Widget build(BuildContext context) {
@@ -59,6 +60,7 @@ class CharacterBarGraph extends StatelessWidget {
         ),
         barTouchData: BarTouchData(
             touchTooltipData: BarTouchTooltipData(
+                fitInsideVertically: true,
                 tooltipBgColor: OnepieceColors.fancyBlue,
                 tooltipPadding: const EdgeInsets.all(5),
                 maxContentWidth: 50,
