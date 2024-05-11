@@ -227,7 +227,7 @@ class _UserHomeState extends State<UserHome> {
             child: ImageHelper.getRoundImageFrame(
                 100,
                 100,
-                3,
+                2,
                 OnepieceColors.liteFancyBlue,
                 20,
                 Base64Helper.decode(characters[index].profileImage!)),
@@ -279,7 +279,7 @@ class _UserHomeState extends State<UserHome> {
               child: ImageHelper.getRoundImageFrame(
                   100,
                   100,
-                  3,
+                  2,
                   OnepieceColors.liteFancyBlue,
                   20,
                   Base64Helper.decode(groups[index].profileImage!))),

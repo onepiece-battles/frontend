@@ -129,415 +129,430 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
   final _formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(15, 0, 0, 15),
-            child: Text(
-              AppLocalizations.of(context)!.basicInfo,
-              style: OnepieceFonts.headerStyle,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 15.0),
-            child: _getAvatar(context),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 15.0),
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    width: 280,
-                    child: TextFormField(
-                      controller: characterNameCnController,
-                      validator: (value) {
-                        if (value!.isWhiteSpace()) {
-                          return AppLocalizations.of(context)!.requiredField;
-                        }
-                        if (!DataValidator.validName(value)) {
-                          return AppLocalizations.of(context)!.invalidName;
-                        }
-                        return null;
-                      },
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      maxLength: 10,
-                      maxLengthEnforcement: MaxLengthEnforcement.enforced,
-                      decoration: InputDecoration(
-                        labelText: AppLocalizations.of(context)!.characterName,
-                        prefixIcon: const Icon(Icons.people),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 25,
-                  ),
-                  if (getIt<User>().loginRole == UserRole.NIKA)
-                    SizedBox(
-                      width: 280,
-                      child: TextFormField(
-                        controller: characterNameEnController,
-                        validator: (value) {
-                          if (value!.isWhiteSpace()) {
-                            return AppLocalizations.of(context)!.requiredField;
-                          }
-                          if (!DataValidator.validName(value)) {
-                            return AppLocalizations.of(context)!.invalidName;
-                          }
-                          return null;
-                        },
-                        autovalidateMode: AutovalidateMode.onUserInteraction,
-                        maxLength: 10,
-                        maxLengthEnforcement: MaxLengthEnforcement.enforced,
-                        decoration: InputDecoration(
-                          labelText:
-                              AppLocalizations.of(context)!.characterName,
-                          prefixIcon: const Icon(Icons.people),
-                        ),
-                      ),
-                    ),
-                  const SizedBox(
-                    width: 50,
-                  ),
-                  Text(
-                    AppLocalizations.of(context)!.battleStyle,
-                    style: OnepieceFonts.fancyBlueHintFont,
-                  ),
-                  _getBattleStyle(context),
-                  const SizedBox(
-                    width: 30,
-                  ),
-                  Text(
-                    AppLocalizations.of(context)!.race,
-                    style: OnepieceFonts.fancyBlueHintFont,
-                  ),
-                  _getRace(context),
-                  const SizedBox(
-                    width: 30,
-                  ),
-                  Text(
-                    AppLocalizations.of(context)!.hakis,
-                    style: OnepieceFonts.fancyBlueHintFont,
-                  ),
-                  _getHakiList(context),
-                  const SizedBox(
-                    height: 30,
-                  ),
-                ]),
-          ),
-          const Divider(
-            height: 2,
-            color: Colors.grey,
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(15, 10, 0, 0),
-            child: Form(
-              key: _formKey,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
+    return Stack(
+      children: [
+        SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(15, 0, 0, 15),
+                child: Text(
+                  AppLocalizations.of(context)!.basicInfo,
+                  style: OnepieceFonts.headerStyle,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 15.0),
+                child: _getAvatar(context),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 15.0),
+                child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 0, 0, 15),
-                        child: Row(
-                          children: [
-                            Text(
-                              AppLocalizations.of(context)!.battleInfo,
-                              style: OnepieceFonts.headerStyle,
-                            ),
-                            Text(
-                              "  ( ${AppLocalizations.of(context)!.required} )",
-                              style: OnepieceFonts.hintFont,
-                            )
-                          ],
-                        ),
-                      ),
-                      _getFormField(
-                          1,
-                          2,
-                          context,
-                          characterFruitLimitController,
-                          AppLocalizations.of(context)!.fruitLimit,
-                          _getIcon(
-                              'images/character_digits_icon/fruit_limit.svg')),
-                      _getFormField(
-                          1,
-                          5,
-                          context,
-                          characterGroupGainController,
-                          AppLocalizations.of(context)!.groupGain,
-                          _getIcon(
-                              'images/character_digits_icon/group_gain.svg')),
-                      _getFormField(
-                          10,
-                          1000,
-                          context,
-                          characterAttackController,
-                          AppLocalizations.of(context)!.characterAttack,
-                          _getIcon('images/character_digits_icon/attack.svg')),
-                      _getFormField(
-                        10,
-                        1000,
-                        context,
-                        characterDefenseController,
-                        AppLocalizations.of(context)!.characterDefense,
-                        _getIcon('images/character_digits_icon/defense.svg'),
-                      ),
-                      _getFormField(
-                        70,
-                        260,
-                        context,
-                        characterIntelligenceController,
-                        AppLocalizations.of(context)!.characterIntelligence,
-                        _getIcon(
-                            'images/character_digits_icon/intelligence.svg'),
-                      ),
-                      _getFormField(
-                        100,
-                        10000,
-                        context,
-                        characterBloodController,
-                        AppLocalizations.of(context)!.characterBlood,
-                        _getIcon('images/character_digits_icon/blood.svg'),
-                      ),
-                      _getFormField(
-                        10,
-                        200,
-                        context,
-                        characterSpeedController,
-                        AppLocalizations.of(context)!.characterSpeed,
-                        _getIcon('images/character_digits_icon/speed.svg'),
-                      ),
-                      _getFormField(
-                        10,
-                        50,
-                        context,
-                        characterEnergyController,
-                        AppLocalizations.of(context)!.characterEnergy,
-                        _getIcon('images/character_digits_icon/energy.svg'),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(
-                    width: 100,
-                  ),
-                  Column(
                     mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 0, 0, 15),
-                        child: Row(
-                          children: [
-                            Text(
-                              AppLocalizations.of(context)!.characterDetail,
-                              style: OnepieceFonts.headerStyle,
-                            ),
-                            Text(
-                              "  ( ${AppLocalizations.of(context)!.optional} )",
-                              style: OnepieceFonts.hintFont,
-                            )
-                          ],
-                        ),
-                      ),
-                      _getFormField(
-                        0,
-                        100000,
-                        context,
-                        characterAge,
-                        AppLocalizations.of(context)!.age,
-                        _getIcon('images/character_digits_icon/age.svg'),
-                      ),
-                      _getFormField(
-                        1,
-                        100000,
-                        context,
-                        characterHeight,
-                        AppLocalizations.of(context)!.height,
-                        _getIcon('images/character_digits_icon/height.svg'),
-                      ),
-                      _getStringFormField(
-                        20,
-                        context,
-                        characterBirthPlace,
-                        AppLocalizations.of(context)!.birthPlace,
-                        _getIcon(
-                            'images/character_digits_icon/birth_place.svg'),
-                      ),
+                    children: [
                       SizedBox(
-                        width: 240,
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 8.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              ImageHelper.getSvgIconWithColor(
-                                  "images/character_digits_icon/birthday.svg",
-                                  25,
-                                  25,
-                                  OnepieceColors.fancyBlue),
-                              SizedBox(
-                                width: 60,
-                                child: DropdownButtonHideUnderline(
-                                  child: DropdownButton2(
-                                    isExpanded: true,
-                                    value: selectedMonth,
-                                    onChanged: (String? month) {
-                                      setState(() {
-                                        selectedMonth = month!;
-                                      });
-                                    },
-                                    buttonStyleData: ButtonStyleData(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 5),
-                                      decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(3),
-                                          color: OnepieceColors.liteFancyGreen),
-                                      height: 30,
-                                      width: 60,
-                                    ),
-                                    menuItemStyleData: const MenuItemStyleData(
-                                      height: 30,
-                                    ),
-                                    selectedItemBuilder: (context) {
-                                      return List<String>.generate(
-                                              12,
-                                              (int index) =>
-                                                  (index + 1).toString())
-                                          .map((String month) {
-                                        return Container(
-                                          alignment:
-                                              AlignmentDirectional.center,
-                                          child: Text(
-                                            month,
-                                            style: const TextStyle(
-                                              fontSize: 16,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                        );
-                                      }).toList();
-                                    },
-                                    items: List<String>.generate(
-                                            12,
-                                            (int index) =>
-                                                (index + 1).toString())
-                                        .map((String month) {
-                                      return DropdownMenuItem<String>(
-                                        value: month,
-                                        child: Text(
-                                          month,
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                      );
-                                    }).toList(),
-                                  ),
-                                ),
-                              ),
-                              Text(
-                                AppLocalizations.of(context)!.month,
-                                style: OnepieceFonts.contentStyle,
-                              ),
-                              SizedBox(
-                                width: 60,
-                                child: DropdownButtonHideUnderline(
-                                  child: DropdownButton2(
-                                    isExpanded: true,
-                                    value: selectedDay,
-                                    onChanged: (String? day) {
-                                      setState(() {
-                                        selectedDay = day!;
-                                      });
-                                    },
-                                    buttonStyleData: ButtonStyleData(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 6),
-                                      decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(3),
-                                          color: OnepieceColors.liteFancyGreen),
-                                      height: 30,
-                                      width: 60,
-                                    ),
-                                    menuItemStyleData: const MenuItemStyleData(
-                                      height: 30,
-                                    ),
-                                    selectedItemBuilder: (context) {
-                                      return List<String>.generate(
-                                              31,
-                                              (int index) =>
-                                                  (index + 1).toString())
-                                          .map((String day) {
-                                        return Container(
-                                          alignment:
-                                              AlignmentDirectional.center,
-                                          child: Text(
-                                            day,
-                                            style: const TextStyle(
-                                              fontSize: 16,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                        );
-                                      }).toList();
-                                    },
-                                    items: List<String>.generate(
-                                            31,
-                                            (int index) =>
-                                                (index + 1).toString())
-                                        .map((String day) {
-                                      return DropdownMenuItem<String>(
-                                        value: day,
-                                        child: Text(
-                                          day,
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                      );
-                                    }).toList(),
-                                  ),
-                                ),
-                              ),
-                              Text(
-                                AppLocalizations.of(context)!.day,
-                                style: OnepieceFonts.contentStyle,
-                              ),
-                            ],
+                        width: 280,
+                        child: TextFormField(
+                          controller: characterNameCnController,
+                          validator: (value) {
+                            if (value!.isWhiteSpace()) {
+                              return AppLocalizations.of(context)!
+                                  .requiredField;
+                            }
+                            if (!DataValidator.validName(value)) {
+                              return AppLocalizations.of(context)!.invalidName;
+                            }
+                            return null;
+                          },
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
+                          maxLength: 10,
+                          maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                          decoration: InputDecoration(
+                            labelText:
+                                AppLocalizations.of(context)!.characterName,
+                            prefixIcon: const Icon(Icons.people),
                           ),
                         ),
                       ),
-                      _getFormField(
-                        10,
-                        100000000000,
-                        context,
-                        characterBounty,
-                        AppLocalizations.of(context)!.bounty,
-                        _getIcon('images/character_digits_icon/bounty.svg'),
+                      const SizedBox(
+                        width: 25,
+                      ),
+                      if (getIt<User>().loginRole == UserRole.NIKA)
+                        SizedBox(
+                          width: 280,
+                          child: TextFormField(
+                            controller: characterNameEnController,
+                            validator: (value) {
+                              if (value!.isWhiteSpace()) {
+                                return AppLocalizations.of(context)!
+                                    .requiredField;
+                              }
+                              if (!DataValidator.validName(value)) {
+                                return AppLocalizations.of(context)!
+                                    .invalidName;
+                              }
+                              return null;
+                            },
+                            autovalidateMode:
+                                AutovalidateMode.onUserInteraction,
+                            maxLength: 10,
+                            maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                            decoration: InputDecoration(
+                              labelText:
+                                  AppLocalizations.of(context)!.characterName,
+                              prefixIcon: const Icon(Icons.people),
+                            ),
+                          ),
+                        ),
+                      const SizedBox(
+                        width: 50,
+                      ),
+                      Text(
+                        AppLocalizations.of(context)!.battleStyle,
+                        style: OnepieceFonts.fancyBlueHintFont,
+                      ),
+                      _getBattleStyle(context),
+                      const SizedBox(
+                        width: 30,
+                      ),
+                      Text(
+                        AppLocalizations.of(context)!.race,
+                        style: OnepieceFonts.fancyBlueHintFont,
+                      ),
+                      _getRace(context),
+                      const SizedBox(
+                        width: 30,
+                      ),
+                      Text(
+                        AppLocalizations.of(context)!.hakis,
+                        style: OnepieceFonts.fancyBlueHintFont,
+                      ),
+                      _getHakiList(context),
+                      const SizedBox(
+                        height: 30,
+                      ),
+                    ]),
+              ),
+              const Divider(
+                height: 2,
+                color: Colors.grey,
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(15, 10, 0, 0),
+                child: Form(
+                  key: _formKey,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 0, 0, 15),
+                            child: Row(
+                              children: [
+                                Text(
+                                  AppLocalizations.of(context)!.battleInfo,
+                                  style: OnepieceFonts.headerStyle,
+                                ),
+                                Text(
+                                  "  ( ${AppLocalizations.of(context)!.required} )",
+                                  style: OnepieceFonts.hintFont,
+                                )
+                              ],
+                            ),
+                          ),
+                          _getFormField(
+                              1,
+                              2,
+                              context,
+                              characterFruitLimitController,
+                              AppLocalizations.of(context)!.fruitLimit,
+                              _getIcon(
+                                  'images/character_digits_icon/fruit_limit.svg')),
+                          _getFormField(
+                              1,
+                              5,
+                              context,
+                              characterGroupGainController,
+                              AppLocalizations.of(context)!.groupGain,
+                              _getIcon(
+                                  'images/character_digits_icon/group_gain.svg')),
+                          _getFormField(
+                              10,
+                              1000,
+                              context,
+                              characterAttackController,
+                              AppLocalizations.of(context)!.characterAttack,
+                              _getIcon(
+                                  'images/character_digits_icon/attack.svg')),
+                          _getFormField(
+                            10,
+                            1000,
+                            context,
+                            characterDefenseController,
+                            AppLocalizations.of(context)!.characterDefense,
+                            _getIcon(
+                                'images/character_digits_icon/defense.svg'),
+                          ),
+                          _getFormField(
+                            70,
+                            260,
+                            context,
+                            characterIntelligenceController,
+                            AppLocalizations.of(context)!.characterIntelligence,
+                            _getIcon(
+                                'images/character_digits_icon/intelligence.svg'),
+                          ),
+                          _getFormField(
+                            100,
+                            10000,
+                            context,
+                            characterBloodController,
+                            AppLocalizations.of(context)!.characterBlood,
+                            _getIcon('images/character_digits_icon/blood.svg'),
+                          ),
+                          _getFormField(
+                            10,
+                            200,
+                            context,
+                            characterSpeedController,
+                            AppLocalizations.of(context)!.characterSpeed,
+                            _getIcon('images/character_digits_icon/speed.svg'),
+                          ),
+                          _getFormField(
+                            10,
+                            50,
+                            context,
+                            characterEnergyController,
+                            AppLocalizations.of(context)!.characterEnergy,
+                            _getIcon('images/character_digits_icon/energy.svg'),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(
+                        width: 100,
+                      ),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 0, 0, 15),
+                            child: Row(
+                              children: [
+                                Text(
+                                  AppLocalizations.of(context)!.characterDetail,
+                                  style: OnepieceFonts.headerStyle,
+                                ),
+                                Text(
+                                  "  ( ${AppLocalizations.of(context)!.optional} )",
+                                  style: OnepieceFonts.hintFont,
+                                )
+                              ],
+                            ),
+                          ),
+                          _getFormField(
+                            0,
+                            100000,
+                            context,
+                            characterAge,
+                            AppLocalizations.of(context)!.age,
+                            _getIcon('images/character_digits_icon/age.svg'),
+                          ),
+                          _getFormField(
+                            1,
+                            100000,
+                            context,
+                            characterHeight,
+                            AppLocalizations.of(context)!.height,
+                            _getIcon('images/character_digits_icon/height.svg'),
+                          ),
+                          _getStringFormField(
+                            20,
+                            context,
+                            characterBirthPlace,
+                            AppLocalizations.of(context)!.birthPlace,
+                            _getIcon(
+                                'images/character_digits_icon/birth_place.svg'),
+                          ),
+                          SizedBox(
+                            width: 240,
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 8.0),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  ImageHelper.getSvgIconWithColor(
+                                      "images/character_digits_icon/birthday.svg",
+                                      25,
+                                      25,
+                                      OnepieceColors.fancyBlue),
+                                  SizedBox(
+                                    width: 60,
+                                    child: DropdownButtonHideUnderline(
+                                      child: DropdownButton2(
+                                        isExpanded: true,
+                                        value: selectedMonth,
+                                        onChanged: (String? month) {
+                                          setState(() {
+                                            selectedMonth = month!;
+                                          });
+                                        },
+                                        buttonStyleData: ButtonStyleData(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 5),
+                                          decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(3),
+                                              color: OnepieceColors
+                                                  .liteFancyGreen),
+                                          height: 30,
+                                          width: 60,
+                                        ),
+                                        menuItemStyleData:
+                                            const MenuItemStyleData(
+                                          height: 30,
+                                        ),
+                                        selectedItemBuilder: (context) {
+                                          return List<String>.generate(
+                                                  12,
+                                                  (int index) =>
+                                                      (index + 1).toString())
+                                              .map((String month) {
+                                            return Container(
+                                              alignment:
+                                                  AlignmentDirectional.center,
+                                              child: Text(
+                                                month,
+                                                style: const TextStyle(
+                                                  fontSize: 16,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                            );
+                                          }).toList();
+                                        },
+                                        items: List<String>.generate(
+                                                12,
+                                                (int index) =>
+                                                    (index + 1).toString())
+                                            .map((String month) {
+                                          return DropdownMenuItem<String>(
+                                            value: month,
+                                            child: Text(
+                                              month,
+                                              style: const TextStyle(
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          );
+                                        }).toList(),
+                                      ),
+                                    ),
+                                  ),
+                                  Text(
+                                    AppLocalizations.of(context)!.month,
+                                    style: OnepieceFonts.contentStyle,
+                                  ),
+                                  SizedBox(
+                                    width: 60,
+                                    child: DropdownButtonHideUnderline(
+                                      child: DropdownButton2(
+                                        isExpanded: true,
+                                        value: selectedDay,
+                                        onChanged: (String? day) {
+                                          setState(() {
+                                            selectedDay = day!;
+                                          });
+                                        },
+                                        buttonStyleData: ButtonStyleData(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 6),
+                                          decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(3),
+                                              color: OnepieceColors
+                                                  .liteFancyGreen),
+                                          height: 30,
+                                          width: 60,
+                                        ),
+                                        menuItemStyleData:
+                                            const MenuItemStyleData(
+                                          height: 30,
+                                        ),
+                                        selectedItemBuilder: (context) {
+                                          return List<String>.generate(
+                                                  31,
+                                                  (int index) =>
+                                                      (index + 1).toString())
+                                              .map((String day) {
+                                            return Container(
+                                              alignment:
+                                                  AlignmentDirectional.center,
+                                              child: Text(
+                                                day,
+                                                style: const TextStyle(
+                                                  fontSize: 16,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                            );
+                                          }).toList();
+                                        },
+                                        items: List<String>.generate(
+                                                31,
+                                                (int index) =>
+                                                    (index + 1).toString())
+                                            .map((String day) {
+                                          return DropdownMenuItem<String>(
+                                            value: day,
+                                            child: Text(
+                                              day,
+                                              style: const TextStyle(
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          );
+                                        }).toList(),
+                                      ),
+                                    ),
+                                  ),
+                                  Text(
+                                    AppLocalizations.of(context)!.day,
+                                    style: OnepieceFonts.contentStyle,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          _getFormField(
+                            10,
+                            100000000000,
+                            context,
+                            characterBounty,
+                            AppLocalizations.of(context)!.bounty,
+                            _getIcon('images/character_digits_icon/bounty.svg'),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
+                ),
               ),
-            ),
+              const SizedBox(height: 40,)
+            ],
           ),
-          const Divider(
-            height: 2,
-            color: Colors.grey,
-          ),
-          _getFootBar(context)
-        ],
-      ),
+        ),
+        _getFootBar(context)
+      ],
     );
   }
 
@@ -924,90 +939,100 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
   }
 
   Widget _getFootBar(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          ElevatedButton(
-            child: Text(AppLocalizations.of(context)!.clearForm),
-            onPressed: () {
-              setState(() {
-                characterControllerListAll().forEach((element) {
-                  element.clear();
-                });
-                _pickedImage = Uint8List(0);
-                _chosenImageName = '';
-                _newImagePicked = false;
-              });
-            },
-          ),
-          ElevatedButton(
-            onPressed: !_allElementsAreFilled()
-                ? null
-                : () {
-                    final isValid = _formKey.currentState!.validate();
-                    if (!isValid) {
-                      return;
-                    }
-                    if (!_newImagePicked) {
-                      OnepieceAlert.getBasicAlertDialogFunc(
-                          context,
-                          AppLocalizations.of(context)!.hint,
-                          AppLocalizations.of(context)!.characterImageRequired);
-                      return;
-                    }
-                    CreateCharacterRequest addCharacterRequest =
-                        CreateCharacterRequest(
-                      battleStyle: selectedBattleStyle,
-                      race: selectedRace,
-                      hakis: selectedHakis,
-                      name: RandomStringGenerator.generateI18n(
-                          characterNameEnController.text,
-                          characterNameCnController.text),
-                      maximumFruitCount: DataConverter.stringToInt(
-                          characterFruitLimitController.text.trim()),
-                      groupGain: DataConverter.stringToInt(
-                          characterGroupGainController.text.trim()),
-                      attack: DataConverter.stringToInt(
-                          characterAttackController.text.trim()),
-                      defense: DataConverter.stringToInt(
-                          characterDefenseController.text.trim()),
-                      intelligence: DataConverter.stringToInt(
-                          characterIntelligenceController.text.trim()),
-                      blood: DataConverter.stringToInt(
-                          characterBloodController.text.trim()),
-                      speed: DataConverter.stringToInt(
-                          characterSpeedController.text.trim()),
-                      energy: DataConverter.stringToInt(
-                          characterEnergyController.text.trim()),
-                      height: DataConverter.stringToInt(
-                          characterHeight.text.trim()),
-                      age: DataConverter.stringToInt(characterAge.text.trim()),
-                      birthPlace: characterBirthPlace.text.trim(),
-                      dateOfBirth: "$selectedMonth-$selectedDay",
-                      bounty: DataConverter.stringToInt(
-                          characterBounty.text.trim()),
-                    );
-                    getIt<CharacterDao>()
-                        .addCharacter(addCharacterRequest)
-                        .then((value) {
-                      var encodedImage = Base64Helper.encode(_pickedImage);
-                      UploadImageRequest uploadImageRequest =
-                          UploadImageRequest(
-                              resourceId: value!.id,
-                              image: encodedImage,
-                              type: ResourceType.CHARACTER);
-                      getIt<ImageDao>()
-                          .addImage(uploadImageRequest)
-                          .then((value) => context.goNamed("characters"));
+    return Positioned(
+        bottom: 0,
+        left: 0,
+        right: 0,
+        child: Container(
+          color: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ElevatedButton(
+                  child: Text(AppLocalizations.of(context)!.clearForm),
+                  onPressed: () {
+                    setState(() {
+                      characterControllerListAll().forEach((element) {
+                        element.clear();
+                      });
+                      _pickedImage = Uint8List(0);
+                      _chosenImageName = '';
+                      _newImagePicked = false;
                     });
                   },
-            child: Text(AppLocalizations.of(context)!.submitForm),
+                ),
+                ElevatedButton(
+                  onPressed: !_allElementsAreFilled()
+                      ? null
+                      : () {
+                          final isValid = _formKey.currentState!.validate();
+                          if (!isValid) {
+                            return;
+                          }
+                          if (!_newImagePicked) {
+                            OnepieceAlert.getBasicAlertDialogFunc(
+                                context,
+                                AppLocalizations.of(context)!.hint,
+                                AppLocalizations.of(context)!
+                                    .characterImageRequired);
+                            return;
+                          }
+                          CreateCharacterRequest addCharacterRequest =
+                              CreateCharacterRequest(
+                            battleStyle: selectedBattleStyle,
+                            race: selectedRace,
+                            hakis: selectedHakis,
+                            name: RandomStringGenerator.generateI18n(
+                                characterNameEnController.text,
+                                characterNameCnController.text),
+                            maximumFruitCount: DataConverter.stringToInt(
+                                characterFruitLimitController.text.trim()),
+                            groupGain: DataConverter.stringToInt(
+                                characterGroupGainController.text.trim()),
+                            attack: DataConverter.stringToInt(
+                                characterAttackController.text.trim()),
+                            defense: DataConverter.stringToInt(
+                                characterDefenseController.text.trim()),
+                            intelligence: DataConverter.stringToInt(
+                                characterIntelligenceController.text.trim()),
+                            blood: DataConverter.stringToInt(
+                                characterBloodController.text.trim()),
+                            speed: DataConverter.stringToInt(
+                                characterSpeedController.text.trim()),
+                            energy: DataConverter.stringToInt(
+                                characterEnergyController.text.trim()),
+                            height: DataConverter.stringToInt(
+                                characterHeight.text.trim()),
+                            age: DataConverter.stringToInt(
+                                characterAge.text.trim()),
+                            birthPlace: characterBirthPlace.text.trim(),
+                            dateOfBirth: "$selectedMonth-$selectedDay",
+                            bounty: DataConverter.stringToInt(
+                                characterBounty.text.trim()),
+                          );
+                          getIt<CharacterDao>()
+                              .addCharacter(addCharacterRequest)
+                              .then((value) {
+                            var encodedImage =
+                                Base64Helper.encode(_pickedImage);
+                            UploadImageRequest uploadImageRequest =
+                                UploadImageRequest(
+                                    resourceId: value!.id,
+                                    image: encodedImage,
+                                    type: ResourceType.CHARACTER);
+                            getIt<ImageDao>()
+                                .addImage(uploadImageRequest)
+                                .then((value) => context.goNamed("characters"));
+                          });
+                        },
+                  child: Text(AppLocalizations.of(context)!.submitForm),
+                ),
+              ],
+            ),
           ),
-        ],
-      ),
-    );
+        ));
   }
 
   bool _allElementsAreFilled() {

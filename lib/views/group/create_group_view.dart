@@ -57,101 +57,110 @@ class _CreateGroupViewState extends State<CreateGroupView> {
     TextEditingController characterNameChController = TextEditingController(
         text: RandomStringGenerator.generateRandomChineseName(
             3, getIt<User>().loginRole == UserRole.NIKA));
-    return SingleChildScrollView(
-      scrollDirection: Axis.vertical,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 0, 15),
-              child: Text(
-                AppLocalizations.of(context)!.basicInfo,
-                style: OnepieceFonts.headerStyle,
-              ),
-            ),
-            _getAvatar(context),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8.0),
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: 300,
-                    child: TextFormField(
-                      controller: characterNameChController,
-                      validator: (value) {
-                        if (value!.isWhiteSpace()) {
-                          return AppLocalizations.of(context)!.requiredField;
-                        }
-                        if (!DataValidator.validName(value)) {
-                          return AppLocalizations.of(context)!.invalidName;
-                        }
-                        return null;
-                      },
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      maxLength: 10,
-                      maxLengthEnforcement: MaxLengthEnforcement.enforced,
-                      decoration: InputDecoration(
-                        labelText: AppLocalizations.of(context)!.groupName,
-                        prefixIcon: const Icon(Icons.people),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 25,
-                  ),
-                  if (getIt<User>().loginRole == UserRole.NIKA)
-                    SizedBox(
-                      width: 300,
-                      child: TextFormField(
-                        controller: groupNameEnController,
-                        validator: (value) {
-                          if (value!.isWhiteSpace()) {
-                            return AppLocalizations.of(context)!.requiredField;
-                          }
-                          if (!DataValidator.validName(value)) {
-                            return AppLocalizations.of(context)!.invalidName;
-                          }
-                          return null;
-                        },
-                        autovalidateMode: AutovalidateMode.onUserInteraction,
-                        maxLength: 10,
-                        maxLengthEnforcement: MaxLengthEnforcement.enforced,
-                        decoration: InputDecoration(
-                          labelText: AppLocalizations.of(context)!.groupName,
-                          prefixIcon: const Icon(Icons.people),
-                        ),
-                      ),
-                    )
-                ],
-              ),
-            ),
-            Row(
+    return Stack(
+      children: [
+        SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 0, 8, 10),
+                  padding: const EdgeInsets.fromLTRB(0, 0, 0, 15),
                   child: Text(
-                    AppLocalizations.of(context)!.groupCategory,
-                    style: OnepieceFonts.tableHeaderStyle,
+                    AppLocalizations.of(context)!.basicInfo,
+                    style: OnepieceFonts.headerStyle,
                   ),
                 ),
-                _getDropDownList(context),
+                _getAvatar(context),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 300,
+                        child: TextFormField(
+                          controller: characterNameChController,
+                          validator: (value) {
+                            if (value!.isWhiteSpace()) {
+                              return AppLocalizations.of(context)!
+                                  .requiredField;
+                            }
+                            if (!DataValidator.validName(value)) {
+                              return AppLocalizations.of(context)!.invalidName;
+                            }
+                            return null;
+                          },
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
+                          maxLength: 10,
+                          maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                          decoration: InputDecoration(
+                            labelText: AppLocalizations.of(context)!.groupName,
+                            prefixIcon: const Icon(Icons.people),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 25,
+                      ),
+                      if (getIt<User>().loginRole == UserRole.NIKA)
+                        SizedBox(
+                          width: 300,
+                          child: TextFormField(
+                            controller: groupNameEnController,
+                            validator: (value) {
+                              if (value!.isWhiteSpace()) {
+                                return AppLocalizations.of(context)!
+                                    .requiredField;
+                              }
+                              if (!DataValidator.validName(value)) {
+                                return AppLocalizations.of(context)!
+                                    .invalidName;
+                              }
+                              return null;
+                            },
+                            autovalidateMode:
+                                AutovalidateMode.onUserInteraction,
+                            maxLength: 10,
+                            maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                            decoration: InputDecoration(
+                              labelText:
+                                  AppLocalizations.of(context)!.groupName,
+                              prefixIcon: const Icon(Icons.people),
+                            ),
+                          ),
+                        )
+                    ],
+                  ),
+                ),
+                Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 0, 8, 10),
+                      child: Text(
+                        AppLocalizations.of(context)!.groupCategory,
+                        style: OnepieceFonts.tableHeaderStyle,
+                      ),
+                    ),
+                    _getDropDownList(context),
+                  ],
+                ),
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(0, 0, 0, 8),
+                  child: Divider(
+                    height: 2,
+                  ),
+                ),
+                const SizedBox(
+                  height: 40,
+                )
               ],
             ),
-            const Padding(
-              padding: EdgeInsets.fromLTRB(0, 0, 0, 8),
-              child: Divider(
-                height: 2,
-              ),
-            ),
-            const Divider(
-              height: 2,
-            ),
-            _getFootBar(context)
-          ],
+          ),
         ),
-      ),
+        _getFootBar(context)
+      ],
     );
   }
 
@@ -310,51 +319,62 @@ class _CreateGroupViewState extends State<CreateGroupView> {
   }
 
   Widget _getFootBar(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          ElevatedButton(
-            child: Text(AppLocalizations.of(context)!.clearForm),
-            onPressed: () {
-              setState(() {
-                groupControlList().forEach((element) {
-                  element.clear();
-                });
-              });
-            },
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (!_newImagePicked) {
-                OnepieceAlert.getBasicAlertDialogFunc(
-                    context,
-                    AppLocalizations.of(context)!.hint,
-                    AppLocalizations.of(context)!.groupEmblemRequired);
-                return;
-              }
-              CreateGroupRequest createGroupRequest = CreateGroupRequest(
-                name: RandomStringGenerator.generateI18n(
-                    groupNameEnController.text, groupNameChController.text),
-                groupCategory: selectedGroupCategory,
-              );
+    return Positioned(
+        bottom: 0,
+        left: 0,
+        right: 0,
+        child: Container(
+          color: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ElevatedButton(
+                  child: Text(AppLocalizations.of(context)!.clearForm),
+                  onPressed: () {
+                    setState(() {
+                      groupControlList().forEach((element) {
+                        element.clear();
+                      });
+                    });
+                  },
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    if (!_newImagePicked) {
+                      OnepieceAlert.getBasicAlertDialogFunc(
+                          context,
+                          AppLocalizations.of(context)!.hint,
+                          AppLocalizations.of(context)!.groupEmblemRequired);
+                      return;
+                    }
+                    CreateGroupRequest createGroupRequest = CreateGroupRequest(
+                      name: RandomStringGenerator.generateI18n(
+                          groupNameEnController.text,
+                          groupNameChController.text),
+                      groupCategory: selectedGroupCategory,
+                    );
 
-              getIt<GroupDao>().createGroup(createGroupRequest).then((value) {
-                var encodedImage = Base64Helper.encode(_pickedImage);
-                UploadImageRequest uploadImageRequest = UploadImageRequest(
-                    resourceId: value!.id.toString(),
-                    image: encodedImage,
-                    type: ResourceType.GROUP);
-                getIt<ImageDao>()
-                    .addImage(uploadImageRequest)
-                    .then((value) => context.goNamed("groups"));
-              });
-            },
-            child: Text(AppLocalizations.of(context)!.submitForm),
+                    getIt<GroupDao>()
+                        .createGroup(createGroupRequest)
+                        .then((value) {
+                      var encodedImage = Base64Helper.encode(_pickedImage);
+                      UploadImageRequest uploadImageRequest =
+                          UploadImageRequest(
+                              resourceId: value!.id.toString(),
+                              image: encodedImage,
+                              type: ResourceType.GROUP);
+                      getIt<ImageDao>()
+                          .addImage(uploadImageRequest)
+                          .then((value) => context.goNamed("groups"));
+                    });
+                  },
+                  child: Text(AppLocalizations.of(context)!.submitForm),
+                ),
+              ],
+            ),
           ),
-        ],
-      ),
-    );
+        ));
   }
 }

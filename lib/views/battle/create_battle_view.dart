@@ -83,10 +83,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                getLeftPanel(context),
-                getRightPanel(context)
-              ],
+              children: [getLeftPanel(context), getRightPanel(context)],
             ),
             const Divider(height: 3),
             _getFoot(context)
@@ -128,9 +125,15 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                                       OnepieceColors.liteFancyBlue)
                                   : Padding(
                                       padding: const EdgeInsets.all(20.0),
-                                      child: Image.memory(Base64Helper.decode(
-                                          starterSelectedItem
-                                              .value!.profileImage!)),
+                                      child: ImageHelper.getRoundImageFrame(
+                                          200,
+                                          200,
+                                          3,
+                                          OnepieceColors.liteFancyBlue,
+                                          100,
+                                          Base64Helper.decode(
+                                              starterSelectedItem
+                                                  .value!.profileImage!)),
                                     ),
                             ),
                           ),
@@ -140,19 +143,18 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                               height: 180,
                               child: Padding(
                                 padding: const EdgeInsets.only(left: 30.0),
-                                child:
-                                RotatedBox(
+                                child: RotatedBox(
                                   quarterTurns: 1,
                                   child: CharacterBarGraph(
-                                    symmetric: false,
+                                      symmetric: false,
                                       characterData: CharacterData(
-                                    starterSelectedItem.value!.attack,
-                                    starterSelectedItem.value!.defense,
-                                    starterSelectedItem.value!.intelligence,
-                                    starterSelectedItem.value!.speed,
-                                    starterSelectedItem.value!.blood,
-                                    starterSelectedItem.value!.energy,
-                                  )),
+                                        starterSelectedItem.value!.attack,
+                                        starterSelectedItem.value!.defense,
+                                        starterSelectedItem.value!.intelligence,
+                                        starterSelectedItem.value!.speed,
+                                        starterSelectedItem.value!.blood,
+                                        starterSelectedItem.value!.energy,
+                                      )),
                                 ),
                               ),
                             ),
@@ -315,23 +317,14 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                                   Padding(
                                     padding:
                                         const EdgeInsets.fromLTRB(3, 3, 8, 3),
-                                    child: Container(
-                                      width: 50,
-                                      height: 50,
-                                      decoration: BoxDecoration(
-                                        borderRadius: const BorderRadius.all(
-                                            Radius.circular(2.0)),
-                                        border: Border.all(
-                                            color: Colors.black54,
-                                            width: 2,
-                                            style: BorderStyle.solid),
-                                      ),
-                                      child: FittedBox(
-                                        fit: BoxFit.fill,
-                                        child: Image.memory(Base64Helper.decode(
+                                    child: ImageHelper.getRoundImageFrame(
+                                        50,
+                                        50,
+                                        2,
+                                        Colors.black12,
+                                        6,
+                                        Base64Helper.decode(
                                             character.profileImage!)),
-                                      ),
-                                    ),
                                   ),
                                   Column(
                                     crossAxisAlignment:
@@ -420,25 +413,24 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                                 SizedBox(
                                   width: 200,
                                   height: 180,
-                                  child: 
-                                  Padding(
+                                  child: Padding(
                                     padding: const EdgeInsets.only(right: 30.0),
                                     child: RotatedBox(
                                       quarterTurns: 1,
                                       child: CharacterBarGraph(
-                                          characterData: CharacterData(
-                                            receiverSelectedItem.value!.attack,
-                                            receiverSelectedItem.value!.defense,
-                                            receiverSelectedItem
-                                                .value!.intelligence,
-                                            receiverSelectedItem.value!.speed,
-                                            receiverSelectedItem.value!.blood,
-                                            receiverSelectedItem.value!.energy,
-                                          ),
-                                      symmetric: false,),
+                                        characterData: CharacterData(
+                                          receiverSelectedItem.value!.attack,
+                                          receiverSelectedItem.value!.defense,
+                                          receiverSelectedItem
+                                              .value!.intelligence,
+                                          receiverSelectedItem.value!.speed,
+                                          receiverSelectedItem.value!.blood,
+                                          receiverSelectedItem.value!.energy,
+                                        ),
+                                        symmetric: false,
+                                      ),
                                     ),
                                   ),
-                                  
                                 ),
                               SizedBox(
                                 width: 180,
@@ -452,8 +444,13 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                                           60,
                                           OnepieceColors.liteFancyBlue)
                                       : Padding(
-                                          padding: const EdgeInsets.symmetric(vertical: 20.0),
-                                          child: Image.memory(
+                                          padding: const EdgeInsets.all(20.0),
+                                          child: ImageHelper.getRoundImageFrame(
+                                              200,
+                                              200,
+                                              3,
+                                              OnepieceColors.liteFancyBlue,
+                                              100,
                                               Base64Helper.decode(
                                                   receiverSelectedItem
                                                       .value!.profileImage!)),
@@ -620,24 +617,14 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                                     Padding(
                                       padding:
                                           const EdgeInsets.fromLTRB(3, 3, 8, 3),
-                                      child: Container(
-                                        width: 50,
-                                        height: 50,
-                                        decoration: BoxDecoration(
-                                          borderRadius: const BorderRadius.all(
-                                              Radius.circular(2.0)),
-                                          border: Border.all(
-                                              color: Colors.black54,
-                                              width: 2,
-                                              style: BorderStyle.solid),
-                                        ),
-                                        child: FittedBox(
-                                          fit: BoxFit.fill,
-                                          child: Image.memory(
-                                              Base64Helper.decode(
-                                                  character.profileImage!)),
-                                        ),
-                                      ),
+                                      child: ImageHelper.getRoundImageFrame(
+                                          50,
+                                          50,
+                                          2,
+                                          Colors.black12,
+                                          6,
+                                          Base64Helper.decode(
+                                              character.profileImage!)),
                                     ),
                                     Column(
                                       crossAxisAlignment:
