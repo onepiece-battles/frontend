@@ -32,7 +32,7 @@ class _CharacterViewState extends State<CharacterView> {
   CharacterFilter characterFilter = CharacterFilter();
   List<CharacterListView> currentCharacterList = [];
   List<CharacterSortableField> sortKeys = [];
-  GlobalKey _tableKey = GlobalKey();
+  final GlobalKey _tableKey = GlobalKey();
 
   // sorting related fields
   Map<SortOrder?, String> sortOrderToPath = const {

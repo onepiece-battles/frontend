@@ -30,7 +30,8 @@ class _FruitDetailViewState extends State<FruitDetailView> {
   late FruitFullView fruitFullView;
   late FruitType selectedFruitType;
   List<CharacterInFruitView> characters = [];
-  ScrollController scrollController = ScrollController();
+  ScrollController horizontalController = ScrollController();
+  ScrollController verticalController = ScrollController();
 
   // controllers
   // 1. basic info
@@ -48,6 +49,8 @@ class _FruitDetailViewState extends State<FruitDetailView> {
   bool _basicInfoEditable = false;
   bool _combatInfoEditable = false;
   bool _editButtonVisible = false;
+
+  double _dividerWidth = 800;
 
   _loadData() {
     return getIt<FruitDao>().get(GetFruitRequest(fruitId: widget.fruitId));
@@ -68,9 +71,9 @@ class _FruitDetailViewState extends State<FruitDetailView> {
 
     // update visibility info
     _editButtonVisible = PermissionCheck.checkPermission(
-        getIt<User>().loginRoleResourcesPermissionMap,
-        ResourceType.FRUIT,
-        Permission.UPDATE) &&
+            getIt<User>().loginRoleResourcesPermissionMap,
+            ResourceType.FRUIT,
+            Permission.UPDATE) &&
         PermissionCheck.isMyResource(
             fruitFullView.creationRecord!.userId!,
             fruitFullView.creationRecord!.roleId!,
@@ -105,35 +108,48 @@ class _FruitDetailViewState extends State<FruitDetailView> {
             return Stack(
               children: [
                 SingleChildScrollView(
-                  controller: scrollController,
+                  controller: verticalController,
                   scrollDirection: Axis.vertical,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _getBasicInfo(context),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8.0),
-                        child: Divider(
-                          color: Colors.grey,
-                          thickness: 1,
-                        ),
+                  child: Center(
+                    child: SingleChildScrollView(
+                      controller: horizontalController,
+                      scrollDirection: Axis.horizontal,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _getBasicInfo(context),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: SizedBox(
+                              width: _dividerWidth,
+                              child: const Divider(
+                                color: Colors.grey,
+                                thickness: 1,
+                              ),
+                            ),
+                          ),
+                          _getCombatInfo(context),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: SizedBox(
+                              width: _dividerWidth,
+                              child: const Divider(
+                                color: Colors.grey,
+                                thickness: 1,
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 8.0),
+                            child: _getCharacterList(context),
+                          ),
+                          const SizedBox(
+                            height: 60,
+                          )
+                        ],
                       ),
-                      _getCombatInfo(context),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8.0),
-                        child: Divider(
-                          color: Colors.grey,
-                          thickness: 1,
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: _getCharacterList(context),
-                      ),
-                      const SizedBox(
-                        height: 60,
-                      )
-                    ],
+                    ),
                   ),
                 ),
                 Positioned(
@@ -224,56 +240,59 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                 const SizedBox(
                   width: 15,
                 ),
-                Tooltip(
-                  message: _basicInfoEditable
-                      ? AppLocalizations.of(context)!.submitForm
-                      : AppLocalizations.of(context)!.editHint,
-                  child: InkWell(
-                    hoverColor: Colors.white,
-                    onTap: () {
-                      basicState(() {
-                        _basicInfoEditable = !_basicInfoEditable;
-                        if (!_basicInfoEditable) {
-                          var updatedFruit = UpdateFruitRequest(
-                              id: widget.fruitId,
-                              // basic info
-                              name: I18nHelper.getI18nFromDisplayName(
-                                  fruitFullView.name!, nameController.text),
-                              fruitType: selectedFruitType);
-                          getIt<FruitDao>().update(updatedFruit).then((value) {
-                            OnepieceAlert.getBasicAlertDialogFunc(
-                                context,
-                                AppLocalizations.of(context)!.hint,
-                                I18nHelper.getDisplayNameFromI18n(
-                                    value!.result));
-                            if (value.success) {
-                              context.goNamed('fruitDetails',
-                                  extra: widget.fruitId,
-                                  pathParameters: {
-                                    'name': I18nHelper.getDisplayNameFromI18n(
-                                        fruitFullView.name)
-                                  });
-                            }
-                          });
-                        }
-                      });
-                    },
-                    child: SizedBox(
-                        width: 25,
-                        height: 25,
-                        child: !_basicInfoEditable
-                            ? ImageHelper.getSvgIconWithColor(
-                                'images/svgs/edit.svg',
-                                150,
-                                150,
-                                OnepieceColors.fancyBlue)
-                            : ImageHelper.getSvgIconWithColor(
-                                'images/svgs/check.svg',
-                                150,
-                                150,
-                                OnepieceColors.fancyBlue)),
+                if (_editButtonVisible)
+                  Tooltip(
+                    message: _basicInfoEditable
+                        ? AppLocalizations.of(context)!.submitForm
+                        : AppLocalizations.of(context)!.editHint,
+                    child: InkWell(
+                      hoverColor: Colors.white,
+                      onTap: () {
+                        basicState(() {
+                          _basicInfoEditable = !_basicInfoEditable;
+                          if (!_basicInfoEditable) {
+                            var updatedFruit = UpdateFruitRequest(
+                                id: widget.fruitId,
+                                // basic info
+                                name: I18nHelper.getI18nFromDisplayName(
+                                    fruitFullView.name!, nameController.text),
+                                fruitType: selectedFruitType);
+                            getIt<FruitDao>()
+                                .update(updatedFruit)
+                                .then((value) {
+                              OnepieceAlert.getBasicAlertDialogFunc(
+                                  context,
+                                  AppLocalizations.of(context)!.hint,
+                                  I18nHelper.getDisplayNameFromI18n(
+                                      value!.result));
+                              if (value.success) {
+                                context.goNamed('fruitDetails',
+                                    extra: widget.fruitId,
+                                    pathParameters: {
+                                      'name': I18nHelper.getDisplayNameFromI18n(
+                                          fruitFullView.name)
+                                    });
+                              }
+                            });
+                          }
+                        });
+                      },
+                      child: SizedBox(
+                          width: 25,
+                          height: 25,
+                          child: !_basicInfoEditable
+                              ? ImageHelper.getSvgIconWithColor(
+                                  'images/svgs/edit.svg',
+                                  150,
+                                  150,
+                                  OnepieceColors.fancyBlue)
+                              : ImageHelper.getSvgIconWithColor(
+                                  'images/svgs/check.svg',
+                                  150,
+                                  150,
+                                  OnepieceColors.fancyBlue)),
+                    ),
                   ),
-                ),
               ],
             ),
             SizedBox(
@@ -384,6 +403,7 @@ class _FruitDetailViewState extends State<FruitDetailView> {
   Widget _getCombatInfo(BuildContext context) {
     return StatefulBuilder(builder: (context, combatState) {
       return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -397,70 +417,73 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                 const SizedBox(
                   width: 15,
                 ),
-                Tooltip(
-                  message: _combatInfoEditable
-                      ? AppLocalizations.of(context)!.submitForm
-                      : AppLocalizations.of(context)!.editHint,
-                  child: InkWell(
-                    hoverColor: Colors.white,
-                    onTap: () {
-                      combatState(() {
-                        _combatInfoEditable = !_combatInfoEditable;
-                        if (!_combatInfoEditable) {
-                          var updatedFruit = UpdateFruitRequest(
-                            id: widget.fruitId,
-                            // digit info
-                            groupGainStrengthen: DataConverter.stringToInt(
-                                groupGainController.text),
-                            attackStrengthen: DataConverter.stringToInt(
-                                attackController.text),
-                            defenseStrengthen: DataConverter.stringToInt(
-                                defenseController.text),
-                            intelligenceStrengthen: DataConverter.stringToInt(
-                                intelligenceController.text),
-                            bloodStrengthen:
-                                DataConverter.stringToInt(bloodController.text),
-                            speedStrengthen:
-                                DataConverter.stringToInt(speedController.text),
-                            energyConsume: DataConverter.stringToInt(
-                                energyConsumeController.text),
-                            // basic info
-                            name: fruitFullView.name,
-                          );
-                          getIt<FruitDao>().update(updatedFruit).then((value) {
-                            OnepieceAlert.getBasicAlertDialogFunc(
-                                context,
-                                AppLocalizations.of(context)!.hint,
-                                I18nHelper.getDisplayNameFromI18n(
-                                    value!.result));
-                            if (value.success) {
-                              context.goNamed('fruitDetails',
-                                  extra: widget.fruitId,
-                                  pathParameters: {
-                                    'name': I18nHelper.getDisplayNameFromI18n(
-                                        fruitFullView.name)
-                                  });
-                            }
-                          });
-                        }
-                      });
-                    },
-                    child: SizedBox(
-                        width: 25,
-                        height: 25,
-                        child: !_combatInfoEditable
-                            ? ImageHelper.getSvgIconWithColor(
-                                'images/svgs/edit.svg',
-                                150,
-                                150,
-                                OnepieceColors.fancyBlue)
-                            : ImageHelper.getSvgIconWithColor(
-                                'images/svgs/check.svg',
-                                150,
-                                150,
-                                OnepieceColors.fancyBlue)),
+                if (_editButtonVisible)
+                  Tooltip(
+                    message: _combatInfoEditable
+                        ? AppLocalizations.of(context)!.submitForm
+                        : AppLocalizations.of(context)!.editHint,
+                    child: InkWell(
+                      hoverColor: Colors.white,
+                      onTap: () {
+                        combatState(() {
+                          _combatInfoEditable = !_combatInfoEditable;
+                          if (!_combatInfoEditable) {
+                            var updatedFruit = UpdateFruitRequest(
+                              id: widget.fruitId,
+                              // digit info
+                              groupGainStrengthen: DataConverter.stringToInt(
+                                  groupGainController.text),
+                              attackStrengthen: DataConverter.stringToInt(
+                                  attackController.text),
+                              defenseStrengthen: DataConverter.stringToInt(
+                                  defenseController.text),
+                              intelligenceStrengthen: DataConverter.stringToInt(
+                                  intelligenceController.text),
+                              bloodStrengthen: DataConverter.stringToInt(
+                                  bloodController.text),
+                              speedStrengthen: DataConverter.stringToInt(
+                                  speedController.text),
+                              energyConsume: DataConverter.stringToInt(
+                                  energyConsumeController.text),
+                              // basic info
+                              name: fruitFullView.name,
+                            );
+                            getIt<FruitDao>()
+                                .update(updatedFruit)
+                                .then((value) {
+                              OnepieceAlert.getBasicAlertDialogFunc(
+                                  context,
+                                  AppLocalizations.of(context)!.hint,
+                                  I18nHelper.getDisplayNameFromI18n(
+                                      value!.result));
+                              if (value.success) {
+                                context.goNamed('fruitDetails',
+                                    extra: widget.fruitId,
+                                    pathParameters: {
+                                      'name': I18nHelper.getDisplayNameFromI18n(
+                                          fruitFullView.name)
+                                    });
+                              }
+                            });
+                          }
+                        });
+                      },
+                      child: SizedBox(
+                          width: 25,
+                          height: 25,
+                          child: !_combatInfoEditable
+                              ? ImageHelper.getSvgIconWithColor(
+                                  'images/svgs/edit.svg',
+                                  150,
+                                  150,
+                                  OnepieceColors.fancyBlue)
+                              : ImageHelper.getSvgIconWithColor(
+                                  'images/svgs/check.svg',
+                                  150,
+                                  150,
+                                  OnepieceColors.fancyBlue)),
+                    ),
                   ),
-                ),
               ],
             ),
           ),

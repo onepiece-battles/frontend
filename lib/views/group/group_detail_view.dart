@@ -32,6 +32,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
   bool _basicInfoEditable = false;
   final ValueNotifier<bool> _onlyCurrentMember = ValueNotifier(false);
   bool _editButtonVisible = false;
+  double _dividerWidth = 900;
 
   @override
   void initState() {
@@ -49,9 +50,9 @@ class _GroupDetailViewState extends State<GroupDetailView> {
     selectedGroupCategory = group.groupCategory!;
     groupNameController.text = I18nHelper.getDisplayNameFromI18n(group.name!);
     _editButtonVisible = PermissionCheck.checkPermission(
-        getIt<User>().loginRoleResourcesPermissionMap,
-        ResourceType.CHARACTER,
-        Permission.UPDATE) &&
+            getIt<User>().loginRoleResourcesPermissionMap,
+            ResourceType.CHARACTER,
+            Permission.UPDATE) &&
         PermissionCheck.isMyResource(
             groupFullView.creationRecord!.userId!,
             groupFullView.creationRecord!.roleId!,
@@ -73,32 +74,40 @@ class _GroupDetailViewState extends State<GroupDetailView> {
           return Stack(
             children: [
               SingleChildScrollView(
-                controller: scrollController,
                 scrollDirection: Axis.vertical,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 15.0),
-                      child: _getBasicInfo(context),
+                child: Center(
+                  child: SingleChildScrollView(
+                    controller: scrollController,
+                    scrollDirection: Axis.horizontal,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(left: 15.0),
+                          child: _getBasicInfo(context),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: SizedBox(
+                            width: _dividerWidth,
+                            child: const Divider(
+                              color: Colors.grey,
+                              thickness: 1,
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 15.0),
+                          child: _getMembersPanel(context),
+                        ),
+                        // bottom space
+                        const SizedBox(
+                          height: 60,
+                        )
+                      ],
                     ),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 8.0),
-                      child: Divider(
-                        color: Colors.grey,
-                        thickness: 1,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 15.0),
-                      child: _getMembersPanel(context),
-                    ),
-                    // bottom space
-                    const SizedBox(
-                      height: 60,
-                    )
-                  ],
+                  ),
                 ),
               ),
               Positioned(
@@ -186,54 +195,57 @@ class _GroupDetailViewState extends State<GroupDetailView> {
               const SizedBox(
                 width: 15,
               ),
-              if (_editButtonVisible) Tooltip(
-                message: _basicInfoEditable
-                    ? AppLocalizations.of(context)!.submitForm
-                    : AppLocalizations.of(context)!.editHint,
-                child: InkWell(
-                  hoverColor: Colors.white,
-                  onTap: () {
-                    basicInfoState(() {
-                      _basicInfoEditable = !_basicInfoEditable;
-                      if (!_basicInfoEditable) {
-                        Group group = Group(
-                            id: groupFullView.id,
-                            groupCategory: selectedGroupCategory,
-                            name: I18nHelper.getI18nFromDisplayName(
-                                groupFullView.name!, groupNameController.text));
-                        getIt<GroupDao>().updateGroups(group).then((value) {
-                          OnepieceAlert.getBasicAlertDialogFunc(
-                              context,
-                              AppLocalizations.of(context)!.hint,
-                              I18nHelper.getDisplayNameFromI18n(value!.result));
-                          if (value.success) {
-                            context.goNamed('groupDetails',
-                                extra: groupFullView.id,
-                                pathParameters: {
-                                  'name': I18nHelper.getDisplayNameFromI18n(
-                                      group.name)
-                                });
-                          }
-                        });
-                      }
-                    });
-                  },
-                  child: SizedBox(
-                      width: 25,
-                      height: 25,
-                      child: !_basicInfoEditable
-                          ? ImageHelper.getSvgIconWithColor(
-                              'images/svgs/edit.svg',
-                              150,
-                              150,
-                              OnepieceColors.fancyBlue)
-                          : ImageHelper.getSvgIconWithColor(
-                              'images/svgs/check.svg',
-                              150,
-                              150,
-                              OnepieceColors.fancyBlue)),
+              if (_editButtonVisible)
+                Tooltip(
+                  message: _basicInfoEditable
+                      ? AppLocalizations.of(context)!.submitForm
+                      : AppLocalizations.of(context)!.editHint,
+                  child: InkWell(
+                    hoverColor: Colors.white,
+                    onTap: () {
+                      basicInfoState(() {
+                        _basicInfoEditable = !_basicInfoEditable;
+                        if (!_basicInfoEditable) {
+                          Group group = Group(
+                              id: groupFullView.id,
+                              groupCategory: selectedGroupCategory,
+                              name: I18nHelper.getI18nFromDisplayName(
+                                  groupFullView.name!,
+                                  groupNameController.text));
+                          getIt<GroupDao>().updateGroups(group).then((value) {
+                            OnepieceAlert.getBasicAlertDialogFunc(
+                                context,
+                                AppLocalizations.of(context)!.hint,
+                                I18nHelper.getDisplayNameFromI18n(
+                                    value!.result));
+                            if (value.success) {
+                              context.goNamed('groupDetails',
+                                  extra: groupFullView.id,
+                                  pathParameters: {
+                                    'name': I18nHelper.getDisplayNameFromI18n(
+                                        group.name)
+                                  });
+                            }
+                          });
+                        }
+                      });
+                    },
+                    child: SizedBox(
+                        width: 25,
+                        height: 25,
+                        child: !_basicInfoEditable
+                            ? ImageHelper.getSvgIconWithColor(
+                                'images/svgs/edit.svg',
+                                150,
+                                150,
+                                OnepieceColors.fancyBlue)
+                            : ImageHelper.getSvgIconWithColor(
+                                'images/svgs/check.svg',
+                                150,
+                                150,
+                                OnepieceColors.fancyBlue)),
+                  ),
                 ),
-              ),
             ],
           ),
           Padding(
