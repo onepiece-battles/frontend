@@ -201,39 +201,45 @@ class _UserHomeState extends State<UserHome> {
         ],
       );
     }
-    return SizedBox(
-      width: characters.length <= 8 ? characters.length * 100 : 800,
-      height:
-          characters.length <= 8 ? 100 : 100.0 * (characters.length / 8).ceil(),
-      child: GridView.builder(
-        itemCount: characters.length,
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: characters.length <= 8 ? characters.length : 8,
-          mainAxisSpacing: 5,
-          crossAxisSpacing: 5,
-        ),
-        itemBuilder: (BuildContext context, int index) => Tooltip(
-          message: I18nHelper.getDisplayNameFromI18n(characters[index].name),
-          child: InkWell(
-            hoverColor: Colors.transparent,
-            onTap: () {
-              context.goNamed('characterDetails',
-                  extra: characters[index].id,
-                  pathParameters: {
-                    'name': I18nHelper.getDisplayNameFromI18n(
-                        characters[index].name)
-                  });
-            },
-            child: ImageHelper.getRoundImageFrame(
-                100,
-                100,
-                2,
-                OnepieceColors.liteFancyBlue,
-                20,
-                Base64Helper.decode(characters[index].profileImage!)),
+    return LayoutBuilder(
+      builder: (context, constraint) {
+        int crossAxisCount = (constraint.maxWidth / 110).ceil().clamp(2, 8);
+        return SizedBox(
+          width: 880,
+          height: ((characters.length / crossAxisCount).ceil() * 110.0)
+              .clamp(110, 440),
+          child: GridView.builder(
+            itemCount: characters.length,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: crossAxisCount,
+              mainAxisSpacing: 5,
+              crossAxisSpacing: 5,
+            ),
+            itemBuilder: (context, int index) => Tooltip(
+              message:
+                  I18nHelper.getDisplayNameFromI18n(characters[index].name),
+              child: InkWell(
+                hoverColor: Colors.transparent,
+                onTap: () {
+                  context.goNamed('characterDetails',
+                      extra: characters[index].id,
+                      pathParameters: {
+                        'name': I18nHelper.getDisplayNameFromI18n(
+                            characters[index].name)
+                      });
+                },
+                child: ImageHelper.getRoundImageFrame(
+                    100,
+                    100,
+                    2,
+                    OnepieceColors.liteFancyBlue,
+                    20,
+                    Base64Helper.decode(characters[index].profileImage!)),
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -254,38 +260,42 @@ class _UserHomeState extends State<UserHome> {
         ],
       );
     }
-    return SizedBox(
-      width: groups.length <= 8 ? groups.length * 100 : 800,
-      height: groups.length <= 8 ? 100 : 100.0 * (groups.length / 8).ceil(),
-      child: GridView.builder(
-        itemCount: groups.length,
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: groups.length <= 8 ? groups.length : 8,
-          mainAxisSpacing: 5,
-          crossAxisSpacing: 5,
+    return LayoutBuilder(builder: (context, constraint) {
+      int crossAxisCount = (constraint.maxWidth / 110).ceil().clamp(2, 8);
+      return SizedBox(
+        width: 880,
+        height:
+            ((groups.length / crossAxisCount).ceil() * 110.0).clamp(110, 400),
+        child: GridView.builder(
+          itemCount: groups.length,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            mainAxisSpacing: 5,
+            crossAxisSpacing: 5,
+          ),
+          itemBuilder: (BuildContext context, int index) => Tooltip(
+            message: I18nHelper.getDisplayNameFromI18n(groups[index].name),
+            child: InkWell(
+                hoverColor: Colors.transparent,
+                onTap: () {
+                  context.goNamed('groupDetails',
+                      extra: groups[index].id,
+                      pathParameters: {
+                        'name': I18nHelper.getDisplayNameFromI18n(
+                            groups[index].name)
+                      });
+                },
+                child: ImageHelper.getRoundImageFrame(
+                    100,
+                    100,
+                    2,
+                    OnepieceColors.liteFancyBlue,
+                    20,
+                    Base64Helper.decode(groups[index].profileImage!))),
+          ),
         ),
-        itemBuilder: (BuildContext context, int index) => Tooltip(
-          message: I18nHelper.getDisplayNameFromI18n(groups[index].name),
-          child: InkWell(
-              hoverColor: Colors.transparent,
-              onTap: () {
-                context.goNamed('groupDetails',
-                    extra: groups[index].id,
-                    pathParameters: {
-                      'name':
-                          I18nHelper.getDisplayNameFromI18n(groups[index].name)
-                    });
-              },
-              child: ImageHelper.getRoundImageFrame(
-                  100,
-                  100,
-                  2,
-                  OnepieceColors.liteFancyBlue,
-                  20,
-                  Base64Helper.decode(groups[index].profileImage!))),
-        ),
-      ),
-    );
+      );
+    });
   }
 
   Widget _getBattleWall(BuildContext context) {
@@ -371,12 +381,12 @@ class _UserHomeState extends State<UserHome> {
                           Padding(
                             padding: const EdgeInsets.fromLTRB(3, 3, 6, 3),
                             child: ImageHelper.getCircleImageFrame(
-                              50,
-                              50,
-                              2,
-                              OnepieceColors.liteFancyBlue,
-                              Base64Helper.decode(
-                                  battle.receiver!.profileImage!)),
+                                50,
+                                50,
+                                2,
+                                OnepieceColors.liteFancyBlue,
+                                Base64Helper.decode(
+                                    battle.receiver!.profileImage!)),
                           ),
                         ],
                       ),
