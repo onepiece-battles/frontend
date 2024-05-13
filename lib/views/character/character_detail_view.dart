@@ -1,4 +1,5 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
@@ -29,6 +30,7 @@ class CharacterDetail extends StatefulWidget {
 }
 
 class _CharacterDetailState extends State<CharacterDetail> {
+  ScrollController verticalController = ScrollController();
   // character details controller
   TextEditingController characterNameController = TextEditingController();
   TextEditingController characterAge = TextEditingController();
@@ -57,6 +59,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
   List<FruitListView> searchingFruitList = [];
   String? selectedFruitId;
   String? selectedGroupId;
+
+  double dividerWidth = 860;
 
   // initial date
   late CharacterFullView character;
@@ -200,89 +204,107 @@ class _CharacterDetailState extends State<CharacterDetail> {
             return Stack(
               children: [
                 SingleChildScrollView(
+                  controller: verticalController,
                   scrollDirection: Axis.vertical,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _getBasicInfo(context),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8.0),
-                        child: Divider(
-                          color: Colors.grey,
-                          thickness: 1,
-                        ),
+                  child: Center(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _getBasicInfo(context),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: SizedBox(
+                              width: dividerWidth,
+                              child: const Divider(
+                                color: Colors.grey,
+                                thickness: 1,
+                              ),
+                            ),
+                          ),
+                          _getCombatInfo(context),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: SizedBox(
+                              width: dividerWidth,
+                              child: const Divider(
+                                color: Colors.grey,
+                                thickness: 1,
+                              ),
+                            ),
+                          ),
+                          _getFruitSearchBar(context),
+                          if (fruits.isNotEmpty)
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: Text(AppLocalizations.of(context)!.eaten,
+                                  style: OnepieceFonts.fancyBlueHintFont),
+                            ),
+                          if (fruits.isNotEmpty)
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: _getFruitList(context),
+                            ),
+                          if (fruits.isEmpty)
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: Text(AppLocalizations.of(context)!.none,
+                                  style: OnepieceFonts.fancyBlueHintFont),
+                            ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: SizedBox(
+                              width: dividerWidth,
+                              child: const Divider(
+                                color: Colors.grey,
+                                thickness: 1,
+                              ),
+                            ),
+                          ),
+                          _getGroupSearchBar(context),
+                          if (groups.isNotEmpty)
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: Text(
+                                  AppLocalizations.of(context)!.historyGroups,
+                                  style: OnepieceFonts.fancyBlueHintFont),
+                            ),
+                          if (groups.isNotEmpty)
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: _getGroupList(context),
+                            ),
+                          if (groups.isEmpty)
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: Text(AppLocalizations.of(context)!.none,
+                                  style: OnepieceFonts.fancyBlueHintFont),
+                            ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: SizedBox(
+                              width: dividerWidth,
+                              child: const Divider(
+                                color: Colors.grey,
+                                thickness: 1,
+                              ),
+                            ),
+                          ),
+                          _getBattle(context),
+                          // bottom space
+                          const SizedBox(
+                            height: 60,
+                          )
+                        ],
                       ),
-                      _getCombatInfo(context),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8.0),
-                        child: Divider(
-                          color: Colors.grey,
-                          thickness: 1,
-                        ),
-                      ),
-                      _getFruitSearchBar(context),
-                      if (fruits.isNotEmpty)
-                        Padding(
-                          padding:
-                              const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Text(AppLocalizations.of(context)!.eaten,
-                              style: OnepieceFonts.fancyBlueHintFont),
-                        ),
-                      if (fruits.isNotEmpty)
-                        Padding(
-                          padding:
-                              const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: _getFruitList(context),
-                        ),
-                      if (fruits.isEmpty)
-                        Padding(
-                          padding:
-                              const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Text(AppLocalizations.of(context)!.none,
-                              style: OnepieceFonts.fancyBlueHintFont),
-                        ),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8.0),
-                        child: Divider(
-                          color: Colors.grey,
-                          thickness: 1,
-                        ),
-                      ),
-                      _getGroupSearchBar(context),
-                      if (groups.isNotEmpty)
-                        Padding(
-                          padding:
-                              const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Text(
-                              AppLocalizations.of(context)!.historyGroups,
-                              style: OnepieceFonts.fancyBlueHintFont),
-                        ),
-                      if (groups.isNotEmpty)
-                        Padding(
-                          padding:
-                              const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: _getGroupList(context),
-                        ),
-                      if (groups.isEmpty)
-                        Padding(
-                          padding:
-                              const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Text(AppLocalizations.of(context)!.none,
-                              style: OnepieceFonts.fancyBlueHintFont),
-                        ),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8.0),
-                        child: Divider(
-                          color: Colors.grey,
-                          thickness: 1,
-                        ),
-                      ),
-                      _getBattle(context),
-                      // bottom space
-                      const SizedBox(
-                        height: 60,
-                      )
-                    ],
+                    ),
                   ),
                 ),
                 Positioned(
@@ -743,6 +765,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
     };
     return StatefulBuilder(builder: (context, combatState) {
       return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -756,78 +779,79 @@ class _CharacterDetailState extends State<CharacterDetail> {
                 const SizedBox(
                   width: 15,
                 ),
-                if (_editButtonVisible) Tooltip(
-                  message: combatInfoEditable
-                      ? AppLocalizations.of(context)!.submitForm
-                      : AppLocalizations.of(context)!.editHint,
-                  child: InkWell(
-                    hoverColor: Colors.white,
-                    onTap: () {
-                      combatState(() {
-                        combatInfoEditable = !combatInfoEditable;
-                        if (!combatInfoEditable) {
-                          var updatedCharacter = Character(
-                            // basic info keep consistent with original value
-                            id: character.id,
-                            battleStyle: character.battleStyle,
-                            race: character.race,
-                            score: character.score,
-                            // digit info
-                            maximumFruitCount: DataConverter.stringToInt(
-                                characterFruitLimitController.text),
-                            groupGain: DataConverter.stringToInt(
-                                characterGroupGainController.text),
-                            attack: DataConverter.stringToInt(
-                                characterAttackController.text),
-                            defense: DataConverter.stringToInt(
-                                characterDefenseController.text),
-                            intelligence: DataConverter.stringToInt(
-                                characterIntelligenceController.text),
-                            blood: DataConverter.stringToInt(
-                                characterBloodController.text),
-                            speed: DataConverter.stringToInt(
-                                characterSpeedController.text),
-                            energy: DataConverter.stringToInt(
-                                characterEnergyController.text),
-                            // basic info
-                            name: character.name,
-                          );
-                          getIt<CharacterDao>()
-                              .update(updatedCharacter)
-                              .then((value) {
-                            OnepieceAlert.getBasicAlertDialogFunc(
-                                context,
-                                AppLocalizations.of(context)!.hint,
-                                I18nHelper.getDisplayNameFromI18n(
-                                    value!.result));
-                            if (value.success) {
-                              context.goNamed('characterDetails',
-                                  extra: character.id,
-                                  pathParameters: {
-                                    'name': I18nHelper.getDisplayNameFromI18n(
-                                        character.name)
-                                  });
-                            }
-                          });
-                        }
-                      });
-                    },
-                    child: SizedBox(
-                        width: 25,
-                        height: 25,
-                        child: !combatInfoEditable
-                            ? ImageHelper.getSvgIconWithColor(
-                                'images/svgs/edit.svg',
-                                150,
-                                150,
-                                OnepieceColors.fancyBlue)
-                            : ImageHelper.getSvgIconWithColor(
-                                'images/svgs/check.svg',
-                                150,
-                                150,
-                                OnepieceColors.fancyBlue)),
+                if (_editButtonVisible)
+                  Tooltip(
+                    message: combatInfoEditable
+                        ? AppLocalizations.of(context)!.submitForm
+                        : AppLocalizations.of(context)!.editHint,
+                    child: InkWell(
+                      hoverColor: Colors.white,
+                      onTap: () {
+                        combatState(() {
+                          combatInfoEditable = !combatInfoEditable;
+                          if (!combatInfoEditable) {
+                            var updatedCharacter = Character(
+                              // basic info keep consistent with original value
+                              id: character.id,
+                              battleStyle: character.battleStyle,
+                              race: character.race,
+                              score: character.score,
+                              // digit info
+                              maximumFruitCount: DataConverter.stringToInt(
+                                  characterFruitLimitController.text),
+                              groupGain: DataConverter.stringToInt(
+                                  characterGroupGainController.text),
+                              attack: DataConverter.stringToInt(
+                                  characterAttackController.text),
+                              defense: DataConverter.stringToInt(
+                                  characterDefenseController.text),
+                              intelligence: DataConverter.stringToInt(
+                                  characterIntelligenceController.text),
+                              blood: DataConverter.stringToInt(
+                                  characterBloodController.text),
+                              speed: DataConverter.stringToInt(
+                                  characterSpeedController.text),
+                              energy: DataConverter.stringToInt(
+                                  characterEnergyController.text),
+                              // basic info
+                              name: character.name,
+                            );
+                            getIt<CharacterDao>()
+                                .update(updatedCharacter)
+                                .then((value) {
+                              OnepieceAlert.getBasicAlertDialogFunc(
+                                  context,
+                                  AppLocalizations.of(context)!.hint,
+                                  I18nHelper.getDisplayNameFromI18n(
+                                      value!.result));
+                              if (value.success) {
+                                context.goNamed('characterDetails',
+                                    extra: character.id,
+                                    pathParameters: {
+                                      'name': I18nHelper.getDisplayNameFromI18n(
+                                          character.name)
+                                    });
+                              }
+                            });
+                          }
+                        });
+                      },
+                      child: SizedBox(
+                          width: 25,
+                          height: 25,
+                          child: !combatInfoEditable
+                              ? ImageHelper.getSvgIconWithColor(
+                                  'images/svgs/edit.svg',
+                                  150,
+                                  150,
+                                  OnepieceColors.fancyBlue)
+                              : ImageHelper.getSvgIconWithColor(
+                                  'images/svgs/check.svg',
+                                  150,
+                                  150,
+                                  OnepieceColors.fancyBlue)),
+                    ),
                   ),
-                ),
               ],
             ),
           ),
