@@ -26,6 +26,7 @@ class GroupView extends StatefulWidget {
 
 class _GroupViewState extends State<GroupView> {
   ScrollController scrollController = ScrollController();
+  ScrollController horizontalController = ScrollController();
   TextEditingController searchNameController = TextEditingController();
   TextEditingController pageNumberController = TextEditingController(text: "0");
   GroupFilter groupFilter = GroupFilter();
@@ -103,27 +104,32 @@ class _GroupViewState extends State<GroupView> {
       child: SingleChildScrollView(
         controller: scrollController,
         scrollDirection: Axis.vertical,
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _createHeader(context),
-              SizedBox(
-                width: 1200,
-                height: 50,
-                child: _createControlPanel(context),
-              ),
-              _createGroupTable(context),
-              const SizedBox(
-                height: 15,
-              ),
-              if (totalPageNum > 1)
+        child: Scrollbar(
+          thumbVisibility: true,
+          controller: horizontalController,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            controller: horizontalController,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _createHeader(context),
                 SizedBox(
                   width: 1200,
-                  child: Center(child: _getPageFoot(context)),
-                )
-            ],
+                  height: 50,
+                  child: _createControlPanel(context),
+                ),
+                _createGroupTable(context),
+                const SizedBox(
+                  height: 15,
+                ),
+                if (totalPageNum > 1)
+                  SizedBox(
+                    width: 1200,
+                    child: Center(child: _getPageFoot(context)),
+                  )
+              ],
+            ),
           ),
         ),
       ),

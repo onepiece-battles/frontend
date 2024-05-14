@@ -33,6 +33,8 @@ class _CreateBattleViewState extends State<CreateBattleView> {
   String receiverSelectedId = "";
   final ScrollController _starterScrollController = ScrollController();
   final ScrollController _receiverScrollController = ScrollController();
+  final ScrollController _verticalScrollController = ScrollController();
+  final ScrollController _horizontalScrollController = ScrollController();
   ValueNotifier<CharacterListView?> starterSelectedItem = ValueNotifier(null);
   ValueNotifier<CharacterListView?> receiverSelectedItem = ValueNotifier(null);
   TextEditingController starterTextController = TextEditingController();
@@ -74,23 +76,27 @@ class _CreateBattleViewState extends State<CreateBattleView> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-        child: Center(
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [getLeftPanel(context), getRightPanel(context)],
-            ),
-            const Divider(height: 3),
-            _getFoot(context)
-          ],
+      scrollDirection: Axis.vertical,
+      controller: _verticalScrollController,
+      child: Center(
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          controller: _horizontalScrollController,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [getLeftPanel(context), getRightPanel(context)],
+              ),
+              const Divider(height: 3),
+              _getFoot(context)
+            ],
+          ),
         ),
       ),
-    ));
+    );
   }
 
   Widget getLeftPanel(BuildContext context) {
@@ -196,7 +202,8 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                                   )
                                 ],
                               ),
-                            )),
+                            ),
+                          ),
                   ],
                 ),
               );
