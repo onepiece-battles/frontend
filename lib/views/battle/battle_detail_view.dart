@@ -19,7 +19,6 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:one_piece_battles_flutter/graph/character_data.dart';
 import '../../constants/onepiece_fonts.dart';
 import '../../utils/base64_helper.dart';
-import 'package:url_launcher_web/url_launcher_web.dart';
 
 GetIt getIt = GetIt.instance;
 

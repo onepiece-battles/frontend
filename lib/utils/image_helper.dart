@@ -2,6 +2,8 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
+import '../constants/onepiece_colors.dart';
+
 class ImageHelper {
   static Widget getSquareImageFrame(double width, double height,
       double? borderWidth, Color? borderColor, Uint8List imageData) {
@@ -37,14 +39,15 @@ class ImageHelper {
       decoration: borderWidth == null || borderColor == null
           ? null
           : BoxDecoration(
-              borderRadius: BorderRadius.all(Radius.circular(width<height?width:height)),
+              borderRadius: BorderRadius.all(
+                  Radius.circular(width < height ? width : height)),
               border: Border.all(
                   color: borderColor,
                   width: borderWidth,
                   style: BorderStyle.solid),
             ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(width<height?width:height),
+        borderRadius: BorderRadius.circular(width < height ? width : height),
         child: AspectRatio(
           aspectRatio: 1,
           child: FittedBox(
@@ -76,8 +79,7 @@ class ImageHelper {
                   style: BorderStyle.solid),
             ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(
-            borderRadios - (borderWidth ?? 0)),
+        borderRadius: BorderRadius.circular(borderRadios - (borderWidth ?? 0)),
         child: AspectRatio(
           aspectRatio: 1,
           child: FittedBox(
@@ -125,7 +127,7 @@ class ImageHelper {
   }
 
   static Widget getSvgIconWithColor(
-      String svgPath, double width, double height, Color color) {
+      String svgPath, double width, double height, Color? color) {
     return SvgPicture.asset(
       "asset/$svgPath",
       color: color,
@@ -135,9 +137,21 @@ class ImageHelper {
   }
 
   static bool isValidImageSize(double maxSize, Uint8List image) {
-    if (image.lengthInBytes>maxSize) {
+    if (image.lengthInBytes > maxSize) {
       return false;
     }
     return true;
+  }
+
+  static Widget getTextFormFieldIcon(String iconPath, bool originalColor) {
+    return SizedBox(
+      width: 35,
+      height: 35,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6.0),
+        child: getSvgIconWithColor(
+            iconPath, 3, 3, originalColor ? null : OnepieceColors.iconGreen),
+      ),
+    );
   }
 }

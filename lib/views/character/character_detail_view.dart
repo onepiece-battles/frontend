@@ -1,14 +1,14 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:one_piece_battles_flutter/components/digit_text_form_field.dart';
+import 'package:one_piece_battles_flutter/components/string_text_form_field.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_tag.dart';
 import 'package:one_piece_battles_flutter/repository/character_dao.dart';
 import 'package:one_piece_battles_flutter/repository/group_dao.dart';
-import 'package:one_piece_battles_flutter/utils/string_extensions.dart';
 import 'package:openapi/api.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../popup/onepiece_alert.dart';
@@ -36,8 +36,6 @@ class _CharacterDetailState extends State<CharacterDetail> {
   TextEditingController characterAge = TextEditingController();
   TextEditingController characterHeight = TextEditingController();
   TextEditingController characterBirthPlace = TextEditingController();
-  // TextEditingController characterDateOfBirthMonth = TextEditingController();
-  // TextEditingController characterDateOfBirthDay = TextEditingController();
   TextEditingController characterBounty = TextEditingController();
   // battle data controller
   TextEditingController characterFruitLimitController = TextEditingController();
@@ -61,6 +59,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
   String? selectedGroupId;
 
   double dividerWidth = 860;
+  double sideWidth = 50;
 
   // initial date
   late CharacterFullView character;
@@ -237,23 +236,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
                           _getFruitSearchBar(context),
                           if (fruits.isNotEmpty)
                             Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 8.0),
-                              child: Text(AppLocalizations.of(context)!.eaten,
-                                  style: OnepieceFonts.fancyBlueHintFont),
-                            ),
-                          if (fruits.isNotEmpty)
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 8.0),
+                              padding: EdgeInsets.fromLTRB(sideWidth, 8, 8, 8),
                               child: _getFruitList(context),
-                            ),
-                          if (fruits.isEmpty)
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 8.0),
-                              child: Text(AppLocalizations.of(context)!.none,
-                                  style: OnepieceFonts.fancyBlueHintFont),
                             ),
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -268,24 +252,15 @@ class _CharacterDetailState extends State<CharacterDetail> {
                           _getGroupSearchBar(context),
                           if (groups.isNotEmpty)
                             Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 8.0),
+                              padding: EdgeInsets.fromLTRB(sideWidth, 0, 8, 0),
                               child: Text(
                                   AppLocalizations.of(context)!.historyGroups,
                                   style: OnepieceFonts.fancyBlueHintFont),
                             ),
                           if (groups.isNotEmpty)
                             Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 8.0),
+                              padding: EdgeInsets.fromLTRB(sideWidth, 0, 8, 8),
                               child: _getGroupList(context),
-                            ),
-                          if (groups.isEmpty)
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 8.0),
-                              child: Text(AppLocalizations.of(context)!.none,
-                                  style: OnepieceFonts.fancyBlueHintFont),
                             ),
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -385,7 +360,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: EdgeInsets.fromLTRB(sideWidth, 8, 8, 8),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
@@ -476,7 +451,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: EdgeInsets.fromLTRB(sideWidth, 8, 8, 8),
             child: ImageHelper.getRoundImageFrame(
                 200,
                 200,
@@ -491,269 +466,269 @@ class _CharacterDetailState extends State<CharacterDetail> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                SizedBox(
+                  width: dividerWidth,
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _getStringFormField(
-                          context,
-                          basicInfoEditable,
-                          characterNameController,
-                          AppLocalizations.of(context)!.name,
-                          20,
-                          _getIcon('images/character_digits_icon/name.svg')),
-                      const SizedBox(
-                        width: 15,
-                      ),
-                      _getDigitFormField(
-                          context,
-                          basicInfoEditable,
-                          characterBounty,
-                          AppLocalizations.of(context)!.bounty,
-                          10,
-                          100000000000,
-                          _getIcon('images/character_digits_icon/bounty.svg')),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      _getStringFormField(
-                          context,
-                          basicInfoEditable,
-                          characterBirthPlace,
-                          AppLocalizations.of(context)!.birthPlace,
-                          20,
-                          _getIcon(
-                              'images/character_digits_icon/birth_place.svg')),
-                      const SizedBox(
-                        width: 15,
-                      ),
-                      _getDigitFormField(
-                          context,
-                          basicInfoEditable,
-                          characterAge,
-                          AppLocalizations.of(context)!.age,
-                          0,
-                          100000,
-                          _getIcon('images/character_digits_icon/age.svg')),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
+                        padding: EdgeInsets.only(left: sideWidth),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            SizedBox(
-                              width: 300,
-                              child: Padding(
-                                padding: const EdgeInsets.fromLTRB(8, 0, 0, 16),
-                                child: Text(
-                                  AppLocalizations.of(context)!.birthDay,
-                                  style: OnepieceFonts.deepBlackHintFont,
+                            StringTextFormField(
+                                context,
+                                basicInfoEditable,
+                                characterNameController,
+                                AppLocalizations.of(context)!.name,
+                                20,
+                                ImageHelper.getTextFormFieldIcon(
+                                    'images/character_digits_icon/name.svg',
+                                    true)),
+                            StringTextFormField(
+                                context,
+                                basicInfoEditable,
+                                characterBirthPlace,
+                                AppLocalizations.of(context)!.birthPlace,
+                                20,
+                                ImageHelper.getTextFormFieldIcon(
+                                    'images/character_digits_icon/birth_place.svg',
+                                    true)),
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(
+                                  width: 300,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      ImageHelper.getTextFormFieldIcon(
+                                          "images/character_digits_icon/birthday.svg",
+                                          true),
+                                      Text(
+                                        AppLocalizations.of(context)!.birthDay,
+                                        style: OnepieceFonts.deepBlackHintFont,
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ),
-                            SizedBox(
-                              width: 240,
-                              child: Padding(
-                                padding: const EdgeInsets.only(left: 8.0),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    ImageHelper.getSvgIconWithColor(
-                                        "images/character_digits_icon/birthday.svg",
-                                        25,
-                                        25,
-                                        OnepieceColors.fancyBlue),
-                                    SizedBox(
-                                      width: 60,
-                                      child: DropdownButtonHideUnderline(
-                                        child: DropdownButton2(
-                                          isExpanded: true,
-                                          value: selectedMonth,
-                                          onChanged: basicInfoEditable
-                                              ? (String? month) {
-                                                  basicState(() {
-                                                    selectedMonth = month!;
-                                                  });
-                                                }
-                                              : null,
-                                          buttonStyleData: ButtonStyleData(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 5),
-                                            decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(3),
-                                                color: OnepieceColors
-                                                    .liteFancyGreen),
-                                            height: 30,
-                                            width: 60,
-                                          ),
-                                          menuItemStyleData:
-                                              const MenuItemStyleData(
-                                            height: 30,
-                                          ),
-                                          selectedItemBuilder: (context) {
-                                            return List<String>.generate(
+                                SizedBox(
+                                  width: 300,
+                                  height: 35,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      SizedBox(
+                                        width: 60,
+                                        child: DropdownButtonHideUnderline(
+                                          child: DropdownButton2(
+                                            isExpanded: true,
+                                            value: selectedMonth,
+                                            onChanged: basicInfoEditable
+                                                ? (String? month) {
+                                                    basicState(() {
+                                                      selectedMonth = month!;
+                                                    });
+                                                  }
+                                                : null,
+                                            buttonStyleData: ButtonStyleData(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 5),
+                                              decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(3),
+                                                  color: OnepieceColors
+                                                      .liteFancyGreen),
+                                              height: 30,
+                                              width: 60,
+                                            ),
+                                            menuItemStyleData:
+                                                const MenuItemStyleData(
+                                              height: 30,
+                                            ),
+                                            selectedItemBuilder: (context) {
+                                              return List<String>.generate(
+                                                      12,
+                                                      (int index) => (index + 1)
+                                                          .toString())
+                                                  .map((String month) {
+                                                return Container(
+                                                  alignment:
+                                                      AlignmentDirectional
+                                                          .center,
+                                                  child: Text(
+                                                    month,
+                                                    style: const TextStyle(
+                                                      fontSize: 16,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                    ),
+                                                  ),
+                                                );
+                                              }).toList();
+                                            },
+                                            items: List<String>.generate(
                                                     12,
                                                     (int index) =>
                                                         (index + 1).toString())
                                                 .map((String month) {
-                                              return Container(
-                                                alignment:
-                                                    AlignmentDirectional.center,
+                                              return DropdownMenuItem<String>(
+                                                value: month,
                                                 child: Text(
                                                   month,
                                                   style: const TextStyle(
-                                                    fontSize: 16,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
+                                                    fontSize: 14,
                                                   ),
                                                 ),
                                               );
-                                            }).toList();
-                                          },
-                                          items: List<String>.generate(
-                                                  12,
-                                                  (int index) =>
-                                                      (index + 1).toString())
-                                              .map((String month) {
-                                            return DropdownMenuItem<String>(
-                                              value: month,
-                                              child: Text(
-                                                month,
-                                                style: const TextStyle(
-                                                  fontSize: 14,
-                                                ),
-                                              ),
-                                            );
-                                          }).toList(),
+                                            }).toList(),
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    Text(
-                                      AppLocalizations.of(context)!.month,
-                                      style: OnepieceFonts.contentStyle,
-                                    ),
-                                    SizedBox(
-                                      width: 60,
-                                      child: DropdownButtonHideUnderline(
-                                        child: DropdownButton2(
-                                          isExpanded: true,
-                                          value: selectedDay,
-                                          onChanged: basicInfoEditable
-                                              ? (String? day) {
-                                                  basicState(() {
-                                                    selectedDay = day!;
-                                                  });
-                                                }
-                                              : null,
-                                          buttonStyleData: ButtonStyleData(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 6),
-                                            decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(3),
-                                                color: OnepieceColors
-                                                    .liteFancyGreen),
-                                            height: 30,
-                                            width: 60,
-                                          ),
-                                          menuItemStyleData:
-                                              const MenuItemStyleData(
-                                            height: 30,
-                                          ),
-                                          selectedItemBuilder: (context) {
-                                            return List<String>.generate(
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8.0),
+                                        child: Text(
+                                          AppLocalizations.of(context)!.month,
+                                          style: OnepieceFonts.contentStyle,
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 60,
+                                        child: DropdownButtonHideUnderline(
+                                          child: DropdownButton2(
+                                            isExpanded: true,
+                                            value: selectedDay,
+                                            onChanged: basicInfoEditable
+                                                ? (String? day) {
+                                                    basicState(() {
+                                                      selectedDay = day!;
+                                                    });
+                                                  }
+                                                : null,
+                                            buttonStyleData: ButtonStyleData(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 6),
+                                              decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(3),
+                                                  color: OnepieceColors
+                                                      .liteFancyGreen),
+                                              height: 30,
+                                              width: 60,
+                                            ),
+                                            menuItemStyleData:
+                                                const MenuItemStyleData(
+                                              height: 30,
+                                            ),
+                                            selectedItemBuilder: (context) {
+                                              return List<String>.generate(
+                                                      31,
+                                                      (int index) => (index + 1)
+                                                          .toString())
+                                                  .map((String day) {
+                                                return Container(
+                                                  alignment:
+                                                      AlignmentDirectional
+                                                          .center,
+                                                  child: Text(
+                                                    day,
+                                                    style: const TextStyle(
+                                                      fontSize: 16,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                    ),
+                                                  ),
+                                                );
+                                              }).toList();
+                                            },
+                                            items: List<String>.generate(
                                                     31,
                                                     (int index) =>
                                                         (index + 1).toString())
                                                 .map((String day) {
-                                              return Container(
-                                                alignment:
-                                                    AlignmentDirectional.center,
+                                              return DropdownMenuItem<String>(
+                                                value: day,
                                                 child: Text(
                                                   day,
                                                   style: const TextStyle(
-                                                    fontSize: 16,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
+                                                    fontSize: 14,
                                                   ),
                                                 ),
                                               );
-                                            }).toList();
-                                          },
-                                          items: List<String>.generate(
-                                                  31,
-                                                  (int index) =>
-                                                      (index + 1).toString())
-                                              .map((String day) {
-                                            return DropdownMenuItem<String>(
-                                              value: day,
-                                              child: Text(
-                                                day,
-                                                style: const TextStyle(
-                                                  fontSize: 14,
-                                                ),
-                                              ),
-                                            );
-                                          }).toList(),
+                                            }).toList(),
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    Text(
-                                      AppLocalizations.of(context)!.day,
-                                      style: OnepieceFonts.contentStyle,
-                                    ),
-                                  ],
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8.0),
+                                        child: Text(
+                                          AppLocalizations.of(context)!.day,
+                                          style: OnepieceFonts.contentStyle,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ),
+                              ],
+                            )
                           ],
                         ),
                       ),
-                      const SizedBox(
-                        width: 15,
+                      Padding(
+                        padding: EdgeInsets.only(right: sideWidth),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            DigitTextFormField(
+                                context,
+                                basicInfoEditable,
+                                characterBounty,
+                                AppLocalizations.of(context)!.bounty,
+                                10,
+                                100000000000,
+                                ImageHelper.getTextFormFieldIcon(
+                                    'images/character_digits_icon/bounty.svg',
+                                    true)),
+                            DigitTextFormField(
+                                context,
+                                basicInfoEditable,
+                                characterAge,
+                                AppLocalizations.of(context)!.age,
+                                0,
+                                100000,
+                                ImageHelper.getTextFormFieldIcon(
+                                    'images/character_digits_icon/age.svg',
+                                    true)),
+                            DigitTextFormField(
+                                context,
+                                basicInfoEditable,
+                                characterHeight,
+                                AppLocalizations.of(context)!.height,
+                                1,
+                                100000,
+                                ImageHelper.getTextFormFieldIcon(
+                                    'images/character_digits_icon/height.svg',
+                                    true)),
+                          ],
+                        ),
                       ),
-                      _getDigitFormField(
-                          context,
-                          basicInfoEditable,
-                          characterHeight,
-                          AppLocalizations.of(context)!.height,
-                          1,
-                          100000,
-                          _getIcon('images/character_digits_icon/height.svg')),
                     ],
                   ),
-                )
+                ),
               ],
             ),
           )
         ],
       );
     });
-  }
-
-  Widget _getIcon(String path) {
-    return Padding(
-      padding: const EdgeInsets.all(10.0),
-      child:
-          ImageHelper.getSvgIconWithColor(path, 3, 3, OnepieceColors.fancyBlue),
-    );
   }
 
 // show character combat information (editable if permitted)
@@ -768,7 +743,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: EdgeInsets.fromLTRB(sideWidth, 8, 8, 8),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
@@ -857,7 +832,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
           ),
           if (character.hakis.isNotEmpty)
             Padding(
-              padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+              padding: EdgeInsets.fromLTRB(sideWidth, 0, 0, 0),
               child: Row(
                 children: character.hakis
                     .map((e) => Padding(
@@ -869,7 +844,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
               ),
             ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(10, 20, 0, 0),
+            padding: EdgeInsets.fromLTRB(sideWidth, 20, 0, 0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -890,91 +865,107 @@ class _CharacterDetailState extends State<CharacterDetail> {
           ),
           Form(
             key: _digitFormKey,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    children: [
-                      _getDigitFormField(
-                          context,
-                          combatInfoEditable,
-                          characterAttackController,
-                          AppLocalizations.of(context)!.characterAttack,
-                          10,
-                          1000,
-                          _getIcon('images/character_digits_icon/attack.svg')),
-                      _getDigitFormField(
-                          context,
-                          combatInfoEditable,
-                          characterDefenseController,
-                          AppLocalizations.of(context)!.characterDefense,
-                          10,
-                          1000,
-                          _getIcon('images/character_digits_icon/defense.svg')),
-                      _getDigitFormField(
-                          context,
-                          combatInfoEditable,
-                          characterBloodController,
-                          AppLocalizations.of(context)!.characterBlood,
-                          100,
-                          10000,
-                          _getIcon('images/character_digits_icon/blood.svg')),
-                      _getDigitFormField(
-                          context,
-                          combatInfoEditable,
-                          characterSpeedController,
-                          AppLocalizations.of(context)!.characterSpeed,
-                          10,
-                          200,
-                          _getIcon('images/character_digits_icon/speed.svg')),
-                    ],
+            child: SizedBox(
+              width: dividerWidth,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(left: sideWidth),
+                    child: Column(
+                      children: [
+                        DigitTextFormField(
+                            context,
+                            combatInfoEditable,
+                            characterAttackController,
+                            AppLocalizations.of(context)!.characterAttack,
+                            10,
+                            1000,
+                            ImageHelper.getTextFormFieldIcon(
+                                'images/character_digits_icon/attack.svg',
+                                true)),
+                        DigitTextFormField(
+                            context,
+                            combatInfoEditable,
+                            characterDefenseController,
+                            AppLocalizations.of(context)!.characterDefense,
+                            10,
+                            1000,
+                            ImageHelper.getTextFormFieldIcon(
+                                'images/character_digits_icon/defense.svg',
+                                true)),
+                        DigitTextFormField(
+                            context,
+                            combatInfoEditable,
+                            characterBloodController,
+                            AppLocalizations.of(context)!.characterBlood,
+                            100,
+                            10000,
+                            ImageHelper.getTextFormFieldIcon(
+                                'images/character_digits_icon/blood.svg',
+                                true)),
+                        DigitTextFormField(
+                            context,
+                            combatInfoEditable,
+                            characterSpeedController,
+                            AppLocalizations.of(context)!.characterSpeed,
+                            10,
+                            200,
+                            ImageHelper.getTextFormFieldIcon(
+                                'images/character_digits_icon/speed.svg',
+                                true)),
+                      ],
+                    ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    children: [
-                      _getDigitFormField(
-                          context,
-                          combatInfoEditable,
-                          characterIntelligenceController,
-                          AppLocalizations.of(context)!.characterIntelligence,
-                          70,
-                          260,
-                          _getIcon(
-                              'images/character_digits_icon/intelligence.svg')),
-                      _getDigitFormField(
-                          context,
-                          combatInfoEditable,
-                          characterEnergyController,
-                          AppLocalizations.of(context)!.characterEnergy,
-                          10,
-                          50,
-                          _getIcon('images/character_digits_icon/energy.svg')),
-                      _getDigitFormField(
-                          context,
-                          combatInfoEditable,
-                          characterGroupGainController,
-                          AppLocalizations.of(context)!.groupGain,
-                          1,
-                          5,
-                          _getIcon(
-                              'images/character_digits_icon/group_gain.svg')),
-                      _getDigitFormField(
-                          context,
-                          combatInfoEditable,
-                          characterFruitLimitController,
-                          AppLocalizations.of(context)!.fruitLimit,
-                          1,
-                          2,
-                          _getIcon(
-                              'images/character_digits_icon/fruit_limit.svg')),
-                    ],
-                  ),
-                )
-              ],
+                  Padding(
+                    padding: EdgeInsets.only(right: sideWidth),
+                    child: Column(
+                      children: [
+                        DigitTextFormField(
+                            context,
+                            combatInfoEditable,
+                            characterIntelligenceController,
+                            AppLocalizations.of(context)!.characterIntelligence,
+                            70,
+                            260,
+                            ImageHelper.getTextFormFieldIcon(
+                                'images/character_digits_icon/intelligence.svg',
+                                true)),
+                        DigitTextFormField(
+                            context,
+                            combatInfoEditable,
+                            characterEnergyController,
+                            AppLocalizations.of(context)!.characterEnergy,
+                            10,
+                            50,
+                            ImageHelper.getTextFormFieldIcon(
+                                'images/character_digits_icon/energy.svg',
+                                true)),
+                        DigitTextFormField(
+                            context,
+                            combatInfoEditable,
+                            characterGroupGainController,
+                            AppLocalizations.of(context)!.groupGain,
+                            1,
+                            5,
+                            ImageHelper.getTextFormFieldIcon(
+                                'images/character_digits_icon/group_gain.svg',
+                                true)),
+                        DigitTextFormField(
+                            context,
+                            combatInfoEditable,
+                            characterFruitLimitController,
+                            AppLocalizations.of(context)!.fruitLimit,
+                            1,
+                            2,
+                            ImageHelper.getTextFormFieldIcon(
+                                'images/character_digits_icon/fruit_limit.svg',
+                                true)),
+                      ],
+                    ),
+                  )
+                ],
+              ),
             ),
           )
         ],
@@ -997,7 +988,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            padding: EdgeInsets.symmetric(horizontal: sideWidth),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
@@ -1008,73 +999,61 @@ class _CharacterDetailState extends State<CharacterDetail> {
                     style: OnepieceFonts.headerStyle,
                   ),
                 ),
-                if (character.maximumFruitCount > fruits.length)
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-                    child: SizedBox(
-                      width: 300,
-                      height: 40,
-                      child: TextFormField(
-                        enabled: fruitSearchEnabled,
-                        controller: fruitNameController,
-                        decoration: InputDecoration(
-                          floatingLabelBehavior: FloatingLabelBehavior.never,
-                          label: Text(
-                            AppLocalizations.of(context)!.fruitName,
-                            style: OnepieceFonts.hintFont,
-                          ),
-                          disabledBorder: const OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: OnepieceColors.fancyGreen)),
-                          enabledBorder: const OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: OnepieceColors.fancyGreen)),
-                          focusedBorder: const OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: OnepieceColors.fancyGreen)),
-                          prefixIcon: const Icon(Icons.search),
-                        ),
-                        onChanged: (value) {
-                          selectedFruitId = null;
-                          fruitSetState(() {});
-                          if (value.isEmpty) {
-                            searchingFruitList = [];
-                            fruitSetState(() {});
-                            return;
-                          }
-                          fruitFilter.name = value;
-                          fruitFilter.languageCode =
-                              I18nHelper.getLanguageCode();
-                          ListFruitRequest request = ListFruitRequest(
-                              pageSize: 5,
-                              pageIndex: 1,
-                              sortKeys: [],
-                              fruitFilter: fruitFilter);
-                          Future<ListFruitResponse?> response =
-                              getIt<FruitDao>().list(request);
-                          response.then(
-                            (value) => {
-                              searchingFruitList = value!.fruits,
-                              fruitSetState(() {})
-                            },
-                          );
-                        },
-                      ),
-                    ),
-                  ),
               ],
             ),
           ),
-          if (searchingFruitList.isNotEmpty)
+          if (character.maximumFruitCount > fruits.length)
             Padding(
-              padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-              child: Text(
-                AppLocalizations.of(context)!.searchList,
-                style: OnepieceFonts.fancyBlueHintFont,
+              padding: EdgeInsets.fromLTRB(sideWidth, 8, 8, 0),
+              child: SizedBox(
+                width: 200,
+                height: 35,
+                child: TextFormField(
+                  enabled: fruitSearchEnabled,
+                  controller: fruitNameController,
+                  decoration: InputDecoration(
+                    floatingLabelBehavior: FloatingLabelBehavior.never,
+                    disabledBorder: const OutlineInputBorder(
+                        borderSide:
+                            BorderSide(color: OnepieceColors.menuHoverColor)),
+                    enabledBorder: const OutlineInputBorder(
+                        borderSide:
+                            BorderSide(color: OnepieceColors.menuHoverColor)),
+                    focusedBorder: const OutlineInputBorder(
+                        borderSide:
+                            BorderSide(color: OnepieceColors.fancyGreen)),
+                    prefixIcon: const Icon(Icons.search),
+                    labelText: AppLocalizations.of(context)!.search,
+                  ),
+                  onChanged: (value) {
+                    selectedFruitId = null;
+                    fruitSetState(() {});
+                    if (value.isEmpty) {
+                      searchingFruitList = [];
+                      fruitSetState(() {});
+                      return;
+                    }
+                    fruitFilter.name = value;
+                    fruitFilter.languageCode = I18nHelper.getLanguageCode();
+                    ListFruitRequest request = ListFruitRequest(
+                        pageSize: 5,
+                        pageIndex: 1,
+                        sortKeys: [],
+                        fruitFilter: fruitFilter);
+                    Future<ListFruitResponse?> response =
+                        getIt<FruitDao>().list(request);
+                    response.then(
+                      (value) => {
+                        searchingFruitList = value!.fruits,
+                        fruitSetState(() {})
+                      },
+                    );
+                  },
+                ),
               ),
             ),
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: EdgeInsets.fromLTRB(sideWidth, 8, 8, 8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -1178,58 +1157,55 @@ class _CharacterDetailState extends State<CharacterDetail> {
           AppLocalizations.of(context)!.artificialZoanFruit,
       FruitType.paramecia: AppLocalizations.of(context)!.parameciaFruit,
     };
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Container(
-        width: 500,
-        decoration: const BoxDecoration(
-          color: OnepieceColors.menuBackgroundColor,
-          borderRadius: BorderRadius.all(Radius.circular(8)),
-        ),
-        child: ListView.builder(
-          shrinkWrap: true,
-          itemCount: fruits.length,
-          itemBuilder: (context, index) {
-            var fruit = fruits[index];
-            return Material(
-              type: MaterialType.transparency,
-              child: Container(
-                padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                decoration: const BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(5))),
-                child: ListTile(
-                  minLeadingWidth: 10,
-                  contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  selectedTileColor: OnepieceColors.liteFancyBlue,
-                  onTap: () {
-                    context.goNamed('fruitDetails',
-                        extra: fruit.id,
-                        pathParameters: {
-                          'name': I18nHelper.getDisplayNameFromI18n(fruit.name!)
-                        });
-                  },
-                  hoverColor: OnepieceColors.liteFancyBlue,
-                  title: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(I18nHelper.getDisplayNameFromI18n(fruit.name!)),
-                      Padding(
-                        padding: const EdgeInsets.only(right: 5),
-                        child: OnepieceTag.getFruitTag(
-                          fruit.fruitType!,
-                          fruitTypeToDisplayValue[fruit.fruitType!]!,
-                        ),
+    return Container(
+      width: 500,
+      decoration: const BoxDecoration(
+        color: OnepieceColors.menuBackgroundColor,
+        borderRadius: BorderRadius.all(Radius.circular(8)),
+      ),
+      child: ListView.builder(
+        shrinkWrap: true,
+        itemCount: fruits.length,
+        itemBuilder: (context, index) {
+          var fruit = fruits[index];
+          return Material(
+            type: MaterialType.transparency,
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+              decoration: const BoxDecoration(
+                  borderRadius: BorderRadius.all(Radius.circular(5))),
+              child: ListTile(
+                minLeadingWidth: 10,
+                contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                selectedTileColor: OnepieceColors.liteFancyBlue,
+                onTap: () {
+                  context.goNamed('fruitDetails',
+                      extra: fruit.id,
+                      pathParameters: {
+                        'name': I18nHelper.getDisplayNameFromI18n(fruit.name!)
+                      });
+                },
+                hoverColor: OnepieceColors.liteFancyBlue,
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(I18nHelper.getDisplayNameFromI18n(fruit.name!)),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 5),
+                      child: OnepieceTag.getFruitTag(
+                        fruit.fruitType!,
+                        fruitTypeToDisplayValue[fruit.fruitType!]!,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -1261,7 +1237,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            padding: EdgeInsets.fromLTRB(sideWidth, 8, 8, 8),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
@@ -1272,72 +1248,68 @@ class _CharacterDetailState extends State<CharacterDetail> {
                     style: OnepieceFonts.headerStyle,
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(8.0, 8, 8, 0),
-                  child: SizedBox(
-                    width: 300,
-                    height: 40,
-                    child: TextFormField(
-                      enabled: groupSearchEnabled,
-                      controller: groupNameController,
-                      decoration: InputDecoration(
-                        floatingLabelBehavior: FloatingLabelBehavior.never,
-                        label: Text(
-                          AppLocalizations.of(context)!.groupName,
-                          style: OnepieceFonts.hintFont,
-                        ),
-                        disabledBorder: const OutlineInputBorder(
-                            borderSide:
-                                BorderSide(color: OnepieceColors.fancyGreen)),
-                        enabledBorder: const OutlineInputBorder(
-                            borderSide:
-                                BorderSide(color: OnepieceColors.fancyGreen)),
-                        focusedBorder: const OutlineInputBorder(
-                            borderSide:
-                                BorderSide(color: OnepieceColors.fancyGreen)),
-                        prefixIcon: const Icon(Icons.search),
-                      ),
-                      onChanged: (value) {
-                        debugPrint(value);
-                        selectedGroupId = null;
-                        groupSetState(() {});
-                        if (value.isEmpty) {
-                          searchingGroupList = [];
-                          groupSetState(() {});
-                          return;
-                        }
-                        groupFilter.name = value;
-                        groupFilter.languageCode = I18nHelper.getLanguageCode();
-                        ListGroupRequest request = ListGroupRequest(
-                            pageSize: 5,
-                            pageIndex: 1,
-                            sortKeys: [],
-                            groupFilter: groupFilter);
-                        Future<ListGroupResponse?> response =
-                            getIt<GroupDao>().listGroups(request);
-                        response.then(
-                          (value) => {
-                            searchingGroupList = value!.groups,
-                            groupSetState(() {})
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                ),
               ],
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(sideWidth, 8, 8, 0),
+            child: SizedBox(
+              width: 200,
+              height: 35,
+              child: TextFormField(
+                enabled: groupSearchEnabled,
+                controller: groupNameController,
+                decoration: InputDecoration(
+                  floatingLabelBehavior: FloatingLabelBehavior.never,
+                  disabledBorder: const OutlineInputBorder(
+                      borderSide:
+                          BorderSide(color: OnepieceColors.menuHoverColor)),
+                  enabledBorder: const OutlineInputBorder(
+                      borderSide:
+                          BorderSide(color: OnepieceColors.menuHoverColor)),
+                  focusedBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
+                  prefixIcon: const Icon(Icons.search),
+                  labelText: AppLocalizations.of(context)!.search,
+                ),
+                onChanged: (value) {
+                  debugPrint(value);
+                  selectedGroupId = null;
+                  groupSetState(() {});
+                  if (value.isEmpty) {
+                    searchingGroupList = [];
+                    groupSetState(() {});
+                    return;
+                  }
+                  groupFilter.name = value;
+                  groupFilter.languageCode = I18nHelper.getLanguageCode();
+                  ListGroupRequest request = ListGroupRequest(
+                      pageSize: 5,
+                      pageIndex: 1,
+                      sortKeys: [],
+                      groupFilter: groupFilter);
+                  Future<ListGroupResponse?> response =
+                      getIt<GroupDao>().listGroups(request);
+                  response.then(
+                    (value) => {
+                      searchingGroupList = value!.groups,
+                      groupSetState(() {})
+                    },
+                  );
+                },
+              ),
             ),
           ),
           if (searchingGroupList.isNotEmpty)
             Padding(
-              padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+              padding: EdgeInsets.fromLTRB(sideWidth, 8, 8, 0),
               child: Text(
                 AppLocalizations.of(context)!.searchList,
                 style: OnepieceFonts.fancyBlueHintFont,
               ),
             ),
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: EdgeInsets.fromLTRB(sideWidth, 8, 8, 8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -1528,12 +1500,11 @@ class _CharacterDetailState extends State<CharacterDetail> {
             return Material(
               type: MaterialType.transparency,
               child: Container(
-                padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
                 decoration: const BoxDecoration(
                     borderRadius: BorderRadius.all(Radius.circular(5))),
                 child: ListTile(
                   minLeadingWidth: 10,
-                  contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                  contentPadding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(5),
                   ),
@@ -1555,25 +1526,15 @@ class _CharacterDetailState extends State<CharacterDetail> {
                         Row(
                           children: <Widget>[
                             Padding(
-                              padding: const EdgeInsets.only(right: 6),
-                              child: Container(
-                                width: 50,
-                                height: 50,
-                                decoration: BoxDecoration(
-                                  borderRadius: const BorderRadius.all(
-                                      Radius.circular(2.0)),
-                                  border: Border.all(
-                                      color: OnepieceColors.fancyBlue,
-                                      width: 2,
-                                      style: BorderStyle.solid),
-                                ),
-                                child: FittedBox(
-                                  fit: BoxFit.fill,
-                                  child: Image.memory(Base64Helper.decode(
-                                      currentGroup.profileImage!)),
-                                ),
-                              ),
-                            ),
+                                padding: const EdgeInsets.only(right: 6),
+                                child: ImageHelper.getRoundImageFrame(
+                                    50,
+                                    50,
+                                    2,
+                                    Colors.black12,
+                                    6,
+                                    Base64Helper.decode(
+                                        character.profileImage!))),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1581,10 +1542,13 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                 Text(
                                   "${I18nHelper.getDisplayNameFromI18n(currentGroup.name!)} "
                                   "${currentGroup.onceBelongedTo! ? "(${AppLocalizations.of(context)!.onceBelongTo})" : ""}",
-                                  style: OnepieceFonts.fancyBlueSmallTitle,
+                                  style: OnepieceFonts.deepBlackHintFont,
                                 ),
-                                Text(groupPositionToDisplayValue[
-                                    currentGroup.position!]!)
+                                Text(
+                                  groupPositionToDisplayValue[
+                                      currentGroup.position!]!,
+                                  style: OnepieceFonts.boldLiteFancySmallFont,
+                                )
                               ],
                             ),
                           ],
@@ -1607,20 +1571,23 @@ class _CharacterDetailState extends State<CharacterDetail> {
 
   Widget _getBattle(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Text(
-            AppLocalizations.of(context)!.relatedBattles,
-            style: OnepieceFonts.headerStyle,
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          _getBattlesTable()
-        ],
+      padding: EdgeInsets.fromLTRB(sideWidth, 8, sideWidth, 8),
+      child: SizedBox(
+        width: dividerWidth,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Text(
+              AppLocalizations.of(context)!.relatedBattles,
+              style: OnepieceFonts.headerStyle,
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            _getBattlesTable()
+          ],
+        ),
       ),
     );
   }
@@ -1635,7 +1602,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
           bottom: BorderSide(color: OnepieceColors.themeColor)),
       columns: _createColumns(character.id),
       rows: _createRows(context),
-      columnSpacing: 20,
+      columnSpacing: 8,
     );
   }
 
@@ -1763,114 +1730,6 @@ class _CharacterDetailState extends State<CharacterDetail> {
             style: OnepieceFonts.tableHeightStyle,
           )
         : Text(value));
-  }
-
-  Widget _getStringFormField(
-      BuildContext context,
-      bool editable,
-      TextEditingController controller,
-      String label,
-      int length,
-      Widget? icon) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 300,
-            child: Padding(
-              padding: const EdgeInsets.only(left: 8),
-              child: Text(
-                label,
-                style: OnepieceFonts.deepBlackHintFont,
-              ),
-            ),
-          ),
-          SizedBox(
-            width: 300,
-            child: TextFormField(
-              controller: controller,
-              enabled: editable,
-              maxLength: length,
-              buildCounter: (
-                context, {
-                required currentLength,
-                required isFocused,
-                maxLength,
-              }) {
-                if (!isFocused) {
-                  return const Text("");
-                } else {
-                  return Text(
-                      "$currentLength/$maxLength ${AppLocalizations.of(context)!.characters}");
-                }
-              },
-              decoration: InputDecoration(
-                prefixIcon: icon,
-                floatingLabelBehavior: FloatingLabelBehavior.never,
-                contentPadding: const EdgeInsets.fromLTRB(0, 15, 0, 0),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _getDigitFormField(
-      BuildContext context,
-      bool editable,
-      TextEditingController controller,
-      String label,
-      int min,
-      int max,
-      Widget? icon) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 300,
-            child: Padding(
-              padding: const EdgeInsets.only(left: 8),
-              child: Text(
-                label,
-                style: OnepieceFonts.deepBlackHintFont,
-              ),
-            ),
-          ),
-          SizedBox(
-            width: 300,
-            child: TextFormField(
-              enabled: editable,
-              controller: controller,
-              validator: (value) {
-                if (value!.isWhiteSpace()) {
-                  return AppLocalizations.of(context)!.requiredField;
-                } else if (!value.isValidInt()) {
-                  return AppLocalizations.of(context)!.fieldMustBeInt;
-                }
-                int valueInt = int.parse(value);
-                if (valueInt < min || valueInt > max) {
-                  return AppLocalizations.of(context)!.valueExceedsLimit;
-                }
-                return null;
-              },
-              decoration: InputDecoration(
-                prefixIcon: icon,
-                floatingLabelBehavior: FloatingLabelBehavior.never,
-                contentPadding: const EdgeInsets.fromLTRB(0, 15, 0, 0),
-                hintText: "$min-$max",
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }
 

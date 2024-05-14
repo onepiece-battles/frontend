@@ -12,6 +12,7 @@ class OnepieceColors {
   static const deepFancyBlue = Color.fromARGB(255, 7, 48, 88);
   static const liteFancyBlue = Color.fromARGB(80, 16, 85, 154);
   static const fancyGreen = Color.fromARGB(255, 60, 126, 200);
+  static const iconGreen = Color.fromARGB(255, 23, 105, 123);
   static const liteFancyGreen = Color.fromARGB(40, 60, 126, 200);
   static const menuTextColor = Color.fromARGB(250, 36, 46, 53);
   static const menuIconColor = Color.fromARGB(250, 95, 110, 121);
