@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 
 class MyInputTheme {
-  TextStyle _buildTextStyle(Color color, {double size = 16.0}) {
+  TextStyle _buildTextStyle(Color color, {double size = 18.0}) {
     return TextStyle(color: color, fontSize: size);
   }
 
