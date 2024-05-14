@@ -31,6 +31,7 @@ class _FruitViewState extends State<FruitView> {
 
   TextEditingController pageNumberController = TextEditingController(text: "0");
   TextEditingController searchNameController = TextEditingController();
+  ScrollController horizontalController = ScrollController();
 
   // first all columns will be sorted by creation id desc.
   Map<FruitSortableFieldsEnum, SortOrder?> sortableEnumToSortOrderMap = {
@@ -110,27 +111,32 @@ class _FruitViewState extends State<FruitView> {
       padding: const EdgeInsets.all(15.0),
       child: SingleChildScrollView(
         scrollDirection: Axis.vertical,
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _getHeaderText(context),
-              SizedBox(
-                width: 1400,
-                height: 50,
-                child: _getControlRow(context),
-              ),
-              _getFruitsTable(context),
-              const SizedBox(
-                height: 15,
-              ),
-              if (totalPageNum > 1)
+        child: Scrollbar(
+          thumbVisibility: true,
+          controller: horizontalController,
+          child: SingleChildScrollView(
+            controller: horizontalController,
+            scrollDirection: Axis.horizontal,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _getHeaderText(context),
                 SizedBox(
                   width: 1400,
-                  child: Center(child: _getPageFoot(context)),
-                )
-            ],
+                  height: 50,
+                  child: _getControlRow(context),
+                ),
+                _getFruitsTable(context),
+                const SizedBox(
+                  height: 15,
+                ),
+                if (totalPageNum > 1)
+                  SizedBox(
+                    width: 1400,
+                    child: Center(child: _getPageFoot(context)),
+                  )
+              ],
+            ),
           ),
         ),
       ),
@@ -160,19 +166,21 @@ class _FruitViewState extends State<FruitView> {
               if (PermissionCheck.checkPermission(
                   getIt<User>().loginRoleResourcesPermissionMap,
                   ResourceType.FRUIT,
-                  Permission.CREATE)) SizedBox(
-                height: 35,
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 10.0),
-                  child: ElevatedButton(
-                    style: OnepieceButtonStyle.getDefaultStyle(),
-                    onPressed: () {
-                      context.goNamed("createFruit");
-                    },
-                    child: Text(AppLocalizations.of(context)!.createDevilFruit),
+                  Permission.CREATE))
+                SizedBox(
+                  height: 35,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 10.0),
+                    child: ElevatedButton(
+                      style: OnepieceButtonStyle.getDefaultStyle(),
+                      onPressed: () {
+                        context.goNamed("createFruit");
+                      },
+                      child:
+                          Text(AppLocalizations.of(context)!.createDevilFruit),
+                    ),
                   ),
                 ),
-              ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(0, 0, 6, 0),
                 child: SizedBox(

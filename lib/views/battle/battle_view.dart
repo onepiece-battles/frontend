@@ -38,6 +38,8 @@ class _BattleViewState extends State<BattleView> {
   List<BattleType> selectedBattleTypes = [];
   List<BattleStatus> selectedBattleStatus = [];
 
+  ScrollController horizontalController = ScrollController();
+
   // first all columns will be sorted by creation id desc.
   Map<BattleSortableFieldsEnum, SortOrder?> sortableEnumToSortOrderMap = {
     BattleSortableFieldsEnum.winnerName: null,
@@ -112,38 +114,43 @@ class _BattleViewState extends State<BattleView> {
     return Padding(
       padding: const EdgeInsets.all(15.0),
       child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: SingleChildScrollView(
-          scrollDirection: Axis.vertical,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _getHeaderText(context),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    width: 1220,
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: _getControlRow(context),
-                      ),
-                    ),
-                  ),
-                  _getBattlesTable(context),
-                  const SizedBox(
-                    height: 15,
-                  ),
-                  if (totalPageNum > 1)
+        scrollDirection: Axis.vertical,
+        child: Scrollbar(
+          thumbVisibility: true,
+          controller: horizontalController,
+          child: SingleChildScrollView(
+            controller: horizontalController,
+            scrollDirection: Axis.horizontal,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _getHeaderText(context),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     SizedBox(
                       width: 1220,
-                      child: Center(child: _getPageFoot(context)),
-                    )
-                ],
-              ),
-            ],
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: _getControlRow(context),
+                        ),
+                      ),
+                    ),
+                    _getBattlesTable(context),
+                    const SizedBox(
+                      height: 15,
+                    ),
+                    if (totalPageNum > 1)
+                      SizedBox(
+                        width: 1220,
+                        child: Center(child: _getPageFoot(context)),
+                      )
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

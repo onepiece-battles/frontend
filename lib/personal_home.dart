@@ -64,7 +64,6 @@ class _UserHomeState extends State<UserHome> {
   }
 
   _updateData(List<dynamic> widgets) {
-    debugPrint("start updating data");
     characters = (widgets[0] as ListCharacterResponse).characters;
     groups = (widgets[1] as ListGroupResponse).groups;
     battles = (widgets[2] as ListBattleResponse).battles;

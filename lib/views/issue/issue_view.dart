@@ -45,6 +45,7 @@ class _IssueViewState extends State<IssueView> {
   List<IssueType> selectedIssueTypes = [];
   List<IssueStatus> selectedIssueStatuses = [];
   ScrollController scrollController = ScrollController();
+  ScrollController horizontalController = ScrollController();
 
   int selectedPageNum = 1;
   int totalPageNum = 0;
@@ -99,26 +100,32 @@ class _IssueViewState extends State<IssueView> {
       child: SingleChildScrollView(
         controller: scrollController,
         scrollDirection: Axis.vertical,
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _createHeader(context),
-              SizedBox(
-                width: 1600,
-                height: 50,
-                child: _createControlPanel(context),
-              ),
-              _createIssueTable(context),
-              const SizedBox(
-                height: 15,
-              ),
-              if (totalPageNum>1) SizedBox(
-                width: 1600,
-                child: Center(child: _getPageFoot(context)),
-              )
-            ],
+        child: Scrollbar(
+          thumbVisibility: true,
+          controller: horizontalController,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            controller: horizontalController,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _createHeader(context),
+                SizedBox(
+                  width: 1600,
+                  height: 50,
+                  child: _createControlPanel(context),
+                ),
+                _createIssueTable(context),
+                const SizedBox(
+                  height: 15,
+                ),
+                if (totalPageNum > 1)
+                  SizedBox(
+                    width: 1600,
+                    child: Center(child: _getPageFoot(context)),
+                  )
+              ],
+            ),
           ),
         ),
       ),
@@ -450,15 +457,15 @@ class _IssueViewState extends State<IssueView> {
             OnepieceColors.fancyBlue,
             25,
             25,
-                () {
-                  sortKeys = [];
-                  sortableEnumToSortOrderMap = {
-                    IssueSortableFieldEnum.issueStatus: null,
-                    IssueSortableFieldEnum.issueType: null,
-                    IssueSortableFieldEnum.creationTimestamp: null,
-                    IssueSortableFieldEnum.modificationTimestamp: null,
-                  };
-                  _search();
+            () {
+              sortKeys = [];
+              sortableEnumToSortOrderMap = {
+                IssueSortableFieldEnum.issueStatus: null,
+                IssueSortableFieldEnum.issueType: null,
+                IssueSortableFieldEnum.creationTimestamp: null,
+                IssueSortableFieldEnum.modificationTimestamp: null,
+              };
+              _search();
             },
           ),
         ),
