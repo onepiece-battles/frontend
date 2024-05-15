@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:one_piece_battles_flutter/utils/string_extensions.dart';
 import '../constants/onepiece_fonts.dart';
+import '../utils/data_validator.dart';
 
 class StringTextFormField extends StatelessWidget {
   final BuildContext buildContext;
@@ -9,9 +11,10 @@ class StringTextFormField extends StatelessWidget {
   final String label;
   final int length;
   final Widget icon;
+  final bool required;
 
   const StringTextFormField(this.buildContext, this.editable, this.controller,
-      this.label, this.length, this.icon,
+      this.label, this.length, this.icon, this.required,
       {super.key});
 
   @override
@@ -19,10 +22,10 @@ class StringTextFormField extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
-      // mainAxisSize: MainAxisSize.min,
       children: [
         SizedBox(
           width: 300,
+          height: 30,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -40,7 +43,7 @@ class StringTextFormField extends StatelessWidget {
         ),
         SizedBox(
           width: 300,
-          height: 58,
+          height: 80,
           child: TextFormField(
             controller: controller,
             enabled: editable,
@@ -59,9 +62,19 @@ class StringTextFormField extends StatelessWidget {
                     "$currentLength/$maxLength ${AppLocalizations.of(context)!.characters}");
               }
             },
+            validator: (value) {
+              if (required && value!.isWhiteSpace()) {
+                return AppLocalizations.of(buildContext)!.requiredField;
+              }
+              if (!DataValidator.validName(value!)) {
+                return AppLocalizations.of(context)!
+                    .invalidName;
+              }
+              return null;
+            },
             decoration: const InputDecoration(
               floatingLabelBehavior: FloatingLabelBehavior.never,
-              contentPadding: EdgeInsets.fromLTRB(10, 0, 0, 15),
+              contentPadding: EdgeInsets.fromLTRB(10, 10, 0, 0),
             ),
           ),
         ),

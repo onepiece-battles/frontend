@@ -485,7 +485,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                 20,
                                 ImageHelper.getTextFormFieldIcon(
                                     'images/character_digits_icon/name.svg',
-                                    true)),
+                                    true),true),
                             StringTextFormField(
                                 context,
                                 basicInfoEditable,
@@ -494,7 +494,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                 20,
                                 ImageHelper.getTextFormFieldIcon(
                                     'images/character_digits_icon/birth_place.svg',
-                                    true)),
+                                    true), false),
                             Column(
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
