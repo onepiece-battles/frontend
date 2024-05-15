@@ -170,7 +170,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                                     AppLocalizations.of(context)!.name,
                                     10,
                                     ImageHelper.getTextFormFieldIcon(
-                                        'images/character_digits_icon/fruit_limit.svg',
+                                        'images/character_digits_icon/name.svg',
                                         true),
                                     true),
                                 if (getIt<User>().loginRole == UserRole.NIKA)
@@ -181,7 +181,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                                       AppLocalizations.of(context)!.name,
                                       10,
                                       ImageHelper.getTextFormFieldIcon(
-                                          'images/character_digits_icon/fruit_limit.svg',
+                                          'images/character_digits_icon/name.svg',
                                           true),
                                       true),
                               ]),
