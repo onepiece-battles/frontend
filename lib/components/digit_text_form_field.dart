@@ -28,7 +28,7 @@ class DigitTextFormField extends StatelessWidget {
       children: [
         SizedBox(
           width: 300,
-          height: 60,
+          height: 30,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -46,7 +46,7 @@ class DigitTextFormField extends StatelessWidget {
         ),
         SizedBox(
           width: 300,
-          height: 35,
+          height: 80,
           child: TextFormField(
             enabled: editable,
             controller: textEditingController,
@@ -65,7 +65,7 @@ class DigitTextFormField extends StatelessWidget {
             },
             decoration: InputDecoration(
               floatingLabelBehavior: FloatingLabelBehavior.never,
-              contentPadding: const EdgeInsets.fromLTRB(10, 0, 0, 15),
+              contentPadding: const EdgeInsets.fromLTRB(10, 10, 0, 0),
               hintText: "$min-$max",
             ),
           ),
