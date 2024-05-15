@@ -113,46 +113,51 @@ class _BattleViewState extends State<BattleView> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(15.0),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.vertical,
-        child: Scrollbar(
-          thumbVisibility: true,
-          controller: horizontalController,
-          child: SingleChildScrollView(
-            controller: horizontalController,
-            scrollDirection: Axis.horizontal,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _getHeaderText(context),
-                Column(
+      child: Column(
+        children: [
+          SingleChildScrollView(
+            scrollDirection: Axis.vertical,
+            child: Scrollbar(
+              thumbVisibility: true,
+              controller: horizontalController,
+              child: SingleChildScrollView(
+                controller: horizontalController,
+                scrollDirection: Axis.horizontal,
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(
-                      width: 1220,
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: _getControlRow(context),
+                    _getHeaderText(context),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          width: 1220,
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: _getControlRow(context),
+                            ),
+                          ),
                         ),
-                      ),
+                        _getBattlesTable(context),
+                        const SizedBox(height: 15,)
+                      ],
                     ),
-                    _getBattlesTable(context),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    if (totalPageNum > 1)
-                      SizedBox(
-                        width: 1220,
-                        child: Center(child: _getPageFoot(context)),
-                      )
                   ],
                 ),
-              ],
+              ),
             ),
           ),
-        ),
+          const SizedBox(
+            height: 6,
+          ),
+          if (totalPageNum > 1)
+            SizedBox(
+              width: 1900,
+              child: Center(child: _getPageFoot(context)),
+            )
+        ],
       ),
     );
   }
