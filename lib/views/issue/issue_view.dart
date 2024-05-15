@@ -97,37 +97,44 @@ class _IssueViewState extends State<IssueView> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(15.0),
-      child: SingleChildScrollView(
-        controller: scrollController,
-        scrollDirection: Axis.vertical,
-        child: Scrollbar(
-          thumbVisibility: true,
-          controller: horizontalController,
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            controller: horizontalController,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _createHeader(context),
-                SizedBox(
-                  width: 1600,
-                  height: 50,
-                  child: _createControlPanel(context),
+      child: Column(
+        children: [
+          SingleChildScrollView(
+            controller: scrollController,
+            scrollDirection: Axis.vertical,
+            child: Scrollbar(
+              thumbVisibility: true,
+              controller: horizontalController,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                controller: horizontalController,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _createHeader(context),
+                    SizedBox(
+                      width: 1600,
+                      height: 50,
+                      child: _createControlPanel(context),
+                    ),
+                    _createIssueTable(context),
+                    const SizedBox(
+                      height: 15,
+                    ),
+                  ],
                 ),
-                _createIssueTable(context),
-                const SizedBox(
-                  height: 15,
-                ),
-                if (totalPageNum > 1)
-                  SizedBox(
-                    width: 1600,
-                    child: Center(child: _getPageFoot(context)),
-                  )
-              ],
+              ),
             ),
           ),
-        ),
+          const SizedBox(
+            height: 6,
+          ),
+          if (totalPageNum > 1)
+            SizedBox(
+              width: 1600,
+              child: Center(child: _getPageFoot(context)),
+            )
+        ],
       ),
     );
   }

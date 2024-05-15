@@ -109,36 +109,43 @@ class _FruitViewState extends State<FruitView> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(15.0),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.vertical,
-        child: Scrollbar(
-          thumbVisibility: true,
-          controller: horizontalController,
-          child: SingleChildScrollView(
-            controller: horizontalController,
-            scrollDirection: Axis.horizontal,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _getHeaderText(context),
-                SizedBox(
-                  width: 1400,
-                  height: 50,
-                  child: _getControlRow(context),
+      child: Column(
+        children: [
+          SingleChildScrollView(
+            scrollDirection: Axis.vertical,
+            child: Scrollbar(
+              thumbVisibility: true,
+              controller: horizontalController,
+              child: SingleChildScrollView(
+                controller: horizontalController,
+                scrollDirection: Axis.horizontal,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _getHeaderText(context),
+                    SizedBox(
+                      width: 1400,
+                      height: 50,
+                      child: _getControlRow(context),
+                    ),
+                    _getFruitsTable(context),
+                    const SizedBox(
+                      height: 15,
+                    ),
+                  ],
                 ),
-                _getFruitsTable(context),
-                const SizedBox(
-                  height: 15,
-                ),
-                if (totalPageNum > 1)
-                  SizedBox(
-                    width: 1400,
-                    child: Center(child: _getPageFoot(context)),
-                  )
-              ],
+              ),
             ),
           ),
-        ),
+          const SizedBox(
+            height: 6,
+          ),
+          if (totalPageNum > 1)
+            SizedBox(
+              width: 1400,
+              child: Center(child: _getPageFoot(context)),
+            )
+        ],
       ),
     );
   }

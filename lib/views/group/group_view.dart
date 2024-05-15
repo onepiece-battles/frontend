@@ -101,37 +101,42 @@ class _GroupViewState extends State<GroupView> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(15.0),
-      child: SingleChildScrollView(
-        controller: scrollController,
-        scrollDirection: Axis.vertical,
-        child: Scrollbar(
-          thumbVisibility: true,
-          controller: horizontalController,
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            controller: horizontalController,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _createHeader(context),
-                SizedBox(
-                  width: 1200,
-                  height: 50,
-                  child: _createControlPanel(context),
+      child: Column(
+        children: [
+          SingleChildScrollView(
+            controller: scrollController,
+            scrollDirection: Axis.vertical,
+            child: Scrollbar(
+              thumbVisibility: true,
+              controller: horizontalController,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                controller: horizontalController,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _createHeader(context),
+                    SizedBox(
+                      width: 1200,
+                      height: 50,
+                      child: _createControlPanel(context),
+                    ),
+                    _createGroupTable(context),
+                    const SizedBox(
+                      height: 15,
+                    ),
+                  ],
                 ),
-                _createGroupTable(context),
-                const SizedBox(
-                  height: 15,
-                ),
-                if (totalPageNum > 1)
-                  SizedBox(
-                    width: 1200,
-                    child: Center(child: _getPageFoot(context)),
-                  )
-              ],
+              ),
             ),
           ),
-        ),
+          const SizedBox(height: 6,),
+          if (totalPageNum > 1)
+            SizedBox(
+              width: 1200,
+              child: Center(child: _getPageFoot(context)),
+            )
+        ],
       ),
     );
   }

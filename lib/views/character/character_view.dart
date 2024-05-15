@@ -112,43 +112,50 @@ class _CharacterViewState extends State<CharacterView> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(15.0),
-      child: SingleChildScrollView(
-        controller: scrollController,
-        scrollDirection: Axis.vertical,
-        child: Scrollbar(
-          thumbVisibility: true,
-          controller: horizontalController,
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            controller: horizontalController,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _createHeader(context),
-                SizedBox(
-                  width: 1900,
-                  height: 50,
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 5.0),
-                      child: _createControlPanel(context),
+      child: Column(
+        children: [
+          SingleChildScrollView(
+            controller: scrollController,
+            scrollDirection: Axis.vertical,
+            child: Scrollbar(
+              thumbVisibility: true,
+              controller: horizontalController,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                controller: horizontalController,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _createHeader(context),
+                    SizedBox(
+                      width: 1900,
+                      height: 50,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 5.0),
+                          child: _createControlPanel(context),
+                        ),
+                      ),
                     ),
-                  ),
+                    _createCharacterTable(context),
+                    const SizedBox(
+                      height: 15,
+                    ),
+                  ],
                 ),
-                _createCharacterTable(context),
-                const SizedBox(
-                  height: 15,
-                ),
-                if (totalPageNum > 1)
-                  SizedBox(
-                    width: 1900,
-                    child: Center(child: _getPageFoot(context)),
-                  )
-              ],
+              ),
             ),
           ),
-        ),
+          const SizedBox(
+            height: 6,
+          ),
+          if (totalPageNum > 1)
+            SizedBox(
+              width: 1900,
+              child: Center(child: _getPageFoot(context)),
+            )
+        ],
       ),
     );
   }
