@@ -101,9 +101,10 @@ class _GroupViewState extends State<GroupView> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(15.0),
-      child: Stack(
+      child: Column(
         children: [
-          SingleChildScrollView(
+          Expanded(
+              child: SingleChildScrollView(
             controller: scrollController,
             scrollDirection: Axis.vertical,
             child: Scrollbar(
@@ -129,6 +130,9 @@ class _GroupViewState extends State<GroupView> {
                 ),
               ),
             ),
+          )),
+          const SizedBox(
+            height: 15,
           ),
           if (totalPageNum > 1)
             Column(

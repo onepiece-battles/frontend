@@ -97,9 +97,10 @@ class _IssueViewState extends State<IssueView> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(15.0),
-      child: Stack(
+      child: Column(
         children: [
-          SingleChildScrollView(
+          Expanded(
+              child: SingleChildScrollView(
             controller: scrollController,
             scrollDirection: Axis.vertical,
             child: Scrollbar(
@@ -125,6 +126,9 @@ class _IssueViewState extends State<IssueView> {
                 ),
               ),
             ),
+          )),
+          const SizedBox(
+            height: 15,
           ),
           if (totalPageNum > 1)
             Column(
