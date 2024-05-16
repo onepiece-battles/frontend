@@ -129,19 +129,22 @@ class _CreateFruitViewState extends State<CreateFruitView> {
                                     true),
                             ],
                           ),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                AppLocalizations.of(context)!.fruitType,
-                                style: OnepieceFonts.smallHeaderStyle,
-                              ),
-                              const SizedBox(
-                                height: 18,
-                              ),
-                              _getDropDownList(context),
-                            ],
+                          SizedBox(
+                            width: 300,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  AppLocalizations.of(context)!.fruitType,
+                                  style: OnepieceFonts.smallHeaderStyle,
+                                ),
+                                const SizedBox(
+                                  height: 18,
+                                ),
+                                _getDropDownList(context),
+                              ],
+                            ),
                           )
                         ],
                       ),
@@ -251,7 +254,7 @@ class _CreateFruitViewState extends State<CreateFruitView> {
                                     1,
                                     5,
                                     ImageHelper.getTextFormFieldIcon(
-                                        'images/character_digits_icon/group.svg',
+                                        'images/character_digits_icon/group_gain.svg',
                                         true)),
                               ],
                             ),
