@@ -109,7 +109,7 @@ class _FruitViewState extends State<FruitView> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(15.0),
-      child: Column(
+      child: Stack(
         children: [
           SingleChildScrollView(
             scrollDirection: Axis.vertical,
@@ -137,13 +137,12 @@ class _FruitViewState extends State<FruitView> {
               ),
             ),
           ),
-          const SizedBox(
-            height: 6,
-          ),
           if (totalPageNum > 1)
-            SizedBox(
-              width: 1400,
-              child: Center(child: _getPageFoot(context)),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Center(child: _getPageFoot(context)),
+              ],
             )
         ],
       ),

@@ -102,7 +102,7 @@ class _UserViewState extends State<UserView> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(15.0),
-      child: Column(
+      child: Stack(
         children: [
           SingleChildScrollView(
             controller: scrollController,
@@ -131,13 +131,12 @@ class _UserViewState extends State<UserView> {
               ),
             ),
           ),
-          const SizedBox(
-            height: 6,
-          ),
           if (totalPageNum > 1)
-            SizedBox(
-              width: 1500,
-              child: Center(child: _getPageFoot(context)),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Center(child: _getPageFoot(context)),
+              ],
             )
         ],
       ),

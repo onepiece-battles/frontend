@@ -113,7 +113,7 @@ class _BattleViewState extends State<BattleView> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(15.0),
-      child: Column(
+      child: Stack(
         children: [
           SingleChildScrollView(
             scrollDirection: Axis.vertical,
@@ -141,7 +141,9 @@ class _BattleViewState extends State<BattleView> {
                           ),
                         ),
                         _getBattlesTable(context),
-                        const SizedBox(height: 15,)
+                        const SizedBox(
+                          height: 15,
+                        )
                       ],
                     ),
                   ],
@@ -149,13 +151,12 @@ class _BattleViewState extends State<BattleView> {
               ),
             ),
           ),
-          const SizedBox(
-            height: 6,
-          ),
           if (totalPageNum > 1)
-            SizedBox(
-              width: 1900,
-              child: Center(child: _getPageFoot(context)),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Center(child: _getPageFoot(context)),
+              ],
             )
         ],
       ),
