@@ -9,7 +9,8 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 class CharacterBarGraph extends StatelessWidget {
   final CharacterData characterData;
   final bool symmetric;
-  const CharacterBarGraph({super.key, required this.characterData, required this.symmetric});
+  const CharacterBarGraph(
+      {super.key, required this.characterData, required this.symmetric});
 
   @override
   Widget build(BuildContext context) {
@@ -34,26 +35,23 @@ class CharacterBarGraph extends StatelessWidget {
     characterData.initBarData();
     return BarChart(
       BarChartData(
-        gridData: FlGridData(show: false),
+        gridData: const FlGridData(show: false),
         titlesData: FlTitlesData(
           show: true,
-          leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          leftTitles:
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          rightTitles:
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles:
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
                 showTitles: true,
                 getTitlesWidget: (value, meta) {
-                  return Padding(
-                    padding: const EdgeInsets.all(3.0),
-                    child: RotatedBox(
-                      quarterTurns: -1,
-                      child: ImageHelper.getSvgIconWithColor(
-                          svgPath[value.toInt()],
-                          100,
-                          100,
-                          OnepieceColors.fancyBlue),
-                    ),
+                  return RotatedBox(
+                    quarterTurns: -1,
+                    child: ImageHelper.getTextFormFieldIcon(
+                        svgPath[value.toInt()], true),
                   );
                 }),
           ),
