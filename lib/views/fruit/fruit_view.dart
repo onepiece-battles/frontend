@@ -109,9 +109,10 @@ class _FruitViewState extends State<FruitView> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(15.0),
-      child: Stack(
+      child: Column(
         children: [
-          SingleChildScrollView(
+          Expanded(
+              child: SingleChildScrollView(
             scrollDirection: Axis.vertical,
             child: Scrollbar(
               thumbVisibility: true,
@@ -136,6 +137,9 @@ class _FruitViewState extends State<FruitView> {
                 ),
               ),
             ),
+          )),
+          const SizedBox(
+            height: 15,
           ),
           if (totalPageNum > 1)
             Column(
