@@ -261,7 +261,8 @@ class _BattleViewState extends State<BattleView> {
                   ),
                 ),
               ),
-              _getBattleTypeFilter(context),
+              // will be displayed later
+              // _getBattleTypeFilter(context),
               _getBattleStatusFilter(context),
             ],
           ),
