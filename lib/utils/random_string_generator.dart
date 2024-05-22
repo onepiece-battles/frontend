@@ -43,7 +43,13 @@ class RandomStringGenerator{
       if (!isNika) {
         return "";
       }
-      return (min + Random().nextInt(max - min)).toString();
+      return (Random().nextInt(max - min + 1) + min).toString();
+  }
+
+  static double generateRandomDouble(double min, double max, int decimalPlaces, bool isNika) {
+    var random = Random();
+    double randomValue = min + random.nextDouble() * (max - min);
+    return double.parse(randomValue.toStringAsFixed(decimalPlaces));
   }
 
   static String generateDateString() {

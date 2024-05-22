@@ -143,12 +143,13 @@ class ImageHelper {
     return true;
   }
 
-  static Widget getTextFormFieldIcon(String iconPath, bool originalColor) {
+  static Widget getTextFormFieldIcon(
+      String iconPath, bool originalColor, double? size) {
     return SizedBox(
-      width: 35,
-      height: 35,
+      width: size ?? 35,
+      height: size ?? 35,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6.0),
+        padding: const EdgeInsets.symmetric(horizontal: 3.0),
         child: getSvgIconWithColor(
             iconPath, 3, 3, originalColor ? null : OnepieceColors.iconGreen),
       ),

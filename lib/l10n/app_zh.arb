@@ -276,5 +276,6 @@
   "viewReport": "查看战斗报告",
   "imageSizeExceedsLimit": "图片大小超出限制!",
   "alert": "⚠️",
-  "search": "搜索..."
+  "search": "搜索...",
+  "fieldMustBeDigit": "必须为数字"
 }

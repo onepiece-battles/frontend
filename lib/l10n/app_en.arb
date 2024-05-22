@@ -151,7 +151,7 @@
   "registerUserNameHint": "Please choose your nick name",
   "relatedBattles": "Related Battles",
   "required": "Required",
-  "requiredField": "This is a required field",
+  "requiredField": "Required field",
   "resetSort": "Reset Sort",
   "roleAdmin": "ADMIN",
   "roleNika": "NIKA",
@@ -276,5 +276,6 @@
   "viewReport": "View Report",
   "imageSizeExceedsLimit": "Image size exceeds limit!",
   "alert": "⚠️",
-  "search": "Search..."
+  "search": "Search...",
+  "fieldMustBeDigit": "Field must be digit"
 }
