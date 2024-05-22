@@ -47,9 +47,12 @@ class _LoginPageState extends State<LoginPage> {
     //todo(yichi): add keyboard listener
     return Scaffold(
       backgroundColor: Colors.grey[300],
-      body: SingleChildScrollView(
+      body:
+      SingleChildScrollView(
         scrollDirection: Axis.vertical,
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Align(
               alignment: Alignment.topRight,
@@ -80,7 +83,7 @@ class _LoginPageState extends State<LoginPage> {
                     onChanged: (b) => setState(() {
                       setState(() {
                         _tabTextIndexSelected =
-                            _tabTextIndexSelected == 0 ? 1 : 0;
+                        _tabTextIndexSelected == 0 ? 1 : 0;
                         Locale locale;
                         if (_tabTextIndexSelected == 0) {
                           locale = locales.first;
@@ -99,36 +102,36 @@ class _LoginPageState extends State<LoginPage> {
                             : OnepieceColors.fancyBlue),
                     iconBuilder: (value) => value
                         ? const Text(
-                            "En",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600),
-                          )
+                      "En",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600),
+                    )
                         : const Text(
-                            "文",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600),
-                          ),
+                      "文",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600),
+                    ),
                     textBuilder: (value) => value
                         ? const Center(
-                            child: Text(
-                            '文',
-                            style: TextStyle(
-                                color: Colors.black87,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600),
-                          ))
+                        child: Text(
+                          '文',
+                          style: TextStyle(
+                              color: Colors.black87,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600),
+                        ))
                         : const Center(
-                            child: Text(
-                            'En',
-                            style: TextStyle(
-                                color: Colors.black87,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600),
-                          )),
+                        child: Text(
+                          'En',
+                          style: TextStyle(
+                              color: Colors.black87,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600),
+                        )),
                   ),
                 ),
               ),
@@ -247,8 +250,8 @@ class _LoginPageState extends State<LoginPage> {
                         },
                         style: ButtonStyle(
                           overlayColor:
-                              MaterialStateProperty.resolveWith<Color?>(
-                            (Set<MaterialState> states) {
+                          MaterialStateProperty.resolveWith<Color?>(
+                                (Set<MaterialState> states) {
                               return Colors.transparent; // No splash color
                             },
                           ),
@@ -274,7 +277,7 @@ class _LoginPageState extends State<LoginPage> {
                     },
                     style: ButtonStyle(
                       overlayColor: MaterialStateProperty.resolveWith<Color?>(
-                        (Set<MaterialState> states) {
+                            (Set<MaterialState> states) {
                           return Colors.transparent; // No splash color
                         },
                       ),
@@ -299,6 +302,7 @@ class _LoginPageState extends State<LoginPage> {
           ],
         ),
       ),
+
     );
   }
 

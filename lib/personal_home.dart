@@ -158,7 +158,9 @@ class _UserHomeState extends State<UserHome> {
                           style: OnepieceFonts.contentStyleBoldFancyBlue,
                         ),
                       ),
-                      _getBattleWall(context)
+                      SizedBox(
+                        height: 600,
+                          child: _getBattleWall(context))
                     ],
                   )),
             );
