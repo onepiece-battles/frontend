@@ -51,7 +51,7 @@ class CharacterBarGraph extends StatelessWidget {
                   return RotatedBox(
                     quarterTurns: -1,
                     child: ImageHelper.getTextFormFieldIcon(
-                        svgPath[value.toInt()], true),
+                        svgPath[value.toInt()], true, null),
                   );
                 }),
           ),

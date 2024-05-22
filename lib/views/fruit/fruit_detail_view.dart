@@ -7,6 +7,7 @@ import 'package:one_piece_battles_flutter/utils/data_converter.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
 import '../../components/digit_text_form_field.dart';
+import '../../components/fruit_digit_text_form_field.dart';
 import '../../components/string_text_form_field.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
@@ -38,12 +39,20 @@ class _FruitDetailViewState extends State<FruitDetailView> {
   TextEditingController nameController = TextEditingController();
   // 2. combat info
   TextEditingController energyConsumeController = TextEditingController();
-  TextEditingController attackController = TextEditingController();
-  TextEditingController defenseController = TextEditingController();
-  TextEditingController intelligenceController = TextEditingController();
-  TextEditingController bloodController = TextEditingController();
-  TextEditingController speedController = TextEditingController();
-  TextEditingController groupGainController = TextEditingController();
+
+  TextEditingController attackSlopeController = TextEditingController();
+  TextEditingController attackInterceptController = TextEditingController();
+  TextEditingController defenseSlopeController = TextEditingController();
+  TextEditingController defenseInterceptController = TextEditingController();
+  TextEditingController intelligenceSlopeController = TextEditingController();
+  TextEditingController intelligenceInterceptController =
+      TextEditingController();
+  TextEditingController bloodSlopeController = TextEditingController();
+  TextEditingController bloodInterceptController = TextEditingController();
+  TextEditingController speedSlopeController = TextEditingController();
+  TextEditingController speedInterceptController = TextEditingController();
+  TextEditingController groupGainSlopeController = TextEditingController();
+  TextEditingController groupGainInterceptController = TextEditingController();
 
   final _battleFormKey = GlobalKey<FormState>();
   bool _basicInfoEditable = false;
@@ -90,13 +99,22 @@ class _FruitDetailViewState extends State<FruitDetailView> {
     nameController.text =
         I18nHelper.getDisplayNameFromI18n(fruitFullView.name!);
     energyConsumeController.text = fruitFullView.energyConsume!.toString();
-    attackController.text = fruitFullView.attackStrengthen!.toString();
-    defenseController.text = fruitFullView.defenseStrengthen!.toString();
-    intelligenceController.text =
-        fruitFullView.intelligenceStrengthen!.toString();
-    bloodController.text = fruitFullView.bloodStrengthen!.toString();
-    speedController.text = fruitFullView.speedStrengthen!.toString();
-    groupGainController.text = fruitFullView.groupGainStrengthen!.toString();
+
+    attackSlopeController.text = fruitFullView.attackSlope.toString();
+    attackInterceptController.text = fruitFullView.attackIntercept.toString();
+    defenseSlopeController.text = fruitFullView.defenseSlope.toString();
+    defenseInterceptController.text = fruitFullView.defenseIntercept.toString();
+    bloodSlopeController.text = fruitFullView.bloodSlope.toString();
+    bloodInterceptController.text = fruitFullView.bloodIntercept.toString();
+    speedSlopeController.text = fruitFullView.speedSlope.toString();
+    speedInterceptController.text = fruitFullView.speedIntercept.toString();
+    intelligenceSlopeController.text =
+        fruitFullView.intelligenceSlope.toString();
+    intelligenceInterceptController.text =
+        fruitFullView.intelligenceIntercept.toString();
+    groupGainSlopeController.text = fruitFullView.groupGainSlope.toString();
+    groupGainInterceptController.text =
+        fruitFullView.groupGainIntercept.toString();
   }
 
   @override
@@ -138,7 +156,7 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                             ),
                             Padding(
                               padding:
-                                   EdgeInsets.symmetric(horizontal: _sideWidth),
+                                  EdgeInsets.symmetric(horizontal: _sideWidth),
                               child: _getCharacterList(context),
                             ),
                             const SizedBox(
@@ -303,7 +321,7 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                 AppLocalizations.of(context)!.name,
                 10,
                 ImageHelper.getTextFormFieldIcon(
-                    'images/character_digits_icon/name.svg', true),
+                    'images/character_digits_icon/name.svg', true, null),
                 true),
             Padding(
               padding: const EdgeInsets.only(bottom: 8.0),
@@ -423,18 +441,30 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                             var updatedFruit = UpdateFruitRequest(
                               id: widget.fruitId,
                               // digit info
-                              groupGainStrengthen: DataConverter.stringToInt(
-                                  groupGainController.text),
-                              attackStrengthen: DataConverter.stringToInt(
-                                  attackController.text),
-                              defenseStrengthen: DataConverter.stringToInt(
-                                  defenseController.text),
-                              intelligenceStrengthen: DataConverter.stringToInt(
-                                  intelligenceController.text),
-                              bloodStrengthen: DataConverter.stringToInt(
-                                  bloodController.text),
-                              speedStrengthen: DataConverter.stringToInt(
-                                  speedController.text),
+                              attackSlope: DataConverter.stringToDouble(
+                                  attackSlopeController.text.trim()),
+                              attackIntercept: DataConverter.stringToInt(
+                                  attackInterceptController.text.trim()),
+                              defenseSlope: DataConverter.stringToDouble(
+                                  defenseSlopeController.text.trim()),
+                              defenseIntercept: DataConverter.stringToInt(
+                                  defenseInterceptController.text.trim()),
+                              bloodSlope: DataConverter.stringToDouble(
+                                  bloodSlopeController.text.trim()),
+                              bloodIntercept: DataConverter.stringToInt(
+                                  bloodInterceptController.text.trim()),
+                              groupGainSlope: DataConverter.stringToDouble(
+                                  groupGainSlopeController.text.trim()),
+                              groupGainIntercept: DataConverter.stringToInt(
+                                  groupGainInterceptController.text.trim()),
+                              speedSlope: DataConverter.stringToDouble(
+                                  speedSlopeController.text.trim()),
+                              speedIntercept: DataConverter.stringToInt(
+                                  speedInterceptController.text.trim()),
+                              intelligenceSlope: DataConverter.stringToDouble(
+                                  intelligenceSlopeController.text.trim()),
+                              intelligenceIntercept: DataConverter.stringToInt(
+                                  intelligenceInterceptController.text.trim()),
                               energyConsume: DataConverter.stringToInt(
                                   energyConsumeController.text),
                               // basic info
@@ -492,34 +522,48 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                 children: <Widget>[
                   Column(
                     children: [
-                      DigitTextFormField(
+                      FruitDigitTextFormField(
                           context,
                           _combatInfoEditable,
-                          attackController,
+                          attackSlopeController,
+                          attackInterceptController,
                           AppLocalizations.of(context)!.attackStrengthen,
-                          1,
-                          5,
+                          0.8,
+                          1.5,
+                          -100,
+                          300,
                           ImageHelper.getTextFormFieldIcon(
-                              'images/character_digits_icon/attack.svg', true)),
-                      DigitTextFormField(
+                              'images/character_digits_icon/attack.svg',
+                              true,
+                              null)),
+                      FruitDigitTextFormField(
                           context,
                           _combatInfoEditable,
-                          defenseController,
+                          defenseSlopeController,
+                          defenseInterceptController,
                           AppLocalizations.of(context)!.defenseStrengthen,
-                          1,
-                          5,
+                          0.8,
+                          1.5,
+                          -100,
+                          800,
                           ImageHelper.getTextFormFieldIcon(
                               'images/character_digits_icon/defense.svg',
-                              true)),
-                      DigitTextFormField(
+                              true,
+                              null)),
+                      FruitDigitTextFormField(
                           context,
                           _combatInfoEditable,
-                          bloodController,
+                          bloodSlopeController,
+                          bloodInterceptController,
                           AppLocalizations.of(context)!.bloodStrengthen,
-                          1,
-                          5,
+                          0.8,
+                          1.5,
+                          -1000,
+                          3000,
                           ImageHelper.getTextFormFieldIcon(
-                              'images/character_digits_icon/blood.svg', true)),
+                              'images/character_digits_icon/blood.svg',
+                              true,
+                              null)),
                       DigitTextFormField(
                           context,
                           _combatInfoEditable,
@@ -528,39 +572,55 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                           1,
                           10,
                           ImageHelper.getTextFormFieldIcon(
-                              'images/character_digits_icon/energy.svg', true)),
+                              'images/character_digits_icon/energy.svg',
+                              true,
+                              null)),
                     ],
                   ),
                   Column(
                     children: [
-                      DigitTextFormField(
+                      FruitDigitTextFormField(
                           context,
                           _combatInfoEditable,
-                          intelligenceController,
+                          intelligenceSlopeController,
+                          intelligenceInterceptController,
                           AppLocalizations.of(context)!.intelligenceStrengthen,
-                          1,
-                          5,
+                          0.8,
+                          2,
+                          -30,
+                          30,
                           ImageHelper.getTextFormFieldIcon(
                               'images/character_digits_icon/intelligence.svg',
-                              true)),
-                      DigitTextFormField(
+                              true,
+                              null)),
+                      FruitDigitTextFormField(
                           context,
                           _combatInfoEditable,
-                          speedController,
+                          speedSlopeController,
+                          speedInterceptController,
                           AppLocalizations.of(context)!.speedStrengthen,
-                          1,
-                          8,
+                          0.8,
+                          3,
+                          -10,
+                          30,
                           ImageHelper.getTextFormFieldIcon(
-                              'images/character_digits_icon/speed.svg', true)),
-                      DigitTextFormField(
+                              'images/character_digits_icon/speed.svg',
+                              true,
+                              null)),
+                      FruitDigitTextFormField(
                           context,
                           _combatInfoEditable,
-                          groupGainController,
+                          groupGainSlopeController,
+                          groupGainInterceptController,
                           AppLocalizations.of(context)!.groupStrengthen,
-                          1,
-                          5,
+                          0.8,
+                          2,
+                          -10,
+                          30,
                           ImageHelper.getTextFormFieldIcon(
-                              'images/character_digits_icon/group_gain.svg', true)),
+                              'images/character_digits_icon/group_gain.svg',
+                              true,
+                              null)),
                     ],
                   ),
                 ],
@@ -589,7 +649,9 @@ class _FruitDetailViewState extends State<FruitDetailView> {
             AppLocalizations.of(context)!.currentlyNone,
             style: OnepieceFonts.fancyBlueHintFont,
           ),
-        const SizedBox(height: 30,),
+        const SizedBox(
+          height: 30,
+        ),
         Container(
           width: 500,
           decoration: const BoxDecoration(
@@ -626,8 +688,8 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                     title: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(I18nHelper.getDisplayNameFromI18n(
-                            character.name!)),
+                        Text(
+                            I18nHelper.getDisplayNameFromI18n(character.name!)),
                         Padding(
                           padding: const EdgeInsets.only(right: 5),
                           child: OnepieceTag.getWakeUpTag(

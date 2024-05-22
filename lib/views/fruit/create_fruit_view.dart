@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
-import 'package:one_piece_battles_flutter/utils/string_extensions.dart';
 import 'package:openapi/api.dart';
 import '../../components/digit_text_form_field.dart';
+import '../../components/fruit_digit_text_form_field.dart';
 import '../../components/string_text_form_field.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
@@ -30,27 +30,48 @@ class _CreateFruitViewState extends State<CreateFruitView> {
   TextEditingController fruitNameChController = TextEditingController(
       text: RandomStringGenerator.generateRandomChineseName(
           3, getIt<User>().loginRole == UserRole.NIKA));
-  TextEditingController fruitAttackStrengthenController = TextEditingController(
+  TextEditingController attackSlopeController = TextEditingController(
+      text: RandomStringGenerator.generateRandomDouble(
+              1.5, 0.8, 1, getIt<User>().loginRole == UserRole.NIKA)
+          .toString());
+  TextEditingController attackInterceptController = TextEditingController(
       text: RandomStringGenerator.generateRandomNumber(
-          1, 5, getIt<User>().loginRole == UserRole.NIKA));
-  TextEditingController fruitDefenseStrengthenController =
-      TextEditingController(
-          text: RandomStringGenerator.generateRandomNumber(
-              1, 5, getIt<User>().loginRole == UserRole.NIKA));
-  TextEditingController fruitIntelligenceStrengthenController =
-      TextEditingController(
-          text: RandomStringGenerator.generateRandomNumber(
-              1, 5, getIt<User>().loginRole == UserRole.NIKA));
-  TextEditingController fruitBloodStrengthenController = TextEditingController(
+          -100, 300, getIt<User>().loginRole == UserRole.NIKA));
+  TextEditingController defenseSlopeController = TextEditingController(
+      text: RandomStringGenerator.generateRandomDouble(
+              1.5, 0.8, 1, getIt<User>().loginRole == UserRole.NIKA)
+          .toString());
+  TextEditingController defenseInterceptController = TextEditingController(
       text: RandomStringGenerator.generateRandomNumber(
-          1, 5, getIt<User>().loginRole == UserRole.NIKA));
-  TextEditingController fruitSpeedStrengthenController = TextEditingController(
+          -100, 800, getIt<User>().loginRole == UserRole.NIKA));
+  TextEditingController intelligenceSlopeController = TextEditingController(
+      text: RandomStringGenerator.generateRandomDouble(
+              2, 0.8, 1, getIt<User>().loginRole == UserRole.NIKA)
+          .toString());
+  TextEditingController intelligenceInterceptController = TextEditingController(
       text: RandomStringGenerator.generateRandomNumber(
-          1, 8, getIt<User>().loginRole == UserRole.NIKA));
-  TextEditingController fruitGroupGainStrengthenController =
-      TextEditingController(
-          text: RandomStringGenerator.generateRandomNumber(
-              1, 5, getIt<User>().loginRole == UserRole.NIKA));
+          -30, 30, getIt<User>().loginRole == UserRole.NIKA));
+  TextEditingController bloodSlopeController = TextEditingController(
+      text: RandomStringGenerator.generateRandomDouble(
+              1.5, 0.8, 1, getIt<User>().loginRole == UserRole.NIKA)
+          .toString());
+  TextEditingController bloodInterceptController = TextEditingController(
+      text: RandomStringGenerator.generateRandomNumber(
+          -1000, 3000, getIt<User>().loginRole == UserRole.NIKA));
+  TextEditingController speedSlopeController = TextEditingController(
+      text: RandomStringGenerator.generateRandomDouble(
+              3, 0.8, 1, getIt<User>().loginRole == UserRole.NIKA)
+          .toString());
+  TextEditingController speedInterceptController = TextEditingController(
+      text: RandomStringGenerator.generateRandomNumber(
+          -30, 30, getIt<User>().loginRole == UserRole.NIKA));
+  TextEditingController groupGainSlopeController = TextEditingController(
+      text: RandomStringGenerator.generateRandomDouble(
+              2, 0.8, 1, getIt<User>().loginRole == UserRole.NIKA)
+          .toString());
+  TextEditingController groupGainInterceptController = TextEditingController(
+      text: RandomStringGenerator.generateRandomNumber(
+          -10, 30, getIt<User>().loginRole == UserRole.NIKA));
   TextEditingController fruitEnergyConsumeController = TextEditingController(
       text: RandomStringGenerator.generateRandomNumber(
           1, 10, getIt<User>().loginRole == UserRole.NIKA));
@@ -58,12 +79,18 @@ class _CreateFruitViewState extends State<CreateFruitView> {
     return <TextEditingController>[
       fruitNameEnController,
       fruitNameChController,
-      fruitAttackStrengthenController,
-      fruitDefenseStrengthenController,
-      fruitIntelligenceStrengthenController,
-      fruitBloodStrengthenController,
-      fruitSpeedStrengthenController,
-      fruitGroupGainStrengthenController,
+      attackSlopeController,
+      attackSlopeController,
+      bloodInterceptController,
+      bloodSlopeController,
+      groupGainInterceptController,
+      groupGainSlopeController,
+      intelligenceInterceptController,
+      intelligenceSlopeController,
+      speedInterceptController,
+      speedSlopeController,
+      defenseInterceptController,
+      defenseSlopeController,
       fruitEnergyConsumeController,
     ];
   }
@@ -114,7 +141,8 @@ class _CreateFruitViewState extends State<CreateFruitView> {
                                   10,
                                   ImageHelper.getTextFormFieldIcon(
                                       'images/character_digits_icon/name.svg',
-                                      true),
+                                      true,
+                                      null),
                                   true),
                               if (getIt<User>().loginRole == UserRole.NIKA)
                                 StringTextFormField(
@@ -125,7 +153,8 @@ class _CreateFruitViewState extends State<CreateFruitView> {
                                     10,
                                     ImageHelper.getTextFormFieldIcon(
                                         'images/character_digits_icon/name.svg',
-                                        true),
+                                        true,
+                                        null),
                                     true),
                             ],
                           ),
@@ -176,39 +205,51 @@ class _CreateFruitViewState extends State<CreateFruitView> {
                           children: <Widget>[
                             Column(
                               children: [
-                                DigitTextFormField(
+                                FruitDigitTextFormField(
                                     context,
                                     true,
-                                    fruitAttackStrengthenController,
+                                    attackSlopeController,
+                                    attackInterceptController,
                                     AppLocalizations.of(context)!
                                         .attackStrengthen,
-                                    1,
-                                    5,
+                                    0.8,
+                                    1.5,
+                                    -100,
+                                    300,
                                     ImageHelper.getTextFormFieldIcon(
                                         'images/character_digits_icon/attack.svg',
-                                        true)),
-                                DigitTextFormField(
+                                        true,
+                                        null)),
+                                FruitDigitTextFormField(
                                     context,
                                     true,
-                                    fruitDefenseStrengthenController,
+                                    defenseSlopeController,
+                                    defenseInterceptController,
                                     AppLocalizations.of(context)!
                                         .defenseStrengthen,
-                                    1,
-                                    5,
+                                    0.8,
+                                    1.5,
+                                    -100,
+                                    800,
                                     ImageHelper.getTextFormFieldIcon(
                                         'images/character_digits_icon/defense.svg',
-                                        true)),
-                                DigitTextFormField(
+                                        true,
+                                        null)),
+                                FruitDigitTextFormField(
                                     context,
                                     true,
-                                    fruitBloodStrengthenController,
+                                    bloodSlopeController,
+                                    bloodInterceptController,
                                     AppLocalizations.of(context)!
                                         .bloodStrengthen,
-                                    1,
-                                    5,
+                                    0.8,
+                                    1.5,
+                                    -1000,
+                                    3000,
                                     ImageHelper.getTextFormFieldIcon(
                                         'images/character_digits_icon/blood.svg',
-                                        true)),
+                                        true,
+                                        null)),
                                 DigitTextFormField(
                                     context,
                                     true,
@@ -218,44 +259,57 @@ class _CreateFruitViewState extends State<CreateFruitView> {
                                     10,
                                     ImageHelper.getTextFormFieldIcon(
                                         'images/character_digits_icon/energy.svg',
-                                        true)),
+                                        true,
+                                        null)),
                               ],
                             ),
                             Column(
                               children: [
-                                DigitTextFormField(
+                                FruitDigitTextFormField(
                                     context,
                                     true,
-                                    fruitIntelligenceStrengthenController,
+                                    intelligenceSlopeController,
+                                    intelligenceInterceptController,
                                     AppLocalizations.of(context)!
                                         .intelligenceStrengthen,
-                                    1,
-                                    5,
+                                    0.8,
+                                    2,
+                                    -30,
+                                    30,
                                     ImageHelper.getTextFormFieldIcon(
                                         'images/character_digits_icon/intelligence.svg',
-                                        true)),
-                                DigitTextFormField(
+                                        true,
+                                        null)),
+                                FruitDigitTextFormField(
                                     context,
                                     true,
-                                    fruitSpeedStrengthenController,
+                                    speedSlopeController,
+                                    speedInterceptController,
                                     AppLocalizations.of(context)!
                                         .speedStrengthen,
-                                    1,
-                                    8,
+                                    0.8,
+                                    3,
+                                    -10,
+                                    30,
                                     ImageHelper.getTextFormFieldIcon(
                                         'images/character_digits_icon/speed.svg',
-                                        true)),
-                                DigitTextFormField(
+                                        true,
+                                        null)),
+                                FruitDigitTextFormField(
                                     context,
                                     true,
-                                    fruitGroupGainStrengthenController,
+                                    groupGainSlopeController,
+                                    groupGainInterceptController,
                                     AppLocalizations.of(context)!
                                         .groupStrengthen,
-                                    1,
-                                    5,
+                                    0.8,
+                                    2,
+                                    -10,
+                                    30,
                                     ImageHelper.getTextFormFieldIcon(
                                         'images/character_digits_icon/group_gain.svg',
-                                        true)),
+                                        true,
+                                        null)),
                               ],
                             ),
                           ],
@@ -377,20 +431,32 @@ class _CreateFruitViewState extends State<CreateFruitView> {
                           fruitNameEnController.text,
                           fruitNameChController.text),
                       fruitType: selectedFruitType,
-                      attackStrengthen: DataConverter.stringToInt(
-                          fruitAttackStrengthenController.text.trim()),
-                      defenseStrengthen: DataConverter.stringToInt(
-                          fruitDefenseStrengthenController.text.trim()),
-                      bloodStrengthen: DataConverter.stringToInt(
-                          fruitBloodStrengthenController.text.trim()),
-                      intelligenceStrengthen: DataConverter.stringToInt(
-                          fruitIntelligenceStrengthenController.text.trim()),
-                      speedStrengthen: DataConverter.stringToInt(
-                          fruitSpeedStrengthenController.text.trim()),
+                      attackSlope: DataConverter.stringToDouble(
+                          attackSlopeController.text.trim()),
+                      attackIntercept: DataConverter.stringToInt(
+                          attackInterceptController.text.trim()),
+                      defenseSlope: DataConverter.stringToDouble(
+                          defenseSlopeController.text.trim()),
+                      defenseIntercept: DataConverter.stringToInt(
+                          defenseInterceptController.text.trim()),
+                      bloodSlope: DataConverter.stringToDouble(
+                          bloodSlopeController.text.trim()),
+                      bloodIntercept: DataConverter.stringToInt(
+                          bloodInterceptController.text.trim()),
+                      groupGainSlope: DataConverter.stringToDouble(
+                          groupGainSlopeController.text.trim()),
+                      groupGainIntercept: DataConverter.stringToInt(
+                          groupGainInterceptController.text.trim()),
+                      speedSlope: DataConverter.stringToDouble(
+                          speedSlopeController.text.trim()),
+                      speedIntercept: DataConverter.stringToInt(
+                          speedInterceptController.text.trim()),
+                      intelligenceSlope: DataConverter.stringToDouble(
+                          intelligenceSlopeController.text.trim()),
+                      intelligenceIntercept: DataConverter.stringToInt(
+                          intelligenceInterceptController.text.trim()),
                       energyConsume: DataConverter.stringToInt(
                           fruitEnergyConsumeController.text),
-                      groupGainStrengthen: DataConverter.stringToInt(
-                          fruitGroupGainStrengthenController.text.trim()),
                     );
 
                     getIt<FruitDao>().add(addFruitRequest).then((value) {

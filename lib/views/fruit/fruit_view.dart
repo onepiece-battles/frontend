@@ -586,12 +586,40 @@ class _FruitViewState extends State<FruitView> {
                 child: OnepieceTag.getFruitTag(entry.value.fruitType!,
                     fruitTypeToDisplayValue[entry.value.fruitType]!),
               )),
-              _getDataCell(entry.value.attackStrengthen.toString()),
-              _getDataCell(entry.value.defenseStrengthen.toString()),
-              _getDataCell(entry.value.bloodStrengthen.toString()),
-              _getDataCell(entry.value.intelligenceStrengthen.toString()),
-              _getDataCell(entry.value.groupGainStrengthen.toString()),
-              _getDataCell(entry.value.speedStrengthen.toString()),
+              _getWidgetDataCell(
+                  entry.value.attackSlope!,
+                  entry.value.attackIntercept!,
+                  ImageHelper.getTextFormFieldIcon(
+                      'images/character_digits_icon/attack.svg', true, 25)),
+              _getWidgetDataCell(
+                  entry.value.defenseSlope!,
+                  entry.value.defenseIntercept!,
+                  ImageHelper.getTextFormFieldIcon(
+                      'images/character_digits_icon/defense.svg', true, 25)),
+              _getWidgetDataCell(
+                  entry.value.bloodSlope!,
+                  entry.value.bloodIntercept!,
+                  ImageHelper.getTextFormFieldIcon(
+                      'images/character_digits_icon/blood.svg', true, 25)),
+              _getWidgetDataCell(
+                  entry.value.intelligenceSlope!,
+                  entry.value.intelligenceIntercept!,
+                  ImageHelper.getTextFormFieldIcon(
+                      'images/character_digits_icon/intelligence.svg',
+                      true,
+                      25)),
+              _getWidgetDataCell(
+                  entry.value.groupGainSlope!,
+                  entry.value.groupGainIntercept!,
+                  ImageHelper.getTextFormFieldIcon(
+                      'images/character_digits_icon/group_gain.svg',
+                      true,
+                      25)),
+              _getWidgetDataCell(
+                  entry.value.speedSlope!,
+                  entry.value.speedIntercept!,
+                  ImageHelper.getTextFormFieldIcon(
+                      'images/character_digits_icon/speed.svg', true, 25)),
             ],
           ),
         )
@@ -604,6 +632,42 @@ class _FruitViewState extends State<FruitView> {
     return DataCell(Padding(
       padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
       child: Text(value),
+    ));
+  }
+
+  DataCell _getWidgetDataCell(
+    double slope,
+    int intercept,
+    Widget icon,
+  ) {
+    return DataCell(SizedBox(
+      width: 120,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(slope.toString()),
+            const Icon(
+              Icons.close,
+              color: OnepieceColors.fancyGreen,
+              size: 17,
+            ),
+            icon,
+            if (intercept >=0) const Icon(
+              Icons.add,
+              color: OnepieceColors.fancyGreen,
+              size: 17,
+            ),
+            if (intercept <0) const Icon(
+              Icons.remove,
+              color: OnepieceColors.fancyGreen,
+              size: 17,
+            ),
+            Text(intercept.abs().toString()),
+          ],
+        ),
+      ),
     ));
   }
 
