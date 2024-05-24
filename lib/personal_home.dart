@@ -160,7 +160,8 @@ class _UserHomeState extends State<UserHome> {
                       ),
                       SizedBox(
                         height: 600,
-                          child: _getBattleWall(context))
+                          child: _getBattleWall(context)),
+                      const SizedBox(height: 100,)
                     ],
                   )),
             );

@@ -321,7 +321,7 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                 AppLocalizations.of(context)!.name,
                 10,
                 ImageHelper.getTextFormFieldIcon(
-                    'images/character_digits_icon/name.svg', true, null),
+                    'images/character_digits_icon/name.svg', true, 25),
                 true),
             Padding(
               padding: const EdgeInsets.only(bottom: 8.0),
@@ -535,7 +535,7 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                           ImageHelper.getTextFormFieldIcon(
                               'images/character_digits_icon/attack.svg',
                               true,
-                              null)),
+                              25)),
                       FruitDigitTextFormField(
                           context,
                           _combatInfoEditable,
@@ -549,7 +549,7 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                           ImageHelper.getTextFormFieldIcon(
                               'images/character_digits_icon/defense.svg',
                               true,
-                              null)),
+                              25)),
                       FruitDigitTextFormField(
                           context,
                           _combatInfoEditable,
@@ -563,7 +563,7 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                           ImageHelper.getTextFormFieldIcon(
                               'images/character_digits_icon/blood.svg',
                               true,
-                              null)),
+                              25)),
                       DigitTextFormField(
                           context,
                           _combatInfoEditable,
@@ -574,7 +574,7 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                           ImageHelper.getTextFormFieldIcon(
                               'images/character_digits_icon/energy.svg',
                               true,
-                              null)),
+                              25)),
                     ],
                   ),
                   Column(
@@ -592,7 +592,7 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                           ImageHelper.getTextFormFieldIcon(
                               'images/character_digits_icon/intelligence.svg',
                               true,
-                              null)),
+                              25)),
                       FruitDigitTextFormField(
                           context,
                           _combatInfoEditable,
@@ -606,7 +606,7 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                           ImageHelper.getTextFormFieldIcon(
                               'images/character_digits_icon/speed.svg',
                               true,
-                              null)),
+                              25)),
                       FruitDigitTextFormField(
                           context,
                           _combatInfoEditable,
@@ -620,7 +620,7 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                           ImageHelper.getTextFormFieldIcon(
                               'images/character_digits_icon/group_gain.svg',
                               true,
-                              null)),
+                              25)),
                     ],
                   ),
                 ],

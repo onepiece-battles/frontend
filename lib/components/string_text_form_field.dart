@@ -67,8 +67,7 @@ class StringTextFormField extends StatelessWidget {
                 return AppLocalizations.of(buildContext)!.requiredField;
               }
               if (!DataValidator.validName(value!)) {
-                return AppLocalizations.of(context)!
-                    .invalidName;
+                return AppLocalizations.of(context)!.invalidName;
               }
               return null;
             },

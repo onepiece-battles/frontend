@@ -1,3 +1,4 @@
+import 'package:animated_toggle_switch/animated_toggle_switch.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -85,6 +86,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
   bool combatInfoEditable = false;
   bool fruitSearchEnabled = false;
   bool groupSearchEnabled = true;
+  bool showBaseValue = false;
 
   @override
   void initState() {
@@ -757,97 +759,172 @@ class _CharacterDetailState extends State<CharacterDetail> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: EdgeInsets.fromLTRB(sideWidth, 8, 8, 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Text(
-                  AppLocalizations.of(context)!.battleInfo,
-                  style: OnepieceFonts.headerStyle,
-                ),
-                const SizedBox(
-                  width: 15,
-                ),
-                if (_editButtonVisible)
-                  Tooltip(
-                    message: combatInfoEditable
-                        ? AppLocalizations.of(context)!.submitForm
-                        : AppLocalizations.of(context)!.editHint,
-                    child: InkWell(
-                      hoverColor: Colors.white,
-                      onTap: () {
-                        combatState(() {
-                          combatInfoEditable = !combatInfoEditable;
-                          if (!combatInfoEditable) {
-                            var updatedCharacter = Character(
-                              // basic info keep consistent with original value
-                              id: character.id,
-                              battleStyle: character.battleStyle,
-                              race: character.race,
-                              score: character.score,
-                              baseGroupGain: character.groupGain,
-                              baseAttack: character.attack,
-                              baseDefense: character.defense,
-                              baseIntelligence: character.intelligence,
-                              baseBlood: character.blood,
-                              baseSpeed: character.speed,
-                              // digit info
-                              maximumFruitCount: DataConverter.stringToInt(
-                                  characterFruitLimitController.text),
-                              groupGain: DataConverter.stringToInt(
-                                  characterGroupGainController.text),
-                              attack: DataConverter.stringToInt(
-                                  characterAttackController.text),
-                              defense: DataConverter.stringToInt(
-                                  characterDefenseController.text),
-                              intelligence: DataConverter.stringToInt(
-                                  characterIntelligenceController.text),
-                              blood: DataConverter.stringToInt(
-                                  characterBloodController.text),
-                              speed: DataConverter.stringToInt(
-                                  characterSpeedController.text),
-                              energy: DataConverter.stringToInt(
-                                  characterEnergyController.text),
-                              // basic info
-                              name: character.name,
-                            );
-                            getIt<CharacterDao>()
-                                .update(updatedCharacter)
-                                .then((value) {
-                              OnepieceAlert.getBasicAlertDialogFunc(
-                                  context,
-                                  AppLocalizations.of(context)!.hint,
-                                  I18nHelper.getDisplayNameFromI18n(
-                                      value!.result));
-                              if (value.success) {
-                                context.goNamed('characterDetails',
-                                    extra: character.id,
-                                    pathParameters: {
-                                      'name': I18nHelper.getDisplayNameFromI18n(
-                                          character.name)
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: SizedBox(
+              width: dividerWidth,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: sideWidth),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(
+                          AppLocalizations.of(context)!.battleInfo,
+                          style: OnepieceFonts.headerStyle,
+                        ),
+                        const SizedBox(
+                          width: 15,
+                        ),
+                        if (_editButtonVisible)
+                          Tooltip(
+                            message: combatInfoEditable
+                                ? AppLocalizations.of(context)!.submitForm
+                                : AppLocalizations.of(context)!.editHint,
+                            child: InkWell(
+                              hoverColor: Colors.white,
+                              onTap: () {
+                                combatState(() {
+                                  combatInfoEditable = !combatInfoEditable;
+                                  if (combatInfoEditable) {
+                                    showBaseValue = true;
+                                    changeValue();
+                                  }
+                                  if (!combatInfoEditable) {
+                                    var updatedCharacter = Character(
+                                      // basic info keep consistent with original value
+                                      id: character.id,
+                                      battleStyle: character.battleStyle,
+                                      race: character.race,
+                                      score: character.score,
+                                      groupGain: character.groupGain,
+                                      attack: character.attack,
+                                      defense: character.defense,
+                                      intelligence: character.intelligence,
+                                      blood: character.blood,
+                                      speed: character.speed,
+                                      // digit info
+                                      maximumFruitCount:
+                                          DataConverter.stringToInt(
+                                              characterFruitLimitController
+                                                  .text),
+                                      baseGroupGain: DataConverter.stringToInt(
+                                          characterGroupGainController.text),
+                                      baseAttack: DataConverter.stringToInt(
+                                          characterAttackController.text),
+                                      baseDefense: DataConverter.stringToInt(
+                                          characterDefenseController.text),
+                                      baseIntelligence:
+                                          DataConverter.stringToInt(
+                                              characterIntelligenceController
+                                                  .text),
+                                      baseBlood: DataConverter.stringToInt(
+                                          characterBloodController.text),
+                                      baseSpeed: DataConverter.stringToInt(
+                                          characterSpeedController.text),
+                                      energy: DataConverter.stringToInt(
+                                          characterEnergyController.text),
+                                      // basic info
+                                      name: character.name,
+                                    );
+                                    showBaseValue = false;
+                                    changeValue();
+                                    getIt<CharacterDao>()
+                                        .update(updatedCharacter)
+                                        .then((value) {
+                                      OnepieceAlert.getBasicAlertDialogFunc(
+                                        context,
+                                        AppLocalizations.of(context)!.hint,
+                                        I18nHelper.getDisplayNameFromI18n(
+                                            value!.result),
+                                      );
+                                      if (value.success) {
+                                        context.goNamed('characterDetails',
+                                            extra: character.id,
+                                            pathParameters: {
+                                              'name': I18nHelper
+                                                  .getDisplayNameFromI18n(
+                                                      character.name)
+                                            });
+                                      }
                                     });
-                              }
-                            });
-                          }
-                        });
-                      },
-                      child: SizedBox(
-                          width: 25,
-                          height: 25,
-                          child: !combatInfoEditable
-                              ? ImageHelper.getSvgIconWithColor(
-                                  'images/svgs/edit.svg',
-                                  150,
-                                  150,
-                                  OnepieceColors.fancyBlue)
-                              : ImageHelper.getSvgIconWithColor(
-                                  'images/svgs/check.svg',
-                                  150,
-                                  150,
-                                  OnepieceColors.fancyBlue)),
+                                  }
+                                });
+                              },
+                              child: SizedBox(
+                                  width: 25,
+                                  height: 25,
+                                  child: !combatInfoEditable
+                                      ? ImageHelper.getSvgIconWithColor(
+                                          'images/svgs/edit.svg',
+                                          150,
+                                          150,
+                                          OnepieceColors.fancyBlue)
+                                      : ImageHelper.getSvgIconWithColor(
+                                          'images/svgs/check.svg',
+                                          150,
+                                          150,
+                                          OnepieceColors.fancyBlue)),
+                            ),
+                          ),
+                      ],
                     ),
-                  ),
-              ],
+                    if (fruits.isNotEmpty)
+                      SizedBox(
+                        width: 130,
+                        height: 36,
+                        child: AnimatedToggleSwitch<bool>.dual(
+                          current: showBaseValue,
+                          first: false,
+                          second: true,
+                          spacing: 1.0,
+                          style: const ToggleStyle(
+                            borderColor: Colors.transparent,
+                            backgroundColor:
+                                OnepieceColors.menuSelectedTileColor,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black26,
+                                spreadRadius: 1,
+                                blurRadius: 2,
+                                offset: Offset(0, 1.5),
+                              ),
+                            ],
+                          ),
+                          borderWidth: 3.0,
+                          height: 36,
+                          onChanged: (b) => combatState(() {
+                            showBaseValue = !showBaseValue;
+                            changeValue();
+                          }),
+                          styleBuilder: (b) => ToggleStyle(
+                              indicatorColor: b ? Colors.white : Colors.white),
+                          iconBuilder: (value) => value
+                              ? ImageHelper.getTextFormFieldIcon(
+                                  'images/svgs/user.svg', true, 30)
+                              : ImageHelper.getTextFormFieldIcon(
+                                  'images/svgs/fruit_total.svg', true, 30),
+                          textBuilder: (value) => value
+                              ? Text(
+                                  AppLocalizations.of(context)!.basicValue,
+                                  style: const TextStyle(
+                                      color: Colors.black87,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600),
+                                )
+                              : Text(
+                                  AppLocalizations.of(context)!.realValue,
+                                  style: const TextStyle(
+                                      color: Colors.black87,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600),
+                                ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
             ),
           ),
           if (character.hakis.isNotEmpty)
@@ -961,7 +1038,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                             combatInfoEditable,
                             characterEnergyController,
                             AppLocalizations.of(context)!.characterEnergy,
-                            10,
+                            30,
                             50,
                             ImageHelper.getTextFormFieldIcon(
                                 'images/character_digits_icon/energy.svg',
@@ -972,8 +1049,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
                             combatInfoEditable,
                             characterGroupGainController,
                             AppLocalizations.of(context)!.groupGain,
-                            1,
-                            5,
+                            100,
+                            200,
                             ImageHelper.getTextFormFieldIcon(
                                 'images/character_digits_icon/group_gain.svg',
                                 true,
@@ -999,6 +1076,25 @@ class _CharacterDetailState extends State<CharacterDetail> {
         ],
       );
     });
+  }
+
+  changeValue() {
+    if (showBaseValue) {
+      characterAttackController.text = character.baseAttack.toString();
+      characterDefenseController.text = character.baseDefense.toString();
+      characterBloodController.text = character.baseBlood.toString();
+      characterIntelligenceController.text =
+          character.baseIntelligence.toString();
+      characterGroupGainController.text = character.baseGroupGain.toString();
+      characterSpeedController.text = character.baseSpeed.toString();
+    } else {
+      characterGroupGainController.text = character.groupGain.toString();
+      characterAttackController.text = character.attack.toString();
+      characterDefenseController.text = character.defense.toString();
+      characterIntelligenceController.text = character.intelligence.toString();
+      characterBloodController.text = character.blood.toString();
+      characterSpeedController.text = character.speed.toString();
+    }
   }
 
   Widget _getFruitSearchBar(BuildContext context) {
@@ -1030,7 +1126,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
               ],
             ),
           ),
-          if (character.maximumFruitCount > fruits.length)
+          if (character.maximumFruitCount > fruits.length && _editButtonVisible)
             Padding(
               padding: EdgeInsets.fromLTRB(sideWidth, 8, 8, 0),
               child: SizedBox(
@@ -1279,55 +1375,57 @@ class _CharacterDetailState extends State<CharacterDetail> {
               ],
             ),
           ),
-          Padding(
-            padding: EdgeInsets.fromLTRB(sideWidth, 8, 8, 0),
-            child: SizedBox(
-              width: 200,
-              height: 35,
-              child: TextFormField(
-                enabled: groupSearchEnabled,
-                controller: groupNameController,
-                decoration: InputDecoration(
-                  floatingLabelBehavior: FloatingLabelBehavior.never,
-                  disabledBorder: const OutlineInputBorder(
-                      borderSide:
-                          BorderSide(color: OnepieceColors.menuHoverColor)),
-                  enabledBorder: const OutlineInputBorder(
-                      borderSide:
-                          BorderSide(color: OnepieceColors.menuHoverColor)),
-                  focusedBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
-                  prefixIcon: const Icon(Icons.search),
-                  labelText: AppLocalizations.of(context)!.search,
-                ),
-                onChanged: (value) {
-                  debugPrint(value);
-                  selectedGroupId = null;
-                  groupSetState(() {});
-                  if (value.isEmpty) {
-                    searchingGroupList = [];
+          if (_editButtonVisible)
+            Padding(
+              padding: EdgeInsets.fromLTRB(sideWidth, 8, 8, 0),
+              child: SizedBox(
+                width: 200,
+                height: 35,
+                child: TextFormField(
+                  enabled: groupSearchEnabled,
+                  controller: groupNameController,
+                  decoration: InputDecoration(
+                    floatingLabelBehavior: FloatingLabelBehavior.never,
+                    disabledBorder: const OutlineInputBorder(
+                        borderSide:
+                            BorderSide(color: OnepieceColors.menuHoverColor)),
+                    enabledBorder: const OutlineInputBorder(
+                        borderSide:
+                            BorderSide(color: OnepieceColors.menuHoverColor)),
+                    focusedBorder: const OutlineInputBorder(
+                        borderSide:
+                            BorderSide(color: OnepieceColors.fancyGreen)),
+                    prefixIcon: const Icon(Icons.search),
+                    labelText: AppLocalizations.of(context)!.search,
+                  ),
+                  onChanged: (value) {
+                    debugPrint(value);
+                    selectedGroupId = null;
                     groupSetState(() {});
-                    return;
-                  }
-                  groupFilter.name = value;
-                  groupFilter.languageCode = I18nHelper.getLanguageCode();
-                  ListGroupRequest request = ListGroupRequest(
-                      pageSize: 5,
-                      pageIndex: 1,
-                      sortKeys: [],
-                      groupFilter: groupFilter);
-                  Future<ListGroupResponse?> response =
-                      getIt<GroupDao>().listGroups(request);
-                  response.then(
-                    (value) => {
-                      searchingGroupList = value!.groups,
-                      groupSetState(() {})
-                    },
-                  );
-                },
+                    if (value.isEmpty) {
+                      searchingGroupList = [];
+                      groupSetState(() {});
+                      return;
+                    }
+                    groupFilter.name = value;
+                    groupFilter.languageCode = I18nHelper.getLanguageCode();
+                    ListGroupRequest request = ListGroupRequest(
+                        pageSize: 5,
+                        pageIndex: 1,
+                        sortKeys: [],
+                        groupFilter: groupFilter);
+                    Future<ListGroupResponse?> response =
+                        getIt<GroupDao>().listGroups(request);
+                    response.then(
+                      (value) => {
+                        searchingGroupList = value!.groups,
+                        groupSetState(() {})
+                      },
+                    );
+                  },
+                ),
               ),
             ),
-          ),
           if (searchingGroupList.isNotEmpty)
             Padding(
               padding: EdgeInsets.fromLTRB(sideWidth, 8, 8, 0),

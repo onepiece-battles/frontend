@@ -277,5 +277,7 @@
   "imageSizeExceedsLimit": "Image size exceeds limit!",
   "alert": "⚠️",
   "search": "Search...",
-  "fieldMustBeDigit": "Field must be digit"
+  "fieldMustBeDigit": "Field must be digit",
+  "basicValue": "Base value",
+  "realValue": "Fruit SNH"
 }
