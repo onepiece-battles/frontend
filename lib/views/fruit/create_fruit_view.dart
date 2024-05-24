@@ -142,7 +142,7 @@ class _CreateFruitViewState extends State<CreateFruitView> {
                                   ImageHelper.getTextFormFieldIcon(
                                       'images/character_digits_icon/name.svg',
                                       true,
-                                      null),
+                                      25),
                                   true),
                               if (getIt<User>().loginRole == UserRole.NIKA)
                                 StringTextFormField(
@@ -154,7 +154,7 @@ class _CreateFruitViewState extends State<CreateFruitView> {
                                     ImageHelper.getTextFormFieldIcon(
                                         'images/character_digits_icon/name.svg',
                                         true,
-                                        null),
+                                        25),
                                     true),
                             ],
                           ),
@@ -166,7 +166,7 @@ class _CreateFruitViewState extends State<CreateFruitView> {
                               children: [
                                 Text(
                                   AppLocalizations.of(context)!.fruitType,
-                                  style: OnepieceFonts.smallHeaderStyle,
+                                  style: OnepieceFonts.deepBlackHintFont,
                                 ),
                                 const SizedBox(
                                   height: 18,
@@ -219,7 +219,7 @@ class _CreateFruitViewState extends State<CreateFruitView> {
                                     ImageHelper.getTextFormFieldIcon(
                                         'images/character_digits_icon/attack.svg',
                                         true,
-                                        null)),
+                                        25)),
                                 FruitDigitTextFormField(
                                     context,
                                     true,
@@ -234,7 +234,7 @@ class _CreateFruitViewState extends State<CreateFruitView> {
                                     ImageHelper.getTextFormFieldIcon(
                                         'images/character_digits_icon/defense.svg',
                                         true,
-                                        null)),
+                                        25)),
                                 FruitDigitTextFormField(
                                     context,
                                     true,
@@ -249,7 +249,7 @@ class _CreateFruitViewState extends State<CreateFruitView> {
                                     ImageHelper.getTextFormFieldIcon(
                                         'images/character_digits_icon/blood.svg',
                                         true,
-                                        null)),
+                                        25)),
                                 DigitTextFormField(
                                     context,
                                     true,
@@ -260,7 +260,7 @@ class _CreateFruitViewState extends State<CreateFruitView> {
                                     ImageHelper.getTextFormFieldIcon(
                                         'images/character_digits_icon/energy.svg',
                                         true,
-                                        null)),
+                                        25)),
                               ],
                             ),
                             Column(
@@ -279,7 +279,7 @@ class _CreateFruitViewState extends State<CreateFruitView> {
                                     ImageHelper.getTextFormFieldIcon(
                                         'images/character_digits_icon/intelligence.svg',
                                         true,
-                                        null)),
+                                        25)),
                                 FruitDigitTextFormField(
                                     context,
                                     true,
@@ -294,7 +294,7 @@ class _CreateFruitViewState extends State<CreateFruitView> {
                                     ImageHelper.getTextFormFieldIcon(
                                         'images/character_digits_icon/speed.svg',
                                         true,
-                                        null)),
+                                        25)),
                                 FruitDigitTextFormField(
                                     context,
                                     true,
@@ -309,7 +309,7 @@ class _CreateFruitViewState extends State<CreateFruitView> {
                                     ImageHelper.getTextFormFieldIcon(
                                         'images/character_digits_icon/group_gain.svg',
                                         true,
-                                        null)),
+                                        25)),
                               ],
                             ),
                           ],

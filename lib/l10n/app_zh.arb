@@ -277,5 +277,7 @@
   "imageSizeExceedsLimit": "图片大小超出限制!",
   "alert": "⚠️",
   "search": "搜索...",
-  "fieldMustBeDigit": "必须为数字"
+  "fieldMustBeDigit": "必须为数字",
+  "basicValue": "基础值",
+  "realValue": "果实加成"
 }

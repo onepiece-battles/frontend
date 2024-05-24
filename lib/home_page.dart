@@ -291,7 +291,7 @@ class HomePageState extends State<HomePage> {
             width: 30,
           ),
           SizedBox(
-            width: 180,
+            width: 140,
             child: DropdownButtonHideUnderline(
               child: DropdownButton2(
                 isExpanded: true,
@@ -312,7 +312,7 @@ class HomePageState extends State<HomePage> {
                         .map((e) => e.resourceType!)
                         .where((e) => !notShownResources.contains(e))
                         .toList();
-                    context.replaceNamed('userHome',
+                    context.goNamed('userHome',
                         extra: getIt<User>().id,
                         pathParameters: {'name': getIt<User>().nickname});
                   });
@@ -324,7 +324,7 @@ class HomePageState extends State<HomePage> {
                       borderRadius: BorderRadius.circular(8),
                       color: OnepieceColors.menuSelectedTileColor),
                   height: 40,
-                  width: 240,
+                  width: 140,
                 ),
                 menuItemStyleData: const MenuItemStyleData(
                   height: 30,
@@ -352,7 +352,10 @@ class HomePageState extends State<HomePage> {
             value: userRole,
             child: Text(
               userRoleToDisplayNameMap[userRole]!,
-              style: OnepieceFonts.dropDownItemStyle,
+              style: const TextStyle(
+                  color: Colors.black87,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600),
             ),
           ),
         )

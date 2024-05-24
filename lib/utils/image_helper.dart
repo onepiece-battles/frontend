@@ -146,8 +146,8 @@ class ImageHelper {
   static Widget getTextFormFieldIcon(
       String iconPath, bool originalColor, double? size) {
     return SizedBox(
-      width: size ?? 35,
-      height: size ?? 35,
+      width: size ?? 25,
+      height: size ?? 25,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 3.0),
         child: getSvgIconWithColor(
