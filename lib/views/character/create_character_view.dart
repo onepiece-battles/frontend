@@ -811,7 +811,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
             });
           },
           selectedItemBuilder: (context) {
-            return BattleStyle.values.map(
+            return Race.values.map(
               (item) {
                 return Container(
                   alignment: AlignmentDirectional.center,
