@@ -828,8 +828,6 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                       // basic info
                                       name: character.name,
                                     );
-                                    showBaseValue = false;
-                                    changeValue();
                                     getIt<CharacterDao>()
                                         .update(updatedCharacter)
                                         .then((value) {
