@@ -527,6 +527,9 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                     ],
                                   ),
                                 ),
+                                const SizedBox(
+                                  height: 15,
+                                ),
                                 SizedBox(
                                   width: 300,
                                   height: 35,
@@ -1791,24 +1794,111 @@ class _CharacterDetailState extends State<CharacterDetail> {
                 },
                 cells: [
                   _getDataCell("${entry.key + 1}", false),
-                  _getDataCell(
-                      I18nHelper.getDisplayNameFromI18n(
-                          entry.value.starter!.name),
-                      character.id == entry.value.starterId),
-                  _getDataCell(
-                      I18nHelper.getDisplayNameFromI18n(
-                          entry.value.receiver!.name),
-                      character.id == entry.value.receiverId),
-                  _getDataCell(
-                      entry.value.battleExecution!.winnerId != null
-                          ? (entry.value.battleExecution!.winnerId ==
-                                  entry.value.starterId
-                              ? I18nHelper.getDisplayNameFromI18n(
-                                  entry.value.starter!.name)
-                              : I18nHelper.getDisplayNameFromI18n(
-                                  entry.value.receiver!.name))
-                          : "",
-                      false),
+                  DataCell(
+                    Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+                          child: ImageHelper.getRoundImageFrame(
+                              40,
+                              40,
+                              1.5,
+                              OnepieceColors.liteFancyBlue,
+                              40,
+                              Base64Helper.decode(
+                                  entry.value.starter!.profileImage!)),
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                              child: Text(I18nHelper.getDisplayNameFromI18n(
+                                  entry.value.starter!.name)),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(left: 5.0),
+                              child: Text(
+                                  entry.value.battleExecution!
+                                      .starterScoreBefore!
+                                      .toString(),
+                                  style: OnepieceFonts.boldFancySmallFont),
+                            )
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  DataCell(
+                    Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+                          child: ImageHelper.getRoundImageFrame(
+                              40,
+                              40,
+                              1.5,
+                              OnepieceColors.liteFancyBlue,
+                              40,
+                              Base64Helper.decode(
+                                  entry.value.receiver!.profileImage!)),
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                              child: Text(I18nHelper.getDisplayNameFromI18n(
+                                  entry.value.receiver!.name)),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(left: 5.0),
+                              child: Text(
+                                  entry.value.battleExecution!
+                                      .receiverScoreBefore!
+                                      .toString(),
+                                  style: OnepieceFonts.boldFancySmallFont),
+                            )
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  DataCell(
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+                      child: entry.value.battleExecution!.winnerId == null
+                          ? Container(
+                              width: 40,
+                              height: 40,
+                              decoration: const BoxDecoration(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(2.0)),
+                              ),
+                              child: FittedBox(
+                                fit: BoxFit.fill,
+                                child: ImageHelper.getSvgIconWithColor(
+                                    'images/svgs/question.svg',
+                                    100,
+                                    100,
+                                    OnepieceColors.liteFancyBlue),
+                              ),
+                            )
+                          : ImageHelper.getRoundImageFrame(
+                              40,
+                              40,
+                              1.5,
+                              OnepieceColors.liteFancyBlue,
+                              40,
+                              Base64Helper.decode(
+                                  entry.value.battleExecution!.winnerId ==
+                                          entry.value.starterId
+                                      ? entry.value.starter!.profileImage!
+                                      : entry.value.receiver!.profileImage!)),
+                    ),
+                  ),
                   _getDataCell(
                       battleStatusToDisplayName[
                           entry.value.battleExecution!.battleStatus]!,
