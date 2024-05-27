@@ -704,30 +704,57 @@ class _CharacterViewState extends State<CharacterView> {
         ),
       ),
       _createSingleColumn(
-          AppLocalizations.of(context)!.characterName, null, 80, false),
+          AppLocalizations.of(context)!.characterName, null, 80, null),
+      _createSingleColumn(AppLocalizations.of(context)!.hakis, null, 250, null),
+      _createSingleColumn(AppLocalizations.of(context)!.race, null, 150, null),
       _createSingleColumn(
-          AppLocalizations.of(context)!.hakis, null, 250, false),
-      _createSingleColumn(AppLocalizations.of(context)!.race, null, 150, false),
+          AppLocalizations.of(context)!.battleStyle, null, 100, null),
       _createSingleColumn(
-          AppLocalizations.of(context)!.battleStyle, null, 100, false),
-      _createSingleColumn(
-          AppLocalizations.of(context)!.bounty, null, 100, false),
+          AppLocalizations.of(context)!.bounty,
+          null,
+          100,
+          ImageHelper.getTextFormFieldIcon(
+              'images/character_digits_icon/bounty.svg', true, 20)),
       _createSingleColumn(AppLocalizations.of(context)!.combatPower,
-          CharacterSortableFieldsEnum.score, 120, false),
-      _createSingleColumn(AppLocalizations.of(context)!.characterAttack,
-          CharacterSortableFieldsEnum.attack, 110, true),
-      _createSingleColumn(AppLocalizations.of(context)!.characterDefense,
-          CharacterSortableFieldsEnum.defense, 110, true),
-      _createSingleColumn(AppLocalizations.of(context)!.characterIntelligence,
-          CharacterSortableFieldsEnum.intelligence, 130, true),
-      _createSingleColumn(AppLocalizations.of(context)!.characterBlood,
-          CharacterSortableFieldsEnum.blood, 110, true),
-      _createSingleColumn(AppLocalizations.of(context)!.characterSpeed,
-          CharacterSortableFieldsEnum.speed, 110, true),
-      _createSingleColumn(AppLocalizations.of(context)!.groupGain,
-          CharacterSortableFieldsEnum.groupGain, 130, true),
+          CharacterSortableFieldsEnum.score, 120, null),
+      _createSingleColumn(
+          AppLocalizations.of(context)!.characterAttack,
+          CharacterSortableFieldsEnum.attack,
+          110,
+          ImageHelper.getTextFormFieldIcon(
+              'images/character_digits_icon/attack.svg', true, 20)),
+      _createSingleColumn(
+          AppLocalizations.of(context)!.characterDefense,
+          CharacterSortableFieldsEnum.defense,
+          110,
+          ImageHelper.getTextFormFieldIcon(
+              'images/character_digits_icon/defense.svg', true, 20)),
+      _createSingleColumn(
+          AppLocalizations.of(context)!.characterIntelligence,
+          CharacterSortableFieldsEnum.intelligence,
+          130,
+          ImageHelper.getTextFormFieldIcon(
+              'images/character_digits_icon/intelligence.svg', true, 20)),
+      _createSingleColumn(
+          AppLocalizations.of(context)!.characterBlood,
+          CharacterSortableFieldsEnum.blood,
+          110,
+          ImageHelper.getTextFormFieldIcon(
+              'images/character_digits_icon/blood.svg', true, 20)),
+      _createSingleColumn(
+          AppLocalizations.of(context)!.characterSpeed,
+          CharacterSortableFieldsEnum.speed,
+          110,
+          ImageHelper.getTextFormFieldIcon(
+              'images/character_digits_icon/speed.svg', true, 20)),
+      _createSingleColumn(
+          AppLocalizations.of(context)!.groupGain,
+          CharacterSortableFieldsEnum.groupGain,
+          130,
+          ImageHelper.getTextFormFieldIcon(
+              'images/character_digits_icon/groupGain.svg', true, 20)),
       _createSingleColumn(AppLocalizations.of(context)!.fruitLimit,
-          CharacterSortableFieldsEnum.fruitLimit, 115, false),
+          CharacterSortableFieldsEnum.fruitLimit, 115, null),
     ];
   }
 
@@ -735,7 +762,7 @@ class _CharacterViewState extends State<CharacterView> {
       String displayText,
       CharacterSortableFieldsEnum? characterSortableFieldsEnum,
       double? width,
-      bool? isBattleDigit) {
+      Widget? icon) {
     return DataColumn(
       label: InkWell(
         onTap: characterSortableFieldsEnum == null
@@ -769,15 +796,26 @@ class _CharacterViewState extends State<CharacterView> {
           child: SizedBox(
             width: width,
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text(
-                  displayText,
-                  style:
-                      sortableEnumToSortOrderMap[characterSortableFieldsEnum] ==
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    if (icon != null)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 1.0),
+                        child: icon,
+                      ),
+                    Text(
+                      displayText,
+                      style: sortableEnumToSortOrderMap[
+                                  characterSortableFieldsEnum] ==
                               null
                           ? OnepieceFonts.tableHeaderStyle
                           : OnepieceFonts.selectedTableHeaderStyle,
+                    ),
+                  ],
                 ),
                 if (characterSortableFieldsEnum != null)
                   Padding(
@@ -793,16 +831,6 @@ class _CharacterViewState extends State<CharacterView> {
                           : OnepieceColors.themeColor,
                     ),
                   ),
-                if (isBattleDigit!)
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8.0),
-                    child: ImageHelper.getSvgIconWithColor(
-                      'images/svgs/battle.svg',
-                      20,
-                      20,
-                      OnepieceColors.fancyBlue,
-                    ),
-                  )
               ],
             ),
           ),

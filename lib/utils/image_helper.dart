@@ -101,6 +101,7 @@ class ImageHelper {
     return IconButton(
       onPressed: onPressed,
       splashRadius: 1,
+      hoverColor: Colors.transparent,
       icon: SvgPicture.asset(
         "asset/$svgPath",
         color: svgColor,
@@ -149,7 +150,7 @@ class ImageHelper {
       width: size ?? 25,
       height: size ?? 25,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 3.0),
+        padding: const EdgeInsets.symmetric(horizontal: 2.0),
         child: getSvgIconWithColor(
             iconPath, 3, 3, originalColor ? null : OnepieceColors.iconGreen),
       ),
