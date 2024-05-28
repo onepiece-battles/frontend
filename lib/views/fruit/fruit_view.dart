@@ -36,13 +36,7 @@ class _FruitViewState extends State<FruitView> {
   // first all columns will be sorted by creation id desc.
   Map<FruitSortableFieldsEnum, SortOrder?> sortableEnumToSortOrderMap = {
     FruitSortableFieldsEnum.fruitType: null,
-    FruitSortableFieldsEnum.attackStrengthen: null,
-    FruitSortableFieldsEnum.defenseStrengthen: null,
-    FruitSortableFieldsEnum.bloodStrengthen: null,
-    FruitSortableFieldsEnum.groupGainStrengthen: null,
-    FruitSortableFieldsEnum.intelligenceStrengthen: null,
     FruitSortableFieldsEnum.magicConsume: null,
-    FruitSortableFieldsEnum.speedStrengthen: null,
     FruitSortableFieldsEnum.name: null,
   };
 
@@ -452,13 +446,7 @@ class _FruitViewState extends State<FruitView> {
               sortKeys = [];
               sortableEnumToSortOrderMap = sortableEnumToSortOrderMap = {
                 FruitSortableFieldsEnum.fruitType: null,
-                FruitSortableFieldsEnum.attackStrengthen: null,
-                FruitSortableFieldsEnum.defenseStrengthen: null,
-                FruitSortableFieldsEnum.bloodStrengthen: null,
-                FruitSortableFieldsEnum.groupGainStrengthen: null,
-                FruitSortableFieldsEnum.intelligenceStrengthen: null,
                 FruitSortableFieldsEnum.magicConsume: null,
-                FruitSortableFieldsEnum.speedStrengthen: null,
                 FruitSortableFieldsEnum.name: null,
               };
               _search();
@@ -469,18 +457,18 @@ class _FruitViewState extends State<FruitView> {
       _createSingleColumn(AppLocalizations.of(context)!.name, null, 80),
       _createSingleColumn(AppLocalizations.of(context)!.fruitType,
           FruitSortableFieldsEnum.fruitType, 150),
-      _createSingleColumn(AppLocalizations.of(context)!.attackStrengthen,
-          FruitSortableFieldsEnum.attackStrengthen, 150),
-      _createSingleColumn(AppLocalizations.of(context)!.defenseStrengthen,
-          FruitSortableFieldsEnum.defenseStrengthen, 150),
-      _createSingleColumn(AppLocalizations.of(context)!.bloodStrengthen,
-          FruitSortableFieldsEnum.bloodStrengthen, 150),
-      _createSingleColumn(AppLocalizations.of(context)!.intelligenceStrengthen,
-          FruitSortableFieldsEnum.intelligenceStrengthen, 150),
-      _createSingleColumn(AppLocalizations.of(context)!.groupStrengthen,
-          FruitSortableFieldsEnum.groupGainStrengthen, 150),
-      _createSingleColumn(AppLocalizations.of(context)!.speedStrengthen,
-          FruitSortableFieldsEnum.speedStrengthen, 150),
+      _createSingleColumn(
+          AppLocalizations.of(context)!.attackStrengthen, null, 150),
+      _createSingleColumn(
+          AppLocalizations.of(context)!.defenseStrengthen, null, 150),
+      _createSingleColumn(
+          AppLocalizations.of(context)!.bloodStrengthen, null, 150),
+      _createSingleColumn(
+          AppLocalizations.of(context)!.intelligenceStrengthen, null, 150),
+      _createSingleColumn(
+          AppLocalizations.of(context)!.groupStrengthen, null, 150),
+      _createSingleColumn(
+          AppLocalizations.of(context)!.speedStrengthen, null, 150),
     ];
   }
 
@@ -612,9 +600,7 @@ class _FruitViewState extends State<FruitView> {
                   entry.value.groupGainSlope!,
                   entry.value.groupGainIntercept!,
                   ImageHelper.getTextFormFieldIcon(
-                      'images/character_digits_icon/group_gain.svg',
-                      true,
-                      25)),
+                      'images/character_digits_icon/group_gain.svg', true, 25)),
               _getWidgetDataCell(
                   entry.value.speedSlope!,
                   entry.value.speedIntercept!,
@@ -654,16 +640,18 @@ class _FruitViewState extends State<FruitView> {
               size: 17,
             ),
             icon,
-            if (intercept >=0) const Icon(
-              Icons.add,
-              color: OnepieceColors.fancyGreen,
-              size: 17,
-            ),
-            if (intercept <0) const Icon(
-              Icons.remove,
-              color: OnepieceColors.fancyGreen,
-              size: 17,
-            ),
+            if (intercept >= 0)
+              const Icon(
+                Icons.add,
+                color: OnepieceColors.fancyGreen,
+                size: 17,
+              ),
+            if (intercept < 0)
+              const Icon(
+                Icons.remove,
+                color: OnepieceColors.fancyGreen,
+                size: 17,
+              ),
             Text(intercept.abs().toString()),
           ],
         ),
