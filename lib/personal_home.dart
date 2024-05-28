@@ -1,9 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/repository/battle_dao.dart';
 import 'package:one_piece_battles_flutter/repository/character_dao.dart';
+import 'package:one_piece_battles_flutter/repository/file_dao.dart';
 import 'package:one_piece_battles_flutter/repository/group_dao.dart';
 import 'package:one_piece_battles_flutter/utils/base64_helper.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
@@ -11,6 +15,7 @@ import 'package:one_piece_battles_flutter/utils/image_helper.dart';
 import 'package:openapi/api.dart';
 import 'constants/onepiece_colors.dart';
 import 'constants/onepiece_fonts.dart';
+import 'dart:html' as html;
 
 GetIt getIt = GetIt.instance;
 
@@ -158,10 +163,10 @@ class _UserHomeState extends State<UserHome> {
                           style: OnepieceFonts.contentStyleBoldFancyBlue,
                         ),
                       ),
-                      SizedBox(
-                        height: 600,
-                          child: _getBattleWall(context)),
-                      const SizedBox(height: 100,)
+                      _getBattleWall(context),
+                      const SizedBox(
+                        height: 100,
+                      )
                     ],
                   )),
             );
@@ -235,7 +240,7 @@ class _UserHomeState extends State<UserHome> {
                     100,
                     2,
                     OnepieceColors.liteFancyBlue,
-                    20,
+                    10,
                     Base64Helper.decode(characters[index].profileImage!)),
               ),
             ),
@@ -292,7 +297,7 @@ class _UserHomeState extends State<UserHome> {
                     100,
                     2,
                     OnepieceColors.liteFancyBlue,
-                    20,
+                    10,
                     Base64Helper.decode(groups[index].profileImage!))),
           ),
         ),
@@ -332,90 +337,197 @@ class _UserHomeState extends State<UserHome> {
         ],
       );
     }
-    return SizedBox(
-      width: 500,
-      child: ListView.builder(
-          shrinkWrap: true,
-          itemCount: battles.length,
-          itemBuilder: (context, index) {
-            var battle = battles[index];
-            return Material(
-              type: MaterialType.transparency,
+    return LayoutBuilder(
+      builder: (context, constraint) {
+        int crossAxisCount = (constraint.maxWidth / 250).ceil().clamp(2, 4);
+        return SizedBox(
+          width: 1000,
+          height: ((battles.length / crossAxisCount).ceil() * 250.0)
+              .clamp(250, 800),
+          child: GridView.builder(
+            itemCount: battles.length,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: crossAxisCount,
+              mainAxisSpacing: 10,
+              crossAxisSpacing: 10,
+            ),
+            itemBuilder: (context, int index) => InkWell(
+              hoverColor: Colors.transparent,
+              onTap: () {
+                context.goNamed('battleDetails',
+                    extra: battles[index].id,
+                    pathParameters: {'id': battles[index].id});
+              },
               child: Container(
-                padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                decoration: const BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(5))),
-                child: ListTile(
-                  minLeadingWidth: 10,
-                  contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  onTap: () {
-                    setState(
-                      () {
-                        context.goNamed('battleDetails',
-                            extra: battle.id,
-                            pathParameters: {'id': battle.id});
-                      },
-                    );
-                  },
-                  hoverColor: OnepieceColors.liteFancyBlue,
-                  title: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(3, 3, 6, 3),
-                            child: ImageHelper.getCircleImageFrame(
-                                50,
-                                50,
-                                2,
+                decoration: BoxDecoration(
+                  borderRadius:  BorderRadius.circular(10.0),
+                  color: OnepieceColors.menuBackgroundColor,
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const SizedBox(width: 10,),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            ImageHelper.getRoundImageFrame(
+                                40,
+                                40,
+                                1,
                                 OnepieceColors.liteFancyBlue,
+                                40,
                                 Base64Helper.decode(
-                                    battle.starter!.profileImage!)),
-                          ),
-                          const Text(
+                                    battles[index].starter!.profileImage!)),
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                              child: Text(I18nHelper.getDisplayNameFromI18n(
+                                  battles[index].starter!.name)),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(left: 5.0),
+                              child: Text(
+                                  battles[index]
+                                      .battleExecution!
+                                      .starterScoreBefore!
+                                      .toString(),
+                                  style: OnepieceFonts.boldFancySmallFont),
+                            )
+                          ],
+                        ),
+                        const Center(
+                          child: Text(
                             "vs",
                             style: OnepieceFonts.contentStyleBoldFancyBlue,
                           ),
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(3, 3, 6, 3),
-                            child: ImageHelper.getCircleImageFrame(
-                                50,
-                                50,
-                                2,
-                                OnepieceColors.liteFancyBlue,
-                                Base64Helper.decode(
-                                    battle.receiver!.profileImage!)),
-                          ),
-                        ],
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
+                        ),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(
-                                battleStatusToDisplayName[
-                                    battle.battleExecution!.battleStatus!]!,
-                                style: OnepieceFonts.fancyBlueHintFont),
-                            const Text(" | ",
-                                style: OnepieceFonts.fancyBlueHintFont),
-                            Text(
-                                reportStatusToDisplayName[battle
-                                    .battleExecution!.battleReportStage!]!,
-                                style: OnepieceFonts.fancyBlueHintFont)
+                            ImageHelper.getRoundImageFrame(
+                                40,
+                                40,
+                                1,
+                                OnepieceColors.liteFancyBlue,
+                                40,
+                                Base64Helper.decode(
+                                    battles[index].receiver!.profileImage!)),
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                              child: Text(I18nHelper.getDisplayNameFromI18n(
+                                  battles[index].receiver!.name)),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(left: 5.0),
+                              child: Text(
+                                  battles[index]
+                                      .battleExecution!
+                                      .receiverScoreBefore!
+                                      .toString(),
+                                  style: OnepieceFonts.boldFancySmallFont),
+                            )
                           ],
                         ),
-                      )
-                    ],
-                  ),
+                        const SizedBox(width: 10,),
+                      ],
+                    ),
+                    const SizedBox(height: 15,),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius:  BorderRadius.circular(5.0),
+                          color: OnepieceColors.fancyBlue,
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                  battleStatusToDisplayName[
+                                      battles[index].battleExecution!.battleStatus!]!,
+                                  style: OnepieceFonts.boldFancyWhiteSmallFont),
+                              const SizedBox(
+                                width: 30,
+                              ),
+                              Tooltip(
+                                message: battles[index]
+                                            .battleExecution!
+                                            .battleReportStage ==
+                                        BattleReportStage.FINISHED
+                                    ? AppLocalizations.of(context)!.downloadReport
+                                    : "",
+                                child: InkWell(
+                                  hoverColor: Colors.transparent,
+                                  onTap: battles[index]
+                                              .battleExecution!
+                                              .battleReportStage ==
+                                          BattleReportStage.FINISHED
+                                      ? () {
+                                          getIt<FileDao>()
+                                              .downloadFile(DownloadFileRequest(
+                                                  id: battles[index]
+                                                      .battleExecution!
+                                                      .reportFileId!))
+                                              .then((response) async {
+                                            debugPrint('pdf downloading finish');
+                                            var pdf =
+                                                base64Decode(response!.fileData!);
+                                            // pdfData.value = Uint8List.fromList(value!);
+                                            final blob = html.Blob(
+                                                [pdf], response.httpMimeType);
+                                            final url =
+                                                html.Url.createObjectUrlFromBlob(
+                                                    blob);
+                                            final anchor = html.AnchorElement()
+                                              ..href = url
+                                              ..setAttribute('target', '_blank')
+                                              ..download = "${response.fileName}.pdf"
+                                              ..style.display = 'none';
+                                            // Add the anchor element to the document body.
+                                            html.document.body?.append(anchor);
+                                            // Programmatically click the anchor element to start the download.
+                                            anchor.click();
+                                            // Remove the anchor element after the download has started.
+                                            anchor.remove();
+                                            // Release the object URL to free up resources.
+                                            html.Url.revokeObjectUrl(url);
+                                          });
+                                        }
+                                      : null,
+                                  child: battles[index]
+                                              .battleExecution!
+                                              .battleReportStage ==
+                                          BattleReportStage.FINISHED
+                                      ? SvgPicture.asset(
+                                          'asset/images/svgs/pdf.svg',
+                                          width: 20,
+                                          height: 20,
+                                        )
+                                      : SvgPicture.asset(
+                                          'asset/images/svgs/pdf_black.svg',
+                                          width: 20,
+                                          height: 20,
+                                          color: Colors.grey,
+                                        ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    )
+                  ],
                 ),
               ),
-            );
-          }),
+            ),
+          ),
+        );
+      },
     );
   }
 }
