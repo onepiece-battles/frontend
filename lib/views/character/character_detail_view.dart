@@ -1661,7 +1661,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                     Colors.black12,
                                     6,
                                     Base64Helper.decode(
-                                        character.profileImage!))),
+                                        currentGroup.profileImage!))),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
