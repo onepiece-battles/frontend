@@ -1,12 +1,14 @@
 # Start from the Dart image to get both Dart and Flutter SDKs
-FROM dart:stable AS build-env
+FROM dart:3.3.4 AS build-env
 
+
+ARG FLUTTER_VERSION=3.19.6
 # Install Flutter
-RUN git clone https://github.com/flutter/flutter.git /usr/local/flutter
+RUN git clone --branch $FLUTTER_VERSION https://github.com/flutter/flutter.git /usr/local/flutter
 ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PATH}"
 
 # Enable Flutter web
-RUN flutter channel stable && flutter upgrade && flutter config --enable-web
+RUN flutter config --enable-web
 
 # Copy files to the container and build your app
 WORKDIR /app
