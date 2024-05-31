@@ -38,8 +38,7 @@ class _RetrievePasswordState extends State<RetrievePassword> {
   bool _isPasswordHidden = true;
   bool _isConfirmedPasswordHidden = true;
 
-  TextEditingController emailController =
-      TextEditingController(text: 'zhangyichiwind@163.com');
+  TextEditingController emailController = TextEditingController(text: '');
 
   TextEditingController passwordController = TextEditingController();
   TextEditingController confirmedPasswordController = TextEditingController();
@@ -142,7 +141,6 @@ class _RetrievePasswordState extends State<RetrievePassword> {
             controller: emailController,
             decoration: InputDecoration(
                 labelText: AppLocalizations.of(context)?.emailAddress,
-                hintText: AppLocalizations.of(context)?.emailAddress,
                 prefixIcon: const Icon(Icons.email)),
           ),
         ),
@@ -209,7 +207,6 @@ class _RetrievePasswordState extends State<RetrievePassword> {
             keyboardType: TextInputType.text,
             obscureText: _isPasswordHidden,
             decoration: InputDecoration(
-                hintText: AppLocalizations.of(context)?.registerPasswordHint,
                 labelText: AppLocalizations.of(context)?.registerPasswordHint,
                 prefixIcon: const Icon(Icons.lock),
                 suffixIcon: IconButton(
@@ -246,7 +243,6 @@ class _RetrievePasswordState extends State<RetrievePassword> {
             keyboardType: TextInputType.text,
             obscureText: _isConfirmedPasswordHidden,
             decoration: InputDecoration(
-                hintText: AppLocalizations.of(context)?.registerPasswordHint2,
                 labelText: AppLocalizations.of(context)?.registerPasswordHint2,
                 prefixIcon: const Icon(Icons.lock),
                 suffixIcon: IconButton(
@@ -284,7 +280,6 @@ class _RetrievePasswordState extends State<RetrievePassword> {
             controller: verificationCodeController,
             keyboardType: TextInputType.text,
             decoration: InputDecoration(
-                hintText: AppLocalizations.of(context)?.verificationCode,
                 labelText: AppLocalizations.of(context)?.verificationCode,
                 prefixIcon: Icon(
                   Icons.verified,
