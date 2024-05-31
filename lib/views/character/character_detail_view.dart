@@ -68,8 +68,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
   List<FruitListView> fruits = [];
   List<GroupForCharacterView> groups = [];
 
-  CharacterBattleInfo characterBattleInfo = CharacterBattleInfo();
-  CharacterBasicInfo characterBasicInfo = CharacterBasicInfo();
+  // CharacterBattleInfo characterBattleInfo = CharacterBattleInfo();
+  // CharacterBasicInfo characterBasicInfo = CharacterBasicInfo();
 
   BattleStyle selectedBattleStyle = BattleStyle.BODY;
   GroupPosition selectedGroupPosition = GroupPosition.member;
@@ -149,21 +149,6 @@ class _CharacterDetailState extends State<CharacterDetail> {
     if (fruits.length < character.maximumFruitCount) {
       fruitSearchEnabled = true;
     }
-    // set battle info
-    characterBattleInfo.setAttack(characterFullView.attack);
-    characterBattleInfo.setDefense(characterFullView.defense);
-    characterBattleInfo.setBlood(characterFullView.blood);
-    characterBattleInfo.setGroupGain(characterFullView.groupGain);
-    characterBattleInfo.setIntelligence(characterFullView.intelligence);
-    characterBattleInfo.setSpeed(characterFullView.speed);
-    // set basic info
-    characterBasicInfo.setAge(characterFullView.age);
-    characterBasicInfo.setBirthPlace(characterFullView.birthPlace);
-    characterBasicInfo.setBounty(characterFullView.bounty);
-    characterBasicInfo.setHeight(characterFullView.height);
-    characterBasicInfo
-        .setName(I18nHelper.getDisplayNameFromI18n(characterFullView.name));
-    characterBasicInfo.setProfileImage(characterFullView.profileImage);
   }
 
   void _updateControllerData() {
@@ -387,6 +372,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                             var updatedCharacter = Character(
                                 id: character.id,
                                 maximumFruitCount: character.maximumFruitCount,
+                                // keep combat info consistent with original data!
                                 groupGain: character.groupGain,
                                 attack: character.attack,
                                 defense: character.defense,
@@ -394,12 +380,12 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                 blood: character.blood,
                                 speed: character.speed,
                                 energy: character.energy,
-                                baseGroupGain: character.groupGain,
-                                baseAttack: character.attack,
-                                baseDefense: character.defense,
-                                baseIntelligence: character.intelligence,
-                                baseBlood: character.blood,
-                                baseSpeed: character.speed,
+                                baseGroupGain: character.baseGroupGain,
+                                baseAttack: character.baseAttack,
+                                baseDefense: character.baseDefense,
+                                baseIntelligence: character.baseIntelligence,
+                                baseBlood: character.baseBlood,
+                                baseSpeed: character.baseSpeed,
                                 battleStyle: selectedBattleStyle,
                                 race: selectedRace,
                                 // basic info
@@ -796,7 +782,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                   }
                                   if (!combatInfoEditable) {
                                     var updatedCharacter = Character(
-                                      // basic info keep consistent with original value
+                                      /* basic info keep consistent with original
+                                       value, will probably updated on backend */
                                       id: character.id,
                                       battleStyle: character.battleStyle,
                                       race: character.race,
@@ -807,7 +794,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                       intelligence: character.intelligence,
                                       blood: character.blood,
                                       speed: character.speed,
-                                      // digit info
+                                      // digit info update
                                       maximumFruitCount:
                                           DataConverter.stringToInt(
                                               characterFruitLimitController
@@ -841,7 +828,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                             value!.result),
                                       );
                                       if (value.success) {
-                                        context.goNamed('characterDetails',
+                                        showBaseValue = false;
+                                        context.replaceNamed('characterDetails',
                                             extra: character.id,
                                             pathParameters: {
                                               'name': I18nHelper
@@ -1945,90 +1933,4 @@ class _CharacterDetailState extends State<CharacterDetail> {
           )
         : Text(value));
   }
-}
-
-class CharacterBattleInfo {
-  late int _currentAttack;
-  late int _currentDefense;
-  late int _currentBlood;
-  late int _currentIntelligence;
-  late int _currentSpeed;
-  late int _currentGroupGain;
-
-  void setAttack(int attack) {
-    _currentAttack = attack;
-  }
-
-  void setDefense(int defense) {
-    _currentDefense = defense;
-  }
-
-  void setBlood(int blood) {
-    _currentBlood = blood;
-  }
-
-  void setIntelligence(int intelligence) {
-    _currentIntelligence = intelligence;
-  }
-
-  void setSpeed(int speed) {
-    _currentSpeed = speed;
-  }
-
-  void setGroupGain(int groupGain) {
-    _currentGroupGain = groupGain;
-  }
-
-  int get attack => _currentAttack;
-  int get defense => _currentDefense;
-  int get blood => _currentBlood;
-  int get speed => _currentSpeed;
-  int get intelligence => _currentIntelligence;
-  int get groupGain => _currentGroupGain;
-}
-
-class CharacterBasicInfo {
-  late String? _name;
-  late int? _age;
-  late String? _profileImage;
-  late int? _height;
-  late String? _birthPlace;
-  late DateTime? _dateOfBirth;
-  late int? _bounty;
-
-  void setName(String? name) {
-    _name = name;
-  }
-
-  void setAge(int? age) {
-    _age = age;
-  }
-
-  void setProfileImage(String? profileImage) {
-    _profileImage = profileImage;
-  }
-
-  void setHeight(int? height) {
-    _height = height;
-  }
-
-  void setBirthPlace(String? birthPlace) {
-    birthPlace = birthPlace;
-  }
-
-  void setDateOfBirth(DateTime? dateOfBirth) {
-    _dateOfBirth = dateOfBirth;
-  }
-
-  void setBounty(int? bounty) {
-    _bounty = bounty;
-  }
-
-  String? get name => _name;
-  int? get age => _age;
-  String? get profileImage => _profileImage;
-  int? get height => _height;
-  String? get birthPlace => _birthPlace;
-  DateTime? get dateOfBirth => _dateOfBirth;
-  int? get bounty => _bounty;
 }
