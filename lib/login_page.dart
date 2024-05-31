@@ -1,7 +1,6 @@
 import 'package:animated_toggle_switch/animated_toggle_switch.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutter_toggle_tab/flutter_toggle_tab.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
@@ -12,7 +11,6 @@ import 'package:one_piece_battles_flutter/constants/path_constants.dart';
 import 'package:one_piece_battles_flutter/main.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
-import 'package:one_piece_battles_flutter/utils/image_helper.dart';
 import 'package:openapi/api.dart';
 import 'constants/button_style.dart';
 import 'constants/onepiece_colors.dart';
@@ -37,9 +35,8 @@ class _LoginPageState extends State<LoginPage> {
   bool _buttonEnabled = true;
   String verificationMessage = "";
   I18nText? verificationI18n = I18nText();
-  TextEditingController emailController =
-      TextEditingController(text: "onepiecebattles@163.com");
-  TextEditingController passwordController = TextEditingController(text: "abc");
+  TextEditingController emailController = TextEditingController(text: "");
+  TextEditingController passwordController = TextEditingController(text: "");
   Logger logger = Logger('_LoginPageState');
 
   @override
@@ -47,8 +44,7 @@ class _LoginPageState extends State<LoginPage> {
     //todo(yichi): add keyboard listener
     return Scaffold(
       backgroundColor: Colors.grey[300],
-      body:
-      SingleChildScrollView(
+      body: SingleChildScrollView(
         scrollDirection: Axis.vertical,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -83,7 +79,7 @@ class _LoginPageState extends State<LoginPage> {
                     onChanged: (b) => setState(() {
                       setState(() {
                         _tabTextIndexSelected =
-                        _tabTextIndexSelected == 0 ? 1 : 0;
+                            _tabTextIndexSelected == 0 ? 1 : 0;
                         Locale locale;
                         if (_tabTextIndexSelected == 0) {
                           locale = locales.first;
@@ -102,36 +98,36 @@ class _LoginPageState extends State<LoginPage> {
                             : OnepieceColors.fancyBlue),
                     iconBuilder: (value) => value
                         ? const Text(
-                      "En",
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600),
-                    )
+                            "En",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600),
+                          )
                         : const Text(
-                      "文",
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600),
-                    ),
+                            "文",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600),
+                          ),
                     textBuilder: (value) => value
                         ? const Center(
-                        child: Text(
-                          '文',
-                          style: TextStyle(
-                              color: Colors.black87,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600),
-                        ))
+                            child: Text(
+                            '文',
+                            style: TextStyle(
+                                color: Colors.black87,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600),
+                          ))
                         : const Center(
-                        child: Text(
-                          'En',
-                          style: TextStyle(
-                              color: Colors.black87,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600),
-                        )),
+                            child: Text(
+                            'En',
+                            style: TextStyle(
+                                color: Colors.black87,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600),
+                          )),
                   ),
                 ),
               ),
@@ -250,8 +246,8 @@ class _LoginPageState extends State<LoginPage> {
                         },
                         style: ButtonStyle(
                           overlayColor:
-                          MaterialStateProperty.resolveWith<Color?>(
-                                (Set<MaterialState> states) {
+                              MaterialStateProperty.resolveWith<Color?>(
+                            (Set<MaterialState> states) {
                               return Colors.transparent; // No splash color
                             },
                           ),
@@ -277,7 +273,7 @@ class _LoginPageState extends State<LoginPage> {
                     },
                     style: ButtonStyle(
                       overlayColor: MaterialStateProperty.resolveWith<Color?>(
-                            (Set<MaterialState> states) {
+                        (Set<MaterialState> states) {
                           return Colors.transparent; // No splash color
                         },
                       ),
@@ -298,11 +294,12 @@ class _LoginPageState extends State<LoginPage> {
                 ],
               ),
             ),
-            const SizedBox(height: 40,)
+            const SizedBox(
+              height: 40,
+            )
           ],
         ),
       ),
-
     );
   }
 

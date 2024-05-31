@@ -8,14 +8,13 @@ class MyInputTheme {
 
   UnderlineInputBorder _buildBorder(Color color) {
     return UnderlineInputBorder(
-      borderRadius: const BorderRadius.all(Radius.circular(5)),
+      borderRadius: const BorderRadius.all(Radius.circular(0)),
       borderSide: BorderSide(color: color, width: 1.0),
     );
   }
 
-
   InputDecorationTheme theme() => InputDecorationTheme(
-        contentPadding: const EdgeInsets.fromLTRB(0,5,0,3),
+        contentPadding: const EdgeInsets.fromLTRB(0, 5, 0, 3),
         floatingLabelBehavior: FloatingLabelBehavior.auto,
         floatingLabelAlignment: FloatingLabelAlignment.start,
 

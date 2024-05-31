@@ -750,9 +750,9 @@ class _CharacterViewState extends State<CharacterView> {
       _createSingleColumn(
           AppLocalizations.of(context)!.groupGain,
           CharacterSortableFieldsEnum.groupGain,
-          130,
+          140,
           ImageHelper.getTextFormFieldIcon(
-              'images/character_digits_icon/groupGain.svg', true, 20)),
+              'images/character_digits_icon/group_gain.svg', true, 20)),
       _createSingleColumn(AppLocalizations.of(context)!.fruitLimit,
           CharacterSortableFieldsEnum.fruitLimit, 115, null),
     ];
@@ -924,7 +924,7 @@ class _CharacterViewState extends State<CharacterView> {
                     Text(battleStyleToDisplayValue[entry.value.battleStyle]!),
               )),
               DataCell(Padding(
-                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
                 child: Text("\$${entry.value.bounty.toString()}"),
               )),
               DataCell(Padding(
@@ -932,27 +932,27 @@ class _CharacterViewState extends State<CharacterView> {
                 child: Text(entry.value.score.toString()),
               )),
               DataCell(Padding(
-                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
                 child: Text(entry.value.attack.toString()),
               )),
               DataCell(Padding(
-                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
                 child: Text(entry.value.defense.toString()),
               )),
               DataCell(Padding(
-                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
                 child: Text(entry.value.intelligence.toString()),
               )),
               DataCell(Padding(
-                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
                 child: Text(entry.value.blood.toString()),
               )),
               DataCell(Padding(
-                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
                 child: Text(entry.value.speed.toString()),
               )),
               DataCell(Padding(
-                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
                 child: Text(entry.value.groupGain.toString()),
               )),
               DataCell(Padding(

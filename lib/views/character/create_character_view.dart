@@ -43,7 +43,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
           1, 2, getIt<User>().loginRole == UserRole.NIKA));
   TextEditingController characterGroupGainController = TextEditingController(
       text: RandomStringGenerator.generateRandomNumber(
-          1, 5, getIt<User>().loginRole == UserRole.NIKA));
+          100, 200, getIt<User>().loginRole == UserRole.NIKA));
   TextEditingController characterAttackController = TextEditingController(
       text: RandomStringGenerator.generateRandomNumber(
           10, 1000, getIt<User>().loginRole == UserRole.NIKA));
@@ -280,8 +280,8 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                                     true,
                                     characterGroupGainController,
                                     AppLocalizations.of(context)!.groupGain,
-                                    1,
-                                    5,
+                                    100,
+                                    200,
                                     ImageHelper.getTextFormFieldIcon(
                                         'images/character_digits_icon/group_gain.svg',
                                         true,
