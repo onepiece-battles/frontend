@@ -279,5 +279,6 @@
   "search": "Search...",
   "fieldMustBeDigit": "Field must be digit",
   "basicValue": "Base value",
-  "realValue": "Fruit SNH"
+  "realValue": "Fruit SNH",
+  "startSuccess": "Started successfully"
 }

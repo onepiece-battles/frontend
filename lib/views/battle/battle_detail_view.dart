@@ -543,7 +543,9 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                           .startBattle(StartBattleRequest(battleId: battle.id))
                           .then((value) => {
                                 OnepieceAlert.getBasicAlertDialogFunc(
-                                    context, "battle", "start success")
+                                    context,
+                                    AppLocalizations.of(context)!.battle,
+                                    AppLocalizations.of(context)!.startSuccess)
                               });
                     }
                   : null,

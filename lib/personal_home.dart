@@ -59,7 +59,7 @@ class _UserHomeState extends State<UserHome> {
 
   Future<ListBattleResponse?> listBattles() async {
     ListBattleRequest request = ListBattleRequest(
-        pageSize: 10,
+        pageSize: 100,
         pageIndex: 1,
         sortKeys: [],
         battleFilter: BattleFilter(
