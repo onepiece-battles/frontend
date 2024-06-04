@@ -247,6 +247,10 @@ class HomePageState extends State<HomePage> {
                   } else {
                     locale = locales.last;
                   }
+                  getIt<UserDao>().updateUser(UpdateUserRequest(
+                      id: getIt<User>().id,
+                      nickname: getIt<User>().nickname,
+                      locale: I18nHelper.convertToOnepieceLocale(locale)));
                   MyApp.setLocale(context, locale);
                 });
               }),
