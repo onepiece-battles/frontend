@@ -744,8 +744,19 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                                         userId: getIt<User>().id,
                                         starterId: starterSelectedId,
                                         receiverId: receiverSelectedId);
-                                getIt<BattleDao>().createBattle(request);
-                                context.goNamed("battle");
+                                Future<CreateBattleResponse?> response =
+                                    getIt<BattleDao>().createBattle(request);
+                                response.then((value) {
+                                  if (value?.battleId != null) {
+                                    context.goNamed('battleDetails',
+                                        extra: value?.battleId,
+                                        pathParameters: {
+                                          'id': value!.battleId!
+                                        });
+                                  } else {
+                                    context.goNamed("battle");
+                                  }
+                                });
                               },
                         child: Text(AppLocalizations.of(context)!.create),
                       ),

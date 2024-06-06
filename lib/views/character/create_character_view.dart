@@ -17,6 +17,7 @@ import '../../repository/character_dao.dart';
 import '../../repository/image_dao.dart';
 import '../../utils/base64_helper.dart';
 import '../../utils/data_converter.dart';
+import '../../utils/i18n_helper.dart';
 import '../../utils/image_helper.dart';
 import '../../utils/onepiece_image_picker.dart';
 
@@ -1027,17 +1028,22 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                           );
                           getIt<CharacterDao>()
                               .addCharacter(addCharacterRequest)
-                              .then((value) {
+                              .then((characterResponse) {
                             var encodedImage =
                                 Base64Helper.encode(_pickedImage);
                             UploadImageRequest uploadImageRequest =
                                 UploadImageRequest(
-                                    resourceId: value!.id,
+                                    resourceId: characterResponse!.id,
                                     image: encodedImage,
                                     type: ResourceType.CHARACTER);
-                            getIt<ImageDao>()
-                                .addImage(uploadImageRequest)
-                                .then((value) => context.goNamed("characters"));
+                            getIt<ImageDao>().addImage(uploadImageRequest).then(
+                                (value) => context.goNamed('characterDetails',
+                                        extra: characterResponse.id,
+                                        pathParameters: {
+                                          'name':
+                                              I18nHelper.getDisplayNameFromI18n(
+                                                  characterResponse.name)
+                                        }));
                           });
                         },
                   child: Text(AppLocalizations.of(context)!.submitForm),

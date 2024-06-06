@@ -12,6 +12,7 @@ import '../../popup/onepiece_alert.dart';
 import '../../repository/image_dao.dart';
 import '../../utils/base64_helper.dart';
 import '../../utils/data_validator.dart';
+import '../../utils/i18n_helper.dart';
 import '../../utils/image_helper.dart';
 import '../../utils/onepiece_image_picker.dart';
 import '../../utils/random_string_generator.dart';
@@ -355,19 +356,22 @@ class _CreateGroupViewState extends State<CreateGroupView> {
                           groupNameChController.text),
                       groupCategory: selectedGroupCategory,
                     );
-
                     getIt<GroupDao>()
                         .createGroup(createGroupRequest)
-                        .then((value) {
+                        .then((createGroupResponse) {
                       var encodedImage = Base64Helper.encode(_pickedImage);
                       UploadImageRequest uploadImageRequest =
                           UploadImageRequest(
-                              resourceId: value!.id.toString(),
+                              resourceId: createGroupResponse!.id.toString(),
                               image: encodedImage,
                               type: ResourceType.GROUP);
                       getIt<ImageDao>()
                           .addImage(uploadImageRequest)
-                          .then((value) => context.goNamed("groups"));
+                          .then((value) => context.goNamed('groupDetails',
+                          extra: createGroupResponse.id,
+                          pathParameters: {
+                            'name': I18nHelper.getDisplayNameFromI18n(createGroupResponse.name)
+                          }));
                     });
                   },
                   child: Text(AppLocalizations.of(context)!.submitForm),
