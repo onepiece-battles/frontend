@@ -8,6 +8,7 @@ class OnepieceButtonStyle {
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(3),
     ),
-    foregroundColor: Colors.white);
+    // foregroundColor: Colors.white
+    );
   }
 }
