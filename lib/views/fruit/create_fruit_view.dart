@@ -11,6 +11,7 @@ import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
 import '../../repository/fruit_dao.dart';
 import '../../utils/data_converter.dart';
+import '../../utils/i18n_helper.dart';
 import '../../utils/image_helper.dart';
 import '../../utils/random_string_generator.dart';
 
@@ -460,7 +461,11 @@ class _CreateFruitViewState extends State<CreateFruitView> {
                     );
 
                     getIt<FruitDao>().add(addFruitRequest).then((value) {
-                      context.goNamed("fruit");
+                      context.goNamed('fruitDetails',
+                          extra: value!.id,
+                          pathParameters: {
+                            'name': I18nHelper.getDisplayNameFromI18n(value.name!)
+                          });
                     });
                   },
                   child: Text(AppLocalizations.of(context)!.submitForm),
