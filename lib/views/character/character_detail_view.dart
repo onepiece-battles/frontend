@@ -88,6 +88,10 @@ class _CharacterDetailState extends State<CharacterDetail> {
   bool groupSearchEnabled = true;
   bool showBaseValue = false;
 
+  int battleStartIndex = 0;
+  int battleEndIndex = 10;
+  int pageCount = 1;
+
   @override
   void initState() {
     super.initState();
@@ -1685,29 +1689,41 @@ class _CharacterDetailState extends State<CharacterDetail> {
   }
 
   Widget _getBattle(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(sideWidth, 8, sideWidth, 8),
-      child: SizedBox(
-        width: dividerWidth,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Text(
-              AppLocalizations.of(context)!.relatedBattles,
-              style: OnepieceFonts.headerStyle,
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            _getBattlesTable()
-          ],
+    return StatefulBuilder(builder: (context, battleListState) {
+      return Padding(
+        padding: EdgeInsets.fromLTRB(sideWidth, 8, sideWidth, 8),
+        child: SizedBox(
+          width: dividerWidth,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    AppLocalizations.of(context)!.relatedBattles,
+                    style: OnepieceFonts.headerStyle,
+                  ),
+                  if (battles.length > 10)
+                    _getPageController(context, battleListState)
+                ],
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              _getBattlesTable(context),
+              const SizedBox(
+                height: 10,
+              ),
+            ],
+          ),
         ),
-      ),
-    );
+      );
+    });
   }
 
-  Widget _getBattlesTable() {
+  Widget _getBattlesTable(BuildContext context) {
     return DataTable(
       showCheckboxColumn: false,
       showBottomBorder: true,
@@ -1715,13 +1731,109 @@ class _CharacterDetailState extends State<CharacterDetail> {
       border: const TableBorder(
           top: BorderSide(color: OnepieceColors.themeColor),
           bottom: BorderSide(color: OnepieceColors.themeColor)),
-      columns: _createColumns(character.id),
+      columns: _createColumns(character.id, context),
       rows: _createRows(context),
       columnSpacing: 8,
     );
   }
 
-  List<DataColumn> _createColumns(String currentCharacterId) {
+  Widget _getPageController(BuildContext context, Function battleListState) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 80.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          SizedBox(
+            width: 40,
+            height: 30,
+            child: Center(
+              child: IconButton(
+                focusColor: Colors.transparent,
+                hoverColor: Colors.transparent,
+                splashColor: Colors.transparent,
+                color: Colors.transparent,
+                highlightColor: Colors.transparent,
+                onPressed: battleStartIndex == 0
+                    ? null
+                    : () {
+                        battleListState(() {
+                          pageCount--;
+                          battleStartIndex = battleStartIndex - 10;
+                          if (battleEndIndex % 10 != 0) {
+                            battleEndIndex =
+                                battleEndIndex - battleEndIndex % 10;
+                          } else {
+                            battleEndIndex = battleEndIndex - 10;
+                          }
+                          if (battleStartIndex < 0) {
+                            battleStartIndex = 0;
+                          }
+                        });
+                      },
+                icon: Icon(
+                  Icons.keyboard_arrow_left_sharp,
+                  size: 20,
+                  color: battleStartIndex == 0
+                      ? Colors.transparent
+                      : OnepieceColors.fancyBlue,
+                ),
+              ),
+            ),
+          ),
+          SizedBox(
+            width: 20,
+            height: 30,
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 5.0),
+                child: Text(
+                  pageCount.toString(),
+                  style: const TextStyle(
+                      color: OnepieceColors.fancyBlue, fontSize: 15),
+                ),
+              ),
+            ),
+          ),
+          SizedBox(
+            width: 40,
+            height: 30,
+            child: Center(
+              child: IconButton(
+                focusColor: Colors.transparent,
+                hoverColor: Colors.transparent,
+                splashColor: Colors.transparent,
+                color: Colors.transparent,
+                highlightColor: Colors.transparent,
+                onPressed: battleEndIndex == battles.length
+                    ? null
+                    : () {
+                        battleListState(() {
+                          pageCount++;
+                          battleStartIndex = battleStartIndex + 10;
+                          battleEndIndex = battleEndIndex + 10;
+                          if (battleEndIndex > battles.length) {
+                            battleEndIndex = battles.length;
+                          }
+                        });
+                      },
+                icon: Icon(
+                  Icons.keyboard_arrow_right_sharp,
+                  size: 20,
+                  color: battleEndIndex == battles.length
+                      ? Colors.transparent
+                      : OnepieceColors.fancyBlue,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<DataColumn> _createColumns(
+      String currentCharacterId, BuildContext context) {
     var headerStyle = OnepieceFonts.tableHeaderStyle;
     return [
       const DataColumn(
@@ -1772,6 +1884,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
     };
     var battles = character.battles;
     return battles
+        .getRange(battleStartIndex, battleEndIndex)
+        .toList()
         .asMap()
         .entries
         .map((entry) => DataRow(
