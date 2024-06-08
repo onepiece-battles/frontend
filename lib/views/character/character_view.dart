@@ -752,7 +752,7 @@ class _CharacterViewState extends State<CharacterView> {
       _createSingleColumn(
           AppLocalizations.of(context)!.groupGain,
           CharacterSortableFieldsEnum.groupGain,
-          140,
+          150,
           ImageHelper.getTextFormFieldIcon(
               'images/character_digits_icon/group_gain.svg', true, 20)),
       _createSingleColumn(AppLocalizations.of(context)!.fruitLimit,
