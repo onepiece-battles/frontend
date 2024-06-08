@@ -456,7 +456,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                 200,
                 3,
                 OnepieceColors.liteFancyBlue,
-                90,
+                100,
                 Base64Helper.decode(character.profileImage!)),
           ),
           Form(

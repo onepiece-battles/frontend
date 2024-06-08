@@ -194,6 +194,7 @@ class _BattleViewState extends State<BattleView> {
                   Permission.CREATE))
                 SizedBox(
                   height: 35,
+                  width: 120,
                   child: Padding(
                     padding: const EdgeInsets.only(right: 10),
                     child: ElevatedButton(
@@ -201,7 +202,7 @@ class _BattleViewState extends State<BattleView> {
                         context.goNamed("createBattle");
                       },
                       style: OnepieceButtonStyle.getDefaultStyle(),
-                      child: Text(AppLocalizations.of(context)!.createBattle),
+                      child: Text(AppLocalizations.of(context)!.create),
                     ),
                   ),
                 ),
@@ -585,6 +586,7 @@ class _BattleViewState extends State<BattleView> {
       DataColumn(
         label: Tooltip(
           message: AppLocalizations.of(context)!.resetSort,
+          preferBelow: true,
           child: ImageHelper.getIconButtonFromSvg(
             'images/svgs/reset.svg',
             OnepieceColors.fancyBlue,

@@ -175,6 +175,7 @@ class _GroupViewState extends State<GroupView> {
               Permission.CREATE))
             SizedBox(
               height: 35,
+              width: 120,
               child: Padding(
                 padding: const EdgeInsets.only(right: 10.0),
                 child: ElevatedButton(
@@ -182,7 +183,7 @@ class _GroupViewState extends State<GroupView> {
                       context.goNamed("createGroup");
                     },
                     style: OnepieceButtonStyle.getDefaultStyle(),
-                    child: Text(AppLocalizations.of(context)!.createGroup)),
+                    child: Text(AppLocalizations.of(context)!.create)),
               ),
             ),
           Padding(
@@ -420,6 +421,7 @@ class _GroupViewState extends State<GroupView> {
     return [
       DataColumn(
         label: Tooltip(
+          preferBelow: true,
           message: AppLocalizations.of(context)!.resetSort,
           child: ImageHelper.getIconButtonFromSvg(
             'images/svgs/reset.svg',
