@@ -223,6 +223,7 @@ class _UserHomeState extends State<UserHome> {
               crossAxisSpacing: 5,
             ),
             itemBuilder: (context, int index) => Tooltip(
+              preferBelow: true,
               message:
                   I18nHelper.getDisplayNameFromI18n(characters[index].name),
               child: InkWell(
@@ -282,6 +283,7 @@ class _UserHomeState extends State<UserHome> {
           ),
           itemBuilder: (BuildContext context, int index) => Tooltip(
             message: I18nHelper.getDisplayNameFromI18n(groups[index].name),
+            preferBelow: true,
             child: InkWell(
                 hoverColor: Colors.transparent,
                 onTap: () {
@@ -360,7 +362,7 @@ class _UserHomeState extends State<UserHome> {
               },
               child: Container(
                 decoration: BoxDecoration(
-                  borderRadius:  BorderRadius.circular(10.0),
+                  borderRadius: BorderRadius.circular(10.0),
                   color: OnepieceColors.menuBackgroundColor,
                 ),
                 child: Column(
@@ -370,7 +372,9 @@ class _UserHomeState extends State<UserHome> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const SizedBox(width: 10,),
+                        const SizedBox(
+                          width: 10,
+                        ),
                         Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -431,15 +435,19 @@ class _UserHomeState extends State<UserHome> {
                             )
                           ],
                         ),
-                        const SizedBox(width: 10,),
+                        const SizedBox(
+                          width: 10,
+                        ),
                       ],
                     ),
-                    const SizedBox(height: 15,),
+                    const SizedBox(
+                      height: 15,
+                    ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20.0),
                       child: Container(
                         decoration: BoxDecoration(
-                          borderRadius:  BorderRadius.circular(5.0),
+                          borderRadius: BorderRadius.circular(5.0),
                           color: OnepieceColors.fancyBlue,
                         ),
                         child: Padding(
@@ -448,8 +456,9 @@ class _UserHomeState extends State<UserHome> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                  battleStatusToDisplayName[
-                                      battles[index].battleExecution!.battleStatus!]!,
+                                  battleStatusToDisplayName[battles[index]
+                                      .battleExecution!
+                                      .battleStatus!]!,
                                   style: OnepieceFonts.boldFancyWhiteSmallFont),
                               const SizedBox(
                                 width: 30,
@@ -459,7 +468,8 @@ class _UserHomeState extends State<UserHome> {
                                             .battleExecution!
                                             .battleReportStage ==
                                         BattleReportStage.FINISHED
-                                    ? AppLocalizations.of(context)!.downloadReport
+                                    ? AppLocalizations.of(context)!
+                                        .downloadReport
                                     : "",
                                 child: InkWell(
                                   hoverColor: Colors.transparent,
@@ -474,19 +484,20 @@ class _UserHomeState extends State<UserHome> {
                                                       .battleExecution!
                                                       .reportFileId!))
                                               .then((response) async {
-                                            debugPrint('pdf downloading finish');
-                                            var pdf =
-                                                base64Decode(response!.fileData!);
+                                            debugPrint(
+                                                'pdf downloading finish');
+                                            var pdf = base64Decode(
+                                                response!.fileData!);
                                             // pdfData.value = Uint8List.fromList(value!);
                                             final blob = html.Blob(
                                                 [pdf], response.httpMimeType);
-                                            final url =
-                                                html.Url.createObjectUrlFromBlob(
-                                                    blob);
+                                            final url = html.Url
+                                                .createObjectUrlFromBlob(blob);
                                             final anchor = html.AnchorElement()
                                               ..href = url
                                               ..setAttribute('target', '_blank')
-                                              ..download = "${response.fileName}.pdf"
+                                              ..download =
+                                                  "${response.fileName}.pdf"
                                               ..style.display = 'none';
                                             // Add the anchor element to the document body.
                                             html.document.body?.append(anchor);

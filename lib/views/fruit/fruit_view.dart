@@ -173,6 +173,7 @@ class _FruitViewState extends State<FruitView> {
                   Permission.CREATE))
                 SizedBox(
                   height: 35,
+                  width: 120,
                   child: Padding(
                     padding: const EdgeInsets.only(right: 10.0),
                     child: ElevatedButton(
@@ -181,7 +182,7 @@ class _FruitViewState extends State<FruitView> {
                         context.goNamed("createFruit");
                       },
                       child:
-                          Text(AppLocalizations.of(context)!.createDevilFruit),
+                          Text(AppLocalizations.of(context)!.create),
                     ),
                   ),
                 ),
@@ -435,6 +436,7 @@ class _FruitViewState extends State<FruitView> {
     return [
       DataColumn(
         label: Tooltip(
+          preferBelow: true,
           message: AppLocalizations.of(context)!.resetSort,
           child: ImageHelper.getIconButtonFromSvg(
             'images/svgs/reset.svg',

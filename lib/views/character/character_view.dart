@@ -209,6 +209,7 @@ class _CharacterViewState extends State<CharacterView> {
               Permission.CREATE))
             SizedBox(
               height: 35,
+              width: 120,
               child: Padding(
                 padding: const EdgeInsets.only(right: 10.0),
                 child: ElevatedButton(
@@ -217,7 +218,7 @@ class _CharacterViewState extends State<CharacterView> {
                     },
                     style: OnepieceButtonStyle.getDefaultStyle(),
                     child: Text(
-                      AppLocalizations.of(context)!.createCharacter,
+                      AppLocalizations.of(context)!.create,
                     )),
               ),
             ),
@@ -685,6 +686,7 @@ class _CharacterViewState extends State<CharacterView> {
     return [
       DataColumn(
         label: Tooltip(
+          preferBelow: true,
           message: AppLocalizations.of(context)!.resetSort,
           child: ImageHelper.getIconButtonFromSvg(
               'images/svgs/reset.svg', OnepieceColors.fancyBlue, 25, 25, () {
