@@ -89,7 +89,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
   bool showBaseValue = false;
 
   int battleStartIndex = 0;
-  int battleEndIndex = 10;
+  int battleEndIndex = 0;
   int pageCount = 1;
 
   @override
@@ -137,6 +137,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
     battles = characterFullView.battles;
     fruits = characterFullView.fruits;
     groups = characterFullView.groups;
+    battleEndIndex = battles.length >= 10 ? 10 : battles.length;
     _editButtonVisible = PermissionCheck.checkPermission(
             getIt<User>().loginRoleResourcesPermissionMap,
             ResourceType.CHARACTER,
