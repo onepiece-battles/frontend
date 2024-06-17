@@ -8,6 +8,7 @@ import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
+import 'components/icp.dart';
 import 'config/api_initializer.dart';
 import 'config/resource_permission_manager.dart';
 import 'constants/button_style.dart';
@@ -48,6 +49,7 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      bottomNavigationBar: const ICP(),
       backgroundColor: Colors.grey[300],
       body: SingleChildScrollView(
         scrollDirection: Axis.vertical,

@@ -927,7 +927,7 @@ class _CharacterViewState extends State<CharacterView> {
               )),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-                child: Text("\$${entry.value.bounty.toString()}"),
+                child: Text(entry.value.bounty.toString()),
               )),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),

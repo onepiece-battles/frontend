@@ -14,6 +14,7 @@ import 'package:openapi/api.dart';
 import 'app_router.dart';
 import 'config/my_input_theme.dart';
 import 'constants/onepiece_colors.dart';
+import 'dart:html' as html; //
 
 final getIt = GetIt.instance;
 
@@ -51,6 +52,16 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   Locale _locale = const Locale('zh', 'CN');
+
+  @override
+  void initState() {
+    super.initState();
+    _setTitle("Onepiece Battles");
+  }
+
+  void _setTitle(String title) {
+    html.document.title = title; // Set the title dynamically
+  }
 
   setLocale(Locale locale) {
     setState(() {
