@@ -1032,8 +1032,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
                             combatInfoEditable,
                             characterEnergyController,
                             AppLocalizations.of(context)!.characterEnergy,
-                            30,
-                            50,
+                            100,
+                            300,
                             ImageHelper.getTextFormFieldIcon(
                                 'images/character_digits_icon/energy.svg',
                                 true,

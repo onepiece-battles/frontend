@@ -62,7 +62,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
           10, 200, getIt<User>().loginRole == UserRole.NIKA));
   TextEditingController characterEnergyController = TextEditingController(
       text: RandomStringGenerator.generateRandomNumber(
-          10, 50, getIt<User>().loginRole == UserRole.NIKA));
+          100, 300, getIt<User>().loginRole == UserRole.NIKA));
 
   // character details controller
   TextEditingController characterAge = TextEditingController(
@@ -352,8 +352,8 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                                   true,
                                   characterEnergyController,
                                   AppLocalizations.of(context)!.characterEnergy,
-                                  10,
-                                  50,
+                                  100,
+                                  300,
                                   ImageHelper.getTextFormFieldIcon(
                                       'images/character_digits_icon/energy.svg',
                                       true,

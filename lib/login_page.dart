@@ -12,6 +12,7 @@ import 'package:one_piece_battles_flutter/main.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
+import 'components/icp.dart';
 import 'constants/button_style.dart';
 import 'constants/onepiece_colors.dart';
 
@@ -35,7 +36,8 @@ class _LoginPageState extends State<LoginPage> {
   bool _buttonEnabled = true;
   String verificationMessage = "";
   I18nText? verificationI18n = I18nText();
-  TextEditingController emailController = TextEditingController(text: "onepiecebattles@163.com");
+  TextEditingController emailController =
+      TextEditingController(text: "onepiecebattles@163.com");
   TextEditingController passwordController = TextEditingController(text: "abc");
   Logger logger = Logger('_LoginPageState');
 
@@ -43,6 +45,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     //todo(yichi): add keyboard listener
     return Scaffold(
+      bottomNavigationBar: const ICP(),
       backgroundColor: Colors.grey[300],
       body: SingleChildScrollView(
         scrollDirection: Axis.vertical,
@@ -294,9 +297,9 @@ class _LoginPageState extends State<LoginPage> {
                 ],
               ),
             ),
-            const SizedBox(
+            Container(
               height: 40,
-            )
+            ),
           ],
         ),
       ),

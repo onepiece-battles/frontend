@@ -1,12 +1,13 @@
+import 'package:animated_toggle_switch/animated_toggle_switch.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutter_toggle_tab/flutter_toggle_tab.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/popup/onepiece_alert.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
+import 'components/icp.dart';
 import 'config/api_initializer.dart';
 import 'config/resource_permission_manager.dart';
 import 'constants/button_style.dart';
@@ -46,6 +47,7 @@ class _RetrievePasswordState extends State<RetrievePassword> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      bottomNavigationBar: const ICP(),
       backgroundColor: Colors.grey[300],
       body: SingleChildScrollView(
         child: Column(
@@ -53,21 +55,35 @@ class _RetrievePasswordState extends State<RetrievePassword> {
             Align(
               alignment: Alignment.topRight,
               child: Padding(
-                  padding: const EdgeInsets.all(30),
-                  child: FlutterToggleTab(
-                    width: 4,
-                    height: 30,
-                    borderRadius: 20,
-                    selectedBackgroundColors: const [
-                      OnepieceColors.fancyBlue,
-                      OnepieceColors.fancyBlue,
-                    ],
-                    labels: const ["文", "EN"],
-                    selectedLabelIndex: (index) {
+                padding: const EdgeInsets.all(30),
+                child: SizedBox(
+                  width: 70,
+                  height: 30,
+                  child: AnimatedToggleSwitch<bool>.dual(
+                    current: _tabTextIndexSelected == 1,
+                    first: false,
+                    second: true,
+                    spacing: 1.0,
+                    style: const ToggleStyle(
+                      borderColor: Colors.transparent,
+                      backgroundColor: Color.fromARGB(255, 182, 180, 180),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black26,
+                          spreadRadius: 1,
+                          blurRadius: 2,
+                          offset: Offset(0, 1.5),
+                        ),
+                      ],
+                    ),
+                    borderWidth: 3.0,
+                    height: 35,
+                    onChanged: (b) => setState(() {
                       setState(() {
-                        _tabTextIndexSelected = index;
+                        _tabTextIndexSelected =
+                        _tabTextIndexSelected == 0 ? 1 : 0;
                         Locale locale;
-                        if (index == 0) {
+                        if (_tabTextIndexSelected == 0) {
                           locale = locales.first;
                         } else {
                           locale = locales.last;
@@ -77,22 +93,46 @@ class _RetrievePasswordState extends State<RetrievePassword> {
                             I18nHelper.getDisplayNameFromI18nByLocale(
                                 verificationI18n, locale);
                       });
-                    },
-                    selectedTextStyle: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700),
-                    unSelectedTextStyle: const TextStyle(
-                        color: Colors.black87,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600),
-                    unSelectedBackgroundColors: const [
-                      Color.fromARGB(255, 182, 180, 180)
-                    ],
-                    marginSelected: const EdgeInsets.all(3),
-                    selectedIndex: _tabTextIndexSelected,
-                    // isScroll: true,
-                  )),
+                    }),
+                    styleBuilder: (b) => ToggleStyle(
+                        indicatorColor: b
+                            ? OnepieceColors.fancyBlue
+                            : OnepieceColors.fancyBlue),
+                    iconBuilder: (value) => value
+                        ? const Text(
+                      "En",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600),
+                    )
+                        : const Text(
+                      "文",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600),
+                    ),
+                    textBuilder: (value) => value
+                        ? const Center(
+                        child: Text(
+                          '文',
+                          style: TextStyle(
+                              color: Colors.black87,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600),
+                        ))
+                        : const Center(
+                        child: Text(
+                          'En',
+                          style: TextStyle(
+                              color: Colors.black87,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600),
+                        )),
+                  ),
+                ),
+              ),
             ),
             const SizedBox(height: 150),
             const Image(
