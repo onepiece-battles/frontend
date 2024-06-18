@@ -37,8 +37,8 @@ class _LoginPageState extends State<LoginPage> {
   String verificationMessage = "";
   I18nText? verificationI18n = I18nText();
   TextEditingController emailController =
-      TextEditingController(text: "onepiecebattles@163.com");
-  TextEditingController passwordController = TextEditingController(text: "abc");
+      TextEditingController(text: "");
+  TextEditingController passwordController = TextEditingController(text: "");
   Logger logger = Logger('_LoginPageState');
 
   @override

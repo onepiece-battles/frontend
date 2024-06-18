@@ -1,12 +1,12 @@
 import 'individual_bar.dart';
 
 class CharacterData {
-  final int attackMax = 1000;
-  final int defenseMax = 1000;
-  final int intelligenceMax = 260;
-  final int speedMax = 200;
-  final int bloodMax = 10000;
-  final int energyMax = 50;
+  final int attackMax = 1500;
+  final int defenseMax = 1400;
+  final int intelligenceMax = 300;
+  final int speedMax = 300;
+  final int bloodMax = 18000;
+  final int energyMax = 300;
   final int attack;
   final int defense;
   final int intelligence;
