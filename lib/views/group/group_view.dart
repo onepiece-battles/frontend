@@ -162,8 +162,11 @@ class _GroupViewState extends State<GroupView> {
       GroupCategory.marine: AppLocalizations.of(context)!.marine,
       GroupCategory.pirate: AppLocalizations.of(context)!.pirate,
       GroupCategory.underWorld: AppLocalizations.of(context)!.underworld,
-      GroupCategory.worldGovernment:
-          AppLocalizations.of(context)!.worldGovernment,
+      GroupCategory.government: AppLocalizations.of(context)!.worldGovernment,
+      GroupCategory.group: AppLocalizations.of(context)!.group,
+      GroupCategory.other: AppLocalizations.of(context)!.otherType,
+      GroupCategory.revolutionArmy:
+          AppLocalizations.of(context)!.revolutionaryArmy,
     };
     return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
       Row(
@@ -519,8 +522,11 @@ class _GroupViewState extends State<GroupView> {
       GroupCategory.marine: AppLocalizations.of(context)!.marine,
       GroupCategory.pirate: AppLocalizations.of(context)!.pirate,
       GroupCategory.underWorld: AppLocalizations.of(context)!.underworld,
-      GroupCategory.worldGovernment:
-          AppLocalizations.of(context)!.worldGovernment,
+      GroupCategory.government: AppLocalizations.of(context)!.worldGovernment,
+      GroupCategory.group: AppLocalizations.of(context)!.group,
+      GroupCategory.other: AppLocalizations.of(context)!.otherType,
+      GroupCategory.revolutionArmy:
+          AppLocalizations.of(context)!.revolutionaryArmy,
     };
     return currentGroupList
         .asMap()

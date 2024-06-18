@@ -1331,8 +1331,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
   Widget _getGroupSearchBar(BuildContext context) {
     Map<GroupCategory, String> groupCategoryToDisplayValue = {
       GroupCategory.pirate: AppLocalizations.of(context)!.pirate,
-      GroupCategory.worldGovernment:
-          AppLocalizations.of(context)!.worldGovernment,
+      GroupCategory.government: AppLocalizations.of(context)!.worldGovernment,
+      GroupCategory.group: AppLocalizations.of(context)!.group,
       GroupCategory.marine: AppLocalizations.of(context)!.marine,
       GroupCategory.underWorld: AppLocalizations.of(context)!.underworld,
     };
@@ -1586,8 +1586,11 @@ class _CharacterDetailState extends State<CharacterDetail> {
       GroupCategory.marine: AppLocalizations.of(context)!.marine,
       GroupCategory.pirate: AppLocalizations.of(context)!.pirate,
       GroupCategory.underWorld: AppLocalizations.of(context)!.underworld,
-      GroupCategory.worldGovernment:
-          AppLocalizations.of(context)!.worldGovernment,
+      GroupCategory.group: AppLocalizations.of(context)!.group,
+      GroupCategory.other: AppLocalizations.of(context)!.otherType,
+      GroupCategory.government: AppLocalizations.of(context)!.worldGovernment,
+      GroupCategory.revolutionArmy:
+          AppLocalizations.of(context)!.revolutionaryArmy,
     };
     Map<GroupPosition, String> groupPositionToDisplayValue = {
       GroupPosition.member: AppLocalizations.of(context)!.member,

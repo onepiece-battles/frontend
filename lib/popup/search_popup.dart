@@ -204,7 +204,10 @@ class _SearchPopupState extends State<SearchPopup> {
               borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
           focusedBorder: const OutlineInputBorder(
               borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
-          prefixIcon: const Icon(Icons.search, color: Colors.white,),
+          prefixIcon: const Icon(
+            Icons.search,
+            color: Colors.white,
+          ),
           labelText: AppLocalizations.of(context)!.searchResourceDetail,
         ),
         onChanged: (value) {
@@ -360,9 +363,11 @@ class _SearchPopupState extends State<SearchPopup> {
         <GroupCategory, String>{
       GroupCategory.marine: AppLocalizations.of(context)!.marine,
       GroupCategory.pirate: AppLocalizations.of(context)!.pirate,
+      GroupCategory.group: AppLocalizations.of(context)!.group,
+      GroupCategory.other: AppLocalizations.of(context)!.otherType,
       GroupCategory.underWorld: AppLocalizations.of(context)!.underworld,
-      GroupCategory.worldGovernment:
-          AppLocalizations.of(context)!.worldGovernment,
+      GroupCategory.government: AppLocalizations.of(context)!.worldGovernment,
+          GroupCategory.revolutionArmy: AppLocalizations.of(context)!.revolutionaryArmy,
     };
     return ConstrainedBox(
         constraints: const BoxConstraints(

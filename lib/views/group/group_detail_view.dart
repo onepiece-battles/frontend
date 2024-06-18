@@ -294,8 +294,10 @@ class _GroupDetailViewState extends State<GroupDetailView> {
       GroupCategory.marine: AppLocalizations.of(context)!.marine,
       GroupCategory.pirate: AppLocalizations.of(context)!.pirate,
       GroupCategory.underWorld: AppLocalizations.of(context)!.underworld,
-      GroupCategory.worldGovernment:
-          AppLocalizations.of(context)!.worldGovernment,
+      GroupCategory.government: AppLocalizations.of(context)!.worldGovernment,
+      GroupCategory.other: AppLocalizations.of(context)!.otherType,
+      GroupCategory.group: AppLocalizations.of(context)!.group,
+      GroupCategory.revolutionArmy: AppLocalizations.of(context)!.revolutionaryArmy,
     };
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),

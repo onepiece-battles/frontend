@@ -258,8 +258,11 @@ class _CreateGroupViewState extends State<CreateGroupView> {
       GroupCategory.marine: AppLocalizations.of(context)!.marine,
       GroupCategory.pirate: AppLocalizations.of(context)!.pirate,
       GroupCategory.underWorld: AppLocalizations.of(context)!.underworld,
-      GroupCategory.worldGovernment:
+      GroupCategory.government:
           AppLocalizations.of(context)!.worldGovernment,
+      GroupCategory.other:AppLocalizations.of(context)!.otherType,
+      GroupCategory.group: AppLocalizations.of(context)!.group,
+      GroupCategory.revolutionArmy: AppLocalizations.of(context)!.revolutionaryArmy,
     };
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
