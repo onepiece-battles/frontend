@@ -60,7 +60,7 @@ try {
 
 ## Documentation for API Endpoints
 
-All URIs are relative to *https://onepiece-battles.com*
+All URIs are relative to *http://localhost:8080*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
@@ -82,6 +82,8 @@ Class | Method | HTTP request | Description
 *FruitApi* | [**getFruit**](doc//FruitApi.md#getfruit) | **POST** /api/onepiece/fruit/get | 
 *FruitApi* | [**listFruit**](doc//FruitApi.md#listfruit) | **POST** /api/onepiece/fruit/list | 
 *FruitApi* | [**updateFruit**](doc//FruitApi.md#updatefruit) | **POST** /api/onepiece/fruit/update | 
+*GroupApi* | [**addCharacter**](doc//GroupApi.md#addcharacter) | **POST** /api/onepiece/group/add_character | 
+*GroupApi* | [**addGroup**](doc//GroupApi.md#addgroup) | **POST** /api/onepiece/group/add_group | 
 *GroupApi* | [**createGroup**](doc//GroupApi.md#creategroup) | **POST** /api/onepiece/group/create | 
 *GroupApi* | [**getGroupFullView**](doc//GroupApi.md#getgroupfullview) | **POST** /api/onepiece/group/get | 
 *GroupApi* | [**listGroups**](doc//GroupApi.md#listgroups) | **POST** /api/onepiece/group/list | 
@@ -113,6 +115,10 @@ Class | Method | HTTP request | Description
 
  - [AccountStatus](doc//AccountStatus.md)
  - [ActionRecord](doc//ActionRecord.md)
+ - [AddCharacterRequest](doc//AddCharacterRequest.md)
+ - [AddCharacterResponse](doc//AddCharacterResponse.md)
+ - [AddGroupRequest](doc//AddGroupRequest.md)
+ - [AddGroupResponse](doc//AddGroupResponse.md)
  - [AddRoleRequest](doc//AddRoleRequest.md)
  - [AddRoleResponse](doc//AddRoleResponse.md)
  - [AssignResourcePermissionsToRoleRequest](doc//AssignResourcePermissionsToRoleRequest.md)

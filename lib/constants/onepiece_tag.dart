@@ -32,8 +32,11 @@ class OnepieceTag {
   };
 
   static Map<GroupCategory, Color> groupCategoryToColor = {
-    GroupCategory.worldGovernment: OnepieceColors.fancyBlue,
+    GroupCategory.government: OnepieceColors.fancyBlue,
+    GroupCategory.group: Colors.green,
     GroupCategory.pirate: OnepieceColors.black,
+    GroupCategory.revolutionArmy: Colors.red,
+    GroupCategory.other: Colors.grey,
     GroupCategory.underWorld: OnepieceColors.fancyGreen,
     GroupCategory.marine: OnepieceColors.liteFancyBlue,
   };
