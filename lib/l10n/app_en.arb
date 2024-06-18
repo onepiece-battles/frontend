@@ -224,7 +224,7 @@
   "wakeUp": "WakeUp",
   "sleep": "Sleeping",
   "owner": "Owners",
-  "currentlyNone": "None at the moment",
+  "currentlyNone": "Empty",
   "human": "Human",
   "fishman": "Fish-Men",
   "merfolk": "Merfolk",
@@ -283,5 +283,6 @@
   "startSuccess": "Started successfully",
   "searchResourceShortcut": " shortcut [ / ] ",
   "searchResourceShortcutShrink": "Search[/]",
-  "revolutionaryArmy": "Revolutionary Army"
+  "revolutionaryArmy": "Revolutionary Army",
+  "add": "Add"
 }
