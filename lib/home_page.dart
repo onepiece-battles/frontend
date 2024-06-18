@@ -606,20 +606,31 @@ class HomePageState extends State<HomePage> {
                 child: TextButton(
                   child: Row(
                     mainAxisAlignment: constraints.maxWidth > screenChangeBar
-                        ? MainAxisAlignment.start
+                        ? MainAxisAlignment.spaceBetween
                         : MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      const Icon(
-                        Icons.search,
-                        color: OnepieceColors.fancyBlue,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          const Icon(
+                            Icons.search,
+                            size: 20,
+                            color: Colors.white,
+                          ),
+                           const SizedBox(width: 5,),
+                          if (constraints.maxWidth > screenChangeBar)
+                            Text(
+                              AppLocalizations.of(context)!.searchResource,
+                              style: OnepieceFonts.superSmallContentStyleWhite,
+                            ),
+                        ],
                       ),
-                      if (constraints.maxWidth > screenChangeBar)
-                        Text(
-                          AppLocalizations.of(context)!.searchResource,
-                          style: OnepieceFonts.smallContentStyle,
-                        ),
-                    ],
+                      if (constraints.maxWidth > screenChangeBar) Text(
+                          AppLocalizations.of(context)!
+                              .searchResourceShortcut,
+                          style: OnepieceFonts.superSmallContentStyleWhite,),
+                    ]
                   ),
                   onPressed: () {
                     _showDialog(context);
