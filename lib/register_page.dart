@@ -157,7 +157,7 @@ class _RegisterPageState extends State<RegisterPage> {
               const SizedBox(height: 90),
               SizedBox(
                 width: 300,
-                child: TextField(
+                child: TextFormField(
                   onChanged: (value) {
                     setState(() {
                       if (nicknameController.text != "" &&
@@ -169,6 +169,19 @@ class _RegisterPageState extends State<RegisterPage> {
                         _buttonEnabled = false;
                       }
                     });
+                  },
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return null;
+                    }
+                    if (!isValidNickname(value!)) {
+                      return AppLocalizations.of(context)?.invalidNickname;
+                    }
+                    if (value.length > 10) {
+                      return AppLocalizations.of(context)?.lengthExceedsLimit;
+                    }
+                    return null;
                   },
                   controller: nicknameController,
                   autofocus: true,
@@ -183,7 +196,7 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               SizedBox(
                 width: 300,
-                child: TextField(
+                child: TextFormField(
                   onChanged: (value) {
                     setState(() {
                       if (nicknameController.text != "" &&
@@ -220,6 +233,19 @@ class _RegisterPageState extends State<RegisterPage> {
                         _buttonEnabled = false;
                       }
                     });
+                  },
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return null;
+                    }
+                    if (!isValidPassword(value)) {
+                      return AppLocalizations.of(context)?.invalidPassword;
+                    }
+                    if (value.length > 10) {
+                      return AppLocalizations.of(context)?.lengthExceedsLimit;
+                    }
+                    return null;
                   },
                   controller: passwordController,
                   keyboardType: TextInputType.text,
@@ -264,6 +290,14 @@ class _RegisterPageState extends State<RegisterPage> {
                   controller: confirmedPasswordController,
                   keyboardType: TextInputType.text,
                   obscureText: _isConfirmedPasswordHidden,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  validator: (value) {
+                    if (passwordController.text !=
+                        confirmedPasswordController.text) {
+                      return AppLocalizations.of(context)?.passwordNotMatch;
+                    }
+                    return null;
+                  },
                   decoration: InputDecoration(
                       labelText:
                           AppLocalizations.of(context)?.registerPasswordHint2,
@@ -389,5 +423,15 @@ class _RegisterPageState extends State<RegisterPage> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('username', username);
     await prefs.setString('password', password);
+  }
+
+  bool isValidNickname(String input) {
+    RegExp regex = RegExp(r'^[0-9a-zA-Z\u4e00-\u9fa5]+$');
+    return regex.hasMatch(input);
+  }
+
+  bool isValidPassword(String input) {
+    RegExp regex = RegExp(r'^[0-9a-zA-Z\u4e00-\u9fa5]+$');
+    return regex.hasMatch(input);
   }
 }
