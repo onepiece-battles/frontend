@@ -13,6 +13,7 @@ import 'package:one_piece_battles_flutter/repository/user_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
 import 'components/icp.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'constants/button_style.dart';
 import 'constants/onepiece_colors.dart';
 
@@ -33,13 +34,30 @@ class _LoginPageState extends State<LoginPage> {
           ? 0
           : 1;
   bool _isHidden = true;
-  bool _buttonEnabled = true;
+  bool _buttonEnabled = false;
   String verificationMessage = "";
   I18nText? verificationI18n = I18nText();
-  TextEditingController emailController =
-      TextEditingController(text: "");
+  TextEditingController emailController = TextEditingController(text: "");
   TextEditingController passwordController = TextEditingController(text: "");
   Logger logger = Logger('_LoginPageState');
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUserCredentials();
+  }
+
+  fetchUserCredentials() async {
+    Map<String, String> userCredentials = await getUserCredentials();
+    setState(() {
+      emailController.text = userCredentials['username'] ?? "";
+      passwordController.text = userCredentials['password'] ?? "";
+      if (emailController.text.isNotEmpty &&
+          passwordController.text.isNotEmpty) {
+        _buttonEnabled = true;
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -312,6 +330,7 @@ class _LoginPageState extends State<LoginPage> {
     Future<LoginResponse?> loginResponse = getIt<UserDao>().login(loginRequest);
     loginResponse.then((value) {
       if (value!.verification == null) {
+        saveUserCredentials(emailController.text, passwordController.text);
         _route(value.user!, value.accessToken!, context);
       } else {
         setState(() {
@@ -331,5 +350,18 @@ class _LoginPageState extends State<LoginPage> {
     context.goNamed('userHome',
         extra: getIt<User>().id,
         pathParameters: {'name': getIt<User>().nickname});
+  }
+
+  Future<void> saveUserCredentials(String username, String password) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('username', username);
+    await prefs.setString('password', password);
+  }
+
+  Future<Map<String, String>> getUserCredentials() async {
+    final prefs = await SharedPreferences.getInstance();
+    final username = prefs.getString('username') ?? '';
+    final password = prefs.getString('password') ?? '';
+    return {'username': username, 'password': password};
   }
 }
