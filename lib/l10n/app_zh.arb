@@ -162,7 +162,7 @@
   "searchReceiver": "搜索接收者 ...",
   "searchResource": "搜索资源",
   "searchResourceShortcut": " 快捷键 [ / ] ",
-  "searchResourceShortcutShrink": " [ / ] ",
+  "searchResourceShortcutShrink": "搜索[/] ",
   "searchResourceDetail": "搜索资源 [ 角色名 | 恶魔果实名 | 团体名 ]",
   "searchStarter": "搜索发起者 ...",
   "selectCharacter": "选择角色",
