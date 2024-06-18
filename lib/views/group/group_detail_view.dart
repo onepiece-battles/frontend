@@ -1,4 +1,7 @@
+import 'dart:ui';
+
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
@@ -10,6 +13,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
 import '../../popup/onepiece_alert.dart';
+import '../../popup/search_popup.dart';
 import '../../utils/base64_helper.dart';
 import '../../utils/permission_check.dart';
 
@@ -382,9 +386,32 @@ class _GroupDetailViewState extends State<GroupDetailView> {
         children: [
           Padding(
             padding: const EdgeInsets.only(bottom: 8.0),
-            child: Text(
-              AppLocalizations.of(context)!.groupMember,
-              style: OnepieceFonts.headerStyle,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  AppLocalizations.of(context)!.groupMember,
+                  style: OnepieceFonts.headerStyle,
+                ),
+                const SizedBox(width: 10,),
+                if (_editButtonVisible) Tooltip(
+                  message: _basicInfoEditable
+                      ? AppLocalizations.of(context)!.add
+                      : AppLocalizations.of(context)!.add,
+                  child: InkWell(
+                    hoverColor: Colors.transparent,
+                    onTap: () {
+                      listState(() {
+                        _showDialog(context);
+                      });
+                    },
+                    child: ImageHelper.getSvgIcon(
+                        'images/svgs/add.svg',
+                        30,
+                        30),
+                  ),
+                ),
+              ],
             ),
           ),
           Row(
@@ -501,5 +528,22 @@ class _GroupDetailViewState extends State<GroupDetailView> {
         ],
       );
     });
+  }
+
+  void _showDialog(BuildContext context) {
+    showCupertinoModalPopup(
+      filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
+      context: context,
+      builder: ((context) {
+        return Dialog(
+          backgroundColor: OnepieceColors.liteFancyGreen,
+          alignment: Alignment.topCenter,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+          child: const SearchPopup(),
+        );
+      }),
+    );
   }
 }
