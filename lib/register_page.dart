@@ -8,6 +8,7 @@ import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'components/icp.dart';
 import 'config/api_initializer.dart';
 import 'config/resource_permission_manager.dart';
@@ -377,9 +378,16 @@ class _RegisterPageState extends State<RegisterPage> {
     loginResponse.then((value) {
       ApiInitializer.initAuthInfo(value!.accessToken!);
       ResourcePermissionManager.updateUserCache(value.user!);
+      saveUserCredentials(usernameController.text, passwordController.text);
       context.goNamed('userHome',
           extra: getIt<User>().id,
           pathParameters: {'name': getIt<User>().nickname});
     });
+  }
+
+  Future<void> saveUserCredentials(String username, String password) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('username', username);
+    await prefs.setString('password', password);
   }
 }
