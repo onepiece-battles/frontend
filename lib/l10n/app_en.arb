@@ -160,7 +160,7 @@
   "route": "Navigation",
   "science": "Science",
   "searchReceiver": "search receiver ...",
-  "searchResource": "search resource ...",
+  "searchResource": "search resource",
   "searchResourceDetail": "Search resource [character name| fruit name | group name]",
   "searchStarter": "search starter ...",
   "selectCharacter": "Select Character",
@@ -280,5 +280,7 @@
   "fieldMustBeDigit": "Field must be digit",
   "basicValue": "Base value",
   "realValue": "Fruit SNH",
-  "startSuccess": "Started successfully"
+  "startSuccess": "Started successfully",
+  "searchResourceShortcut": " shortcut [ / ] ",
+  "searchResourceShortcutShrink": "Search[/]"
 }

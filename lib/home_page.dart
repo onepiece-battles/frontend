@@ -592,7 +592,7 @@ class HomePageState extends State<HomePage> {
             ),
           Padding(
             padding: constraints.maxWidth > screenChangeBar
-                ? const EdgeInsets.fromLTRB(2, 8, 2, 8)
+                ? const EdgeInsets.fromLTRB(0, 8, 0, 8)
                 : const EdgeInsets.fromLTRB(8, 8, 8, 8),
             child: Material(
               type: MaterialType.transparency,
@@ -604,23 +604,58 @@ class HomePageState extends State<HomePage> {
                   borderRadius: BorderRadius.all(Radius.circular(3.0)),
                 ),
                 child: TextButton(
-                  child: Row(
-                    mainAxisAlignment: constraints.maxWidth > screenChangeBar
-                        ? MainAxisAlignment.start
-                        : MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.search,
-                        color: OnepieceColors.fancyBlue,
-                      ),
-                      if (constraints.maxWidth > screenChangeBar)
-                        Text(
-                          AppLocalizations.of(context)!.searchResource,
-                          style: OnepieceFonts.smallContentStyle,
-                        ),
-                    ],
+                  style: ButtonStyle(
+                    padding: constraints.maxWidth < screenChangeBar
+                        ? MaterialStateProperty.all<EdgeInsetsGeometry>(
+                            const EdgeInsets.symmetric(
+                                horizontal:
+                                    2.0), // Adjust the value to control the padding
+                          )
+                        : MaterialStateProperty.all<EdgeInsetsGeometry>(
+                            const EdgeInsets.symmetric(
+                                horizontal:
+                                    6.0), // Adjust the value to control the padding
+                          ),
                   ),
+                  child: Row(
+                      mainAxisAlignment: constraints.maxWidth > screenChangeBar
+                          ? MainAxisAlignment.spaceBetween
+                          : MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            if (constraints.maxWidth > screenChangeBar)
+                              const Icon(
+                                Icons.search,
+                                size: 20,
+                                color: Colors.white,
+                              ),
+                            const SizedBox(
+                              width: 5,
+                            ),
+                            if (constraints.maxWidth > screenChangeBar)
+                              Text(
+                                AppLocalizations.of(context)!.searchResource,
+                                style:
+                                    OnepieceFonts.superSmallContentStyleWhite,
+                              ),
+                          ],
+                        ),
+                        if (constraints.maxWidth > screenChangeBar)
+                          Text(
+                            AppLocalizations.of(context)!
+                                .searchResourceShortcut,
+                            style: OnepieceFonts.superSmallContentStyleWhite,
+                          ),
+                        if (constraints.maxWidth <= screenChangeBar)
+                          Text(
+                            AppLocalizations.of(context)!
+                                .searchResourceShortcutShrink,
+                            style: OnepieceFonts.superSmallContentStyleWhite,
+                          ),
+                      ]),
                   onPressed: () {
                     _showDialog(context);
                   },
