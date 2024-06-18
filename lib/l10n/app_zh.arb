@@ -284,5 +284,9 @@
   "realValue": "果实加成",
   "startSuccess": "成功开始",
   "revolutionaryArmy": "革命军",
-  "add": "添加"
+  "add": "添加",
+  "invalidPassword": "密码只能包含数字，英文字母和下划线",
+  "invalidNickname": "昵称只能包含数字，英文字母和中文字符",
+  "passwordNotMatch": "密码不一致",
+  "lengthExceedsLimit": "长度超出限制，最大字符数为10"
 }
