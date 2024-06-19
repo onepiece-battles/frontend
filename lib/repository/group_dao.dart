@@ -1,6 +1,6 @@
 import 'package:openapi/api.dart';
 
-class GroupDao{
+class GroupDao {
   GroupApi groupApi = GroupApi();
   GroupDao.empty();
   GroupDao(ApiClient apiClient) {
@@ -21,5 +21,14 @@ class GroupDao{
 
   Future<UpdateGroupResponse?> updateGroups(Group group) async {
     return await groupApi.updateGroup(group);
+  }
+
+  Future<AddCharacterResponse?> addCharacter(
+      AddCharacterRequest addCharacterRequest) async {
+    return await groupApi.addCharacter(addCharacterRequest);
+  }
+
+  Future<AddGroupResponse?> addGroup(AddGroupRequest addGroupRequest) async {
+    return await groupApi.addGroup(addGroupRequest);
   }
 }

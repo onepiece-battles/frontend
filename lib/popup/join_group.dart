@@ -3,6 +3,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:openapi/api.dart';
 import 'package:get_it/get_it.dart';
+import 'package:path/path.dart';
 import '../constants/onepiece_colors.dart';
 import '../constants/onepiece_fonts.dart';
 import '../repository/character_dao.dart';
@@ -35,6 +36,8 @@ class _JoinGroupState extends State<JoinGroup> {
   List<CharacterListView> selectedCharacters =
       <CharacterListView>[].toList(growable: true);
   CharacterFilter characterFilter = CharacterFilter();
+  List<String> currentCharacterIds = [];
+  List<String> currentGroupsIds = [];
 
   Future<ListCharacterResponse?> listCharacters() async {
     ListCharacterRequest listCharacterRequest = ListCharacterRequest(
@@ -55,6 +58,7 @@ class _JoinGroupState extends State<JoinGroup> {
         sortKeys: [],
         groupFilter: GroupFilter(
           languageCode: I18nHelper.getLanguageCode(),
+          noFather: true,
           userId: getIt<User>().id,
         ));
     return await getIt<GroupDao>().listGroups(listGroupRequest);
@@ -64,7 +68,10 @@ class _JoinGroupState extends State<JoinGroup> {
     characterFilter.languageCode = I18nHelper.getLanguageCode();
     characterFilter.userId = getIt<User>().id;
     characterFilter.name = characterNameController.text;
-    characterFilter.excludedCharacterIds = selectedCharacters.map((character) => character.id).toList();
+    characterFilter.excludedCharacterIds = [
+      ...currentCharacterIds,
+      ...selectedCharacters.map((character) => character.id).toList()
+    ];
     ListCharacterRequest listCharacterRequest = ListCharacterRequest(
         pageSize: 12,
         pageIndex: 1,
@@ -83,11 +90,15 @@ class _JoinGroupState extends State<JoinGroup> {
     groupFilter.languageCode = I18nHelper.getLanguageCode();
     groupFilter.name = groupNameController.text;
     groupFilter.userId = getIt<User>().id;
-    groupFilter.excludedGroupIds = selectedGroups.map((group) => group.id).toList();
+    groupFilter.noFather = true;
+    groupFilter.excludedGroupIds = [
+      ...currentGroupsIds,
+      ...selectedGroups.map((group) => group.id).toList()
+    ];
     ListGroupRequest listGroupRequest = ListGroupRequest(
         pageSize: 12, pageIndex: 1, sortKeys: [], groupFilter: groupFilter);
     Future<ListGroupResponse?> listGroupResponse =
-    getIt<GroupDao>().listGroups(listGroupRequest);
+        getIt<GroupDao>().listGroups(listGroupRequest);
     listGroupResponse.then((value) {
       panelState(() {
         groups = value!.groups;
@@ -98,6 +109,9 @@ class _JoinGroupState extends State<JoinGroup> {
   _updateData(List<dynamic> widgets) {
     characters = (widgets[0] as ListCharacterResponse).characters;
     groups = (widgets[1] as ListGroupResponse).groups;
+    currentCharacterIds =
+        widget.fatherGroup.characters.map((e) => e.id!).toList();
+    currentGroupsIds = widget.fatherGroup.subGroups.map((e) => e.id).toList();
   }
 
   @override
@@ -126,11 +140,45 @@ class _JoinGroupState extends State<JoinGroup> {
                         children: [
                           getSelectionPanel(context),
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               ElevatedButton(
-                                  onPressed: () {}, child: Text("cancel")),
+                                  onPressed: () {
+                                    setState(() {
+                                      selectedGroups = [];
+                                      selectedCharacters = [];
+                                    });
+                                  },
+                                  child: Text(
+                                      AppLocalizations.of(context)!.reselect)),
                               ElevatedButton(
-                                  onPressed: () {}, child: Text("submit"))
+                                  onPressed: !itemSelected(context)
+                                      ? null
+                                      : () {
+                                          if (GroupCategory.group ==
+                                              widget
+                                                  .fatherGroup.groupCategory) {
+                                            getIt<GroupDao>().addGroup(
+                                                AddGroupRequest(
+                                                    fatherGroupId:
+                                                        widget.fatherGroup.id,
+                                                    childGroupIds:
+                                                        selectedGroups
+                                                            .map((e) => e.id)
+                                                            .toList()));
+                                          } else {
+                                            getIt<GroupDao>().addCharacter(
+                                                AddCharacterRequest(
+                                                    groupId:
+                                                        widget.fatherGroup.id,
+                                                    characterIds:
+                                                        selectedCharacters
+                                                            .map((e) => e.id)
+                                                            .toList()));
+                                          }
+                                        },
+                                  child: Text(
+                                      AppLocalizations.of(context)!.submitForm))
                             ],
                           )
                         ],
@@ -174,6 +222,7 @@ class _JoinGroupState extends State<JoinGroup> {
       );
     });
   }
+
   Widget _getSelectedCharacterWall(BuildContext context, Function panelState) {
     if (selectedCharacters.isEmpty) {
       return Row(mainAxisAlignment: MainAxisAlignment.start, children: [
@@ -199,8 +248,8 @@ class _JoinGroupState extends State<JoinGroup> {
             ),
             itemBuilder: (context, int index) => Tooltip(
               preferBelow: true,
-              message:
-              I18nHelper.getDisplayNameFromI18n(selectedCharacters[index].name),
+              message: I18nHelper.getDisplayNameFromI18n(
+                  selectedCharacters[index].name),
               child: InkWell(
                 hoverColor: Colors.transparent,
                 onTap: () {
@@ -215,7 +264,8 @@ class _JoinGroupState extends State<JoinGroup> {
                     2,
                     OnepieceColors.liteFancyBlue,
                     10,
-                    Base64Helper.decode(selectedCharacters[index].profileImage!)),
+                    Base64Helper.decode(
+                        selectedCharacters[index].profileImage!)),
               ),
             ),
           ),
@@ -290,8 +340,8 @@ class _JoinGroupState extends State<JoinGroup> {
       int crossAxisCount = (constraint.maxWidth / 110).ceil().clamp(2, 8);
       return SizedBox(
         width: 880,
-        height:
-        ((selectedGroups.length / crossAxisCount).ceil() * 110.0).clamp(110, 400),
+        height: ((selectedGroups.length / crossAxisCount).ceil() * 110.0)
+            .clamp(110, 400),
         child: GridView.builder(
           itemCount: selectedGroups.length,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -300,7 +350,8 @@ class _JoinGroupState extends State<JoinGroup> {
             crossAxisSpacing: 5,
           ),
           itemBuilder: (BuildContext context, int index) => Tooltip(
-            message: I18nHelper.getDisplayNameFromI18n(selectedGroups[index].name),
+            message:
+                I18nHelper.getDisplayNameFromI18n(selectedGroups[index].name),
             preferBelow: true,
             child: InkWell(
                 hoverColor: Colors.transparent,
@@ -370,5 +421,12 @@ class _JoinGroupState extends State<JoinGroup> {
         ),
       );
     });
+  }
+
+  bool itemSelected(BuildContext context) {
+    return (selectedCharacters.isNotEmpty &&
+            GroupCategory.group != widget.fatherGroup.groupCategory) ||
+        (selectedGroups.isNotEmpty &&
+            GroupCategory.group == widget.fatherGroup.groupCategory);
   }
 }

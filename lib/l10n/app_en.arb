@@ -288,5 +288,6 @@
   "invalidPassword": "Password should only consists of digits, English letters and underline",
   "invalidNickname": "Nickname should only consists of digits, English letters and chinese characters",
   "passwordNotMatch": "Password not match",
-  "lengthExceedsLimit": "String length exceeds limit，maximum is 10"
+  "lengthExceedsLimit": "String length exceeds limit，maximum is 10",
+  "reselect": "Reselect"
 }
