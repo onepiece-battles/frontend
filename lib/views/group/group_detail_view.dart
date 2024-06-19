@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:one_piece_battles_flutter/popup/join_group.dart';
 import 'package:one_piece_battles_flutter/repository/group_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:one_piece_battles_flutter/utils/image_helper.dart';
@@ -536,12 +537,12 @@ class _GroupDetailViewState extends State<GroupDetailView> {
       context: context,
       builder: ((context) {
         return Dialog(
-          backgroundColor: OnepieceColors.liteFancyGreen,
+          backgroundColor: Colors.white,
           alignment: Alignment.topCenter,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.0),
           ),
-          child: const SearchPopup(),
+          child:  JoinGroup(fatherGroup: groupFullView),
         );
       }),
     );
