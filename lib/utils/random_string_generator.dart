@@ -46,10 +46,13 @@ class RandomStringGenerator{
       return (Random().nextInt(max - min + 1) + min).toString();
   }
 
-  static double generateRandomDouble(double min, double max, int decimalPlaces, bool isNika) {
+  static String generateRandomDouble(double min, double max, int decimalPlaces, bool isNika) {
+    if (!isNika) {
+      return "";
+    }
     var random = Random();
     double randomValue = min + random.nextDouble() * (max - min);
-    return double.parse(randomValue.toStringAsFixed(decimalPlaces));
+    return double.parse(randomValue.toStringAsFixed(decimalPlaces)).toString();
   }
 
   static String generateDateString() {

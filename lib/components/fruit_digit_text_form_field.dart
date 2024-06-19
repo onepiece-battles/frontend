@@ -82,7 +82,7 @@ class FruitDigitTextFormField extends StatelessWidget {
                   decoration: InputDecoration(
                     floatingLabelBehavior: FloatingLabelBehavior.never,
                     contentPadding: const EdgeInsets.fromLTRB(10, 10, 0, 0),
-                    hintText: "$slopeMin-$slopeMax",
+                    hintText: "$slopeMin - $slopeMax",
                   ),
                 ),
               ),
@@ -111,7 +111,7 @@ class FruitDigitTextFormField extends StatelessWidget {
                   decoration: InputDecoration(
                     floatingLabelBehavior: FloatingLabelBehavior.never,
                     contentPadding: const EdgeInsets.fromLTRB(10, 10, 0, 0),
-                    hintText: "$interceptMin-$interceptMax",
+                    hintText: "$interceptMin - $interceptMax",
                   ),
                 ),
               ),

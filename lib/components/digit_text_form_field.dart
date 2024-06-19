@@ -66,7 +66,7 @@ class DigitTextFormField extends StatelessWidget {
             decoration: InputDecoration(
               floatingLabelBehavior: FloatingLabelBehavior.never,
               contentPadding: const EdgeInsets.fromLTRB(10, 10, 0, 0),
-              hintText: "$min-$max",
+              hintText: "$min - $max",
             ),
           ),
         ),
