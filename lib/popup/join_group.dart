@@ -47,6 +47,10 @@ class _JoinGroupState extends State<JoinGroup> {
         characterFilter: CharacterFilter(
           languageCode: I18nHelper.getLanguageCode(),
           userId: getIt<User>().id,
+          excludedCharacterIds:  [
+            ...currentCharacterIds,
+            ...selectedCharacters.map((character) => character.id).toList()
+          ]
         ));
     return await getIt<CharacterDao>().listCharacter(listCharacterRequest);
   }
@@ -60,6 +64,11 @@ class _JoinGroupState extends State<JoinGroup> {
           languageCode: I18nHelper.getLanguageCode(),
           noFather: true,
           userId: getIt<User>().id,
+          excludedGroupIds: [
+            widget.fatherGroup.id,
+            ...currentGroupsIds,
+            ...selectedGroups.map((group) => group.id).toList()
+          ]
         ));
     return await getIt<GroupDao>().listGroups(listGroupRequest);
   }
@@ -92,6 +101,7 @@ class _JoinGroupState extends State<JoinGroup> {
     groupFilter.userId = getIt<User>().id;
     groupFilter.noFather = true;
     groupFilter.excludedGroupIds = [
+      widget.fatherGroup.id,
       ...currentGroupsIds,
       ...selectedGroups.map((group) => group.id).toList()
     ];
@@ -134,56 +144,62 @@ class _JoinGroupState extends State<JoinGroup> {
                   scrollDirection: Axis.vertical,
                   child: Center(
                     child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          getSelectionPanel(context),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        scrollDirection: Axis.horizontal,
+                        child: StatefulBuilder(builder: (context, panelState) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              ElevatedButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      selectedGroups = [];
-                                      selectedCharacters = [];
-                                    });
-                                  },
-                                  child: Text(
-                                      AppLocalizations.of(context)!.reselect)),
-                              ElevatedButton(
-                                  onPressed: !itemSelected(context)
-                                      ? null
-                                      : () {
-                                          if (GroupCategory.group ==
-                                              widget
-                                                  .fatherGroup.groupCategory) {
-                                            getIt<GroupDao>().addGroup(
-                                                AddGroupRequest(
-                                                    fatherGroupId:
-                                                        widget.fatherGroup.id,
-                                                    childGroupIds:
-                                                        selectedGroups
-                                                            .map((e) => e.id)
-                                                            .toList()));
-                                          } else {
-                                            getIt<GroupDao>().addCharacter(
-                                                AddCharacterRequest(
-                                                    groupId:
-                                                        widget.fatherGroup.id,
-                                                    characterIds:
-                                                        selectedCharacters
-                                                            .map((e) => e.id)
-                                                            .toList()));
-                                          }
-                                        },
-                                  child: Text(
-                                      AppLocalizations.of(context)!.submitForm))
+                              getSelectionPanel(context, panelState),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  ElevatedButton(
+                                      onPressed: !itemSelected(context)
+                                          ? null
+                                          : () {
+                                              setState(() {
+                                                selectedGroups = [];
+                                                selectedCharacters = [];
+                                              });
+                                            },
+                                      child: Text(AppLocalizations.of(context)!
+                                          .reselect)),
+                                  ElevatedButton(
+                                      onPressed: !itemSelected(context)
+                                          ? null
+                                          : () {
+                                              if (GroupCategory.group ==
+                                                  widget.fatherGroup
+                                                      .groupCategory) {
+                                                getIt<GroupDao>().addGroup(
+                                                    AddGroupRequest(
+                                                        fatherGroupId: widget
+                                                            .fatherGroup.id,
+                                                        childGroupIds:
+                                                            selectedGroups
+                                                                .map(
+                                                                    (e) => e.id)
+                                                                .toList()));
+                                              } else {
+                                                getIt<GroupDao>().addCharacter(
+                                                    AddCharacterRequest(
+                                                        groupId: widget
+                                                            .fatherGroup.id,
+                                                        characterIds:
+                                                            selectedCharacters
+                                                                .map(
+                                                                    (e) => e.id)
+                                                                .toList()));
+                                              }
+                                            },
+                                      child: Text(AppLocalizations.of(context)!
+                                          .submitForm))
+                                ],
+                              )
                             ],
-                          )
-                        ],
-                      ),
-                    ),
+                          );
+                        })),
                   ),
                 ),
               ],
@@ -199,28 +215,26 @@ class _JoinGroupState extends State<JoinGroup> {
         });
   }
 
-  Widget getSelectionPanel(BuildContext context) {
-    return StatefulBuilder(builder: (context, panelState) {
-      return SizedBox(
-        width: 600,
-        height: 600,
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: [
-              if (GroupCategory.group == widget.fatherGroup.groupCategory)
-                _getSelectedGroupWall(context, panelState),
-              if (GroupCategory.group == widget.fatherGroup.groupCategory)
-                _getGroupWall(context, panelState),
-              if (GroupCategory.group != widget.fatherGroup.groupCategory)
-                _getSelectedCharacterWall(context, panelState),
-              if (GroupCategory.group != widget.fatherGroup.groupCategory)
-                _getCharacterWall(context, panelState),
-            ],
-          ),
+  Widget getSelectionPanel(BuildContext context, Function panelState) {
+    return SizedBox(
+      width: 600,
+      height: 600,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            if (GroupCategory.group == widget.fatherGroup.groupCategory)
+              _getSelectedGroupWall(context, panelState),
+            if (GroupCategory.group == widget.fatherGroup.groupCategory)
+              _getGroupWall(context, panelState),
+            if (GroupCategory.group != widget.fatherGroup.groupCategory)
+              _getSelectedCharacterWall(context, panelState),
+            if (GroupCategory.group != widget.fatherGroup.groupCategory)
+              _getCharacterWall(context, panelState),
+          ],
         ),
-      );
-    });
+      ),
+    );
   }
 
   Widget _getSelectedCharacterWall(BuildContext context, Function panelState) {

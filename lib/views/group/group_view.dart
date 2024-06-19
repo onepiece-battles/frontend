@@ -578,7 +578,10 @@ class _GroupViewState extends State<GroupView> {
                   padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
                   child: SizedBox(
                     width: 700,
-                    child: _createCharacterList(entry.value.characterInGroup),
+                    child:
+                    entry.value.groupCategory==GroupCategory.group?
+                        _createGroupList(entry.value.subGroups):
+                    _createCharacterList(entry.value.characterInGroup),
                   ),
                 ),
               ),
@@ -621,6 +624,44 @@ class _GroupViewState extends State<GroupView> {
                             Base64Helper.decode(character.profileImage!))),
                   ),
                 ))
+            .toList(),
+      ),
+    );
+  }
+
+  Widget _createGroupList(List<Group> groups) {
+    if (groups.isEmpty) {
+      return const Text("");
+    }
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: groups
+            .map((group) => InkWell(
+          hoverColor: Colors.transparent,
+          onTap: () {
+            context.goNamed('groupDetails',
+                extra: group.id,
+                pathParameters: {
+                  'name':
+                  I18nHelper.getDisplayNameFromI18n(group.name!)
+                });
+          },
+          child: Tooltip(
+            message: I18nHelper.getDisplayNameFromI18n(group.name),
+            preferBelow: false,
+            showDuration: const Duration(seconds: 1),
+            child: Padding(
+                padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+                child: ImageHelper.getRoundImageFrame(
+                    40,
+                    40,
+                    1.5,
+                    OnepieceColors.liteFancyBlue,
+                    40,
+                    Base64Helper.decode(group.profileImage!))),
+          ),
+        ))
             .toList(),
       ),
     );
