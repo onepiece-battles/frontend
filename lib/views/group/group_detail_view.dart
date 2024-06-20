@@ -1,5 +1,4 @@
 import 'dart:ui';
-
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +13,6 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
 import '../../popup/onepiece_alert.dart';
-import '../../popup/search_popup.dart';
 import '../../utils/base64_helper.dart';
 import '../../utils/permission_check.dart';
 
@@ -29,15 +27,16 @@ class GroupDetailView extends StatefulWidget {
 }
 
 class _GroupDetailViewState extends State<GroupDetailView> {
+  late GroupNode root;
   TextEditingController groupNameController = TextEditingController();
   ScrollController scrollController = ScrollController();
   late GroupFullView groupFullView;
   List<CharacterInGroupView> characters = [];
+  List<Group> subGroups = [];
   late GroupCategory selectedGroupCategory;
   bool _basicInfoEditable = false;
-  final ValueNotifier<bool> _onlyCurrentMember = ValueNotifier(false);
   bool _editButtonVisible = false;
-  double _dividerWidth = 900;
+  final double _dividerWidth = 900;
 
   @override
   void initState() {
@@ -52,8 +51,20 @@ class _GroupDetailViewState extends State<GroupDetailView> {
   void _prepareData(GroupFullView group) {
     groupFullView = group;
     characters = group.characters;
+    subGroups = group.subGroups;
     selectedGroupCategory = group.groupCategory!;
     groupNameController.text = I18nHelper.getDisplayNameFromI18n(group.name!);
+    root = GroupNode(
+        groupFullView.subGroups.map((e) => GroupNode([], false, e)).toList(),
+        true,
+        Group(
+            id: groupFullView.id,
+            fatherGroupId: groupFullView.fatherGroupId,
+            creationRecordId: groupFullView.creationRecordId,
+            modificationRecordId: groupFullView.modificationRecordId,
+            groupCategory: groupFullView.groupCategory,
+            name: groupFullView.name,
+            profileImage: groupFullView.profileImage));
     _editButtonVisible = PermissionCheck.checkPermission(
             getIt<User>().loginRoleResourcesPermissionMap,
             ResourceType.CHARACTER,
@@ -302,7 +313,8 @@ class _GroupDetailViewState extends State<GroupDetailView> {
       GroupCategory.government: AppLocalizations.of(context)!.worldGovernment,
       GroupCategory.other: AppLocalizations.of(context)!.otherType,
       GroupCategory.group: AppLocalizations.of(context)!.group,
-      GroupCategory.revolutionArmy: AppLocalizations.of(context)!.revolutionaryArmy,
+      GroupCategory.revolutionArmy:
+          AppLocalizations.of(context)!.revolutionaryArmy,
     };
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
@@ -365,168 +377,49 @@ class _GroupDetailViewState extends State<GroupDetailView> {
   }
 
   Widget _getMembersPanel(BuildContext context) {
-    Map<GroupPosition, String> groupPositionToDisplayValue = {
-      GroupPosition.member: AppLocalizations.of(context)!.member,
-      GroupPosition.captain: AppLocalizations.of(context)!.caption,
-      GroupPosition.combatant: AppLocalizations.of(context)!.combatant,
-      GroupPosition.cook: AppLocalizations.of(context)!.cook,
-      GroupPosition.doctor: AppLocalizations.of(context)!.doctor,
-      GroupPosition.firstMate: AppLocalizations.of(context)!.firstMate,
-      GroupPosition.helmsman: AppLocalizations.of(context)!.helmsman,
-      GroupPosition.intern: AppLocalizations.of(context)!.intern,
-      GroupPosition.musician: AppLocalizations.of(context)!.musician,
-      GroupPosition.navigator: AppLocalizations.of(context)!.navigator,
-      GroupPosition.scholar: AppLocalizations.of(context)!.scholar,
-      GroupPosition.shipwright: AppLocalizations.of(context)!.shipwright,
-    };
-    var charactersInside = characters;
     return StatefulBuilder(
         builder: (BuildContext context, StateSetter listState) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8.0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  AppLocalizations.of(context)!.groupMember,
-                  style: OnepieceFonts.headerStyle,
-                ),
-                const SizedBox(width: 10,),
-                if (_editButtonVisible) Tooltip(
-                  message: _basicInfoEditable
-                      ? AppLocalizations.of(context)!.add
-                      : AppLocalizations.of(context)!.add,
-                  child: InkWell(
-                    hoverColor: Colors.transparent,
-                    onTap: () {
-                      listState(() {
-                        _showDialog(context);
-                      });
-                    },
-                    child: ImageHelper.getSvgIcon(
-                        'images/svgs/add.svg',
-                        30,
-                        30),
+      return SizedBox(
+        width: 600,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    AppLocalizations.of(context)!.groupMember,
+                    style: OnepieceFonts.headerStyle,
                   ),
-                ),
-              ],
-            ),
-          ),
-          Row(
-            children: [
-              Text(AppLocalizations.of(context)!.currentMember),
-              IconButton(
-                onPressed: () {
-                  listState(() {
-                    _onlyCurrentMember.value = !_onlyCurrentMember.value;
-                    if (_onlyCurrentMember.value) {
-                      charactersInside = characters
-                          .where((element) => element.onceBelongedTo == false)
-                          .toList();
-                    } else {
-                      charactersInside = characters;
-                    }
-                  });
-                },
-                splashRadius: 1,
-                icon: _onlyCurrentMember.value
-                    ? const Icon(
-                        Icons.check_box,
-                        color: OnepieceColors.fancyBlue,
-                        size: 20,
-                      )
-                    : const Icon(
-                        Icons.check_box_outline_blank,
-                        color: OnepieceColors.fancyBlue,
-                        size: 20,
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  if (_editButtonVisible)
+                    Tooltip(
+                      message: _basicInfoEditable
+                          ? AppLocalizations.of(context)!.add
+                          : AppLocalizations.of(context)!.add,
+                      child: InkWell(
+                        hoverColor: Colors.transparent,
+                        onTap: () {
+                          listState(() {
+                            _showDialog(context);
+                          });
+                        },
+                        child: ImageHelper.getSvgIcon(
+                            'images/svgs/add.svg', 30, 30),
                       ),
-              ),
-            ],
-          ),
-          Container(
-            width: 300,
-            decoration: const BoxDecoration(
-              color: OnepieceColors.menuBackgroundColor,
-              borderRadius: BorderRadius.all(Radius.circular(8)),
-            ),
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: charactersInside.length,
-              itemBuilder: (context, index) {
-                var character = charactersInside[index];
-                return Material(
-                  type: MaterialType.transparency,
-                  child: Container(
-                    padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                    decoration: const BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(5))),
-                    child: ExpansionTile(
-                      expandedAlignment: Alignment.centerLeft,
-                      expandedCrossAxisAlignment: CrossAxisAlignment.start,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      onExpansionChanged: (value) {},
-                      title: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Container(
-                            width: 50,
-                            height: 50,
-                            decoration: BoxDecoration(
-                              borderRadius:
-                                  const BorderRadius.all(Radius.circular(2.0)),
-                              border: Border.all(
-                                  color: OnepieceColors.fancyBlue,
-                                  width: 2,
-                                  style: BorderStyle.solid),
-                            ),
-                            child: FittedBox(
-                              fit: BoxFit.fill,
-                              child: Padding(
-                                padding: const EdgeInsets.all(1.0),
-                                child: Image.memory(Base64Helper.decode(
-                                    character.profileImage!)),
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 8.0),
-                            child: Text(
-                              I18nHelper.getDisplayNameFromI18n(
-                                  character.name!),
-                            ),
-                          )
-                        ],
-                      ),
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(20, 3, 0, 3),
-                          child: Row(
-                            children: [
-                              Text(
-                                "${AppLocalizations.of(context)!.position}: ",
-                                style: OnepieceFonts.contentStyle,
-                              ),
-                              Text(
-                                groupPositionToDisplayValue[
-                                    character.position!]!,
-                                style: OnepieceFonts.contentStyle,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
                     ),
-                  ),
-                );
-              },
+                ],
+              ),
             ),
-          ),
-        ],
+            root.group.groupCategory == GroupCategory.group
+                ? buildTreeNode(root, listState, false, 1)
+                : buildCharacterList(context)
+          ],
+        ),
       );
     });
   }
@@ -542,9 +435,206 @@ class _GroupDetailViewState extends State<GroupDetailView> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.0),
           ),
-          child:  JoinGroup(fatherGroup: groupFullView),
+          child: JoinGroup(fatherGroup: groupFullView),
         );
       }),
     );
   }
+
+  Widget buildCharacterList(BuildContext context) {
+    Map<GroupPosition, String> groupPositionToDisplayValue = {
+      GroupPosition.member: AppLocalizations.of(context)!.member,
+      GroupPosition.captain: AppLocalizations.of(context)!.caption,
+      GroupPosition.combatant: AppLocalizations.of(context)!.combatant,
+      GroupPosition.cook: AppLocalizations.of(context)!.cook,
+      GroupPosition.doctor: AppLocalizations.of(context)!.doctor,
+      GroupPosition.firstMate: AppLocalizations.of(context)!.firstMate,
+      GroupPosition.helmsman: AppLocalizations.of(context)!.helmsman,
+      GroupPosition.intern: AppLocalizations.of(context)!.intern,
+      GroupPosition.musician: AppLocalizations.of(context)!.musician,
+      GroupPosition.navigator: AppLocalizations.of(context)!.navigator,
+      GroupPosition.scholar: AppLocalizations.of(context)!.scholar,
+      GroupPosition.shipwright: AppLocalizations.of(context)!.shipwright,
+    };
+    return SizedBox(
+      width: 600,
+      child: ListView.builder(
+        shrinkWrap: true,
+        itemCount: characters.length,
+        itemBuilder: (context, index) {
+          var character = characters[index];
+          return Material(
+            type: MaterialType.transparency,
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+              decoration: const BoxDecoration(
+                  borderRadius: BorderRadius.all(Radius.circular(5))),
+              child: ExpansionTile(
+                expandedAlignment: Alignment.centerLeft,
+                expandedCrossAxisAlignment: CrossAxisAlignment.start,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                onExpansionChanged: (value) {},
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    ImageHelper.getRoundImageFrame(
+                        40,
+                        40,
+                        1.5,
+                        OnepieceColors.liteFancyBlue,
+                        3,
+                        Base64Helper.decode(character.profileImage!)),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8.0),
+                      child: Text(
+                        I18nHelper.getDisplayNameFromI18n(character.name!),
+                      ),
+                    )
+                  ],
+                ),
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 3, 0, 3),
+                    child: Row(
+                      children: [
+                        Text(
+                          "${AppLocalizations.of(context)!.position}: ",
+                          style: OnepieceFonts.contentStyle,
+                        ),
+                        Text(
+                          groupPositionToDisplayValue[character.position!]!,
+                          style: OnepieceFonts.contentStyle,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  void handleExpansionChanged(
+      bool isExpanded, GroupNode node, Function listState) {
+    if (isExpanded && !node.childrenFetched) {
+      // Simulate fetching children from the backend
+      List<TreeNode> fetchedChildren = [];
+      if (node.group.groupCategory == GroupCategory.group) {
+        getIt<GroupDao>()
+            .listChildGroups(ListChildGroupsRequest(groupId: node.group.id))
+            .then((value) {
+          fetchedChildren = value!.childCharacters.map((e) {
+            return GroupNode(fetchedChildren, false, e);
+          }).toList();
+          listState(() {
+            node.children = fetchedChildren;
+            node.childrenFetched = true;
+          });
+        });
+      } else {
+        getIt<GroupDao>()
+            .listChildCharacters(
+                ListChildCharactersRequest(groupId: node.group.id))
+            .then((value) {
+          fetchedChildren = value!.childCharacters.map((e) {
+            return CharacterNode(fetchedChildren, false, e);
+          }).toList();
+          listState(() {
+            node.children = fetchedChildren;
+            node.childrenFetched = true;
+          });
+        });
+      }
+    }
+  }
+
+  Widget buildTreeNode(
+      TreeNode node, Function listState, bool isChildCharacter, int level) {
+    Map<GroupPosition, String> groupPositionToDisplayValue = {
+      GroupPosition.member: AppLocalizations.of(context)!.member,
+      GroupPosition.captain: AppLocalizations.of(context)!.caption,
+      GroupPosition.combatant: AppLocalizations.of(context)!.combatant,
+      GroupPosition.cook: AppLocalizations.of(context)!.cook,
+      GroupPosition.doctor: AppLocalizations.of(context)!.doctor,
+      GroupPosition.firstMate: AppLocalizations.of(context)!.firstMate,
+      GroupPosition.helmsman: AppLocalizations.of(context)!.helmsman,
+      GroupPosition.intern: AppLocalizations.of(context)!.intern,
+      GroupPosition.musician: AppLocalizations.of(context)!.musician,
+      GroupPosition.navigator: AppLocalizations.of(context)!.navigator,
+      GroupPosition.scholar: AppLocalizations.of(context)!.scholar,
+      GroupPosition.shipwright: AppLocalizations.of(context)!.shipwright,
+    };
+    if (!isChildCharacter) {
+      GroupNode actualNode = node as GroupNode;
+      return ExpansionTile(
+        childrenPadding: EdgeInsets.only(left: level *20),
+        title:
+        Row(
+          children: [
+            ImageHelper.getRoundImageFrame(
+                50,
+                50,
+                3,
+                OnepieceColors.liteFancyBlue,
+                3,
+                Base64Helper.decode(node.group.profileImage!)),
+            Text(I18nHelper.getDisplayNameFromI18n(
+                actualNode.group.name!))
+          ],
+        ),
+        onExpansionChanged: (isExpanded) =>
+            handleExpansionChanged(isExpanded, actualNode, listState),
+        children: actualNode.children
+            .map((child) => buildTreeNode(child, listState,
+                actualNode.group.groupCategory != GroupCategory.group, level+1))
+            .toList(),
+      );
+    } else {
+      CharacterNode actualNode = node as CharacterNode;
+      return SizedBox(
+        width: 600,
+        height: 100,
+        child: ExpansionTile(
+          title: Row(
+            children: [
+              ImageHelper.getRoundImageFrame(
+                  50,
+                  50,
+                  3,
+                  OnepieceColors.liteFancyBlue,
+                  3,
+                  Base64Helper.decode(node.characterInGroupView.profileImage!)),
+              Text(I18nHelper.getDisplayNameFromI18n(
+                  actualNode.characterInGroupView.name!)),
+            ],
+          ),
+          children: [
+            Text(groupPositionToDisplayValue[node.characterInGroupView.position]!)
+          ],
+        ),
+      );
+    }
+  }
+}
+
+class TreeNode {
+  List<TreeNode> children;
+  bool childrenFetched;
+  TreeNode(this.children, this.childrenFetched);
+}
+
+class GroupNode extends TreeNode {
+  Group group;
+  GroupNode(super.children, super.childrenFetched, this.group);
+}
+
+class CharacterNode extends TreeNode {
+  CharacterInGroupView characterInGroupView;
+  CharacterNode(
+      super.children, super.childrenFetched, this.characterInGroupView);
 }

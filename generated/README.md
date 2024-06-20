@@ -86,6 +86,8 @@ Class | Method | HTTP request | Description
 *GroupApi* | [**addGroup**](doc//GroupApi.md#addgroup) | **POST** /api/onepiece/group/add_group | 
 *GroupApi* | [**createGroup**](doc//GroupApi.md#creategroup) | **POST** /api/onepiece/group/create | 
 *GroupApi* | [**getGroupFullView**](doc//GroupApi.md#getgroupfullview) | **POST** /api/onepiece/group/get | 
+*GroupApi* | [**listChildCharacters**](doc//GroupApi.md#listchildcharacters) | **POST** /api/onepiece/group/list_child_characters | 
+*GroupApi* | [**listChildGroups**](doc//GroupApi.md#listchildgroups) | **POST** /api/onepiece/group/list_child_groups | 
 *GroupApi* | [**listGroups**](doc//GroupApi.md#listgroups) | **POST** /api/onepiece/group/list | 
 *GroupApi* | [**updateGroup**](doc//GroupApi.md#updategroup) | **POST** /api/onepiece/group/update | 
 *ImageApi* | [**getImage**](doc//ImageApi.md#getimage) | **POST** /api/onepiece/image/get_by_target_id/{id} | 
@@ -219,6 +221,10 @@ Class | Method | HTTP request | Description
  - [ListBattleResponse](doc//ListBattleResponse.md)
  - [ListCharacterRequest](doc//ListCharacterRequest.md)
  - [ListCharacterResponse](doc//ListCharacterResponse.md)
+ - [ListChildCharactersRequest](doc//ListChildCharactersRequest.md)
+ - [ListChildCharactersResponse](doc//ListChildCharactersResponse.md)
+ - [ListChildGroupsRequest](doc//ListChildGroupsRequest.md)
+ - [ListChildGroupsResponse](doc//ListChildGroupsResponse.md)
  - [ListFruitRequest](doc//ListFruitRequest.md)
  - [ListFruitResponse](doc//ListFruitResponse.md)
  - [ListGroupRequest](doc//ListGroupRequest.md)
