@@ -31,4 +31,14 @@ class GroupDao {
   Future<AddGroupResponse?> addGroup(AddGroupRequest addGroupRequest) async {
     return await groupApi.addGroup(addGroupRequest);
   }
+
+  Future<ListChildGroupsResponse?> listChildGroups(
+      ListChildGroupsRequest listChildGroupsRequest) async {
+    return await groupApi.listChildGroups(listChildGroupsRequest);
+  }
+
+  Future<ListChildCharactersResponse?> listChildCharacters(
+      ListChildCharactersRequest listChildCharactersRequest) async {
+    return await groupApi.listChildCharacters(listChildCharactersRequest);
+  }
 }
