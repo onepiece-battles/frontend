@@ -45,13 +45,12 @@ class _JoinGroupState extends State<JoinGroup> {
         pageIndex: 1,
         sortKeys: [],
         characterFilter: CharacterFilter(
-          languageCode: I18nHelper.getLanguageCode(),
-          userId: getIt<User>().id,
-          excludedCharacterIds:  [
-            ...currentCharacterIds,
-            ...selectedCharacters.map((character) => character.id).toList()
-          ]
-        ));
+            languageCode: I18nHelper.getLanguageCode(),
+            userId: getIt<User>().id,
+            excludedCharacterIds: [
+              ...currentCharacterIds,
+              ...selectedCharacters.map((character) => character.id).toList()
+            ]));
     return await getIt<CharacterDao>().listCharacter(listCharacterRequest);
   }
 
@@ -61,15 +60,14 @@ class _JoinGroupState extends State<JoinGroup> {
         pageIndex: 1,
         sortKeys: [],
         groupFilter: GroupFilter(
-          languageCode: I18nHelper.getLanguageCode(),
-          noFather: true,
-          userId: getIt<User>().id,
-          excludedGroupIds: [
-            widget.fatherGroup.id,
-            ...currentGroupsIds,
-            ...selectedGroups.map((group) => group.id).toList()
-          ]
-        ));
+            languageCode: I18nHelper.getLanguageCode(),
+            noFather: true,
+            userId: getIt<User>().id,
+            excludedGroupIds: [
+              ...widget.fatherGroup.fatherGroups.map((e) => e.id).toList(),
+              ...currentGroupsIds,
+              ...selectedGroups.map((group) => group.id).toList()
+            ]));
     return await getIt<GroupDao>().listGroups(listGroupRequest);
   }
 

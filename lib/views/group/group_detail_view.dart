@@ -389,10 +389,15 @@ class _GroupDetailViewState extends State<GroupDetailView> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text(
-                    AppLocalizations.of(context)!.groupMember,
-                    style: OnepieceFonts.headerStyle,
-                  ),
+                  groupFullView.groupCategory == GroupCategory.group
+                      ? Text(
+                          AppLocalizations.of(context)!.groupStructure,
+                          style: OnepieceFonts.headerStyle,
+                        )
+                      : Text(
+                          AppLocalizations.of(context)!.groupMember,
+                          style: OnepieceFonts.headerStyle,
+                        ),
                   const SizedBox(
                     width: 10,
                   ),
@@ -415,13 +420,67 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                 ],
               ),
             ),
+            if (groupFullView.fatherGroups.isNotEmpty)
+              getFatherList(context),
+            Text(
+              AppLocalizations.of(context)!.thisGroup,
+              style: OnepieceFonts.navigationTopBarStyleClickable,
+            ),
             root.group.groupCategory == GroupCategory.group
                 ? buildTreeNode(root, listState, false, 1)
-                : buildCharacterList(context)
+                : buildCharacterList(context),
           ],
         ),
       );
     });
+  }
+
+  Widget getFatherList(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          AppLocalizations.of(context)!.fatherGroups,
+          style: OnepieceFonts.navigationTopBarStyleClickable,
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: groupFullView.fatherGroups.map((e) {
+            return Row(
+              children: [
+                TextButton(
+                    onPressed: () {
+                      context.goNamed('groupDetails',
+                          extra: e.id,
+                          pathParameters: {
+                            'name':
+                            I18nHelper.getDisplayNameFromI18n(e.name!)
+                          });
+                    },
+                    child: Row(
+                      children: [
+                        ImageHelper.getRoundImageFrame(
+                            40,
+                            40,
+                            1.5,
+                            OnepieceColors.liteFancyBlue,
+                            3,
+                            Base64Helper.decode(e.profileImage!)),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8.0),
+                          child: Text(
+                            I18nHelper.getDisplayNameFromI18n(e.name!),
+                          ),
+                        )
+                      ],
+                    )),
+                const Icon(Icons.chevron_right, size: 20,)
+              ],
+            );
+          }).toList(),
+        )
+      ],
+    );
   }
 
   void _showDialog(BuildContext context) {
@@ -528,7 +587,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
         getIt<GroupDao>()
             .listChildGroups(ListChildGroupsRequest(groupId: node.group.id))
             .then((value) {
-          fetchedChildren = value!.childCharacters.map((e) {
+          fetchedChildren = value!.childGroups.map((e) {
             return GroupNode(fetchedChildren, false, e);
           }).toList();
           listState(() {
@@ -572,9 +631,8 @@ class _GroupDetailViewState extends State<GroupDetailView> {
     if (!isChildCharacter) {
       GroupNode actualNode = node as GroupNode;
       return ExpansionTile(
-        childrenPadding: EdgeInsets.only(left: level *20),
-        title:
-        Row(
+        childrenPadding: EdgeInsets.only(left: level * 20),
+        title: Row(
           children: [
             ImageHelper.getRoundImageFrame(
                 50,
@@ -583,15 +641,17 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                 OnepieceColors.liteFancyBlue,
                 3,
                 Base64Helper.decode(node.group.profileImage!)),
-            Text(I18nHelper.getDisplayNameFromI18n(
-                actualNode.group.name!))
+            Text(I18nHelper.getDisplayNameFromI18n(actualNode.group.name!))
           ],
         ),
         onExpansionChanged: (isExpanded) =>
             handleExpansionChanged(isExpanded, actualNode, listState),
         children: actualNode.children
-            .map((child) => buildTreeNode(child, listState,
-                actualNode.group.groupCategory != GroupCategory.group, level+1))
+            .map((child) => buildTreeNode(
+                child,
+                listState,
+                actualNode.group.groupCategory != GroupCategory.group,
+                level + 1))
             .toList(),
       );
     } else {
@@ -614,7 +674,8 @@ class _GroupDetailViewState extends State<GroupDetailView> {
             ],
           ),
           children: [
-            Text(groupPositionToDisplayValue[node.characterInGroupView.position]!)
+            Text(groupPositionToDisplayValue[
+                node.characterInGroupView.position]!)
           ],
         ),
       );

@@ -289,5 +289,8 @@
   "invalidNickname": "Nickname should only consists of digits, English letters and chinese characters",
   "passwordNotMatch": "Password not match",
   "lengthExceedsLimit": "String length exceeds limit，maximum is 10",
-  "reselect": "Reselect"
+  "reselect": "Reselect",
+  "groupStructure": "Team Structure",
+  "fatherGroups": "Superior groups",
+  "thisGroup": "Current group"
 }
