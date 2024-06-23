@@ -421,10 +421,12 @@ class _GroupDetailViewState extends State<GroupDetailView> {
               ),
             ),
             if (groupFullView.fatherGroups.isNotEmpty) getFatherList(context),
+            const SizedBox(height: 10,),
             Text(
               AppLocalizations.of(context)!.thisGroup,
               style: OnepieceFonts.navigationTopBarStyleClickable,
             ),
+            const SizedBox(height: 10,),
             root.group.groupCategory == GroupCategory.group
                 ? buildTreeNode(root, listState, false, 1)
                 : buildCharacterList(context),
@@ -442,6 +444,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
           AppLocalizations.of(context)!.fatherGroups,
           style: OnepieceFonts.navigationTopBarStyleClickable,
         ),
+        const SizedBox(height: 10,),
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: groupFullView.fatherGroups.reversed.toList().map((e) {

@@ -292,5 +292,8 @@
   "reselect": "Reselect",
   "groupStructure": "Team Structure",
   "fatherGroups": "Superior groups",
-  "thisGroup": "Current group"
+  "thisGroup": "Current group",
+  "selected": "Selected",
+  "selectable": "Selectable",
+  "selectNewMembers": "Add new members"
 }

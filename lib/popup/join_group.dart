@@ -25,8 +25,6 @@ class JoinGroup extends StatefulWidget {
 
 class _JoinGroupState extends State<JoinGroup> {
   ScrollController verticalController = ScrollController();
-  TextEditingController characterNameController = TextEditingController();
-  TextEditingController groupNameController = TextEditingController();
   late Future myFuture;
   GroupFilter groupFilter = GroupFilter();
   CharacterFilter characterFilter = CharacterFilter();
@@ -39,6 +37,7 @@ class _JoinGroupState extends State<JoinGroup> {
   List<String> memberCharacterIds = [];
   List<String> memberGroupIds = [];
   List<String> fatherGroupIds = [];
+  TextEditingController searchBarController = TextEditingController();
 
   Future<ListCharacterResponse?> listCharacters() async {
     ListCharacterRequest listCharacterRequest = ListCharacterRequest(
@@ -73,7 +72,7 @@ class _JoinGroupState extends State<JoinGroup> {
   _searchCharacter(Function panelState) {
     characterFilter.languageCode = I18nHelper.getLanguageCode();
     characterFilter.userId = getIt<User>().id;
-    characterFilter.name = characterNameController.text;
+    characterFilter.name = searchBarController.text;
     characterFilter.excludedCharacterIds = [
       ...memberCharacterIds,
       ...selectedCharacters.map((character) => character.id).toList()
@@ -94,7 +93,7 @@ class _JoinGroupState extends State<JoinGroup> {
 
   _searchGroup(Function panelState) {
     groupFilter.languageCode = I18nHelper.getLanguageCode();
-    groupFilter.name = groupNameController.text;
+    groupFilter.name = searchBarController.text;
     groupFilter.userId = getIt<User>().id;
     groupFilter.excludedGroupIds = [
       widget.fatherGroup.id,
@@ -152,54 +151,77 @@ class _JoinGroupState extends State<JoinGroup> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 getSelectionPanel(context, panelState),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    ElevatedButton(
-                                        onPressed: !itemSelected(context)
-                                            ? null
-                                            : () {
-                                                setState(() {
-                                                  selectedGroups = [];
-                                                  selectedCharacters = [];
-                                                });
-                                              },
-                                        child: Text(
-                                            AppLocalizations.of(context)!
-                                                .reselect)),
-                                    ElevatedButton(
-                                        onPressed: !itemSelected(context)
-                                            ? null
-                                            : () {
-                                                if (GroupCategory.group ==
-                                                    widget.fatherGroup
-                                                        .groupCategory) {
-                                                  getIt<GroupDao>().addGroup(
-                                                      AddGroupRequest(
-                                                          fatherGroupId: widget
-                                                              .fatherGroup.id,
-                                                          childGroupIds:
-                                                              selectedGroups
-                                                                  .map((e) =>
-                                                                      e.id)
-                                                                  .toList()));
-                                                } else {
-                                                  getIt<GroupDao>().addCharacter(
-                                                      AddCharacterRequest(
-                                                          groupId: widget
-                                                              .fatherGroup.id,
-                                                          characterIds:
-                                                              selectedCharacters
-                                                                  .map((e) =>
-                                                                      e.id)
-                                                                  .toList()));
-                                                }
-                                              },
-                                        child: Text(
-                                            AppLocalizations.of(context)!
-                                                .submitForm))
-                                  ],
+                                const Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 8.0),
+                                  child: SizedBox(
+                                    width: 700,
+                                    child: Divider(
+                                      color: Colors.grey,
+                                      thickness: 1,
+                                    ),
+                                  ),
+                                ),
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 5.0),
+                                  child: SizedBox(
+                                    width: 700,
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        ElevatedButton(
+                                            onPressed: !itemSelected(context)
+                                                ? null
+                                                : () {
+                                                    setState(() {
+                                                      selectedGroups = [];
+                                                      selectedCharacters = [];
+                                                    });
+                                                  },
+                                            child: Text(
+                                                AppLocalizations.of(context)!
+                                                    .reselect)),
+                                        ElevatedButton(
+                                            onPressed: !itemSelected(context)
+                                                ? null
+                                                : () {
+                                                    if (GroupCategory.group ==
+                                                        widget.fatherGroup
+                                                            .groupCategory) {
+                                                      getIt<GroupDao>().addGroup(
+                                                          AddGroupRequest(
+                                                              fatherGroupId:
+                                                                  widget
+                                                                      .fatherGroup
+                                                                      .id,
+                                                              childGroupIds:
+                                                                  selectedGroups
+                                                                      .map((e) =>
+                                                                          e.id)
+                                                                      .toList()));
+                                                    } else {
+                                                      getIt<GroupDao>().addCharacter(
+                                                          AddCharacterRequest(
+                                                              groupId: widget
+                                                                  .fatherGroup
+                                                                  .id,
+                                                              characterIds:
+                                                                  selectedCharacters
+                                                                      .map((e) =>
+                                                                          e.id)
+                                                                      .toList()));
+                                                    }
+                                                  },
+                                            child: Text(
+                                                AppLocalizations.of(context)!
+                                                    .submitForm)),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(
+                                  height: 15,
                                 )
                               ],
                             );
@@ -220,20 +242,101 @@ class _JoinGroupState extends State<JoinGroup> {
         });
   }
 
+  Widget _getSearchBar(BuildContext context, Function panelState) {
+    return SizedBox(
+      width: 200,
+      height: 35,
+      child: TextFormField(
+        controller: searchBarController,
+        decoration: InputDecoration(
+          floatingLabelBehavior: FloatingLabelBehavior.never,
+          disabledBorder: const OutlineInputBorder(
+              borderSide: BorderSide(color: OnepieceColors.menuHoverColor)),
+          enabledBorder: const OutlineInputBorder(
+              borderSide: BorderSide(color: OnepieceColors.menuHoverColor)),
+          focusedBorder: const OutlineInputBorder(
+              borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
+          prefixIcon: const Icon(Icons.search),
+          hintText: AppLocalizations.of(context)!.name,
+        ),
+        onChanged: (value) {
+          if (_timer?.isActive ?? false) _timer?.cancel();
+          _timer = Timer(const Duration(milliseconds: 500), () {
+            widget.fatherGroup.groupCategory == GroupCategory.group
+                ? _searchGroup(panelState)
+                : _searchCharacter(panelState);
+          });
+        },
+      ),
+    );
+  }
+
   Widget getSelectionPanel(BuildContext context, Function panelState) {
     return SizedBox(
-      width: 600,
-      height: 600,
+      width: 700,
+      height: 700,
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Center(
+                child: Text(
+                  AppLocalizations.of(context)!.selectNewMembers,
+                  style: OnepieceFonts.smallHeaderStyle,
+                ),
+              ),
+            ),
+            Text(
+              AppLocalizations.of(context)!.selected,
+              style: OnepieceFonts.navigationTopBarStyleClickable,
+            ),
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 8.0),
+              child: SizedBox(
+                width: 700,
+                child: Divider(
+                  color: Colors.grey,
+                  thickness: 1,
+                ),
+              ),
+            ),
             if (GroupCategory.group == widget.fatherGroup.groupCategory)
               _getSelectedGroupWall(context, panelState),
-            if (GroupCategory.group == widget.fatherGroup.groupCategory)
-              _getGroupWall(context, panelState),
             if (GroupCategory.group != widget.fatherGroup.groupCategory)
               _getSelectedCharacterWall(context, panelState),
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 8.0),
+              child: SizedBox(
+                width: 700,
+                child: Divider(
+                  color: Colors.grey,
+                  thickness: 1,
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10.0),
+              child: Row(
+                children: [
+                  Text(
+                    AppLocalizations.of(context)!.selectable,
+                    style: OnepieceFonts.navigationTopBarStyleClickable,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: _getSearchBar(context, panelState),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            if (GroupCategory.group == widget.fatherGroup.groupCategory)
+              _getGroupWall(context, panelState),
             if (GroupCategory.group != widget.fatherGroup.groupCategory)
               _getCharacterWall(context, panelState),
           ],
@@ -245,10 +348,18 @@ class _JoinGroupState extends State<JoinGroup> {
   Widget _getSelectedCharacterWall(BuildContext context, Function panelState) {
     if (selectedCharacters.isEmpty) {
       return Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-        Padding(
-          padding: const EdgeInsets.only(right: 8.0),
-          child: Text(AppLocalizations.of(context)!.empty),
-        ),
+        Container(
+          width: 110,
+          height: 110,
+          decoration: const BoxDecoration(
+            borderRadius: BorderRadius.all(Radius.circular(2.0)),
+          ),
+          child: FittedBox(
+            fit: BoxFit.fill,
+            child: ImageHelper.getSvgIconWithColor('images/svgs/question.svg',
+                100, 100, OnepieceColors.liteFancyBlue),
+          ),
+        )
       ]);
     }
     return LayoutBuilder(
@@ -265,26 +376,27 @@ class _JoinGroupState extends State<JoinGroup> {
               mainAxisSpacing: 5,
               crossAxisSpacing: 5,
             ),
-            itemBuilder: (context, int index) => Tooltip(
-              preferBelow: true,
-              message: I18nHelper.getDisplayNameFromI18n(
-                  selectedCharacters[index].name),
-              child: InkWell(
-                hoverColor: Colors.transparent,
-                onTap: () {
-                  panelState(() {
-                    selectedCharacters.removeAt(index);
-                    _searchCharacter(panelState);
-                  });
-                },
-                child: ImageHelper.getRoundImageFrame(
-                    100,
-                    100,
-                    2,
-                    OnepieceColors.liteFancyBlue,
-                    10,
-                    Base64Helper.decode(
-                        selectedCharacters[index].profileImage!)),
+            itemBuilder: (context, int index) => InkWell(
+              hoverColor: Colors.transparent,
+              onTap: () {
+                panelState(() {
+                  selectedCharacters.removeAt(index);
+                  _searchCharacter(panelState);
+                });
+              },
+              child: Column(
+                children: [
+                  ImageHelper.getRoundImageFrame(
+                      100,
+                      100,
+                      2,
+                      OnepieceColors.liteFancyBlue,
+                      10,
+                      Base64Helper.decode(
+                          selectedCharacters[index].profileImage!)),
+                  Text(I18nHelper.getDisplayNameFromI18n(
+                      selectedCharacters[index].name))
+                ],
               ),
             ),
           ),
@@ -294,14 +406,6 @@ class _JoinGroupState extends State<JoinGroup> {
   }
 
   Widget _getCharacterWall(BuildContext context, Function panelState) {
-    if (characters.isEmpty) {
-      return Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-        Padding(
-          padding: const EdgeInsets.only(right: 8.0),
-          child: Text(AppLocalizations.of(context)!.empty),
-        ),
-      ]);
-    }
     return LayoutBuilder(
       builder: (context, constraint) {
         int crossAxisCount = (constraint.maxWidth / 110).ceil().clamp(2, 8);
@@ -316,25 +420,26 @@ class _JoinGroupState extends State<JoinGroup> {
               mainAxisSpacing: 5,
               crossAxisSpacing: 5,
             ),
-            itemBuilder: (context, int index) => Tooltip(
-              preferBelow: true,
-              message:
-                  I18nHelper.getDisplayNameFromI18n(characters[index].name),
-              child: InkWell(
-                hoverColor: Colors.transparent,
-                onTap: () {
-                  panelState(() {
-                    selectedCharacters.add(characters[index]);
-                    _searchCharacter(panelState);
-                  });
-                },
-                child: ImageHelper.getRoundImageFrame(
-                    100,
-                    100,
-                    2,
-                    OnepieceColors.liteFancyBlue,
-                    10,
-                    Base64Helper.decode(characters[index].profileImage!)),
+            itemBuilder: (context, int index) => InkWell(
+              hoverColor: Colors.transparent,
+              onTap: () {
+                panelState(() {
+                  selectedCharacters.add(characters[index]);
+                  _searchCharacter(panelState);
+                });
+              },
+              child: Column(
+                children: [
+                  ImageHelper.getRoundImageFrame(
+                      100,
+                      100,
+                      2,
+                      OnepieceColors.liteFancyBlue,
+                      10,
+                      Base64Helper.decode(characters[index].profileImage!)),
+                  Text(
+                      I18nHelper.getDisplayNameFromI18n(characters[index].name))
+                ],
               ),
             ),
           ),
@@ -348,10 +453,18 @@ class _JoinGroupState extends State<JoinGroup> {
       return Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: Text(AppLocalizations.of(context)!.empty),
-          ),
+          Container(
+            width: 120,
+            height: 120,
+            decoration: const BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(2.0)),
+            ),
+            child: FittedBox(
+              fit: BoxFit.fill,
+              child: ImageHelper.getSvgIconWithColor('images/svgs/question.svg',
+                  100, 100, OnepieceColors.liteFancyBlue),
+            ),
+          )
         ],
       );
     }
@@ -360,7 +473,7 @@ class _JoinGroupState extends State<JoinGroup> {
       return SizedBox(
         width: 880,
         height: ((selectedGroups.length / crossAxisCount).ceil() * 110.0)
-            .clamp(110, 400),
+            .clamp(110, 440),
         child: GridView.builder(
           itemCount: selectedGroups.length,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -368,49 +481,33 @@ class _JoinGroupState extends State<JoinGroup> {
             mainAxisSpacing: 5,
             crossAxisSpacing: 5,
           ),
-          itemBuilder: (BuildContext context, int index) => Tooltip(
-            message:
-                I18nHelper.getDisplayNameFromI18n(selectedGroups[index].name),
-            preferBelow: true,
-            child: InkWell(
-                hoverColor: Colors.transparent,
-                onTap: () {
-                  panelState(() {
-                    selectedGroups.removeAt(index);
-                    _searchGroup(panelState);
-                  });
-                },
-                child: ImageHelper.getRoundImageFrame(
-                    100,
-                    100,
-                    2,
-                    OnepieceColors.liteFancyBlue,
-                    10,
-                    Base64Helper.decode(selectedGroups[index].profileImage!))),
-          ),
+          itemBuilder: (BuildContext context, int index) => InkWell(
+              hoverColor: Colors.transparent,
+              onTap: () {
+                panelState(() {
+                  selectedGroups.removeAt(index);
+                  _searchGroup(panelState);
+                });
+              },
+              child: ImageHelper.getRoundImageFrame(
+                  100,
+                  100,
+                  2,
+                  OnepieceColors.liteFancyBlue,
+                  10,
+                  Base64Helper.decode(selectedGroups[index].profileImage!))),
         ),
       );
     });
   }
 
   Widget _getGroupWall(BuildContext context, Function panelState) {
-    if (groups.isEmpty) {
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: Text(AppLocalizations.of(context)!.empty),
-          ),
-        ],
-      );
-    }
     return LayoutBuilder(builder: (context, constraint) {
       int crossAxisCount = (constraint.maxWidth / 110).ceil().clamp(2, 8);
       return SizedBox(
         width: 880,
         height:
-            ((groups.length / crossAxisCount).ceil() * 110.0).clamp(110, 400),
+            ((groups.length / crossAxisCount).ceil() * 110.0).clamp(110, 440),
         child: GridView.builder(
           itemCount: groups.length,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -418,25 +515,21 @@ class _JoinGroupState extends State<JoinGroup> {
             mainAxisSpacing: 5,
             crossAxisSpacing: 5,
           ),
-          itemBuilder: (BuildContext context, int index) => Tooltip(
-            message: I18nHelper.getDisplayNameFromI18n(groups[index].name),
-            preferBelow: true,
-            child: InkWell(
-                hoverColor: Colors.transparent,
-                onTap: () {
-                  panelState(() {
-                    selectedGroups.add(groups[index]);
-                    _searchGroup(panelState);
-                  });
-                },
-                child: ImageHelper.getRoundImageFrame(
-                    100,
-                    100,
-                    2,
-                    OnepieceColors.liteFancyBlue,
-                    10,
-                    Base64Helper.decode(groups[index].profileImage!))),
-          ),
+          itemBuilder: (BuildContext context, int index) => InkWell(
+              hoverColor: Colors.transparent,
+              onTap: () {
+                panelState(() {
+                  selectedGroups.add(groups[index]);
+                  _searchGroup(panelState);
+                });
+              },
+              child: ImageHelper.getRoundImageFrame(
+                  100,
+                  100,
+                  2,
+                  OnepieceColors.liteFancyBlue,
+                  10,
+                  Base64Helper.decode(groups[index].profileImage!))),
         ),
       );
     });
