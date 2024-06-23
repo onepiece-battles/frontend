@@ -29,15 +29,16 @@ class _JoinGroupState extends State<JoinGroup> {
   TextEditingController groupNameController = TextEditingController();
   late Future myFuture;
   GroupFilter groupFilter = GroupFilter();
+  CharacterFilter characterFilter = CharacterFilter();
   List<GroupListView> groups = [];
   List<GroupListView> selectedGroups = [];
   List<CharacterListView> characters =
       <CharacterListView>[].toList(growable: true);
   List<CharacterListView> selectedCharacters =
       <CharacterListView>[].toList(growable: true);
-  CharacterFilter characterFilter = CharacterFilter();
-  List<String> currentCharacterIds = [];
-  List<String> currentGroupsIds = [];
+  List<String> memberCharacterIds = [];
+  List<String> memberGroupIds = [];
+  List<String> fatherGroupIds = [];
 
   Future<ListCharacterResponse?> listCharacters() async {
     ListCharacterRequest listCharacterRequest = ListCharacterRequest(
@@ -48,7 +49,7 @@ class _JoinGroupState extends State<JoinGroup> {
             languageCode: I18nHelper.getLanguageCode(),
             userId: getIt<User>().id,
             excludedCharacterIds: [
-              ...currentCharacterIds,
+              ...memberCharacterIds,
               ...selectedCharacters.map((character) => character.id).toList()
             ]));
     return await getIt<CharacterDao>().listCharacter(listCharacterRequest);
@@ -61,12 +62,10 @@ class _JoinGroupState extends State<JoinGroup> {
         sortKeys: [],
         groupFilter: GroupFilter(
             languageCode: I18nHelper.getLanguageCode(),
-            noFather: true,
             userId: getIt<User>().id,
             excludedGroupIds: [
-              ...widget.fatherGroup.fatherGroups.map((e) => e.id).toList(),
-              ...currentGroupsIds,
-              ...selectedGroups.map((group) => group.id).toList()
+              ...fatherGroupIds,
+              widget.fatherGroup.id,
             ]));
     return await getIt<GroupDao>().listGroups(listGroupRequest);
   }
@@ -76,7 +75,7 @@ class _JoinGroupState extends State<JoinGroup> {
     characterFilter.userId = getIt<User>().id;
     characterFilter.name = characterNameController.text;
     characterFilter.excludedCharacterIds = [
-      ...currentCharacterIds,
+      ...memberCharacterIds,
       ...selectedCharacters.map((character) => character.id).toList()
     ];
     ListCharacterRequest listCharacterRequest = ListCharacterRequest(
@@ -97,10 +96,9 @@ class _JoinGroupState extends State<JoinGroup> {
     groupFilter.languageCode = I18nHelper.getLanguageCode();
     groupFilter.name = groupNameController.text;
     groupFilter.userId = getIt<User>().id;
-    groupFilter.noFather = true;
     groupFilter.excludedGroupIds = [
       widget.fatherGroup.id,
-      ...currentGroupsIds,
+      ...widget.fatherGroup.fatherGroups.map((e) => e.id).toList(),
       ...selectedGroups.map((group) => group.id).toList()
     ];
     ListGroupRequest listGroupRequest = ListGroupRequest(
@@ -117,14 +115,17 @@ class _JoinGroupState extends State<JoinGroup> {
   _updateData(List<dynamic> widgets) {
     characters = (widgets[0] as ListCharacterResponse).characters;
     groups = (widgets[1] as ListGroupResponse).groups;
-    currentCharacterIds =
-        widget.fatherGroup.characters.map((e) => e.id!).toList();
-    currentGroupsIds = widget.fatherGroup.subGroups.map((e) => e.id).toList();
   }
 
   @override
   void initState() {
     super.initState();
+    memberCharacterIds =
+        widget.fatherGroup.characters.map((e) => e.id!).toList();
+    memberGroupIds = widget.fatherGroup.subGroups.map((e) => e.id).toList();
+    fatherGroupIds = widget.fatherGroup.fatherGroups.map((e) => e.id).toList();
+    characterFilter.excludedCharacterIds = memberCharacterIds;
+    groupFilter.excludedGroupIds = [widget.fatherGroup.id, ...fatherGroupIds];
     myFuture = Future.wait([listCharacters(), listGroups()]);
   }
 
@@ -137,67 +138,73 @@ class _JoinGroupState extends State<JoinGroup> {
             _updateData(snapshot.data!);
             return Stack(
               children: [
-                SingleChildScrollView(
-                  controller: verticalController,
-                  scrollDirection: Axis.vertical,
-                  child: Center(
-                    child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: StatefulBuilder(builder: (context, panelState) {
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              getSelectionPanel(context, panelState),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  ElevatedButton(
-                                      onPressed: !itemSelected(context)
-                                          ? null
-                                          : () {
-                                              setState(() {
-                                                selectedGroups = [];
-                                                selectedCharacters = [];
-                                              });
-                                            },
-                                      child: Text(AppLocalizations.of(context)!
-                                          .reselect)),
-                                  ElevatedButton(
-                                      onPressed: !itemSelected(context)
-                                          ? null
-                                          : () {
-                                              if (GroupCategory.group ==
-                                                  widget.fatherGroup
-                                                      .groupCategory) {
-                                                getIt<GroupDao>().addGroup(
-                                                    AddGroupRequest(
-                                                        fatherGroupId: widget
-                                                            .fatherGroup.id,
-                                                        childGroupIds:
-                                                            selectedGroups
-                                                                .map(
-                                                                    (e) => e.id)
-                                                                .toList()));
-                                              } else {
-                                                getIt<GroupDao>().addCharacter(
-                                                    AddCharacterRequest(
-                                                        groupId: widget
-                                                            .fatherGroup.id,
-                                                        characterIds:
-                                                            selectedCharacters
-                                                                .map(
-                                                                    (e) => e.id)
-                                                                .toList()));
-                                              }
-                                            },
-                                      child: Text(AppLocalizations.of(context)!
-                                          .submitForm))
-                                ],
-                              )
-                            ],
-                          );
-                        })),
+                SizedBox(
+                  width: 800,
+                  child: SingleChildScrollView(
+                    controller: verticalController,
+                    scrollDirection: Axis.vertical,
+                    child: Center(
+                      child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child:
+                              StatefulBuilder(builder: (context, panelState) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                getSelectionPanel(context, panelState),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    ElevatedButton(
+                                        onPressed: !itemSelected(context)
+                                            ? null
+                                            : () {
+                                                setState(() {
+                                                  selectedGroups = [];
+                                                  selectedCharacters = [];
+                                                });
+                                              },
+                                        child: Text(
+                                            AppLocalizations.of(context)!
+                                                .reselect)),
+                                    ElevatedButton(
+                                        onPressed: !itemSelected(context)
+                                            ? null
+                                            : () {
+                                                if (GroupCategory.group ==
+                                                    widget.fatherGroup
+                                                        .groupCategory) {
+                                                  getIt<GroupDao>().addGroup(
+                                                      AddGroupRequest(
+                                                          fatherGroupId: widget
+                                                              .fatherGroup.id,
+                                                          childGroupIds:
+                                                              selectedGroups
+                                                                  .map((e) =>
+                                                                      e.id)
+                                                                  .toList()));
+                                                } else {
+                                                  getIt<GroupDao>().addCharacter(
+                                                      AddCharacterRequest(
+                                                          groupId: widget
+                                                              .fatherGroup.id,
+                                                          characterIds:
+                                                              selectedCharacters
+                                                                  .map((e) =>
+                                                                      e.id)
+                                                                  .toList()));
+                                                }
+                                              },
+                                        child: Text(
+                                            AppLocalizations.of(context)!
+                                                .submitForm))
+                                  ],
+                                )
+                              ],
+                            );
+                          })),
+                    ),
                   ),
                 ),
               ],

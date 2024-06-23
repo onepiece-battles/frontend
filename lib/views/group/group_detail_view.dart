@@ -420,8 +420,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                 ],
               ),
             ),
-            if (groupFullView.fatherGroups.isNotEmpty)
-              getFatherList(context),
+            if (groupFullView.fatherGroups.isNotEmpty) getFatherList(context),
             Text(
               AppLocalizations.of(context)!.thisGroup,
               style: OnepieceFonts.navigationTopBarStyleClickable,
@@ -445,7 +444,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
-          children: groupFullView.fatherGroups.map((e) {
+          children: groupFullView.fatherGroups.reversed.toList().map((e) {
             return Row(
               children: [
                 TextButton(
@@ -453,8 +452,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                       context.goNamed('groupDetails',
                           extra: e.id,
                           pathParameters: {
-                            'name':
-                            I18nHelper.getDisplayNameFromI18n(e.name!)
+                            'name': I18nHelper.getDisplayNameFromI18n(e.name!)
                           });
                     },
                     child: Row(
@@ -474,7 +472,10 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                         )
                       ],
                     )),
-                const Icon(Icons.chevron_right, size: 20,)
+                const Icon(
+                  Icons.chevron_right,
+                  size: 20,
+                )
               ],
             );
           }).toList(),
