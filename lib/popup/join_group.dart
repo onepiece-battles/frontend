@@ -1,6 +1,9 @@
 import 'dart:async';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:openapi/api.dart';
 import 'package:get_it/get_it.dart';
 import 'package:path/path.dart';
@@ -212,6 +215,18 @@ class _JoinGroupState extends State<JoinGroup> {
                                                                           e.id)
                                                                       .toList()));
                                                     }
+                                                    Navigator.pop(context);
+                                                    context.replaceNamed(
+                                                        'groupDetails',
+                                                        extra: widget
+                                                            .fatherGroup.id,
+                                                        pathParameters: {
+                                                          'name': I18nHelper
+                                                              .getDisplayNameFromI18n(
+                                                                  widget
+                                                                      .fatherGroup
+                                                                      .name)
+                                                        });
                                                   },
                                             child: Text(
                                                 AppLocalizations.of(context)!
@@ -349,8 +364,8 @@ class _JoinGroupState extends State<JoinGroup> {
     if (selectedCharacters.isEmpty) {
       return Row(mainAxisAlignment: MainAxisAlignment.start, children: [
         Container(
-          width: 110,
-          height: 110,
+          width: 120,
+          height: 120,
           decoration: const BoxDecoration(
             borderRadius: BorderRadius.all(Radius.circular(2.0)),
           ),
@@ -367,12 +382,13 @@ class _JoinGroupState extends State<JoinGroup> {
         int crossAxisCount = (constraint.maxWidth / 110).ceil().clamp(2, 8);
         return SizedBox(
           width: 880,
-          height: ((selectedCharacters.length / crossAxisCount).ceil() * 110.0)
-              .clamp(110, 440),
+          height: ((selectedCharacters.length / crossAxisCount).ceil() * 120.0)
+              .clamp(120, 480),
           child: GridView.builder(
             itemCount: selectedCharacters.length,
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: crossAxisCount,
+              childAspectRatio: 0.8,
               mainAxisSpacing: 5,
               crossAxisSpacing: 5,
             ),
@@ -386,14 +402,18 @@ class _JoinGroupState extends State<JoinGroup> {
               },
               child: Column(
                 children: [
-                  ImageHelper.getRoundImageFrame(
-                      100,
-                      100,
-                      2,
-                      OnepieceColors.liteFancyBlue,
-                      10,
-                      Base64Helper.decode(
-                          selectedCharacters[index].profileImage!)),
+                  Flexible(
+                      child: ImageHelper.getRoundImageFrame(
+                          100,
+                          100,
+                          2,
+                          OnepieceColors.liteFancyBlue,
+                          10,
+                          Base64Helper.decode(
+                              selectedCharacters[index].profileImage!))),
+                  const SizedBox(
+                    height: 3,
+                  ),
                   Text(I18nHelper.getDisplayNameFromI18n(
                       selectedCharacters[index].name))
                 ],
@@ -411,12 +431,13 @@ class _JoinGroupState extends State<JoinGroup> {
         int crossAxisCount = (constraint.maxWidth / 110).ceil().clamp(2, 8);
         return SizedBox(
           width: 880,
-          height: ((characters.length / crossAxisCount).ceil() * 110.0)
-              .clamp(110, 440),
+          height: ((characters.length / crossAxisCount).ceil() * 120.0)
+              .clamp(120, 480),
           child: GridView.builder(
             itemCount: characters.length,
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: crossAxisCount,
+              childAspectRatio: 0.8,
               mainAxisSpacing: 5,
               crossAxisSpacing: 5,
             ),
@@ -430,13 +451,18 @@ class _JoinGroupState extends State<JoinGroup> {
               },
               child: Column(
                 children: [
-                  ImageHelper.getRoundImageFrame(
-                      100,
-                      100,
-                      2,
-                      OnepieceColors.liteFancyBlue,
-                      10,
-                      Base64Helper.decode(characters[index].profileImage!)),
+                  Flexible(
+                      child: ImageHelper.getRoundImageFrame(
+                          100,
+                          100,
+                          2,
+                          OnepieceColors.liteFancyBlue,
+                          10,
+                          Base64Helper.decode(
+                              characters[index].profileImage!))),
+                  const SizedBox(
+                    height: 3,
+                  ),
                   Text(
                       I18nHelper.getDisplayNameFromI18n(characters[index].name))
                 ],
@@ -472,12 +498,13 @@ class _JoinGroupState extends State<JoinGroup> {
       int crossAxisCount = (constraint.maxWidth / 110).ceil().clamp(2, 8);
       return SizedBox(
         width: 880,
-        height: ((selectedGroups.length / crossAxisCount).ceil() * 110.0)
-            .clamp(110, 440),
+        height: ((selectedGroups.length / crossAxisCount).ceil() * 120.0)
+            .clamp(120, 480),
         child: GridView.builder(
           itemCount: selectedGroups.length,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: crossAxisCount,
+            childAspectRatio: 0.8,
             mainAxisSpacing: 5,
             crossAxisSpacing: 5,
           ),
@@ -489,13 +516,25 @@ class _JoinGroupState extends State<JoinGroup> {
                   _searchGroup(panelState);
                 });
               },
-              child: ImageHelper.getRoundImageFrame(
-                  100,
-                  100,
-                  2,
-                  OnepieceColors.liteFancyBlue,
-                  10,
-                  Base64Helper.decode(selectedGroups[index].profileImage!))),
+              child: Column(
+                children: [
+                  Flexible(
+                    child: ImageHelper.getRoundImageFrame(
+                        100,
+                        100,
+                        2,
+                        OnepieceColors.liteFancyBlue,
+                        10,
+                        Base64Helper.decode(
+                            selectedGroups[index].profileImage!)),
+                  ),
+                  const SizedBox(
+                    height: 3,
+                  ),
+                  Text(I18nHelper.getDisplayNameFromI18n(
+                      selectedGroups[index].name))
+                ],
+              )),
         ),
       );
     });
@@ -507,11 +546,12 @@ class _JoinGroupState extends State<JoinGroup> {
       return SizedBox(
         width: 880,
         height:
-            ((groups.length / crossAxisCount).ceil() * 110.0).clamp(110, 440),
+            ((groups.length / crossAxisCount).ceil() * 110.0).clamp(120, 480),
         child: GridView.builder(
           itemCount: groups.length,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: crossAxisCount,
+            childAspectRatio: 0.8,
             mainAxisSpacing: 5,
             crossAxisSpacing: 5,
           ),
@@ -523,13 +563,23 @@ class _JoinGroupState extends State<JoinGroup> {
                   _searchGroup(panelState);
                 });
               },
-              child: ImageHelper.getRoundImageFrame(
-                  100,
-                  100,
-                  2,
-                  OnepieceColors.liteFancyBlue,
-                  10,
-                  Base64Helper.decode(groups[index].profileImage!))),
+              child: Column(
+                children: [
+                  Flexible(
+                    child: ImageHelper.getRoundImageFrame(
+                        100,
+                        100,
+                        2,
+                        OnepieceColors.liteFancyBlue,
+                        10,
+                        Base64Helper.decode(groups[index].profileImage!)),
+                  ),
+                  const SizedBox(
+                    height: 3,
+                  ),
+                  Text(I18nHelper.getDisplayNameFromI18n(groups[index].name))
+                ],
+              )),
         ),
       );
     });
