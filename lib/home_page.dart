@@ -36,6 +36,8 @@ class HomePage extends StatefulWidget {
 
 class HomePageState extends State<HomePage> {
   final String setting = "setting";
+  final String profile = "profile";
+  String currentResource = "";
   final int screenChangeBar = 800;
   var _tabTextIndexSelected =
       I18nHelper.convertToOnepieceLocale(getIt<Locale>()).toString() ==
@@ -385,7 +387,133 @@ class HomePageState extends State<HomePage> {
                       style: const TextStyle(
                           fontSize: 18, fontWeight: FontWeight.w800)),
                 ),
-                _getSideMenuList(context, constraints),
+                _getResourceMenu(context, constraints),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 10, 0, 10),
+                  child: Text(AppLocalizations.of(context)!.user,
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.w800)),
+                ),
+                Material(
+                  type: MaterialType.transparency,
+                  child: Container(
+                    padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+                    decoration: const BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(5))),
+                    child: ListTile(
+                      minLeadingWidth: 10,
+                      contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      leading: ImageHelper.getSvgIconWithColor(
+                          'images/svgs/profile.svg',
+                          18,
+                          18,
+                          OnepieceColors.fancyBlue),
+                      selected: profile.compareTo(currentResource)==0,
+                      selectedTileColor: OnepieceColors.liteFancyBlue,
+                      onTap: () {
+                        setState(
+                          () {
+                            currentResource = profile;
+                            context.goNamed('userProfile',
+                                extra: getIt<User>().id,
+                                pathParameters: {
+                                  'name': getIt<User>().nickname
+                                });
+                          },
+                        );
+                      },
+                      trailing: Padding(
+                        padding: const EdgeInsets.fromLTRB(0, 0, 3, 0),
+                        child: Container(
+                          width: 3,
+                          height: 30,
+                          decoration: BoxDecoration(
+                              color: OnepieceColors.menuBackgroundColor,
+                              borderRadius: BorderRadius.circular(3)),
+                        ),
+                      ),
+                      hoverColor: OnepieceColors.liteFancyBlue,
+                      title: constraints.maxWidth > screenChangeBar
+                          ? Text(
+                              AppLocalizations.of(context)!.userProfile,
+                              textAlign: TextAlign.left,
+                              style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: OnepieceFonts.sideMenuFontWeight,
+                                  color: currentResource == "profile"
+                                      ? OnepieceColors.fancyBlue
+                                      : OnepieceColors.menuTextColor),
+                            )
+                          : const Text(""),
+                    ),
+                  ),
+                ),
+                Material(
+                  type: MaterialType.transparency,
+                  child: Container(
+                    padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+                    decoration: const BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(5))),
+                    child: ListTile(
+                      minLeadingWidth: 10,
+                      contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      leading: const Icon(
+                        Icons.logout,
+                        size: 20,
+                        color: OnepieceColors.fancyBlue,
+                      ),
+                      // selected: currentResource == "profile",
+                      // selectedTileColor: OnepieceColors.liteFancyBlue,
+                      onTap: () {
+                        setState(
+                          () {
+                            currentResource = "";
+                            getIt<UserDao>()
+                                .logout(LogoutRequest(userId: getIt<User>().id))
+                                .then((value) {
+                              getIt.registerLazySingleton<User>(() =>
+                                  User(id: "", username: "", nickname: ""));
+                            });
+                            context.replace(AppRouter.loginPath);
+                          },
+                        );
+                      },
+                      trailing: Padding(
+                        padding: const EdgeInsets.fromLTRB(0, 0, 3, 0),
+                        child: Container(
+                          width: 3,
+                          height: 30,
+                          decoration: BoxDecoration(
+                              color: OnepieceColors.menuBackgroundColor,
+                              borderRadius: BorderRadius.circular(3)),
+                        ),
+                      ),
+                      selectedColor: OnepieceColors.liteFancyBlue,
+                      hoverColor: OnepieceColors.liteFancyBlue,
+                      title: constraints.maxWidth > screenChangeBar
+                          ? Text(
+                              AppLocalizations.of(context)!.logout,
+                              textAlign: TextAlign.left,
+                              style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: OnepieceFonts.sideMenuFontWeight,
+                                  color: currentResource == "profile"
+                                      ? OnepieceColors.fancyBlue
+                                      : OnepieceColors.menuTextColor),
+                            )
+                          : const Text(""),
+                    ),
+                  ),
+                ),
+                const SizedBox(
+                  height: 40,
+                ),
               ],
             ),
           ),
@@ -448,7 +576,7 @@ class HomePageState extends State<HomePage> {
                 ),
               ),
             ),
-          )
+          ),
         ],
       ),
     );
@@ -685,8 +813,7 @@ class HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _getSideMenuList(BuildContext context, BoxConstraints constraints) {
-    String currentResource = "";
+  Widget _getResourceMenu(BuildContext context, BoxConstraints constraints) {
     List<String> routes = GoRouterState.of(context)
         .matchedLocation
         .split("/")
@@ -696,23 +823,20 @@ class HomePageState extends State<HomePage> {
       currentResource = routes[0];
     }
     Map<String, Widget> resourceToIconMap = {
-      ResourceType.FRUIT.toString(): ImageHelper.getSvgIcon(
-        'images/svgs/fruit.svg',
-        20,
-        20,
-      ),
-      ResourceType.GROUP.toString(): const Icon(Icons.group,
-          color: OnepieceColors.menuIconColor, size: 20),
+      ResourceType.FRUIT.toString(): ImageHelper.getSvgIconWithColor(
+          'images/svgs/fruit.svg', 20, 20, OnepieceColors.fancyBlue),
+      ResourceType.GROUP.toString():
+          const Icon(Icons.group, color: OnepieceColors.fancyBlue, size: 20),
       ResourceType.USER.toString(): const Icon(Icons.manage_accounts,
-          color: OnepieceColors.menuIconColor, size: 20),
+          color: OnepieceColors.fancyBlue, size: 20),
       ResourceType.BATTLE.toString(): const Icon(Icons.sports_mma_outlined,
-          color: OnepieceColors.menuIconColor, size: 20),
+          color: OnepieceColors.fancyBlue, size: 20),
       ResourceType.CHARACTER.toString():
-          const Icon(Icons.face, color: OnepieceColors.menuIconColor, size: 20),
+          const Icon(Icons.face, color: OnepieceColors.fancyBlue, size: 20),
       ResourceType.ISSUE.toString(): const Icon(Icons.add_alert,
-          color: OnepieceColors.menuIconColor, size: 20),
-      setting: const Icon(Icons.settings,
-          color: OnepieceColors.menuIconColor, size: 20)
+          color: OnepieceColors.fancyBlue, size: 20),
+      setting:
+          const Icon(Icons.settings, color: OnepieceColors.fancyBlue, size: 20)
     };
 
     Map<String, String> resourceToLocationMap = {

@@ -421,12 +421,16 @@ class _GroupDetailViewState extends State<GroupDetailView> {
               ),
             ),
             if (groupFullView.fatherGroups.isNotEmpty) getFatherList(context),
-            const SizedBox(height: 10,),
+            const SizedBox(
+              height: 10,
+            ),
             Text(
               AppLocalizations.of(context)!.thisGroup,
               style: OnepieceFonts.navigationTopBarStyleClickable,
             ),
-            const SizedBox(height: 10,),
+            const SizedBox(
+              height: 10,
+            ),
             root.group.groupCategory == GroupCategory.group
                 ? buildTreeNode(root, listState, false, 1)
                 : buildCharacterList(context),
@@ -444,7 +448,9 @@ class _GroupDetailViewState extends State<GroupDetailView> {
           AppLocalizations.of(context)!.fatherGroups,
           style: OnepieceFonts.navigationTopBarStyleClickable,
         ),
-        const SizedBox(height: 10,),
+        const SizedBox(
+          height: 10,
+        ),
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: groupFullView.fatherGroups.reversed.toList().map((e) {
@@ -660,28 +666,29 @@ class _GroupDetailViewState extends State<GroupDetailView> {
       );
     } else {
       CharacterNode actualNode = node as CharacterNode;
-      return SizedBox(
-        width: 600,
-        height: 100,
-        child: ExpansionTile(
-          title: Row(
-            children: [
-              ImageHelper.getRoundImageFrame(
-                  50,
-                  50,
-                  3,
-                  OnepieceColors.liteFancyBlue,
-                  3,
-                  Base64Helper.decode(node.characterInGroupView.profileImage!)),
-              Text(I18nHelper.getDisplayNameFromI18n(
-                  actualNode.characterInGroupView.name!)),
-            ],
-          ),
+      return ExpansionTile(
+        childrenPadding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
+        expandedAlignment: Alignment.centerLeft,
+        title: Row(
           children: [
-            Text(groupPositionToDisplayValue[
-                node.characterInGroupView.position]!)
+            ImageHelper.getRoundImageFrame(
+                40,
+                40,
+                1.5,
+                OnepieceColors.liteFancyBlue,
+                3,
+                Base64Helper.decode(node.characterInGroupView.profileImage!)),
+            Text(I18nHelper.getDisplayNameFromI18n(
+                actualNode.characterInGroupView.name!)),
           ],
         ),
+        children: [
+          SizedBox(
+            height: 30,
+            child: Text(groupPositionToDisplayValue[
+                node.characterInGroupView.position]!),
+          )
+        ],
       );
     }
   }
