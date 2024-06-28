@@ -292,5 +292,8 @@
   "reselect": "重选",
   "groupStructure": "团队结构",
   "fatherGroups": "上级团队",
-  "thisGroup": "当前团队"
+  "thisGroup": "当前团队",
+  "selected": "已选择",
+  "selectable": "可选择",
+  "selectNewMembers": "添加新成员"
 }

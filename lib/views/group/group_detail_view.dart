@@ -421,10 +421,12 @@ class _GroupDetailViewState extends State<GroupDetailView> {
               ),
             ),
             if (groupFullView.fatherGroups.isNotEmpty) getFatherList(context),
+            const SizedBox(height: 10,),
             Text(
               AppLocalizations.of(context)!.thisGroup,
               style: OnepieceFonts.navigationTopBarStyleClickable,
             ),
+            const SizedBox(height: 10,),
             root.group.groupCategory == GroupCategory.group
                 ? buildTreeNode(root, listState, false, 1)
                 : buildCharacterList(context),
@@ -442,12 +444,13 @@ class _GroupDetailViewState extends State<GroupDetailView> {
           AppLocalizations.of(context)!.fatherGroups,
           style: OnepieceFonts.navigationTopBarStyleClickable,
         ),
+        const SizedBox(height: 10,),
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: groupFullView.fatherGroups.reversed.toList().map((e) {
             return Row(
               children: [
-                TextButton(
+                ElevatedButton(
                     onPressed: () {
                       context.goNamed('groupDetails',
                           extra: e.id,
@@ -636,9 +639,9 @@ class _GroupDetailViewState extends State<GroupDetailView> {
         title: Row(
           children: [
             ImageHelper.getRoundImageFrame(
-                50,
-                50,
-                3,
+                40,
+                40,
+                1.5,
                 OnepieceColors.liteFancyBlue,
                 3,
                 Base64Helper.decode(node.group.profileImage!)),
