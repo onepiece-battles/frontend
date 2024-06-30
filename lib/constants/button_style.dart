@@ -11,4 +11,15 @@ class OnepieceButtonStyle {
     foregroundColor: Colors.white
     );
   }
+
+  static ButtonStyle getFatherGroupButtonStyle() {
+    return ElevatedButton.styleFrom(
+        backgroundColor: OnepieceColors.fancyBlue,
+        padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 10, 0),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(3),
+        ),
+        foregroundColor: Colors.white
+    );
+  }
 }
