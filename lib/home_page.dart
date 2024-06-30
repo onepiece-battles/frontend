@@ -304,6 +304,7 @@ class HomePageState extends State<HomePage> {
                 value: selectedRole,
                 onChanged: (UserRole? value) {
                   selectedRole = value!;
+                  currentResource = "";
                   UpdateLoginRoleRequest request =
                       UpdateLoginRoleRequest(role: selectedRole);
                   getIt<UserDao>().updateLoginRole(request).then((value) {
@@ -318,7 +319,7 @@ class HomePageState extends State<HomePage> {
                         .map((e) => e.resourceType!)
                         .where((e) => !notShownResources.contains(e))
                         .toList();
-                    context.goNamed('userHome',
+                    context.replaceNamed('userHome',
                         extra: getIt<User>().id,
                         pathParameters: {'name': getIt<User>().nickname});
                   });

@@ -10,6 +10,7 @@ import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:one_piece_battles_flutter/utils/image_helper.dart';
 import 'package:openapi/api.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../../constants/button_style.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
 import '../../popup/onepiece_alert.dart';
@@ -326,7 +327,8 @@ class _GroupDetailViewState extends State<GroupDetailView> {
             AppLocalizations.of(context)!.groupCategory,
             style: OnepieceFonts.dropDownItemStyle,
           ),
-          onChanged: !_basicInfoEditable
+          onChanged: !_basicInfoEditable ||
+                  GroupCategory.group == groupFullView.groupCategory
               ? null
               : (value) {
                   basicInfoState(() {
@@ -457,6 +459,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
             return Row(
               children: [
                 ElevatedButton(
+                    style: OnepieceButtonStyle.getFatherGroupButtonStyle(),
                     onPressed: () {
                       context.goNamed('groupDetails',
                           extra: e.id,
