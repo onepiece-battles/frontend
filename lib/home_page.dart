@@ -411,7 +411,7 @@ class HomePageState extends State<HomePage> {
                           18,
                           18,
                           OnepieceColors.fancyBlue),
-                      selected: profile.compareTo(currentResource)==0,
+                      selected: profile == currentResource,
                       selectedTileColor: OnepieceColors.liteFancyBlue,
                       onTap: () {
                         setState(
@@ -814,14 +814,6 @@ class HomePageState extends State<HomePage> {
   }
 
   Widget _getResourceMenu(BuildContext context, BoxConstraints constraints) {
-    List<String> routes = GoRouterState.of(context)
-        .matchedLocation
-        .split("/")
-        .where((element) => element != '' && element != "home")
-        .toList();
-    if (routes.isNotEmpty) {
-      currentResource = routes[0];
-    }
     Map<String, Widget> resourceToIconMap = {
       ResourceType.FRUIT.toString(): ImageHelper.getSvgIconWithColor(
           'images/svgs/fruit.svg', 20, 20, OnepieceColors.fancyBlue),
