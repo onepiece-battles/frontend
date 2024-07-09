@@ -150,6 +150,7 @@ class HomePageState extends State<HomePage> {
                   _getMiddleArrow(),
                   TextButton(
                     onPressed: () {
+                      currentResource = "";
                       var decodedUri = Uri.decodeFull(entry.value);
                       if (decodedUri == getIt<User>().nickname) {
                         context.goNamed('userHome',
