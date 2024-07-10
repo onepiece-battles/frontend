@@ -1,7 +1,10 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:one_piece_battles_flutter/repository/image_dao.dart';
+import 'package:openapi/api.dart';
 
+import '../app_router.dart';
 import '../constants/onepiece_colors.dart';
 
 class ImageHelper {
@@ -155,5 +158,11 @@ class ImageHelper {
             iconPath, 3, 3, originalColor ? null : OnepieceColors.iconGreen),
       ),
     );
+  }
+
+  static Future<String> loadImageByUri(String uri)  async {
+    return await getIt<ImageDao>().getImage(GetImageRequest(uri: uri)).then((value) {
+      return value!.image;
+    });
   }
 }

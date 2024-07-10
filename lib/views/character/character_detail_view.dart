@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/components/digit_text_form_field.dart';
+import 'package:one_piece_battles_flutter/components/image_lazy_loader.dart';
 import 'package:one_piece_battles_flutter/components/string_text_form_field.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
@@ -451,13 +452,19 @@ class _CharacterDetailState extends State<CharacterDetail> {
           ),
           Padding(
             padding: EdgeInsets.fromLTRB(sideWidth, 8, 8, 8),
-            child: ImageHelper.getRoundImageFrame(
-                200,
-                200,
-                3,
-                OnepieceColors.liteFancyBlue,
-                100,
-                Base64Helper.decode(character.profileImage!)),
+            child: character.imageUri != null
+                ? ImageLazyLoader(
+                    uri: character.imageUri!,
+                    width: 200,
+                    borderWidth: 3,
+                    borderRadios: 200)
+                : ImageHelper.getRoundImageFrame(
+                    200,
+                    200,
+                    3,
+                    OnepieceColors.liteFancyBlue,
+                    200,
+                    Base64Helper.decode(character.profileImage!)),
           ),
           Form(
             key: _basicFormKey,
