@@ -4,6 +4,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
+import 'package:one_piece_battles_flutter/components/image_lazy_loader.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:one_piece_battles_flutter/repository/character_dao.dart';
@@ -888,17 +889,26 @@ class _CharacterViewState extends State<CharacterView> {
                   });
             },
             cells: [
-              DataCell(
-                Padding(
+              if (entry.value.imageUri == null)
+                DataCell(
+                  Padding(
+                      padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+                      child: ImageHelper.getRoundImageFrame(
+                          40,
+                          40,
+                          1.5,
+                          OnepieceColors.liteFancyBlue,
+                          40,
+                          Base64Helper.decode(entry.value.profileImage!))),
+                ),
+              if (entry.value.imageUri != null)
+                DataCell(
+                  Padding(
                     padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                    child: ImageHelper.getRoundImageFrame(
-                        40,
-                        40,
-                        1.5,
-                        OnepieceColors.liteFancyBlue,
-                        40,
-                        Base64Helper.decode(entry.value.profileImage!))),
-              ),
+                    child:
+                    ImageLazyLoader(uri: entry.value.imageUri!, width: 40, borderWidth: 1.5, borderRadios: 40)
+                  ),
+                ),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
                 child:

@@ -90,7 +90,7 @@ Class | Method | HTTP request | Description
 *GroupApi* | [**listChildGroups**](doc//GroupApi.md#listchildgroups) | **POST** /api/onepiece/group/list_child_groups | 
 *GroupApi* | [**listGroups**](doc//GroupApi.md#listgroups) | **POST** /api/onepiece/group/list | 
 *GroupApi* | [**updateGroup**](doc//GroupApi.md#updategroup) | **POST** /api/onepiece/group/update | 
-*ImageApi* | [**getImage**](doc//ImageApi.md#getimage) | **POST** /api/onepiece/image/get_by_target_id/{id} | 
+*ImageApi* | [**getImage**](doc//ImageApi.md#getimage) | **POST** /api/onepiece/image/get_image | 
 *ImageApi* | [**uploadImage**](doc//ImageApi.md#uploadimage) | **POST** /api/onepiece/image/add | 
 *IssueApi* | [**batchUpdateIssue**](doc//IssueApi.md#batchupdateissue) | **POST** /api/onepiece/issue/batch_update | 
 *IssueApi* | [**createIssue**](doc//IssueApi.md#createissue) | **POST** /api/onepiece/issue/create | 
