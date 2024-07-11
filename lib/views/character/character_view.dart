@@ -14,6 +14,7 @@ import 'package:one_piece_battles_flutter/utils/permission_check.dart';
 import 'package:openapi/api.dart';
 import '../../constants/button_style.dart';
 import '../../constants/onepiece_tag.dart';
+import '../../repository/support_dao.dart';
 import '../../utils/i18n_helper.dart';
 import '../../utils/image_helper.dart';
 
@@ -222,6 +223,17 @@ class _CharacterViewState extends State<CharacterView> {
                       AppLocalizations.of(context)!.create,
                     )),
               ),
+            ),
+          if (getIt<User>().loginRole == UserRole.NIKA)
+            Padding(
+              padding: const EdgeInsets.only(right: 10.0),
+              child: ElevatedButton(
+                  onPressed: () {
+                    getIt<SupportDao>().updateUri(UpdateUriRequest(
+                        resourceId: "", resourceType: ResourceType.CHARACTER));
+                  },
+                  style: OnepieceButtonStyle.getDefaultStyle(),
+                  child: const Text("update uri")),
             ),
           Padding(
             padding: const EdgeInsets.fromLTRB(0, 0, 6, 0),
@@ -889,26 +901,24 @@ class _CharacterViewState extends State<CharacterView> {
                   });
             },
             cells: [
-              if (entry.value.imageUri == null)
-                DataCell(
-                  Padding(
-                      padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                      child: ImageHelper.getRoundImageFrame(
+              DataCell(
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+                  child: entry.value.imageUri == null
+                      ? ImageHelper.getRoundImageFrame(
                           40,
                           40,
                           1.5,
                           OnepieceColors.liteFancyBlue,
                           40,
-                          Base64Helper.decode(entry.value.profileImage!))),
+                          Base64Helper.decode(entry.value.profileImage!))
+                      : ImageLazyLoader(
+                          uri: entry.value.imageUri!,
+                          width: 40,
+                          borderWidth: 1.5,
+                          borderRadios: 40),
                 ),
-              if (entry.value.imageUri != null)
-                DataCell(
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                    child:
-                    ImageLazyLoader(uri: entry.value.imageUri!, width: 40, borderWidth: 1.5, borderRadios: 40)
-                  ),
-                ),
+              ),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
                 child:

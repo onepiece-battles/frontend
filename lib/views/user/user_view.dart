@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
+import 'package:one_piece_battles_flutter/components/image_lazy_loader.dart';
+import 'package:one_piece_battles_flutter/repository/support_dao.dart';
 import 'package:openapi/api.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../constants/button_style.dart';
@@ -104,7 +106,8 @@ class _UserViewState extends State<UserView> {
       padding: const EdgeInsets.all(15.0),
       child: Column(
         children: [
-          Expanded(child: SingleChildScrollView(
+          Expanded(
+              child: SingleChildScrollView(
             controller: scrollController,
             scrollDirection: Axis.vertical,
             child: Scrollbar(
@@ -130,9 +133,10 @@ class _UserViewState extends State<UserView> {
                 ),
               ),
             ),
-          ))
-          ,
-          const SizedBox(height: 15,),
+          )),
+          const SizedBox(
+            height: 15,
+          ),
           if (totalPageNum > 1)
             Column(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -146,12 +150,23 @@ class _UserViewState extends State<UserView> {
   }
 
   Widget _createHeader(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(0, 0, 0, 20),
-      child: Text(
-        AppLocalizations.of(context)!.user,
-        style: OnepieceFonts.headerStyle,
-      ),
+    return Row(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(0, 0, 10, 20),
+          child: Text(
+            AppLocalizations.of(context)!.user,
+            style: OnepieceFonts.headerStyle,
+          ),
+        ),
+        ElevatedButton(
+            onPressed: () {
+              getIt<SupportDao>().updateUri(UpdateUriRequest(
+                  resourceId: "", resourceType: ResourceType.USER));
+            },
+            style: OnepieceButtonStyle.getDefaultStyle(),
+            child: const Text("update uri"))
+      ],
     );
   }
 
@@ -486,13 +501,19 @@ class _UserViewState extends State<UserView> {
               DataCell(
                 Padding(
                   padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                  child: ImageHelper.getRoundImageFrame(
-                      40,
-                      40,
-                      1.5,
-                      OnepieceColors.liteFancyBlue,
-                      40,
-                      Base64Helper.decode(user.profileImage!)),
+                  child: user.imageUri != null
+                      ? ImageLazyLoader(
+                          uri: user.imageUri!,
+                          width: 40,
+                          borderWidth: 1.5,
+                          borderRadios: 40)
+                      : ImageHelper.getRoundImageFrame(
+                          40,
+                          40,
+                          1.5,
+                          OnepieceColors.liteFancyBlue,
+                          40,
+                          Base64Helper.decode(user.profileImage!)),
                 ),
               ),
               DataCell(Padding(

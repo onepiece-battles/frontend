@@ -797,7 +797,8 @@ class _BattleViewState extends State<BattleView> {
                                 OnepieceColors.liteFancyBlue),
                           ),
                         )
-                      : ImageHelper.getRoundImageFrame(
+                      :
+                  ImageHelper.getRoundImageFrame(
                           40,
                           40,
                           1.5,

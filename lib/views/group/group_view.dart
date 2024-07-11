@@ -6,9 +6,11 @@ import 'package:one_piece_battles_flutter/repository/group_dao.dart';
 import 'package:openapi/api.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../../components/image_lazy_loader.dart';
 import '../../constants/button_style.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
+import '../../repository/support_dao.dart';
 import '../../utils/base64_helper.dart';
 import '../../utils/data_validator.dart';
 import '../../utils/i18n_helper.dart';
@@ -188,6 +190,17 @@ class _GroupViewState extends State<GroupView> {
                     style: OnepieceButtonStyle.getDefaultStyle(),
                     child: Text(AppLocalizations.of(context)!.create)),
               ),
+            ),
+          if (getIt<User>().loginRole == UserRole.NIKA)
+            Padding(
+              padding: const EdgeInsets.only(right: 10.0),
+              child: ElevatedButton(
+                  onPressed: () {
+                    getIt<SupportDao>().updateUri(UpdateUriRequest(
+                        resourceId: "", resourceType: ResourceType.GROUP));
+                  },
+                  style: OnepieceButtonStyle.getDefaultStyle(),
+                  child: const Text("update uri")),
             ),
           Padding(
             padding: const EdgeInsets.fromLTRB(0, 0, 6, 0),
@@ -552,13 +565,19 @@ class _GroupViewState extends State<GroupView> {
               DataCell(
                 Padding(
                     padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                    child: ImageHelper.getRoundImageFrame(
-                        40,
-                        40,
-                        1.5,
-                        OnepieceColors.liteFancyBlue,
-                        40,
-                        Base64Helper.decode(entry.value.profileImage!))),
+                    child: entry.value.imageUri != null
+                        ? ImageLazyLoader(
+                            uri: entry.value.imageUri!,
+                            width: 40,
+                            borderWidth: 1.5,
+                            borderRadios: 40)
+                        : ImageHelper.getRoundImageFrame(
+                            40,
+                            40,
+                            1.5,
+                            OnepieceColors.liteFancyBlue,
+                            40,
+                            Base64Helper.decode(entry.value.profileImage!))),
               ),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
@@ -578,10 +597,9 @@ class _GroupViewState extends State<GroupView> {
                   padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
                   child: SizedBox(
                     width: 700,
-                    child:
-                    entry.value.groupCategory==GroupCategory.group?
-                        _createGroupList(entry.value.subGroups):
-                    _createCharacterList(entry.value.characterInGroup),
+                    child: entry.value.groupCategory == GroupCategory.group
+                        ? _createGroupList(entry.value.subGroups)
+                        : _createCharacterList(entry.value.characterInGroup),
                   ),
                 ),
               ),
@@ -615,13 +633,13 @@ class _GroupViewState extends State<GroupView> {
                     showDuration: const Duration(seconds: 1),
                     child: Padding(
                         padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                        child: ImageHelper.getRoundImageFrame(
-                            40,
-                            40,
-                            1.5,
-                            OnepieceColors.liteFancyBlue,
-                            40,
-                            Base64Helper.decode(character.profileImage!))),
+                        child: character.imageUri == null
+                            ? const Text("null")
+                            : ImageLazyLoader(
+                                uri: character.imageUri!,
+                                width: 40,
+                                borderWidth: 1.5,
+                                borderRadios: 40)),
                   ),
                 ))
             .toList(),
@@ -638,30 +656,35 @@ class _GroupViewState extends State<GroupView> {
       child: Row(
         children: groups
             .map((group) => InkWell(
-          hoverColor: Colors.transparent,
-          onTap: () {
-            context.goNamed('groupDetails',
-                extra: group.id,
-                pathParameters: {
-                  'name':
-                  I18nHelper.getDisplayNameFromI18n(group.name!)
-                });
-          },
-          child: Tooltip(
-            message: I18nHelper.getDisplayNameFromI18n(group.name),
-            preferBelow: false,
-            showDuration: const Duration(seconds: 1),
-            child: Padding(
-                padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                child: ImageHelper.getRoundImageFrame(
-                    40,
-                    40,
-                    1.5,
-                    OnepieceColors.liteFancyBlue,
-                    40,
-                    Base64Helper.decode(group.profileImage!))),
-          ),
-        ))
+                  hoverColor: Colors.transparent,
+                  onTap: () {
+                    context.goNamed('groupDetails',
+                        extra: group.id,
+                        pathParameters: {
+                          'name': I18nHelper.getDisplayNameFromI18n(group.name!)
+                        });
+                  },
+                  child: Tooltip(
+                    message: I18nHelper.getDisplayNameFromI18n(group.name),
+                    preferBelow: false,
+                    showDuration: const Duration(seconds: 1),
+                    child: Padding(
+                        padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+                        child: group.imageUri == null
+                            ? ImageHelper.getRoundImageFrame(
+                                40,
+                                40,
+                                1.5,
+                                OnepieceColors.liteFancyBlue,
+                                40,
+                                Base64Helper.decode(group.profileImage!))
+                            : ImageLazyLoader(
+                                uri: group.imageUri!,
+                                width: 40,
+                                borderWidth: 1.5,
+                                borderRadios: 40)),
+                  ),
+                ))
             .toList(),
       ),
     );

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:one_piece_battles_flutter/components/image_lazy_loader.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_tag.dart';
 import 'package:one_piece_battles_flutter/repository/group_dao.dart';
@@ -264,13 +265,16 @@ class _SearchPopupState extends State<SearchPopup> {
                         children: [
                           Padding(
                             padding: const EdgeInsets.fromLTRB(3, 3, 6, 3),
-                            child: ImageHelper.getRoundImageFrame(
+                            child: 
+                            character.imageUri==null?
+                            ImageHelper.getRoundImageFrame(
                                 50,
                                 50,
                                 2,
                                 OnepieceColors.liteFancyBlue,
                                 10,
-                                Base64Helper.decode(character.profileImage!)),
+                                Base64Helper.decode(character.profileImage!)):
+                            ImageLazyLoader(uri: character.imageUri!, width: 50, borderWidth: 2, borderRadios: 10),
                           ),
                           Text(
                             I18nHelper.getDisplayNameFromI18n(character.name),
@@ -407,13 +411,16 @@ class _SearchPopupState extends State<SearchPopup> {
                           children: [
                             Padding(
                               padding: const EdgeInsets.fromLTRB(3, 6, 3, 3),
-                              child: ImageHelper.getRoundImageFrame(
+                              child: 
+                              group.imageUri==null?
+                              ImageHelper.getRoundImageFrame(
                                   50,
                                   50,
                                   2,
                                   OnepieceColors.liteFancyBlue,
                                   10,
-                                  Base64Helper.decode(group.profileImage!)),
+                                  Base64Helper.decode(group.profileImage!)):
+                              ImageLazyLoader(uri: group.imageUri!, width: 50, borderWidth: 2, borderRadios: 10),
                             ),
                             Padding(
                               padding: const EdgeInsets.only(left: 5.0),

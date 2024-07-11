@@ -98,6 +98,7 @@ Class | Method | HTTP request | Description
 *IssueApi* | [**listIssue**](doc//IssueApi.md#listissue) | **POST** /api/onepiece/issue/list | 
 *RoleApi* | [**addRole**](doc//RoleApi.md#addrole) | **POST** /api/onepiece/iam/add_role | 
 *RoleApi* | [**assignResourceToRole**](doc//RoleApi.md#assignresourcetorole) | **POST** /api/onepiece/iam/assign_resource_permissions_to_role | 
+*SupportApi* | [**updateUri**](doc//SupportApi.md#updateuri) | **POST** /api/onepiece/support/update_uri | 
 *UserApi* | [**assignRole**](doc//UserApi.md#assignrole) | **POST** /api/onepiece/user/assign_role | 
 *UserApi* | [**getUser**](doc//UserApi.md#getuser) | **POST** /api/onepiece/user/get | 
 *UserApi* | [**listUsers**](doc//UserApi.md#listusers) | **POST** /api/onepiece/user/list | 
@@ -259,6 +260,8 @@ Class | Method | HTTP request | Description
  - [UpdateLoginRoleResponse](doc//UpdateLoginRoleResponse.md)
  - [UpdatePasswordRequest](doc//UpdatePasswordRequest.md)
  - [UpdatePasswordResponse](doc//UpdatePasswordResponse.md)
+ - [UpdateUriRequest](doc//UpdateUriRequest.md)
+ - [UpdateUriResponse](doc//UpdateUriResponse.md)
  - [UpdateUserRequest](doc//UpdateUserRequest.md)
  - [UpdateUserResponse](doc//UpdateUserResponse.md)
  - [UploadImageRequest](doc//UploadImageRequest.md)
