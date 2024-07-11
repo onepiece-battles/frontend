@@ -9,6 +9,7 @@ import 'package:one_piece_battles_flutter/repository/fruit_dao.dart';
 import 'package:one_piece_battles_flutter/repository/group_dao.dart';
 import 'package:one_piece_battles_flutter/repository/image_dao.dart';
 import 'package:one_piece_battles_flutter/repository/issue_dao.dart';
+import 'package:one_piece_battles_flutter/repository/support_dao.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
 import 'package:openapi/api.dart';
 import 'app_router.dart';
@@ -28,6 +29,7 @@ void setup() {
   getIt.registerLazySingleton<FruitDao>(() => FruitDao.empty());
   getIt.registerLazySingleton<FileDao>(() => FileDao.empty());
   getIt.registerLazySingleton<GroupDao>(() => GroupDao.empty());
+  getIt.registerLazySingleton<SupportDao>(() => SupportDao.empty());
   getIt.registerLazySingleton<User>(
       () => User(id: "", username: "", nickname: ""));
 }

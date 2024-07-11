@@ -1657,14 +1657,11 @@ class _CharacterDetailState extends State<CharacterDetail> {
                           children: <Widget>[
                             Padding(
                                 padding: const EdgeInsets.only(right: 6),
-                                child: ImageHelper.getRoundImageFrame(
-                                    50,
-                                    50,
-                                    2,
-                                    Colors.black12,
-                                    6,
-                                    Base64Helper.decode(
-                                        currentGroup.profileImage!))),
+                                child: ImageLazyLoader(
+                                    uri: currentGroup.imageUri!,
+                                    width: 50,
+                                    borderWidth: 2,
+                                    borderRadios: 10)),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1912,14 +1909,20 @@ class _CharacterDetailState extends State<CharacterDetail> {
                       children: [
                         Padding(
                           padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                          child: ImageHelper.getRoundImageFrame(
-                              40,
-                              40,
-                              1.5,
-                              OnepieceColors.liteFancyBlue,
-                              40,
-                              Base64Helper.decode(
-                                  entry.value.starter!.profileImage!)),
+                          child: entry.value.starter!.imageUri == null
+                              ? ImageHelper.getRoundImageFrame(
+                                  40,
+                                  40,
+                                  1.5,
+                                  OnepieceColors.liteFancyBlue,
+                                  40,
+                                  Base64Helper.decode(
+                                      entry.value.starter!.profileImage!))
+                              : ImageLazyLoader(
+                                  uri: entry.value.starter!.imageUri!,
+                                  width: 40,
+                                  borderWidth: 1.5,
+                                  borderRadios: 40),
                         ),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1948,14 +1951,20 @@ class _CharacterDetailState extends State<CharacterDetail> {
                       children: [
                         Padding(
                           padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                          child: ImageHelper.getRoundImageFrame(
-                              40,
-                              40,
-                              1.5,
-                              OnepieceColors.liteFancyBlue,
-                              40,
-                              Base64Helper.decode(
-                                  entry.value.receiver!.profileImage!)),
+                          child: entry.value.receiver!.imageUri == null
+                              ? ImageHelper.getRoundImageFrame(
+                                  40,
+                                  40,
+                                  1.5,
+                                  OnepieceColors.liteFancyBlue,
+                                  40,
+                                  Base64Helper.decode(
+                                      entry.value.receiver!.profileImage!))
+                              : ImageLazyLoader(
+                                  uri: entry.value.receiver!.imageUri!,
+                                  width: 40,
+                                  borderWidth: 1.5,
+                                  borderRadios: 40),
                         ),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1999,17 +2008,27 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                     OnepieceColors.liteFancyBlue),
                               ),
                             )
-                          : ImageHelper.getRoundImageFrame(
-                              40,
-                              40,
-                              1.5,
-                              OnepieceColors.liteFancyBlue,
-                              40,
-                              Base64Helper.decode(
-                                  entry.value.battleExecution!.winnerId ==
+                          : entry.value.starter!.imageUri == null ||
+                                  entry.value.receiver!.imageUri == null
+                              ? ImageHelper.getRoundImageFrame(
+                                  40,
+                                  40,
+                                  1.5,
+                                  OnepieceColors.liteFancyBlue,
+                                  40,
+                                  Base64Helper.decode(entry.value
+                                              .battleExecution!.winnerId ==
                                           entry.value.starterId
                                       ? entry.value.starter!.profileImage!
-                                      : entry.value.receiver!.profileImage!)),
+                                      : entry.value.receiver!.profileImage!))
+                              : ImageLazyLoader(
+                                  uri: entry.value.battleExecution!.winnerId ==
+                                          entry.value.starterId
+                                      ? entry.value.starter!.imageUri!
+                                      : entry.value.receiver!.imageUri!,
+                                  width: 40,
+                                  borderWidth: 1.5,
+                                  borderRadios: 40),
                     ),
                   ),
                   _getDataCell(

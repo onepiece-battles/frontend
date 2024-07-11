@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:one_piece_battles_flutter/components/image_lazy_loader.dart';
 import 'package:one_piece_battles_flutter/popup/join_group.dart';
 import 'package:one_piece_battles_flutter/repository/group_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
@@ -551,13 +552,11 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                 title: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    ImageHelper.getRoundImageFrame(
-                        40,
-                        40,
-                        1.5,
-                        OnepieceColors.liteFancyBlue,
-                        3,
-                        Base64Helper.decode(character.profileImage!)),
+                    ImageLazyLoader(
+                        uri: character.imageUri!,
+                        width: 40,
+                        borderWidth: 1.4,
+                        borderRadios: 3),
                     Padding(
                       padding: const EdgeInsets.only(left: 8.0),
                       child: Text(
@@ -674,13 +673,11 @@ class _GroupDetailViewState extends State<GroupDetailView> {
         expandedAlignment: Alignment.centerLeft,
         title: Row(
           children: [
-            ImageHelper.getRoundImageFrame(
-                40,
-                40,
-                1.5,
-                OnepieceColors.liteFancyBlue,
-                3,
-                Base64Helper.decode(node.characterInGroupView.profileImage!)),
+            ImageLazyLoader(
+                uri: actualNode.characterInGroupView.imageUri!,
+                width: 40,
+                borderWidth: 1.5,
+                borderRadios: 3),
             Text(I18nHelper.getDisplayNameFromI18n(
                 actualNode.characterInGroupView.name!)),
           ],
