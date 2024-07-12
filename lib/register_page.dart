@@ -175,10 +175,10 @@ class _RegisterPageState extends State<RegisterPage> {
                     if (value!.isEmpty) {
                       return null;
                     }
-                    if (!isValidNickname(value!)) {
+                    if (!isValidNickname(value)) {
                       return AppLocalizations.of(context)?.invalidNickname;
                     }
-                    if (value.length > 10) {
+                    if (value.length > 20) {
                       return AppLocalizations.of(context)?.lengthExceedsLimit;
                     }
                     return null;
@@ -242,7 +242,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     if (!isValidPassword(value)) {
                       return AppLocalizations.of(context)?.invalidPassword;
                     }
-                    if (value.length > 10) {
+                    if (value.length > 20) {
                       return AppLocalizations.of(context)?.lengthExceedsLimit;
                     }
                     return null;

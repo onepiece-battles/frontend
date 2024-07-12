@@ -4,6 +4,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:one_piece_battles_flutter/repository/battle_dao.dart';
 import 'package:one_piece_battles_flutter/repository/character_dao.dart';
+import 'package:one_piece_battles_flutter/repository/email_dao.dart';
 import 'package:one_piece_battles_flutter/repository/file_dao.dart';
 import 'package:one_piece_battles_flutter/repository/fruit_dao.dart';
 import 'package:one_piece_battles_flutter/repository/group_dao.dart';
@@ -30,6 +31,7 @@ void setup() {
   getIt.registerLazySingleton<FileDao>(() => FileDao.empty());
   getIt.registerLazySingleton<GroupDao>(() => GroupDao.empty());
   getIt.registerLazySingleton<SupportDao>(() => SupportDao.empty());
+  getIt.registerLazySingleton<EmailDao>(() => EmailDao.empty());
   getIt.registerLazySingleton<User>(
       () => User(id: "", username: "", nickname: ""));
 }

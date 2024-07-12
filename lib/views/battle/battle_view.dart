@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:one_piece_battles_flutter/components/image_lazy_loader.dart';
 import 'package:one_piece_battles_flutter/constants/button_style.dart';
 import 'package:one_piece_battles_flutter/repository/battle_dao.dart';
 import 'package:one_piece_battles_flutter/utils/date_helper.dart';
@@ -608,7 +609,7 @@ class _BattleViewState extends State<BattleView> {
       _createSingleColumn(AppLocalizations.of(context)!.initiator, null, 150),
       _createSingleColumn(AppLocalizations.of(context)!.receiver, null, 150),
       _createSingleColumn(AppLocalizations.of(context)!.winner,
-          BattleSortableFieldsEnum.winnerName, 120),
+          BattleSortableFieldsEnum.winnerName, 80),
       _createSingleColumn(AppLocalizations.of(context)!.status, null, 70),
       _createSingleColumn(AppLocalizations.of(context)!.creator, null, 150),
       _createSingleColumn(AppLocalizations.of(context)!.creationTime,
@@ -712,14 +713,11 @@ class _BattleViewState extends State<BattleView> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                      child: ImageHelper.getRoundImageFrame(
-                          40,
-                          40,
-                          1.5,
-                          OnepieceColors.liteFancyBlue,
-                          40,
-                          Base64Helper.decode(
-                              entry.value.starter!.profileImage!)),
+                      child: ImageLazyLoader(
+                          uri: entry.value.starter!.imageUri!,
+                          width: 40,
+                          borderWidth: 1.5,
+                          borderRadios: 40),
                     ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -747,14 +745,11 @@ class _BattleViewState extends State<BattleView> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                      child: ImageHelper.getRoundImageFrame(
-                          40,
-                          40,
-                          1.5,
-                          OnepieceColors.liteFancyBlue,
-                          40,
-                          Base64Helper.decode(
-                              entry.value.receiver!.profileImage!)),
+                      child: ImageLazyLoader(
+                          uri: entry.value.receiver!.imageUri!,
+                          width: 40,
+                          borderWidth: 1.5,
+                          borderRadios: 40),
                     ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -797,18 +792,14 @@ class _BattleViewState extends State<BattleView> {
                                 OnepieceColors.liteFancyBlue),
                           ),
                         )
-                      :
-                  ImageHelper.getRoundImageFrame(
-                          40,
-                          40,
-                          1.5,
-                          OnepieceColors.liteFancyBlue,
-                          40,
-                          Base64Helper.decode(
-                              entry.value.battleExecution!.winnerId ==
-                                      entry.value.starterId
-                                  ? entry.value.starter!.profileImage!
-                                  : entry.value.receiver!.profileImage!)),
+                      : ImageLazyLoader(
+                          uri: entry.value.battleExecution!.winnerId ==
+                                  entry.value.starterId
+                              ? entry.value.starter!.imageUri!
+                              : entry.value.receiver!.imageUri!,
+                          width: 40,
+                          borderWidth: 1.5,
+                          borderRadios: 40),
                 ),
               ),
               _getDataCell(battleStatusToDisplayName[

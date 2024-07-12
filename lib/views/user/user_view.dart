@@ -159,13 +159,6 @@ class _UserViewState extends State<UserView> {
             style: OnepieceFonts.headerStyle,
           ),
         ),
-        ElevatedButton(
-            onPressed: () {
-              getIt<SupportDao>().updateUri(UpdateUriRequest(
-                  resourceId: "", resourceType: ResourceType.USER));
-            },
-            style: OnepieceButtonStyle.getDefaultStyle(),
-            child: const Text("update uri"))
       ],
     );
   }
@@ -501,19 +494,12 @@ class _UserViewState extends State<UserView> {
               DataCell(
                 Padding(
                   padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                  child: user.imageUri != null
-                      ? ImageLazyLoader(
+                  child:
+                       ImageLazyLoader(
                           uri: user.imageUri!,
                           width: 40,
                           borderWidth: 1.5,
                           borderRadios: 40)
-                      : ImageHelper.getRoundImageFrame(
-                          40,
-                          40,
-                          1.5,
-                          OnepieceColors.liteFancyBlue,
-                          40,
-                          Base64Helper.decode(user.profileImage!)),
                 ),
               ),
               DataCell(Padding(

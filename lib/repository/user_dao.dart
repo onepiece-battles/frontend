@@ -28,10 +28,6 @@ class UserDao {
     return await userApi.updateUser(updateUserRequest: request);
   }
 
-  Future<VerifyEmailAddressResponse?> verifyEmailAddress(VerifyEmailAddressRequest request) async {
-    return await userApi.verifyEmailAddress(verifyEmailAddressRequest: request);
-  }
-
   Future<VerifyByEmailCodeResponse?> verifyEmail(
       VerifyByEmailCodeRequest request) async {
     return await userApi.verifyByEmailCode(request);
@@ -46,9 +42,7 @@ class UserDao {
     return await userApi.updateRole(request);
   }
 
-  Future<PasswordRetrievalResponse?> sendRetrievalEmail(PasswordRetrievalRequest request) async {
-    return await userApi.sendRetrievalEmail(request);
-  }
+
 
   Future<UpdatePasswordResponse?> updatePassword(UpdatePasswordRequest request) async {
     return await userApi.updatePassword(request);

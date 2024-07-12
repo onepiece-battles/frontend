@@ -10,9 +10,7 @@ import 'package:one_piece_battles_flutter/repository/battle_dao.dart';
 import 'package:one_piece_battles_flutter/repository/character_dao.dart';
 import 'package:one_piece_battles_flutter/repository/file_dao.dart';
 import 'package:one_piece_battles_flutter/repository/group_dao.dart';
-import 'package:one_piece_battles_flutter/utils/base64_helper.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
-import 'package:one_piece_battles_flutter/utils/image_helper.dart';
 import 'package:openapi/api.dart';
 import 'constants/onepiece_colors.dart';
 import 'constants/onepiece_fonts.dart';
@@ -237,19 +235,11 @@ class _UserHomeState extends State<UserHome> {
                             characters[index].name)
                       });
                 },
-                child: characters[index].imageUri == null
-                    ? ImageHelper.getRoundImageFrame(
-                        100,
-                        100,
-                        2,
-                        OnepieceColors.liteFancyBlue,
-                        10,
-                        Base64Helper.decode(characters[index].profileImage!))
-                    : ImageLazyLoader(
-                        uri: characters[index].imageUri!,
-                        width: 100,
-                        borderWidth: 2,
-                        borderRadios: 100),
+                child: ImageLazyLoader(
+                    uri: characters[index].imageUri!,
+                    width: 100,
+                    borderWidth: 2,
+                    borderRadios: 100),
               ),
             ),
           ),
@@ -301,19 +291,11 @@ class _UserHomeState extends State<UserHome> {
                             groups[index].name)
                       });
                 },
-                child: groups[index].imageUri == null
-                    ? ImageHelper.getRoundImageFrame(
-                        100,
-                        100,
-                        2,
-                        OnepieceColors.liteFancyBlue,
-                        10,
-                        Base64Helper.decode(groups[index].profileImage!))
-                    : ImageLazyLoader(
-                        uri: groups[index].imageUri!,
-                        width: 100,
-                        borderWidth: 2,
-                        borderRadios: 10)),
+                child: ImageLazyLoader(
+                    uri: groups[index].imageUri!,
+                    width: 100,
+                    borderWidth: 2,
+                    borderRadios: 10)),
           ),
         ),
       );
@@ -383,20 +365,11 @@ class _UserHomeState extends State<UserHome> {
                         Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            battles[index].starter!.imageUri == null
-                                ? ImageLazyLoader(
-                                    uri: battles[index].starter!.imageUri!,
-                                    width: 40,
-                                    borderWidth: 1.5,
-                                    borderRadios: 40)
-                                : ImageHelper.getRoundImageFrame(
-                                    40,
-                                    40,
-                                    1.5,
-                                    OnepieceColors.liteFancyBlue,
-                                    40,
-                                    Base64Helper.decode(
-                                        battles[index].starter!.profileImage!)),
+                            ImageLazyLoader(
+                                uri: battles[index].starter!.imageUri!,
+                                width: 40,
+                                borderWidth: 1.5,
+                                borderRadios: 40),
                             Padding(
                               padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
                               child: Text(I18nHelper.getDisplayNameFromI18n(
@@ -422,20 +395,11 @@ class _UserHomeState extends State<UserHome> {
                         Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            (battles[index].receiver!.imageUri) == null
-                                ? ImageHelper.getRoundImageFrame(
-                                    40,
-                                    40,
-                                    1.5,
-                                    OnepieceColors.liteFancyBlue,
-                                    40,
-                                    Base64Helper.decode(
-                                        battles[index].receiver!.profileImage!))
-                                : ImageLazyLoader(
-                                    uri: battles[index].receiver!.imageUri!,
-                                    width: 40,
-                                    borderWidth: 1.5,
-                                    borderRadios: 40),
+                            ImageLazyLoader(
+                                uri: battles[index].receiver!.imageUri!,
+                                width: 40,
+                                borderWidth: 1.5,
+                                borderRadios: 40),
                             Padding(
                               padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
                               child: Text(I18nHelper.getDisplayNameFromI18n(

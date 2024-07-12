@@ -8,7 +8,7 @@ class OnepieceFonts {
   static const double smallHeaderFontSize = 20;
   static const FontWeight headerFontWeight = FontWeight.bold;
   static const Color headerFontColor = Colors.black;
-  static const double contentFontSize = 18;
+  static const double contentFontSize = 16;
   static const double bigContentFontSize = 22;
   static const double tableHeaderFontSize = 15;
   static const double dropDownFontSize = 16;

@@ -443,7 +443,7 @@ class HomePageState extends State<HomePage> {
                               AppLocalizations.of(context)!.userProfile,
                               textAlign: TextAlign.left,
                               style: TextStyle(
-                                  fontSize: 18,
+                                  fontSize: 16,
                                   fontWeight: OnepieceFonts.sideMenuFontWeight,
                                   color: currentResource == "profile"
                                       ? OnepieceColors.fancyBlue
@@ -503,7 +503,7 @@ class HomePageState extends State<HomePage> {
                               AppLocalizations.of(context)!.logout,
                               textAlign: TextAlign.left,
                               style: TextStyle(
-                                  fontSize: 18,
+                                  fontSize: 16,
                                   fontWeight: OnepieceFonts.sideMenuFontWeight,
                                   color: currentResource == "profile"
                                       ? OnepieceColors.fancyBlue
@@ -567,11 +567,14 @@ class HomePageState extends State<HomePage> {
                         ),
                         const SizedBox(width: 6),
                         if (constraints.maxWidth > screenChangeBar)
-                          Text(AppLocalizations.of(context)!.feedback,
-                              style: const TextStyle(
-                                  color: OnepieceColors.menuTextColor,
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.w500))
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 2.0),
+                            child: Text(AppLocalizations.of(context)!.feedback,
+                                style: const TextStyle(
+                                    color: OnepieceColors.menuTextColor,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500)),
+                          )
                       ],
                     ),
                   ),
@@ -904,7 +907,7 @@ class HomePageState extends State<HomePage> {
                       resourceToDisplayTextMap[resourceType]!,
                       textAlign: TextAlign.left,
                       style: TextStyle(
-                          fontSize: 18,
+                          fontSize: 16,
                           fontWeight: OnepieceFonts.sideMenuFontWeight,
                           color: currentResource == resourceType.toLowerCase()
                               ? OnepieceColors.fancyBlue

@@ -66,7 +66,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
             modificationRecordId: groupFullView.modificationRecordId,
             groupCategory: groupFullView.groupCategory,
             name: groupFullView.name,
-            profileImage: groupFullView.profileImage));
+            imageUri: groupFullView.imageUri));
     _editButtonVisible = PermissionCheck.checkPermission(
             getIt<User>().loginRoleResourcesPermissionMap,
             ResourceType.CHARACTER,
@@ -268,13 +268,11 @@ class _GroupDetailViewState extends State<GroupDetailView> {
           ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 5),
-            child: ImageHelper.getRoundImageFrame(
-                200,
-                200,
-                3,
-                OnepieceColors.liteFancyBlue,
-                20,
-                Base64Helper.decode(groupFullView.profileImage!)),
+            child: ImageLazyLoader(
+                uri: groupFullView.imageUri!,
+                width: 200,
+                borderWidth: 3,
+                borderRadios: 20),
           ),
           SizedBox(
             width: 300,
@@ -470,13 +468,11 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                     },
                     child: Row(
                       children: [
-                        ImageHelper.getRoundImageFrame(
-                            40,
-                            40,
-                            1.5,
-                            OnepieceColors.liteFancyBlue,
-                            3,
-                            Base64Helper.decode(e.profileImage!)),
+                        ImageLazyLoader(
+                            uri: e.imageUri!,
+                            width: 40,
+                            borderWidth: 1.5,
+                            borderRadios: 3),
                         Padding(
                           padding: const EdgeInsets.only(left: 8.0),
                           child: Text(
@@ -646,13 +642,11 @@ class _GroupDetailViewState extends State<GroupDetailView> {
         childrenPadding: EdgeInsets.only(left: level * 20),
         title: Row(
           children: [
-            ImageHelper.getRoundImageFrame(
-                40,
-                40,
-                1.5,
-                OnepieceColors.liteFancyBlue,
-                3,
-                Base64Helper.decode(node.group.profileImage!)),
+            ImageLazyLoader(
+                uri: node.group.imageUri!,
+                width: 40,
+                borderWidth: 1.5,
+                borderRadios: 3),
             Text(I18nHelper.getDisplayNameFromI18n(actualNode.group.name!))
           ],
         ),
@@ -703,6 +697,11 @@ class TreeNode {
 class GroupNode extends TreeNode {
   Group group;
   GroupNode(super.children, super.childrenFetched, this.group);
+
+  @override
+  String toString() {
+    return group.toString();
+  }
 }
 
 class CharacterNode extends TreeNode {

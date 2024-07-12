@@ -77,6 +77,8 @@ Class | Method | HTTP request | Description
 *CharacterApi* | [**listCharacters**](doc//CharacterApi.md#listcharacters) | **POST** /api/onepiece/character/list | 
 *CharacterApi* | [**updateCharacter**](doc//CharacterApi.md#updatecharacter) | **POST** /api/onepiece/character/update | 
 *DataExportApi* | [**generatePdf**](doc//DataExportApi.md#generatepdf) | **POST** /api/onepiece/export/generate_pdf | 
+*EmailApi* | [**sendRetrievalEmail**](doc//EmailApi.md#sendretrievalemail) | **POST** /api/onepiece/email/send_password_retrieval_email | 
+*EmailApi* | [**verifyEmailAddress**](doc//EmailApi.md#verifyemailaddress) | **POST** /api/onepiece/email/verify_email_address | 
 *FileApi* | [**downloadFile**](doc//FileApi.md#downloadfile) | **POST** /api/onepiece/file/download_file | 
 *FruitApi* | [**addFruit**](doc//FruitApi.md#addfruit) | **POST** /api/onepiece/fruit/add | 
 *FruitApi* | [**getFruit**](doc//FruitApi.md#getfruit) | **POST** /api/onepiece/fruit/get | 
@@ -105,13 +107,11 @@ Class | Method | HTTP request | Description
 *UserApi* | [**login**](doc//UserApi.md#login) | **POST** /api/onepiece/user/login | 
 *UserApi* | [**logout**](doc//UserApi.md#logout) | **POST** /api/onepiece/user/logout | 
 *UserApi* | [**register**](doc//UserApi.md#register) | **POST** /api/onepiece/user/register | 
-*UserApi* | [**sendRetrievalEmail**](doc//UserApi.md#sendretrievalemail) | **POST** /api/onepiece/user/send_password_retrieval_email | 
 *UserApi* | [**shareResource**](doc//UserApi.md#shareresource) | **POST** /api/onepiece/user/share_resource | 
 *UserApi* | [**updatePassword**](doc//UserApi.md#updatepassword) | **POST** /api/onepiece/user/update_password_with_verification | 
 *UserApi* | [**updateRole**](doc//UserApi.md#updaterole) | **POST** /api/onepiece/user/update_login_role | 
 *UserApi* | [**updateUser**](doc//UserApi.md#updateuser) | **POST** /api/onepiece/user/update_user | 
 *UserApi* | [**verifyByEmailCode**](doc//UserApi.md#verifybyemailcode) | **POST** /api/onepiece/user/verify_by_email_code | 
-*UserApi* | [**verifyEmailAddress**](doc//UserApi.md#verifyemailaddress) | **POST** /api/onepiece/user/verify_email_address | 
 
 
 ## Documentation For Models
