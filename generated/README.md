@@ -150,6 +150,7 @@ Class | Method | HTTP request | Description
  - [CharacterFullView](doc//CharacterFullView.md)
  - [CharacterFullViewAllOf](doc//CharacterFullViewAllOf.md)
  - [CharacterInFruitView](doc//CharacterInFruitView.md)
+ - [CharacterInFruitViewAllOf](doc//CharacterInFruitViewAllOf.md)
  - [CharacterInGroupLite](doc//CharacterInGroupLite.md)
  - [CharacterInGroupView](doc//CharacterInGroupView.md)
  - [CharacterListView](doc//CharacterListView.md)

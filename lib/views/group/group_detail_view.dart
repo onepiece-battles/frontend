@@ -334,22 +334,22 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                     selectedGroupCategory = value! as GroupCategory;
                   });
                 },
-          selectedItemBuilder: (context) {
-            return GroupCategory.values.map(
-              (item) {
-                return Container(
-                  alignment: AlignmentDirectional.center,
-                  child: Text(
-                    groupCategoryToDisplayName[selectedGroupCategory]!,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                );
-              },
-            ).toList();
-          },
+          // selectedItemBuilder: (context) {
+          //   return GroupCategory.values.map(
+          //     (item) {
+          //       return Container(
+          //         alignment: AlignmentDirectional.center,
+          //         child: Text(
+          //           groupCategoryToDisplayName[selectedGroupCategory]!,
+          //           style: const TextStyle(
+          //             fontSize: 16,
+          //             overflow: TextOverflow.ellipsis,
+          //           ),
+          //         ),
+          //       );
+          //     },
+          //   ).toList();
+          // },
           buttonStyleData: ButtonStyleData(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               height: 34,
@@ -361,17 +361,33 @@ class _GroupDetailViewState extends State<GroupDetailView> {
           menuItemStyleData: const MenuItemStyleData(
             height: 35,
           ),
-          items: GroupCategory.values.map((GroupCategory groupCategory) {
-            return DropdownMenuItem<GroupCategory>(
-              value: groupCategory,
-              child: Text(
-                groupCategoryToDisplayName[groupCategory]!,
-                style: const TextStyle(
-                  fontSize: 14,
-                ),
-              ),
-            );
-          }).toList(),
+          items: selectedGroupCategory != GroupCategory.group
+              ? GroupCategory.values
+                  .where((element) => element != GroupCategory.group)
+                  .map((GroupCategory groupCategory) {
+                  return DropdownMenuItem<GroupCategory>(
+                    value: groupCategory,
+                    child: Text(
+                      groupCategoryToDisplayName[groupCategory]!,
+                      style: const TextStyle(
+                        fontSize: 14,
+                      ),
+                    ),
+                  );
+                }).toList()
+              : GroupCategory.values
+                  .where((element) => element == GroupCategory.group)
+                  .map((GroupCategory groupCategory) {
+                  return DropdownMenuItem<GroupCategory>(
+                    value: groupCategory,
+                    child: Text(
+                      groupCategoryToDisplayName[groupCategory]!,
+                      style: const TextStyle(
+                        fontSize: 14,
+                      ),
+                    ),
+                  );
+                }).toList(),
         ),
       ),
     );
