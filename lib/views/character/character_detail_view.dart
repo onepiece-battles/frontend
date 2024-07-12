@@ -15,7 +15,6 @@ import 'package:openapi/api.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../popup/onepiece_alert.dart';
 import '../../repository/fruit_dao.dart';
-import '../../utils/base64_helper.dart';
 import '../../utils/data_converter.dart';
 import '../../utils/i18n_helper.dart';
 import '../../utils/image_helper.dart';
@@ -227,6 +226,13 @@ class _CharacterDetailState extends State<CharacterDetail> {
                             ),
                           ),
                           _getFruitSearchBar(context),
+                          if (fruits.isNotEmpty)
+                            Padding(
+                              padding: EdgeInsets.fromLTRB(sideWidth, 0, 8, 0),
+                              child: Text(
+                                  AppLocalizations.of(context)!.devilFruit,
+                                  style: OnepieceFonts.fancyBlueHintFont),
+                            ),
                           if (fruits.isNotEmpty)
                             Padding(
                               padding: EdgeInsets.fromLTRB(sideWidth, 8, 8, 8),
@@ -1274,7 +1280,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
       FruitType.paramecia: AppLocalizations.of(context)!.parameciaFruit,
     };
     return Container(
-      width: 500,
+      width: 700,
       decoration: const BoxDecoration(
         color: OnepieceColors.menuBackgroundColor,
         borderRadius: BorderRadius.all(Radius.circular(8)),
@@ -1607,12 +1613,12 @@ class _CharacterDetailState extends State<CharacterDetail> {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Container(
-        width: 500,
-        constraints: const BoxConstraints(maxHeight: 300),
+        width: 700,
         decoration: const BoxDecoration(
           color: OnepieceColors.menuBackgroundColor,
           borderRadius: BorderRadius.all(Radius.circular(8)),
         ),
+        constraints: const BoxConstraints(maxHeight: 300),
         child: ListView.builder(
           shrinkWrap: true,
           itemCount: groups.length,

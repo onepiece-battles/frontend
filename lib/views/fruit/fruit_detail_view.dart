@@ -1,4 +1,5 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
@@ -8,6 +9,7 @@ import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
 import '../../components/digit_text_form_field.dart';
 import '../../components/fruit_digit_text_form_field.dart';
+import '../../components/image_lazy_loader.dart';
 import '../../components/string_text_form_field.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
@@ -652,12 +654,8 @@ class _FruitDetailViewState extends State<FruitDetailView> {
         const SizedBox(
           height: 30,
         ),
-        Container(
-          width: 500,
-          decoration: const BoxDecoration(
-            color: OnepieceColors.menuBackgroundColor,
-            borderRadius: BorderRadius.all(Radius.circular(8)),
-          ),
+        SizedBox(
+          width: 600,
           child: ListView.builder(
             shrinkWrap: true,
             itemCount: characters.length,
@@ -669,27 +667,29 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                   padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
                   decoration: const BoxDecoration(
                       borderRadius: BorderRadius.all(Radius.circular(5))),
-                  child: ListTile(
-                    minLeadingWidth: 10,
-                    contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    selectedTileColor: OnepieceColors.liteFancyBlue,
-                    onTap: () {
-                      context.goNamed('characterDetails',
-                          extra: character.characterId,
-                          pathParameters: {
-                            'name': I18nHelper.getDisplayNameFromI18n(
-                                character.name!)
-                          });
-                    },
-                    hoverColor: OnepieceColors.liteFancyBlue,
+                  child: ExpansionTile(
+                    childrenPadding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
+                    expandedAlignment: Alignment.centerLeft,
                     title: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                            I18nHelper.getDisplayNameFromI18n(character.name!)),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Padding(
+                                padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+                                child: ImageLazyLoader(
+                                    uri: character.imageUri!,
+                                    width: 40,
+                                    borderWidth: 1.5,
+                                    borderRadios: 40)),
+                            const SizedBox(
+                              width: 10,
+                            ),
+                            Text(I18nHelper.getDisplayNameFromI18n(
+                                character.name)),
+                          ],
+                        ),
                         Padding(
                           padding: const EdgeInsets.only(right: 5),
                           child: OnepieceTag.getWakeUpTag(
@@ -699,6 +699,209 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                         ),
                       ],
                     ),
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              ImageHelper.getTextFormFieldIcon(
+                                  'images/character_digits_icon/attack.svg',
+                                  true,
+                                  25),
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              SizedBox(
+                                  width: 80,
+                                  child: Text(
+                                    "${character.baseAttack}",
+                                    style: OnepieceFonts.boldFancyBlueHintFont,
+                                  )),
+                              const Padding(
+                                padding: EdgeInsets.only(right: 50.0),
+                                child: Icon(Icons.arrow_right_alt_outlined),
+                              ),
+                              SizedBox(
+                                  width: 80,
+                                  child: Text(
+                                    "${character.attack}",
+                                    style: OnepieceFonts.boldFancyBlueHintFont,
+                                  ))
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              ImageHelper.getTextFormFieldIcon(
+                                  'images/character_digits_icon/defense.svg',
+                                  true,
+                                  25),
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              SizedBox(
+                                  width: 80,
+                                  child: Text(
+                                    "${character.baseDefense}",
+                                    style: OnepieceFonts.boldFancyBlueHintFont,
+                                  )),
+                              const Padding(
+                                padding: EdgeInsets.only(right: 50.0),
+                                child: Icon(Icons.arrow_right_alt_outlined),
+                              ),
+                              SizedBox(
+                                  width: 80,
+                                  child: Text(
+                                    "${character.defense}",
+                                    style: OnepieceFonts.boldFancyBlueHintFont,
+                                  ))
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              ImageHelper.getTextFormFieldIcon(
+                                  'images/character_digits_icon/intelligence.svg',
+                                  true,
+                                  25),
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              SizedBox(
+                                  width: 80,
+                                  child: Text(
+                                    "${character.baseIntelligence}",
+                                    style: OnepieceFonts.boldFancyBlueHintFont,
+                                  )),
+                              const Padding(
+                                padding: EdgeInsets.only(right: 50.0),
+                                child: Icon(Icons.arrow_right_alt_outlined),
+                              ),
+                              SizedBox(
+                                  width: 80,
+                                  child: Text(
+                                    "${character.intelligence}",
+                                    style: OnepieceFonts.boldFancyBlueHintFont,
+                                  ))
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              ImageHelper.getTextFormFieldIcon(
+                                  'images/character_digits_icon/speed.svg',
+                                  true,
+                                  25),
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              SizedBox(
+                                  width: 80,
+                                  child: Text(
+                                    "${character.baseSpeed}",
+                                    style: OnepieceFonts.boldFancyBlueHintFont,
+                                  )),
+                              const Padding(
+                                padding: EdgeInsets.only(right: 50.0),
+                                child: Icon(Icons.arrow_right_alt_outlined),
+                              ),
+                              SizedBox(
+                                  width: 80,
+                                  child: Text(
+                                    "${character.speed}",
+                                    style: OnepieceFonts.boldFancyBlueHintFont,
+                                  ))
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              ImageHelper.getTextFormFieldIcon(
+                                  'images/character_digits_icon/blood.svg',
+                                  true,
+                                  25),
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              SizedBox(
+                                  width: 80,
+                                  child: Text(
+                                    "${character.baseBlood}",
+                                    style: OnepieceFonts.boldFancyBlueHintFont,
+                                  )),
+                              const Padding(
+                                padding: EdgeInsets.only(right: 50.0),
+                                child: Icon(Icons.arrow_right_alt_outlined),
+                              ),
+                              SizedBox(
+                                  width: 80,
+                                  child: Text(
+                                    "${character.blood}",
+                                    style: OnepieceFonts.boldFancyBlueHintFont,
+                                  ))
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              ImageHelper.getTextFormFieldIcon(
+                                  'images/character_digits_icon/group_gain.svg',
+                                  true,
+                                  25),
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              SizedBox(
+                                  width: 80,
+                                  child: Text(
+                                    "${character.baseGroupGain}",
+                                    style: OnepieceFonts.boldFancyBlueHintFont,
+                                  )),
+                              const Padding(
+                                padding: EdgeInsets.only(right: 50.0),
+                                child: Icon(Icons.arrow_right_alt_outlined),
+                              ),
+                              SizedBox(
+                                  width: 80,
+                                  child: Text(
+                                    "${character.groupGain}",
+                                    style: OnepieceFonts.boldFancyBlueHintFont,
+                                  ))
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              ImageHelper.getTextFormFieldIcon(
+                                  'images/character_digits_icon/attack.svg',
+                                  true,
+                                  25),
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              SizedBox(
+                                  width: 80,
+                                  child: Text(
+                                    "${character.baseAttack}",
+                                    style: OnepieceFonts.boldFancyBlueHintFont,
+                                  )),
+                              const Padding(
+                                padding: EdgeInsets.only(right: 50.0),
+                                child: Icon(Icons.arrow_right_alt_outlined),
+                              ),
+                              SizedBox(
+                                  width: 80,
+                                  child: Text(
+                                    "${character.attack}",
+                                    style: OnepieceFonts.boldFancyBlueHintFont,
+                                  ))
+                            ],
+                          ),
+                        ],
+                      )
+                    ],
                   ),
                 ),
               );

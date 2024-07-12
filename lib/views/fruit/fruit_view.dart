@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_tag.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
+import '../../components/image_lazy_loader.dart';
 import '../../constants/button_style.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
@@ -459,6 +460,7 @@ class _FruitViewState extends State<FruitView> {
       _createSingleColumn(AppLocalizations.of(context)!.name, null, 80),
       _createSingleColumn(AppLocalizations.of(context)!.fruitType,
           FruitSortableFieldsEnum.fruitType, 150),
+      _createSingleColumn(AppLocalizations.of(context)!.owner, null, 300),
       _createSingleColumn(
           AppLocalizations.of(context)!.attackStrengthen, null, 150),
       _createSingleColumn(
@@ -576,6 +578,7 @@ class _FruitViewState extends State<FruitView> {
                 child: OnepieceTag.getFruitTag(entry.value.fruitType!,
                     fruitTypeToDisplayValue[entry.value.fruitType]!),
               )),
+              DataCell(_createCharacterList(entry.value.characters)),
               _getWidgetDataCell(
                   entry.value.attackSlope!,
                   entry.value.attackIntercept!,
@@ -614,6 +617,42 @@ class _FruitViewState extends State<FruitView> {
         .toList();
     result.addAll(dataList);
     return result;
+  }
+
+  Widget _createCharacterList(List<CharacterInFruitView> characters) {
+    if (characters.isEmpty) {
+      return const Text("");
+    }
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: characters
+            .map((character) => InkWell(
+          hoverColor: Colors.transparent,
+          onTap: () {
+            context.goNamed('characterDetails',
+                extra: character.id,
+                pathParameters: {
+                  'name':
+                  I18nHelper.getDisplayNameFromI18n(character.name!)
+                });
+          },
+          child: Tooltip(
+            message: I18nHelper.getDisplayNameFromI18n(character.name),
+            preferBelow: false,
+            showDuration: const Duration(seconds: 1),
+            child: Padding(
+                padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+                child: ImageLazyLoader(
+                    uri: character.imageUri!,
+                    width: 40,
+                    borderWidth: 1.5,
+                    borderRadios: 40)),
+          ),
+        ))
+            .toList(),
+      ),
+    );
   }
 
   DataCell _getDataCell(String value) {
