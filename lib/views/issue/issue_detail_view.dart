@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:one_piece_battles_flutter/components/image_lazy_loader.dart';
 import 'package:one_piece_battles_flutter/repository/issue_dao.dart';
 import 'package:openapi/api.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -76,13 +77,11 @@ class _IssueDetailViewState extends State<IssueDetailView> {
                             'name': issue.issueCreator!.nickname
                           });
                     },
-                    child: ImageHelper.getRoundImageFrame(
-                        100,
-                        100,
-                        3,
-                        OnepieceColors.liteFancyBlue,
-                        100,
-                        Uint8List.fromList(Base64Helper.decode(issue.issueCreator!.profileImage!))),
+                    child: ImageLazyLoader(
+                        uri: issue.issueCreator!.imageUri!,
+                        width: 100,
+                        borderWidth: 3,
+                        borderRadios: 100),
                   ),
                 ),
                 Padding(
@@ -246,34 +245,34 @@ class _IssueDetailViewState extends State<IssueDetailView> {
                   }),
                 ),
                 Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Container(
-                      width: 800,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(
-                          color: OnepieceColors.fancyBlue,
-                          width: 3, // Width of the border
-                        ),
-                        borderRadius: BorderRadius.circular(10),
+                  padding: const EdgeInsets.all(8.0),
+                  child: Container(
+                    width: 800,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(
+                        color: OnepieceColors.fancyBlue,
+                        width: 3, // Width of the border
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              issue.issueHeader!,
-                              style: OnepieceFonts.smallHeaderStyle,
-                            ),
-                            Text(
-                              issue.issueDescription!,
-                              style: OnepieceFonts.contentStyle,
-                            ),
-                          ],
-                        ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            issue.issueHeader!,
+                            style: OnepieceFonts.smallHeaderStyle,
+                          ),
+                          Text(
+                            issue.issueDescription!,
+                            style: OnepieceFonts.contentStyle,
+                          ),
+                        ],
                       ),
                     ),
+                  ),
                 ),
               ],
             ),
