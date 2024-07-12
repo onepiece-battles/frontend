@@ -404,20 +404,11 @@ class _JoinGroupState extends State<JoinGroup> {
               child: Column(
                 children: [
                   Flexible(
-                      child: selectedCharacters[index].imageUri == null
-                          ? ImageHelper.getRoundImageFrame(
-                              100,
-                              100,
-                              2,
-                              OnepieceColors.liteFancyBlue,
-                              10,
-                              Base64Helper.decode(
-                                  selectedCharacters[index].profileImage!))
-                          : ImageLazyLoader(
-                              uri: selectedCharacters[index].imageUri!,
-                              width: 100,
-                              borderWidth: 2,
-                              borderRadios: 10)),
+                      child: ImageLazyLoader(
+                          uri: selectedCharacters[index].imageUri!,
+                          width: 100,
+                          borderWidth: 2,
+                          borderRadios: 10)),
                   const SizedBox(
                     height: 3,
                   ),
@@ -459,20 +450,11 @@ class _JoinGroupState extends State<JoinGroup> {
               child: Column(
                 children: [
                   Flexible(
-                      child: characters[index].imageUri == null
-                          ? ImageHelper.getRoundImageFrame(
-                              100,
-                              100,
-                              2,
-                              OnepieceColors.liteFancyBlue,
-                              10,
-                              Base64Helper.decode(
-                                  characters[index].profileImage!))
-                          : ImageLazyLoader(
-                              uri: characters[index].imageUri!,
-                              width: 100,
-                              borderWidth: 2,
-                              borderRadios: 10)),
+                      child: ImageLazyLoader(
+                          uri: characters[index].imageUri!,
+                          width: 100,
+                          borderWidth: 2,
+                          borderRadios: 10)),
                   const SizedBox(
                     height: 3,
                   ),
@@ -532,20 +514,11 @@ class _JoinGroupState extends State<JoinGroup> {
               child: Column(
                 children: [
                   Flexible(
-                    child: selectedGroups[index].imageUri == null
-                        ? ImageHelper.getRoundImageFrame(
-                            100,
-                            100,
-                            2,
-                            OnepieceColors.liteFancyBlue,
-                            10,
-                            Base64Helper.decode(
-                                selectedGroups[index].profileImage!))
-                        : ImageLazyLoader(
-                            uri: selectedGroups[index].imageUri!,
-                            width: 100,
-                            borderWidth: 2,
-                            borderRadios: 10),
+                    child: ImageLazyLoader(
+                        uri: selectedGroups[index].imageUri!,
+                        width: 100,
+                        borderWidth: 2,
+                        borderRadios: 10),
                   ),
                   const SizedBox(
                     height: 3,
@@ -585,19 +558,11 @@ class _JoinGroupState extends State<JoinGroup> {
               child: Column(
                 children: [
                   Flexible(
-                    child: groups[index].imageUri == null
-                        ? ImageHelper.getRoundImageFrame(
-                            100,
-                            100,
-                            2,
-                            OnepieceColors.liteFancyBlue,
-                            10,
-                            Base64Helper.decode(groups[index].profileImage!))
-                        : ImageLazyLoader(
-                            uri: groups[index].imageUri!,
-                            width: 100,
-                            borderWidth: 2,
-                            borderRadios: 10),
+                    child: ImageLazyLoader(
+                        uri: groups[index].imageUri!,
+                        width: 100,
+                        borderWidth: 2,
+                        borderRadios: 10),
                   ),
                   const SizedBox(
                     height: 3,

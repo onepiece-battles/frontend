@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:one_piece_battles_flutter/components/image_lazy_loader.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:one_piece_battles_flutter/graph/character_bar_graph.dart';
 import 'package:one_piece_battles_flutter/popup/onepiece_alert.dart';
@@ -393,21 +394,19 @@ class _BattleDetailViewState extends State<BattleDetailView> {
         Column(
           children: [
             InkWell(
-              hoverColor: Colors.transparent,
-              onTap: () {
-                context.goNamed('characterDetails',
-                    extra: starter.id,
-                    pathParameters: {
-                      'name': I18nHelper.getDisplayNameFromI18n(starter.name)
-                    });
-              },
-              child: ImageHelper.getCircleImageFrame(
-                  120,
-                  120,
-                  3,
-                  OnepieceColors.liteFancyBlue,
-                  Base64Helper.decode(battle.starter!.profileImage!)),
-            ),
+                hoverColor: Colors.transparent,
+                onTap: () {
+                  context.goNamed('characterDetails',
+                      extra: starter.id,
+                      pathParameters: {
+                        'name': I18nHelper.getDisplayNameFromI18n(starter.name)
+                      });
+                },
+                child: ImageLazyLoader(
+                    uri: battle.starter!.imageUri!,
+                    width: 120,
+                    borderWidth: 3,
+                    borderRadios: 120)),
             Consumer<BattleExecutionData>(builder: (context, model, child) {
               return Column(
                 children: [
@@ -448,21 +447,19 @@ class _BattleDetailViewState extends State<BattleDetailView> {
         Column(
           children: [
             InkWell(
-              hoverColor: Colors.transparent,
-              onTap: () {
-                context.goNamed('characterDetails',
-                    extra: receiver.id,
-                    pathParameters: {
-                      'name': I18nHelper.getDisplayNameFromI18n(receiver.name)
-                    });
-              },
-              child: ImageHelper.getCircleImageFrame(
-                  120,
-                  120,
-                  3,
-                  OnepieceColors.liteFancyBlue,
-                  Base64Helper.decode(battle.receiver!.profileImage!)),
-            ),
+                hoverColor: Colors.transparent,
+                onTap: () {
+                  context.goNamed('characterDetails',
+                      extra: receiver.id,
+                      pathParameters: {
+                        'name': I18nHelper.getDisplayNameFromI18n(receiver.name)
+                      });
+                },
+                child: ImageLazyLoader(
+                    uri: battle.receiver!.imageUri!,
+                    width: 120,
+                    borderWidth: 3,
+                    borderRadios: 120)),
             Consumer<BattleExecutionData>(builder: (context, model, child) {
               return Column(
                 children: [
@@ -568,14 +565,13 @@ class _BattleDetailViewState extends State<BattleDetailView> {
               child: ImageHelper.getSvgIconWithColor('images/svgs/question.svg',
                   120, 120, OnepieceColors.liteFancyBlue),
             )
-          : ImageHelper.getCircleImageFrame(
-              120,
-              120,
-              3,
-              OnepieceColors.liteFancyBlue,
-              Base64Helper.decode(battle.starter!.id == model.winnerId
-                  ? battle.starter!.profileImage!
-                  : battle.receiver!.profileImage!));
+          : ImageLazyLoader(
+              uri: battle.starter!.id == model.winnerId
+                  ? battle.starter!.imageUri!
+                  : battle.receiver!.imageUri!,
+              width: 120,
+              borderWidth: 3,
+              borderRadios: 120);
     });
   }
 

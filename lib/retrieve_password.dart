@@ -4,6 +4,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/popup/onepiece_alert.dart';
+import 'package:one_piece_battles_flutter/repository/email_dao.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
@@ -81,7 +82,7 @@ class _RetrievePasswordState extends State<RetrievePassword> {
                     onChanged: (b) => setState(() {
                       setState(() {
                         _tabTextIndexSelected =
-                        _tabTextIndexSelected == 0 ? 1 : 0;
+                            _tabTextIndexSelected == 0 ? 1 : 0;
                         Locale locale;
                         if (_tabTextIndexSelected == 0) {
                           locale = locales.first;
@@ -100,36 +101,36 @@ class _RetrievePasswordState extends State<RetrievePassword> {
                             : OnepieceColors.fancyBlue),
                     iconBuilder: (value) => value
                         ? const Text(
-                      "En",
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600),
-                    )
+                            "En",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600),
+                          )
                         : const Text(
-                      "文",
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600),
-                    ),
+                            "文",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600),
+                          ),
                     textBuilder: (value) => value
                         ? const Center(
-                        child: Text(
-                          '文',
-                          style: TextStyle(
-                              color: Colors.black87,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600),
-                        ))
+                            child: Text(
+                            '文',
+                            style: TextStyle(
+                                color: Colors.black87,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600),
+                          ))
                         : const Center(
-                        child: Text(
-                          'En',
-                          style: TextStyle(
-                              color: Colors.black87,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600),
-                        )),
+                            child: Text(
+                            'En',
+                            style: TextStyle(
+                                color: Colors.black87,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600),
+                          )),
                   ),
                 ),
               ),
@@ -194,7 +195,7 @@ class _RetrievePasswordState extends State<RetrievePassword> {
             onPressed: !_verificationCodeButtonEnabled
                 ? null
                 : () {
-                    getIt<UserDao>()
+                    getIt<EmailDao>()
                         .sendRetrievalEmail(PasswordRetrievalRequest(
                             email: emailController.text,
                             locale: I18nHelper.convertToOnepieceLocale(

@@ -451,21 +451,12 @@ class _CharacterDetailState extends State<CharacterDetail> {
             ),
           ),
           Padding(
-            padding: EdgeInsets.fromLTRB(sideWidth, 8, 8, 8),
-            child: character.imageUri != null
-                ? ImageLazyLoader(
-                    uri: character.imageUri!,
-                    width: 200,
-                    borderWidth: 3,
-                    borderRadios: 200)
-                : ImageHelper.getRoundImageFrame(
-                    200,
-                    200,
-                    3,
-                    OnepieceColors.liteFancyBlue,
-                    200,
-                    Base64Helper.decode(character.profileImage!)),
-          ),
+              padding: EdgeInsets.fromLTRB(sideWidth, 8, 8, 8),
+              child: ImageLazyLoader(
+                  uri: character.imageUri!,
+                  width: 200,
+                  borderWidth: 3,
+                  borderRadios: 200)),
           Form(
             key: _basicFormKey,
             child: Column(
@@ -1909,20 +1900,11 @@ class _CharacterDetailState extends State<CharacterDetail> {
                       children: [
                         Padding(
                           padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                          child: entry.value.starter!.imageUri == null
-                              ? ImageHelper.getRoundImageFrame(
-                                  40,
-                                  40,
-                                  1.5,
-                                  OnepieceColors.liteFancyBlue,
-                                  40,
-                                  Base64Helper.decode(
-                                      entry.value.starter!.profileImage!))
-                              : ImageLazyLoader(
-                                  uri: entry.value.starter!.imageUri!,
-                                  width: 40,
-                                  borderWidth: 1.5,
-                                  borderRadios: 40),
+                          child: ImageLazyLoader(
+                              uri: entry.value.starter!.imageUri!,
+                              width: 40,
+                              borderWidth: 1.5,
+                              borderRadios: 40),
                         ),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1951,20 +1933,11 @@ class _CharacterDetailState extends State<CharacterDetail> {
                       children: [
                         Padding(
                           padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                          child: entry.value.receiver!.imageUri == null
-                              ? ImageHelper.getRoundImageFrame(
-                                  40,
-                                  40,
-                                  1.5,
-                                  OnepieceColors.liteFancyBlue,
-                                  40,
-                                  Base64Helper.decode(
-                                      entry.value.receiver!.profileImage!))
-                              : ImageLazyLoader(
-                                  uri: entry.value.receiver!.imageUri!,
-                                  width: 40,
-                                  borderWidth: 1.5,
-                                  borderRadios: 40),
+                          child: ImageLazyLoader(
+                              uri: entry.value.receiver!.imageUri!,
+                              width: 40,
+                              borderWidth: 1.5,
+                              borderRadios: 40),
                         ),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1991,44 +1964,14 @@ class _CharacterDetailState extends State<CharacterDetail> {
                   DataCell(
                     Padding(
                       padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                      child: entry.value.battleExecution!.winnerId == null
-                          ? Container(
-                              width: 40,
-                              height: 40,
-                              decoration: const BoxDecoration(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(2.0)),
-                              ),
-                              child: FittedBox(
-                                fit: BoxFit.fill,
-                                child: ImageHelper.getSvgIconWithColor(
-                                    'images/svgs/question.svg',
-                                    100,
-                                    100,
-                                    OnepieceColors.liteFancyBlue),
-                              ),
-                            )
-                          : entry.value.starter!.imageUri == null ||
-                                  entry.value.receiver!.imageUri == null
-                              ? ImageHelper.getRoundImageFrame(
-                                  40,
-                                  40,
-                                  1.5,
-                                  OnepieceColors.liteFancyBlue,
-                                  40,
-                                  Base64Helper.decode(entry.value
-                                              .battleExecution!.winnerId ==
-                                          entry.value.starterId
-                                      ? entry.value.starter!.profileImage!
-                                      : entry.value.receiver!.profileImage!))
-                              : ImageLazyLoader(
-                                  uri: entry.value.battleExecution!.winnerId ==
-                                          entry.value.starterId
-                                      ? entry.value.starter!.imageUri!
-                                      : entry.value.receiver!.imageUri!,
-                                  width: 40,
-                                  borderWidth: 1.5,
-                                  borderRadios: 40),
+                      child: ImageLazyLoader(
+                          uri: entry.value.battleExecution!.winnerId ==
+                                  entry.value.starterId
+                              ? entry.value.starter!.imageUri!
+                              : entry.value.receiver!.imageUri!,
+                          width: 40,
+                          borderWidth: 1.5,
+                          borderRadios: 40),
                     ),
                   ),
                   _getDataCell(

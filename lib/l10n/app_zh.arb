@@ -288,7 +288,7 @@
   "invalidPassword": "密码只能包含数字，英文字母和下划线",
   "invalidNickname": "昵称只能包含数字，英文字母和中文字符",
   "passwordNotMatch": "密码不一致",
-  "lengthExceedsLimit": "长度超出限制，最大字符数为10",
+  "lengthExceedsLimit": "长度超出限制，最大字符数为20",
   "reselect": "重选",
   "groupStructure": "团队结构",
   "fatherGroups": "上级团队",

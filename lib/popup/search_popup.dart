@@ -265,16 +265,11 @@ class _SearchPopupState extends State<SearchPopup> {
                         children: [
                           Padding(
                             padding: const EdgeInsets.fromLTRB(3, 3, 6, 3),
-                            child: 
-                            character.imageUri==null?
-                            ImageHelper.getRoundImageFrame(
-                                50,
-                                50,
-                                2,
-                                OnepieceColors.liteFancyBlue,
-                                10,
-                                Base64Helper.decode(character.profileImage!)):
-                            ImageLazyLoader(uri: character.imageUri!, width: 50, borderWidth: 2, borderRadios: 10),
+                            child: ImageLazyLoader(
+                                uri: character.imageUri!,
+                                width: 50,
+                                borderWidth: 2,
+                                borderRadios: 10),
                           ),
                           Text(
                             I18nHelper.getDisplayNameFromI18n(character.name),
@@ -371,7 +366,8 @@ class _SearchPopupState extends State<SearchPopup> {
       GroupCategory.other: AppLocalizations.of(context)!.otherType,
       GroupCategory.underWorld: AppLocalizations.of(context)!.underworld,
       GroupCategory.government: AppLocalizations.of(context)!.worldGovernment,
-          GroupCategory.revolutionArmy: AppLocalizations.of(context)!.revolutionaryArmy,
+      GroupCategory.revolutionArmy:
+          AppLocalizations.of(context)!.revolutionaryArmy,
     };
     return ConstrainedBox(
         constraints: const BoxConstraints(
@@ -411,16 +407,11 @@ class _SearchPopupState extends State<SearchPopup> {
                           children: [
                             Padding(
                               padding: const EdgeInsets.fromLTRB(3, 6, 3, 3),
-                              child: 
-                              group.imageUri==null?
-                              ImageHelper.getRoundImageFrame(
-                                  50,
-                                  50,
-                                  2,
-                                  OnepieceColors.liteFancyBlue,
-                                  10,
-                                  Base64Helper.decode(group.profileImage!)):
-                              ImageLazyLoader(uri: group.imageUri!, width: 50, borderWidth: 2, borderRadios: 10),
+                              child: ImageLazyLoader(
+                                  uri: group.imageUri!,
+                                  width: 50,
+                                  borderWidth: 2,
+                                  borderRadios: 10),
                             ),
                             Padding(
                               padding: const EdgeInsets.only(left: 5.0),

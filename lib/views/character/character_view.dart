@@ -224,17 +224,6 @@ class _CharacterViewState extends State<CharacterView> {
                     )),
               ),
             ),
-          if (getIt<User>().loginRole == UserRole.NIKA)
-            Padding(
-              padding: const EdgeInsets.only(right: 10.0),
-              child: ElevatedButton(
-                  onPressed: () {
-                    getIt<SupportDao>().updateUri(UpdateUriRequest(
-                        resourceId: "", resourceType: ResourceType.CHARACTER));
-                  },
-                  style: OnepieceButtonStyle.getDefaultStyle(),
-                  child: const Text("update uri")),
-            ),
           Padding(
             padding: const EdgeInsets.fromLTRB(0, 0, 6, 0),
             child: SizedBox(
@@ -904,19 +893,11 @@ class _CharacterViewState extends State<CharacterView> {
               DataCell(
                 Padding(
                   padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                  child: entry.value.imageUri == null
-                      ? ImageHelper.getRoundImageFrame(
-                          40,
-                          40,
-                          1.5,
-                          OnepieceColors.liteFancyBlue,
-                          40,
-                          Base64Helper.decode(entry.value.profileImage!))
-                      : ImageLazyLoader(
-                          uri: entry.value.imageUri!,
-                          width: 40,
-                          borderWidth: 1.5,
-                          borderRadios: 40),
+                  child: ImageLazyLoader(
+                      uri: entry.value.imageUri!,
+                      width: 40,
+                      borderWidth: 1.5,
+                      borderRadios: 40),
                 ),
               ),
               DataCell(Padding(

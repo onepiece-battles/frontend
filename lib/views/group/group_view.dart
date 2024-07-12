@@ -191,17 +191,6 @@ class _GroupViewState extends State<GroupView> {
                     child: Text(AppLocalizations.of(context)!.create)),
               ),
             ),
-          if (getIt<User>().loginRole == UserRole.NIKA)
-            Padding(
-              padding: const EdgeInsets.only(right: 10.0),
-              child: ElevatedButton(
-                  onPressed: () {
-                    getIt<SupportDao>().updateUri(UpdateUriRequest(
-                        resourceId: "", resourceType: ResourceType.GROUP));
-                  },
-                  style: OnepieceButtonStyle.getDefaultStyle(),
-                  child: const Text("update uri")),
-            ),
           Padding(
             padding: const EdgeInsets.fromLTRB(0, 0, 6, 0),
             child: SizedBox(
@@ -565,19 +554,11 @@ class _GroupViewState extends State<GroupView> {
               DataCell(
                 Padding(
                     padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                    child: entry.value.imageUri != null
-                        ? ImageLazyLoader(
-                            uri: entry.value.imageUri!,
-                            width: 40,
-                            borderWidth: 1.5,
-                            borderRadios: 40)
-                        : ImageHelper.getRoundImageFrame(
-                            40,
-                            40,
-                            1.5,
-                            OnepieceColors.liteFancyBlue,
-                            40,
-                            Base64Helper.decode(entry.value.profileImage!))),
+                    child: ImageLazyLoader(
+                        uri: entry.value.imageUri!,
+                        width: 40,
+                        borderWidth: 1.5,
+                        borderRadios: 40)),
               ),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
@@ -633,13 +614,11 @@ class _GroupViewState extends State<GroupView> {
                     showDuration: const Duration(seconds: 1),
                     child: Padding(
                         padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                        child: character.imageUri == null
-                            ? const Text("null")
-                            : ImageLazyLoader(
-                                uri: character.imageUri!,
-                                width: 40,
-                                borderWidth: 1.5,
-                                borderRadios: 40)),
+                        child: ImageLazyLoader(
+                            uri: character.imageUri!,
+                            width: 40,
+                            borderWidth: 1.5,
+                            borderRadios: 40)),
                   ),
                 ))
             .toList(),
@@ -670,19 +649,11 @@ class _GroupViewState extends State<GroupView> {
                     showDuration: const Duration(seconds: 1),
                     child: Padding(
                         padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                        child: group.imageUri == null
-                            ? ImageHelper.getRoundImageFrame(
-                                40,
-                                40,
-                                1.5,
-                                OnepieceColors.liteFancyBlue,
-                                40,
-                                Base64Helper.decode(group.profileImage!))
-                            : ImageLazyLoader(
-                                uri: group.imageUri!,
-                                width: 40,
-                                borderWidth: 1.5,
-                                borderRadios: 40)),
+                        child: ImageLazyLoader(
+                            uri: group.imageUri!,
+                            width: 40,
+                            borderWidth: 1.5,
+                            borderRadios: 40)),
                   ),
                 ))
             .toList(),

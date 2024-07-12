@@ -3,42 +3,55 @@ import '../constants/onepiece_colors.dart';
 import '../utils/base64_helper.dart';
 import '../utils/image_helper.dart';
 
-class ImageLazyLoader extends StatelessWidget {
+class ImageLazyLoader extends StatefulWidget {
   final String uri;
   final double width;
   final double borderWidth;
   final double borderRadios;
-  const ImageLazyLoader(
-      {super.key,
-      required this.uri,
-      required this.width,
-      required this.borderWidth,
-      required this.borderRadios});
+  const ImageLazyLoader({
+    Key? key,
+    required this.uri,
+    required this.width,
+    required this.borderWidth,
+    required this.borderRadios,
+  }) : super(key: key);
+
+  @override
+  State<ImageLazyLoader> createState() => _ImageLazyLoaderState();
+}
+
+class _ImageLazyLoaderState extends State<ImageLazyLoader> {
+  late Future<String> imageFuture;
+  @override
+  void initState() {
+    super.initState();
+    imageFuture = ImageHelper.loadImageByUri(widget.uri);
+  }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<String>(
-        future: ImageHelper.loadImageByUri(uri),
+        future: imageFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done &&
               snapshot.hasData) {
             return ImageHelper.getRoundImageFrame(
-              width,
-              width,
-              borderWidth,
+              widget.width,
+              widget.width,
+              widget.borderWidth,
               OnepieceColors.liteFancyBlue,
-              borderRadios,
+              widget.borderRadios,
               Base64Helper.decode(snapshot.data!),
             );
           } else if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(
               child: SizedBox(
-                width: width,
-                height: width,
+                width: widget.width,
+                height: widget.width,
                 child: CircularProgressIndicator(
                   valueColor: const AlwaysStoppedAnimation<Color>(
                       OnepieceColors.liteFancyBlue), // Change color to green
-                  strokeWidth: borderWidth, //
+                  strokeWidth: widget.borderWidth, //
                 ),
               ),
             );

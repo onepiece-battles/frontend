@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
+import 'package:one_piece_battles_flutter/repository/email_dao.dart';
 import 'package:one_piece_battles_flutter/utils/image_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -324,7 +325,7 @@ class _UserProfileState extends State<UserProfile> {
               if (!_emailVerified)
                 ElevatedButton(
                   onPressed: () {
-                    getIt<UserDao>()
+                    getIt<EmailDao>()
                         .verifyEmailAddress(VerifyEmailAddressRequest(
                             id: user.id, email: user.username))
                         .then((value) => {
