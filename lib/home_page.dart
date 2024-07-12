@@ -26,7 +26,7 @@ GetIt getIt = GetIt.instance;
 const locales = [Locale('zh', 'CN'), Locale('en', 'US')];
 List<ResourceType> notShownResources = [ResourceType.ROLE];
 // Define a ValueNotifier to track the navigation state changes
-final ValueNotifier<String> routeNotifier = ValueNotifier<String>('/');
+final ValueNotifier<String> routeNotifier = ValueNotifier<String>('/home/abc');
 
 class HomePage extends StatefulWidget {
   final Widget mainScreen;

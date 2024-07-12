@@ -48,15 +48,20 @@ class AppRouter {
       '/home/${ResourceType.USER.toString().toLowerCase()}';
   static final issuePath =
       '/home/${ResourceType.ISSUE.toString().toLowerCase()}';
+  
+  static void updateRoutingState(String matchedLocation) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      routeNotifier.value = matchedLocation;
+    });
+  }
 
-  static final router = GoRouter(
+  static final  router = GoRouter(
     navigatorKey: _rootNavigatorState,
     initialLocation: homePath,
     routes: [
       ShellRoute(
         navigatorKey: _homeNavigatorState,
         pageBuilder: (context, state, child) {
-          routeNotifier.value = state.matchedLocation;
           return NoTransitionPage(
               child: HomePage(
                 mainScreen: child,
@@ -69,7 +74,7 @@ class AppRouter {
             name: "characters",
             parentNavigatorKey: _homeNavigatorState,
             pageBuilder: (context, state) {
-              routeNotifier.value = state.matchedLocation;
+              updateRoutingState(state.matchedLocation);
               return NoTransitionPage(
                   child: const CharacterView(), key: state.pageKey);
             },
@@ -79,7 +84,7 @@ class AppRouter {
                 name: 'createCharacter',
                 parentNavigatorKey: _homeNavigatorState,
                 pageBuilder: (context, state) {
-                  routeNotifier.value = state.matchedLocation;
+                  updateRoutingState(state.matchedLocation);
                   return const NoTransitionPage(
                     child: CreateCharacterView(),
                   );
@@ -90,7 +95,7 @@ class AppRouter {
                 name: 'characterDetails',
                 parentNavigatorKey: _homeNavigatorState,
                 pageBuilder: (context, state) {
-                  routeNotifier.value = state.matchedLocation;
+                  updateRoutingState(state.matchedLocation);
                   String characterId = state.extra as String;
                   return NoTransitionPage(
                       child: CharacterDetail(
@@ -106,7 +111,7 @@ class AppRouter {
             name: "groups",
             parentNavigatorKey: _homeNavigatorState,
             pageBuilder: (context, state) {
-              routeNotifier.value = state.matchedLocation;
+              updateRoutingState(state.matchedLocation);
               return NoTransitionPage(
                   child: const GroupView(), key: state.pageKey);
             },
@@ -116,7 +121,7 @@ class AppRouter {
                 name: 'createGroup',
                 parentNavigatorKey: _homeNavigatorState,
                 pageBuilder: (context, state) {
-                  routeNotifier.value = state.matchedLocation;
+                  updateRoutingState(state.matchedLocation);
                   return const NoTransitionPage(
                     child: CreateGroupView(),
                   );
@@ -127,7 +132,7 @@ class AppRouter {
                 name: 'groupDetails',
                 parentNavigatorKey: _homeNavigatorState,
                 pageBuilder: (context, state) {
-                  routeNotifier.value = state.matchedLocation;
+                  updateRoutingState(state.matchedLocation);
                   String groupId = state.extra as String;
                   return NoTransitionPage(
                     child: GroupDetailView(
@@ -143,7 +148,7 @@ class AppRouter {
               name: "fruit",
               parentNavigatorKey: _homeNavigatorState,
               pageBuilder: (context, state) {
-                routeNotifier.value = state.matchedLocation;
+                updateRoutingState(state.matchedLocation);
                 return NoTransitionPage(
                     child: const FruitView(), key: state.pageKey);
               },
@@ -153,7 +158,7 @@ class AppRouter {
                   name: 'createFruit',
                   parentNavigatorKey: _homeNavigatorState,
                   pageBuilder: (context, state) {
-                    routeNotifier.value = state.matchedLocation;
+                    updateRoutingState(state.matchedLocation);
                     return const NoTransitionPage(
                       child: CreateFruitView(),
                     );
@@ -164,7 +169,7 @@ class AppRouter {
                   name: 'fruitDetails',
                   parentNavigatorKey: _homeNavigatorState,
                   pageBuilder: (context, state) {
-                    routeNotifier.value = state.matchedLocation;
+                    updateRoutingState(state.matchedLocation);
                     String fruitId = state.extra as String;
                     return NoTransitionPage(
                       child: FruitDetailView(
@@ -179,7 +184,7 @@ class AppRouter {
               name: "battle",
               parentNavigatorKey: _homeNavigatorState,
               pageBuilder: (context, state) {
-                routeNotifier.value = state.matchedLocation;
+                updateRoutingState(state.matchedLocation);
                 return NoTransitionPage(
                     child: const BattleView(), key: state.pageKey);
               },
@@ -189,7 +194,7 @@ class AppRouter {
                   name: 'createBattle',
                   parentNavigatorKey: _homeNavigatorState,
                   pageBuilder: (context, state) {
-                    routeNotifier.value = state.matchedLocation;
+                    updateRoutingState(state.matchedLocation);
                     return const NoTransitionPage(
                       child: CreateBattleView(),
                     );
@@ -200,7 +205,7 @@ class AppRouter {
                   name: 'battleDetails',
                   parentNavigatorKey: _homeNavigatorState,
                   pageBuilder: (context, state) {
-                    routeNotifier.value = state.matchedLocation;
+                    updateRoutingState(state.matchedLocation);
                     String battleId = state.extra as String;
                     return NoTransitionPage(
                       child: BattleDetailView(
@@ -215,7 +220,7 @@ class AppRouter {
             name: "userManagement",
             parentNavigatorKey: _homeNavigatorState,
             pageBuilder: (context, state) {
-              routeNotifier.value = state.matchedLocation;
+              updateRoutingState(state.matchedLocation);
               return NoTransitionPage(
                   child: const UserView(), key: state.pageKey);
             },
@@ -225,7 +230,7 @@ class AppRouter {
                 name: 'userDetails',
                 parentNavigatorKey: _homeNavigatorState,
                 pageBuilder: (context, state) {
-                  routeNotifier.value = state.matchedLocation;
+                  updateRoutingState(state.matchedLocation);
                   String userId = state.extra as String;
                   return NoTransitionPage(
                     child: UserDetailView(
@@ -241,7 +246,7 @@ class AppRouter {
               name: "issue",
               parentNavigatorKey: _homeNavigatorState,
               pageBuilder: (context, state) {
-                routeNotifier.value = state.matchedLocation;
+                updateRoutingState(state.matchedLocation);
                 return NoTransitionPage(
                     child: const IssueView(), key: state.pageKey);
               },
@@ -251,7 +256,7 @@ class AppRouter {
                   name: 'issueDetails',
                   parentNavigatorKey: _homeNavigatorState,
                   pageBuilder: (context, state) {
-                    routeNotifier.value = state.matchedLocation;
+                    updateRoutingState(state.matchedLocation);
                     String issueId = state.extra as String;
                     return NoTransitionPage(
                       child: IssueDetailView(
@@ -266,7 +271,7 @@ class AppRouter {
               name: "userHome",
               parentNavigatorKey: _homeNavigatorState,
               pageBuilder: (context, state) {
-                routeNotifier.value = state.matchedLocation;
+                updateRoutingState(state.matchedLocation);
                 return NoTransitionPage(
                     child: UserHome(userId: getIt<User>().id),
                     key: state.pageKey);
@@ -277,7 +282,7 @@ class AppRouter {
                   name: 'userProfile',
                   parentNavigatorKey: _homeNavigatorState,
                   pageBuilder: (context, state) {
-                    routeNotifier.value = state.matchedLocation;
+                    updateRoutingState(state.matchedLocation);
                     String userId = state.extra as String;
                     return NoTransitionPage(
                         child: UserProfile(
@@ -291,7 +296,7 @@ class AppRouter {
                   name: 'userSetting',
                   parentNavigatorKey: _homeNavigatorState,
                   pageBuilder: (context, state) {
-                    routeNotifier.value = state.matchedLocation;
+                    updateRoutingState(state.matchedLocation);
                     String userId = state.extra as String;
                     return NoTransitionPage(
                       child: UserDetailView(
