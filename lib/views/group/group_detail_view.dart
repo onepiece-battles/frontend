@@ -441,7 +441,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
             const SizedBox(
               height: 10,
             ),
-            Text(
+            if (groupFullView.characters.isNotEmpty) Text(
               AppLocalizations.of(context)!.thisGroup,
               style: OnepieceFonts.navigationTopBarStyleClickable,
             ),

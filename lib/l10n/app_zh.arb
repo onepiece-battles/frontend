@@ -295,5 +295,6 @@
   "thisGroup": "当前团队",
   "selected": "已选择",
   "selectable": "可选择",
-  "selectNewMembers": "添加新成员"
+  "selectNewMembers": "添加新成员",
+  "myAccount": "我的账号"
 }
