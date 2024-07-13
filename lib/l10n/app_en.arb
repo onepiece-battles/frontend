@@ -295,5 +295,6 @@
   "thisGroup": "Current group",
   "selected": "Selected",
   "selectable": "Selectable",
-  "selectNewMembers": "Add new members"
+  "selectNewMembers": "Add new members",
+  "myAccount": "My account"
 }
