@@ -34,7 +34,7 @@ class _UserHomeState extends State<UserHome> {
   List<BattleListView> battles = [];
   Future<ListCharacterResponse?> listCharacters() async {
     ListCharacterRequest listCharacterRequest = ListCharacterRequest(
-        pageSize: 1,
+        pageSize: 100,
         pageIndex: 1,
         sortKeys: [],
         characterFilter: CharacterFilter(
@@ -46,7 +46,7 @@ class _UserHomeState extends State<UserHome> {
 
   Future<ListGroupResponse?> listGroups() async {
     ListGroupRequest listGroupRequest = ListGroupRequest(
-        pageSize: 1,
+        pageSize: 100,
         pageIndex: 1,
         sortKeys: [],
         groupFilter: GroupFilter(
@@ -58,7 +58,7 @@ class _UserHomeState extends State<UserHome> {
 
   Future<ListBattleResponse?> listBattles() async {
     ListBattleRequest request = ListBattleRequest(
-        pageSize: 1,
+        pageSize: 100,
         pageIndex: 1,
         sortKeys: [],
         battleFilter: BattleFilter(
