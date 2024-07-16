@@ -133,7 +133,8 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                                   : Padding(
                                       padding: const EdgeInsets.all(20.0),
                                       child: ImageLazyLoader(
-                                          uri: starterSelectedItem
+                                          key: UniqueKey(),
+                                          uriProvider: () => starterSelectedItem
                                               .value!.imageUri!,
                                           width: 200,
                                           borderWidth: 3,
@@ -323,7 +324,8 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                                     padding:
                                         const EdgeInsets.fromLTRB(3, 3, 8, 3),
                                     child: ImageLazyLoader(
-                                        uri: character.imageUri!,
+                                        key: UniqueKey(),
+                                        uriProvider: () => character.imageUri!,
                                         width: 50,
                                         borderWidth: 2,
                                         borderRadios: 6),
@@ -448,7 +450,8 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                                       : Padding(
                                           padding: const EdgeInsets.all(20.0),
                                           child: ImageLazyLoader(
-                                              uri: receiverSelectedItem
+                                              key: UniqueKey(),
+                                              uriProvider:() =>  receiverSelectedItem
                                                   .value!.imageUri!,
                                               width: 200,
                                               borderWidth: 3,
@@ -617,7 +620,8 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                                       padding:
                                           const EdgeInsets.fromLTRB(3, 3, 8, 3),
                                       child: ImageLazyLoader(
-                                          uri: character.imageUri!,
+                                          key: UniqueKey(),
+                                          uriProvider: () => character.imageUri!,
                                           width: 50,
                                           borderWidth: 2,
                                           borderRadios: 6),

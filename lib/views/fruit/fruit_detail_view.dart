@@ -679,7 +679,8 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                             Padding(
                                 padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
                                 child: ImageLazyLoader(
-                                    uri: character.imageUri!,
+                                    key: UniqueKey(),
+                                    uriProvider: () => character.imageUri!,
                                     width: 40,
                                     borderWidth: 1.5,
                                     borderRadios: 40)),

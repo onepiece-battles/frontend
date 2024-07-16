@@ -894,7 +894,8 @@ class _CharacterViewState extends State<CharacterView> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
                   child: ImageLazyLoader(
-                      uri: entry.value.imageUri!,
+                      key: UniqueKey(),
+                      uriProvider: () => entry.value.imageUri!,
                       width: 40,
                       borderWidth: 1.5,
                       borderRadios: 40),

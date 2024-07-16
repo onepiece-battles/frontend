@@ -139,7 +139,7 @@ class _CreateFruitViewState extends State<CreateFruitView> {
                                   true,
                                   fruitNameChController,
                                   AppLocalizations.of(context)!.name,
-                                  10,
+                                  30,
                                   ImageHelper.getTextFormFieldIcon(
                                       'images/character_digits_icon/name.svg',
                                       true,
@@ -151,7 +151,7 @@ class _CreateFruitViewState extends State<CreateFruitView> {
                                     true,
                                     fruitNameEnController,
                                     AppLocalizations.of(context)!.name,
-                                    10,
+                                    30,
                                     ImageHelper.getTextFormFieldIcon(
                                         'images/character_digits_icon/name.svg',
                                         true,

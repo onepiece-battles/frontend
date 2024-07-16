@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:one_piece_battles_flutter/components/digit_text_form_field.dart';
 import 'package:one_piece_battles_flutter/components/string_text_form_field.dart';
+import 'package:one_piece_battles_flutter/constants/button_style.dart';
 import 'package:one_piece_battles_flutter/utils/random_string_generator.dart';
 import 'package:openapi/api.dart';
 import '../../constants/onepiece_colors.dart';
@@ -167,7 +168,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                                     true,
                                     characterNameCnController,
                                     AppLocalizations.of(context)!.name,
-                                    10,
+                                    30,
                                     ImageHelper.getTextFormFieldIcon(
                                         'images/character_digits_icon/name.svg',
                                         true,
@@ -179,7 +180,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                                       true,
                                       characterNameEnController,
                                       AppLocalizations.of(context)!.name,
-                                      10,
+                                      30,
                                       ImageHelper.getTextFormFieldIcon(
                                           'images/character_digits_icon/name.svg',
                                           true,
@@ -685,6 +686,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                   children: [
                     ElevatedButton(
                       onPressed: _pickAndProcessImage,
+                      style: OnepieceButtonStyle.getDefaultStyle(),
                       child: Text(AppLocalizations.of(context)!.chooseFile),
                     ),
                     const SizedBox(

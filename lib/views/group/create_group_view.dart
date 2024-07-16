@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:one_piece_battles_flutter/repository/group_dao.dart';
 import 'package:one_piece_battles_flutter/utils/string_extensions.dart';
 import 'package:openapi/api.dart';
+import '../../constants/button_style.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
 import '../../constants/path_constants.dart';
@@ -52,12 +53,6 @@ class _CreateGroupViewState extends State<CreateGroupView> {
   String _chosenImageName = "";
   @override
   Widget build(BuildContext context) {
-    TextEditingController groupNameEnController = TextEditingController(
-        text: RandomStringGenerator.generateRandomName(
-            8, getIt<User>().loginRole == UserRole.NIKA));
-    TextEditingController characterNameChController = TextEditingController(
-        text: RandomStringGenerator.generateRandomChineseName(
-            3, getIt<User>().loginRole == UserRole.NIKA));
     return Stack(
       children: [
         SingleChildScrollView(
@@ -82,7 +77,7 @@ class _CreateGroupViewState extends State<CreateGroupView> {
                       SizedBox(
                         width: 300,
                         child: TextFormField(
-                          controller: characterNameChController,
+                          controller: groupNameChController,
                           validator: (value) {
                             if (value!.isWhiteSpace()) {
                               return AppLocalizations.of(context)!
@@ -94,7 +89,7 @@ class _CreateGroupViewState extends State<CreateGroupView> {
                             return null;
                           },
                           autovalidateMode: AutovalidateMode.onUserInteraction,
-                          maxLength: 10,
+                          maxLength: 30,
                           maxLengthEnforcement: MaxLengthEnforcement.enforced,
                           decoration: InputDecoration(
                             labelText: AppLocalizations.of(context)!.groupName,
@@ -123,7 +118,7 @@ class _CreateGroupViewState extends State<CreateGroupView> {
                             },
                             autovalidateMode:
                                 AutovalidateMode.onUserInteraction,
-                            maxLength: 10,
+                            maxLength: 30,
                             maxLengthEnforcement: MaxLengthEnforcement.enforced,
                             decoration: InputDecoration(
                               labelText:
@@ -208,7 +203,7 @@ class _CreateGroupViewState extends State<CreateGroupView> {
                             await pickedImage!.readAsBytes();
                         _pickedImage = imageInByte;
                         if (!ImageHelper.isValidImageSize(
-                            200 * 1024, imageInByte)) {
+                            500 * 1024, imageInByte)) {
                           OnepieceAlert.getBasicAlertDialogFunc(
                               context,
                               AppLocalizations.of(context)!.alert,
@@ -221,6 +216,7 @@ class _CreateGroupViewState extends State<CreateGroupView> {
                           _newImagePicked = true;
                         });
                       },
+                      style: OnepieceButtonStyle.getDefaultStyle(),
                       child: Text(AppLocalizations.of(context)!.chooseFile),
                     ),
                     const SizedBox(
@@ -242,7 +238,7 @@ class _CreateGroupViewState extends State<CreateGroupView> {
                   height: 10,
                 ),
                 Text(
-                  AppLocalizations.of(context)!.maxFileSizeDescription,
+                  AppLocalizations.of(context)!.maxFileSize500,
                   style: OnepieceFonts.contentStyle,
                 )
               ],

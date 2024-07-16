@@ -403,7 +403,8 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                       });
                 },
                 child: ImageLazyLoader(
-                    uri: battle.starter!.imageUri!,
+                    key: UniqueKey(),
+                    uriProvider: () => battle.starter!.imageUri!,
                     width: 120,
                     borderWidth: 3,
                     borderRadios: 120)),
@@ -456,7 +457,8 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                       });
                 },
                 child: ImageLazyLoader(
-                    uri: battle.receiver!.imageUri!,
+                    key: UniqueKey(),
+                    uriProvider: () => battle.receiver!.imageUri!,
                     width: 120,
                     borderWidth: 3,
                     borderRadios: 120)),
@@ -566,7 +568,8 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                   120, 120, OnepieceColors.liteFancyBlue),
             )
           : ImageLazyLoader(
-              uri: battle.starter!.id == model.winnerId
+          key: UniqueKey(),
+              uriProvider: () => battle.starter!.id == model.winnerId
                   ? battle.starter!.imageUri!
                   : battle.receiver!.imageUri!,
               width: 120,

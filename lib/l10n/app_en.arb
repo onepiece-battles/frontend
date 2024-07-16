@@ -296,5 +296,6 @@
   "selected": "Selected",
   "selectable": "Selectable",
   "selectNewMembers": "Add new members",
-  "myAccount": "My account"
+  "myAccount": "My account",
+  "maxFileSize500": "The maximum file size allowed is 500 kb."
 }

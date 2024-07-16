@@ -493,14 +493,13 @@ class _UserViewState extends State<UserView> {
             cells: [
               DataCell(
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                  child:
-                       ImageLazyLoader(
-                          uri: user.imageUri!,
-                          width: 40,
-                          borderWidth: 1.5,
-                          borderRadios: 40)
-                ),
+                    padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+                    child: ImageLazyLoader(
+                        key: UniqueKey(),
+                        uriProvider: () => user.imageUri!,
+                        width: 40,
+                        borderWidth: 1.5,
+                        borderRadios: 40)),
               ),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),

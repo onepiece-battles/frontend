@@ -182,8 +182,7 @@ class _FruitViewState extends State<FruitView> {
                       onPressed: () {
                         context.goNamed("createFruit");
                       },
-                      child:
-                          Text(AppLocalizations.of(context)!.create),
+                      child: Text(AppLocalizations.of(context)!.create),
                     ),
                   ),
                 ),
@@ -628,28 +627,29 @@ class _FruitViewState extends State<FruitView> {
       child: Row(
         children: characters
             .map((character) => InkWell(
-          hoverColor: Colors.transparent,
-          onTap: () {
-            context.goNamed('characterDetails',
-                extra: character.id,
-                pathParameters: {
-                  'name':
-                  I18nHelper.getDisplayNameFromI18n(character.name!)
-                });
-          },
-          child: Tooltip(
-            message: I18nHelper.getDisplayNameFromI18n(character.name),
-            preferBelow: false,
-            showDuration: const Duration(seconds: 1),
-            child: Padding(
-                padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                child: ImageLazyLoader(
-                    uri: character.imageUri!,
-                    width: 40,
-                    borderWidth: 1.5,
-                    borderRadios: 40)),
-          ),
-        ))
+                  hoverColor: Colors.transparent,
+                  onTap: () {
+                    context.goNamed('characterDetails',
+                        extra: character.id,
+                        pathParameters: {
+                          'name':
+                              I18nHelper.getDisplayNameFromI18n(character.name!)
+                        });
+                  },
+                  child: Tooltip(
+                    message: I18nHelper.getDisplayNameFromI18n(character.name),
+                    preferBelow: false,
+                    showDuration: const Duration(seconds: 1),
+                    child: Padding(
+                        padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+                        child: ImageLazyLoader(
+                            key: UniqueKey(),
+                            uriProvider: () => character.imageUri!,
+                            width: 40,
+                            borderWidth: 1.5,
+                            borderRadios: 40)),
+                  ),
+                ))
             .toList(),
       ),
     );
