@@ -1,10 +1,14 @@
+import 'dart:typed_data';
 import 'dart:ui';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:one_piece_battles_flutter/components/image_cache_manager.dart';
 import 'package:one_piece_battles_flutter/components/image_lazy_loader.dart';
+import 'package:one_piece_battles_flutter/components/string_text_form_field.dart';
 import 'package:one_piece_battles_flutter/popup/join_group.dart';
 import 'package:one_piece_battles_flutter/repository/group_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
@@ -15,6 +19,9 @@ import '../../constants/button_style.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
 import '../../popup/onepiece_alert.dart';
+import '../../repository/image_dao.dart';
+import '../../utils/base64_helper.dart';
+import '../../utils/onepiece_image_picker.dart';
 import '../../utils/permission_check.dart';
 
 GetIt getIt = GetIt.instance;
@@ -35,6 +42,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
   List<CharacterInGroupView> characters = [];
   List<Group> subGroups = [];
   late GroupCategory selectedGroupCategory;
+  String? selectedImage;
   bool _basicInfoEditable = false;
   bool _editButtonVisible = false;
   final double _dividerWidth = 900;
@@ -229,21 +237,49 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                               name: I18nHelper.getI18nFromDisplayName(
                                   groupFullView.name!,
                                   groupNameController.text));
-                          getIt<GroupDao>().updateGroups(group).then((value) {
-                            OnepieceAlert.getBasicAlertDialogFunc(
-                                context,
-                                AppLocalizations.of(context)!.hint,
-                                I18nHelper.getDisplayNameFromI18n(
-                                    value!.result));
-                            if (value.success) {
+                          if (groupFullView.groupCategory !=
+                                  selectedGroupCategory ||
+                              groupFullView.name.toString() !=
+                                  I18nHelper.getI18nFromDisplayName(
+                                          groupFullView.name!,
+                                          groupNameController.text)
+                                      .toString()) {
+                            getIt<GroupDao>().updateGroups(group).then((value) {
+                              OnepieceAlert.getBasicAlertDialogFunc(
+                                  context,
+                                  AppLocalizations.of(context)!.hint,
+                                  I18nHelper.getDisplayNameFromI18n(
+                                      value!.result));
+                              if (value.success) {
+                                context.goNamed('groupDetails',
+                                    extra: groupFullView.id,
+                                    pathParameters: {
+                                      'name': I18nHelper.getDisplayNameFromI18n(
+                                          group.name)
+                                    });
+                              }
+                            });
+                          }
+                          if (selectedImage != null) {
+                            getIt<ImageDao>()
+                                .addImage(UploadImageRequest(
+                                    type: ResourceType.GROUP,
+                                    resourceId: group.id,
+                                    image: selectedImage!))
+                                .then((value) {
+                              OnepieceAlert.getBasicAlertDialogFunc(
+                                  context,
+                                  AppLocalizations.of(context)!.hint,
+                                  I18nHelper.getDisplayNameFromI18n(
+                                      value!.result));
                               context.goNamed('groupDetails',
-                                  extra: groupFullView.id,
+                                  extra: group.id,
                                   pathParameters: {
                                     'name': I18nHelper.getDisplayNameFromI18n(
                                         group.name)
                                   });
-                            }
-                          });
+                            });
+                          }
                         }
                       });
                     },
@@ -265,33 +301,53 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                 ),
             ],
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 5),
-            child: ImageLazyLoader(
-                key: UniqueKey(),
-                uriProvider: () => groupFullView.imageUri!,
-                width: 200,
-                borderWidth: 3,
-                borderRadios: 20),
+          InkWell(
+            onTap: _basicInfoEditable
+                ? () async {
+                    basicInfoState(() async {
+                      XFile? pickedImage =
+                          await OnepieceImagePicker.pickWebImage();
+                      Uint8List imageInByte = await pickedImage!.readAsBytes();
+                      if (!ImageHelper.isValidImageSize(
+                          500 * 1024, imageInByte)) {
+                        OnepieceAlert.getBasicAlertDialogFunc(
+                            context,
+                            AppLocalizations.of(context)!.alert,
+                            AppLocalizations.of(context)!
+                                .imageSizeExceedsLimit);
+                        return;
+                      }
+                      selectedImage = Base64Helper.encode(imageInByte);
+                    });
+                  }
+                : null,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 5),
+              child: selectedImage == null
+                  ? ImageLazyLoader(
+                      key: UniqueKey(),
+                      uriProvider: () => groupFullView.imageUri!,
+                      width: 200,
+                      borderWidth: 3,
+                      borderRadios: 20)
+                  : ImageHelper.getRoundImageFrame(
+                      200,
+                      200,
+                      3,
+                      OnepieceColors.liteFancyBlue,
+                      20,
+                      Base64Helper.decode(selectedImage!)),
+            ),
           ),
-          SizedBox(
-            width: 300,
-            child: Text(
+          StringTextFormField(
+              context,
+              _basicInfoEditable,
+              groupNameController,
               AppLocalizations.of(context)!.name,
-              style: OnepieceFonts.deepBlackHintFont,
-            ),
-          ),
-          SizedBox(
-            width: 300,
-            child: TextFormField(
-              controller: groupNameController,
-              enabled: _basicInfoEditable,
-              maxLength: 20,
-              decoration: const InputDecoration(
-                  floatingLabelBehavior: FloatingLabelBehavior.auto,
-                  contentPadding: EdgeInsets.fromLTRB(5, 20, 10, 2)),
-            ),
-          ),
+              30,
+              ImageHelper.getTextFormFieldIcon(
+                  'images/character_digits_icon/name.svg', true, null),
+              true),
           SizedBox(
             width: 300,
             child: Text(

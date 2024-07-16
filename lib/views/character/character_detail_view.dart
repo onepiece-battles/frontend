@@ -1,8 +1,11 @@
+import 'dart:typed_data';
+
 import 'package:animated_toggle_switch/animated_toggle_switch.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:one_piece_battles_flutter/components/digit_text_form_field.dart';
 import 'package:one_piece_battles_flutter/components/image_lazy_loader.dart';
 import 'package:one_piece_battles_flutter/components/string_text_form_field.dart';
@@ -15,9 +18,12 @@ import 'package:openapi/api.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../popup/onepiece_alert.dart';
 import '../../repository/fruit_dao.dart';
+import '../../repository/image_dao.dart';
+import '../../utils/base64_helper.dart';
 import '../../utils/data_converter.dart';
 import '../../utils/i18n_helper.dart';
 import '../../utils/image_helper.dart';
+import '../../utils/onepiece_image_picker.dart';
 import '../../utils/permission_check.dart';
 
 GetIt getIt = GetIt.instance;
@@ -58,6 +64,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
   List<FruitListView> searchingFruitList = [];
   String? selectedFruitId;
   String? selectedGroupId;
+  String? selectedImage;
 
   double dividerWidth = 860;
   double sideWidth = 50;
@@ -138,15 +145,16 @@ class _CharacterDetailState extends State<CharacterDetail> {
     fruits = characterFullView.fruits;
     groups = characterFullView.groups;
     battleEndIndex = battles.length >= 10 ? 10 : battles.length;
-    _editButtonVisible = PermissionCheck.checkPermission(
-            getIt<User>().loginRoleResourcesPermissionMap,
-            ResourceType.CHARACTER,
-            Permission.UPDATE) &&
-        PermissionCheck.isMyResource(
-            character.creationRecord!.userId!,
-            character.creationRecord!.roleId!,
-            getIt<User>().id,
-            getIt<User>().loginRoleId!);
+    _editButtonVisible = (PermissionCheck.checkPermission(
+                getIt<User>().loginRoleResourcesPermissionMap,
+                ResourceType.CHARACTER,
+                Permission.UPDATE) &&
+            PermissionCheck.isMyResource(
+                character.creationRecord!.userId!,
+                character.creationRecord!.roleId!,
+                getIt<User>().id,
+                getIt<User>().loginRoleId!)) ||
+        getIt<User>().loginRole == UserRole.NIKA;
     // nika role has the edit permission for all resources
     if (getIt<User>().loginRole == UserRole.NIKA) {
       _editButtonVisible = true;
@@ -173,6 +181,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
         : character.dateOfBirth!.split("-")[1].toString();
     characterBounty.text =
         character.bounty == null ? "" : character.bounty.toString();
+    selectedBattleStyle = character.battleStyle;
+    selectedRace = character.race;
     // update combat information
     characterFruitLimitController.text = character.maximumFruitCount.toString();
     characterGroupGainController.text = character.groupGain.toString();
@@ -398,6 +408,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                 baseIntelligence: character.baseIntelligence,
                                 baseBlood: character.baseBlood,
                                 baseSpeed: character.baseSpeed,
+                                imageUri: character.imageUri,
+                                systemResource: character.systemResource,
                                 battleStyle: selectedBattleStyle,
                                 race: selectedRace,
                                 // basic info
@@ -408,7 +420,6 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                     selectedDay == null || selectedMonth == null
                                         ? null
                                         : "$selectedMonth-$selectedDay",
-                                // todo(yichi): profile image update
                                 birthPlace: characterBirthPlace.text,
                                 age: DataConverter.stringToInt(
                                     characterAge.text.trim()),
@@ -417,23 +428,47 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                 height: DataConverter.stringToInt(
                                     characterHeight.text.trim()),
                                 score: character.score);
-                            getIt<CharacterDao>()
-                                .update(updatedCharacter)
-                                .then((value) {
-                              OnepieceAlert.getBasicAlertDialogFunc(
-                                  context,
-                                  AppLocalizations.of(context)!.hint,
-                                  I18nHelper.getDisplayNameFromI18n(
-                                      value!.result));
-                              if (value.success) {
+                            if (updatedCharacter.toString() !=
+                                character.toString()) {
+                              getIt<CharacterDao>()
+                                  .update(updatedCharacter)
+                                  .then((value) {
+                                OnepieceAlert.getBasicAlertDialogFunc(
+                                    context,
+                                    AppLocalizations.of(context)!.hint,
+                                    I18nHelper.getDisplayNameFromI18n(
+                                        value!.result));
+                                if (value.success) {
+                                  context.goNamed('characterDetails',
+                                      extra: character.id,
+                                      pathParameters: {
+                                        'name':
+                                            I18nHelper.getDisplayNameFromI18n(
+                                                character.name)
+                                      });
+                                }
+                              });
+                            }
+                            if (selectedImage != null) {
+                              getIt<ImageDao>()
+                                  .addImage(UploadImageRequest(
+                                      type: ResourceType.CHARACTER,
+                                      resourceId: character.id,
+                                      image: selectedImage!))
+                                  .then((value) {
+                                OnepieceAlert.getBasicAlertDialogFunc(
+                                    context,
+                                    AppLocalizations.of(context)!.hint,
+                                    I18nHelper.getDisplayNameFromI18n(
+                                        value!.result));
                                 context.goNamed('characterDetails',
                                     extra: character.id,
                                     pathParameters: {
                                       'name': I18nHelper.getDisplayNameFromI18n(
                                           character.name)
                                     });
-                              }
-                            });
+                              });
+                            }
                           }
                         });
                       },
@@ -458,12 +493,40 @@ class _CharacterDetailState extends State<CharacterDetail> {
           ),
           Padding(
               padding: EdgeInsets.fromLTRB(sideWidth, 8, 8, 8),
-              child: ImageLazyLoader(
-                  key: UniqueKey(),
-                  uriProvider: () => character.imageUri!,
-                  width: 200,
-                  borderWidth: 3,
-                  borderRadios: 200)),
+              child: InkWell(
+                onTap: basicInfoEditable
+                    ? () async {
+                        XFile? pickedImage =
+                            await OnepieceImagePicker.pickWebImage();
+                        Uint8List imageInByte =
+                            await pickedImage!.readAsBytes();
+                        if (!ImageHelper.isValidImageSize(
+                            500 * 1024, imageInByte)) {
+                          OnepieceAlert.getBasicAlertDialogFunc(
+                              context,
+                              AppLocalizations.of(context)!.alert,
+                              AppLocalizations.of(context)!
+                                  .imageSizeExceedsLimit);
+                          return;
+                        }
+                        selectedImage = Base64Helper.encode(imageInByte);
+                      }
+                    : null,
+                child: selectedImage == null
+                    ? ImageLazyLoader(
+                        key: UniqueKey(),
+                        uriProvider: () => character.imageUri!,
+                        width: 200,
+                        borderWidth: 3,
+                        borderRadios: 200)
+                    : ImageHelper.getRoundImageFrame(
+                        200,
+                        200,
+                        3,
+                        OnepieceColors.liteFancyBlue,
+                        200,
+                        Base64Helper.decode(selectedImage!)),
+              )),
           Form(
             key: _basicFormKey,
             child: Column(
@@ -480,6 +543,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                         padding: EdgeInsets.only(left: sideWidth),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             StringTextFormField(
                                 context,
@@ -690,7 +754,18 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                   ),
                                 ),
                               ],
-                            )
+                            ),
+                            const SizedBox(
+                              height: 40,
+                            ),
+                            Text(
+                              AppLocalizations.of(context)!.battleStyle,
+                              style: OnepieceFonts.fancyBlueHintFont,
+                            ),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            _getBattleStyle(context, basicState),
                           ],
                         ),
                       ),
@@ -698,6 +773,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                         padding: EdgeInsets.only(right: sideWidth),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             DigitTextFormField(
                                 context,
@@ -732,6 +808,17 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                     'images/character_digits_icon/height.svg',
                                     true,
                                     null)),
+                            const SizedBox(
+                              height: 5,
+                            ),
+                            Text(
+                              AppLocalizations.of(context)!.race,
+                              style: OnepieceFonts.fancyBlueHintFont,
+                            ),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            _getRace(context, basicState),
                           ],
                         ),
                       ),
@@ -740,11 +827,250 @@ class _CharacterDetailState extends State<CharacterDetail> {
                 ),
               ],
             ),
-          )
+          ),
         ],
       );
     });
   }
+
+  Widget _getBattleStyle(BuildContext context, Function basicState) {
+    Map<BattleStyle, String> battleStyleToDisplayValue = {
+      BattleStyle.BODY: AppLocalizations.of(context)!.body,
+      BattleStyle.SCIENCE: AppLocalizations.of(context)!.science,
+      BattleStyle.KATANA: AppLocalizations.of(context)!.katana,
+      BattleStyle.SHOOTER: AppLocalizations.of(context)!.shoot
+    };
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0, 0, 0, 2),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton2(
+          isExpanded: true,
+          value: selectedBattleStyle,
+          hint: Text(
+            AppLocalizations.of(context)!.battleStyle,
+            style: OnepieceFonts.dropDownItemStyle,
+          ),
+          onChanged: basicInfoEditable
+              ? (value) {
+                  basicState(() {
+                    selectedBattleStyle = value as BattleStyle;
+                  });
+                }
+              : null,
+          selectedItemBuilder: (context) {
+            return BattleStyle.values.map(
+              (item) {
+                return Container(
+                  alignment: AlignmentDirectional.center,
+                  child: Text(
+                    battleStyleToDisplayValue[selectedBattleStyle]!,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    maxLines: 1,
+                  ),
+                );
+              },
+            ).toList();
+          },
+          buttonStyleData: ButtonStyleData(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            height: 35,
+            width: 280,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(3),
+              color: OnepieceColors.liteFancyGreen,
+            ),
+          ),
+          menuItemStyleData: const MenuItemStyleData(
+            height: 35,
+          ),
+          items: BattleStyle.values.map((BattleStyle battleStyle) {
+            return DropdownMenuItem<BattleStyle>(
+              value: battleStyle,
+              enabled: true,
+              child: Text(battleStyleToDisplayValue[battleStyle]!,
+                  style: OnepieceFonts.dropDownItemStyle),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  Widget _getRace(BuildContext context, Function basicState) {
+    Map<Race, String> raceEnumToDisplayName = {
+      Race.HUMAN: AppLocalizations.of(context)!.human,
+      Race.FISH_MAN: AppLocalizations.of(context)!.fishman,
+      Race.MERFOLK: AppLocalizations.of(context)!.merfolk,
+      Race.GIANT: AppLocalizations.of(context)!.giant,
+      Race.LONG_ARM: AppLocalizations.of(context)!.longArm,
+      Race.LONG_LEG: AppLocalizations.of(context)!.longLeg,
+      Race.SNAKE_NECK: AppLocalizations.of(context)!.snakeNeck,
+      Race.THREE_EYE: AppLocalizations.of(context)!.threeEye,
+      Race.LUNARIAN: AppLocalizations.of(context)!.lunarian,
+      Race.MINK: AppLocalizations.of(context)!.mink,
+      Race.WORLD_NOBEL: AppLocalizations.of(context)!.worldNobel,
+      Race.DWARVES: AppLocalizations.of(context)!.dwarves
+    };
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0, 0, 0, 2),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton2(
+          isExpanded: true,
+          value: selectedRace,
+          hint: Text(
+            AppLocalizations.of(context)!.race,
+            style: OnepieceFonts.dropDownItemStyle,
+          ),
+          onChanged: basicInfoEditable
+              ? (value) {
+                  basicState(() {
+                    selectedRace = value as Race;
+                  });
+                }
+              : null,
+          selectedItemBuilder: (context) {
+            return Race.values.map(
+              (item) {
+                return Container(
+                  alignment: AlignmentDirectional.center,
+                  child: Text(
+                    raceEnumToDisplayName[selectedRace]!,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    maxLines: 1,
+                  ),
+                );
+              },
+            ).toList();
+          },
+          buttonStyleData: ButtonStyleData(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            height: 35,
+            width: 280,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(3),
+              color: OnepieceColors.liteFancyGreen,
+            ),
+          ),
+          menuItemStyleData: const MenuItemStyleData(
+            height: 35,
+          ),
+          items: Race.values.map((Race race) {
+            return DropdownMenuItem<Race>(
+              value: race,
+              enabled: true,
+              child: Text(raceEnumToDisplayName[race]!,
+                  style: OnepieceFonts.dropDownItemStyle),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  // Widget _getHakiList(BuildContext context) {
+  //   Map<Haki, String> enumValueToDisplayValue = {
+  //     Haki.busoshoku: AppLocalizations.of(context)!.busoshoku,
+  //     Haki.haoshoku: AppLocalizations.of(context)!.haoshoku,
+  //     Haki.kenbunshoku: AppLocalizations.of(context)!.kenbunshoku,
+  //   };
+  //   return Padding(
+  //     padding: const EdgeInsets.fromLTRB(0, 0, 0, 2),
+  //     child: DropdownButtonHideUnderline(
+  //       child: DropdownButton2(
+  //         isExpanded: true,
+  //         value: selectedHakis.isEmpty ? null : selectedHakis.last,
+  //         hint: Text(
+  //           AppLocalizations.of(context)!.hakis,
+  //           style: OnepieceFonts.dropDownItemStyle,
+  //         ),
+  //         onChanged: (value) {},
+  //         selectedItemBuilder: (context) {
+  //           return Haki.values.map(
+  //                 (item) {
+  //               return Container(
+  //                 alignment: AlignmentDirectional.center,
+  //                 child: Text(
+  //                   selectedHakis
+  //                       .map((selectedHaki) {
+  //                     return enumValueToDisplayValue[selectedHaki];
+  //                   })
+  //                       .toSet()
+  //                       .join(', '),
+  //                   style: const TextStyle(
+  //                     fontSize: 16,
+  //                     overflow: TextOverflow.ellipsis,
+  //                   ),
+  //                   maxLines: 1,
+  //                 ),
+  //               );
+  //             },
+  //           ).toList();
+  //         },
+  //         buttonStyleData: ButtonStyleData(
+  //           padding: const EdgeInsets.symmetric(horizontal: 16),
+  //           height: 35,
+  //           width: 280,
+  //           decoration: BoxDecoration(
+  //             borderRadius: BorderRadius.circular(3),
+  //             color: OnepieceColors.liteFancyGreen,
+  //           ),
+  //         ),
+  //         menuItemStyleData: const MenuItemStyleData(
+  //           height: 35,
+  //         ),
+  //         items: Haki.values.map((Haki haki) {
+  //           return DropdownMenuItem<Haki>(
+  //             value: haki,
+  //             enabled: false,
+  //             child: StatefulBuilder(
+  //               builder: (context, menuSetState) {
+  //                 final isSelected = selectedHakis.contains(haki);
+  //                 return InkWell(
+  //                   onTap: () {
+  //                     isSelected
+  //                         ? selectedHakis.remove(haki)
+  //                         : selectedHakis.add(haki);
+  //                     // //This rebuilds the StatefulWidget to update the button's text
+  //                     setState(() {});
+  //                     //This rebuilds the dropdownMenu Widget to update the check mark
+  //                     menuSetState(() {});
+  //                   },
+  //                   child: Container(
+  //                     height: double.infinity,
+  //                     padding: const EdgeInsets.symmetric(horizontal: 3.0),
+  //                     child: Row(
+  //                       children: [
+  //                         if (isSelected)
+  //                           const Icon(Icons.check_box_outlined)
+  //                         else
+  //                           const Icon(Icons.check_box_outline_blank),
+  //                         const SizedBox(width: 8),
+  //                         Expanded(
+  //                           child: Text(
+  //                             enumValueToDisplayValue[haki]!,
+  //                             style: const TextStyle(
+  //                               fontSize: 16,
+  //                             ),
+  //                           ),
+  //                         ),
+  //                       ],
+  //                     ),
+  //                   ),
+  //                 );
+  //               },
+  //             ),
+  //           );
+  //         }).toList(),
+  //       ),
+  //     ),
+  //   );
+  // }
 
 // show character combat information (editable if permitted)
   Widget _getCombatInfo(BuildContext context) {

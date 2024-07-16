@@ -161,7 +161,7 @@ class _UserProfileState extends State<UserProfile> {
                               Uint8List imageInByte =
                                   await pickedImage!.readAsBytes();
                               if (!ImageHelper.isValidImageSize(
-                                  200 * 1024, imageInByte)) {
+                                  500 * 1024, imageInByte)) {
                                  OnepieceAlert.getBasicAlertDialogFunc(
                                     context,
                                     AppLocalizations.of(context)!.alert,
@@ -196,7 +196,7 @@ class _UserProfileState extends State<UserProfile> {
                         height: 10,
                       ),
                       Text(
-                        AppLocalizations.of(context)!.maxFileSizeDescription,
+                        AppLocalizations.of(context)!.maxFileSize500,
                         style: OnepieceFonts.contentStyle,
                       )
                     ],

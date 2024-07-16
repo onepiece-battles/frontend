@@ -559,7 +559,7 @@ class _GroupViewState extends State<GroupView> {
                         uriProvider: () => entry.value.imageUri!,
                         width: 40,
                         borderWidth: 1.5,
-                        borderRadios: 40)),
+                        borderRadios: 5)),
               ),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
