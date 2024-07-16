@@ -714,7 +714,8 @@ class _BattleViewState extends State<BattleView> {
                     Padding(
                       padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
                       child: ImageLazyLoader(
-                          uri: entry.value.starter!.imageUri!,
+                          key: UniqueKey(),
+                          uriProvider: () => entry.value.starter!.imageUri!,
                           width: 40,
                           borderWidth: 1.5,
                           borderRadios: 40),
@@ -746,7 +747,8 @@ class _BattleViewState extends State<BattleView> {
                     Padding(
                       padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
                       child: ImageLazyLoader(
-                          uri: entry.value.receiver!.imageUri!,
+                          key: UniqueKey(),
+                          uriProvider: () => entry.value.receiver!.imageUri!,
                           width: 40,
                           borderWidth: 1.5,
                           borderRadios: 40),
@@ -793,10 +795,12 @@ class _BattleViewState extends State<BattleView> {
                           ),
                         )
                       : ImageLazyLoader(
-                          uri: entry.value.battleExecution!.winnerId ==
-                                  entry.value.starterId
-                              ? entry.value.starter!.imageUri!
-                              : entry.value.receiver!.imageUri!,
+                      key: UniqueKey(),
+                          uriProvider: () =>
+                              entry.value.battleExecution!.winnerId ==
+                                      entry.value.starterId
+                                  ? entry.value.starter!.imageUri!
+                                  : entry.value.receiver!.imageUri!,
                           width: 40,
                           borderWidth: 1.5,
                           borderRadios: 40),

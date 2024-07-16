@@ -405,7 +405,9 @@ class _JoinGroupState extends State<JoinGroup> {
                 children: [
                   Flexible(
                       child: ImageLazyLoader(
-                          uri: selectedCharacters[index].imageUri!,
+                          key: UniqueKey(),
+                          uriProvider: () =>
+                              selectedCharacters[index].imageUri!,
                           width: 100,
                           borderWidth: 2,
                           borderRadios: 10)),
@@ -451,7 +453,8 @@ class _JoinGroupState extends State<JoinGroup> {
                 children: [
                   Flexible(
                       child: ImageLazyLoader(
-                          uri: characters[index].imageUri!,
+                          key: UniqueKey(),
+                          uriProvider: () => characters[index].imageUri!,
                           width: 100,
                           borderWidth: 2,
                           borderRadios: 10)),
@@ -515,7 +518,8 @@ class _JoinGroupState extends State<JoinGroup> {
                 children: [
                   Flexible(
                     child: ImageLazyLoader(
-                        uri: selectedGroups[index].imageUri!,
+                        key: UniqueKey(),
+                        uriProvider: () => selectedGroups[index].imageUri!,
                         width: 100,
                         borderWidth: 2,
                         borderRadios: 10),
@@ -559,7 +563,8 @@ class _JoinGroupState extends State<JoinGroup> {
                 children: [
                   Flexible(
                     child: ImageLazyLoader(
-                        uri: groups[index].imageUri!,
+                        key: UniqueKey(),
+                        uriProvider: () => groups[index].imageUri!,
                         width: 100,
                         borderWidth: 2,
                         borderRadios: 10),

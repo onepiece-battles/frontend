@@ -555,7 +555,8 @@ class _GroupViewState extends State<GroupView> {
                 Padding(
                     padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
                     child: ImageLazyLoader(
-                        uri: entry.value.imageUri!,
+                        key: UniqueKey(),
+                        uriProvider: () => entry.value.imageUri!,
                         width: 40,
                         borderWidth: 1.5,
                         borderRadios: 40)),
@@ -615,7 +616,8 @@ class _GroupViewState extends State<GroupView> {
                     child: Padding(
                         padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
                         child: ImageLazyLoader(
-                            uri: character.imageUri!,
+                            key: UniqueKey(),
+                            uriProvider: () => character.imageUri!,
                             width: 40,
                             borderWidth: 1.5,
                             borderRadios: 40)),
@@ -650,7 +652,8 @@ class _GroupViewState extends State<GroupView> {
                     child: Padding(
                         padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
                         child: ImageLazyLoader(
-                            uri: group.imageUri!,
+                            key: UniqueKey(),
+                            uriProvider: () => group.imageUri!,
                             width: 40,
                             borderWidth: 1.5,
                             borderRadios: 40)),

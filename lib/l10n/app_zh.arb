@@ -296,5 +296,6 @@
   "selected": "已选择",
   "selectable": "可选择",
   "selectNewMembers": "添加新成员",
-  "myAccount": "我的账号"
+  "myAccount": "我的账号",
+  "maxFileSize500": "允许最大文件大小为500KB。"
 }

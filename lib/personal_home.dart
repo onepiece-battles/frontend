@@ -34,7 +34,7 @@ class _UserHomeState extends State<UserHome> {
   List<BattleListView> battles = [];
   Future<ListCharacterResponse?> listCharacters() async {
     ListCharacterRequest listCharacterRequest = ListCharacterRequest(
-        pageSize: 30,
+        pageSize: 1,
         pageIndex: 1,
         sortKeys: [],
         characterFilter: CharacterFilter(
@@ -46,7 +46,7 @@ class _UserHomeState extends State<UserHome> {
 
   Future<ListGroupResponse?> listGroups() async {
     ListGroupRequest listGroupRequest = ListGroupRequest(
-        pageSize: 10,
+        pageSize: 1,
         pageIndex: 1,
         sortKeys: [],
         groupFilter: GroupFilter(
@@ -58,7 +58,7 @@ class _UserHomeState extends State<UserHome> {
 
   Future<ListBattleResponse?> listBattles() async {
     ListBattleRequest request = ListBattleRequest(
-        pageSize: 100,
+        pageSize: 1,
         pageIndex: 1,
         sortKeys: [],
         battleFilter: BattleFilter(
@@ -236,7 +236,8 @@ class _UserHomeState extends State<UserHome> {
                       });
                 },
                 child: ImageLazyLoader(
-                    uri: characters[index].imageUri!,
+                    // key: UniqueKey(),
+                    uriProvider:() =>  characters[index].imageUri!,
                     width: 100,
                     borderWidth: 2,
                     borderRadios: 100),
@@ -292,7 +293,8 @@ class _UserHomeState extends State<UserHome> {
                       });
                 },
                 child: ImageLazyLoader(
-                    uri: groups[index].imageUri!,
+                    // key: UniqueKey(),
+                    uriProvider: () => groups[index].imageUri!,
                     width: 100,
                     borderWidth: 2,
                     borderRadios: 10)),
@@ -366,7 +368,8 @@ class _UserHomeState extends State<UserHome> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             ImageLazyLoader(
-                                uri: battles[index].starter!.imageUri!,
+                                // key: UniqueKey(),
+                                uriProvider: () => battles[index].starter!.imageUri!,
                                 width: 40,
                                 borderWidth: 1.5,
                                 borderRadios: 40),
@@ -396,7 +399,8 @@ class _UserHomeState extends State<UserHome> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             ImageLazyLoader(
-                                uri: battles[index].receiver!.imageUri!,
+                                // key: UniqueKey(),
+                                uriProvider: () => battles[index].receiver!.imageUri!,
                                 width: 40,
                                 borderWidth: 1.5,
                                 borderRadios: 40),

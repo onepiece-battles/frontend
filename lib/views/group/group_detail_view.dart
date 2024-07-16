@@ -15,7 +15,6 @@ import '../../constants/button_style.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
 import '../../popup/onepiece_alert.dart';
-import '../../utils/base64_helper.dart';
 import '../../utils/permission_check.dart';
 
 GetIt getIt = GetIt.instance;
@@ -269,7 +268,8 @@ class _GroupDetailViewState extends State<GroupDetailView> {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 5),
             child: ImageLazyLoader(
-                uri: groupFullView.imageUri!,
+                key: UniqueKey(),
+                uriProvider: () => groupFullView.imageUri!,
                 width: 200,
                 borderWidth: 3,
                 borderRadios: 20),
@@ -441,10 +441,11 @@ class _GroupDetailViewState extends State<GroupDetailView> {
             const SizedBox(
               height: 10,
             ),
-            if (groupFullView.characters.isNotEmpty) Text(
-              AppLocalizations.of(context)!.thisGroup,
-              style: OnepieceFonts.navigationTopBarStyleClickable,
-            ),
+            if (groupFullView.characters.isNotEmpty)
+              Text(
+                AppLocalizations.of(context)!.thisGroup,
+                style: OnepieceFonts.navigationTopBarStyleClickable,
+              ),
             const SizedBox(
               height: 10,
             ),
@@ -485,7 +486,8 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                     child: Row(
                       children: [
                         ImageLazyLoader(
-                            uri: e.imageUri!,
+                            key: UniqueKey(),
+                            uriProvider: () => e.imageUri!,
                             width: 40,
                             borderWidth: 1.5,
                             borderRadios: 3),
@@ -565,7 +567,8 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     ImageLazyLoader(
-                        uri: character.imageUri!,
+                        key: UniqueKey(),
+                        uriProvider: () => character.imageUri!,
                         width: 40,
                         borderWidth: 1.4,
                         borderRadios: 3),
@@ -659,7 +662,8 @@ class _GroupDetailViewState extends State<GroupDetailView> {
         title: Row(
           children: [
             ImageLazyLoader(
-                uri: node.group.imageUri!,
+                key: UniqueKey(),
+                uriProvider: () => node.group.imageUri!,
                 width: 40,
                 borderWidth: 1.5,
                 borderRadios: 3),
@@ -684,7 +688,8 @@ class _GroupDetailViewState extends State<GroupDetailView> {
         title: Row(
           children: [
             ImageLazyLoader(
-                uri: actualNode.characterInGroupView.imageUri!,
+                key: UniqueKey(),
+                uriProvider: () => actualNode.characterInGroupView.imageUri!,
                 width: 40,
                 borderWidth: 1.5,
                 borderRadios: 3),

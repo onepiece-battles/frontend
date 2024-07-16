@@ -78,7 +78,8 @@ class _IssueDetailViewState extends State<IssueDetailView> {
                           });
                     },
                     child: ImageLazyLoader(
-                        uri: issue.issueCreator!.imageUri!,
+                        key: UniqueKey(),
+                        uriProvider: () => issue.issueCreator!.imageUri!,
                         width: 100,
                         borderWidth: 3,
                         borderRadios: 100),
