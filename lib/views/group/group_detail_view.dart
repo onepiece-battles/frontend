@@ -628,6 +628,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                         width: 40,
                         borderWidth: 1.4,
                         borderRadios: 3),
+                    const SizedBox(width: 10,),
                     Padding(
                       padding: const EdgeInsets.only(left: 8.0),
                       child: Text(
@@ -723,6 +724,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                 width: 40,
                 borderWidth: 1.5,
                 borderRadios: 3),
+            const SizedBox(width: 10,),
             Text(I18nHelper.getDisplayNameFromI18n(actualNode.group.name!))
           ],
         ),
@@ -749,6 +751,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                 width: 40,
                 borderWidth: 1.5,
                 borderRadios: 3),
+            const SizedBox(width: 10,),
             Text(I18nHelper.getDisplayNameFromI18n(
                 actualNode.characterInGroupView.name!)),
           ],
