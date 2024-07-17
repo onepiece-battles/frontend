@@ -656,7 +656,7 @@ class _GroupViewState extends State<GroupView> {
                             uriProvider: () => group.imageUri!,
                             width: 40,
                             borderWidth: 1.5,
-                            borderRadios: 40)),
+                            borderRadios: 3)),
                   ),
                 ))
             .toList(),
