@@ -16,9 +16,18 @@ class DigitTextFormField extends StatelessWidget {
   final int min;
   final Widget icon;
   final String label;
-  const DigitTextFormField(this.buildContext, this.editable,
-      this.textEditingController, this.label, this.min, this.max, this.icon,
-      {super.key});
+  final bool required;
+  const DigitTextFormField(
+    this.buildContext,
+    this.editable,
+    this.textEditingController,
+    this.label,
+    this.min,
+    this.max,
+    this.icon,
+    this.required, {
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -52,12 +61,16 @@ class DigitTextFormField extends StatelessWidget {
             controller: textEditingController,
             autovalidateMode: AutovalidateMode.onUserInteraction,
             validator: (value) {
-              if (value!.isWhiteSpace()) {
+              if (!required && (value == null || value.isEmpty)) {
+                return null;
+              }
+              if (required && value!.isWhiteSpace()) {
                 return AppLocalizations.of(buildContext)!.requiredField;
-              } else if (!value.isValidInt()) {
+              }
+              if (value != null && value.isNotEmpty && !value.isValidInt()) {
                 return AppLocalizations.of(buildContext)!.fieldMustBeInt;
               }
-              int valueInt = int.parse(value);
+              int valueInt = int.parse(value!);
               if (valueInt < min || valueInt > max) {
                 return AppLocalizations.of(buildContext)!.valueExceedsLimit;
               }
@@ -66,7 +79,7 @@ class DigitTextFormField extends StatelessWidget {
             decoration: InputDecoration(
               floatingLabelBehavior: FloatingLabelBehavior.never,
               contentPadding: const EdgeInsets.fromLTRB(10, 10, 0, 0),
-              hintText: "$min - $max",
+              hintText: editable? "$min - $max" : "",
             ),
           ),
         ),

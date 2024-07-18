@@ -276,7 +276,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                                     ImageHelper.getTextFormFieldIcon(
                                         'images/character_digits_icon/fruit_limit.svg',
                                         true,
-                                        null)),
+                                        null), true),
                                 DigitTextFormField(
                                     context,
                                     true,
@@ -287,7 +287,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                                     ImageHelper.getTextFormFieldIcon(
                                         'images/character_digits_icon/group_gain.svg',
                                         true,
-                                        null)),
+                                        null), true),
                                 DigitTextFormField(
                                     context,
                                     true,
@@ -299,7 +299,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                                     ImageHelper.getTextFormFieldIcon(
                                         'images/character_digits_icon/attack.svg',
                                         true,
-                                        null)),
+                                        null), true),
                                 DigitTextFormField(
                                     context,
                                     true,
@@ -311,7 +311,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                                     ImageHelper.getTextFormFieldIcon(
                                         'images/character_digits_icon/defense.svg',
                                         true,
-                                        null)),
+                                        null), true),
                                 DigitTextFormField(
                                     context,
                                     true,
@@ -323,7 +323,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                                     ImageHelper.getTextFormFieldIcon(
                                         'images/character_digits_icon/intelligence.svg',
                                         true,
-                                        null)),
+                                        null), true),
                                 DigitTextFormField(
                                     context,
                                     true,
@@ -335,7 +335,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                                     ImageHelper.getTextFormFieldIcon(
                                         'images/character_digits_icon/blood.svg',
                                         true,
-                                        null)),
+                                        null), true),
                                 DigitTextFormField(
                                     context,
                                     true,
@@ -347,7 +347,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                                     ImageHelper.getTextFormFieldIcon(
                                         'images/character_digits_icon/speed.svg',
                                         true,
-                                        null)),
+                                        null), true),
                                 DigitTextFormField(
                                   context,
                                   true,
@@ -358,7 +358,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                                   ImageHelper.getTextFormFieldIcon(
                                       'images/character_digits_icon/energy.svg',
                                       true,
-                                      null),
+                                      null),true
                                 ),
                               ],
                             ),
@@ -396,7 +396,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                                   ImageHelper.getTextFormFieldIcon(
                                       'images/character_digits_icon/age.svg',
                                       true,
-                                      null),
+                                      null), false
                                 ),
                                 DigitTextFormField(
                                   context,
@@ -408,7 +408,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                                   ImageHelper.getTextFormFieldIcon(
                                       'images/character_digits_icon/height.svg',
                                       true,
-                                      null),
+                                      null),false
                                 ),
                                 StringTextFormField(
                                     context,
@@ -431,7 +431,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                                   ImageHelper.getTextFormFieldIcon(
                                       'images/character_digits_icon/bounty.svg',
                                       true,
-                                      null),
+                                      null),false
                                 ),
                                 SizedBox(
                                   width: 240,

@@ -576,7 +576,7 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                           ImageHelper.getTextFormFieldIcon(
                               'images/character_digits_icon/energy.svg',
                               true,
-                              25)),
+                              25), true),
                     ],
                   ),
                   Column(

@@ -76,7 +76,7 @@ class AppRouter {
             pageBuilder: (context, state) {
               updateRoutingState(state.matchedLocation);
               return NoTransitionPage(
-                  child: const CharacterView(), key: state.pageKey);
+                  child: const CharacterView(), key: UniqueKey());
             },
             routes: [
               GoRoute(
@@ -101,7 +101,7 @@ class AppRouter {
                       child: CharacterDetail(
                         characterId: characterId,
                       ),
-                      key: state.pageKey);
+                      key: UniqueKey());
                 },
               ),
             ],
@@ -113,7 +113,7 @@ class AppRouter {
             pageBuilder: (context, state) {
               updateRoutingState(state.matchedLocation);
               return NoTransitionPage(
-                  child: const GroupView(), key: state.pageKey);
+                  child: const GroupView(), key: UniqueKey());
             },
             routes: [
               GoRoute(
@@ -150,7 +150,7 @@ class AppRouter {
               pageBuilder: (context, state) {
                 updateRoutingState(state.matchedLocation);
                 return NoTransitionPage(
-                    child: const FruitView(), key: state.pageKey);
+                    child: const FruitView(), key: UniqueKey());
               },
               routes: [
                 GoRoute(
@@ -186,7 +186,7 @@ class AppRouter {
               pageBuilder: (context, state) {
                 updateRoutingState(state.matchedLocation);
                 return NoTransitionPage(
-                    child: const BattleView(), key: state.pageKey);
+                    child: const BattleView(), key: UniqueKey());
               },
               routes: [
                 GoRoute(
@@ -222,7 +222,7 @@ class AppRouter {
             pageBuilder: (context, state) {
               updateRoutingState(state.matchedLocation);
               return NoTransitionPage(
-                  child: const UserView(), key: state.pageKey);
+                  child: const UserView(), key: UniqueKey());
             },
             routes: [
               GoRoute(
@@ -248,7 +248,7 @@ class AppRouter {
               pageBuilder: (context, state) {
                 updateRoutingState(state.matchedLocation);
                 return NoTransitionPage(
-                    child: const IssueView(), key: state.pageKey);
+                    child: const IssueView(), key: UniqueKey());
               },
               routes: [
                 GoRoute(
@@ -274,7 +274,7 @@ class AppRouter {
                 updateRoutingState(state.matchedLocation);
                 return NoTransitionPage(
                     child: UserHome(userId: getIt<User>().id),
-                    key: state.pageKey);
+                    key: UniqueKey());
               },
               routes: [
                 GoRoute(
