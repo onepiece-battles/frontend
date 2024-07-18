@@ -75,9 +75,6 @@ class _CharacterDetailState extends State<CharacterDetail> {
   List<FruitListView> fruits = [];
   List<GroupForCharacterView> groups = [];
 
-  // CharacterBattleInfo characterBattleInfo = CharacterBattleInfo();
-  // CharacterBasicInfo characterBasicInfo = CharacterBasicInfo();
-
   BattleStyle selectedBattleStyle = BattleStyle.BODY;
   GroupPosition selectedGroupPosition = GroupPosition.member;
   Race selectedRace = Race.HUMAN;
@@ -421,12 +418,18 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                         ? null
                                         : "$selectedMonth-$selectedDay",
                                 birthPlace: characterBirthPlace.text,
-                                age: DataConverter.stringToInt(
-                                    characterAge.text.trim()),
-                                bounty: DataConverter.stringToInt(
-                                    characterBounty.text.trim()),
-                                height: DataConverter.stringToInt(
-                                    characterHeight.text.trim()),
+                                age: characterAge.text.isEmpty
+                                    ? null
+                                    : DataConverter.stringToInt(
+                                        characterAge.text.trim()),
+                                bounty: characterBounty.text.isEmpty
+                                    ? null
+                                    : DataConverter.stringToInt(
+                                        characterBounty.text.trim()),
+                                height: characterHeight.text.isEmpty
+                                    ? null
+                                    : DataConverter.stringToInt(
+                                        characterHeight.text.trim()),
                                 score: character.score);
                             if (updatedCharacter.toString() !=
                                 character.toString()) {
@@ -785,7 +788,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                 ImageHelper.getTextFormFieldIcon(
                                     'images/character_digits_icon/bounty.svg',
                                     true,
-                                    null)),
+                                    null),
+                                false),
                             DigitTextFormField(
                                 context,
                                 basicInfoEditable,
@@ -796,7 +800,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                 ImageHelper.getTextFormFieldIcon(
                                     'images/character_digits_icon/age.svg',
                                     true,
-                                    null)),
+                                    null),
+                                false),
                             DigitTextFormField(
                                 context,
                                 basicInfoEditable,
@@ -807,7 +812,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                 ImageHelper.getTextFormFieldIcon(
                                     'images/character_digits_icon/height.svg',
                                     true,
-                                    null)),
+                                    null),
+                                false),
                             const SizedBox(
                               height: 5,
                             ),
@@ -1306,7 +1312,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
                             ImageHelper.getTextFormFieldIcon(
                                 'images/character_digits_icon/attack.svg',
                                 true,
-                                null)),
+                                null),
+                            true),
                         DigitTextFormField(
                             context,
                             combatInfoEditable,
@@ -1317,7 +1324,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
                             ImageHelper.getTextFormFieldIcon(
                                 'images/character_digits_icon/defense.svg',
                                 true,
-                                null)),
+                                null),
+                            true),
                         DigitTextFormField(
                             context,
                             combatInfoEditable,
@@ -1328,7 +1336,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
                             ImageHelper.getTextFormFieldIcon(
                                 'images/character_digits_icon/blood.svg',
                                 true,
-                                null)),
+                                null),
+                            true),
                         DigitTextFormField(
                             context,
                             combatInfoEditable,
@@ -1339,7 +1348,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
                             ImageHelper.getTextFormFieldIcon(
                                 'images/character_digits_icon/speed.svg',
                                 true,
-                                null)),
+                                null),
+                            true),
                       ],
                     ),
                   ),
@@ -1357,7 +1367,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
                             ImageHelper.getTextFormFieldIcon(
                                 'images/character_digits_icon/intelligence.svg',
                                 true,
-                                null)),
+                                null),
+                            true),
                         DigitTextFormField(
                             context,
                             combatInfoEditable,
@@ -1368,7 +1379,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
                             ImageHelper.getTextFormFieldIcon(
                                 'images/character_digits_icon/energy.svg',
                                 true,
-                                null)),
+                                null),
+                            true),
                         DigitTextFormField(
                             context,
                             combatInfoEditable,
@@ -1379,7 +1391,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
                             ImageHelper.getTextFormFieldIcon(
                                 'images/character_digits_icon/group_gain.svg',
                                 true,
-                                null)),
+                                null),
+                            true),
                         DigitTextFormField(
                             context,
                             combatInfoEditable,
@@ -1390,7 +1403,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
                             ImageHelper.getTextFormFieldIcon(
                                 'images/character_digits_icon/fruit_limit.svg',
                                 true,
-                                null)),
+                                null),
+                            true),
                       ],
                     ),
                   )
