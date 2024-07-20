@@ -80,6 +80,7 @@ class _MyAppState extends State<MyApp> {
       locale: _locale,
       theme: ThemeData(
           inputDecorationTheme: MyInputTheme().theme(),
+          fontFamily: 'NotoSansSC',
           tooltipTheme: TooltipThemeData(
             showDuration: const Duration(seconds: 1),
             preferBelow: false,
