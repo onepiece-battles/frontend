@@ -34,52 +34,88 @@ class CreateCharacterView extends StatefulWidget {
 class _CreateCharacterViewState extends State<CreateCharacterView> {
   TextEditingController characterNameEnController = TextEditingController(
       text: RandomStringGenerator.generateRandomName(
-          8, getIt<User>().loginRole == UserRole.NIKA));
+          8,
+          getIt<User>().loginRole == UserRole.NIKA &&
+              getIt<User>().nickname != "Nika"));
   TextEditingController characterNameCnController = TextEditingController(
       text: RandomStringGenerator.generateRandomChineseName(
-          3, getIt<User>().loginRole == UserRole.NIKA));
+          3,
+          getIt<User>().loginRole == UserRole.NIKA &&
+              getIt<User>().nickname != "Nika"));
 
   // battle data controller
   TextEditingController characterFruitLimitController = TextEditingController(
       text: RandomStringGenerator.generateRandomNumber(
-          1, 2, getIt<User>().loginRole == UserRole.NIKA));
+          1, 1, getIt<User>().loginRole == UserRole.NIKA));
   TextEditingController characterGroupGainController = TextEditingController(
       text: RandomStringGenerator.generateRandomNumber(
-          100, 200, getIt<User>().loginRole == UserRole.NIKA));
+          100,
+          200,
+          getIt<User>().loginRole == UserRole.NIKA &&
+              getIt<User>().nickname != "Nika"));
   TextEditingController characterAttackController = TextEditingController(
       text: RandomStringGenerator.generateRandomNumber(
-          10, 1000, getIt<User>().loginRole == UserRole.NIKA));
+          10,
+          1000,
+          getIt<User>().loginRole == UserRole.NIKA &&
+              getIt<User>().nickname != "Nika"));
   TextEditingController characterDefenseController = TextEditingController(
       text: RandomStringGenerator.generateRandomNumber(
-          10, 1000, getIt<User>().loginRole == UserRole.NIKA));
+          10,
+          1000,
+          getIt<User>().loginRole == UserRole.NIKA &&
+              getIt<User>().nickname != "Nika"));
   TextEditingController characterIntelligenceController = TextEditingController(
       text: RandomStringGenerator.generateRandomNumber(
-          70, 260, getIt<User>().loginRole == UserRole.NIKA));
+          70,
+          260,
+          getIt<User>().loginRole == UserRole.NIKA &&
+              getIt<User>().nickname != "Nika"));
   TextEditingController characterBloodController = TextEditingController(
       text: RandomStringGenerator.generateRandomNumber(
-          100, 10000, getIt<User>().loginRole == UserRole.NIKA));
+          100,
+          10000,
+          getIt<User>().loginRole == UserRole.NIKA &&
+              getIt<User>().nickname != "Nika"));
   TextEditingController characterSpeedController = TextEditingController(
       text: RandomStringGenerator.generateRandomNumber(
-          10, 200, getIt<User>().loginRole == UserRole.NIKA));
+          10,
+          200,
+          getIt<User>().loginRole == UserRole.NIKA &&
+              getIt<User>().nickname != "Nika"));
   TextEditingController characterEnergyController = TextEditingController(
       text: RandomStringGenerator.generateRandomNumber(
-          100, 300, getIt<User>().loginRole == UserRole.NIKA));
+          100,
+          300,
+          getIt<User>().loginRole == UserRole.NIKA &&
+              getIt<User>().nickname != "Nika"));
 
   // character details controller
   TextEditingController characterAge = TextEditingController(
       text: RandomStringGenerator.generateRandomNumber(
-          0, 100000, getIt<User>().loginRole == UserRole.NIKA));
+          0,
+          100000,
+          getIt<User>().loginRole == UserRole.NIKA &&
+              getIt<User>().nickname != "Nika"));
   TextEditingController characterHeight = TextEditingController(
       text: RandomStringGenerator.generateRandomNumber(
-          1, 100000, getIt<User>().loginRole == UserRole.NIKA));
+          1,
+          100000,
+          getIt<User>().loginRole == UserRole.NIKA &&
+              getIt<User>().nickname != "Nika"));
   TextEditingController characterBirthPlace = TextEditingController(
       text: RandomStringGenerator.generateRandomName(
-          10, getIt<User>().loginRole == UserRole.NIKA));
+          10,
+          getIt<User>().loginRole == UserRole.NIKA &&
+              getIt<User>().nickname != "Nika"));
   TextEditingController characterDateOfBirthMonth = TextEditingController();
   TextEditingController characterDateOfBirthDay = TextEditingController();
   TextEditingController characterBounty = TextEditingController(
       text: RandomStringGenerator.generateRandomNumber(
-          10, 100000, getIt<User>().loginRole == UserRole.NIKA));
+          10,
+          100000,
+          getIt<User>().loginRole == UserRole.NIKA &&
+              getIt<User>().nickname != "Nika"));
 
   List<TextEditingController> characterControllerListRequired() {
     return <TextEditingController>[
@@ -88,7 +124,6 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
       characterFruitLimitController,
       characterGroupGainController,
       characterAttackController,
-      characterDefenseController,
       characterDefenseController,
       characterIntelligenceController,
       characterBloodController,
@@ -104,7 +139,6 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
       characterFruitLimitController,
       characterGroupGainController,
       characterAttackController,
-      characterDefenseController,
       characterDefenseController,
       characterIntelligenceController,
       characterBloodController,
@@ -276,7 +310,8 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                                     ImageHelper.getTextFormFieldIcon(
                                         'images/character_digits_icon/fruit_limit.svg',
                                         true,
-                                        null), true),
+                                        null),
+                                    true),
                                 DigitTextFormField(
                                     context,
                                     true,
@@ -287,7 +322,8 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                                     ImageHelper.getTextFormFieldIcon(
                                         'images/character_digits_icon/group_gain.svg',
                                         true,
-                                        null), true),
+                                        null),
+                                    true),
                                 DigitTextFormField(
                                     context,
                                     true,
@@ -299,7 +335,8 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                                     ImageHelper.getTextFormFieldIcon(
                                         'images/character_digits_icon/attack.svg',
                                         true,
-                                        null), true),
+                                        null),
+                                    true),
                                 DigitTextFormField(
                                     context,
                                     true,
@@ -311,7 +348,8 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                                     ImageHelper.getTextFormFieldIcon(
                                         'images/character_digits_icon/defense.svg',
                                         true,
-                                        null), true),
+                                        null),
+                                    true),
                                 DigitTextFormField(
                                     context,
                                     true,
@@ -323,7 +361,8 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                                     ImageHelper.getTextFormFieldIcon(
                                         'images/character_digits_icon/intelligence.svg',
                                         true,
-                                        null), true),
+                                        null),
+                                    true),
                                 DigitTextFormField(
                                     context,
                                     true,
@@ -335,7 +374,8 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                                     ImageHelper.getTextFormFieldIcon(
                                         'images/character_digits_icon/blood.svg',
                                         true,
-                                        null), true),
+                                        null),
+                                    true),
                                 DigitTextFormField(
                                     context,
                                     true,
@@ -347,19 +387,21 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                                     ImageHelper.getTextFormFieldIcon(
                                         'images/character_digits_icon/speed.svg',
                                         true,
-                                        null), true),
+                                        null),
+                                    true),
                                 DigitTextFormField(
-                                  context,
-                                  true,
-                                  characterEnergyController,
-                                  AppLocalizations.of(context)!.characterEnergy,
-                                  100,
-                                  300,
-                                  ImageHelper.getTextFormFieldIcon(
-                                      'images/character_digits_icon/energy.svg',
-                                      true,
-                                      null),true
-                                ),
+                                    context,
+                                    true,
+                                    characterEnergyController,
+                                    AppLocalizations.of(context)!
+                                        .characterEnergy,
+                                    100,
+                                    300,
+                                    ImageHelper.getTextFormFieldIcon(
+                                        'images/character_digits_icon/energy.svg',
+                                        true,
+                                        null),
+                                    true),
                               ],
                             ),
                             const SizedBox(
@@ -387,29 +429,29 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                                   ),
                                 ),
                                 DigitTextFormField(
-                                  context,
-                                  true,
-                                  characterAge,
-                                  AppLocalizations.of(context)!.age,
-                                  0,
-                                  100000,
-                                  ImageHelper.getTextFormFieldIcon(
-                                      'images/character_digits_icon/age.svg',
-                                      true,
-                                      null), false
-                                ),
+                                    context,
+                                    true,
+                                    characterAge,
+                                    AppLocalizations.of(context)!.age,
+                                    0,
+                                    100000,
+                                    ImageHelper.getTextFormFieldIcon(
+                                        'images/character_digits_icon/age.svg',
+                                        true,
+                                        null),
+                                    false),
                                 DigitTextFormField(
-                                  context,
-                                  true,
-                                  characterHeight,
-                                  AppLocalizations.of(context)!.height,
-                                  1,
-                                  100000,
-                                  ImageHelper.getTextFormFieldIcon(
-                                      'images/character_digits_icon/height.svg',
-                                      true,
-                                      null),false
-                                ),
+                                    context,
+                                    true,
+                                    characterHeight,
+                                    AppLocalizations.of(context)!.height,
+                                    1,
+                                    100000,
+                                    ImageHelper.getTextFormFieldIcon(
+                                        'images/character_digits_icon/height.svg',
+                                        true,
+                                        null),
+                                    false),
                                 StringTextFormField(
                                     context,
                                     true,
@@ -422,17 +464,17 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                                         null),
                                     false),
                                 DigitTextFormField(
-                                  context,
-                                  true,
-                                  characterBounty,
-                                  AppLocalizations.of(context)!.bounty,
-                                  10,
-                                  100000000000,
-                                  ImageHelper.getTextFormFieldIcon(
-                                      'images/character_digits_icon/bounty.svg',
-                                      true,
-                                      null),false
-                                ),
+                                    context,
+                                    true,
+                                    characterBounty,
+                                    AppLocalizations.of(context)!.bounty,
+                                    10,
+                                    100000000000,
+                                    ImageHelper.getTextFormFieldIcon(
+                                        'images/character_digits_icon/bounty.svg',
+                                        true,
+                                        null),
+                                    false),
                                 SizedBox(
                                   width: 240,
                                   child: Padding(
