@@ -224,7 +224,7 @@ class HomePageState extends State<HomePage> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           SizedBox(
-            width: 68,
+            width: 75,
             height: 32,
             child: AnimatedToggleSwitch<bool>.dual(
               current: _tabTextIndexSelected == 1,

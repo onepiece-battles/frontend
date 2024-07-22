@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:get_it/get_it.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:one_piece_battles_flutter/repository/battle_dao.dart';
 import 'package:one_piece_battles_flutter/repository/character_dao.dart';
 import 'package:one_piece_battles_flutter/repository/email_dao.dart';
@@ -79,20 +81,21 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp.router(
       locale: _locale,
       theme: ThemeData(
-          inputDecorationTheme: MyInputTheme().theme(),
-          fontFamily: 'NotoSansSC',
-          tooltipTheme: TooltipThemeData(
-            showDuration: const Duration(seconds: 1),
-            preferBelow: false,
-            decoration: BoxDecoration(
-              color: OnepieceColors.fancyBlue, // Background color
-              borderRadius: BorderRadius.circular(8), // Rounded corners
-              border: Border.all(
-                color: Colors.white, // Border color
-                width: 1, // Border width
-              ),
+        fontFamily: getIt<Locale>().languageCode == "en"? 'Roboto': 'Noto Sans SC',
+        inputDecorationTheme: MyInputTheme().theme(),
+        tooltipTheme: TooltipThemeData(
+          showDuration: const Duration(seconds: 1),
+          preferBelow: false,
+          decoration: BoxDecoration(
+            color: OnepieceColors.fancyBlue, // Background color
+            borderRadius: BorderRadius.circular(8), // Rounded corners
+            border: Border.all(
+              color: Colors.white, // Border color
+              width: 1, // Border width
             ),
-          )),
+          ),
+        ),
+      ),
       debugShowCheckedModeBanner: false,
       localizationsDelegates: const [
         AppLocalizations.delegate,
