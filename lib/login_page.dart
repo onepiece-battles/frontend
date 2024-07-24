@@ -348,9 +348,7 @@ class _LoginPageState extends State<LoginPage> {
     // init apis with tokens
     ApiInitializer.initAuthInfo(token);
     ResourcePermissionManager.updateUserCache(user);
-    context.goNamed('userHome',
-        extra: getIt<User>().id,
-        pathParameters: {'name': getIt<User>().nickname});
+    context.goNamed('characters',);
   }
 
   Future<void> saveUserCredentials(String username, String password) async {

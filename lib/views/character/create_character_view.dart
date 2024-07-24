@@ -1121,7 +1121,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
       Uint8List imageInByte = await pickedImage.readAsBytes();
 
       // 验证图片大小
-      if (!ImageHelper.isValidImageSize(200 * 1024, imageInByte)) {
+      if (!ImageHelper.isValidImageSize(500 * 1024, imageInByte)) {
         showImageSizeErrorDialog();
         return;
       }

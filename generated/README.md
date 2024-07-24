@@ -60,7 +60,7 @@ try {
 
 ## Documentation for API Endpoints
 
-All URIs are relative to *https://onepiece-battles.com*
+All URIs are relative to *http://localhost:8080*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
@@ -100,6 +100,7 @@ Class | Method | HTTP request | Description
 *IssueApi* | [**listIssue**](doc//IssueApi.md#listissue) | **POST** /api/onepiece/issue/list | 
 *RoleApi* | [**addRole**](doc//RoleApi.md#addrole) | **POST** /api/onepiece/iam/add_role | 
 *RoleApi* | [**assignResourceToRole**](doc//RoleApi.md#assignresourcetorole) | **POST** /api/onepiece/iam/assign_resource_permissions_to_role | 
+*SupportApi* | [**batchCreateFruit**](doc//SupportApi.md#batchcreatefruit) | **POST** /api/onepiece/support/batch_create_fruit | 
 *SupportApi* | [**updateUri**](doc//SupportApi.md#updateuri) | **POST** /api/onepiece/support/update_uri | 
 *UserApi* | [**assignRole**](doc//UserApi.md#assignrole) | **POST** /api/onepiece/user/assign_role | 
 *UserApi* | [**getUser**](doc//UserApi.md#getuser) | **POST** /api/onepiece/user/get | 
@@ -128,6 +129,8 @@ Class | Method | HTTP request | Description
  - [AssignResourcePermissionsToRoleResponse](doc//AssignResourcePermissionsToRoleResponse.md)
  - [AssignRoleRequest](doc//AssignRoleRequest.md)
  - [AssignRoleResponse](doc//AssignRoleResponse.md)
+ - [BatchCreateFruitRequest](doc//BatchCreateFruitRequest.md)
+ - [BatchCreateFruitResponse](doc//BatchCreateFruitResponse.md)
  - [BatchUpdateIssueRequest](doc//BatchUpdateIssueRequest.md)
  - [Battle](doc//Battle.md)
  - [BattleExecution](doc//BattleExecution.md)

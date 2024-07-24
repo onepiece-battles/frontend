@@ -10,4 +10,9 @@ class SupportDao {
   Future<UpdateUriResponse?> updateUri(UpdateUriRequest request) async {
     return await supportApi.updateUri(request);
   }
+
+  Future<BatchCreateFruitResponse?> batchCreateFruit(
+      BatchCreateFruitRequest request) async {
+    return await supportApi.batchCreateFruit(request);
+  }
 }

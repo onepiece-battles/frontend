@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_tag.dart';
+import 'package:one_piece_battles_flutter/repository/support_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
 import '../../components/image_lazy_loader.dart';
@@ -183,6 +184,21 @@ class _FruitViewState extends State<FruitView> {
                         context.goNamed("createFruit");
                       },
                       child: Text(AppLocalizations.of(context)!.create),
+                    ),
+                  ),
+                ),
+              if (getIt<User>().loginRole == UserRole.NIKA)
+                SizedBox(
+                  height: 35,
+                  width: 120,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 10.0),
+                    child: ElevatedButton(
+                      style: OnepieceButtonStyle.getDefaultStyle(),
+                      onPressed: () {
+                        getIt<SupportDao>().batchCreateFruit(BatchCreateFruitRequest());
+                      },
+                      child: Text(AppLocalizations.of(context)!.fruitType),
                     ),
                   ),
                 ),
