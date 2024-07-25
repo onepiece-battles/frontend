@@ -405,11 +405,11 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                 baseIntelligence: character.baseIntelligence,
                                 baseBlood: character.baseBlood,
                                 baseSpeed: character.baseSpeed,
+                                // basic info
                                 imageUri: character.imageUri,
                                 systemResource: character.systemResource,
                                 battleStyle: selectedBattleStyle,
                                 race: selectedRace,
-                                // basic info
                                 name: I18nHelper.getI18nFromDisplayName(
                                     character.name,
                                     characterNameController.text),
@@ -512,7 +512,9 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                   .imageSizeExceedsLimit);
                           return;
                         }
-                        selectedImage = Base64Helper.encode(imageInByte);
+                        basicState(() {
+                          selectedImage = Base64Helper.encode(imageInByte);
+                        });
                       }
                     : null,
                 child: selectedImage == null
@@ -918,7 +920,10 @@ class _CharacterDetailState extends State<CharacterDetail> {
       Race.LUNARIAN: AppLocalizations.of(context)!.lunarian,
       Race.MINK: AppLocalizations.of(context)!.mink,
       Race.WORLD_NOBEL: AppLocalizations.of(context)!.worldNobel,
-      Race.DWARVES: AppLocalizations.of(context)!.dwarves
+      Race.DWARVES: AppLocalizations.of(context)!.dwarves,
+      Race.NO_LIFE_OBJECT: AppLocalizations.of(context)!.lifeless_object,
+      Race.ANIMAL: AppLocalizations.of(context)!.animal,
+      Race.SOUL: AppLocalizations.of(context)!.soul,
     };
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 0, 0, 2),

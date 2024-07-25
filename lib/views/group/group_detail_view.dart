@@ -317,7 +317,9 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                                 .imageSizeExceedsLimit);
                         return;
                       }
-                      selectedImage = Base64Helper.encode(imageInByte);
+                      basicInfoState(() {
+                        selectedImage = Base64Helper.encode(imageInByte);
+                      });
                     });
                   }
                 : null,

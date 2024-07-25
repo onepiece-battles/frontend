@@ -58,10 +58,13 @@ class _IssueViewState extends State<IssueView> {
   @override
   void initState() {
     super.initState();
-    _search();
+    _search(false);
   }
 
-  void _search() {
+  void _search(bool filterChange) {
+    if (filterChange) {
+      selectedPageNum = 1;
+    }
     ListIssueRequest listIssueRequest = ListIssueRequest(
         pageSize: itemCountPerPage,
         pageIndex: selectedPageNum,
@@ -179,7 +182,7 @@ class _IssueViewState extends State<IssueView> {
                 controller: searchEmailController,
                 onChanged: (value) {
                   issueFilter.username = value;
-                  _search();
+                  _search(true);
                 },
                 decoration: InputDecoration(
                   floatingLabelBehavior: FloatingLabelBehavior.never,
@@ -206,7 +209,7 @@ class _IssueViewState extends State<IssueView> {
                 controller: searchNicknameController,
                 onChanged: (value) {
                   issueFilter.nickname = value;
-                  _search();
+                  _search(true);
                 },
                 decoration: InputDecoration(
                   floatingLabelBehavior: FloatingLabelBehavior.never,
@@ -233,7 +236,7 @@ class _IssueViewState extends State<IssueView> {
                 controller: searchHeaderController,
                 onChanged: (value) {
                   issueFilter.issueHeader = value;
-                  _search();
+                  _search(true);
                 },
                 decoration: InputDecoration(
                   floatingLabelBehavior: FloatingLabelBehavior.never,
@@ -314,7 +317,7 @@ class _IssueViewState extends State<IssueView> {
                             setState(() {});
                             //This rebuilds the dropdownMenu Widget to update the check mark
                             menuSetState(() {});
-                            _search();
+                            _search(true);
                           },
                           child: Container(
                             height: double.infinity,
@@ -408,7 +411,7 @@ class _IssueViewState extends State<IssueView> {
                           setState(() {});
                           //This rebuilds the dropdownMenu Widget to update the check mark
                           menuSetState(() {});
-                          _search();
+                          _search(true);
                         },
                         child: Container(
                           height: double.infinity,
@@ -475,7 +478,7 @@ class _IssueViewState extends State<IssueView> {
                 IssueSortableFieldEnum.creationTimestamp: null,
                 IssueSortableFieldEnum.modificationTimestamp: null,
               };
-              _search();
+              _search(false);
             },
           ),
         ),
@@ -524,7 +527,7 @@ class _IssueViewState extends State<IssueView> {
                         IssueSortableField(
                             sortKey: sortKey, sortOrder: sortOrder));
                   }
-                  _search();
+                  _search(false);
                 });
               },
         child: Padding(
@@ -643,7 +646,7 @@ class _IssueViewState extends State<IssueView> {
               ? null
               : () {
                   selectedPageNum = selectedPageNum - 1;
-                  _search();
+                  _search(false);
                 },
           child: const Icon(Icons.arrow_back));
       ElevatedButton nextPage = ElevatedButton(
@@ -652,7 +655,7 @@ class _IssueViewState extends State<IssueView> {
               ? null
               : () {
                   selectedPageNum = selectedPageNum + 1;
-                  _search();
+                  _search(false);
                 },
           child: const Icon(Icons.arrow_forward));
       Widget pageNumber = SizedBox(
@@ -694,7 +697,7 @@ class _IssueViewState extends State<IssueView> {
               : () {
                   selectedPageNum = int.parse(pageNumberController.text);
                   confirmButtonEnabled = false;
-                  _search();
+                  _search(false);
                 },
           child: Text(
             AppLocalizations.of(context)!.jumpToPage,

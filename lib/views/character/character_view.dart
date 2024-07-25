@@ -8,13 +8,11 @@ import 'package:one_piece_battles_flutter/components/image_lazy_loader.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:one_piece_battles_flutter/repository/character_dao.dart';
-import 'package:one_piece_battles_flutter/utils/base64_helper.dart';
 import 'package:one_piece_battles_flutter/utils/data_validator.dart';
 import 'package:one_piece_battles_flutter/utils/permission_check.dart';
 import 'package:openapi/api.dart';
 import '../../constants/button_style.dart';
 import '../../constants/onepiece_tag.dart';
-import '../../repository/support_dao.dart';
 import '../../utils/i18n_helper.dart';
 import '../../utils/image_helper.dart';
 
@@ -27,7 +25,8 @@ class CharacterView extends StatefulWidget {
   State<CharacterView> createState() => _CharacterViewState();
 }
 
-class _CharacterViewState extends State<CharacterView> {
+class _CharacterViewState extends State<CharacterView>
+    with AutomaticKeepAliveClientMixin {
   Logger logger = Logger('CharacterView');
   TextEditingController searchNameController = TextEditingController();
   TextEditingController pageNumberController = TextEditingController(text: "0");
@@ -73,11 +72,14 @@ class _CharacterViewState extends State<CharacterView> {
   @override
   void initState() {
     super.initState();
-    _search();
+    _search(false);
   }
 
-  void _search() {
+  void _search(bool filterChange) {
     characterFilter.languageCode = I18nHelper.getLanguageCode();
+    if (filterChange) {
+      selectedPageNum = 1;
+    }
     ListCharacterRequest listCharacterRequest = ListCharacterRequest(
         pageSize: itemCountPerPage,
         pageIndex: selectedPageNum,
@@ -112,6 +114,7 @@ class _CharacterViewState extends State<CharacterView> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Padding(
       padding: const EdgeInsets.all(15.0),
       child: Column(
@@ -194,7 +197,10 @@ class _CharacterViewState extends State<CharacterView> {
       Race.LUNARIAN: AppLocalizations.of(context)!.lunarian,
       Race.MINK: AppLocalizations.of(context)!.mink,
       Race.WORLD_NOBEL: AppLocalizations.of(context)!.worldNobel,
-      Race.DWARVES: AppLocalizations.of(context)!.dwarves
+      Race.DWARVES: AppLocalizations.of(context)!.dwarves,
+      Race.NO_LIFE_OBJECT: AppLocalizations.of(context)!.lifeless_object,
+      Race.ANIMAL: AppLocalizations.of(context)!.animal,
+      Race.SOUL: AppLocalizations.of(context)!.soul,
     };
     Map<Haki, String> hakiEnumValueToDisplayValue = {
       Haki.busoshoku: AppLocalizations.of(context)!.busoshoku,
@@ -233,7 +239,7 @@ class _CharacterViewState extends State<CharacterView> {
                 controller: searchNameController,
                 onChanged: (value) {
                   characterFilter.name = value;
-                  _search();
+                  _search(true);
                 },
                 decoration: InputDecoration(
                   floatingLabelBehavior: FloatingLabelBehavior.never,
@@ -314,7 +320,7 @@ class _CharacterViewState extends State<CharacterView> {
                           setState(() {});
                           //This rebuilds the dropdownMenu Widget to update the check mark
                           menuSetState(() {});
-                          _search();
+                          _search(true);
                         },
                         child: Container(
                           height: double.infinity,
@@ -408,7 +414,7 @@ class _CharacterViewState extends State<CharacterView> {
                           setState(() {});
                           //This rebuilds the dropdownMenu Widget to update the check mark
                           menuSetState(() {});
-                          _search();
+                          _search(true);
                         },
                         child: Container(
                           height: double.infinity,
@@ -501,7 +507,7 @@ class _CharacterViewState extends State<CharacterView> {
                           setState(() {});
                           //This rebuilds the dropdownMenu Widget to update the check mark
                           menuSetState(() {});
-                          _search();
+                          _search(true);
                         },
                         child: Container(
                           height: double.infinity,
@@ -562,7 +568,7 @@ class _CharacterViewState extends State<CharacterView> {
                         } else {
                           characterFilter.onlySystem = null;
                         }
-                        _search();
+                        _search(true);
                       });
                     },
                     splashRadius: 1,
@@ -606,7 +612,7 @@ class _CharacterViewState extends State<CharacterView> {
                         } else {
                           characterFilter.onlySystem = null;
                         }
-                        _search();
+                        _search(true);
                       });
                     },
                     splashRadius: 1,
@@ -645,7 +651,7 @@ class _CharacterViewState extends State<CharacterView> {
                       } else {
                         characterFilter.hasFruit = null;
                       }
-                      _search();
+                      _search(true);
                     });
                   },
                   splashRadius: 1,
@@ -703,7 +709,7 @@ class _CharacterViewState extends State<CharacterView> {
               CharacterSortableFieldsEnum.blood: null,
               CharacterSortableFieldsEnum.speed: null,
             };
-            _search();
+            _search(false);
           }),
         ),
       ),
@@ -792,7 +798,7 @@ class _CharacterViewState extends State<CharacterView> {
                         CharacterSortableField(
                             sortKey: sortKey, sortOrder: sortOrder));
                   }
-                  _search();
+                  _search(false);
                 });
               },
         child: Padding(
@@ -867,7 +873,10 @@ class _CharacterViewState extends State<CharacterView> {
       Race.LUNARIAN: AppLocalizations.of(context)!.lunarian,
       Race.MINK: AppLocalizations.of(context)!.mink,
       Race.WORLD_NOBEL: AppLocalizations.of(context)!.worldNobel,
-      Race.DWARVES: AppLocalizations.of(context)!.dwarves
+      Race.DWARVES: AppLocalizations.of(context)!.dwarves,
+      Race.NO_LIFE_OBJECT: AppLocalizations.of(context)!.lifeless_object,
+      Race.ANIMAL: AppLocalizations.of(context)!.animal,
+      Race.SOUL: AppLocalizations.of(context)!.soul,
     };
     return currentCharacterList
         .asMap()
@@ -979,7 +988,7 @@ class _CharacterViewState extends State<CharacterView> {
               ? null
               : () {
                   selectedPageNum = selectedPageNum - 1;
-                  _search();
+                  _search(false);
                 },
           child: const Icon(Icons.arrow_back));
       ElevatedButton nextPage = ElevatedButton(
@@ -988,7 +997,7 @@ class _CharacterViewState extends State<CharacterView> {
               ? null
               : () {
                   selectedPageNum = selectedPageNum + 1;
-                  _search();
+                  _search(false);
                 },
           child: const Icon(Icons.arrow_forward));
       Widget pageNumber = SizedBox(
@@ -1030,7 +1039,7 @@ class _CharacterViewState extends State<CharacterView> {
               : () {
                   selectedPageNum = int.parse(pageNumberController.text);
                   confirmButtonEnabled = false;
-                  _search();
+                  _search(false);
                 },
           child: Text(
             AppLocalizations.of(context)!.jumpToPage,
@@ -1070,4 +1079,7 @@ class _CharacterViewState extends State<CharacterView> {
       );
     });
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }

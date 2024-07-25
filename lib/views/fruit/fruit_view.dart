@@ -62,11 +62,14 @@ class _FruitViewState extends State<FruitView> {
   @override
   void initState() {
     super.initState();
-    _search();
+    _search(false);
   }
 
-  void _search() {
+  void _search(bool filterChange) {
     fruitFilter.languageCode = I18nHelper.getLanguageCode();
+    if (filterChange) {
+      selectedPageNum = 1;
+    }
     ListFruitRequest request = ListFruitRequest(
         pageSize: itemCountPerPage,
         pageIndex: selectedPageNum,
@@ -187,21 +190,6 @@ class _FruitViewState extends State<FruitView> {
                     ),
                   ),
                 ),
-              if (getIt<User>().loginRole == UserRole.NIKA)
-                SizedBox(
-                  height: 35,
-                  width: 120,
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 10.0),
-                    child: ElevatedButton(
-                      style: OnepieceButtonStyle.getDefaultStyle(),
-                      onPressed: () {
-                        getIt<SupportDao>().batchCreateFruit(BatchCreateFruitRequest());
-                      },
-                      child: Text(AppLocalizations.of(context)!.fruitType),
-                    ),
-                  ),
-                ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(0, 0, 6, 0),
                 child: SizedBox(
@@ -211,7 +199,7 @@ class _FruitViewState extends State<FruitView> {
                     controller: searchNameController,
                     onChanged: (value) {
                       fruitFilter.name = value;
-                      _search();
+                      _search(true);
                     },
                     decoration: InputDecoration(
                       floatingLabelBehavior: FloatingLabelBehavior.never,
@@ -227,7 +215,7 @@ class _FruitViewState extends State<FruitView> {
                       prefixIcon: IconButton(
                           onPressed: () {
                             fruitFilter.name = searchNameController.text;
-                            _search();
+                            _search(true);
                           },
                           icon: const Icon(Icons.search)),
                       labelText: AppLocalizations.of(context)!.name,
@@ -265,7 +253,7 @@ class _FruitViewState extends State<FruitView> {
                             } else {
                               fruitFilter.onlySystem = null;
                             }
-                            _search();
+                            _search(true);
                           });
                         },
                         splashRadius: 1,
@@ -307,7 +295,7 @@ class _FruitViewState extends State<FruitView> {
                           } else {
                             fruitFilter.onlySystem = null;
                           }
-                          _search();
+                          _search(true);
                         });
                       },
                       splashRadius: 1,
@@ -402,7 +390,7 @@ class _FruitViewState extends State<FruitView> {
                     setState(() {});
                     //This rebuilds the dropdownMenu Widget to update the check mark
                     menuSetState(() {});
-                    _search();
+                    _search(true);
                   },
                   child: Container(
                     height: double.infinity,
@@ -467,7 +455,7 @@ class _FruitViewState extends State<FruitView> {
                 FruitSortableFieldsEnum.magicConsume: null,
                 FruitSortableFieldsEnum.name: null,
               };
-              _search();
+              _search(false);
             },
           ),
         ),
@@ -517,7 +505,7 @@ class _FruitViewState extends State<FruitView> {
                         FruitSortableField(
                             sortKey: sortKey, sortOrder: sortOrder));
                   }
-                  _search();
+                  _search(false);
                 });
               },
         child: Padding(
@@ -726,7 +714,7 @@ class _FruitViewState extends State<FruitView> {
               ? null
               : () {
                   selectedPageNum = selectedPageNum - 1;
-                  _search();
+                  _search(false);
                 },
           child: const Icon(Icons.arrow_back));
       ElevatedButton nextPage = ElevatedButton(
@@ -735,7 +723,7 @@ class _FruitViewState extends State<FruitView> {
               ? null
               : () {
                   selectedPageNum = selectedPageNum + 1;
-                  _search();
+                  _search(false);
                 },
           child: const Icon(Icons.arrow_forward));
       Widget pageNumber = SizedBox(
@@ -777,7 +765,7 @@ class _FruitViewState extends State<FruitView> {
               : () {
                   selectedPageNum = int.parse(pageNumberController.text);
                   confirmButtonEnabled = false;
-                  _search();
+                  _search(false);
                 },
           child: Text(
             AppLocalizations.of(context)!.jumpToPage,
