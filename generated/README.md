@@ -256,6 +256,8 @@ Class | Method | HTTP request | Description
  - [SortOrder](doc//SortOrder.md)
  - [StartBattleRequest](doc//StartBattleRequest.md)
  - [StartBattleResponse](doc//StartBattleResponse.md)
+ - [UpdateCharacterRequest](doc//UpdateCharacterRequest.md)
+ - [UpdateCharacterRequestAllOf](doc//UpdateCharacterRequestAllOf.md)
  - [UpdateCharacterResponse](doc//UpdateCharacterResponse.md)
  - [UpdateFruitRequest](doc//UpdateFruitRequest.md)
  - [UpdateFruitResponse](doc//UpdateFruitResponse.md)

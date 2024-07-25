@@ -32,7 +32,10 @@ class _CharacterViewState extends State<CharacterView>
   TextEditingController pageNumberController = TextEditingController(text: "0");
   CharacterFilter characterFilter = CharacterFilter();
   List<CharacterListView> currentCharacterList = [];
-  List<CharacterSortableField> sortKeys = [];
+  List<CharacterSortableField> sortKeys = [
+    CharacterSortableField(
+        sortKey: CharacterSortableFieldsEnum.score, sortOrder: SortOrder.DESC)
+  ];
   final GlobalKey _tableKey = GlobalKey();
 
   // sorting related fields
@@ -43,6 +46,7 @@ class _CharacterViewState extends State<CharacterView>
   };
   Map<CharacterSortableFieldsEnum, SortOrder?> sortableEnumToSortOrderMap = {
     CharacterSortableFieldsEnum.name: null,
+    CharacterSortableFieldsEnum.score: SortOrder.DESC,
     CharacterSortableFieldsEnum.fruitLimit: null,
     CharacterSortableFieldsEnum.groupGain: null,
     CharacterSortableFieldsEnum.attack: null,
@@ -186,7 +190,7 @@ class _CharacterViewState extends State<CharacterView>
       BattleStyle.SHOOTER: AppLocalizations.of(context)!.shoot,
       BattleStyle.STICK: AppLocalizations.of(context)!.stick,
       BattleStyle.RIFLE: AppLocalizations.of(context)!.rifle,
-      BattleStyle.SWORD:AppLocalizations.of(context)!.sword
+      BattleStyle.SWORD: AppLocalizations.of(context)!.sword
     };
     Map<Race, String> raceEnumToDisplayName = {
       Race.HUMAN: AppLocalizations.of(context)!.human,
@@ -366,7 +370,7 @@ class _CharacterViewState extends State<CharacterView>
               ),
               onChanged: (value) {},
               selectedItemBuilder: (context) {
-                return BattleStyle.values.map(
+                return Haki.values.map(
                   (item) {
                     return Container(
                       alignment: AlignmentDirectional.center,
@@ -719,6 +723,8 @@ class _CharacterViewState extends State<CharacterView>
       _createSingleColumn(
           AppLocalizations.of(context)!.characterName, null, 80, null),
       _createSingleColumn(AppLocalizations.of(context)!.hakis, null, 250, null),
+      _createSingleColumn(AppLocalizations.of(context)!.combatPower,
+          CharacterSortableFieldsEnum.score, 80, null),
       _createSingleColumn(AppLocalizations.of(context)!.race, null, 150, null),
       _createSingleColumn(
           AppLocalizations.of(context)!.battleStyle, null, 100, null),
@@ -728,8 +734,6 @@ class _CharacterViewState extends State<CharacterView>
           100,
           ImageHelper.getTextFormFieldIcon(
               'images/character_digits_icon/bounty.svg', true, 20)),
-      _createSingleColumn(AppLocalizations.of(context)!.combatPower,
-          CharacterSortableFieldsEnum.score, 120, null),
       _createSingleColumn(
           AppLocalizations.of(context)!.characterAttack,
           CharacterSortableFieldsEnum.attack,
@@ -809,7 +813,7 @@ class _CharacterViewState extends State<CharacterView>
           child: SizedBox(
             width: width,
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Row(
@@ -830,14 +834,15 @@ class _CharacterViewState extends State<CharacterView>
                     ),
                   ],
                 ),
+                const SizedBox(width: 5,),
                 if (characterSortableFieldsEnum != null)
                   Padding(
                     padding: const EdgeInsets.all(5.0),
                     child: ImageHelper.getSvgIconWithColor(
                       sortOrderToPath[sortableEnumToSortOrderMap[
                           characterSortableFieldsEnum]]!,
-                      15,
-                      15,
+                      12,
+                      12,
                       sortableEnumToSortOrderMap[characterSortableFieldsEnum] ==
                               null
                           ? Colors.grey
@@ -865,7 +870,7 @@ class _CharacterViewState extends State<CharacterView>
       BattleStyle.SHOOTER: AppLocalizations.of(context)!.shoot,
       BattleStyle.STICK: AppLocalizations.of(context)!.stick,
       BattleStyle.RIFLE: AppLocalizations.of(context)!.rifle,
-      BattleStyle.SWORD:AppLocalizations.of(context)!.sword
+      BattleStyle.SWORD: AppLocalizations.of(context)!.sword
     };
     Map<Race, String> raceEnumToDisplayName = {
       Race.HUMAN: AppLocalizations.of(context)!.human,
@@ -935,6 +940,10 @@ class _CharacterViewState extends State<CharacterView>
               )),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                child: Text(entry.value.score.toString(), style: OnepieceFonts.boldFancySmallFont,),
+              )),
+              DataCell(Padding(
+                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
                 child: Text(raceEnumToDisplayName[entry.value.race]!),
               )),
               DataCell(Padding(
@@ -945,10 +954,6 @@ class _CharacterViewState extends State<CharacterView>
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
                 child: Text(entry.value.bounty.toString()),
-              )),
-              DataCell(Padding(
-                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: Text(entry.value.score.toString()),
               )),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),

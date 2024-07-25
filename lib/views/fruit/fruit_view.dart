@@ -463,7 +463,7 @@ class _FruitViewState extends State<FruitView> {
       _createSingleColumn(AppLocalizations.of(context)!.name, null, 80),
       _createSingleColumn(AppLocalizations.of(context)!.fruitType,
           FruitSortableFieldsEnum.fruitType, 150),
-      _createSingleColumn(AppLocalizations.of(context)!.owner, null, 300),
+      _createSingleColumn(AppLocalizations.of(context)!.owner, null, 100),
       _createSingleColumn(
           AppLocalizations.of(context)!.attackStrengthen, null, 150),
       _createSingleColumn(
@@ -521,14 +521,15 @@ class _FruitViewState extends State<FruitView> {
                       ? OnepieceFonts.tableHeaderStyle
                       : OnepieceFonts.selectedTableHeaderStyle,
                 ),
+                const SizedBox(width: 10,),
                 if (sortableFieldsEnum != null)
                   Padding(
                     padding: const EdgeInsets.all(5.0),
                     child: ImageHelper.getSvgIconWithColor(
                       sortOrderToPath[
                           sortableEnumToSortOrderMap[sortableFieldsEnum]]!,
-                      15,
-                      15,
+                      12,
+                      12,
                       sortableEnumToSortOrderMap[sortableFieldsEnum] == null
                           ? Colors.grey
                           : OnepieceColors.themeColor,

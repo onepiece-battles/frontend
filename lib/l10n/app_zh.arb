@@ -19,7 +19,7 @@
   "battleInProgress": "已开始",
   "battleUnFinished": "未完成",
   "battleNotInProgress": "未开始",
-  "battleInfo": "战斗数值",
+  "battleInfo": "战斗信息",
   "battleStatusCanceled": "已取消",
   "battleStatusCreated": "已创建",
   "battleStatusFailed": "执行失败",

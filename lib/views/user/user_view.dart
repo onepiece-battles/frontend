@@ -420,14 +420,17 @@ class _UserViewState extends State<UserView> {
                           ? OnepieceFonts.tableHeaderStyle
                           : OnepieceFonts.selectedTableHeaderStyle,
                 ),
+                const SizedBox(
+                  width: 10,
+                ),
                 if (userSortableFieldsEnum != null)
                   Padding(
                     padding: const EdgeInsets.all(5.0),
                     child: ImageHelper.getSvgIconWithColor(
                       sortOrderToPath[
                           sortableEnumToSortOrderMap[userSortableFieldsEnum]]!,
-                      15,
-                      15,
+                      12,
+                      12,
                       sortableEnumToSortOrderMap[userSortableFieldsEnum] == null
                           ? Colors.grey
                           : OnepieceColors.themeColor,
