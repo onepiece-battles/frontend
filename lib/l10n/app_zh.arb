@@ -113,7 +113,7 @@
   "issueType": "类型",
   "join": "加入",
   "jumpToPage": "前往",
-  "katana": "刀剑",
+  "katana": "刀",
   "kenbunshoku": "见闻色",
   "language": "语言",
   "leaved": "已退出",
@@ -167,7 +167,7 @@
   "searchStarter": "搜索发起者 ...",
   "selectCharacter": "选择角色",
   "settings": "设置",
-  "shoot": "枪",
+  "shoot": "狙击",
   "signIn": "登录",
   "signUp": "注册",
   "signUpHeadLine": "注册一个免费账号！",
@@ -300,5 +300,8 @@
   "maxFileSize500": "允许最大文件大小为500KB。",
   "animal": "动物",
   "soul": "人造灵异物体",
-  "lifeless_object": "无生命物体"
+  "lifeless_object": "无生命物体",
+  "sword": "剑",
+  "stick": "棍",
+  "rifle": "枪"
 }

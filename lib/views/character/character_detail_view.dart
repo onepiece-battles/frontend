@@ -846,7 +846,10 @@ class _CharacterDetailState extends State<CharacterDetail> {
       BattleStyle.BODY: AppLocalizations.of(context)!.body,
       BattleStyle.SCIENCE: AppLocalizations.of(context)!.science,
       BattleStyle.KATANA: AppLocalizations.of(context)!.katana,
-      BattleStyle.SHOOTER: AppLocalizations.of(context)!.shoot
+      BattleStyle.SHOOTER: AppLocalizations.of(context)!.shoot,
+      BattleStyle.STICK: AppLocalizations.of(context)!.stick,
+      BattleStyle.RIFLE: AppLocalizations.of(context)!.rifle,
+      BattleStyle.SWORD:AppLocalizations.of(context)!.sword
     };
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 0, 0, 2),
