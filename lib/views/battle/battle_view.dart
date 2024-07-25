@@ -71,14 +71,16 @@ class _BattleViewState extends State<BattleView> {
   @override
   void initState() {
     super.initState();
-    _search();
+    _search(false);
   }
 
-  void _search() {
+  void _search(bool filterChange) {
     battleFilter.languageCode = I18nHelper.getLanguageCode();
     battleFilter.starterName = starterNameController.text;
     battleFilter.receiverName = receiverNameController.text;
-
+    if (filterChange) {
+      selectedPageNum = 1;
+    }
     ListBattleRequest request = ListBattleRequest(
         pageSize: itemCountPerPage,
         pageIndex: selectedPageNum,
@@ -216,7 +218,7 @@ class _BattleViewState extends State<BattleView> {
                     controller: starterNameController,
                     onChanged: (value) {
                       battleFilter.starterName = value.trim();
-                      _search();
+                      _search(true);
                     },
                     decoration: InputDecoration(
                       floatingLabelBehavior: FloatingLabelBehavior.never,
@@ -244,7 +246,7 @@ class _BattleViewState extends State<BattleView> {
                     controller: receiverNameController,
                     onChanged: (value) {
                       battleFilter.receiverName = value.trim();
-                      _search();
+                      _search(true);
                     },
                     decoration: InputDecoration(
                       floatingLabelBehavior: FloatingLabelBehavior.never,
@@ -295,7 +297,7 @@ class _BattleViewState extends State<BattleView> {
                             } else {
                               battleFilter.onlySystem = null;
                             }
-                            _search();
+                            _search(true);
                           });
                         },
                         splashRadius: 1,
@@ -337,7 +339,7 @@ class _BattleViewState extends State<BattleView> {
                           } else {
                             battleFilter.onlySystem = null;
                           }
-                          _search();
+                          _search(true);
                         });
                       },
                       splashRadius: 1,
@@ -430,7 +432,7 @@ class _BattleViewState extends State<BattleView> {
                       setState(() {});
                       //This rebuilds the dropdownMenu Widget to update the check mark
                       menuSetState(() {});
-                      _search();
+                      _search(true);
                     },
                     child: Container(
                       height: double.infinity,
@@ -535,7 +537,7 @@ class _BattleViewState extends State<BattleView> {
                       setState(() {});
                       //This rebuilds the dropdownMenu Widget to update the check mark
                       menuSetState(() {});
-                      _search();
+                      _search(true);
                     },
                     child: Container(
                       height: double.infinity,
@@ -601,7 +603,7 @@ class _BattleViewState extends State<BattleView> {
                 BattleSortableFieldsEnum.creationRecordId: null,
                 BattleSortableFieldsEnum.modificationRecordId: null,
               };
-              _search();
+              _search(false);
             },
           ),
         ),
@@ -644,7 +646,7 @@ class _BattleViewState extends State<BattleView> {
                       BattleSortableField(
                           sortKey: sortKey, sortOrder: sortOrder));
                 }
-                _search();
+                _search(false);
               });
             },
       child: Padding(
@@ -795,7 +797,7 @@ class _BattleViewState extends State<BattleView> {
                           ),
                         )
                       : ImageLazyLoader(
-                      key: UniqueKey(),
+                          key: UniqueKey(),
                           uriProvider: () =>
                               entry.value.battleExecution!.winnerId ==
                                       entry.value.starterId
@@ -836,7 +838,7 @@ class _BattleViewState extends State<BattleView> {
               ? null
               : () {
                   selectedPageNum = selectedPageNum - 1;
-                  _search();
+                  _search(false);
                 },
           child: const Icon(Icons.arrow_back));
       ElevatedButton nextPage = ElevatedButton(
@@ -845,7 +847,7 @@ class _BattleViewState extends State<BattleView> {
               ? null
               : () {
                   selectedPageNum = selectedPageNum + 1;
-                  _search();
+                  _search(false);
                 },
           child: const Icon(Icons.arrow_forward));
       Widget pageNumber = SizedBox(
@@ -881,18 +883,19 @@ class _BattleViewState extends State<BattleView> {
             }),
       );
       ElevatedButton confirmPage = ElevatedButton(
-          style: OnepieceButtonStyle.getDefaultStyle(),
-          onPressed: !confirmButtonEnabled
-              ? null
-              : () {
-                  selectedPageNum = int.parse(pageNumberController.text);
-                  _search();
-                  confirmButtonEnabled = false;
-                },
-          child: Text(
-            AppLocalizations.of(context)!.jumpToPage,
-            textAlign: TextAlign.left,
-          ));
+        style: OnepieceButtonStyle.getDefaultStyle(),
+        onPressed: !confirmButtonEnabled
+            ? null
+            : () {
+                selectedPageNum = int.parse(pageNumberController.text);
+                _search(false);
+                confirmButtonEnabled = false;
+              },
+        child: Text(
+          AppLocalizations.of(context)!.jumpToPage,
+          textAlign: TextAlign.left,
+        ),
+      );
       widgetList.add(Padding(
         padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
         child: prePage,

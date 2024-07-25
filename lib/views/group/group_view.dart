@@ -10,8 +10,6 @@ import '../../components/image_lazy_loader.dart';
 import '../../constants/button_style.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
-import '../../repository/support_dao.dart';
-import '../../utils/base64_helper.dart';
 import '../../utils/data_validator.dart';
 import '../../utils/i18n_helper.dart';
 import '../../utils/image_helper.dart';
@@ -62,11 +60,14 @@ class _GroupViewState extends State<GroupView> {
   @override
   void initState() {
     super.initState();
-    _search();
+    _search(false);
   }
 
-  void _search() {
+  void _search(bool filterChange) {
     groupFilter.languageCode = I18nHelper.getLanguageCode();
+    if (filterChange) {
+      selectedPageNum = 1;
+    }
     ListGroupRequest listGroupRequest = ListGroupRequest(
         pageSize: itemCountPerPage,
         pageIndex: selectedPageNum,
@@ -200,7 +201,7 @@ class _GroupViewState extends State<GroupView> {
                 controller: searchNameController,
                 onChanged: (value) {
                   groupFilter.name = value;
-                  _search();
+                  _search(true);
                 },
                 decoration: InputDecoration(
                   floatingLabelBehavior: FloatingLabelBehavior.never,
@@ -281,7 +282,7 @@ class _GroupViewState extends State<GroupView> {
                           setState(() {});
                           //This rebuilds the dropdownMenu Widget to update the check mark
                           menuSetState(() {});
-                          _search();
+                          _search(true);
                         },
                         child: Container(
                           height: double.infinity,
@@ -339,7 +340,7 @@ class _GroupViewState extends State<GroupView> {
                         } else {
                           groupFilter.onlySystem = null;
                         }
-                        _search();
+                        _search(true);
                       });
                     },
                     splashRadius: 1,
@@ -383,7 +384,7 @@ class _GroupViewState extends State<GroupView> {
                         } else {
                           groupFilter.onlySystem = null;
                         }
-                        _search();
+                        _search(true);
                       });
                     },
                     splashRadius: 1,
@@ -440,7 +441,7 @@ class _GroupViewState extends State<GroupView> {
                 GroupSortableFieldsEnum.name: null,
                 GroupSortableFieldsEnum.category: null,
               };
-              _search();
+              _search(true);
             },
           ),
         ),
@@ -479,7 +480,7 @@ class _GroupViewState extends State<GroupView> {
                         GroupSortableField(
                             sortKey: sortKey, sortOrder: sortOrder));
                   }
-                  _search();
+                  _search(false);
                 });
               },
         child: Padding(
@@ -674,7 +675,7 @@ class _GroupViewState extends State<GroupView> {
               ? null
               : () {
                   selectedPageNum = selectedPageNum - 1;
-                  _search();
+                  _search(false);
                 },
           child: const Icon(Icons.arrow_back));
       ElevatedButton nextPage = ElevatedButton(
@@ -683,7 +684,7 @@ class _GroupViewState extends State<GroupView> {
               ? null
               : () {
                   selectedPageNum = selectedPageNum + 1;
-                  _search();
+                  _search(false);
                 },
           child: const Icon(Icons.arrow_forward));
       Widget pageNumber = SizedBox(
@@ -724,7 +725,7 @@ class _GroupViewState extends State<GroupView> {
             ? null
             : () {
                 selectedPageNum = int.parse(pageNumberController.text);
-                _search();
+                _search(false);
               },
         child: Text(
           AppLocalizations.of(context)!.jumpToPage,

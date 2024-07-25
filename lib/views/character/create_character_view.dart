@@ -838,7 +838,10 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
       Race.LUNARIAN: AppLocalizations.of(context)!.lunarian,
       Race.MINK: AppLocalizations.of(context)!.mink,
       Race.WORLD_NOBEL: AppLocalizations.of(context)!.worldNobel,
-      Race.DWARVES: AppLocalizations.of(context)!.dwarves
+      Race.DWARVES: AppLocalizations.of(context)!.dwarves,
+      Race.NO_LIFE_OBJECT: AppLocalizations.of(context)!.lifeless_object,
+      Race.ANIMAL: AppLocalizations.of(context)!.animal,
+      Race.SOUL: AppLocalizations.of(context)!.soul,
     };
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 0, 0, 2),

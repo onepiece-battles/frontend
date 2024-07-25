@@ -297,5 +297,8 @@
   "selectable": "Selectable",
   "selectNewMembers": "Add new members",
   "myAccount": "My account",
-  "maxFileSize500": "The maximum file size allowed is 500 kb."
+  "maxFileSize500": "The maximum file size allowed is 500 kb.",
+  "animal": "Animal",
+  "soul": "Supernatural Object",
+  "lifeless_object": "Lifeless Object"
 }

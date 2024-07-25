@@ -4,7 +4,6 @@ import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
 import 'package:one_piece_battles_flutter/components/image_lazy_loader.dart';
-import 'package:one_piece_battles_flutter/repository/support_dao.dart';
 import 'package:openapi/api.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../constants/button_style.dart';
@@ -12,7 +11,6 @@ import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
 import '../../constants/onepiece_tag.dart';
 import '../../repository/user_dao.dart';
-import '../../utils/base64_helper.dart';
 import '../../utils/data_validator.dart';
 import '../../utils/date_helper.dart';
 import '../../utils/image_helper.dart';
@@ -64,10 +62,13 @@ class _UserViewState extends State<UserView> {
   @override
   void initState() {
     super.initState();
-    _search();
+    _search(false);
   }
 
-  void _search() {
+  void _search(bool filterChange) {
+    if (filterChange) {
+      selectedPageNum = 1;
+    }
     ListUsersRequest listUserRequest = ListUsersRequest(
         pageSize: itemCountPerPage,
         pageIndex: selectedPageNum,
@@ -183,7 +184,7 @@ class _UserViewState extends State<UserView> {
                 controller: searchNameController,
                 onChanged: (value) {
                   userFilter.nickname = value;
-                  _search();
+                  _search(true);
                 },
                 decoration: InputDecoration(
                   floatingLabelBehavior: FloatingLabelBehavior.never,
@@ -210,7 +211,7 @@ class _UserViewState extends State<UserView> {
                 controller: searchEmailController,
                 onChanged: (value) {
                   userFilter.username = value;
-                  _search();
+                  _search(true);
                 },
                 decoration: InputDecoration(
                   floatingLabelBehavior: FloatingLabelBehavior.never,
@@ -288,7 +289,7 @@ class _UserViewState extends State<UserView> {
                           setState(() {});
                           //This rebuilds the dropdownMenu Widget to update the check mark
                           menuSetState(() {});
-                          _search();
+                          _search(true);
                         },
                         child: Container(
                           height: double.infinity,
@@ -354,7 +355,7 @@ class _UserViewState extends State<UserView> {
                 UserSortableFieldsEnum.username: null,
                 UserSortableFieldsEnum.loginRole: null,
               };
-              _search();
+              _search(false);
             },
           ),
         ),
@@ -402,7 +403,7 @@ class _UserViewState extends State<UserView> {
                         UserSortableField(
                             sortKey: sortKey, sortOrder: sortOrder));
                   }
-                  _search();
+                  _search(false);
                 });
               },
         child: Padding(
@@ -563,7 +564,7 @@ class _UserViewState extends State<UserView> {
               ? null
               : () {
                   selectedPageNum = selectedPageNum - 1;
-                  _search();
+                  _search(false);
                 },
           child: const Icon(Icons.arrow_back));
       ElevatedButton nextPage = ElevatedButton(
@@ -572,7 +573,7 @@ class _UserViewState extends State<UserView> {
               ? null
               : () {
                   selectedPageNum = selectedPageNum + 1;
-                  _search();
+                  _search(false);
                 },
           child: const Icon(Icons.arrow_forward));
       Widget pageNumber = SizedBox(
@@ -613,7 +614,7 @@ class _UserViewState extends State<UserView> {
               ? null
               : () {
                   selectedPageNum = int.parse(pageNumberController.text);
-                  _search();
+                  _search(false);
                   confirmButtonEnabled = false;
                 },
           child: Text(

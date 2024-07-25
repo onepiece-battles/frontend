@@ -100,8 +100,7 @@ class AppRouter {
                   return NoTransitionPage(
                       child: CharacterDetail(
                         characterId: characterId,
-                      ),
-                      key: UniqueKey());
+                      ),);
                 },
               ),
             ],
