@@ -300,5 +300,8 @@
   "maxFileSize500": "The maximum file size allowed is 500 kb.",
   "animal": "Animal",
   "soul": "Supernatural Object",
-  "lifeless_object": "Lifeless Object"
+  "lifeless_object": "Lifeless Object",
+  "sword": "Sword",
+  "stick": "Stick",
+  "rifle": "Gun"
 }
