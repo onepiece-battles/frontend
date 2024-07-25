@@ -62,6 +62,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
   FruitFilter fruitFilter = FruitFilter();
   List<GroupListView> searchingGroupList = [];
   List<FruitListView> searchingFruitList = [];
+  List<Haki> selectedHakis = [];
   String? selectedFruitId;
   String? selectedGroupId;
   String? selectedImage;
@@ -141,6 +142,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
     battles = characterFullView.battles;
     fruits = characterFullView.fruits;
     groups = characterFullView.groups;
+    selectedHakis = characterFullView.hakis.toList(growable: true);
     battleEndIndex = battles.length >= 10 ? 10 : battles.length;
     _editButtonVisible = (PermissionCheck.checkPermission(
                 getIt<User>().loginRoleResourcesPermissionMap,
@@ -235,13 +237,6 @@ class _CharacterDetailState extends State<CharacterDetail> {
                           _getFruitSearchBar(context),
                           if (fruits.isNotEmpty)
                             Padding(
-                              padding: EdgeInsets.fromLTRB(sideWidth, 0, 8, 0),
-                              child: Text(
-                                  AppLocalizations.of(context)!.devilFruit,
-                                  style: OnepieceFonts.fancyBlueHintFont),
-                            ),
-                          if (fruits.isNotEmpty)
-                            Padding(
                               padding: EdgeInsets.fromLTRB(sideWidth, 8, 8, 8),
                               child: _getFruitList(context),
                             ),
@@ -256,13 +251,6 @@ class _CharacterDetailState extends State<CharacterDetail> {
                             ),
                           ),
                           _getGroupSearchBar(context),
-                          if (groups.isNotEmpty)
-                            Padding(
-                              padding: EdgeInsets.fromLTRB(sideWidth, 0, 8, 0),
-                              child: Text(
-                                  AppLocalizations.of(context)!.historyGroups,
-                                  style: OnepieceFonts.fancyBlueHintFont),
-                            ),
                           if (groups.isNotEmpty)
                             Padding(
                               padding: EdgeInsets.fromLTRB(sideWidth, 0, 8, 8),
@@ -388,10 +376,11 @@ class _CharacterDetailState extends State<CharacterDetail> {
                         basicState(() {
                           basicInfoEditable = !basicInfoEditable;
                           if (!basicInfoEditable) {
-                            var updatedCharacter = Character(
+                            var updatedCharacter = UpdateCharacterRequest(
                                 id: character.id,
                                 maximumFruitCount: character.maximumFruitCount,
                                 // keep combat info consistent with original data!
+                                hakis: character.hakis,
                                 groupGain: character.groupGain,
                                 attack: character.attack,
                                 defense: character.defense,
@@ -849,7 +838,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
       BattleStyle.SHOOTER: AppLocalizations.of(context)!.shoot,
       BattleStyle.STICK: AppLocalizations.of(context)!.stick,
       BattleStyle.RIFLE: AppLocalizations.of(context)!.rifle,
-      BattleStyle.SWORD:AppLocalizations.of(context)!.sword
+      BattleStyle.SWORD: AppLocalizations.of(context)!.sword
     };
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 0, 0, 2),
@@ -987,106 +976,6 @@ class _CharacterDetailState extends State<CharacterDetail> {
     );
   }
 
-  // Widget _getHakiList(BuildContext context) {
-  //   Map<Haki, String> enumValueToDisplayValue = {
-  //     Haki.busoshoku: AppLocalizations.of(context)!.busoshoku,
-  //     Haki.haoshoku: AppLocalizations.of(context)!.haoshoku,
-  //     Haki.kenbunshoku: AppLocalizations.of(context)!.kenbunshoku,
-  //   };
-  //   return Padding(
-  //     padding: const EdgeInsets.fromLTRB(0, 0, 0, 2),
-  //     child: DropdownButtonHideUnderline(
-  //       child: DropdownButton2(
-  //         isExpanded: true,
-  //         value: selectedHakis.isEmpty ? null : selectedHakis.last,
-  //         hint: Text(
-  //           AppLocalizations.of(context)!.hakis,
-  //           style: OnepieceFonts.dropDownItemStyle,
-  //         ),
-  //         onChanged: (value) {},
-  //         selectedItemBuilder: (context) {
-  //           return Haki.values.map(
-  //                 (item) {
-  //               return Container(
-  //                 alignment: AlignmentDirectional.center,
-  //                 child: Text(
-  //                   selectedHakis
-  //                       .map((selectedHaki) {
-  //                     return enumValueToDisplayValue[selectedHaki];
-  //                   })
-  //                       .toSet()
-  //                       .join(', '),
-  //                   style: const TextStyle(
-  //                     fontSize: 16,
-  //                     overflow: TextOverflow.ellipsis,
-  //                   ),
-  //                   maxLines: 1,
-  //                 ),
-  //               );
-  //             },
-  //           ).toList();
-  //         },
-  //         buttonStyleData: ButtonStyleData(
-  //           padding: const EdgeInsets.symmetric(horizontal: 16),
-  //           height: 35,
-  //           width: 280,
-  //           decoration: BoxDecoration(
-  //             borderRadius: BorderRadius.circular(3),
-  //             color: OnepieceColors.liteFancyGreen,
-  //           ),
-  //         ),
-  //         menuItemStyleData: const MenuItemStyleData(
-  //           height: 35,
-  //         ),
-  //         items: Haki.values.map((Haki haki) {
-  //           return DropdownMenuItem<Haki>(
-  //             value: haki,
-  //             enabled: false,
-  //             child: StatefulBuilder(
-  //               builder: (context, menuSetState) {
-  //                 final isSelected = selectedHakis.contains(haki);
-  //                 return InkWell(
-  //                   onTap: () {
-  //                     isSelected
-  //                         ? selectedHakis.remove(haki)
-  //                         : selectedHakis.add(haki);
-  //                     // //This rebuilds the StatefulWidget to update the button's text
-  //                     setState(() {});
-  //                     //This rebuilds the dropdownMenu Widget to update the check mark
-  //                     menuSetState(() {});
-  //                   },
-  //                   child: Container(
-  //                     height: double.infinity,
-  //                     padding: const EdgeInsets.symmetric(horizontal: 3.0),
-  //                     child: Row(
-  //                       children: [
-  //                         if (isSelected)
-  //                           const Icon(Icons.check_box_outlined)
-  //                         else
-  //                           const Icon(Icons.check_box_outline_blank),
-  //                         const SizedBox(width: 8),
-  //                         Expanded(
-  //                           child: Text(
-  //                             enumValueToDisplayValue[haki]!,
-  //                             style: const TextStyle(
-  //                               fontSize: 16,
-  //                             ),
-  //                           ),
-  //                         ),
-  //                       ],
-  //                     ),
-  //                   ),
-  //                 );
-  //               },
-  //             ),
-  //           );
-  //         }).toList(),
-  //       ),
-  //     ),
-  //   );
-  // }
-
-// show character combat information (editable if permitted)
   Widget _getCombatInfo(BuildContext context) {
     Map<Haki, String> hakiEnumValueToDisplayValue = {
       Haki.busoshoku: AppLocalizations.of(context)!.busoshoku,
@@ -1098,7 +987,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
+            padding: const EdgeInsets.fromLTRB(0, 3, 0, 0),
             child: SizedBox(
               width: dividerWidth,
               child: Padding(
@@ -1131,11 +1020,11 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                     changeValue();
                                   }
                                   if (!combatInfoEditable) {
-                                    var updatedCharacter = Character(
+                                    var updatedCharacter =
+                                        UpdateCharacterRequest(
                                       /* basic info keep consistent with original
                                        value, will probably updated on backend */
                                       id: character.id,
-                                      battleStyle: character.battleStyle,
                                       race: character.race,
                                       score: character.score,
                                       groupGain: character.groupGain,
@@ -1144,7 +1033,9 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                       intelligence: character.intelligence,
                                       blood: character.blood,
                                       speed: character.speed,
-                                      // digit info update
+                                      // combat info update
+                                      battleStyle: selectedBattleStyle,
+                                      hakis: selectedHakis,
                                       maximumFruitCount:
                                           DataConverter.stringToInt(
                                               characterFruitLimitController
@@ -1211,8 +1102,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
                     ),
                     if (fruits.isNotEmpty)
                       SizedBox(
-                        width: 130,
-                        height: 36,
+                        width: 80,
+                        height: 26,
                         child: AnimatedToggleSwitch<bool>.dual(
                           current: showBaseValue,
                           first: false,
@@ -1241,9 +1132,9 @@ class _CharacterDetailState extends State<CharacterDetail> {
                               indicatorColor: b ? Colors.white : Colors.white),
                           iconBuilder: (value) => value
                               ? ImageHelper.getTextFormFieldIcon(
-                                  'images/svgs/user.svg', true, 30)
+                                  'images/svgs/user.svg', true, 20)
                               : ImageHelper.getTextFormFieldIcon(
-                                  'images/svgs/fruit_total.svg', true, 30),
+                                  'images/svgs/fruit_total.svg', true, 20),
                           textBuilder: (value) => value
                               ? Text(
                                   AppLocalizations.of(context)!.basicValue,
@@ -1266,38 +1157,147 @@ class _CharacterDetailState extends State<CharacterDetail> {
               ),
             ),
           ),
-          if (character.hakis.isNotEmpty)
-            Padding(
-              padding: EdgeInsets.fromLTRB(sideWidth, 0, 0, 0),
-              child: Row(
-                children: character.hakis
-                    .map((e) => Padding(
-                          padding: const EdgeInsets.only(right: 5),
-                          child: OnepieceTag.getHakiTag(
-                              e, hakiEnumValueToDisplayValue[e]!),
-                        ))
-                    .toList(),
-              ),
-            ),
-          Padding(
-            padding: EdgeInsets.fromLTRB(sideWidth, 20, 0, 0),
+          SizedBox(
+            width: dividerWidth,
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Tooltip(
-                  message: AppLocalizations.of(context)!.getByJoinCombat,
-                  child: Text(
-                    AppLocalizations.of(context)!.combatPower,
-                    style: OnepieceFonts.contentStyleBold,
+                if (character.hakis.isNotEmpty && !combatInfoEditable)
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(sideWidth, 0, 0, 0),
+                    child: Row(
+                      children: character.hakis
+                          .map((e) => Padding(
+                                padding: const EdgeInsets.only(right: 5),
+                                child: OnepieceTag.getHakiTag(
+                                    e, hakiEnumValueToDisplayValue[e]!),
+                              ))
+                          .toList(),
+                    ),
+                  ),
+                if (combatInfoEditable)
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(sideWidth, 0, 0, 0),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton2(
+                        isExpanded: true,
+                        value:
+                            selectedHakis.isEmpty ? null : selectedHakis.last,
+                        hint: Text(
+                          AppLocalizations.of(context)!.hakis,
+                          style: OnepieceFonts.dropDownItemStyle,
+                        ),
+                        onChanged: (value) {},
+                        selectedItemBuilder: (context) {
+                          return Haki.values.map(
+                            (item) {
+                              return Container(
+                                alignment: AlignmentDirectional.center,
+                                child: Text(
+                                  selectedHakis
+                                      .map((selectedType) {
+                                        return hakiEnumValueToDisplayValue[
+                                            selectedType];
+                                      })
+                                      .toSet()
+                                      .join(', '),
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  maxLines: 1,
+                                ),
+                              );
+                            },
+                          ).toList();
+                        },
+                        buttonStyleData: ButtonStyleData(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          height: 35,
+                          width: 200,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(3),
+                            color: OnepieceColors.liteFancyGreen,
+                          ),
+                        ),
+                        menuItemStyleData: const MenuItemStyleData(
+                          height: 35,
+                        ),
+                        items: Haki.values.map((Haki haki) {
+                          return DropdownMenuItem<Haki>(
+                            value: haki,
+                            enabled: false,
+                            child: StatefulBuilder(
+                              builder: (context, menuSetState) {
+                                final isSelected = selectedHakis.contains(haki);
+                                return InkWell(
+                                  onTap: () {
+                                    isSelected
+                                        ? selectedHakis.remove(haki)
+                                        : selectedHakis.add(haki);
+                                    debugPrint("$selectedHakis");
+                                    // //This rebuilds the StatefulWidget to update the button's text
+                                    combatState(() {});
+                                    //This rebuilds the dropdownMenu Widget to update the check mark
+                                    menuSetState(() {});
+                                  },
+                                  child: Container(
+                                    height: double.infinity,
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 3.0),
+                                    child: Row(
+                                      children: [
+                                        if (isSelected)
+                                          const Icon(Icons.check_box_outlined)
+                                        else
+                                          const Icon(
+                                              Icons.check_box_outline_blank),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            hakiEnumValueToDisplayValue[haki]!,
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(sideWidth, 0, sideWidth, 0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Tooltip(
+                        message: AppLocalizations.of(context)!.getByJoinCombat,
+                        child: Text(
+                          AppLocalizations.of(context)!.combatPower,
+                          style: OnepieceFonts.contentStyleBold,
+                        ),
+                      ),
+                      Text(
+                        " ${character.score}",
+                        style: OnepieceFonts.contentStyleBoldFancyBlue,
+                      )
+                    ],
                   ),
                 ),
-                Text(
-                  " ${character.score}",
-                  style: OnepieceFonts.contentStyleBoldFancyBlue,
-                )
               ],
             ),
+          ),
+          const SizedBox(
+            height: 30,
           ),
           Form(
             key: _digitFormKey,

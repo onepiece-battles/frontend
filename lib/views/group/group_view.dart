@@ -497,14 +497,17 @@ class _GroupViewState extends State<GroupView> {
                       ? OnepieceFonts.tableHeaderStyle
                       : OnepieceFonts.selectedTableHeaderStyle,
                 ),
+                const SizedBox(
+                  width: 10,
+                ),
                 if (groupSortableFieldsEnum != null)
                   Padding(
                     padding: const EdgeInsets.all(5.0),
                     child: ImageHelper.getSvgIconWithColor(
                       sortOrderToPath[
                           sortableEnumToSortOrderMap[groupSortableFieldsEnum]]!,
-                      15,
-                      15,
+                      12,
+                      12,
                       sortableEnumToSortOrderMap[groupSortableFieldsEnum] ==
                               null
                           ? Colors.grey

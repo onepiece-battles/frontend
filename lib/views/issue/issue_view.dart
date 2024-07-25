@@ -544,14 +544,17 @@ class _IssueViewState extends State<IssueView> {
                       ? OnepieceFonts.tableHeaderStyle
                       : OnepieceFonts.selectedTableHeaderStyle,
                 ),
+                const SizedBox(
+                  width: 10,
+                ),
                 if (issueSortableFieldsEnum != null)
                   Padding(
                     padding: const EdgeInsets.all(5.0),
                     child: ImageHelper.getSvgIconWithColor(
                       sortOrderToPath[
                           sortableEnumToSortOrderMap[issueSortableFieldsEnum]]!,
-                      15,
-                      15,
+                      12,
+                      12,
                       sortableEnumToSortOrderMap[issueSortableFieldsEnum] ==
                               null
                           ? Colors.grey
