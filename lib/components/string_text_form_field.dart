@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:one_piece_battles_flutter/utils/string_extensions.dart';
+import '../constants/onepiece_colors.dart';
 import '../constants/onepiece_fonts.dart';
 import '../utils/data_validator.dart';
 
@@ -43,7 +44,6 @@ class StringTextFormField extends StatelessWidget {
         ),
         SizedBox(
           width: 300,
-          height: 80,
           child: TextFormField(
             controller: controller,
             enabled: editable,
@@ -63,7 +63,8 @@ class StringTextFormField extends StatelessWidget {
               }
             },
             validator: (value) {
-              if (required && value!.isWhiteSpace()) {
+              if ((required && value!.isWhiteSpace()) ||
+                  (required && value == null)) {
                 return AppLocalizations.of(buildContext)!.requiredField;
               }
               if (!DataValidator.validName(value!)) {
@@ -71,9 +72,48 @@ class StringTextFormField extends StatelessWidget {
               }
               return null;
             },
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               floatingLabelBehavior: FloatingLabelBehavior.never,
-              contentPadding: EdgeInsets.fromLTRB(10, 10, 0, 0),
+              isDense: true,
+              contentPadding: const EdgeInsets.fromLTRB(10, 10, 0, 10),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(5.0),
+                borderSide: const BorderSide(
+                  color: OnepieceColors.fancyBlue,
+                  width: 1.0,
+                ),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(5.0),
+                borderSide: const BorderSide(
+                  color: Colors.red,
+                  width: 1.5,
+                ),
+              ),
+              focusedErrorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(5.0),
+                borderSide: const BorderSide(
+                  color: Colors.red,
+                  width: 1.5,
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(5.0),
+                borderSide: const BorderSide(
+                  color: OnepieceColors.fancyBlue,
+                  width: 1.5,
+                ),
+              ),
+              disabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(5.0),
+                borderSide: const BorderSide(
+                  color: Colors.white,
+                  width: 1.0,
+                ),
+              ),
+              filled: true,
+              fillColor:
+                  editable ? Colors.white : OnepieceColors.liteFancyGreen,
             ),
           ),
         ),

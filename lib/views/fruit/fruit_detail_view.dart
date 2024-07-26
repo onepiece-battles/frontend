@@ -1,5 +1,4 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
@@ -326,16 +325,37 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                     'images/character_digits_icon/name.svg', true, 25),
                 true),
             Padding(
-              padding: const EdgeInsets.only(bottom: 8.0),
-              child: SizedBox(
-                width: 300,
-                child: Text(
-                  AppLocalizations.of(context)!.category,
-                  style: OnepieceFonts.deepBlackHintFont,
-                ),
+              padding: const EdgeInsets.only(bottom: 3.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  ImageHelper.getTextFormFieldIcon(
+                      'images/svgs/type.svg',
+                      true,
+                      22),
+                  const SizedBox(width: 10,),
+                  SizedBox(
+                    width: 300,
+                    child: Text(
+                      AppLocalizations.of(context)!.category,
+                      style: OnepieceFonts.deepBlackHintFont,
+                    ),
+                  ),
+                ],
               ),
             ),
             _getDropDownList(context, basicState),
+            DigitTextFormField(
+                context,
+                _basicInfoEditable,
+                energyConsumeController,
+                AppLocalizations.of(context)!.energyConsume,
+                1,
+                10,
+                ImageHelper.getTextFormFieldIcon(
+                    'images/character_digits_icon/energy.svg',
+                    true,
+                    25), true),
           ],
         ),
       );
@@ -388,10 +408,10 @@ class _FruitDetailViewState extends State<FruitDetailView> {
           buttonStyleData: ButtonStyleData(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               height: 34,
-              width: 210,
+              width: 300,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(3),
-                color: OnepieceColors.menuBackgroundColor,
+                color: OnepieceColors.liteFancyGreen,
               )),
           menuItemStyleData: const MenuItemStyleData(
             height: 35,
@@ -566,17 +586,6 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                               'images/character_digits_icon/blood.svg',
                               true,
                               25)),
-                      DigitTextFormField(
-                          context,
-                          _combatInfoEditable,
-                          energyConsumeController,
-                          AppLocalizations.of(context)!.energyConsume,
-                          1,
-                          10,
-                          ImageHelper.getTextFormFieldIcon(
-                              'images/character_digits_icon/energy.svg',
-                              true,
-                              25), true),
                     ],
                   ),
                   Column(
@@ -710,7 +719,7 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                               ImageHelper.getTextFormFieldIcon(
                                   'images/character_digits_icon/attack.svg',
                                   true,
-                                  25),
+                                  21),
                               const SizedBox(
                                 width: 10,
                               ),
@@ -732,13 +741,14 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                                   ))
                             ],
                           ),
+                          const SizedBox(height: 10,),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               ImageHelper.getTextFormFieldIcon(
                                   'images/character_digits_icon/defense.svg',
                                   true,
-                                  25),
+                                  22),
                               const SizedBox(
                                 width: 10,
                               ),
@@ -760,13 +770,14 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                                   ))
                             ],
                           ),
+                          const SizedBox(height: 10,),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               ImageHelper.getTextFormFieldIcon(
                                   'images/character_digits_icon/intelligence.svg',
                                   true,
-                                  25),
+                                  22),
                               const SizedBox(
                                 width: 10,
                               ),
@@ -788,13 +799,14 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                                   ))
                             ],
                           ),
+                          const SizedBox(height: 10,),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               ImageHelper.getTextFormFieldIcon(
                                   'images/character_digits_icon/speed.svg',
                                   true,
-                                  25),
+                                  22),
                               const SizedBox(
                                 width: 10,
                               ),
@@ -816,13 +828,14 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                                   ))
                             ],
                           ),
+                          const SizedBox(height: 10,),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               ImageHelper.getTextFormFieldIcon(
                                   'images/character_digits_icon/blood.svg',
                                   true,
-                                  25),
+                                  22),
                               const SizedBox(
                                 width: 10,
                               ),
@@ -844,13 +857,14 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                                   ))
                             ],
                           ),
+                          const SizedBox(height: 10,),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               ImageHelper.getTextFormFieldIcon(
                                   'images/character_digits_icon/group_gain.svg',
                                   true,
-                                  25),
+                                  20),
                               const SizedBox(
                                 width: 10,
                               ),
@@ -872,34 +886,7 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                                   ))
                             ],
                           ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              ImageHelper.getTextFormFieldIcon(
-                                  'images/character_digits_icon/attack.svg',
-                                  true,
-                                  25),
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              SizedBox(
-                                  width: 80,
-                                  child: Text(
-                                    "${character.baseAttack}",
-                                    style: OnepieceFonts.boldFancyBlueHintFont,
-                                  )),
-                              const Padding(
-                                padding: EdgeInsets.only(right: 50.0),
-                                child: Icon(Icons.arrow_right_alt_outlined),
-                              ),
-                              SizedBox(
-                                  width: 80,
-                                  child: Text(
-                                    "${character.attack}",
-                                    style: OnepieceFonts.boldFancyBlueHintFont,
-                                  ))
-                            ],
-                          ),
+                          const SizedBox(height: 10,),
                         ],
                       )
                     ],

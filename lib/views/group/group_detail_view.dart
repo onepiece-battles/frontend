@@ -350,12 +350,22 @@ class _GroupDetailViewState extends State<GroupDetailView> {
               ImageHelper.getTextFormFieldIcon(
                   'images/character_digits_icon/name.svg', true, null),
               true),
-          SizedBox(
-            width: 300,
-            child: Text(
-              AppLocalizations.of(context)!.category,
-              style: OnepieceFonts.deepBlackHintFont,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              ImageHelper.getTextFormFieldIcon(
+                  'images/svgs/type.svg',
+                  true,
+                  22),
+              const SizedBox(width: 10,),
+              SizedBox(
+                width: 300,
+                child: Text(
+                  AppLocalizations.of(context)!.category,
+                  style: OnepieceFonts.deepBlackHintFont,
+                ),
+              ),
+            ],
           ),
           _getDropDownList(context, basicInfoState),
         ],
@@ -375,7 +385,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
           AppLocalizations.of(context)!.revolutionaryArmy,
     };
     return Padding(
-      padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
+      padding: const EdgeInsets.fromLTRB(0, 5, 0, 10),
       child: DropdownButtonHideUnderline(
         child: DropdownButton2(
           isExpanded: true,
@@ -392,29 +402,13 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                     selectedGroupCategory = value! as GroupCategory;
                   });
                 },
-          // selectedItemBuilder: (context) {
-          //   return GroupCategory.values.map(
-          //     (item) {
-          //       return Container(
-          //         alignment: AlignmentDirectional.center,
-          //         child: Text(
-          //           groupCategoryToDisplayName[selectedGroupCategory]!,
-          //           style: const TextStyle(
-          //             fontSize: 16,
-          //             overflow: TextOverflow.ellipsis,
-          //           ),
-          //         ),
-          //       );
-          //     },
-          //   ).toList();
-          // },
           buttonStyleData: ButtonStyleData(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              height: 34,
-              width: 210,
+              height: 35,
+              width: 300,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(3),
-                color: OnepieceColors.menuBackgroundColor,
+                color: OnepieceColors.liteFancyGreen,
               )),
           menuItemStyleData: const MenuItemStyleData(
             height: 35,
