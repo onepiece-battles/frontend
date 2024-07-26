@@ -354,10 +354,10 @@ class _GroupDetailViewState extends State<GroupDetailView> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               ImageHelper.getTextFormFieldIcon(
-                  'images/svgs/type.svg',
-                  true,
-                  22),
-              const SizedBox(width: 10,),
+                  'images/svgs/type.svg', true, 22),
+              const SizedBox(
+                width: 10,
+              ),
               SizedBox(
                 width: 300,
                 child: Text(
@@ -618,13 +618,25 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                 title: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    ImageLazyLoader(
-                        key: UniqueKey(),
-                        uriProvider: () => character.imageUri!,
-                        width: 40,
-                        borderWidth: 1.4,
-                        borderRadios: 3),
-                    const SizedBox(width: 10,),
+                    InkWell(
+                      child: ImageLazyLoader(
+                          key: UniqueKey(),
+                          uriProvider: () => character.imageUri!,
+                          width: 40,
+                          borderWidth: 1.4,
+                          borderRadios: 3),
+                      onTap: () {
+                        context.goNamed('characterDetails',
+                            extra: character.id,
+                            pathParameters: {
+                              'name': I18nHelper.getDisplayNameFromI18n(
+                                  character.name)
+                            });
+                      },
+                    ),
+                    const SizedBox(
+                      width: 10,
+                    ),
                     Padding(
                       padding: const EdgeInsets.only(left: 8.0),
                       child: Text(
@@ -714,13 +726,24 @@ class _GroupDetailViewState extends State<GroupDetailView> {
         childrenPadding: EdgeInsets.only(left: level * 20),
         title: Row(
           children: [
-            ImageLazyLoader(
-                key: UniqueKey(),
-                uriProvider: () => node.group.imageUri!,
-                width: 40,
-                borderWidth: 1.5,
-                borderRadios: 3),
-            const SizedBox(width: 10,),
+            InkWell(
+              child: ImageLazyLoader(
+                  key: UniqueKey(),
+                  uriProvider: () => node.group.imageUri!,
+                  width: 40,
+                  borderWidth: 1.5,
+                  borderRadios: 3),
+              onTap: () {
+                context.goNamed('groupDetails',
+                    extra: node.group.id,
+                    pathParameters: {
+                      'name': I18nHelper.getDisplayNameFromI18n(node.group.name)
+                    });
+              },
+            ),
+            const SizedBox(
+              width: 10,
+            ),
             Text(I18nHelper.getDisplayNameFromI18n(actualNode.group.name!))
           ],
         ),
@@ -741,13 +764,25 @@ class _GroupDetailViewState extends State<GroupDetailView> {
         expandedAlignment: Alignment.centerLeft,
         title: Row(
           children: [
-            ImageLazyLoader(
-                key: UniqueKey(),
-                uriProvider: () => actualNode.characterInGroupView.imageUri!,
-                width: 40,
-                borderWidth: 1.5,
-                borderRadios: 3),
-            const SizedBox(width: 10,),
+            InkWell(
+              child: ImageLazyLoader(
+                  key: UniqueKey(),
+                  uriProvider: () => actualNode.characterInGroupView.imageUri!,
+                  width: 40,
+                  borderWidth: 1.5,
+                  borderRadios: 3),
+              onTap: () {
+                context.goNamed('characterDetails',
+                    extra: node.characterInGroupView.id,
+                    pathParameters: {
+                      'name': I18nHelper.getDisplayNameFromI18n(
+                          node.characterInGroupView.name)
+                    });
+              },
+            ),
+            const SizedBox(
+              width: 10,
+            ),
             Text(I18nHelper.getDisplayNameFromI18n(
                 actualNode.characterInGroupView.name!)),
           ],
