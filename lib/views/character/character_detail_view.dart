@@ -2044,8 +2044,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  "${I18nHelper.getDisplayNameFromI18n(currentGroup.name!)} "
-                                  "${currentGroup.onceBelongedTo! ? "(${AppLocalizations.of(context)!.onceBelongTo})" : ""}",
+                                  I18nHelper.getDisplayNameFromI18n(currentGroup.name!),
                                   style: OnepieceFonts.deepBlackHintFont,
                                 ),
                                 Text(
