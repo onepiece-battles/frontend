@@ -561,6 +561,51 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                     true,
                                     null),
                                 false),
+                            DigitTextFormField(
+                                context,
+                                basicInfoEditable,
+                                characterBounty,
+                                AppLocalizations.of(context)!.bounty,
+                                10,
+                                100000000000,
+                                ImageHelper.getTextFormFieldIcon(
+                                    'images/character_digits_icon/bounty.svg',
+                                    true,
+                                    null),
+                                false),
+                            DigitTextFormField(
+                                context,
+                                basicInfoEditable,
+                                characterAge,
+                                AppLocalizations.of(context)!.age,
+                                0,
+                                100000,
+                                ImageHelper.getTextFormFieldIcon(
+                                    'images/character_digits_icon/age.svg',
+                                    true,
+                                    null),
+                                false),
+                            DigitTextFormField(
+                                context,
+                                basicInfoEditable,
+                                characterHeight,
+                                AppLocalizations.of(context)!.height,
+                                1,
+                                100000,
+                                ImageHelper.getTextFormFieldIcon(
+                                    'images/character_digits_icon/height.svg',
+                                    true,
+                                    null),
+                                false),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(right: sideWidth),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
                             Column(
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -574,6 +619,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                           "images/character_digits_icon/birthday.svg",
                                           true,
                                           null),
+                                      const SizedBox(width: 10,),
                                       Text(
                                         AppLocalizations.of(context)!.birthDay,
                                         style: OnepieceFonts.deepBlackHintFont,
@@ -582,7 +628,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                   ),
                                 ),
                                 const SizedBox(
-                                  height: 15,
+                                  height: 3,
                                 ),
                                 SizedBox(
                                   width: 300,
@@ -750,72 +796,80 @@ class _CharacterDetailState extends State<CharacterDetail> {
                               ],
                             ),
                             const SizedBox(
-                              height: 40,
+                              height: 30,
                             ),
-                            Text(
-                              AppLocalizations.of(context)!.battleStyle,
-                              style: OnepieceFonts.fancyBlueHintFont,
+                            SizedBox(
+                              width: 300,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  ImageHelper.getTextFormFieldIcon(
+                                      "images/svgs/knife.svg",
+                                      true,
+                                      null),
+                                  const SizedBox(width: 10,),
+                                  Text(
+                                    AppLocalizations.of(context)!.battleStyle,
+                                    style: OnepieceFonts.deepBlackHintFont,
+                                  ),
+                                ],
+                              ),
                             ),
                             const SizedBox(
-                              height: 10,
+                              height: 3,
                             ),
                             _getBattleStyle(context, basicState),
-                          ],
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(right: sideWidth),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            DigitTextFormField(
-                                context,
-                                basicInfoEditable,
-                                characterBounty,
-                                AppLocalizations.of(context)!.bounty,
-                                10,
-                                100000000000,
-                                ImageHelper.getTextFormFieldIcon(
-                                    'images/character_digits_icon/bounty.svg',
-                                    true,
-                                    null),
-                                false),
-                            DigitTextFormField(
-                                context,
-                                basicInfoEditable,
-                                characterAge,
-                                AppLocalizations.of(context)!.age,
-                                0,
-                                100000,
-                                ImageHelper.getTextFormFieldIcon(
-                                    'images/character_digits_icon/age.svg',
-                                    true,
-                                    null),
-                                false),
-                            DigitTextFormField(
-                                context,
-                                basicInfoEditable,
-                                characterHeight,
-                                AppLocalizations.of(context)!.height,
-                                1,
-                                100000,
-                                ImageHelper.getTextFormFieldIcon(
-                                    'images/character_digits_icon/height.svg',
-                                    true,
-                                    null),
-                                false),
                             const SizedBox(
-                              height: 5,
+                              height: 28,
                             ),
-                            Text(
-                              AppLocalizations.of(context)!.race,
-                              style: OnepieceFonts.fancyBlueHintFont,
+                            SizedBox(
+                              width: 300,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  ImageHelper.getTextFormFieldIcon(
+                                      "images/svgs/earth.svg",
+                                      true,
+                                      22),
+                                  const SizedBox(width: 10,),
+                                  Text(
+                                    AppLocalizations.of(context)!.race,
+                                    style: OnepieceFonts.deepBlackHintFont,
+                                  ),
+                                ],
+                              ),
                             ),
                             const SizedBox(
-                              height: 10,
+                              height: 3,
                             ),
                             _getRace(context, basicState),
+                            const SizedBox(
+                              height: 28,
+                            ),
+                            DigitTextFormField(
+                                context,
+                                basicInfoEditable,
+                                characterEnergyController,
+                                AppLocalizations.of(context)!.characterEnergy,
+                                100,
+                                300,
+                                ImageHelper.getTextFormFieldIcon(
+                                    'images/character_digits_icon/energy.svg',
+                                    true,
+                                    null),
+                                true),
+                            DigitTextFormField(
+                                context,
+                                basicInfoEditable,
+                                characterFruitLimitController,
+                                AppLocalizations.of(context)!.fruitLimit,
+                                1,
+                                2,
+                                ImageHelper.getTextFormFieldIcon(
+                                    'images/character_digits_icon/fruit_limit.svg',
+                                    true,
+                                    null),
+                                true),
                           ],
                         ),
                       ),
@@ -876,15 +930,15 @@ class _CharacterDetailState extends State<CharacterDetail> {
           },
           buttonStyleData: ButtonStyleData(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            height: 35,
-            width: 280,
+            height: 30,
+            width: 300,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(3),
               color: OnepieceColors.liteFancyGreen,
             ),
           ),
           menuItemStyleData: const MenuItemStyleData(
-            height: 35,
+            height: 30,
           ),
           items: BattleStyle.values.map((BattleStyle battleStyle) {
             return DropdownMenuItem<BattleStyle>(
@@ -953,15 +1007,15 @@ class _CharacterDetailState extends State<CharacterDetail> {
           },
           buttonStyleData: ButtonStyleData(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            height: 35,
-            width: 280,
+            height: 30,
+            width: 300,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(3),
               color: OnepieceColors.liteFancyGreen,
             ),
           ),
           menuItemStyleData: const MenuItemStyleData(
-            height: 35,
+            height: 30,
           ),
           items: Race.values.map((Race race) {
             return DropdownMenuItem<Race>(
@@ -1320,7 +1374,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                             ImageHelper.getTextFormFieldIcon(
                                 'images/character_digits_icon/attack.svg',
                                 true,
-                                null),
+                                21),
                             true),
                         DigitTextFormField(
                             context,
@@ -1332,7 +1386,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                             ImageHelper.getTextFormFieldIcon(
                                 'images/character_digits_icon/defense.svg',
                                 true,
-                                null),
+                                22),
                             true),
                         DigitTextFormField(
                             context,
@@ -1344,19 +1398,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                             ImageHelper.getTextFormFieldIcon(
                                 'images/character_digits_icon/blood.svg',
                                 true,
-                                null),
-                            true),
-                        DigitTextFormField(
-                            context,
-                            combatInfoEditable,
-                            characterSpeedController,
-                            AppLocalizations.of(context)!.characterSpeed,
-                            10,
-                            200,
-                            ImageHelper.getTextFormFieldIcon(
-                                'images/character_digits_icon/speed.svg',
-                                true,
-                                null),
+                                22),
                             true),
                       ],
                     ),
@@ -1368,6 +1410,18 @@ class _CharacterDetailState extends State<CharacterDetail> {
                         DigitTextFormField(
                             context,
                             combatInfoEditable,
+                            characterSpeedController,
+                            AppLocalizations.of(context)!.characterSpeed,
+                            10,
+                            200,
+                            ImageHelper.getTextFormFieldIcon(
+                                'images/character_digits_icon/speed.svg',
+                                true,
+                                22),
+                            true),
+                        DigitTextFormField(
+                            context,
+                            combatInfoEditable,
                             characterIntelligenceController,
                             AppLocalizations.of(context)!.characterIntelligence,
                             70,
@@ -1375,19 +1429,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                             ImageHelper.getTextFormFieldIcon(
                                 'images/character_digits_icon/intelligence.svg',
                                 true,
-                                null),
-                            true),
-                        DigitTextFormField(
-                            context,
-                            combatInfoEditable,
-                            characterEnergyController,
-                            AppLocalizations.of(context)!.characterEnergy,
-                            100,
-                            300,
-                            ImageHelper.getTextFormFieldIcon(
-                                'images/character_digits_icon/energy.svg',
-                                true,
-                                null),
+                                20),
                             true),
                         DigitTextFormField(
                             context,
@@ -1399,19 +1441,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                             ImageHelper.getTextFormFieldIcon(
                                 'images/character_digits_icon/group_gain.svg',
                                 true,
-                                null),
-                            true),
-                        DigitTextFormField(
-                            context,
-                            combatInfoEditable,
-                            characterFruitLimitController,
-                            AppLocalizations.of(context)!.fruitLimit,
-                            1,
-                            2,
-                            ImageHelper.getTextFormFieldIcon(
-                                'images/character_digits_icon/fruit_limit.svg',
-                                true,
-                                null),
+                                20),
                             true),
                       ],
                     ),

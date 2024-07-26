@@ -485,11 +485,8 @@ class HomePageState extends State<HomePage> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(5),
                           ),
-                          leading: const Icon(
-                            Icons.logout,
-                            size: 20,
-                            color: OnepieceColors.fancyBlue,
-                          ),
+                          leading: ImageHelper.getSvgIconWithColor(
+                              'images/svgs/logout.svg', 20, 20, OnepieceColors.fancyBlue),
                           onTap: () {
                             setState(
                               () {
@@ -841,14 +838,14 @@ class HomePageState extends State<HomePage> {
     Map<String, Widget> resourceToIconMap = {
       ResourceType.FRUIT.toString(): ImageHelper.getSvgIconWithColor(
           'images/svgs/fruit.svg', 20, 20, OnepieceColors.fancyBlue),
-      ResourceType.GROUP.toString():
-          const Icon(Icons.group, color: OnepieceColors.fancyBlue, size: 20),
+      ResourceType.GROUP.toString(): ImageHelper.getSvgIconWithColor(
+          'images/svgs/flag.svg', 20, 20, OnepieceColors.fancyBlue),
       ResourceType.USER.toString(): const Icon(Icons.manage_accounts,
           color: OnepieceColors.fancyBlue, size: 20),
-      ResourceType.BATTLE.toString(): const Icon(Icons.sports_mma_outlined,
-          color: OnepieceColors.fancyBlue, size: 20),
-      ResourceType.CHARACTER.toString():
-          const Icon(Icons.face, color: OnepieceColors.fancyBlue, size: 20),
+      ResourceType.BATTLE.toString(): ImageHelper.getSvgIconWithColor(
+          'images/svgs/cannon.svg', 20, 20, OnepieceColors.fancyBlue),
+      ResourceType.CHARACTER.toString(): ImageHelper.getSvgIconWithColor(
+          'images/svgs/hat.svg', 20, 20, OnepieceColors.fancyBlue),
       ResourceType.ISSUE.toString(): const Icon(Icons.add_alert,
           color: OnepieceColors.fancyBlue, size: 20),
       setting:
