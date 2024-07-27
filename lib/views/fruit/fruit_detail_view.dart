@@ -22,6 +22,7 @@ GetIt getIt = GetIt.instance;
 
 class FruitDetailView extends StatefulWidget {
   final String fruitId;
+
   const FruitDetailView({super.key, required this.fruitId});
 
   @override
@@ -38,6 +39,7 @@ class _FruitDetailViewState extends State<FruitDetailView> {
   // controllers
   // 1. basic info
   TextEditingController nameController = TextEditingController();
+
   // 2. combat info
   TextEditingController energyConsumeController = TextEditingController();
 
@@ -263,7 +265,8 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                         ? AppLocalizations.of(context)!.submitForm
                         : AppLocalizations.of(context)!.editHint,
                     child: InkWell(
-                      hoverColor: Colors.white,
+                      hoverColor: Colors.transparent,
+                      splashColor: Colors.transparent,
                       onTap: () {
                         basicState(() {
                           _basicInfoEditable = !_basicInfoEditable;
@@ -330,10 +333,10 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   ImageHelper.getTextFormFieldIcon(
-                      'images/svgs/type.svg',
-                      true,
-                      22),
-                  const SizedBox(width: 10,),
+                      'images/svgs/type.svg', true, 22),
+                  const SizedBox(
+                    width: 10,
+                  ),
                   SizedBox(
                     width: 300,
                     child: Text(
@@ -353,9 +356,8 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                 1,
                 10,
                 ImageHelper.getTextFormFieldIcon(
-                    'images/character_digits_icon/energy.svg',
-                    true,
-                    25), true),
+                    'images/character_digits_icon/energy.svg', true, 25),
+                true),
           ],
         ),
       );
@@ -455,7 +457,8 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                         ? AppLocalizations.of(context)!.submitForm
                         : AppLocalizations.of(context)!.editHint,
                     child: InkWell(
-                      hoverColor: Colors.white,
+                      hoverColor: Colors.transparent,
+                      splashColor: Colors.transparent,
                       onTap: () {
                         combatState(() {
                           _combatInfoEditable = !_combatInfoEditable;
@@ -686,13 +689,27 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             Padding(
-                                padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+                              padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+                              child: InkWell(
+                                hoverColor: Colors.transparent,
+                                splashColor: Colors.transparent,
+                                onTap: () {
+                                  context.goNamed('characterDetails',
+                                      extra: character.id,
+                                      pathParameters: {
+                                        'name':
+                                            I18nHelper.getDisplayNameFromI18n(
+                                                character.name)
+                                      });
+                                },
                                 child: ImageLazyLoader(
                                     key: UniqueKey(),
                                     uriProvider: () => character.imageUri!,
                                     width: 40,
                                     borderWidth: 1.5,
-                                    borderRadios: 40)),
+                                    borderRadios: 40),
+                              ),
+                            ),
                             const SizedBox(
                               width: 10,
                             ),
@@ -741,7 +758,9 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                                   ))
                             ],
                           ),
-                          const SizedBox(height: 10,),
+                          const SizedBox(
+                            height: 10,
+                          ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
@@ -770,7 +789,9 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                                   ))
                             ],
                           ),
-                          const SizedBox(height: 10,),
+                          const SizedBox(
+                            height: 10,
+                          ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
@@ -799,7 +820,9 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                                   ))
                             ],
                           ),
-                          const SizedBox(height: 10,),
+                          const SizedBox(
+                            height: 10,
+                          ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
@@ -828,7 +851,9 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                                   ))
                             ],
                           ),
-                          const SizedBox(height: 10,),
+                          const SizedBox(
+                            height: 10,
+                          ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
@@ -857,7 +882,9 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                                   ))
                             ],
                           ),
-                          const SizedBox(height: 10,),
+                          const SizedBox(
+                            height: 10,
+                          ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
@@ -886,7 +913,9 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                                   ))
                             ],
                           ),
-                          const SizedBox(height: 10,),
+                          const SizedBox(
+                            height: 10,
+                          ),
                         ],
                       )
                     ],

@@ -24,6 +24,7 @@ class ImageLazyLoader extends StatefulWidget {
 
 class _ImageLazyLoaderState extends State<ImageLazyLoader> {
   late Future<String> imageFuture;
+
   @override
   void initState() {
     super.initState();

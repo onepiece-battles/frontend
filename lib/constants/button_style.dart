@@ -5,11 +5,10 @@ class OnepieceButtonStyle {
   static ButtonStyle getDefaultStyle() {
     return ElevatedButton.styleFrom(
         backgroundColor: OnepieceColors.fancyBlue,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(3),
-    ),
-    foregroundColor: Colors.white
-    );
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(3),
+        ),
+        foregroundColor: Colors.white);
   }
 
   static ButtonStyle getFatherGroupButtonStyle() {
@@ -19,7 +18,6 @@ class OnepieceButtonStyle {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(3),
         ),
-        foregroundColor: Colors.white
-    );
+        foregroundColor: Colors.white);
   }
 }

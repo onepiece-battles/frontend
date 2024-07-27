@@ -30,6 +30,7 @@ final ValueNotifier<String> routeNotifier = ValueNotifier<String>('/home/abc');
 
 class HomePage extends StatefulWidget {
   final Widget mainScreen;
+
   const HomePage({super.key, required this.mainScreen});
 
   @override
@@ -486,7 +487,10 @@ class HomePageState extends State<HomePage> {
                             borderRadius: BorderRadius.circular(5),
                           ),
                           leading: ImageHelper.getSvgIconWithColor(
-                              'images/svgs/logout.svg', 20, 20, OnepieceColors.fancyBlue),
+                              'images/svgs/logout.svg',
+                              20,
+                              20,
+                              OnepieceColors.fancyBlue),
                           onTap: () {
                             setState(
                               () {

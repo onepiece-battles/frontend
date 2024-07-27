@@ -153,7 +153,9 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
             ),
-            const SizedBox(height: 160,),
+            const SizedBox(
+              height: 160,
+            ),
             const Image(
               image: AssetImage(PathConstants.luffyFlag),
             ),
@@ -293,8 +295,7 @@ class _LoginPageState extends State<LoginPage> {
                       context.go(AppRouter.retrievePassword);
                     },
                     style: ButtonStyle(
-                      overlayColor:
-                          MaterialStateProperty.resolveWith<Color?>(
+                      overlayColor: MaterialStateProperty.resolveWith<Color?>(
                         (Set<MaterialState> states) {
                           return Colors.transparent; // No splash color
                         },
@@ -348,7 +349,9 @@ class _LoginPageState extends State<LoginPage> {
     // init apis with tokens
     ApiInitializer.initAuthInfo(token);
     ResourcePermissionManager.updateUserCache(user);
-    context.goNamed('characters',);
+    context.goNamed(
+      'characters',
+    );
   }
 
   Future<void> saveUserCredentials(String username, String password) async {

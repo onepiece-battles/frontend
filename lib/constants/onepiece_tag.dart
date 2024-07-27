@@ -4,7 +4,6 @@ import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:openapi/api.dart';
 
 class OnepieceTag {
-
   static Map<FruitType, Color> fruitTypeToColor = {
     FruitType.logia: OnepieceColors.fruitLogia,
     FruitType.paramecia: OnepieceColors.fruitParamecia,
@@ -59,11 +58,13 @@ class OnepieceTag {
       height: 25,
       decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(5)),
-          color: userRoleToColor[userRole]
-      ),
+          color: userRoleToColor[userRole]),
       child: Padding(
         padding: const EdgeInsets.all(4.0),
-        child: Text(text, style: OnepieceFonts.tagStyle,),
+        child: Text(
+          text,
+          style: OnepieceFonts.tagStyle,
+        ),
       ),
     );
   }
@@ -73,11 +74,13 @@ class OnepieceTag {
       height: 25,
       decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(5)),
-          color: resourceTypeToColor[resourceType]
-      ),
+          color: resourceTypeToColor[resourceType]),
       child: Padding(
         padding: const EdgeInsets.all(4.0),
-        child: Text(text, style: OnepieceFonts.tagStyle,),
+        child: Text(
+          text,
+          style: OnepieceFonts.tagStyle,
+        ),
       ),
     );
   }
@@ -87,11 +90,13 @@ class OnepieceTag {
       height: 25,
       decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(5)),
-          color: hakiToColor[haki]
-      ),
+          color: hakiToColor[haki]),
       child: Padding(
         padding: const EdgeInsets.all(4.0),
-        child: Text(text, style: OnepieceFonts.tagStyle,),
+        child: Text(
+          text,
+          style: OnepieceFonts.tagStyle,
+        ),
       ),
     );
   }
@@ -101,11 +106,13 @@ class OnepieceTag {
       height: 25,
       decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(5)),
-          color: fruitTypeToColor[fruitType]
-      ),
+          color: fruitTypeToColor[fruitType]),
       child: Padding(
         padding: const EdgeInsets.all(4.0),
-        child: Text(text, style: OnepieceFonts.tagStyle,),
+        child: Text(
+          text,
+          style: OnepieceFonts.tagStyle,
+        ),
       ),
     );
   }
@@ -115,11 +122,13 @@ class OnepieceTag {
       height: 25,
       decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(5)),
-          color: getWakeUpColor(wakeUp)
-      ),
+          color: getWakeUpColor(wakeUp)),
       child: Padding(
         padding: const EdgeInsets.all(4.0),
-        child: Text(text, style: OnepieceFonts.tagStyle,),
+        child: Text(
+          text,
+          style: OnepieceFonts.tagStyle,
+        ),
       ),
     );
   }
@@ -129,11 +138,13 @@ class OnepieceTag {
       height: 25,
       decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(5)),
-          color: groupCategoryToColor[groupCategory]
-      ),
+          color: groupCategoryToColor[groupCategory]),
       child: Padding(
         padding: const EdgeInsets.all(4.0),
-        child: Text(text, style: OnepieceFonts.tagStyle,),
+        child: Text(
+          text,
+          style: OnepieceFonts.tagStyle,
+        ),
       ),
     );
   }

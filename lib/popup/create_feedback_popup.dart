@@ -27,6 +27,7 @@ class _CreateFeedbackPopupState extends State<CreateFeedbackPopup> {
   TextEditingController descriptionController = TextEditingController();
   bool _submitButtonEnabled = false;
   bool _clearButtonEnabled = false;
+
   @override
   Widget build(BuildContext context) {
     Map<IssueType, String> issueToDisplayNameMap = {

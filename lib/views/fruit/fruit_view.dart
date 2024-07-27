@@ -381,6 +381,8 @@ class _FruitViewState extends State<FruitView> {
               builder: (context, menuSetState) {
                 final isSelected = selectedFruitTypes.contains(fruitType);
                 return InkWell(
+                  hoverColor: Colors.transparent,
+                  splashColor: Colors.transparent,
                   onTap: () {
                     isSelected
                         ? selectedFruitTypes.remove(fruitType)
@@ -483,6 +485,8 @@ class _FruitViewState extends State<FruitView> {
       FruitSortableFieldsEnum? sortableFieldsEnum, double? width) {
     return DataColumn(
       label: InkWell(
+        hoverColor: Colors.transparent,
+        splashColor: Colors.transparent,
         onTap: sortableFieldsEnum == null
             ? null
             : () {
@@ -521,7 +525,9 @@ class _FruitViewState extends State<FruitView> {
                       ? OnepieceFonts.tableHeaderStyle
                       : OnepieceFonts.selectedTableHeaderStyle,
                 ),
-                const SizedBox(width: 10,),
+                const SizedBox(
+                  width: 10,
+                ),
                 if (sortableFieldsEnum != null)
                   Padding(
                     padding: const EdgeInsets.all(5.0),
@@ -633,6 +639,7 @@ class _FruitViewState extends State<FruitView> {
         children: characters
             .map((character) => InkWell(
                   hoverColor: Colors.transparent,
+                  splashColor: Colors.transparent,
                   onTap: () {
                     context.goNamed('characterDetails',
                         extra: character.id,

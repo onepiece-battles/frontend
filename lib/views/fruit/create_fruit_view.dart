@@ -76,6 +76,7 @@ class _CreateFruitViewState extends State<CreateFruitView> {
   TextEditingController fruitEnergyConsumeController = TextEditingController(
       text: RandomStringGenerator.generateRandomNumber(
           1, 10, getIt<User>().loginRole == UserRole.NIKA));
+
   List<TextEditingController> fruitControllerList() {
     return <TextEditingController>[
       fruitNameEnController,
@@ -261,7 +262,8 @@ class _CreateFruitViewState extends State<CreateFruitView> {
                                     ImageHelper.getTextFormFieldIcon(
                                         'images/character_digits_icon/energy.svg',
                                         true,
-                                        25),true),
+                                        25),
+                                    true),
                               ],
                             ),
                             Column(
@@ -464,7 +466,8 @@ class _CreateFruitViewState extends State<CreateFruitView> {
                       context.goNamed('fruitDetails',
                           extra: value!.id,
                           pathParameters: {
-                            'name': I18nHelper.getDisplayNameFromI18n(value.name!)
+                            'name':
+                                I18nHelper.getDisplayNameFromI18n(value.name!)
                           });
                     });
                   },

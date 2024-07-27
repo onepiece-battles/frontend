@@ -30,6 +30,7 @@ GetIt getIt = GetIt.instance;
 
 class CharacterDetail extends StatefulWidget {
   final String characterId;
+
   const CharacterDetail({super.key, required this.characterId});
 
   @override
@@ -38,12 +39,14 @@ class CharacterDetail extends StatefulWidget {
 
 class _CharacterDetailState extends State<CharacterDetail> {
   ScrollController verticalController = ScrollController();
+
   // character details controller
   TextEditingController characterNameController = TextEditingController();
   TextEditingController characterAge = TextEditingController();
   TextEditingController characterHeight = TextEditingController();
   TextEditingController characterBirthPlace = TextEditingController();
   TextEditingController characterBounty = TextEditingController();
+
   // battle data controller
   TextEditingController characterFruitLimitController = TextEditingController();
   TextEditingController characterGroupGainController = TextEditingController();
@@ -372,6 +375,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                         : AppLocalizations.of(context)!.editHint,
                     child: InkWell(
                       hoverColor: Colors.transparent,
+                      splashColor: Colors.transparent,
                       onTap: () {
                         basicState(() {
                           basicInfoEditable = !basicInfoEditable;
@@ -486,6 +490,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
           Padding(
               padding: EdgeInsets.fromLTRB(sideWidth, 8, 8, 8),
               child: InkWell(
+                hoverColor: Colors.transparent,
+                splashColor: Colors.transparent,
                 onTap: basicInfoEditable
                     ? () async {
                         XFile? pickedImage =
@@ -619,7 +625,9 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                           "images/character_digits_icon/birthday.svg",
                                           true,
                                           null),
-                                      const SizedBox(width: 10,),
+                                      const SizedBox(
+                                        width: 10,
+                                      ),
                                       Text(
                                         AppLocalizations.of(context)!.birthDay,
                                         style: OnepieceFonts.deepBlackHintFont,
@@ -804,10 +812,10 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
                                   ImageHelper.getTextFormFieldIcon(
-                                      "images/svgs/knife.svg",
-                                      true,
-                                      null),
-                                  const SizedBox(width: 10,),
+                                      "images/svgs/knife.svg", true, null),
+                                  const SizedBox(
+                                    width: 10,
+                                  ),
                                   Text(
                                     AppLocalizations.of(context)!.battleStyle,
                                     style: OnepieceFonts.deepBlackHintFont,
@@ -828,10 +836,10 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
                                   ImageHelper.getTextFormFieldIcon(
-                                      "images/svgs/earth.svg",
-                                      true,
-                                      22),
-                                  const SizedBox(width: 10,),
+                                      "images/svgs/earth.svg", true, 22),
+                                  const SizedBox(
+                                    width: 10,
+                                  ),
                                   Text(
                                     AppLocalizations.of(context)!.race,
                                     style: OnepieceFonts.deepBlackHintFont,
@@ -1065,7 +1073,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                 ? AppLocalizations.of(context)!.submitForm
                                 : AppLocalizations.of(context)!.editHint,
                             child: InkWell(
-                              hoverColor: Colors.white,
+                              hoverColor: Colors.transparent,
+                              splashColor: Colors.transparent,
                               onTap: () {
                                 combatState(() {
                                   combatInfoEditable = !combatInfoEditable;
@@ -1286,6 +1295,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
                               builder: (context, menuSetState) {
                                 final isSelected = selectedHakis.contains(haki);
                                 return InkWell(
+                                  hoverColor: Colors.transparent,
+                                  splashColor: Colors.transparent,
                                   onTap: () {
                                     isSelected
                                         ? selectedHakis.remove(haki)
@@ -2044,7 +2055,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  I18nHelper.getDisplayNameFromI18n(currentGroup.name!),
+                                  I18nHelper.getDisplayNameFromI18n(
+                                      currentGroup.name!),
                                   style: OnepieceFonts.deepBlackHintFont,
                                 ),
                                 Text(

@@ -9,7 +9,10 @@ class OnepieceAlert {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text(title, style: OnepieceFonts.alertTitle,),
+            title: Text(
+              title,
+              style: OnepieceFonts.alertTitle,
+            ),
             content: Text(
               displayMessage,
               style: OnepieceFonts.contentStyle,

@@ -7,7 +7,7 @@ class DataValidator {
   }
 
   static bool validName(String name) {
-    if(name.isEmpty) {
+    if (name.isEmpty) {
       return true;
     }
     // not case sensitive

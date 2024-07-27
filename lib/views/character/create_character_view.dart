@@ -165,6 +165,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
   double sideWidth = 50;
 
   final _formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -962,6 +963,8 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                 builder: (context, menuSetState) {
                   final isSelected = selectedHakis.contains(haki);
                   return InkWell(
+                    hoverColor: Colors.transparent,
+                    splashColor: Colors.transparent,
                     onTap: () {
                       isSelected
                           ? selectedHakis.remove(haki)

@@ -19,6 +19,7 @@ class DigitTextFormField extends StatelessWidget {
   final Widget icon;
   final String label;
   final bool required;
+
   const DigitTextFormField(
     this.buildContext,
     this.editable,

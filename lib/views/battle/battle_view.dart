@@ -31,6 +31,7 @@ class _BattleViewState extends State<BattleView> {
   TextEditingController pageNumberController = TextEditingController(text: "0");
   TextEditingController starterNameController = TextEditingController();
   TextEditingController receiverNameController = TextEditingController();
+
   // base full data
   List<BattleListView> currentBattleList = [];
 
@@ -423,6 +424,8 @@ class _BattleViewState extends State<BattleView> {
                 builder: (context, menuSetState) {
                   final isSelected = selectedBattleTypes.contains(battleType);
                   return InkWell(
+                    hoverColor: Colors.transparent,
+                    splashColor: Colors.transparent,
                     onTap: () {
                       isSelected
                           ? selectedBattleTypes.remove(battleType)
@@ -527,6 +530,8 @@ class _BattleViewState extends State<BattleView> {
                   final isSelected =
                       selectedBattleStatus.contains(battleStatus);
                   return InkWell(
+                    hoverColor: Colors.transparent,
+                    splashColor: Colors.transparent,
                     onTap: () {
                       isSelected
                           ? selectedBattleStatus.remove(battleStatus)
@@ -625,6 +630,8 @@ class _BattleViewState extends State<BattleView> {
       BattleSortableFieldsEnum? sortableFieldsEnum, double? width) {
     return DataColumn(
         label: InkWell(
+      hoverColor: Colors.transparent,
+      splashColor: Colors.transparent,
       onTap: sortableFieldsEnum == null
           ? null
           : () {

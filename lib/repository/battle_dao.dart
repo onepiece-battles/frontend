@@ -1,14 +1,16 @@
 import 'package:openapi/api.dart';
 
-class BattleDao{
+class BattleDao {
   BattleApi battleApi = BattleApi();
+
   BattleDao.empty();
 
   BattleDao(ApiClient apiClient) {
     battleApi = BattleApi(apiClient);
   }
 
-  Future<ListBattleByIdsResponse?> batchFindByIds(ListBattleByIdsRequest request) async {
+  Future<ListBattleByIdsResponse?> batchFindByIds(
+      ListBattleByIdsRequest request) async {
     return await battleApi.listBattleByIds(request);
   }
 
@@ -16,7 +18,8 @@ class BattleDao{
     return await battleApi.listBattles(request);
   }
 
-  Future<CreateBattleResponse?> createBattle(CreateBattleRequest request) async {
+  Future<CreateBattleResponse?> createBattle(
+      CreateBattleRequest request) async {
     return await battleApi.createBattle(request);
   }
 
@@ -24,11 +27,13 @@ class BattleDao{
     return await battleApi.startBattle(request);
   }
 
-  Future<BattleFullView?> getBattleFullView(GetBattleFullViewRequest request)async {
+  Future<BattleFullView?> getBattleFullView(
+      GetBattleFullViewRequest request) async {
     return await battleApi.getBattleFullView(request);
   }
 
-  Future<BattleExecution?> getBattleExecution(GetBattleExecutionRequest request) async {
+  Future<BattleExecution?> getBattleExecution(
+      GetBattleExecutionRequest request) async {
     return await battleApi.getBattleExecution(request);
   }
 }

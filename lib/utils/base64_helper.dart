@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
-class Base64Helper {
 
+class Base64Helper {
   static String encode(List<int> bytes) {
     return base64Encode(bytes);
   }

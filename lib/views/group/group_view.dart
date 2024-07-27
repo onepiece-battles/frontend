@@ -32,6 +32,7 @@ class _GroupViewState extends State<GroupView> {
   GroupFilter groupFilter = GroupFilter();
   List<GroupListView> currentGroupList = [];
   List<GroupSortableField> sortKeys = [];
+
   // group sorting options
   Map<SortOrder?, String> sortOrderToPath = const {
     null: 'images/svgs/sort-solid.svg',
@@ -42,6 +43,7 @@ class _GroupViewState extends State<GroupView> {
     GroupSortableFieldsEnum.name: null,
     GroupSortableFieldsEnum.category: null,
   };
+
   // group filter options
 
   List<GroupCategory> selectedGroupCategories = [];
@@ -273,6 +275,8 @@ class _GroupViewState extends State<GroupView> {
                       final isSelected =
                           selectedGroupCategories.contains(groupCategory);
                       return InkWell(
+                        hoverColor: Colors.transparent,
+                        splashColor: Colors.transparent,
                         onTap: () {
                           isSelected
                               ? selectedGroupCategories.remove(groupCategory)
@@ -457,6 +461,8 @@ class _GroupViewState extends State<GroupView> {
       GroupSortableFieldsEnum? groupSortableFieldsEnum, double? width) {
     return DataColumn(
       label: InkWell(
+        hoverColor: Colors.transparent,
+        splashColor: Colors.transparent,
         onTap: groupSortableFieldsEnum == null
             ? null
             : () {
@@ -605,6 +611,7 @@ class _GroupViewState extends State<GroupView> {
         children: characters
             .map((character) => InkWell(
                   hoverColor: Colors.transparent,
+                  splashColor: Colors.transparent,
                   onTap: () {
                     context.goNamed('characterDetails',
                         extra: character.id,
@@ -642,6 +649,7 @@ class _GroupViewState extends State<GroupView> {
         children: groups
             .map((group) => InkWell(
                   hoverColor: Colors.transparent,
+                  splashColor: Colors.transparent,
                   onTap: () {
                     context.goNamed('groupDetails',
                         extra: group.id,

@@ -3,7 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../constants/onepiece_fonts.dart';
 
-class ICP extends StatelessWidget{
+class ICP extends StatelessWidget {
   const ICP({super.key});
 
   @override

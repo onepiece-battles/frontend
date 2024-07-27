@@ -160,8 +160,10 @@ class ImageHelper {
     );
   }
 
-  static Future<String> loadImageByUri(String uri)  async {
-    return await getIt<ImageDao>().getImage(GetImageRequest(uri: uri)).then((value) {
+  static Future<String> loadImageByUri(String uri) async {
+    return await getIt<ImageDao>()
+        .getImage(GetImageRequest(uri: uri))
+        .then((value) {
       return value!.image;
     });
   }

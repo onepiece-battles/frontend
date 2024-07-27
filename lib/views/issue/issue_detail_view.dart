@@ -15,6 +15,7 @@ import '../../utils/image_helper.dart';
 
 class IssueDetailView extends StatefulWidget {
   final String issueId;
+
   const IssueDetailView({super.key, required this.issueId});
 
   @override
@@ -25,6 +26,7 @@ class _IssueDetailViewState extends State<IssueDetailView> {
   late IssueFullView issue;
   bool _issueStatusEditable = false;
   IssueStatus? _selectedIssueStatus;
+
   _loadData() {
     return getIt<IssueDao>()
         .getIssueFullView(GetIssueFullViewRequest(id: widget.issueId));
@@ -70,6 +72,8 @@ class _IssueDetailViewState extends State<IssueDetailView> {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: InkWell(
+                    hoverColor: Colors.transparent,
+                    splashColor: Colors.transparent,
                     onTap: () {
                       context.goNamed('userDetails',
                           extra: issue.issueCreator!.id,
@@ -208,7 +212,8 @@ class _IssueDetailViewState extends State<IssueDetailView> {
                               ? AppLocalizations.of(context)!.submitForm
                               : AppLocalizations.of(context)!.editHint,
                           child: InkWell(
-                            hoverColor: Colors.white,
+                            hoverColor: Colors.transparent,
+                            splashColor: Colors.transparent,
                             onTap: () {
                               basicState(() {
                                 _issueStatusEditable = !_issueStatusEditable;

@@ -14,6 +14,7 @@ GetIt getIt = GetIt.instance;
 class EmailVerification extends StatefulWidget {
   final String userId;
   final String email;
+
   const EmailVerification({Key? key, required this.userId, required this.email})
       : super(key: key);
 
@@ -26,6 +27,7 @@ class _EmailVerificationState extends State<EmailVerification> {
   bool verificationCodeSent = false;
   bool verificationSuccess = false;
   String verificationMessage = "";
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -63,7 +65,7 @@ class _EmailVerificationState extends State<EmailVerification> {
             ),
           if (!verificationSuccess)
             Padding(
-              padding: const EdgeInsets.fromLTRB(30,30,30,0),
+              padding: const EdgeInsets.fromLTRB(30, 30, 30, 0),
               child: SizedBox(
                 width: 500,
                 child: TextFormField(
