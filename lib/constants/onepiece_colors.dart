@@ -28,5 +28,4 @@ class OnepieceColors {
   static const fruitAncientZoan = Color.fromARGB(255, 255, 0, 255);
   static const fruitMythicalZoan = fancyBlue;
   static const fruitArtificialZoan = Color.fromARGB(255, 155, 138, 51);
-
 }

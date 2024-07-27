@@ -20,6 +20,7 @@ GetIt getIt = GetIt.instance;
 
 class UserHome extends StatefulWidget {
   final String userId;
+
   const UserHome({super.key, required this.userId});
 
   @override
@@ -32,6 +33,7 @@ class _UserHomeState extends State<UserHome> {
   List<CharacterListView> characters = [];
   List<GroupListView> groups = [];
   List<BattleListView> battles = [];
+
   Future<ListCharacterResponse?> listCharacters() async {
     ListCharacterRequest listCharacterRequest = ListCharacterRequest(
         pageSize: 100,
@@ -226,6 +228,7 @@ class _UserHomeState extends State<UserHome> {
               message:
                   I18nHelper.getDisplayNameFromI18n(characters[index].name),
               child: InkWell(
+                splashColor: Colors.transparent,
                 hoverColor: Colors.transparent,
                 onTap: () {
                   context.goNamed('characterDetails',
@@ -237,7 +240,7 @@ class _UserHomeState extends State<UserHome> {
                 },
                 child: ImageLazyLoader(
                     // key: UniqueKey(),
-                    uriProvider:() =>  characters[index].imageUri!,
+                    uriProvider: () => characters[index].imageUri!,
                     width: 100,
                     borderWidth: 2,
                     borderRadios: 100),
@@ -283,6 +286,7 @@ class _UserHomeState extends State<UserHome> {
             message: I18nHelper.getDisplayNameFromI18n(groups[index].name),
             preferBelow: true,
             child: InkWell(
+                splashColor: Colors.transparent,
                 hoverColor: Colors.transparent,
                 onTap: () {
                   context.goNamed('groupDetails',
@@ -343,6 +347,7 @@ class _UserHomeState extends State<UserHome> {
               crossAxisSpacing: 10,
             ),
             itemBuilder: (context, int index) => InkWell(
+              splashColor: Colors.transparent,
               hoverColor: Colors.transparent,
               onTap: () {
                 context.goNamed('battleDetails',
@@ -369,7 +374,8 @@ class _UserHomeState extends State<UserHome> {
                           children: [
                             ImageLazyLoader(
                                 // key: UniqueKey(),
-                                uriProvider: () => battles[index].starter!.imageUri!,
+                                uriProvider: () =>
+                                    battles[index].starter!.imageUri!,
                                 width: 40,
                                 borderWidth: 1.5,
                                 borderRadios: 40),
@@ -400,7 +406,8 @@ class _UserHomeState extends State<UserHome> {
                           children: [
                             ImageLazyLoader(
                                 // key: UniqueKey(),
-                                uriProvider: () => battles[index].receiver!.imageUri!,
+                                uriProvider: () =>
+                                    battles[index].receiver!.imageUri!,
                                 width: 40,
                                 borderWidth: 1.5,
                                 borderRadios: 40),
@@ -457,6 +464,7 @@ class _UserHomeState extends State<UserHome> {
                                         .downloadReport
                                     : "",
                                 child: InkWell(
+                                  splashColor: Colors.transparent,
                                   hoverColor: Colors.transparent,
                                   onTap: battles[index]
                                               .battleExecution!

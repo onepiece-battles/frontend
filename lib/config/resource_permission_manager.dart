@@ -2,6 +2,7 @@ import 'package:get_it/get_it.dart';
 import 'package:openapi/api.dart';
 
 GetIt getIt = GetIt.instance;
+
 class ResourcePermissionManager {
   static const Map<ResourceType, int> resourceOrderMap = {
     ResourceType.CHARACTER: 1,
@@ -15,9 +16,10 @@ class ResourcePermissionManager {
 
   static void updateUserCache(User user) {
     // sort resource type value, the display order is dependent on this order map
-    user.loginRoleResourcesPermissionMap
-        .sort((a, b) => resourceOrderMap[a.resourceType]!.compareTo(resourceOrderMap[b.resourceType]!));
+    user.loginRoleResourcesPermissionMap.sort((a, b) =>
+        resourceOrderMap[a.resourceType]!
+            .compareTo(resourceOrderMap[b.resourceType]!));
 
-    getIt.registerLazySingleton(()=>user);
+    getIt.registerLazySingleton(() => user);
   }
 }

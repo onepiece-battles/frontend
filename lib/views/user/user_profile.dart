@@ -26,6 +26,7 @@ GetIt getIt = GetIt.instance;
 
 class UserProfile extends StatefulWidget {
   final String userId;
+
   const UserProfile({super.key, required this.userId});
 
   @override
@@ -162,12 +163,12 @@ class _UserProfileState extends State<UserProfile> {
                                   await pickedImage!.readAsBytes();
                               if (!ImageHelper.isValidImageSize(
                                   500 * 1024, imageInByte)) {
-                                 OnepieceAlert.getBasicAlertDialogFunc(
+                                OnepieceAlert.getBasicAlertDialogFunc(
                                     context,
                                     AppLocalizations.of(context)!.alert,
                                     AppLocalizations.of(context)!
                                         .imageSizeExceedsLimit);
-                                 return;
+                                return;
                               }
                               _realtimeData.setProfileImage(imageInByte);
                               if (!CompareUint8List.equals(
@@ -245,7 +246,8 @@ class _UserProfileState extends State<UserProfile> {
                       ),
                     ),
                     InkWell(
-                      hoverColor: Colors.white,
+                      hoverColor: Colors.transparent,
+                      splashColor: Colors.transparent,
                       onTap: () {
                         _nicknameEditable.value = !_nicknameEditable.value;
                       },
@@ -427,6 +429,7 @@ class _UserProfileState extends State<UserProfile> {
 
 class UserProfileModel {
   late Uint8List _profileImage;
+
   // the _username is email
   late String _username;
   late String _nickname;
@@ -450,7 +453,9 @@ class UserProfileModel {
   }
 
   Uint8List get profileImage => _profileImage;
+
   String get username => _username;
+
   String get nickname => _nickname;
 
   @override

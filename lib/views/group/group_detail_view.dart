@@ -28,6 +28,7 @@ GetIt getIt = GetIt.instance;
 
 class GroupDetailView extends StatefulWidget {
   final String groupId;
+
   const GroupDetailView({super.key, required this.groupId});
 
   @override
@@ -226,7 +227,8 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                       ? AppLocalizations.of(context)!.submitForm
                       : AppLocalizations.of(context)!.editHint,
                   child: InkWell(
-                    hoverColor: Colors.white,
+                    hoverColor: Colors.transparent,
+                    splashColor: Colors.transparent,
                     onTap: () {
                       basicInfoState(() {
                         _basicInfoEditable = !_basicInfoEditable;
@@ -302,6 +304,8 @@ class _GroupDetailViewState extends State<GroupDetailView> {
             ],
           ),
           InkWell(
+            hoverColor: Colors.transparent,
+            splashColor: Colors.transparent,
             onTap: _basicInfoEditable
                 ? () async {
                     basicInfoState(() async {
@@ -477,6 +481,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                           : AppLocalizations.of(context)!.add,
                       child: InkWell(
                         hoverColor: Colors.transparent,
+                        splashColor: Colors.transparent,
                         onTap: () {
                           listState(() {
                             _showDialog(context);
@@ -619,6 +624,8 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     InkWell(
+                      hoverColor: Colors.transparent,
+                      splashColor: Colors.transparent,
                       child: ImageLazyLoader(
                           key: UniqueKey(),
                           uriProvider: () => character.imageUri!,
@@ -727,6 +734,8 @@ class _GroupDetailViewState extends State<GroupDetailView> {
         title: Row(
           children: [
             InkWell(
+              hoverColor: Colors.transparent,
+              splashColor: Colors.transparent,
               child: ImageLazyLoader(
                   key: UniqueKey(),
                   uriProvider: () => node.group.imageUri!,
@@ -765,6 +774,8 @@ class _GroupDetailViewState extends State<GroupDetailView> {
         title: Row(
           children: [
             InkWell(
+              hoverColor: Colors.transparent,
+              splashColor: Colors.transparent,
               child: ImageLazyLoader(
                   key: UniqueKey(),
                   uriProvider: () => actualNode.characterInGroupView.imageUri!,
@@ -802,11 +813,13 @@ class _GroupDetailViewState extends State<GroupDetailView> {
 class TreeNode {
   List<TreeNode> children;
   bool childrenFetched;
+
   TreeNode(this.children, this.childrenFetched);
 }
 
 class GroupNode extends TreeNode {
   Group group;
+
   GroupNode(super.children, super.childrenFetched, this.group);
 
   @override
@@ -817,6 +830,7 @@ class GroupNode extends TreeNode {
 
 class CharacterNode extends TreeNode {
   CharacterInGroupView characterInGroupView;
+
   CharacterNode(
       super.children, super.childrenFetched, this.characterInGroupView);
 }

@@ -318,6 +318,8 @@ class _CharacterViewState extends State<CharacterView>
                       final isSelected =
                           selectedBattleStyles.contains(battleStyle);
                       return InkWell(
+                        hoverColor: Colors.transparent,
+                        splashColor: Colors.transparent,
                         onTap: () {
                           isSelected
                               ? selectedBattleStyles.remove(battleStyle)
@@ -411,6 +413,8 @@ class _CharacterViewState extends State<CharacterView>
                     builder: (context, menuSetState) {
                       final isSelected = selectedHakis.contains(haki);
                       return InkWell(
+                        hoverColor: Colors.transparent,
+                        splashColor: Colors.transparent,
                         onTap: () {
                           isSelected
                               ? selectedHakis.remove(haki)
@@ -505,6 +509,8 @@ class _CharacterViewState extends State<CharacterView>
                     builder: (context, menuSetState) {
                       final isSelected = selectedRaces.contains(race);
                       return InkWell(
+                        hoverColor: Colors.transparent,
+                        splashColor: Colors.transparent,
                         onTap: () {
                           isSelected
                               ? selectedRaces.remove(race)
@@ -782,6 +788,8 @@ class _CharacterViewState extends State<CharacterView>
       Widget? icon) {
     return DataColumn(
       label: InkWell(
+        hoverColor: Colors.transparent,
+        splashColor: Colors.transparent,
         onTap: characterSortableFieldsEnum == null
             ? null
             : () {
@@ -834,7 +842,9 @@ class _CharacterViewState extends State<CharacterView>
                     ),
                   ],
                 ),
-                const SizedBox(width: 5,),
+                const SizedBox(
+                  width: 5,
+                ),
                 if (characterSortableFieldsEnum != null)
                   Padding(
                     padding: const EdgeInsets.all(5.0),
@@ -940,7 +950,10 @@ class _CharacterViewState extends State<CharacterView>
               )),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: Text(entry.value.score.toString(), style: OnepieceFonts.boldFancySmallFont,),
+                child: Text(
+                  entry.value.score.toString(),
+                  style: OnepieceFonts.boldFancySmallFont,
+                ),
               )),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),

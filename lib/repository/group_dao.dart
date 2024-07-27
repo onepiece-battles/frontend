@@ -2,7 +2,9 @@ import 'package:openapi/api.dart';
 
 class GroupDao {
   GroupApi groupApi = GroupApi();
+
   GroupDao.empty();
+
   GroupDao(ApiClient apiClient) {
     groupApi = GroupApi(apiClient);
   }

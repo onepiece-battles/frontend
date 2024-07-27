@@ -11,11 +11,12 @@ class DateHelper {
         datetime.minute);
   }
 
-  static String getFormattedDatetimeFromTimestamp(int timestamp, BuildContext context) {
+  static String getFormattedDatetimeFromTimestamp(
+      int timestamp, BuildContext context) {
     var datetime =
-    DateTime.fromMicrosecondsSinceEpoch(timestamp * 1000).toLocal();
+        DateTime.fromMicrosecondsSinceEpoch(timestamp * 1000).toLocal();
     Locale myLocale = Localizations.localeOf(context);
-    if (myLocale.languageCode=="zh") {
+    if (myLocale.languageCode == "zh") {
       return DateFormat('yyyy/MM/dd h:mm a').format(datetime);
     }
     return DateFormat('MM/dd/yyyy h:mm a').format(datetime);

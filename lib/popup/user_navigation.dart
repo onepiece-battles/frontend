@@ -18,7 +18,9 @@ GetIt getIt = GetIt.instance;
 
 class UserNavigation extends StatefulWidget {
   final BoxConstraints constraints;
-  const UserNavigation({super.key, required BuildContext context, required this.constraints});
+
+  const UserNavigation(
+      {super.key, required BuildContext context, required this.constraints});
 
   @override
   State<UserNavigation> createState() => _UserNavigationState();
@@ -28,6 +30,8 @@ class _UserNavigationState extends State<UserNavigation> {
   @override
   Widget build(BuildContext context) {
     return InkWell(
+      splashColor: Colors.transparent,
+      hoverColor: Colors.transparent,
       onTap: () => showPopover(
         width: 160,
         height: 70,
@@ -99,12 +103,21 @@ class _UserNavigationState extends State<UserNavigation> {
           ],
         ),
       ),
-      child:
-      widget.constraints.maxWidth>800?
-      ImageHelper.getRoundImageFrame(
-          70, 70, 3, OnepieceColors.liteFancyBlue, 70, Base64Helper.decode(getIt<User>().profileImage!)):
-      ImageHelper.getRoundImageFrame(
-            60, 60, 3, OnepieceColors.liteFancyBlue, 60, Base64Helper.decode(getIt<User>().profileImage!)),
+      child: widget.constraints.maxWidth > 800
+          ? ImageHelper.getRoundImageFrame(
+              70,
+              70,
+              3,
+              OnepieceColors.liteFancyBlue,
+              70,
+              Base64Helper.decode(getIt<User>().profileImage!))
+          : ImageHelper.getRoundImageFrame(
+              60,
+              60,
+              3,
+              OnepieceColors.liteFancyBlue,
+              60,
+              Base64Helper.decode(getIt<User>().profileImage!)),
     );
   }
 }

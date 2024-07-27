@@ -3,5 +3,5 @@ class IndividualBar {
   final int y;
   final int yMax;
 
-  IndividualBar({  required this.x, required this.y, required this.yMax});
+  IndividualBar({required this.x, required this.y, required this.yMax});
 }

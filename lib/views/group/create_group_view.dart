@@ -51,6 +51,7 @@ class _CreateGroupViewState extends State<CreateGroupView> {
   Uint8List _pickedImage = Uint8List(0);
   bool _newImagePicked = false;
   String _chosenImageName = "";
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -254,11 +255,11 @@ class _CreateGroupViewState extends State<CreateGroupView> {
       GroupCategory.marine: AppLocalizations.of(context)!.marine,
       GroupCategory.pirate: AppLocalizations.of(context)!.pirate,
       GroupCategory.underWorld: AppLocalizations.of(context)!.underworld,
-      GroupCategory.government:
-          AppLocalizations.of(context)!.worldGovernment,
-      GroupCategory.other:AppLocalizations.of(context)!.otherType,
+      GroupCategory.government: AppLocalizations.of(context)!.worldGovernment,
+      GroupCategory.other: AppLocalizations.of(context)!.otherType,
       GroupCategory.group: AppLocalizations.of(context)!.group,
-      GroupCategory.revolutionArmy: AppLocalizations.of(context)!.revolutionaryArmy,
+      GroupCategory.revolutionArmy:
+          AppLocalizations.of(context)!.revolutionaryArmy,
     };
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
@@ -364,13 +365,13 @@ class _CreateGroupViewState extends State<CreateGroupView> {
                               resourceId: createGroupResponse!.id.toString(),
                               image: encodedImage,
                               type: ResourceType.GROUP);
-                      getIt<ImageDao>()
-                          .addImage(uploadImageRequest)
-                          .then((value) => context.goNamed('groupDetails',
-                          extra: createGroupResponse.id,
-                          pathParameters: {
-                            'name': I18nHelper.getDisplayNameFromI18n(createGroupResponse.name)
-                          }));
+                      getIt<ImageDao>().addImage(uploadImageRequest).then(
+                          (value) => context.goNamed('groupDetails',
+                                  extra: createGroupResponse.id,
+                                  pathParameters: {
+                                    'name': I18nHelper.getDisplayNameFromI18n(
+                                        createGroupResponse.name)
+                                  }));
                     });
                   },
                   child: Text(AppLocalizations.of(context)!.submitForm),

@@ -25,6 +25,7 @@ GetIt getIt = GetIt.instance;
 
 class BattleDetailView extends StatefulWidget {
   final String battleId;
+
   const BattleDetailView({super.key, required this.battleId});
 
   @override
@@ -395,6 +396,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
           children: [
             InkWell(
                 hoverColor: Colors.transparent,
+                splashColor: Colors.transparent,
                 onTap: () {
                   context.goNamed('characterDetails',
                       extra: starter.id,
@@ -449,6 +451,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
           children: [
             InkWell(
                 hoverColor: Colors.transparent,
+                splashColor: Colors.transparent,
                 onTap: () {
                   context.goNamed('characterDetails',
                       extra: receiver.id,
@@ -568,7 +571,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                   120, 120, OnepieceColors.liteFancyBlue),
             )
           : ImageLazyLoader(
-          key: UniqueKey(),
+              key: UniqueKey(),
               uriProvider: () => battle.starter!.id == model.winnerId
                   ? battle.starter!.imageUri!
                   : battle.receiver!.imageUri!,
@@ -700,6 +703,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
               : "",
           child: InkWell(
             hoverColor: Colors.transparent,
+            splashColor: Colors.transparent,
             onTap: model.battleReportStage == BattleReportStage.FINISHED
                 ? () {
                     getIt<FileDao>()
@@ -772,14 +776,23 @@ class BattleExecutionData extends ChangeNotifier {
       this._receiverScoreAfter);
 
   BattleStatus get battleStatus => _battleStatus;
+
   BattleReportStage get battleReportStage => _battleReportStage;
+
   String? get reportFileId => _reportFileId;
+
   String? get winnerId => _winnerId;
+
   int? get winnerScoreChange => _winnerScoreChange;
+
   int? get loserScoreChange => _loserScoreChange;
+
   int? get receiverScoreBefore => _receiverScoreBefore;
+
   int? get receiverScoreAfter => _receiverScoreAfter;
+
   int? get starterScoreBefore => _starterScoreBefore;
+
   int? get starterScoreAfter => _starterScoreAfter;
 
   set battleStatus(BattleStatus battleStatus) {

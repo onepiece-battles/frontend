@@ -308,6 +308,8 @@ class _IssueViewState extends State<IssueView> {
                         final isSelected =
                             selectedIssueTypes.contains(issueType);
                         return InkWell(
+                          hoverColor: Colors.transparent,
+                          splashColor: Colors.transparent,
                           onTap: () {
                             isSelected
                                 ? selectedIssueTypes.remove(issueType)
@@ -402,6 +404,8 @@ class _IssueViewState extends State<IssueView> {
                       final isSelected =
                           selectedIssueStatuses.contains(issueStatus);
                       return InkWell(
+                        hoverColor: Colors.transparent,
+                        splashColor: Colors.transparent,
                         onTap: () {
                           isSelected
                               ? selectedIssueStatuses.remove(issueStatus)
@@ -504,6 +508,8 @@ class _IssueViewState extends State<IssueView> {
       IssueSortableFieldEnum? issueSortableFieldsEnum, double? width) {
     return DataColumn(
       label: InkWell(
+        hoverColor: Colors.transparent,
+        splashColor: Colors.transparent,
         onTap: issueSortableFieldsEnum == null
             ? null
             : () {

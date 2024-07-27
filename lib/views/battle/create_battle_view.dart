@@ -42,6 +42,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
   TextEditingController receiverTextController = TextEditingController();
   CharacterFilter starterCharacterFilter = CharacterFilter();
   CharacterFilter receiverCharacterFilter = CharacterFilter();
+
   // these two indexes are used when loading more data
   int starterSelectedPageIndex = 1;
   int receiverSelectedPageIndex = 1;
@@ -451,8 +452,9 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                                           padding: const EdgeInsets.all(20.0),
                                           child: ImageLazyLoader(
                                               key: UniqueKey(),
-                                              uriProvider:() =>  receiverSelectedItem
-                                                  .value!.imageUri!,
+                                              uriProvider: () =>
+                                                  receiverSelectedItem
+                                                      .value!.imageUri!,
                                               width: 200,
                                               borderWidth: 3,
                                               borderRadios: 100),
@@ -621,7 +623,8 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                                           const EdgeInsets.fromLTRB(3, 3, 8, 3),
                                       child: ImageLazyLoader(
                                           key: UniqueKey(),
-                                          uriProvider: () => character.imageUri!,
+                                          uriProvider: () =>
+                                              character.imageUri!,
                                           width: 50,
                                           borderWidth: 2,
                                           borderRadios: 6),

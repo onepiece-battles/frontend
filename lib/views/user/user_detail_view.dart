@@ -13,6 +13,7 @@ GetIt getIt = GetIt.instance;
 
 class UserDetailView extends StatefulWidget {
   final String userId;
+
   const UserDetailView({super.key, required this.userId});
 
   @override
@@ -21,6 +22,7 @@ class UserDetailView extends StatefulWidget {
 
 class _UserDetailViewState extends State<UserDetailView> {
   late User user;
+
   @override
   void initState() {
     super.initState();

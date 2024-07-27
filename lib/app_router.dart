@@ -35,6 +35,7 @@ class AppRouter {
   static const homePath = '/home';
   static const registerPath = '/register';
   static const retrievePassword = '/retrievePassword';
+
   // sub-paths
   static final characterPath =
       '/home/${ResourceType.CHARACTER.toString().toLowerCase()}';
@@ -48,14 +49,14 @@ class AppRouter {
       '/home/${ResourceType.USER.toString().toLowerCase()}';
   static final issuePath =
       '/home/${ResourceType.ISSUE.toString().toLowerCase()}';
-  
+
   static void updateRoutingState(String matchedLocation) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       routeNotifier.value = matchedLocation;
     });
   }
 
-  static final  router = GoRouter(
+  static final router = GoRouter(
     navigatorKey: _rootNavigatorState,
     initialLocation: homePath,
     routes: [
@@ -98,9 +99,10 @@ class AppRouter {
                   updateRoutingState(state.matchedLocation);
                   String characterId = state.extra as String;
                   return NoTransitionPage(
-                      child: CharacterDetail(
-                        characterId: characterId,
-                      ),);
+                    child: CharacterDetail(
+                      characterId: characterId,
+                    ),
+                  );
                 },
               ),
             ],

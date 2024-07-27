@@ -2,6 +2,7 @@ import 'package:openapi/api.dart';
 
 class FruitDao {
   FruitApi fruitApi = FruitApi();
+
   FruitDao.empty();
 
   FruitDao(ApiClient apiClient) {

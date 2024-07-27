@@ -5,6 +5,7 @@ class ItemDisplayField extends StatelessWidget {
   final Widget icon;
   final String label;
   final String value;
+
   const ItemDisplayField(
       {super.key,
       required this.icon,

@@ -21,6 +21,7 @@ Timer? _timer;
 
 class JoinGroup extends StatefulWidget {
   final GroupFullView fatherGroup;
+
   const JoinGroup({super.key, required this.fatherGroup});
 
   @override
@@ -394,6 +395,7 @@ class _JoinGroupState extends State<JoinGroup> {
               crossAxisSpacing: 5,
             ),
             itemBuilder: (context, int index) => InkWell(
+              splashColor: Colors.transparent,
               hoverColor: Colors.transparent,
               onTap: () {
                 panelState(() {
@@ -442,6 +444,7 @@ class _JoinGroupState extends State<JoinGroup> {
               crossAxisSpacing: 5,
             ),
             itemBuilder: (context, int index) => InkWell(
+              splashColor: Colors.transparent,
               hoverColor: Colors.transparent,
               onTap: () {
                 panelState(() {
@@ -507,6 +510,7 @@ class _JoinGroupState extends State<JoinGroup> {
             crossAxisSpacing: 5,
           ),
           itemBuilder: (BuildContext context, int index) => InkWell(
+              splashColor: Colors.transparent,
               hoverColor: Colors.transparent,
               onTap: () {
                 panelState(() {
@@ -552,6 +556,7 @@ class _JoinGroupState extends State<JoinGroup> {
             crossAxisSpacing: 5,
           ),
           itemBuilder: (BuildContext context, int index) => InkWell(
+              splashColor: Colors.transparent,
               hoverColor: Colors.transparent,
               onTap: () {
                 panelState(() {

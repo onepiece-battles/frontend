@@ -9,6 +9,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 class CharacterBarGraph extends StatelessWidget {
   final CharacterData characterData;
   final bool symmetric;
+
   const CharacterBarGraph(
       {super.key, required this.characterData, required this.symmetric});
 

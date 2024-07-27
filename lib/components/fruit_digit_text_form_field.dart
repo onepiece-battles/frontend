@@ -38,6 +38,7 @@ class FruitDigitTextFormField extends StatefulWidget {
 class _FruitDigitTextFormFieldState extends State<FruitDigitTextFormField> {
   final ValueNotifier<bool> leftHasError = ValueNotifier<bool>(false);
   final ValueNotifier<bool> rightHasError = ValueNotifier<bool>(false);
+
   @override
   Widget build(BuildContext context) {
     return Column(

@@ -2,9 +2,11 @@ import 'package:openapi/api.dart';
 
 class IssueDao {
   IssueApi issueApi = IssueApi();
+
   IssueDao(ApiClient apiClient) {
     issueApi = IssueApi(apiClient);
   }
+
   IssueDao.empty();
 
   Future<CreateIssueResponse?> createIssue(CreateIssueRequest request) async {
@@ -19,7 +21,8 @@ class IssueDao {
     return await issueApi.batchUpdateIssue(request);
   }
 
-  Future<IssueFullView?> getIssueFullView(GetIssueFullViewRequest request) async {
+  Future<IssueFullView?> getIssueFullView(
+      GetIssueFullViewRequest request) async {
     return await issueApi.getIssueFullView(request);
   }
 }

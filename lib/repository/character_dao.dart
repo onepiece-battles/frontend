@@ -2,9 +2,11 @@ import 'package:openapi/api.dart';
 
 class CharacterDao {
   CharacterApi characterApi = CharacterApi();
+
   CharacterDao(ApiClient apiClient) {
     characterApi = CharacterApi(apiClient);
   }
+
   CharacterDao.empty();
 
   Future<ListCharacterResponse?> listCharacter(
@@ -25,11 +27,13 @@ class CharacterDao {
     return await characterApi.joinGroup(request);
   }
 
-  Future<CharacterFullView?> getCharacter(GetCharacterFullViewRequest request) async {
+  Future<CharacterFullView?> getCharacter(
+      GetCharacterFullViewRequest request) async {
     return await characterApi.getCharacterFullView(request);
   }
 
-  Future<UpdateCharacterResponse?> update(UpdateCharacterRequest character) async {
+  Future<UpdateCharacterResponse?> update(
+      UpdateCharacterRequest character) async {
     return await characterApi.updateCharacter(character);
   }
 }

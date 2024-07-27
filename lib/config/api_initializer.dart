@@ -13,6 +13,7 @@ import '../repository/issue_dao.dart';
 
 class ApiInitializer {
   static GetIt getIt = GetIt.instance;
+
   static initAuthInfo(String token) {
     // construct new api client
     HttpBearerAuth bearAuth = HttpBearerAuth();

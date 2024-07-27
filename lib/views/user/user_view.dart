@@ -280,6 +280,8 @@ class _UserViewState extends State<UserView> {
                     builder: (context, menuSetState) {
                       final isSelected = selectedUserRoles.contains(userRole);
                       return InkWell(
+                        hoverColor: Colors.transparent,
+                        splashColor: Colors.transparent,
                         onTap: () {
                           isSelected
                               ? selectedUserRoles.remove(userRole)
@@ -380,6 +382,8 @@ class _UserViewState extends State<UserView> {
       UserSortableFieldsEnum? userSortableFieldsEnum, double? width) {
     return DataColumn(
       label: InkWell(
+        hoverColor: Colors.transparent,
+        splashColor: Colors.transparent,
         onTap: userSortableFieldsEnum == null
             ? null
             : () {

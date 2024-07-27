@@ -81,7 +81,8 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp.router(
       locale: _locale,
       theme: ThemeData(
-        fontFamily: getIt<Locale>().languageCode == "en"? 'Roboto': 'Noto Sans SC',
+        fontFamily:
+            getIt<Locale>().languageCode == "en" ? 'Roboto' : 'Noto Sans SC',
         inputDecorationTheme: MyInputTheme().theme(),
         tooltipTheme: TooltipThemeData(
           showDuration: const Duration(seconds: 1),

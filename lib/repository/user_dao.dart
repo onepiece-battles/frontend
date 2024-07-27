@@ -2,6 +2,7 @@ import 'package:openapi/api.dart';
 
 class UserDao {
   UserApi userApi = UserApi();
+
   UserDao.empty();
 
   UserDao(ApiClient apiClient) {
@@ -42,9 +43,8 @@ class UserDao {
     return await userApi.updateRole(request);
   }
 
-
-
-  Future<UpdatePasswordResponse?> updatePassword(UpdatePasswordRequest request) async {
+  Future<UpdatePasswordResponse?> updatePassword(
+      UpdatePasswordRequest request) async {
     return await userApi.updatePassword(request);
   }
 }
