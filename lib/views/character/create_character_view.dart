@@ -769,7 +769,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
       BattleStyle.SHOOTER: AppLocalizations.of(context)!.shoot,
       BattleStyle.STICK: AppLocalizations.of(context)!.stick,
       BattleStyle.RIFLE: AppLocalizations.of(context)!.rifle,
-      BattleStyle.SWORD:AppLocalizations.of(context)!.sword
+      BattleStyle.SWORD: AppLocalizations.of(context)!.sword
     };
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 0, 0, 2),
@@ -1067,14 +1067,20 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                                 characterSpeedController.text.trim()),
                             energy: DataConverter.stringToInt(
                                 characterEnergyController.text.trim()),
-                            height: DataConverter.stringToInt(
-                                characterHeight.text.trim()),
-                            age: DataConverter.stringToInt(
-                                characterAge.text.trim()),
+                            height: characterHeight.text.isEmpty
+                                ? null
+                                : DataConverter.stringToInt(
+                                    characterHeight.text.trim()),
+                            age: characterAge.text.isEmpty
+                                ? null
+                                : DataConverter.stringToInt(
+                                    characterAge.text.trim()),
                             birthPlace: characterBirthPlace.text.trim(),
                             dateOfBirth: "$selectedMonth-$selectedDay",
-                            bounty: DataConverter.stringToInt(
-                                characterBounty.text.trim()),
+                            bounty: characterBounty.text.isEmpty
+                                ? null
+                                : DataConverter.stringToInt(
+                                    characterBounty.text.trim()),
                           );
                           getIt<CharacterDao>()
                               .addCharacter(addCharacterRequest)
