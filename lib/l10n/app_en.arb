@@ -304,5 +304,6 @@
   "sword": "Sword",
   "stick": "Stick",
   "rifle": "Gun",
-  "fightAgain":"Fight Again"
+  "fightAgain":"Fight Again",
+  "loginAsVisitor": "Visitor Login"
 }

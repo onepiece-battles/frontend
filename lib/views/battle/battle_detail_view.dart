@@ -163,7 +163,8 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                               ),
                             ),
                             _getBattleReportIcon(context),
-                            _getFightAgain(context),
+                            if (getIt<User>().loginRole != UserRole.VISITOR)
+                              _getFightAgain(context),
                             // bottom space
                             const SizedBox(
                               height: 60,
@@ -702,13 +703,15 @@ class _BattleDetailViewState extends State<BattleDetailView> {
       return Padding(
         padding: const EdgeInsets.fromLTRB(0, 8, 0, 20),
         child: Tooltip(
-          message: model.battleReportStage == BattleReportStage.FINISHED
+          message: model.battleReportStage == BattleReportStage.FINISHED &&
+                  getIt<User>().loginRole != UserRole.VISITOR
               ? AppLocalizations.of(context)!.downloadReport
               : "",
           child: InkWell(
             hoverColor: Colors.transparent,
             splashColor: Colors.transparent,
-            onTap: model.battleReportStage == BattleReportStage.FINISHED
+            onTap: model.battleReportStage == BattleReportStage.FINISHED &&
+                    getIt<User>().loginRole != UserRole.VISITOR
                 ? () {
                     getIt<FileDao>()
                         .downloadFile(DownloadFileRequest(
@@ -771,7 +774,10 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                           pathParameters: {'id': value.battleId!});
                     });
                   },
-                  child: Text(AppLocalizations.of(context)!.fightAgain, style: OnepieceFonts.boldFancySmallFont,)),
+                  child: Text(
+                    AppLocalizations.of(context)!.fightAgain,
+                    style: OnepieceFonts.boldFancySmallFont,
+                  )),
             )
           : const SizedBox(
               height: 10,
