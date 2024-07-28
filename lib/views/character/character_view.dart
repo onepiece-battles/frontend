@@ -939,7 +939,7 @@ class _CharacterViewState extends State<CharacterView>
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
                 child: Row(
-                  children: entry.value.hakis
+                  children: [...entry.value.hakis.toList()..sort((a, b) => a.toString().compareTo(b.toString()))]
                       .map((e) => Padding(
                             padding: const EdgeInsets.only(right: 5),
                             child: OnepieceTag.getHakiTag(
