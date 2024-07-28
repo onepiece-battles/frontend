@@ -161,7 +161,7 @@
   "science": "Science",
   "searchReceiver": "search receiver ...",
   "searchResource": "search resource",
-  "searchResourceDetail": "Search resource [character name| fruit name | group name]",
+  "searchResourceDetail": "[ character name| fruit name | group name ]",
   "searchStarter": "search starter ...",
   "selectCharacter": "Select Character",
   "settings": "Settings",
@@ -303,5 +303,6 @@
   "lifeless_object": "Lifeless Object",
   "sword": "Sword",
   "stick": "Stick",
-  "rifle": "Gun"
+  "rifle": "Gun",
+  "fightAgain":"Fight Again"
 }

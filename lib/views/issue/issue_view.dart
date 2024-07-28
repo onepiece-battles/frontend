@@ -179,6 +179,33 @@ class _IssueViewState extends State<IssueView> {
               width: 200,
               height: 35,
               child: TextFormField(
+                controller: searchHeaderController,
+                onChanged: (value) {
+                  issueFilter.issueHeader = value;
+                  _search(true);
+                },
+                decoration: InputDecoration(
+                  floatingLabelBehavior: FloatingLabelBehavior.never,
+                  disabledBorder: const OutlineInputBorder(
+                      borderSide:
+                      BorderSide(color: OnepieceColors.menuHoverColor)),
+                  enabledBorder: const OutlineInputBorder(
+                      borderSide:
+                      BorderSide(color: OnepieceColors.menuHoverColor)),
+                  focusedBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
+                  prefixIcon: const Icon(Icons.search),
+                  labelText: AppLocalizations.of(context)!.title,
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(0, 0, 6, 0),
+            child: SizedBox(
+              width: 200,
+              height: 35,
+              child: TextFormField(
                 controller: searchEmailController,
                 onChanged: (value) {
                   issueFilter.username = value;
@@ -223,33 +250,6 @@ class _IssueViewState extends State<IssueView> {
                       borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
                   prefixIcon: const Icon(Icons.search),
                   labelText: AppLocalizations.of(context)!.creatorNickname,
-                ),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(0, 0, 6, 0),
-            child: SizedBox(
-              width: 200,
-              height: 35,
-              child: TextFormField(
-                controller: searchHeaderController,
-                onChanged: (value) {
-                  issueFilter.issueHeader = value;
-                  _search(true);
-                },
-                decoration: InputDecoration(
-                  floatingLabelBehavior: FloatingLabelBehavior.never,
-                  disabledBorder: const OutlineInputBorder(
-                      borderSide:
-                          BorderSide(color: OnepieceColors.menuHoverColor)),
-                  enabledBorder: const OutlineInputBorder(
-                      borderSide:
-                          BorderSide(color: OnepieceColors.menuHoverColor)),
-                  focusedBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
-                  prefixIcon: const Icon(Icons.search),
-                  labelText: AppLocalizations.of(context)!.title,
                 ),
               ),
             ),
@@ -488,19 +488,19 @@ class _IssueViewState extends State<IssueView> {
         ),
       ),
       _createSingleColumn(
-          AppLocalizations.of(context)!.creatorEmail, null, 220),
-      _createSingleColumn(
-          AppLocalizations.of(context)!.creatorNickname, null, 220),
-      _createSingleColumn(
           AppLocalizations.of(context)!.feedbackTitle, null, 200),
       _createSingleColumn(AppLocalizations.of(context)!.issueType,
-          IssueSortableFieldEnum.issueType, 200),
+          IssueSortableFieldEnum.issueType, 170),
       _createSingleColumn(AppLocalizations.of(context)!.status,
-          IssueSortableFieldEnum.issueStatus, 180),
+          IssueSortableFieldEnum.issueStatus, 150),
+      _createSingleColumn(
+          AppLocalizations.of(context)!.creatorEmail, null, 150),
+      _createSingleColumn(
+          AppLocalizations.of(context)!.creatorNickname, null, 150),
       _createSingleColumn(AppLocalizations.of(context)!.creationTime,
-          IssueSortableFieldEnum.creationTimestamp, 180),
+          IssueSortableFieldEnum.creationTimestamp, 160),
       _createSingleColumn(AppLocalizations.of(context)!.modificationTime,
-          IssueSortableFieldEnum.modificationTimestamp, 180),
+          IssueSortableFieldEnum.modificationTimestamp, 160),
     ];
   }
 
@@ -602,13 +602,13 @@ class _IssueViewState extends State<IssueView> {
             },
             cells: [
               _getDataCell("${entry.key + 1}", null),
-              _getDataCell(entry.value.creationRecord!.username!, null),
-              _getDataCell(entry.value.creationRecord!.nickname!, null),
-              _getDataCell(entry.value.issueHeader.toString(), 200),
+              _getDataCell(entry.value.issueHeader.toString(), null),
               _getDataCell(
                   issueTypeToDisplayValue[entry.value.issueType]!, null),
               _getDataCell(
                   issueStatusToDisplayValue[entry.value.issueStatus]!, null),
+              _getDataCell(entry.value.creationRecord!.username!, null),
+              _getDataCell(entry.value.creationRecord!.nickname!, null),
               _getDataCell(
                   DateHelper.getFormattedDatetimeFromTimestamp(
                       entry.value.creationRecord!.actionTimestamp!, context),

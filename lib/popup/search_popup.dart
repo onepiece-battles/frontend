@@ -7,13 +7,11 @@ import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_tag.dart';
 import 'package:one_piece_battles_flutter/repository/group_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
-import 'package:one_piece_battles_flutter/utils/image_helper.dart';
 import 'package:openapi/api.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../constants/onepiece_colors.dart';
 import '../repository/character_dao.dart';
 import '../repository/fruit_dao.dart';
-import '../utils/base64_helper.dart';
 
 GetIt getIt = GetIt.instance;
 Timer? _timer;
@@ -194,17 +192,46 @@ class _SearchPopupState extends State<SearchPopup> {
       width: 800,
       child: TextFormField(
         autofocus: true,
+        cursorColor: Colors.white,
         controller: searchBarController,
         decoration: InputDecoration(
-          floatingLabelAlignment: FloatingLabelAlignment.center,
-          floatingLabelStyle: OnepieceFonts.smallHeaderStyleFancyBlue,
-          labelStyle: OnepieceFonts.contentStyleBold,
-          disabledBorder: const OutlineInputBorder(
-              borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
-          enabledBorder: const OutlineInputBorder(
-              borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
-          focusedBorder: const OutlineInputBorder(
-              borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
+          floatingLabelBehavior: FloatingLabelBehavior.never,
+          labelStyle: OnepieceFonts.whiteHintFont,
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(5.0),
+            borderSide: const BorderSide(
+              color: Colors.white,
+              width: 1.0,
+            ),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(5.0),
+            borderSide: const BorderSide(
+              color: Colors.white,
+              width: 1.5,
+            ),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(5.0),
+            borderSide: const BorderSide(
+              color: Colors.white,
+              width: 1.5,
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(5.0),
+            borderSide: const BorderSide(
+              color: Colors.white,
+              width: 1.5,
+            ),
+          ),
+          disabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(5.0),
+            borderSide: const BorderSide(
+              color: Colors.white,
+              width: 1.0,
+            ),
+          ),
           prefixIcon: const Icon(
             Icons.search,
             color: Colors.white,
@@ -257,7 +284,7 @@ class _SearchPopupState extends State<SearchPopup> {
                               I18nHelper.getDisplayNameFromI18n(character.name)
                         });
                   },
-                  hoverColor: OnepieceColors.liteFancyBlue,
+                  hoverColor: OnepieceColors.fancyBlue,
                   title: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -336,7 +363,7 @@ class _SearchPopupState extends State<SearchPopup> {
                           'name': I18nHelper.getDisplayNameFromI18n(fruit.name!)
                         });
                   },
-                  hoverColor: OnepieceColors.liteFancyBlue,
+                  hoverColor: OnepieceColors.fancyBlue,
                   title: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -400,7 +427,7 @@ class _SearchPopupState extends State<SearchPopup> {
                                 I18nHelper.getDisplayNameFromI18n(group.name)
                           });
                     },
-                    hoverColor: OnepieceColors.liteFancyBlue,
+                    hoverColor: OnepieceColors.fancyBlue,
                     title: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
