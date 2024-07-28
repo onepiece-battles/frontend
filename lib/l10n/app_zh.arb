@@ -304,5 +304,6 @@
   "sword": "剑",
   "stick": "棍",
   "rifle": "枪",
-  "fightAgain":"再战一轮"
+  "fightAgain":"再战一轮",
+  "loginAsVisitor": "游客登陆"
 }

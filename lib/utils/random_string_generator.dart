@@ -25,6 +25,16 @@ class RandomStringGenerator {
     return randomString;
   }
 
+  static String generateRandomUserName(int length) {
+    final random = Random();
+    const availableChars =
+        'abcdefghigklmnopqrstuvwxyz1234567890';
+    final randomString = List.generate(length,
+            (index) => availableChars[random.nextInt(availableChars.length)])
+        .join();
+    return randomString;
+  }
+
   static String generateRandomChineseName(int length, bool isNika) {
     if (!isNika) {
       return "";

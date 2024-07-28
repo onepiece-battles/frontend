@@ -324,9 +324,9 @@ class HomePageState extends State<HomePage> {
                         .map((e) => e.resourceType!)
                         .where((e) => !notShownResources.contains(e))
                         .toList();
-                    context.replaceNamed('userHome',
-                        extra: getIt<User>().id,
-                        pathParameters: {'name': getIt<User>().nickname});
+                    context.goNamed(
+                      'characters',
+                    );
                   });
                 },
                 buttonStyleData: ButtonStyleData(
@@ -437,11 +437,16 @@ class HomePageState extends State<HomePage> {
                               onTap: () {
                                 setState(
                                   () {
-                                    context.goNamed('userProfile',
-                                        extra: getIt<User>().id,
-                                        pathParameters: {
-                                          'name': getIt<User>().nickname
-                                        });
+                                    if (getIt<User>().loginRole ==
+                                        UserRole.VISITOR) {
+                                      context.go(AppRouter.registerPath);
+                                    } else {
+                                      context.goNamed('userProfile',
+                                          extra: getIt<User>().id,
+                                          pathParameters: {
+                                            'name': getIt<User>().nickname
+                                          });
+                                    }
                                   },
                                 );
                               },

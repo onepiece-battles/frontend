@@ -11,6 +11,7 @@ import 'package:one_piece_battles_flutter/constants/path_constants.dart';
 import 'package:one_piece_battles_flutter/main.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
+import 'package:one_piece_battles_flutter/utils/random_string_generator.dart';
 import 'package:openapi/api.dart';
 import 'components/icp.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -40,6 +41,7 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController emailController = TextEditingController(text: "");
   TextEditingController passwordController = TextEditingController(text: "");
   Logger logger = Logger('_LoginPageState');
+  UserDao userDao = UserDao.empty();
 
   @override
   void initState() {
@@ -249,6 +251,28 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
             ),
+            const SizedBox(
+              height: 15,
+            ),
+            SizedBox(
+              width: 300,
+              child: ElevatedButton(
+                onPressed:
+                    !_buttonEnabled ? null : () => _visitorLogin(context),
+                style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                    foregroundColor: Colors.white),
+                child: Text(
+                  AppLocalizations.of(context)!.loginAsVisitor,
+                  style: const TextStyle(
+                      color: OnepieceColors.fancyBlue,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 15),
+                ),
+              ),
+            ),
             const SizedBox(height: 5),
             SizedBox(
               width: 300,
@@ -340,6 +364,50 @@ class _LoginPageState extends State<LoginPage> {
           Locale myLocale = Localizations.localeOf(context);
           verificationMessage = I18nHelper.getDisplayNameFromI18nByLocale(
               verificationI18n, myLocale);
+        });
+      }
+    });
+  }
+
+  void _visitorLogin(BuildContext context) {
+    String nickname = RandomStringGenerator.generateRandomUserName(10);
+    String username = RandomStringGenerator.generateRandomUserName(10);
+    String fullUsername = "$username@163.com";
+    String password =
+        RandomStringGenerator.generateRandomNumber(10000000, 99999999, false);
+
+    RegisterRequest request = RegisterRequest(
+        nickname: nickname,
+        username: fullUsername,
+        password: password,
+        userRole: UserRole.VISITOR,
+        confirmedPassword: password,
+        locale: I18nHelper.convertToOnepieceLocale(getIt<Locale>()));
+    Future<RegisterResponse?> response = userDao.register(request);
+    response.then((value) {
+      if (value!.registerResult) {
+        LoginRequest loginRequest =
+            LoginRequest(email: fullUsername, password: password);
+        Future<LoginResponse?> loginResponse =
+            getIt<UserDao>().login(loginRequest);
+        loginResponse.then((value) {
+          if (value!.verification == null) {
+            saveUserCredentials(emailController.text, passwordController.text);
+            _route(value.user!, value.accessToken!, context);
+          } else {
+            setState(() {
+              verificationI18n = value.verification;
+              Locale myLocale = Localizations.localeOf(context);
+              verificationMessage = I18nHelper.getDisplayNameFromI18nByLocale(
+                  verificationI18n, myLocale);
+            });
+          }
+        });
+      } else {
+        setState(() {
+          Locale myLocale = Localizations.localeOf(context);
+          verificationMessage = I18nHelper.getDisplayNameFromI18nByLocale(
+              value.verification, myLocale);
         });
       }
     });

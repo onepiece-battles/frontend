@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
@@ -46,10 +45,14 @@ class _UserNavigationState extends State<UserNavigation> {
                 height: 35,
                 child: ElevatedButton(
                   onPressed: () {
-                    context.goNamed('userProfile',
-                        extra: getIt<User>().id,
-                        pathParameters: {'name': getIt<User>().nickname});
-                    Navigator.pop(context);
+                    if (getIt<User>().loginRole == UserRole.VISITOR) {
+                      context.go(AppRouter.registerPath);
+                    } else {
+                      context.goNamed('userProfile',
+                          extra: getIt<User>().id,
+                          pathParameters: {'name': getIt<User>().nickname});
+                      Navigator.pop(context);
+                    }
                   },
                   style: OnepieceButtonStyle.getDefaultStyle(),
                   child: Row(
