@@ -163,7 +163,7 @@
   "searchResource": "搜索资源",
   "searchResourceShortcut": " 快捷键 [ / ] ",
   "searchResourceShortcutShrink": "搜索[/] ",
-  "searchResourceDetail": "搜索资源 [ 角色名 | 恶魔果实名 | 团体名 ]",
+  "searchResourceDetail": "[ 角色名 | 恶魔果实名 | 团体名 ]",
   "searchStarter": "搜索发起者 ...",
   "selectCharacter": "选择角色",
   "settings": "设置",
@@ -303,5 +303,6 @@
   "lifeless_object": "无生命物体",
   "sword": "剑",
   "stick": "棍",
-  "rifle": "枪"
+  "rifle": "枪",
+  "fightAgain":"再战一轮"
 }

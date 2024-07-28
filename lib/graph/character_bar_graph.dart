@@ -23,7 +23,7 @@ class CharacterBarGraph extends StatelessWidget {
       AppLocalizations.of(context)!.characterBlood,
       AppLocalizations.of(context)!.characterEnergy,
     ];
-    List<int> max = [1000, 1000, 260, 200, 10000, 50];
+    List<int> max = [1500, 1400, 300, 300, 18000, 300];
     List<String> svgPath = [
       'images/character_digits_icon/attack.svg',
       'images/character_digits_icon/defense.svg',

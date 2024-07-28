@@ -163,6 +163,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                               ),
                             ),
                             _getBattleReportIcon(context),
+                            _getFightAgain(context),
                             // bottom space
                             const SizedBox(
                               height: 60,
@@ -551,12 +552,15 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                               });
                     }
                   : null,
-              child: SvgPicture.asset(
-                'asset/images/svgs/battle.svg',
-                color: OnepieceColors.liteFancyBlue,
-                width: 80,
-                height: 80,
-              )),
+              child: model.battleStatus == BattleStatus.CREATED
+                  ? const Icon(
+                      Icons.not_started,
+                      size: 55,
+                      color: OnepieceColors.fancyBlue,
+                    )
+                  : const SizedBox(
+                      width: 35,
+                    )),
         ),
       );
     });
@@ -696,7 +700,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
   Widget _getBattleReportIcon(BuildContext context) {
     return Consumer<BattleExecutionData>(builder: (context, model, child) {
       return Padding(
-        padding: const EdgeInsets.fromLTRB(0, 8, 0, 100),
+        padding: const EdgeInsets.fromLTRB(0, 8, 0, 20),
         child: Tooltip(
           message: model.battleReportStage == BattleReportStage.FINISHED
               ? AppLocalizations.of(context)!.downloadReport
@@ -746,6 +750,32 @@ class _BattleDetailViewState extends State<BattleDetailView> {
           ),
         ),
       );
+    });
+  }
+
+  Widget _getFightAgain(BuildContext context) {
+    return Consumer<BattleExecutionData>(builder: (context, model, child) {
+      return model.battleReportStage == BattleReportStage.FINISHED
+          ? Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ElevatedButton(
+                  onPressed: () {
+                    getIt<BattleDao>()
+                        .createBattle(CreateBattleRequest(
+                            userId: getIt<User>().id,
+                            starterId: battle.starterId,
+                            receiverId: battle.receiverId))
+                        .then((value) {
+                      context.goNamed('battleDetails',
+                          extra: value!.battleId,
+                          pathParameters: {'id': value.battleId!});
+                    });
+                  },
+                  child: Text(AppLocalizations.of(context)!.fightAgain, style: OnepieceFonts.boldFancySmallFont,)),
+            )
+          : const SizedBox(
+              height: 10,
+            );
     });
   }
 }

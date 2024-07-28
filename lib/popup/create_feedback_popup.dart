@@ -45,43 +45,55 @@ class _CreateFeedbackPopupState extends State<CreateFeedbackPopup> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-                padding: const EdgeInsets.all(5),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton2<IssueType>(
-                    hint: Text(AppLocalizations.of(context)!.issueType),
-                    isExpanded: true,
-                    value: selectedIssueType,
-                    onChanged: (IssueType? value) {
-                      setState(() {
-                        selectedIssueType = value!;
-                        _calculateButtonCondition();
-                      });
-                    },
-                    buttonStyleData: ButtonStyleData(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(3),
-                          color: OnepieceColors.liteFancyBlue),
-                      height: 40,
-                      width: 240,
-                    ),
-                    menuItemStyleData: const MenuItemStyleData(
-                      height: 40,
-                    ),
-                    items: IssueType.values
-                        .toList()
-                        .map((IssueType issueType) =>
-                            DropdownMenuItem<IssueType>(
-                              value: issueType,
-                              child: Text(
-                                issueToDisplayNameMap[issueType]!,
-                                style: OnepieceFonts.dropDownItemStyle,
-                              ),
-                            ))
-                        .toList(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(10, 5, 5, 5),
+                  child: Text(
+                    AppLocalizations.of(context)!.feedback,
+                    style: OnepieceFonts.fancyBlueSmallTitle,
                   ),
-                )),
+                ),
+                Padding(
+                    padding: const EdgeInsets.all(5),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton2<IssueType>(
+                        hint: Text(AppLocalizations.of(context)!.issueType),
+                        isExpanded: true,
+                        value: selectedIssueType,
+                        onChanged: (IssueType? value) {
+                          setState(() {
+                            selectedIssueType = value!;
+                            _calculateButtonCondition();
+                          });
+                        },
+                        buttonStyleData: ButtonStyleData(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(3),
+                              color: OnepieceColors.liteFancyBlue),
+                          height: 40,
+                          width: 240,
+                        ),
+                        menuItemStyleData: const MenuItemStyleData(
+                          height: 40,
+                        ),
+                        items: IssueType.values
+                            .toList()
+                            .map((IssueType issueType) =>
+                                DropdownMenuItem<IssueType>(
+                                  value: issueType,
+                                  child: Text(
+                                    issueToDisplayNameMap[issueType]!,
+                                    style: OnepieceFonts.dropDownItemStyle,
+                                  ),
+                                ))
+                            .toList(),
+                      ),
+                    )),
+              ],
+            ),
             Padding(
               padding: const EdgeInsets.all(5.0),
               child: TextFormField(
@@ -96,11 +108,42 @@ class _CreateFeedbackPopupState extends State<CreateFeedbackPopup> {
                 decoration: InputDecoration(
                   contentPadding: const EdgeInsets.all(15),
                   floatingLabelBehavior: FloatingLabelBehavior.always,
-                  labelText: AppLocalizations.of(context)!.feedbackTitle,
                   hintText: AppLocalizations.of(context)!.feedbackTitleHint,
-                  disabledBorder: const OutlineInputBorder(),
-                  enabledBorder: const OutlineInputBorder(),
-                  focusedBorder: const OutlineInputBorder(),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5.0),
+                    borderSide: const BorderSide(
+                      color: OnepieceColors.fancyBlue,
+                      width: 1.0,
+                    ),
+                  ),
+                  errorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5.0),
+                    borderSide: const BorderSide(
+                      color: Colors.red,
+                      width: 1.5,
+                    ),
+                  ),
+                  focusedErrorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5.0),
+                    borderSide: const BorderSide(
+                      color: Colors.red,
+                      width: 1.5,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5.0),
+                    borderSide: const BorderSide(
+                      color: OnepieceColors.fancyBlue,
+                      width: 1.5,
+                    ),
+                  ),
+                  disabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5.0),
+                    borderSide: const BorderSide(
+                      color: Colors.white,
+                      width: 1.0,
+                    ),
+                  ),
                   suffixIcon: IconButton(
                     onPressed: () {
                       headerController.text = '';
@@ -128,11 +171,42 @@ class _CreateFeedbackPopupState extends State<CreateFeedbackPopup> {
                 cursorHeight: 18,
                 decoration: InputDecoration(
                   floatingLabelBehavior: FloatingLabelBehavior.always,
-                  contentPadding: const EdgeInsets.all(10),
-                  disabledBorder: const OutlineInputBorder(),
-                  enabledBorder: const OutlineInputBorder(),
-                  focusedBorder: const OutlineInputBorder(),
-                  labelText: AppLocalizations.of(context)!.feedbackContent,
+                  contentPadding: const EdgeInsets.fromLTRB(10, 15, 10, 15),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5.0),
+                    borderSide: const BorderSide(
+                      color: OnepieceColors.fancyBlue,
+                      width: 1.0,
+                    ),
+                  ),
+                  errorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5.0),
+                    borderSide: const BorderSide(
+                      color: Colors.red,
+                      width: 1.5,
+                    ),
+                  ),
+                  focusedErrorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5.0),
+                    borderSide: const BorderSide(
+                      color: Colors.red,
+                      width: 1.5,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5.0),
+                    borderSide: const BorderSide(
+                      color: OnepieceColors.fancyBlue,
+                      width: 1.5,
+                    ),
+                  ),
+                  disabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5.0),
+                    borderSide: const BorderSide(
+                      color: Colors.white,
+                      width: 1.0,
+                    ),
+                  ),
                   hintText: AppLocalizations.of(context)!.feedbackContentHint,
                 ),
               ),
