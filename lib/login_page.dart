@@ -257,8 +257,7 @@ class _LoginPageState extends State<LoginPage> {
             SizedBox(
               width: 300,
               child: ElevatedButton(
-                onPressed:
-                    !_buttonEnabled ? null : () => _visitorLogin(context),
+                onPressed: ()=>_visitorLogin(context),
                 style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(3),
