@@ -424,8 +424,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                     : DataConverter.stringToInt(
                                         characterHeight.text.trim()),
                                 score: character.score);
-                            if (updatedCharacter.toString() !=
-                                character.toString()) {
+                            if (_basicInfoUpdated()) {
                               getIt<CharacterDao>()
                                   .update(updatedCharacter)
                                   .then((value) {
@@ -1059,65 +1058,69 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                     changeValue();
                                   }
                                   if (!combatInfoEditable) {
-                                    var updatedCharacter =
-                                        UpdateCharacterRequest(
-                                      /* basic info keep consistent with original
+                                    if (_combatInfoUpdated()) {
+                                      var updatedCharacter =
+                                          UpdateCharacterRequest(
+                                        // combat info update
+                                        groupGain: character.groupGain,
+                                        attack: character.attack,
+                                        defense: character.defense,
+                                        intelligence: character.intelligence,
+                                        blood: character.blood,
+                                        speed: character.speed,
+                                        maximumFruitCount:
+                                            DataConverter.stringToInt(
+                                                characterFruitLimitController
+                                                    .text),
+                                        baseGroupGain:
+                                            DataConverter.stringToInt(
+                                                characterGroupGainController
+                                                    .text),
+                                        baseAttack: DataConverter.stringToInt(
+                                            characterAttackController.text),
+                                        baseDefense: DataConverter.stringToInt(
+                                            characterDefenseController.text),
+                                        baseIntelligence:
+                                            DataConverter.stringToInt(
+                                                characterIntelligenceController
+                                                    .text),
+                                        baseBlood: DataConverter.stringToInt(
+                                            characterBloodController.text),
+                                        baseSpeed: DataConverter.stringToInt(
+                                            characterSpeedController.text),
+                                        energy: DataConverter.stringToInt(
+                                            characterEnergyController.text),
+                                        hakis: selectedHakis,
+                                        /* basic info keep consistent with original
                                        value, will probably updated on backend */
-                                      id: character.id,
-                                      race: character.race,
-                                      score: character.score,
-                                      groupGain: character.groupGain,
-                                      attack: character.attack,
-                                      defense: character.defense,
-                                      intelligence: character.intelligence,
-                                      blood: character.blood,
-                                      speed: character.speed,
-                                      // combat info update
-                                      battleStyle: selectedBattleStyle,
-                                      hakis: selectedHakis,
-                                      maximumFruitCount:
-                                          DataConverter.stringToInt(
-                                              characterFruitLimitController
-                                                  .text),
-                                      baseGroupGain: DataConverter.stringToInt(
-                                          characterGroupGainController.text),
-                                      baseAttack: DataConverter.stringToInt(
-                                          characterAttackController.text),
-                                      baseDefense: DataConverter.stringToInt(
-                                          characterDefenseController.text),
-                                      baseIntelligence:
-                                          DataConverter.stringToInt(
-                                              characterIntelligenceController
-                                                  .text),
-                                      baseBlood: DataConverter.stringToInt(
-                                          characterBloodController.text),
-                                      baseSpeed: DataConverter.stringToInt(
-                                          characterSpeedController.text),
-                                      energy: DataConverter.stringToInt(
-                                          characterEnergyController.text),
-                                      // basic info
-                                      name: character.name,
-                                    );
-                                    getIt<CharacterDao>()
-                                        .update(updatedCharacter)
-                                        .then((value) {
-                                      OnepieceAlert.getBasicAlertDialogFunc(
-                                        context,
-                                        AppLocalizations.of(context)!.hint,
-                                        I18nHelper.getDisplayNameFromI18n(
-                                            value!.result),
+                                        id: character.id,
+                                        race: character.race,
+                                        score: character.score,
+                                        battleStyle: selectedBattleStyle,
+                                        name: character.name,
                                       );
-                                      if (value.success) {
-                                        showBaseValue = false;
-                                        context.replaceNamed('characterDetails',
-                                            extra: character.id,
-                                            pathParameters: {
-                                              'name': I18nHelper
-                                                  .getDisplayNameFromI18n(
-                                                      character.name)
-                                            });
-                                      }
-                                    });
+                                      getIt<CharacterDao>()
+                                          .update(updatedCharacter)
+                                          .then((value) {
+                                        OnepieceAlert.getBasicAlertDialogFunc(
+                                          context,
+                                          AppLocalizations.of(context)!.hint,
+                                          I18nHelper.getDisplayNameFromI18n(
+                                              value!.result),
+                                        );
+                                        if (value.success) {
+                                          showBaseValue = false;
+                                          context.replaceNamed(
+                                              'characterDetails',
+                                              extra: character.id,
+                                              pathParameters: {
+                                                'name': I18nHelper
+                                                    .getDisplayNameFromI18n(
+                                                        character.name)
+                                              });
+                                        }
+                                      });
+                                    }
                                   }
                                 });
                               },
@@ -1357,7 +1360,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                             characterAttackController,
                             AppLocalizations.of(context)!.characterAttack,
                             10,
-                            1000,
+                            1500,
                             ImageHelper.getTextFormFieldIcon(
                                 'images/character_digits_icon/attack.svg',
                                 true,
@@ -1369,7 +1372,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                             characterDefenseController,
                             AppLocalizations.of(context)!.characterDefense,
                             10,
-                            1000,
+                            1400,
                             ImageHelper.getTextFormFieldIcon(
                                 'images/character_digits_icon/defense.svg',
                                 true,
@@ -2408,6 +2411,44 @@ class _CharacterDetailState extends State<CharacterDetail> {
                   ),
                 ]))
         .toList();
+  }
+
+  bool _basicInfoUpdated() {
+    return character.race.toString() != selectedRace.toString() ||
+        character.battleStyle.toString() != selectedBattleStyle.toString() ||
+        I18nHelper.getDisplayNameFromI18n(character.name) !=
+            characterNameController.text.toString() ||
+        character.birthPlace.toString() !=
+            characterBirthPlace.text.toString() ||
+        character.dateOfBirth.toString() != "$selectedMonth-$selectedDay" ||
+        !intValueEquals(character.bounty, characterBounty.text.toString()) ||
+        !intValueEquals(character.height, characterHeight.text.toString()) ||
+        !intValueEquals(character.age, characterAge.text.toString());
+  }
+
+  bool intValueEquals(int? value, String text) {
+    if (value == null) {
+      if (text.isEmpty) {
+        return true;
+      }
+      return false;
+    } else {
+      return value.toString() == text;
+    }
+  }
+
+  bool _combatInfoUpdated() {
+    return character.groupGain.toString() !=
+            characterGroupGainController.text ||
+        character.maximumFruitCount.toString() !=
+            characterFruitLimitController.text ||
+        character.attack.toString() != characterAttackController.text ||
+        character.defense.toString() != characterDefenseController.text ||
+        character.intelligence.toString() !=
+            characterIntelligenceController.text ||
+        character.speed.toString() != characterSpeedController.text ||
+        character.blood.toString() != characterBloodController.text ||
+        character.energy.toString() != characterEnergyController.text;
   }
 
   String getScoreText(int scoreChange) {

@@ -332,7 +332,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                                     AppLocalizations.of(context)!
                                         .characterAttack,
                                     10,
-                                    1000,
+                                    1500,
                                     ImageHelper.getTextFormFieldIcon(
                                         'images/character_digits_icon/attack.svg',
                                         true,
@@ -345,7 +345,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                                     AppLocalizations.of(context)!
                                         .characterDefense,
                                     10,
-                                    1000,
+                                    1400,
                                     ImageHelper.getTextFormFieldIcon(
                                         'images/character_digits_icon/defense.svg',
                                         true,

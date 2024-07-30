@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:logging/logging.dart';
 import 'package:one_piece_battles_flutter/components/image_lazy_loader.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
@@ -966,7 +967,11 @@ class _CharacterViewState extends State<CharacterView>
               )),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-                child: Text(entry.value.bounty.toString()),
+                child: Text(
+                  textAlign: TextAlign.right,
+                  entry.value.bounty==null?"":entry.value.bounty.toString(),
+                style: GoogleFonts.lobster(),
+                ),
               )),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
