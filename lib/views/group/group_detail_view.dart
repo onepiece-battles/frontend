@@ -77,7 +77,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
             imageUri: groupFullView.imageUri));
     _editButtonVisible = PermissionCheck.checkPermission(
             getIt<User>().loginRoleResourcesPermissionMap,
-            ResourceType.CHARACTER,
+            ResourceType.GROUP,
             Permission.UPDATE) &&
         PermissionCheck.isMyResource(
             groupFullView.creationRecord!.userId!,
@@ -233,19 +233,17 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                       basicInfoState(() {
                         _basicInfoEditable = !_basicInfoEditable;
                         if (!_basicInfoEditable) {
-                          Group group = Group(
-                              id: groupFullView.id,
-                              groupCategory: selectedGroupCategory,
-                              name: I18nHelper.getI18nFromDisplayName(
-                                  groupFullView.name!,
-                                  groupNameController.text));
                           if (groupFullView.groupCategory !=
                                   selectedGroupCategory ||
-                              groupFullView.name.toString() !=
-                                  I18nHelper.getI18nFromDisplayName(
-                                          groupFullView.name!,
-                                          groupNameController.text)
-                                      .toString()) {
+                              I18nHelper.getDisplayNameFromI18n(
+                                      groupFullView.name) !=
+                                  groupNameController.text) {
+                            Group group = Group(
+                                id: groupFullView.id,
+                                groupCategory: selectedGroupCategory,
+                                name: I18nHelper.getI18nFromDisplayName(
+                                    groupFullView.name!,
+                                    groupNameController.text));
                             getIt<GroupDao>().updateGroups(group).then((value) {
                               OnepieceAlert.getBasicAlertDialogFunc(
                                   context,
@@ -266,7 +264,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                             getIt<ImageDao>()
                                 .addImage(UploadImageRequest(
                                     type: ResourceType.GROUP,
-                                    resourceId: group.id,
+                                    resourceId: groupFullView.id,
                                     image: selectedImage!))
                                 .then((value) {
                               OnepieceAlert.getBasicAlertDialogFunc(
@@ -275,10 +273,10 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                                   I18nHelper.getDisplayNameFromI18n(
                                       value!.result));
                               context.goNamed('groupDetails',
-                                  extra: group.id,
+                                  extra: groupFullView.id,
                                   pathParameters: {
                                     'name': I18nHelper.getDisplayNameFromI18n(
-                                        group.name)
+                                        groupFullView.name)
                                   });
                             });
                           }

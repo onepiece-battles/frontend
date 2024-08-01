@@ -380,51 +380,51 @@ class _CharacterDetailState extends State<CharacterDetail> {
                         basicState(() {
                           basicInfoEditable = !basicInfoEditable;
                           if (!basicInfoEditable) {
-                            var updatedCharacter = UpdateCharacterRequest(
-                                id: character.id,
-                                maximumFruitCount: character.maximumFruitCount,
-                                // keep combat info consistent with original data!
-                                hakis: character.hakis,
-                                groupGain: character.groupGain,
-                                attack: character.attack,
-                                defense: character.defense,
-                                intelligence: character.intelligence,
-                                blood: character.blood,
-                                speed: character.speed,
-                                energy: character.energy,
-                                baseGroupGain: character.baseGroupGain,
-                                baseAttack: character.baseAttack,
-                                baseDefense: character.baseDefense,
-                                baseIntelligence: character.baseIntelligence,
-                                baseBlood: character.baseBlood,
-                                baseSpeed: character.baseSpeed,
-                                // basic info
-                                imageUri: character.imageUri,
-                                systemResource: character.systemResource,
-                                battleStyle: selectedBattleStyle,
-                                race: selectedRace,
-                                name: I18nHelper.getI18nFromDisplayName(
-                                    character.name,
-                                    characterNameController.text),
-                                dateOfBirth:
-                                    selectedDay == null || selectedMonth == null
-                                        ? null
-                                        : "$selectedMonth-$selectedDay",
-                                birthPlace: characterBirthPlace.text,
-                                age: characterAge.text.isEmpty
-                                    ? null
-                                    : DataConverter.stringToInt(
-                                        characterAge.text.trim()),
-                                bounty: characterBounty.text.isEmpty
-                                    ? null
-                                    : DataConverter.stringToInt(
-                                        characterBounty.text.trim()),
-                                height: characterHeight.text.isEmpty
-                                    ? null
-                                    : DataConverter.stringToInt(
-                                        characterHeight.text.trim()),
-                                score: character.score);
                             if (_basicInfoUpdated()) {
+                              var updatedCharacter = UpdateCharacterRequest(
+                                  id: character.id,
+                                  maximumFruitCount: character.maximumFruitCount,
+                                  // keep combat info consistent with original data!
+                                  hakis: character.hakis,
+                                  groupGain: character.groupGain,
+                                  attack: character.attack,
+                                  defense: character.defense,
+                                  intelligence: character.intelligence,
+                                  blood: character.blood,
+                                  speed: character.speed,
+                                  energy: character.energy,
+                                  baseGroupGain: character.baseGroupGain,
+                                  baseAttack: character.baseAttack,
+                                  baseDefense: character.baseDefense,
+                                  baseIntelligence: character.baseIntelligence,
+                                  baseBlood: character.baseBlood,
+                                  baseSpeed: character.baseSpeed,
+                                  // basic info
+                                  imageUri: character.imageUri,
+                                  systemResource: character.systemResource,
+                                  battleStyle: selectedBattleStyle,
+                                  race: selectedRace,
+                                  name: I18nHelper.getI18nFromDisplayName(
+                                      character.name,
+                                      characterNameController.text),
+                                  dateOfBirth:
+                                  selectedDay == null || selectedMonth == null
+                                      ? null
+                                      : "$selectedMonth-$selectedDay",
+                                  birthPlace: characterBirthPlace.text,
+                                  age: characterAge.text.isEmpty
+                                      ? null
+                                      : DataConverter.stringToInt(
+                                      characterAge.text.trim()),
+                                  bounty: characterBounty.text.isEmpty
+                                      ? null
+                                      : DataConverter.stringToInt(
+                                      characterBounty.text.trim()),
+                                  height: characterHeight.text.isEmpty
+                                      ? null
+                                      : DataConverter.stringToInt(
+                                      characterHeight.text.trim()),
+                                  score: character.score);
                               getIt<CharacterDao>()
                                   .update(updatedCharacter)
                                   .then((value) {
