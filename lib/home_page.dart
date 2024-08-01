@@ -40,7 +40,7 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   final String setting = "setting";
   final String profile = "profile";
-  final int screenChangeBar = 1600;
+  final int screenChangeBar = 1500;
   var _tabTextIndexSelected =
       I18nHelper.convertToOnepieceLocale(getIt<Locale>()).toString() ==
               (OnepieceLocale.zhCN.toString())

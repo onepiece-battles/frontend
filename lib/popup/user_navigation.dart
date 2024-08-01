@@ -106,7 +106,7 @@ class _UserNavigationState extends State<UserNavigation> {
           ],
         ),
       ),
-      child: widget.constraints.maxWidth > 1600
+      child: widget.constraints.maxWidth > 1500
           ? ImageHelper.getRoundImageFrame(
               70,
               70,

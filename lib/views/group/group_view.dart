@@ -292,6 +292,9 @@ class _GroupViewState extends State<GroupView> {
                   },
                 ),
               ),
+              const SizedBox(
+                width: 10,
+              ),
               DropdownButtonHideUnderline(
                 child: DropdownButton2(
                   isExpanded: true,

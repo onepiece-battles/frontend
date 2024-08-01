@@ -1,3 +1,4 @@
+import 'dart:js_interop';
 import 'dart:math';
 
 import 'package:openapi/api.dart';
@@ -48,6 +49,12 @@ class RandomStringGenerator {
   }
 
   static I18nText generateI18n(String enString, String cnString) {
+    if (enString.isEmpty && cnString.isNotEmpty) {
+      enString = cnString;
+    }
+    if (cnString.isEmpty && enString.isNotEmpty) {
+      cnString = enString;
+    }
     return I18nText(enUS: enString, zhCN: cnString);
   }
 
