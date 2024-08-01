@@ -11,7 +11,7 @@ class OnepieceFonts {
   static const double contentFontSize = 16;
   static const double bigContentFontSize = 22;
   static const double tableHeaderFontSize = 15;
-  static const double dropDownFontSize = 16;
+  static const double dropDownFontSize = 14;
   static const double smallContentFontSize = 16;
   static const double superSmallContentFontSize = 12;
   static const Color contentFontColor = Colors.black54;

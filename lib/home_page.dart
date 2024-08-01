@@ -40,7 +40,7 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   final String setting = "setting";
   final String profile = "profile";
-  final int screenChangeBar = 800;
+  final int screenChangeBar = 1600;
   var _tabTextIndexSelected =
       I18nHelper.convertToOnepieceLocale(getIt<Locale>()).toString() ==
               (OnepieceLocale.zhCN.toString())
@@ -615,7 +615,7 @@ class HomePageState extends State<HomePage> {
   Widget _getDrawerHeader(BuildContext context, BoxConstraints constraints) {
     return Container(
       width: constraints.maxWidth > screenChangeBar ? 300 : 80,
-      height: 170,
+      height: 180,
       color: OnepieceColors.deepFancyBlue,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,

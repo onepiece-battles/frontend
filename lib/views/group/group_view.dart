@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/repository/group_dao.dart';
 import 'package:openapi/api.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:toggle_switch/toggle_switch.dart';
 
 import '../../components/image_lazy_loader.dart';
 import '../../constants/button_style.dart';
@@ -43,7 +44,10 @@ class _GroupViewState extends State<GroupView> {
     GroupSortableFieldsEnum.name: null,
     GroupSortableFieldsEnum.category: null,
   };
-
+  ScrollController mainController = ScrollController();
+  ScrollController controlBarController = ScrollController();
+  ScrollController tableController = ScrollController();
+  int initialLabelIndex = 0;
   // group filter options
 
   List<GroupCategory> selectedGroupCategories = [];
@@ -110,30 +114,37 @@ class _GroupViewState extends State<GroupView> {
         children: [
           Expanded(
               child: SingleChildScrollView(
-            controller: scrollController,
+            controller: mainController,
             scrollDirection: Axis.vertical,
-            child: Scrollbar(
-              thumbVisibility: true,
-              controller: horizontalController,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                controller: horizontalController,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _createHeader(context),
-                    SizedBox(
-                      width: 1200,
-                      height: 50,
-                      child: _createControlPanel(context),
-                    ),
-                    _createGroupTable(context),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                  ],
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _createHeader(context),
+                SizedBox(
+                    width: 1400,
+                    height: 90,
+                    child: Scrollbar(
+                      controller: controlBarController,
+                      trackVisibility: true,
+                      thickness: 5,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: _createControlPanel(context),
+                      ),
+                    )),
+                Scrollbar(
+                  controller: tableController,
+                  trackVisibility: true,
+                  thickness: 5,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: _createGroupTable(context),
+                  ),
                 ),
-              ),
+                const SizedBox(
+                  height: 15,
+                ),
+              ],
             ),
           )),
           const SizedBox(
@@ -173,244 +184,216 @@ class _GroupViewState extends State<GroupView> {
       GroupCategory.revolutionArmy:
           AppLocalizations.of(context)!.revolutionaryArmy,
     };
-    return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-      Row(
+    return Column(
         mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (PermissionCheck.checkPermission(
-              getIt<User>().loginRoleResourcesPermissionMap,
-              ResourceType.GROUP,
-              Permission.CREATE))
-            SizedBox(
-              height: 35,
-              width: 120,
-              child: Padding(
-                padding: const EdgeInsets.only(right: 10.0),
-                child: ElevatedButton(
-                    onPressed: () {
-                      context.goNamed("createGroup");
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              if (PermissionCheck.checkPermission(
+                  getIt<User>().loginRoleResourcesPermissionMap,
+                  ResourceType.GROUP,
+                  Permission.CREATE))
+                SizedBox(
+                  height: 35,
+                  width: 120,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 10.0),
+                    child: ElevatedButton(
+                        onPressed: () {
+                          context.goNamed("createGroup");
+                        },
+                        style: OnepieceButtonStyle.getDefaultStyle(),
+                        child: Text(AppLocalizations.of(context)!.create)),
+                  ),
+                ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 0, 6, 0),
+                child: SizedBox(
+                  width: 200,
+                  height: 35,
+                  child: TextFormField(
+                    controller: searchNameController,
+                    onChanged: (value) {
+                      groupFilter.name = value;
+                      _search(true);
                     },
-                    style: OnepieceButtonStyle.getDefaultStyle(),
-                    child: Text(AppLocalizations.of(context)!.create)),
-              ),
-            ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(0, 0, 6, 0),
-            child: SizedBox(
-              width: 200,
-              height: 35,
-              child: TextFormField(
-                controller: searchNameController,
-                onChanged: (value) {
-                  groupFilter.name = value;
-                  _search(true);
-                },
-                decoration: InputDecoration(
-                  floatingLabelBehavior: FloatingLabelBehavior.never,
-                  disabledBorder: const OutlineInputBorder(
-                      borderSide:
-                          BorderSide(color: OnepieceColors.menuHoverColor)),
-                  enabledBorder: const OutlineInputBorder(
-                      borderSide:
-                          BorderSide(color: OnepieceColors.menuHoverColor)),
-                  focusedBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
-                  prefixIcon: const Icon(Icons.search),
-                  labelText: AppLocalizations.of(context)!.name,
+                    decoration: InputDecoration(
+                      labelStyle: OnepieceFonts.dropDownItemStyle,
+                      floatingLabelBehavior: FloatingLabelBehavior.never,
+                      disabledBorder: const OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: OnepieceColors.menuHoverColor)),
+                      enabledBorder: const OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: OnepieceColors.menuHoverColor)),
+                      focusedBorder: const OutlineInputBorder(
+                          borderSide: BorderSide(
+                              color: OnepieceColors.fancyGreen, width: 1.5)),
+                      prefixIcon: const Icon(Icons.search),
+                      labelText: AppLocalizations.of(context)!.name,
+                    ),
+                  ),
                 ),
               ),
-            ),
+            ],
           ),
-          DropdownButtonHideUnderline(
-            child: DropdownButton2(
-              isExpanded: true,
-              value: selectedGroupCategories.isEmpty
-                  ? null
-                  : selectedGroupCategories.last,
-              hint: Text(
-                AppLocalizations.of(context)!.groupCategory,
-                style: OnepieceFonts.dropDownItemStyle,
+          const SizedBox(
+            height: 10,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              SizedBox(
+                height: 36,
+                child: ToggleSwitch(
+                  customWidths: const [150, 150, 150, 180],
+                  cornerRadius: 4,
+                  minWidth: 150.0,
+                  minHeight: 35.0,
+                  fontSize: 14.0,
+                  dividerColor: Colors.white,
+                  initialLabelIndex: initialLabelIndex,
+                  activeBgColor: const [OnepieceColors.fancyBlue],
+                  activeFgColor: Colors.white,
+                  inactiveBgColor: OnepieceColors.liteFancyGreen,
+                  inactiveFgColor: Colors.grey[600],
+                  totalSwitches: 4,
+                  labels: [
+                    AppLocalizations.of(context)!.allResources,
+                    AppLocalizations.of(context)!.myResource,
+                    AppLocalizations.of(context)!.systemResource,
+                    AppLocalizations.of(context)!.excludeSystem
+                  ],
+                  onToggle: (index) {
+                    initialLabelIndex = index!;
+                    // show all resources
+                    if (index == 0) {
+                      groupFilter.systemResource = null;
+                      groupFilter.userId = null;
+                    }
+                    // show my resource
+                    if (index == 1) {
+                      groupFilter.systemResource = null;
+                      groupFilter.userId = getIt<User>().id;
+                    }
+                    // only show system resource
+                    if (index == 2) {
+                      groupFilter.systemResource = true;
+                      groupFilter.userId = null;
+                    }
+                    // do not show system resource
+                    if (index == 3) {
+                      groupFilter.systemResource = false;
+                      groupFilter.userId = null;
+                    }
+                    _search(true);
+                  },
+                ),
               ),
-              onChanged: (value) {},
-              selectedItemBuilder: (context) {
-                return GroupCategory.values.map(
-                  (item) {
-                    return Container(
-                      alignment: AlignmentDirectional.center,
-                      child: Text(
-                        selectedGroupCategories
-                            .map((selectedType) {
-                              return enumValueToDisplayValue[selectedType];
-                            })
-                            .toSet()
-                            .join(', '),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        maxLines: 1,
+              DropdownButtonHideUnderline(
+                child: DropdownButton2(
+                  isExpanded: true,
+                  value: selectedGroupCategories.isEmpty
+                      ? null
+                      : selectedGroupCategories.last,
+                  hint: Text(
+                    AppLocalizations.of(context)!.groupCategory,
+                    style: OnepieceFonts.dropDownItemStyle,
+                  ),
+                  onChanged: (value) {},
+                  selectedItemBuilder: (context) {
+                    return GroupCategory.values.map(
+                      (item) {
+                        return Container(
+                          alignment: AlignmentDirectional.center,
+                          child: Text(
+                            selectedGroupCategories
+                                .map((selectedType) {
+                                  return enumValueToDisplayValue[selectedType];
+                                })
+                                .toSet()
+                                .join(', '),
+                            style: const TextStyle(
+                              fontSize: 16,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            maxLines: 1,
+                          ),
+                        );
+                      },
+                    ).toList();
+                  },
+                  buttonStyleData: ButtonStyleData(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    height: 35,
+                    width: 240,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(3),
+                      color: OnepieceColors.liteFancyGreen,
+                    ),
+                  ),
+                  menuItemStyleData: const MenuItemStyleData(
+                    height: 35,
+                  ),
+                  items:
+                      GroupCategory.values.map((GroupCategory groupCategory) {
+                    return DropdownMenuItem<GroupCategory>(
+                      value: groupCategory,
+                      enabled: false,
+                      child: StatefulBuilder(
+                        builder: (context, menuSetState) {
+                          final isSelected =
+                              selectedGroupCategories.contains(groupCategory);
+                          return InkWell(
+                            hoverColor: Colors.transparent,
+                            splashColor: Colors.transparent,
+                            onTap: () {
+                              isSelected
+                                  ? selectedGroupCategories
+                                      .remove(groupCategory)
+                                  : selectedGroupCategories.add(groupCategory);
+                              groupFilter.groupCategories =
+                                  selectedGroupCategories;
+                              // //This rebuilds the StatefulWidget to update the button's text
+                              setState(() {});
+                              //This rebuilds the dropdownMenu Widget to update the check mark
+                              menuSetState(() {});
+                              _search(true);
+                            },
+                            child: Container(
+                              height: double.infinity,
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 3.0),
+                              child: Row(
+                                children: [
+                                  if (isSelected)
+                                    const Icon(Icons.check_box_outlined)
+                                  else
+                                    const Icon(Icons.check_box_outline_blank),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      enumValueToDisplayValue[groupCategory]!,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     );
-                  },
-                ).toList();
-              },
-              buttonStyleData: ButtonStyleData(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                height: 35,
-                width: 240,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(3),
-                  color: OnepieceColors.liteFancyGreen,
+                  }).toList(),
                 ),
               ),
-              menuItemStyleData: const MenuItemStyleData(
-                height: 35,
-              ),
-              items: GroupCategory.values.map((GroupCategory groupCategory) {
-                return DropdownMenuItem<GroupCategory>(
-                  value: groupCategory,
-                  enabled: false,
-                  child: StatefulBuilder(
-                    builder: (context, menuSetState) {
-                      final isSelected =
-                          selectedGroupCategories.contains(groupCategory);
-                      return InkWell(
-                        hoverColor: Colors.transparent,
-                        splashColor: Colors.transparent,
-                        onTap: () {
-                          isSelected
-                              ? selectedGroupCategories.remove(groupCategory)
-                              : selectedGroupCategories.add(groupCategory);
-                          groupFilter.groupCategories = selectedGroupCategories;
-                          // //This rebuilds the StatefulWidget to update the button's text
-                          setState(() {});
-                          //This rebuilds the dropdownMenu Widget to update the check mark
-                          menuSetState(() {});
-                          _search(true);
-                        },
-                        child: Container(
-                          height: double.infinity,
-                          padding: const EdgeInsets.symmetric(horizontal: 3.0),
-                          child: Row(
-                            children: [
-                              if (isSelected)
-                                const Icon(Icons.check_box_outlined)
-                              else
-                                const Icon(Icons.check_box_outline_blank),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  enumValueToDisplayValue[groupCategory]!,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-        ],
-      ),
-      Row(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
-            child: SizedBox(
-              height: 35,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    AppLocalizations.of(context)!.systemResource,
-                    style: OnepieceFonts.smallContentStyle,
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      setState(() {
-                        onlyShowSystemResource = !onlyShowSystemResource;
-                        if (donNotShowSystemResource) {
-                          donNotShowSystemResource = false;
-                        }
-                        if (onlyShowSystemResource) {
-                          groupFilter.onlySystem = true;
-                        } else {
-                          groupFilter.onlySystem = null;
-                        }
-                        _search(true);
-                      });
-                    },
-                    splashRadius: 1,
-                    icon: onlyShowSystemResource
-                        ? const Icon(
-                            Icons.check_box,
-                            color: OnepieceColors.fancyBlue,
-                            size: 20,
-                          )
-                        : const Icon(
-                            Icons.check_box_outline_blank,
-                            color: OnepieceColors.fancyBlue,
-                            size: 20,
-                          ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
-            child: SizedBox(
-              height: 35,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    AppLocalizations.of(context)!.noSystemResource,
-                    style: OnepieceFonts.smallContentStyle,
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      setState(() {
-                        donNotShowSystemResource = !donNotShowSystemResource;
-                        if (onlyShowSystemResource) {
-                          onlyShowSystemResource = false;
-                        }
-                        if (donNotShowSystemResource) {
-                          groupFilter.onlySystem = false;
-                        } else {
-                          groupFilter.onlySystem = null;
-                        }
-                        _search(true);
-                      });
-                    },
-                    splashRadius: 1,
-                    icon: donNotShowSystemResource
-                        ? const Icon(
-                            Icons.check_box,
-                            color: OnepieceColors.fancyBlue,
-                            size: 20,
-                          )
-                        : const Icon(
-                            Icons.check_box_outline_blank,
-                            color: OnepieceColors.fancyBlue,
-                            size: 20,
-                          ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    ]);
+            ],
+          )
+        ]);
   }
 
   DataTable _createGroupTable(BuildContext context) {

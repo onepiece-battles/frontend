@@ -60,7 +60,7 @@ try {
 
 ## Documentation for API Endpoints
 
-All URIs are relative to *https://onepiece-battles.com*
+All URIs are relative to *http://localhost:8080*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
@@ -101,6 +101,7 @@ Class | Method | HTTP request | Description
 *RoleApi* | [**addRole**](doc//RoleApi.md#addrole) | **POST** /api/onepiece/iam/add_role | 
 *RoleApi* | [**assignResourceToRole**](doc//RoleApi.md#assignresourcetorole) | **POST** /api/onepiece/iam/assign_resource_permissions_to_role | 
 *SupportApi* | [**batchCreateFruit**](doc//SupportApi.md#batchcreatefruit) | **POST** /api/onepiece/support/batch_create_fruit | 
+*SupportApi* | [**updateCharacterBasic**](doc//SupportApi.md#updatecharacterbasic) | **POST** /api/onepiece/support/update_character_basic | Update Character Basic Information
 *SupportApi* | [**updateUri**](doc//SupportApi.md#updateuri) | **POST** /api/onepiece/support/update_uri | 
 *UserApi* | [**assignRole**](doc//UserApi.md#assignrole) | **POST** /api/onepiece/user/assign_role | 
 *UserApi* | [**getUser**](doc//UserApi.md#getuser) | **POST** /api/onepiece/user/get | 

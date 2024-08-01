@@ -6,6 +6,7 @@ import 'package:one_piece_battles_flutter/constants/onepiece_tag.dart';
 import 'package:one_piece_battles_flutter/repository/support_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
+import 'package:toggle_switch/toggle_switch.dart';
 import '../../components/image_lazy_loader.dart';
 import '../../constants/button_style.dart';
 import '../../constants/onepiece_colors.dart';
@@ -33,7 +34,6 @@ class _FruitViewState extends State<FruitView> {
 
   TextEditingController pageNumberController = TextEditingController(text: "0");
   TextEditingController searchNameController = TextEditingController();
-  ScrollController horizontalController = ScrollController();
 
   // first all columns will be sorted by creation id desc.
   Map<FruitSortableFieldsEnum, SortOrder?> sortableEnumToSortOrderMap = {
@@ -48,6 +48,10 @@ class _FruitViewState extends State<FruitView> {
     SortOrder.ASC: 'images/svgs/sort-up-solid.svg',
     SortOrder.DESC: 'images/svgs/sort-down-solid.svg'
   };
+  ScrollController mainController = ScrollController();
+  ScrollController controlBarController = ScrollController();
+  ScrollController tableController = ScrollController();
+  int initialLabelIndex = 0;
   int selectedPageNum = 1;
   int totalPageNum = 0;
   int itemCountPerPage = 10;
@@ -113,28 +117,36 @@ class _FruitViewState extends State<FruitView> {
           Expanded(
               child: SingleChildScrollView(
             scrollDirection: Axis.vertical,
-            child: Scrollbar(
-              thumbVisibility: true,
-              controller: horizontalController,
-              child: SingleChildScrollView(
-                controller: horizontalController,
-                scrollDirection: Axis.horizontal,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _getHeaderText(context),
-                    SizedBox(
-                      width: 1400,
-                      height: 50,
-                      child: _getControlRow(context),
-                    ),
-                    _getFruitsTable(context),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                  ],
+            controller: mainController,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _getHeaderText(context),
+                SizedBox(
+                    width: 1400,
+                    height: 90,
+                    child: Scrollbar(
+                      controller: controlBarController,
+                      trackVisibility: true,
+                      thickness: 5,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: _getControlRow(context),
+                      ),
+                    )),
+                Scrollbar(
+                  controller: tableController,
+                  trackVisibility: true,
+                  thickness: 5,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: _getFruitsTable(context),
+                  ),
                 ),
-              ),
+                const SizedBox(
+                  height: 15,
+                ),
+              ],
             ),
           )),
           const SizedBox(
@@ -165,9 +177,9 @@ class _FruitViewState extends State<FruitView> {
   Widget _getControlRow(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.end,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
@@ -202,6 +214,7 @@ class _FruitViewState extends State<FruitView> {
                       _search(true);
                     },
                     decoration: InputDecoration(
+                      labelStyle: OnepieceFonts.dropDownItemStyle,
                       floatingLabelBehavior: FloatingLabelBehavior.never,
                       disabledBorder: const OutlineInputBorder(
                           borderSide:
@@ -210,8 +223,8 @@ class _FruitViewState extends State<FruitView> {
                           borderSide:
                               BorderSide(color: OnepieceColors.menuHoverColor)),
                       focusedBorder: const OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: OnepieceColors.fancyGreen)),
+                          borderSide: BorderSide(
+                              color: OnepieceColors.fancyGreen, width: 1.5)),
                       prefixIcon: IconButton(
                           onPressed: () {
                             fruitFilter.name = searchNameController.text;
@@ -223,99 +236,67 @@ class _FruitViewState extends State<FruitView> {
                   ),
                 ),
               ),
-              _getFruitTypeFilter(context),
             ],
+          ),
+          const SizedBox(
+            height: 10,
           ),
           Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(40, 0, 20, 0),
-                child: SizedBox(
-                  height: 35,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        AppLocalizations.of(context)!.systemResource,
-                        style: OnepieceFonts.smallContentStyle,
-                      ),
-                      IconButton(
-                        onPressed: () {
-                          setState(() {
-                            onlyShowSystemResource = !onlyShowSystemResource;
-                            if (donNotShowSystemResource) {
-                              donNotShowSystemResource = false;
-                            }
-                            if (onlyShowSystemResource) {
-                              fruitFilter.onlySystem = true;
-                            } else {
-                              fruitFilter.onlySystem = null;
-                            }
-                            _search(true);
-                          });
-                        },
-                        splashRadius: 1,
-                        icon: onlyShowSystemResource
-                            ? const Icon(
-                                Icons.check_box,
-                                color: OnepieceColors.fancyBlue,
-                                size: 20,
-                              )
-                            : const Icon(
-                                Icons.check_box_outline_blank,
-                                color: OnepieceColors.fancyBlue,
-                                size: 20,
-                              ),
-                      ),
-                    ],
-                  ),
+              SizedBox(
+                height: 36,
+                child: ToggleSwitch(
+                  customWidths: const [150, 150, 150, 180],
+                  cornerRadius: 4,
+                  minWidth: 150.0,
+                  minHeight: 35.0,
+                  fontSize: 14.0,
+                  dividerColor: Colors.white,
+                  initialLabelIndex: initialLabelIndex,
+                  activeBgColor: const [OnepieceColors.fancyBlue],
+                  activeFgColor: Colors.white,
+                  inactiveBgColor: OnepieceColors.liteFancyGreen,
+                  inactiveFgColor: Colors.grey[600],
+                  totalSwitches: 4,
+                  labels: [
+                    AppLocalizations.of(context)!.allResources,
+                    AppLocalizations.of(context)!.myResource,
+                    AppLocalizations.of(context)!.systemResource,
+                    AppLocalizations.of(context)!.excludeSystem
+                  ],
+                  onToggle: (index) {
+                    initialLabelIndex = index!;
+                    // show all resources
+                    if (index == 0) {
+                      fruitFilter.systemResource = null;
+                      fruitFilter.userId = null;
+                    }
+                    // show my resource
+                    if (index == 1) {
+                      fruitFilter.systemResource = null;
+                      fruitFilter.userId = getIt<User>().id;
+                    }
+                    // only show system resource
+                    if (index == 2) {
+                      fruitFilter.systemResource = true;
+                      fruitFilter.userId = null;
+                    }
+                    // do not show system resource
+                    if (index == 3) {
+                      fruitFilter.systemResource = false;
+                      fruitFilter.userId = null;
+                    }
+                    _search(true);
+                  },
                 ),
               ),
-              SizedBox(
-                height: 35,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      AppLocalizations.of(context)!.noSystemResource,
-                      style: OnepieceFonts.smallContentStyle,
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        setState(() {
-                          donNotShowSystemResource = !donNotShowSystemResource;
-                          if (onlyShowSystemResource) {
-                            onlyShowSystemResource = false;
-                          }
-                          if (donNotShowSystemResource) {
-                            fruitFilter.onlySystem = false;
-                          } else {
-                            fruitFilter.onlySystem = null;
-                          }
-                          _search(true);
-                        });
-                      },
-                      splashRadius: 1,
-                      icon: donNotShowSystemResource
-                          ? const Icon(
-                              Icons.check_box,
-                              color: OnepieceColors.fancyBlue,
-                              size: 20,
-                            )
-                          : const Icon(
-                              Icons.check_box_outline_blank,
-                              color: OnepieceColors.fancyBlue,
-                              size: 20,
-                            ),
-                    ),
-                  ],
-                ),
-              )
+              const SizedBox(
+                width: 10,
+              ),
+              _getFruitTypeFilter(context)
             ],
-          ),
+          )
         ],
       ),
     );
@@ -368,7 +349,7 @@ class _FruitViewState extends State<FruitView> {
             width: 280,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(3),
-              color: OnepieceColors.menuBackgroundColor,
+              color: OnepieceColors.liteFancyGreen,
             )),
         menuItemStyleData: const MenuItemStyleData(
           height: 35,
