@@ -10,6 +10,7 @@ import 'package:one_piece_battles_flutter/utils/date_helper.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
 import 'package:logging/logging.dart';
+import 'package:toggle_switch/toggle_switch.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
 import '../../utils/base64_helper.dart';
@@ -40,7 +41,9 @@ class _BattleViewState extends State<BattleView> {
   List<BattleType> selectedBattleTypes = [];
   List<BattleStatus> selectedBattleStatus = [];
 
-  ScrollController horizontalController = ScrollController();
+  ScrollController mainController = ScrollController();
+  ScrollController controlBarController = ScrollController();
+  ScrollController tableController = ScrollController();
 
   // first all columns will be sorted by creation id desc.
   Map<BattleSortableFieldsEnum, SortOrder?> sortableEnumToSortOrderMap = {
@@ -57,7 +60,7 @@ class _BattleViewState extends State<BattleView> {
   };
 
   List<BattleSortableField> sortKeys = [];
-
+  int initialLabelIndex = 0;
   int selectedPageNum = 1;
   int totalPageNum = 0;
   int itemCountPerPage = 10;
@@ -122,38 +125,42 @@ class _BattleViewState extends State<BattleView> {
           Expanded(
             child: SingleChildScrollView(
               scrollDirection: Axis.vertical,
-              child: Scrollbar(
-                thumbVisibility: true,
-                controller: horizontalController,
-                child: SingleChildScrollView(
-                  controller: horizontalController,
-                  scrollDirection: Axis.horizontal,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _getHeaderText(context),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(
-                            width: 1220,
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                child: _getControlRow(context),
-                              ),
-                            ),
-                          ),
-                          _getBattlesTable(context),
-                          const SizedBox(
-                            height: 15,
-                          )
-                        ],
+              controller: mainController,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _getHeaderText(context),
+                  SizedBox(
+                    width: 1220,
+                    height: 90,
+                    child: Scrollbar(
+                      controller: controlBarController,
+                      trackVisibility: true,
+                      thickness: 5,
+                      child: SingleChildScrollView(
+                        controller: controlBarController,
+                        scrollDirection: Axis.horizontal,
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: _getControlRow(context),
+                        ),
                       ),
-                    ],
+                    ),
                   ),
-                ),
+                  Scrollbar(
+                    controller: tableController,
+                    trackVisibility: true,
+                    thickness: 5,
+                    child:
+                    SingleChildScrollView(
+                      controller: tableController,
+                      scrollDirection: Axis.horizontal,
+                      child:_getBattlesTable(context),),
+                  ),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                ],
               ),
             ),
           ),
@@ -185,9 +192,9 @@ class _BattleViewState extends State<BattleView> {
   Widget _getControlRow(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
@@ -222,19 +229,19 @@ class _BattleViewState extends State<BattleView> {
                       _search(true);
                     },
                     decoration: InputDecoration(
-                      floatingLabelBehavior: FloatingLabelBehavior.never,
-                      disabledBorder: const OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: OnepieceColors.menuHoverColor)),
-                      enabledBorder: const OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: OnepieceColors.menuHoverColor)),
-                      focusedBorder: const OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: OnepieceColors.fancyGreen)),
-                      prefixIcon: const Icon(Icons.search),
-                      labelText: AppLocalizations.of(context)!.starterName,
-                    ),
+                        floatingLabelBehavior: FloatingLabelBehavior.never,
+                        disabledBorder: const OutlineInputBorder(
+                            borderSide: BorderSide(
+                                color: OnepieceColors.menuHoverColor)),
+                        enabledBorder: const OutlineInputBorder(
+                            borderSide: BorderSide(
+                                color: OnepieceColors.menuHoverColor,)),
+                        focusedBorder: const OutlineInputBorder(
+                            borderSide:
+                                BorderSide(color: OnepieceColors.fancyGreen, width: 1.5),),
+                        prefixIcon: const Icon(Icons.search),
+                        labelText: AppLocalizations.of(context)!.starterName,
+                        labelStyle: OnepieceFonts.dropDownItemStyle),
                   ),
                 ),
               ),
@@ -250,6 +257,7 @@ class _BattleViewState extends State<BattleView> {
                       _search(true);
                     },
                     decoration: InputDecoration(
+                      labelStyle: OnepieceFonts.dropDownItemStyle,
                       floatingLabelBehavior: FloatingLabelBehavior.never,
                       disabledBorder: const OutlineInputBorder(
                           borderSide:
@@ -259,108 +267,76 @@ class _BattleViewState extends State<BattleView> {
                               BorderSide(color: OnepieceColors.menuHoverColor)),
                       focusedBorder: const OutlineInputBorder(
                           borderSide:
-                              BorderSide(color: OnepieceColors.fancyGreen)),
+                              BorderSide(color: OnepieceColors.fancyGreen, width: 1.5)),
                       prefixIcon: const Icon(Icons.search),
                       labelText: AppLocalizations.of(context)!.receiverName,
                     ),
                   ),
                 ),
               ),
+            ],
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              SizedBox(
+                height: 36,
+                child: ToggleSwitch(
+                  customWidths: const [150, 150, 150, 180],
+                  cornerRadius: 4,
+                  minWidth: 150.0,
+                  minHeight: 35.0,
+                  fontSize: 14.0,
+                  dividerColor: Colors.white,
+                  initialLabelIndex: initialLabelIndex,
+                  activeBgColor: const [OnepieceColors.fancyBlue],
+                  activeFgColor: Colors.white,
+                  inactiveBgColor: OnepieceColors.liteFancyGreen,
+                  inactiveFgColor: Colors.grey[600],
+                  totalSwitches: 4,
+                  labels: [
+                    AppLocalizations.of(context)!.allResources,
+                    AppLocalizations.of(context)!.myResource,
+                    AppLocalizations.of(context)!.systemResource,
+                    AppLocalizations.of(context)!.excludeSystem
+                  ],
+                  onToggle: (index) {
+                    initialLabelIndex = index!;
+                    // show all resources
+                    if (index == 0) {
+                      battleFilter.systemResource = null;
+                      battleFilter.userId = null;
+                    }
+                    // show my resource
+                    if (index == 1) {
+                      battleFilter.systemResource = null;
+                      battleFilter.userId = getIt<User>().id;
+                    }
+                    // only show system resource
+                    if (index == 2) {
+                      battleFilter.systemResource = true;
+                      battleFilter.userId = null;
+                    }
+                    // do not show system resource
+                    if (index == 3) {
+                      battleFilter.systemResource = false;
+                      battleFilter.userId = null;
+                    }
+                    _search(true);
+                  },
+                ),
+              ),
+              const SizedBox(
+                width: 10,
+              ),
               // will be displayed later
               // _getBattleTypeFilter(context),
               _getBattleStatusFilter(context),
             ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(40, 0, 20, 0),
-                child: SizedBox(
-                  height: 35,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        AppLocalizations.of(context)!.systemResource,
-                        style: OnepieceFonts.smallContentStyle,
-                      ),
-                      IconButton(
-                        onPressed: () {
-                          setState(() {
-                            onlyShowSystemResource = !onlyShowSystemResource;
-                            if (donNotShowSystemResource) {
-                              donNotShowSystemResource = false;
-                            }
-                            if (onlyShowSystemResource) {
-                              battleFilter.onlySystem = true;
-                            } else {
-                              battleFilter.onlySystem = null;
-                            }
-                            _search(true);
-                          });
-                        },
-                        splashRadius: 1,
-                        icon: onlyShowSystemResource
-                            ? const Icon(
-                                Icons.check_box,
-                                color: OnepieceColors.fancyBlue,
-                                size: 20,
-                              )
-                            : const Icon(
-                                Icons.check_box_outline_blank,
-                                color: OnepieceColors.fancyBlue,
-                                size: 20,
-                              ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(
-                height: 35,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      AppLocalizations.of(context)!.noSystemResource,
-                      style: OnepieceFonts.smallContentStyle,
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        setState(() {
-                          donNotShowSystemResource = !donNotShowSystemResource;
-                          if (onlyShowSystemResource) {
-                            onlyShowSystemResource = false;
-                          }
-                          if (donNotShowSystemResource) {
-                            battleFilter.onlySystem = false;
-                          } else {
-                            battleFilter.onlySystem = null;
-                          }
-                          _search(true);
-                        });
-                      },
-                      splashRadius: 1,
-                      icon: donNotShowSystemResource
-                          ? const Icon(
-                              Icons.check_box,
-                              color: OnepieceColors.fancyBlue,
-                              size: 20,
-                            )
-                          : const Icon(
-                              Icons.check_box_outline_blank,
-                              color: OnepieceColors.fancyBlue,
-                              size: 20,
-                            ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+          )
         ],
       ),
     );
@@ -516,7 +492,7 @@ class _BattleViewState extends State<BattleView> {
               width: 250,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(3),
-                color: OnepieceColors.menuBackgroundColor,
+                color: OnepieceColors.liteFancyGreen,
               )),
           menuItemStyleData: const MenuItemStyleData(
             height: 35,

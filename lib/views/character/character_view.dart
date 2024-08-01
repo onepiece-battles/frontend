@@ -12,6 +12,7 @@ import 'package:one_piece_battles_flutter/repository/character_dao.dart';
 import 'package:one_piece_battles_flutter/utils/data_validator.dart';
 import 'package:one_piece_battles_flutter/utils/permission_check.dart';
 import 'package:openapi/api.dart';
+import 'package:toggle_switch/toggle_switch.dart';
 import '../../constants/button_style.dart';
 import '../../constants/onepiece_tag.dart';
 import '../../utils/i18n_helper.dart';
@@ -60,7 +61,8 @@ class _CharacterViewState extends State<CharacterView>
   List<Race> selectedRaces = [];
   List<Haki> selectedHakis = [];
   ScrollController scrollController = ScrollController();
-  ScrollController horizontalController = ScrollController();
+  ScrollController controlPanelController = ScrollController();
+  ScrollController tableController = ScrollController();
 
   int selectedPageNum = 1;
   int totalPageNum = 0;
@@ -70,10 +72,11 @@ class _CharacterViewState extends State<CharacterView>
   bool nextButtonEnabled = false;
   bool confirmButtonEnabled = false;
 
-  bool onlyShowSystemResource = false;
+  bool? onlyShowSystemResource = false;
   bool donNotShowSystemResource = false;
   bool fruitOwnersOnly = false;
 
+  int initialLabelIndex = 0;
   @override
   void initState() {
     super.initState();
@@ -128,34 +131,40 @@ class _CharacterViewState extends State<CharacterView>
               child: SingleChildScrollView(
             controller: scrollController,
             scrollDirection: Axis.vertical,
-            child: Scrollbar(
-              thumbVisibility: true,
-              controller: horizontalController,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                controller: horizontalController,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _createHeader(context),
-                    SizedBox(
-                      width: 1900,
-                      height: 50,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _createHeader(context),
+                SizedBox(
+                    width: 1900,
+                    height: 90,
+                    child: Scrollbar(
+                      controller: controlPanelController,
+                      trackVisibility: true,
+                      thickness: 5,
                       child: SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
+                        controller: controlPanelController,
                         child: Padding(
-                          padding: const EdgeInsets.only(bottom: 5.0),
+                          padding: const EdgeInsets.only(bottom: 6.0),
                           child: _createControlPanel(context),
                         ),
                       ),
-                    ),
-                    _createCharacterTable(context),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                  ],
+                    )),
+                Scrollbar(
+                  trackVisibility: true,
+                  thickness: 5,
+                  controller: tableController,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    controller: tableController,
+                    child: _createCharacterTable(context),
+                  ),
                 ),
-              ),
+                const SizedBox(
+                  height: 15,
+                ),
+              ],
             ),
           )),
           const SizedBox(
@@ -215,478 +224,413 @@ class _CharacterViewState extends State<CharacterView>
       Haki.haoshoku: AppLocalizations.of(context)!.haoshoku,
       Haki.kenbunshoku: AppLocalizations.of(context)!.kenbunshoku,
     };
-    return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-      Row(
+    return Column(
         mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (PermissionCheck.checkPermission(
-              getIt<User>().loginRoleResourcesPermissionMap,
-              ResourceType.CHARACTER,
-              Permission.CREATE))
-            SizedBox(
-              height: 35,
-              width: 120,
-              child: Padding(
-                padding: const EdgeInsets.only(right: 10.0),
-                child: ElevatedButton(
-                    onPressed: () {
-                      context.goNamed("createCharacter");
-                    },
-                    style: OnepieceButtonStyle.getDefaultStyle(),
-                    child: Text(
-                      AppLocalizations.of(context)!.create,
-                    )),
-              ),
-            ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(0, 0, 6, 0),
-            child: SizedBox(
-              width: 200,
-              height: 35,
-              child: TextFormField(
-                controller: searchNameController,
-                onChanged: (value) {
-                  characterFilter.name = value;
-                  _search(true);
-                },
-                decoration: InputDecoration(
-                  floatingLabelBehavior: FloatingLabelBehavior.never,
-                  disabledBorder: const OutlineInputBorder(
-                      borderSide:
-                          BorderSide(color: OnepieceColors.menuHoverColor)),
-                  enabledBorder: const OutlineInputBorder(
-                      borderSide:
-                          BorderSide(color: OnepieceColors.menuHoverColor)),
-                  focusedBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
-                  prefixIcon: const Icon(Icons.search),
-                  labelText: AppLocalizations.of(context)!.name,
-                ),
-              ),
-            ),
-          ),
-          DropdownButtonHideUnderline(
-            child: DropdownButton2(
-              isExpanded: true,
-              value: selectedBattleStyles.isEmpty
-                  ? null
-                  : selectedBattleStyles.last,
-              hint: Text(
-                AppLocalizations.of(context)!.battleStyle,
-                style: OnepieceFonts.dropDownItemStyle,
-              ),
-              onChanged: (value) {},
-              selectedItemBuilder: (context) {
-                return BattleStyle.values.map(
-                  (item) {
-                    return Container(
-                      alignment: AlignmentDirectional.center,
-                      child: Text(
-                        selectedBattleStyles
-                            .map((selectedType) {
-                              return battleStyleToDisplayValue[selectedType];
-                            })
-                            .toSet()
-                            .join(', '),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        maxLines: 1,
-                      ),
-                    );
-                  },
-                ).toList();
-              },
-              buttonStyleData: ButtonStyleData(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                height: 35,
-                width: 200,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(3),
-                  color: OnepieceColors.liteFancyGreen,
-                ),
-              ),
-              menuItemStyleData: const MenuItemStyleData(
-                height: 35,
-              ),
-              items: BattleStyle.values.map((BattleStyle battleStyle) {
-                return DropdownMenuItem<BattleStyle>(
-                  value: battleStyle,
-                  enabled: false,
-                  child: StatefulBuilder(
-                    builder: (context, menuSetState) {
-                      final isSelected =
-                          selectedBattleStyles.contains(battleStyle);
-                      return InkWell(
-                        hoverColor: Colors.transparent,
-                        splashColor: Colors.transparent,
-                        onTap: () {
-                          isSelected
-                              ? selectedBattleStyles.remove(battleStyle)
-                              : selectedBattleStyles.add(battleStyle);
-                          characterFilter.battleStyles = selectedBattleStyles;
-                          // //This rebuilds the StatefulWidget to update the button's text
-                          setState(() {});
-                          //This rebuilds the dropdownMenu Widget to update the check mark
-                          menuSetState(() {});
-                          _search(true);
+          Row(
+            children: [
+              if (PermissionCheck.checkPermission(
+                  getIt<User>().loginRoleResourcesPermissionMap,
+                  ResourceType.CHARACTER,
+                  Permission.CREATE))
+                SizedBox(
+                  height: 35,
+                  width: 120,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 10.0),
+                    child: ElevatedButton(
+                        onPressed: () {
+                          context.goNamed("createCharacter");
                         },
-                        child: Container(
-                          height: double.infinity,
-                          padding: const EdgeInsets.symmetric(horizontal: 3.0),
-                          child: Row(
-                            children: [
-                              if (isSelected)
-                                const Icon(Icons.check_box_outlined)
-                              else
-                                const Icon(Icons.check_box_outline_blank),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  battleStyleToDisplayValue[battleStyle]!,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
+                        style: OnepieceButtonStyle.getDefaultStyle(),
+                        child: Text(
+                          AppLocalizations.of(context)!.create,
+                        )),
                   ),
-                );
-              }).toList(),
-            ),
-          ),
-          const SizedBox(
-            width: 6,
-          ),
-          DropdownButtonHideUnderline(
-            child: DropdownButton2(
-              isExpanded: true,
-              value: selectedHakis.isEmpty ? null : selectedHakis.last,
-              hint: Text(
-                AppLocalizations.of(context)!.hakis,
-                style: OnepieceFonts.dropDownItemStyle,
-              ),
-              onChanged: (value) {},
-              selectedItemBuilder: (context) {
-                return Haki.values.map(
-                  (item) {
-                    return Container(
-                      alignment: AlignmentDirectional.center,
-                      child: Text(
-                        selectedHakis
-                            .map((selectedType) {
-                              return hakiEnumValueToDisplayValue[selectedType];
-                            })
-                            .toSet()
-                            .join(', '),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        maxLines: 1,
-                      ),
-                    );
-                  },
-                ).toList();
-              },
-              buttonStyleData: ButtonStyleData(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                height: 35,
-                width: 200,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(3),
-                  color: OnepieceColors.liteFancyGreen,
                 ),
-              ),
-              menuItemStyleData: const MenuItemStyleData(
-                height: 35,
-              ),
-              items: Haki.values.map((Haki haki) {
-                return DropdownMenuItem<Haki>(
-                  value: haki,
-                  enabled: false,
-                  child: StatefulBuilder(
-                    builder: (context, menuSetState) {
-                      final isSelected = selectedHakis.contains(haki);
-                      return InkWell(
-                        hoverColor: Colors.transparent,
-                        splashColor: Colors.transparent,
-                        onTap: () {
-                          isSelected
-                              ? selectedHakis.remove(haki)
-                              : selectedHakis.add(haki);
-                          characterFilter.hakis = selectedHakis;
-                          debugPrint('$selectedHakis');
-                          // //This rebuilds the StatefulWidget to update the button's text
-                          setState(() {});
-                          //This rebuilds the dropdownMenu Widget to update the check mark
-                          menuSetState(() {});
-                          _search(true);
-                        },
-                        child: Container(
-                          height: double.infinity,
-                          padding: const EdgeInsets.symmetric(horizontal: 3.0),
-                          child: Row(
-                            children: [
-                              if (isSelected)
-                                const Icon(Icons.check_box_outlined)
-                              else
-                                const Icon(Icons.check_box_outline_blank),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  hakiEnumValueToDisplayValue[haki]!,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-          const SizedBox(
-            width: 6,
-          ),
-          DropdownButtonHideUnderline(
-            child: DropdownButton2(
-              isExpanded: true,
-              value: selectedRaces.isEmpty ? null : selectedRaces.last,
-              hint: Text(
-                AppLocalizations.of(context)!.race,
-                style: OnepieceFonts.dropDownItemStyle,
-              ),
-              onChanged: (value) {},
-              selectedItemBuilder: (context) {
-                return Race.values.map(
-                  (item) {
-                    return Container(
-                      alignment: AlignmentDirectional.center,
-                      child: Text(
-                        selectedRaces
-                            .map((selectedRace) {
-                              return raceEnumToDisplayName[selectedRace];
-                            })
-                            .toSet()
-                            .join(', '),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        maxLines: 1,
-                      ),
-                    );
-                  },
-                ).toList();
-              },
-              buttonStyleData: ButtonStyleData(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                height: 35,
-                width: 250,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(3),
-                  color: OnepieceColors.liteFancyGreen,
-                ),
-              ),
-              menuItemStyleData: const MenuItemStyleData(
-                height: 35,
-              ),
-              items: Race.values.map((Race race) {
-                return DropdownMenuItem<Race>(
-                  value: race,
-                  enabled: false,
-                  child: StatefulBuilder(
-                    builder: (context, menuSetState) {
-                      final isSelected = selectedRaces.contains(race);
-                      return InkWell(
-                        hoverColor: Colors.transparent,
-                        splashColor: Colors.transparent,
-                        onTap: () {
-                          isSelected
-                              ? selectedRaces.remove(race)
-                              : selectedRaces.add(race);
-                          characterFilter.races = selectedRaces;
-                          // //This rebuilds the StatefulWidget to update the button's text
-                          setState(() {});
-                          //This rebuilds the dropdownMenu Widget to update the check mark
-                          menuSetState(() {});
-                          _search(true);
-                        },
-                        child: Container(
-                          height: double.infinity,
-                          padding: const EdgeInsets.symmetric(horizontal: 3.0),
-                          child: Row(
-                            children: [
-                              if (isSelected)
-                                const Icon(Icons.check_box_outlined)
-                              else
-                                const Icon(Icons.check_box_outline_blank),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  raceEnumToDisplayName[race]!,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-        ],
-      ),
-      const SizedBox(
-        width: 60,
-      ),
-      Row(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
-            child: SizedBox(
-              height: 35,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    AppLocalizations.of(context)!.systemResource,
-                    style: OnepieceFonts.smallContentStyle,
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      setState(() {
-                        onlyShowSystemResource = !onlyShowSystemResource;
-                        if (donNotShowSystemResource) {
-                          donNotShowSystemResource = false;
-                        }
-                        if (onlyShowSystemResource) {
-                          characterFilter.onlySystem = true;
-                        } else {
-                          characterFilter.onlySystem = null;
-                        }
-                        _search(true);
-                      });
-                    },
-                    splashRadius: 1,
-                    icon: onlyShowSystemResource
-                        ? const Icon(
-                            Icons.check_box,
-                            color: OnepieceColors.fancyBlue,
-                            size: 20,
-                          )
-                        : const Icon(
-                            Icons.check_box_outline_blank,
-                            color: OnepieceColors.fancyBlue,
-                            size: 20,
-                          ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
-            child: SizedBox(
-              height: 35,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    AppLocalizations.of(context)!.noSystemResource,
-                    style: OnepieceFonts.smallContentStyle,
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      setState(() {
-                        donNotShowSystemResource = !donNotShowSystemResource;
-                        if (onlyShowSystemResource) {
-                          onlyShowSystemResource = false;
-                        }
-                        if (donNotShowSystemResource) {
-                          characterFilter.onlySystem = false;
-                        } else {
-                          characterFilter.onlySystem = null;
-                        }
-                        _search(true);
-                      });
-                    },
-                    splashRadius: 1,
-                    icon: donNotShowSystemResource
-                        ? const Icon(
-                            Icons.check_box,
-                            color: OnepieceColors.fancyBlue,
-                            size: 20,
-                          )
-                        : const Icon(
-                            Icons.check_box_outline_blank,
-                            color: OnepieceColors.fancyBlue,
-                            size: 20,
-                          ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          SizedBox(
-            height: 35,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  AppLocalizations.of(context)!.fruitOwner,
-                  style: OnepieceFonts.smallContentStyle,
-                ),
-                IconButton(
-                  onPressed: () {
-                    setState(() {
-                      fruitOwnersOnly = !fruitOwnersOnly;
-                      if (fruitOwnersOnly) {
-                        characterFilter.hasFruit = true;
-                      } else {
-                        characterFilter.hasFruit = null;
-                      }
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 0, 6, 0),
+                child: SizedBox(
+                  width: 200,
+                  height: 35,
+                  child: TextFormField(
+                    controller: searchNameController,
+                    onChanged: (value) {
+                      characterFilter.name = value;
                       _search(true);
-                    });
-                  },
-                  splashRadius: 1,
-                  icon: fruitOwnersOnly
-                      ? const Icon(
-                          Icons.check_box,
-                          color: OnepieceColors.fancyBlue,
-                          size: 20,
-                        )
-                      : const Icon(
-                          Icons.check_box_outline_blank,
-                          color: OnepieceColors.fancyBlue,
-                          size: 20,
-                        ),
+                    },
+                    decoration: InputDecoration(
+                      labelStyle: OnepieceFonts.dropDownItemStyle,
+                      floatingLabelBehavior: FloatingLabelBehavior.never,
+                      disabledBorder: const OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: OnepieceColors.menuHoverColor)),
+                      enabledBorder: const OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: OnepieceColors.menuHoverColor)),
+                      focusedBorder: const OutlineInputBorder(
+                          borderSide: BorderSide(
+                              color: OnepieceColors.fancyGreen, width: 1.5)),
+                      prefixIcon: const Icon(Icons.search),
+                      labelText: AppLocalizations.of(context)!.name,
+                    ),
+                  ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
-    ]);
+          const SizedBox(
+            height: 10,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              SizedBox(
+                height: 36,
+                child: ToggleSwitch(
+                  customWidths: const [150, 150, 150, 180],
+                  cornerRadius: 4,
+                  minWidth: 150.0,
+                  minHeight: 35.0,
+                  fontSize: 14.0,
+                  dividerColor: Colors.white,
+                  initialLabelIndex: initialLabelIndex,
+                  activeBgColor: const [OnepieceColors.fancyBlue],
+                  activeFgColor: Colors.white,
+                  inactiveBgColor: OnepieceColors.liteFancyGreen,
+                  inactiveFgColor: Colors.grey[600],
+                  totalSwitches: 4,
+                  labels: [
+                    AppLocalizations.of(context)!.allResources,
+                    AppLocalizations.of(context)!.myResource,
+                    AppLocalizations.of(context)!.systemResource,
+                    AppLocalizations.of(context)!.excludeSystem
+                  ],
+                  onToggle: (index) {
+                    initialLabelIndex = index!;
+                    // show all resources
+                    if (index == 0) {
+                      characterFilter.systemResource = null;
+                      characterFilter.userId = null;
+                    }
+                    // show my resource
+                    if (index == 1) {
+                      characterFilter.systemResource = null;
+                      characterFilter.userId = getIt<User>().id;
+                    }
+                    // only show system resource
+                    if (index == 2) {
+                      characterFilter.systemResource = true;
+                      characterFilter.userId = null;
+                    }
+                    // do not show system resource
+                    if (index == 3) {
+                      characterFilter.systemResource = false;
+                      characterFilter.userId = null;
+                    }
+                    _search(true);
+                  },
+                ),
+              ),
+              const SizedBox(
+                width: 5,
+              ),
+              DropdownButtonHideUnderline(
+                child: DropdownButton2(
+                  isExpanded: true,
+                  value: selectedBattleStyles.isEmpty
+                      ? null
+                      : selectedBattleStyles.last,
+                  hint: Text(
+                    AppLocalizations.of(context)!.battleStyle,
+                    style: OnepieceFonts.dropDownItemStyle,
+                  ),
+                  onChanged: (value) {},
+                  selectedItemBuilder: (context) {
+                    return BattleStyle.values.map(
+                      (item) {
+                        return Container(
+                          alignment: AlignmentDirectional.center,
+                          child: Text(
+                            selectedBattleStyles
+                                .map((selectedType) {
+                                  return battleStyleToDisplayValue[
+                                      selectedType];
+                                })
+                                .toSet()
+                                .join(', '),
+                            style: const TextStyle(
+                              fontSize: 16,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            maxLines: 1,
+                          ),
+                        );
+                      },
+                    ).toList();
+                  },
+                  buttonStyleData: ButtonStyleData(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    height: 35,
+                    width: 200,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(3),
+                      color: OnepieceColors.liteFancyGreen,
+                    ),
+                  ),
+                  menuItemStyleData: const MenuItemStyleData(
+                    height: 35,
+                  ),
+                  items: BattleStyle.values.map((BattleStyle battleStyle) {
+                    return DropdownMenuItem<BattleStyle>(
+                      value: battleStyle,
+                      enabled: false,
+                      child: StatefulBuilder(
+                        builder: (context, menuSetState) {
+                          final isSelected =
+                              selectedBattleStyles.contains(battleStyle);
+                          return InkWell(
+                            hoverColor: Colors.transparent,
+                            splashColor: Colors.transparent,
+                            onTap: () {
+                              isSelected
+                                  ? selectedBattleStyles.remove(battleStyle)
+                                  : selectedBattleStyles.add(battleStyle);
+                              characterFilter.battleStyles =
+                                  selectedBattleStyles;
+                              // //This rebuilds the StatefulWidget to update the button's text
+                              setState(() {});
+                              //This rebuilds the dropdownMenu Widget to update the check mark
+                              menuSetState(() {});
+                              _search(true);
+                            },
+                            child: Container(
+                              height: double.infinity,
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 3.0),
+                              child: Row(
+                                children: [
+                                  if (isSelected)
+                                    const Icon(Icons.check_box_outlined)
+                                  else
+                                    const Icon(Icons.check_box_outline_blank),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      battleStyleToDisplayValue[battleStyle]!,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+              const SizedBox(
+                width: 6,
+              ),
+              DropdownButtonHideUnderline(
+                child: DropdownButton2(
+                  isExpanded: true,
+                  value: selectedHakis.isEmpty ? null : selectedHakis.last,
+                  hint: Text(
+                    AppLocalizations.of(context)!.hakis,
+                    style: OnepieceFonts.dropDownItemStyle,
+                  ),
+                  onChanged: (value) {},
+                  selectedItemBuilder: (context) {
+                    return Haki.values.map(
+                      (item) {
+                        return Container(
+                          alignment: AlignmentDirectional.center,
+                          child: Text(
+                            selectedHakis
+                                .map((selectedType) {
+                                  return hakiEnumValueToDisplayValue[
+                                      selectedType];
+                                })
+                                .toSet()
+                                .join(', '),
+                            style: const TextStyle(
+                              fontSize: 16,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            maxLines: 1,
+                          ),
+                        );
+                      },
+                    ).toList();
+                  },
+                  buttonStyleData: ButtonStyleData(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    height: 35,
+                    width: 200,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(3),
+                      color: OnepieceColors.liteFancyGreen,
+                    ),
+                  ),
+                  menuItemStyleData: const MenuItemStyleData(
+                    height: 35,
+                  ),
+                  items: Haki.values.map((Haki haki) {
+                    return DropdownMenuItem<Haki>(
+                      value: haki,
+                      enabled: false,
+                      child: StatefulBuilder(
+                        builder: (context, menuSetState) {
+                          final isSelected = selectedHakis.contains(haki);
+                          return InkWell(
+                            hoverColor: Colors.transparent,
+                            splashColor: Colors.transparent,
+                            onTap: () {
+                              isSelected
+                                  ? selectedHakis.remove(haki)
+                                  : selectedHakis.add(haki);
+                              characterFilter.hakis = selectedHakis;
+                              debugPrint('$selectedHakis');
+                              // //This rebuilds the StatefulWidget to update the button's text
+                              setState(() {});
+                              //This rebuilds the dropdownMenu Widget to update the check mark
+                              menuSetState(() {});
+                              _search(true);
+                            },
+                            child: Container(
+                              height: double.infinity,
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 3.0),
+                              child: Row(
+                                children: [
+                                  if (isSelected)
+                                    const Icon(Icons.check_box_outlined)
+                                  else
+                                    const Icon(Icons.check_box_outline_blank),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      hakiEnumValueToDisplayValue[haki]!,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+              const SizedBox(
+                width: 6,
+              ),
+              DropdownButtonHideUnderline(
+                child: DropdownButton2(
+                  isExpanded: true,
+                  value: selectedRaces.isEmpty ? null : selectedRaces.last,
+                  hint: Text(
+                    AppLocalizations.of(context)!.race,
+                    style: OnepieceFonts.dropDownItemStyle,
+                  ),
+                  onChanged: (value) {},
+                  selectedItemBuilder: (context) {
+                    return Race.values.map(
+                      (item) {
+                        return Container(
+                          alignment: AlignmentDirectional.center,
+                          child: Text(
+                            selectedRaces
+                                .map((selectedRace) {
+                                  return raceEnumToDisplayName[selectedRace];
+                                })
+                                .toSet()
+                                .join(', '),
+                            style: const TextStyle(
+                              fontSize: 16,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            maxLines: 1,
+                          ),
+                        );
+                      },
+                    ).toList();
+                  },
+                  buttonStyleData: ButtonStyleData(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    height: 35,
+                    width: 250,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(3),
+                      color: OnepieceColors.liteFancyGreen,
+                    ),
+                  ),
+                  menuItemStyleData: const MenuItemStyleData(
+                    height: 35,
+                  ),
+                  items: Race.values.map((Race race) {
+                    return DropdownMenuItem<Race>(
+                      value: race,
+                      enabled: false,
+                      child: StatefulBuilder(
+                        builder: (context, menuSetState) {
+                          final isSelected = selectedRaces.contains(race);
+                          return InkWell(
+                            hoverColor: Colors.transparent,
+                            splashColor: Colors.transparent,
+                            onTap: () {
+                              isSelected
+                                  ? selectedRaces.remove(race)
+                                  : selectedRaces.add(race);
+                              characterFilter.races = selectedRaces;
+                              // //This rebuilds the StatefulWidget to update the button's text
+                              setState(() {});
+                              //This rebuilds the dropdownMenu Widget to update the check mark
+                              menuSetState(() {});
+                              _search(true);
+                            },
+                            child: Container(
+                              height: double.infinity,
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 3.0),
+                              child: Row(
+                                children: [
+                                  if (isSelected)
+                                    const Icon(Icons.check_box_outlined)
+                                  else
+                                    const Icon(Icons.check_box_outline_blank),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      raceEnumToDisplayName[race]!,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ],
+          ),
+        ]);
   }
 
   DataTable _createCharacterTable(BuildContext context) {
@@ -940,7 +884,10 @@ class _CharacterViewState extends State<CharacterView>
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
                 child: Row(
-                  children: [...entry.value.hakis.toList()..sort((a, b) => a.toString().compareTo(b.toString()))]
+                  children: [
+                    ...entry.value.hakis.toList()
+                      ..sort((a, b) => a.toString().compareTo(b.toString()))
+                  ]
                       .map((e) => Padding(
                             padding: const EdgeInsets.only(right: 5),
                             child: OnepieceTag.getHakiTag(
@@ -969,8 +916,10 @@ class _CharacterViewState extends State<CharacterView>
                 padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
                 child: Text(
                   textAlign: TextAlign.right,
-                  entry.value.bounty==null?"":entry.value.bounty.toString(),
-                style: GoogleFonts.lobster(),
+                  entry.value.bounty == null
+                      ? ""
+                      : entry.value.bounty.toString(),
+                  style: GoogleFonts.lobster(),
                 ),
               )),
               DataCell(Padding(

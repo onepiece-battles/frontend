@@ -17,4 +17,8 @@ class SupportDao {
       BatchCreateFruitRequest request) async {
     return await supportApi.batchCreateFruit(request);
   }
+
+  Future<void> updateCharacterBasic() async {
+    return await supportApi.updateCharacterBasic();
+  }
 }

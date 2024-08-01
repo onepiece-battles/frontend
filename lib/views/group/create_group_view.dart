@@ -40,6 +40,7 @@ class _CreateGroupViewState extends State<CreateGroupView> {
           3, getIt<User>().loginRole == UserRole.NIKA));
 
   GroupCategory selectedGroupCategory = GroupCategory.pirate;
+  final _formKey = GlobalKey<FormState>();
 
   List<TextEditingController> groupControlList() {
     return <TextEditingController>[
@@ -75,7 +76,9 @@ class _CreateGroupViewState extends State<CreateGroupView> {
                   padding: const EdgeInsets.only(bottom: 8.0),
                   child: Row(
                     children: [
-                      SizedBox(
+                      Form(
+                        key:_formKey,
+                        child:  SizedBox(
                         width: 300,
                         child: TextFormField(
                           controller: groupNameChController,
@@ -97,7 +100,7 @@ class _CreateGroupViewState extends State<CreateGroupView> {
                             prefixIcon: const Icon(Icons.people),
                           ),
                         ),
-                      ),
+                      ),),
                       const SizedBox(
                         width: 25,
                       ),
@@ -107,7 +110,7 @@ class _CreateGroupViewState extends State<CreateGroupView> {
                           child: TextFormField(
                             controller: groupNameEnController,
                             validator: (value) {
-                              if (value!.isWhiteSpace()) {
+                              if (value==null||value.isWhiteSpace()) {
                                 return AppLocalizations.of(context)!
                                     .requiredField;
                               }
@@ -198,18 +201,26 @@ class _CreateGroupViewState extends State<CreateGroupView> {
                   children: [
                     ElevatedButton(
                       onPressed: () async {
+                        if (!mounted) return;
+                        final alert = AppLocalizations.of(context)!.alert;
+                        final message = AppLocalizations.of(context)!
+                            .imageSizeExceedsLimit;
                         XFile? pickedImage =
                             await OnepieceImagePicker.pickWebImage();
+                        if (pickedImage == null) {
+                          // Optionally, show a message to the user
+                          return;
+                        }
                         Uint8List imageInByte =
-                            await pickedImage!.readAsBytes();
+                            await pickedImage.readAsBytes();
                         _pickedImage = imageInByte;
                         if (!ImageHelper.isValidImageSize(
                             500 * 1024, imageInByte)) {
                           OnepieceAlert.getBasicAlertDialogFunc(
                               context,
-                              AppLocalizations.of(context)!.alert,
-                              AppLocalizations.of(context)!
-                                  .imageSizeExceedsLimit);
+                              alert,
+                              message
+                          );
                           return;
                         }
                         setState(() {
@@ -348,6 +359,9 @@ class _CreateGroupViewState extends State<CreateGroupView> {
                           context,
                           AppLocalizations.of(context)!.hint,
                           AppLocalizations.of(context)!.groupEmblemRequired);
+                      return;
+                    }
+                    if (!_formKey.currentState!.validate()) {
                       return;
                     }
                     CreateGroupRequest createGroupRequest = CreateGroupRequest(

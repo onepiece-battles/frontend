@@ -24,12 +24,12 @@
   "battleStatusCreated": "已创建",
   "battleStatusFailed": "执行失败",
   "battleStatusFinished": "已结束",
-  "battleStatusHint": "请选择状态",
+  "battleStatusHint": "状态",
   "battleStatusStarted": "已开始",
   "battleReportWaiting": "报告待生成",
   "battleReportInProgress": "报告生成中",
   "battleReportGenerated": "报告可下载",
-  "battleTypeHint": "请选择类型",
+  "battleTypeHint": "类型",
   "battleProcess": "战斗流程",
   "birthDay": "生日",
   "birthPlace": "出生地",
@@ -182,7 +182,7 @@
   "statusResolved": "已解决",
   "statusRevoked": "驳回",
   "submitForm": "提交",
-  "systemResource": "只显示系统资源",
+  "systemResource": "系统资源",
   "thisCharacter": "此角色",
   "title": "标题",
   "underworld": "地下世界",
@@ -305,5 +305,8 @@
   "stick": "棍",
   "rifle": "枪",
   "fightAgain":"再战一轮",
-  "loginAsVisitor": "游客登陆"
+  "loginAsVisitor": "游客登陆",
+  "allResources": "全部",
+  "myResource": "我的资源",
+  "excludeSystem": "排除系统资源"
 }
