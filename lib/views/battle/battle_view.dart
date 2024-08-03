@@ -592,7 +592,7 @@ class _BattleViewState extends State<BattleView> {
       _createSingleColumn(AppLocalizations.of(context)!.initiator, null, 150),
       _createSingleColumn(AppLocalizations.of(context)!.receiver, null, 150),
       _createSingleColumn(AppLocalizations.of(context)!.winner,
-          BattleSortableFieldsEnum.winnerName, 80),
+          null, 60),
       _createSingleColumn(AppLocalizations.of(context)!.status, null, 70),
       _createSingleColumn(AppLocalizations.of(context)!.creator, null, 150),
       _createSingleColumn(AppLocalizations.of(context)!.creationTime,
@@ -762,33 +762,39 @@ class _BattleViewState extends State<BattleView> {
               DataCell(
                 Padding(
                   padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                  child: entry.value.battleExecution!.winnerId == null
-                      ? Container(
-                          width: 40,
-                          height: 40,
-                          decoration: const BoxDecoration(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(2.0)),
-                          ),
-                          child: FittedBox(
-                            fit: BoxFit.fill,
-                            child: ImageHelper.getSvgIconWithColor(
-                                'images/svgs/question.svg',
-                                100,
-                                100,
-                                OnepieceColors.liteFancyBlue),
-                          ),
-                        )
-                      : ImageLazyLoader(
-                          key: UniqueKey(),
-                          uriProvider: () =>
-                              entry.value.battleExecution!.winnerId ==
-                                      entry.value.starterId
-                                  ? entry.value.starter!.imageUri!
-                                  : entry.value.receiver!.imageUri!,
-                          width: 40,
-                          borderWidth: 1.5,
-                          borderRadios: 40),
+                  child:
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      entry.value.battleExecution!.winnerId == null
+                          ? Container(
+                              width: 40,
+                              height: 40,
+                              decoration: const BoxDecoration(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(2.0)),
+                              ),
+                              child: FittedBox(
+                                fit: BoxFit.fill,
+                                child: ImageHelper.getSvgIconWithColor(
+                                    'images/svgs/question.svg',
+                                    100,
+                                    100,
+                                    OnepieceColors.liteFancyBlue),
+                              ),
+                            )
+                          : ImageLazyLoader(
+                              key: UniqueKey(),
+                              uriProvider: () =>
+                                  entry.value.battleExecution!.winnerId ==
+                                          entry.value.starterId
+                                      ? entry.value.starter!.imageUri!
+                                      : entry.value.receiver!.imageUri!,
+                              width: 40,
+                              borderWidth: 1.5,
+                              borderRadios: 40),
+                    ],
+                  ),
                 ),
               ),
               _getDataCell(battleStatusToDisplayName[

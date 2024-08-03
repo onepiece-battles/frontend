@@ -420,60 +420,77 @@ class HomePageState extends State<HomePage> {
                             decoration: const BoxDecoration(
                                 borderRadius:
                                     BorderRadius.all(Radius.circular(5))),
-                            child: ListTile(
-                              minLeadingWidth: 10,
-                              contentPadding:
-                                  const EdgeInsets.fromLTRB(8, 0, 0, 0),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(5),
-                              ),
-                              leading: ImageHelper.getSvgIconWithColor(
-                                  'images/svgs/profile.svg',
-                                  18,
-                                  18,
-                                  OnepieceColors.fancyBlue),
-                              selected: profile == resource,
-                              selectedTileColor: OnepieceColors.liteFancyBlue,
-                              onTap: () {
-                                setState(
-                                  () {
-                                    if (getIt<User>().loginRole ==
-                                        UserRole.VISITOR) {
-                                      context.go(AppRouter.registerPath);
-                                    } else {
-                                      context.goNamed('userProfile',
-                                          extra: getIt<User>().id,
-                                          pathParameters: {
-                                            'name': getIt<User>().nickname
-                                          });
-                                    }
-                                  },
-                                );
-                              },
-                              trailing: Padding(
-                                padding: const EdgeInsets.fromLTRB(0, 0, 3, 0),
-                                child: Container(
-                                  width: 3,
-                                  height: 30,
-                                  decoration: BoxDecoration(
-                                      color: OnepieceColors.menuBackgroundColor,
-                                      borderRadius: BorderRadius.circular(3)),
+                            child: Tooltip(
+                              message: constraints.maxWidth > screenChangeBar
+                                  ? ""
+                                  : AppLocalizations.of(context)!.myAccount,
+                              child: ListTile(
+                                minLeadingWidth: 2,
+                                dense: true,
+                                contentPadding:
+                                    const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(5),
+                                ),
+                                leading: SizedBox(
+                                  width: 20,
+                                  child: ImageHelper.getSvgIconWithColor(
+                                      'images/svgs/profile.svg',
+                                      18,
+                                      18,
+                                      OnepieceColors.fancyBlue),
+                                ),
+                                selected: profile == resource,
+                                selectedTileColor: OnepieceColors.liteFancyBlue,
+                                onTap: () {
+                                  setState(
+                                    () {
+                                      if (getIt<User>().loginRole ==
+                                          UserRole.VISITOR) {
+                                        context.go(AppRouter.registerPath);
+                                      } else {
+                                        context.goNamed('userProfile',
+                                            extra: getIt<User>().id,
+                                            pathParameters: {
+                                              'name': getIt<User>().nickname
+                                            });
+                                      }
+                                    },
+                                  );
+                                },
+                                trailing: Padding(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(0, 0, 3, 0),
+                                  child: Container(
+                                    width: 3,
+                                    height: 30,
+                                    decoration: BoxDecoration(
+                                        color: OnepieceColors
+                                            .menuBackgroundColor,
+                                        borderRadius:
+                                            BorderRadius.circular(3)),
+                                  ),
+                                ),
+                                hoverColor: OnepieceColors.liteFancyBlue,
+                                title: Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Flexible(
+                                      child: Text(
+                                        constraints.maxWidth > screenChangeBar?AppLocalizations.of(context)!.myAccount:"",
+                                        textAlign: TextAlign.left,
+                                        style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: OnepieceFonts.sideMenuFontWeight,
+                                            color: resource == "profile"
+                                                ? OnepieceColors.fancyBlue
+                                                : OnepieceColors.menuTextColor),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              hoverColor: OnepieceColors.liteFancyBlue,
-                              title: constraints.maxWidth > screenChangeBar
-                                  ? Text(
-                                      AppLocalizations.of(context)!.myAccount,
-                                      textAlign: TextAlign.left,
-                                      style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight:
-                                              OnepieceFonts.sideMenuFontWeight,
-                                          color: resource == "profile"
-                                              ? OnepieceColors.fancyBlue
-                                              : OnepieceColors.menuTextColor),
-                                    )
-                                  : const Text(""),
                             ),
                           ),
                         );
@@ -485,54 +502,64 @@ class HomePageState extends State<HomePage> {
                         padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
                         decoration: const BoxDecoration(
                             borderRadius: BorderRadius.all(Radius.circular(5))),
-                        child: ListTile(
-                          minLeadingWidth: 10,
-                          contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5),
-                          ),
-                          leading: ImageHelper.getSvgIconWithColor(
-                              'images/svgs/logout.svg',
-                              20,
-                              20,
-                              OnepieceColors.fancyBlue),
-                          onTap: () {
-                            setState(
-                              () {
-                                getIt<UserDao>()
-                                    .logout(
-                                        LogoutRequest(userId: getIt<User>().id))
-                                    .then((value) {
-                                  getIt.registerLazySingleton<User>(() =>
-                                      User(id: "", username: "", nickname: ""));
-                                });
-                                context.replace(AppRouter.loginPath);
-                              },
-                            );
-                          },
-                          trailing: Padding(
-                            padding: const EdgeInsets.fromLTRB(0, 0, 3, 0),
-                            child: Container(
-                              width: 3,
-                              height: 30,
-                              decoration: BoxDecoration(
-                                  color: OnepieceColors.menuBackgroundColor,
-                                  borderRadius: BorderRadius.circular(3)),
+                        child: Tooltip(
+                          message: constraints.maxWidth > screenChangeBar
+                              ? ""
+                              : AppLocalizations.of(context)!.logout,
+                          child: ListTile(
+                            minLeadingWidth: 10,
+                            dense: true,
+                            contentPadding:
+                                const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5),
                             ),
+                            leading: ImageHelper.getSvgIconWithColor(
+                                'images/svgs/logout.svg',
+                                20,
+                                20,
+                                OnepieceColors.fancyBlue),
+                            onTap: () {
+                              setState(
+                                () {
+                                  getIt<UserDao>()
+                                      .logout(LogoutRequest(
+                                          userId: getIt<User>().id))
+                                      .then((value) {
+                                    getIt.registerLazySingleton<User>(() =>
+                                        User(
+                                            id: "",
+                                            username: "",
+                                            nickname: ""));
+                                  });
+                                  context.replace(AppRouter.loginPath);
+                                },
+                              );
+                            },
+                            trailing: Padding(
+                              padding: const EdgeInsets.fromLTRB(0, 0, 3, 0),
+                              child: Container(
+                                width: 3,
+                                height: 30,
+                                decoration: BoxDecoration(
+                                    color: OnepieceColors.menuBackgroundColor,
+                                    borderRadius: BorderRadius.circular(3)),
+                              ),
+                            ),
+                            selectedColor: OnepieceColors.liteFancyBlue,
+                            hoverColor: OnepieceColors.liteFancyBlue,
+                            title: constraints.maxWidth > screenChangeBar
+                                ? Text(
+                                    AppLocalizations.of(context)!.logout,
+                                    textAlign: TextAlign.left,
+                                    style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight:
+                                            OnepieceFonts.sideMenuFontWeight,
+                                        color: OnepieceColors.menuTextColor),
+                                  )
+                                : const Text(""),
                           ),
-                          selectedColor: OnepieceColors.liteFancyBlue,
-                          hoverColor: OnepieceColors.liteFancyBlue,
-                          title: constraints.maxWidth > screenChangeBar
-                              ? Text(
-                                  AppLocalizations.of(context)!.logout,
-                                  textAlign: TextAlign.left,
-                                  style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight:
-                                          OnepieceFonts.sideMenuFontWeight,
-                                      color: OnepieceColors.menuTextColor),
-                                )
-                              : const Text(""),
                         ),
                       ),
                     ),
@@ -902,59 +929,65 @@ class HomePageState extends State<HomePage> {
                 padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
                 decoration: const BoxDecoration(
                     borderRadius: BorderRadius.all(Radius.circular(5))),
-                child: ListTile(
-                  minLeadingWidth: 10,
-                  contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  leading: resourceToIconMap[resourceType],
-                  selected: routeNotifier.value
-                          .split("/")
-                          .where(
-                              (element) => element != '' && element != "home")
-                          .toList()
-                          .first ==
-                      resourceType.toLowerCase(),
-                  selectedTileColor: OnepieceColors.liteFancyBlue,
-                  onTap: () {
-                    setState(
-                      () {
-                        GoRouter.of(context)
-                            .go(resourceToLocationMap[resourceType]!);
-                      },
-                    );
-                  },
-                  trailing: Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 0, 3, 0),
-                    child: Container(
-                      width: 3,
-                      height: 30,
-                      decoration: BoxDecoration(
-                          color: OnepieceColors.menuBackgroundColor,
-                          borderRadius: BorderRadius.circular(3)),
+                child: Tooltip(
+                  message: constraints.maxWidth > screenChangeBar
+                      ? ""
+                      : resourceToDisplayTextMap[resourceType]!,
+                  child: ListTile(
+                    dense: true,
+                    minLeadingWidth: 10,
+                    contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
                     ),
+                    leading: resourceToIconMap[resourceType],
+                    selected: routeNotifier.value
+                            .split("/")
+                            .where(
+                                (element) => element != '' && element != "home")
+                            .toList()
+                            .first ==
+                        resourceType.toLowerCase(),
+                    selectedTileColor: OnepieceColors.liteFancyBlue,
+                    onTap: () {
+                      setState(
+                        () {
+                          GoRouter.of(context)
+                              .go(resourceToLocationMap[resourceType]!);
+                        },
+                      );
+                    },
+                    trailing: Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 0, 3, 0),
+                      child: Container(
+                        width: 3,
+                        height: 30,
+                        decoration: BoxDecoration(
+                            color: OnepieceColors.menuBackgroundColor,
+                            borderRadius: BorderRadius.circular(3)),
+                      ),
+                    ),
+                    hoverColor: OnepieceColors.liteFancyBlue,
+                    title: constraints.maxWidth > screenChangeBar
+                        ? Text(
+                            resourceToDisplayTextMap[resourceType]!,
+                            textAlign: TextAlign.left,
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: OnepieceFonts.sideMenuFontWeight,
+                                color: routeNotifier.value
+                                            .split("/")
+                                            .where((element) =>
+                                                element != '' &&
+                                                element != "home")
+                                            .toList()
+                                            .first ==
+                                        resourceType.toLowerCase()
+                                    ? OnepieceColors.fancyBlue
+                                    : OnepieceColors.menuTextColor),
+                          )
+                        : const Text(""),
                   ),
-                  hoverColor: OnepieceColors.liteFancyBlue,
-                  title: constraints.maxWidth > screenChangeBar
-                      ? Text(
-                          resourceToDisplayTextMap[resourceType]!,
-                          textAlign: TextAlign.left,
-                          style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: OnepieceFonts.sideMenuFontWeight,
-                              color: routeNotifier.value
-                                          .split("/")
-                                          .where((element) =>
-                                              element != '' &&
-                                              element != "home")
-                                          .toList()
-                                          .first ==
-                                      resourceType.toLowerCase()
-                                  ? OnepieceColors.fancyBlue
-                                  : OnepieceColors.menuTextColor),
-                        )
-                      : const Text(""),
                 ),
               ),
             );
