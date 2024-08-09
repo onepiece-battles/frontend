@@ -128,6 +128,7 @@ class _GroupViewState extends State<GroupView> {
                       trackVisibility: true,
                       thickness: 5,
                       child: SingleChildScrollView(
+                        controller: controlBarController,
                         scrollDirection: Axis.horizontal,
                         child: _createControlPanel(context),
                       ),

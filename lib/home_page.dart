@@ -5,6 +5,7 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get_it/get_it.dart';
 import 'package:string_validator/string_validator.dart';
 import 'package:go_router/go_router.dart';
@@ -59,19 +60,17 @@ class HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       double width = MediaQuery.of(context).size.width;
       setState(() {
-        if(width<800){
+        if (width < 800) {
           _drawerWidth = 75;
-        } else if(width>1000) {
+        } else if (width > 1000) {
           _drawerWidth = 300;
         }
       });
     });
-
   }
 
   @override
@@ -99,7 +98,7 @@ class HomePageState extends State<HomePage> {
                         height: 55,
                         child: Padding(
                           padding: const EdgeInsets.all(5.0),
-                          child: getTopBar(context),
+                          child: getTopBar(context, constraints),
                         ),
                       ),
                       const Divider(
@@ -111,7 +110,7 @@ class HomePageState extends State<HomePage> {
                       )
                     ],
                   ),
-                )
+                ),
               ],
             ),
           );
@@ -121,12 +120,23 @@ class HomePageState extends State<HomePage> {
   }
 
   // the first one route is fixed in this case, and the latter routes are clickable
-  Widget getTopBar(BuildContext context) {
-    return Row(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [_getRoutingBar(context), _getRightControlPanel(context)]);
+  Widget getTopBar(BuildContext context, BoxConstraints constraints) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: ConstrainedBox(
+          constraints: BoxConstraints(minWidth: constraints.maxWidth-_drawerWidth-10),
+          child: Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                _getRoutingBar(context),
+                const SizedBox(
+                  width: 100,
+                ),
+                _getRightControlPanel(context)
+              ])),
+    );
   }
 
   Widget _getRoutingBar(BuildContext context) {
@@ -242,7 +252,7 @@ class HomePageState extends State<HomePage> {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.end,
         children: [
           SizedBox(
             width: 75,
@@ -683,7 +693,11 @@ class HomePageState extends State<HomePage> {
             onExit: (_) => setState(() {
               _isHovering = false;
             }),
+
             child: GestureDetector(
+              onTapDown: (_) => setState(() => _isHovering = true),
+              onTapUp: (_) => setState(() => _isHovering = false),
+              onTapCancel: () => setState(() => _isHovering = false),
               onHorizontalDragUpdate: (details) {
                 setState(() {
                   _drawerWidth += details.delta.dx; // 更新宽度
