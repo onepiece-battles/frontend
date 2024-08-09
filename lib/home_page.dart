@@ -40,7 +40,6 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   final String setting = "setting";
   final String profile = "profile";
-  final int screenChangeBar = 1500;
   var _tabTextIndexSelected =
       I18nHelper.convertToOnepieceLocale(getIt<Locale>()).toString() ==
               (OnepieceLocale.zhCN.toString())
@@ -53,6 +52,27 @@ class HomePageState extends State<HomePage> {
       .toList()
       .where((e) => !notShownResources.contains(e))
       .toList();
+
+  double _drawerWidth = 300;
+  bool _isHovering = false;
+  final double _shrinkLimitWidth = 120;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      double width = MediaQuery.of(context).size.width;
+      setState(() {
+        if(width<800){
+          _drawerWidth = 75;
+        } else if(width>1000) {
+          _drawerWidth = 300;
+        }
+      });
+    });
+
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -375,45 +395,140 @@ class HomePageState extends State<HomePage> {
   }
 
   Widget _getNavigationMenu(BuildContext context, BoxConstraints constraints) {
-    return Container(
-      width: constraints.maxWidth > screenChangeBar ? 300 : 80,
-      color: OnepieceColors.menuBackgroundColor,
-      child: Stack(
-        children: [
-          Column(
+    return Stack(
+      alignment: Alignment.centerLeft,
+      children: [
+        Container(
+          width: _drawerWidth,
+          color: OnepieceColors.menuBackgroundColor,
+          child: Stack(
+            alignment: Alignment.bottomCenter,
             children: [
-              _getDrawerHeader(context, constraints),
-              Expanded(
-                  child: SingleChildScrollView(
-                scrollDirection: Axis.vertical,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(8, 10, 0, 10),
-                      child: Text(AppLocalizations.of(context)!.route,
-                          style: const TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.w800)),
-                    ),
-                    _getResourceMenu(context, constraints),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(8, 10, 0, 10),
-                      child: Text(AppLocalizations.of(context)!.user,
-                          style: const TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.w800)),
-                    ),
-                    ValueListenableBuilder<String>(
-                      valueListenable: routeNotifier,
-                      builder: (context, value, child) {
-                        // Rebuild the HomePage when the route changes
-                        var resource = routeNotifier.value
-                            .split("/")
-                            .where(
-                                (element) => element != '' && element != "home")
-                            .toList()
-                            .last;
-                        return Material(
+              Column(
+                children: [
+                  _getDrawerHeader(context, constraints),
+                  Expanded(
+                      child: SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(8, 10, 0, 10),
+                          child: Text(AppLocalizations.of(context)!.route,
+                              style: const TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.w800)),
+                        ),
+                        _getResourceMenu(context, constraints),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(8, 10, 0, 10),
+                          child: Text(AppLocalizations.of(context)!.user,
+                              style: const TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.w800)),
+                        ),
+                        ValueListenableBuilder<String>(
+                          valueListenable: routeNotifier,
+                          builder: (context, value, child) {
+                            // Rebuild the HomePage when the route changes
+                            var resource = routeNotifier.value
+                                .split("/")
+                                .where((element) =>
+                                    element != '' && element != "home")
+                                .toList()
+                                .last;
+                            return Material(
+                              type: MaterialType.transparency,
+                              child: Container(
+                                padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+                                decoration: const BoxDecoration(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(5))),
+                                child: Tooltip(
+                                  message: _drawerWidth > _shrinkLimitWidth
+                                      ? ""
+                                      : AppLocalizations.of(context)!.myAccount,
+                                  child: ListTile(
+                                    minLeadingWidth: 2,
+                                    dense: true,
+                                    contentPadding:
+                                        const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(5),
+                                    ),
+                                    leading: SizedBox(
+                                      width: 20,
+                                      child: ImageHelper.getSvgIconWithColor(
+                                          'images/svgs/profile.svg',
+                                          18,
+                                          18,
+                                          OnepieceColors.fancyBlue),
+                                    ),
+                                    selected: profile == resource,
+                                    selectedTileColor:
+                                        OnepieceColors.liteFancyBlue,
+                                    onTap: () {
+                                      setState(
+                                        () {
+                                          if (getIt<User>().loginRole ==
+                                              UserRole.VISITOR) {
+                                            context.go(AppRouter.registerPath);
+                                          } else {
+                                            context.goNamed('userProfile',
+                                                extra: getIt<User>().id,
+                                                pathParameters: {
+                                                  'name': getIt<User>().nickname
+                                                });
+                                          }
+                                        },
+                                      );
+                                    },
+                                    trailing: Padding(
+                                      padding:
+                                          const EdgeInsets.fromLTRB(0, 0, 3, 0),
+                                      child: Container(
+                                        width: 3,
+                                        height: 30,
+                                        decoration: BoxDecoration(
+                                            color: OnepieceColors
+                                                .menuBackgroundColor,
+                                            borderRadius:
+                                                BorderRadius.circular(3)),
+                                      ),
+                                    ),
+                                    hoverColor: OnepieceColors.liteFancyBlue,
+                                    title: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Flexible(
+                                          child: Text(
+                                            _drawerWidth > _shrinkLimitWidth
+                                                ? AppLocalizations.of(context)!
+                                                    .myAccount
+                                                : "",
+                                            textAlign: TextAlign.left,
+                                            maxLines: 1,
+                                            style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: OnepieceFonts
+                                                    .sideMenuFontWeight,
+                                                color: resource == "profile"
+                                                    ? OnepieceColors.fancyBlue
+                                                    : OnepieceColors
+                                                        .menuTextColor),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        Material(
                           type: MaterialType.transparency,
                           child: Container(
                             padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
@@ -421,40 +536,36 @@ class HomePageState extends State<HomePage> {
                                 borderRadius:
                                     BorderRadius.all(Radius.circular(5))),
                             child: Tooltip(
-                              message: constraints.maxWidth > screenChangeBar
+                              message: _drawerWidth > _shrinkLimitWidth
                                   ? ""
-                                  : AppLocalizations.of(context)!.myAccount,
+                                  : AppLocalizations.of(context)!.logout,
                               child: ListTile(
-                                minLeadingWidth: 2,
+                                minLeadingWidth: 10,
                                 dense: true,
                                 contentPadding:
                                     const EdgeInsets.fromLTRB(8, 0, 0, 0),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(5),
                                 ),
-                                leading: SizedBox(
-                                  width: 20,
-                                  child: ImageHelper.getSvgIconWithColor(
-                                      'images/svgs/profile.svg',
-                                      18,
-                                      18,
-                                      OnepieceColors.fancyBlue),
-                                ),
-                                selected: profile == resource,
-                                selectedTileColor: OnepieceColors.liteFancyBlue,
+                                leading: ImageHelper.getSvgIconWithColor(
+                                    'images/svgs/logout.svg',
+                                    20,
+                                    20,
+                                    OnepieceColors.fancyBlue),
                                 onTap: () {
                                   setState(
                                     () {
-                                      if (getIt<User>().loginRole ==
-                                          UserRole.VISITOR) {
-                                        context.go(AppRouter.registerPath);
-                                      } else {
-                                        context.goNamed('userProfile',
-                                            extra: getIt<User>().id,
-                                            pathParameters: {
-                                              'name': getIt<User>().nickname
-                                            });
-                                      }
+                                      getIt<UserDao>()
+                                          .logout(LogoutRequest(
+                                              userId: getIt<User>().id))
+                                          .then((value) {
+                                        getIt.registerLazySingleton<User>(() =>
+                                            User(
+                                                id: "",
+                                                username: "",
+                                                nickname: ""));
+                                      });
+                                      context.replace(AppRouter.loginPath);
                                     },
                                   );
                                 },
@@ -465,324 +576,249 @@ class HomePageState extends State<HomePage> {
                                     width: 3,
                                     height: 30,
                                     decoration: BoxDecoration(
-                                        color: OnepieceColors
-                                            .menuBackgroundColor,
-                                        borderRadius:
-                                            BorderRadius.circular(3)),
+                                        color:
+                                            OnepieceColors.menuBackgroundColor,
+                                        borderRadius: BorderRadius.circular(3)),
                                   ),
                                 ),
+                                selectedColor: OnepieceColors.liteFancyBlue,
                                 hoverColor: OnepieceColors.liteFancyBlue,
-                                title: Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Flexible(
-                                      child: Text(
-                                        constraints.maxWidth > screenChangeBar?AppLocalizations.of(context)!.myAccount:"",
-                                        textAlign: TextAlign.left,
-                                        style: TextStyle(
+                                title: _drawerWidth > _shrinkLimitWidth
+                                    ? Text(
+                                        AppLocalizations.of(context)!.logout,
+                                        maxLines: 1,
+                                        style: const TextStyle(
                                             fontSize: 16,
-                                            fontWeight: OnepieceFonts.sideMenuFontWeight,
-                                            color: resource == "profile"
-                                                ? OnepieceColors.fancyBlue
-                                                : OnepieceColors.menuTextColor),
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                            fontWeight: OnepieceFonts
+                                                .sideMenuFontWeight,
+                                            color:
+                                                OnepieceColors.menuTextColor),
+                                      )
+                                    : const Text(""),
                               ),
                             ),
-                          ),
-                        );
-                      },
-                    ),
-                    Material(
-                      type: MaterialType.transparency,
-                      child: Container(
-                        padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                        decoration: const BoxDecoration(
-                            borderRadius: BorderRadius.all(Radius.circular(5))),
-                        child: Tooltip(
-                          message: constraints.maxWidth > screenChangeBar
-                              ? ""
-                              : AppLocalizations.of(context)!.logout,
-                          child: ListTile(
-                            minLeadingWidth: 10,
-                            dense: true,
-                            contentPadding:
-                                const EdgeInsets.fromLTRB(8, 0, 0, 0),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                            leading: ImageHelper.getSvgIconWithColor(
-                                'images/svgs/logout.svg',
-                                20,
-                                20,
-                                OnepieceColors.fancyBlue),
-                            onTap: () {
-                              setState(
-                                () {
-                                  getIt<UserDao>()
-                                      .logout(LogoutRequest(
-                                          userId: getIt<User>().id))
-                                      .then((value) {
-                                    getIt.registerLazySingleton<User>(() =>
-                                        User(
-                                            id: "",
-                                            username: "",
-                                            nickname: ""));
-                                  });
-                                  context.replace(AppRouter.loginPath);
-                                },
-                              );
-                            },
-                            trailing: Padding(
-                              padding: const EdgeInsets.fromLTRB(0, 0, 3, 0),
-                              child: Container(
-                                width: 3,
-                                height: 30,
-                                decoration: BoxDecoration(
-                                    color: OnepieceColors.menuBackgroundColor,
-                                    borderRadius: BorderRadius.circular(3)),
-                              ),
-                            ),
-                            selectedColor: OnepieceColors.liteFancyBlue,
-                            hoverColor: OnepieceColors.liteFancyBlue,
-                            title: constraints.maxWidth > screenChangeBar
-                                ? Text(
-                                    AppLocalizations.of(context)!.logout,
-                                    textAlign: TextAlign.left,
-                                    style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight:
-                                            OnepieceFonts.sideMenuFontWeight,
-                                        color: OnepieceColors.menuTextColor),
-                                  )
-                                : const Text(""),
                           ),
                         ),
+                        const SizedBox(
+                          height: 40,
+                        ),
+                      ],
+                    ),
+                  )),
+                ],
+              ),
+              Container(
+                decoration: const BoxDecoration(
+                  color: OnepieceColors.menuBackgroundColor,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: TextButton(
+                    style: TextButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      padding: const EdgeInsets.all(5),
+                      backgroundColor: OnepieceColors.menuBackgroundColor,
+                      foregroundColor: OnepieceColors.menuHoverColor,
+                      elevation: 1.0,
+                      // shadowColor: Colors.transparent,
+                    ),
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: ((context) {
+                          return Dialog(
+                            surfaceTintColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                            alignment: AlignmentDirectional.bottomStart,
+                            child: const CreateFeedbackPopup(),
+                          );
+                        }),
+                      );
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          ImageHelper.getSvgIcon(
+                            'images/svgs/menu_question.svg',
+                            21,
+                            21,
+                          ),
+                          if (_drawerWidth > _shrinkLimitWidth)
+                            const SizedBox(width: 6),
+                          if (_drawerWidth > _shrinkLimitWidth)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 2.0),
+                              child: Text(
+                                  AppLocalizations.of(context)!.feedback,
+                                  style: const TextStyle(
+                                      color: OnepieceColors.menuTextColor,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500)),
+                            )
+                        ],
                       ),
                     ),
-                    const SizedBox(
-                      height: 40,
-                    ),
-                  ],
+                  ),
                 ),
-              )),
+              ),
             ],
           ),
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              decoration: const BoxDecoration(
-                color: OnepieceColors.menuBackgroundColor,
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(5.0),
-                child: TextButton(
-                  style: TextButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    padding: const EdgeInsets.all(5),
-                    backgroundColor: OnepieceColors.menuBackgroundColor,
-                    foregroundColor: OnepieceColors.menuHoverColor,
-                    elevation: 1.0,
-                    // shadowColor: Colors.transparent,
-                  ),
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: ((context) {
-                        return Dialog(
-                          surfaceTintColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0),
+        ),
+        Positioned(
+          left: _drawerWidth - 10, // 拖动边缘的宽度
+          top: 0,
+          bottom: 0,
+          child: MouseRegion(
+            // Change cursor and update hover state
+            cursor: SystemMouseCursors.resizeLeftRight,
+            onEnter: (_) => setState(() {
+              _isHovering = true;
+            }),
+            onExit: (_) => setState(() {
+              _isHovering = false;
+            }),
+            child: GestureDetector(
+              onHorizontalDragUpdate: (details) {
+                setState(() {
+                  _drawerWidth += details.delta.dx; // 更新宽度
+                  // 确保宽度在一定范围内
+                  _drawerWidth = _drawerWidth.clamp(75.0, 350.0);
+                });
+              },
+              child: Container(
+                width: 8,
+                height: 30,
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.horizontal(
+                      left: Radius.circular(8),
+                      right:
+                          Radius.circular(8)), // Rounded corners on the right
+                  color: _isHovering
+                      ? OnepieceColors.liteFancyBlue
+                      : Colors.transparent, // Background color based on hover
+                  boxShadow: _isHovering
+                      ? [
+                          const BoxShadow(
+                            color: OnepieceColors.liteFancyBlue,
+                            spreadRadius: 2,
+                            blurRadius: 10,
+                            offset: Offset(0, 4), // changes position of shadow
                           ),
-                          alignment: AlignmentDirectional.bottomStart,
-                          child: const CreateFeedbackPopup(),
-                        );
-                      }),
-                    );
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        ImageHelper.getSvgIcon(
-                          'images/svgs/menu_question.svg',
-                          21,
-                          21,
-                        ),
-                        const SizedBox(width: 6),
-                        if (constraints.maxWidth > screenChangeBar)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 2.0),
-                            child: Text(AppLocalizations.of(context)!.feedback,
-                                style: const TextStyle(
-                                    color: OnepieceColors.menuTextColor,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500)),
-                          )
-                      ],
+                        ]
+                      : [],
+                ),
+                child: Center(
+                  child: SizedBox(
+                    height: 30,
+                    child: VerticalDivider(
+                      width: 5,
+                      color: _isHovering
+                          ? OnepieceColors.fancyBlue
+                          : Colors.transparent, // Indicator line
                     ),
                   ),
                 ),
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
   Widget _getDrawerHeader(BuildContext context, BoxConstraints constraints) {
     return Container(
-      width: constraints.maxWidth > screenChangeBar ? 300 : 80,
+      width: _drawerWidth,
       height: 180,
       color: OnepieceColors.deepFancyBlue,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(8, 8, 0, 0),
+            padding: const EdgeInsets.fromLTRB(8, 15, 0, 0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding: constraints.maxWidth > screenChangeBar
-                      ? const EdgeInsets.only(left: 5.0)
-                      : const EdgeInsets.fromLTRB(3.5, 8, 0, 0),
-                  child: UserNavigation(
-                      context: context, constraints: constraints),
-                ),
-                if (constraints.maxWidth > screenChangeBar)
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(8, 5, 8, 8),
-                        child: Text(
-                          getIt<User>().nickname,
-                          style: OnepieceFonts.headerStyleWhite,
-                          overflow: TextOverflow.ellipsis,
+                UserNavigation(context: context, constraints: constraints),
+                if (_drawerWidth > _shrinkLimitWidth)
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+                          child: Text(
+                            getIt<User>().nickname,
+                            style: OnepieceFonts.headerStyleWhite,
+                            maxLines: 1,
+                          ),
                         ),
-                      ),
-                      Row(
-                        children: [
-                          SizedBox(
-                            width: 30,
-                            height: 30,
-                            child: Padding(
-                              padding: const EdgeInsets.only(left: 5.0),
-                              child: ImageHelper.getSvgIcon(
-                                'images/svgs/email.svg',
-                                120,
-                                120,
-                              ),
+                        Tooltip(
+                          message: getIt<User>().username,
+                          child: Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 8.0),
+                            child: Text(
+                              getIt<User>().username,
+                              style: OnepieceFonts.contentStyleWhite,
+                              maxLines: 1,
                             ),
                           ),
-                          SizedBox(
-                            width: 170,
-                            child: Padding(
-                              padding: const EdgeInsets.only(left: 5.0),
-                              child: Tooltip(
-                                message: getIt<User>().username,
-                                child: Text(
-                                  getIt<User>().username,
-                                  style: OnepieceFonts.emailFont,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ),
-                          )
-                        ],
-                      )
-                    ],
-                  )
+                        ),
+                      ],
+                    ),
+                  ),
               ],
             ),
           ),
-          if (constraints.maxWidth <= screenChangeBar)
+          if (_drawerWidth <= _shrinkLimitWidth)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10.0),
+              child: Tooltip(
+                message: getIt<User>().nickname,
+                child: Text(
+                  getIt<User>().nickname,
+                  style: OnepieceFonts.contentStyleBoldWhite,
+                  maxLines: 1,
+                  overflow: TextOverflow.clip,
+                ),
+              ),
+            ),
+          if (_drawerWidth <= _shrinkLimitWidth)
+            Tooltip(
+              message: getIt<User>().username,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                child: Text(
+                  getIt<User>().username,
+                  style: OnepieceFonts.contentStyleWhite,
+                  maxLines: 1,
+                  overflow: TextOverflow.clip,
+                ),
+              ),
+            ),
+          if (_drawerWidth > _shrinkLimitWidth)
             const SizedBox(
-              height: 10,
+              height: 20,
             ),
-          if (constraints.maxWidth <= screenChangeBar)
-            Padding(
-              padding: const EdgeInsets.only(left: 5.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                    child: SizedBox(
-                      width: 13,
-                      height: 13,
-                      child: ImageHelper.getSvgIcon(
-                        'images/svgs/user.svg',
-                        15,
-                        15,
-                      ),
-                    ),
-                  ),
-                  Tooltip(
-                    message: getIt<User>().nickname,
-                    child: SizedBox(
-                      width: 50,
-                      child: Text(
-                        getIt<User>().nickname,
-                        style: OnepieceFonts.contentStyleWhite,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          if (constraints.maxWidth <= screenChangeBar)
-            Padding(
-              padding: const EdgeInsets.only(left: 5.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 2.0),
-                    child: SizedBox(
-                      width: 15,
-                      height: 15,
-                      child: ImageHelper.getSvgIcon(
-                        'images/svgs/email.svg',
-                        15,
-                        15,
-                      ),
-                    ),
-                  ),
-                  Tooltip(
-                    message: getIt<User>().username,
-                    child: SizedBox(
-                      width: 50,
-                      child: Text(
-                        getIt<User>().username,
-                        style: OnepieceFonts.contentStyleWhite,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          const SizedBox(
+            height: 10,
+          ),
           Padding(
-            padding: constraints.maxWidth > screenChangeBar
-                ? const EdgeInsets.fromLTRB(0, 8, 0, 8)
-                : const EdgeInsets.fromLTRB(8, 8, 8, 8),
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: Material(
               type: MaterialType.transparency,
               child: Container(
-                width: constraints.maxWidth > screenChangeBar ? 280 : 80,
+                width: _drawerWidth - 20,
                 height: 33,
                 decoration: const BoxDecoration(
                   color: OnepieceColors.fancyGreen,
@@ -790,7 +826,7 @@ class HomePageState extends State<HomePage> {
                 ),
                 child: TextButton(
                   style: ButtonStyle(
-                    padding: constraints.maxWidth < screenChangeBar
+                    padding: _drawerWidth <= _shrinkLimitWidth
                         ? MaterialStateProperty.all<EdgeInsetsGeometry>(
                             const EdgeInsets.symmetric(
                                 horizontal:
@@ -803,41 +839,25 @@ class HomePageState extends State<HomePage> {
                           ),
                   ),
                   child: Row(
-                      mainAxisAlignment: constraints.maxWidth > screenChangeBar
+                      mainAxisAlignment: _drawerWidth > _shrinkLimitWidth
                           ? MainAxisAlignment.spaceBetween
                           : MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            if (constraints.maxWidth > screenChangeBar)
-                              const Icon(
-                                Icons.search,
-                                size: 20,
-                                color: Colors.white,
-                              ),
-                            const SizedBox(
-                              width: 5,
-                            ),
-                            if (constraints.maxWidth > screenChangeBar)
-                              Text(
-                                AppLocalizations.of(context)!.searchResource,
-                                style:
-                                    OnepieceFonts.superSmallContentStyleWhite,
-                              ),
-                          ],
+                        const Icon(
+                          Icons.search,
+                          size: 20,
+                          color: Colors.white,
                         ),
-                        if (constraints.maxWidth > screenChangeBar)
+                        if (_drawerWidth > 200)
+                          Text(
+                            AppLocalizations.of(context)!.searchResource,
+                            style: OnepieceFonts.superSmallContentStyleWhite,
+                          ),
+                        if (_drawerWidth > _shrinkLimitWidth)
                           Text(
                             AppLocalizations.of(context)!
                                 .searchResourceShortcut,
-                            style: OnepieceFonts.superSmallContentStyleWhite,
-                          ),
-                        if (constraints.maxWidth <= screenChangeBar)
-                          Text(
-                            AppLocalizations.of(context)!
-                                .searchResourceShortcutShrink,
                             style: OnepieceFonts.superSmallContentStyleWhite,
                           ),
                       ]),
@@ -930,7 +950,7 @@ class HomePageState extends State<HomePage> {
                 decoration: const BoxDecoration(
                     borderRadius: BorderRadius.all(Radius.circular(5))),
                 child: Tooltip(
-                  message: constraints.maxWidth > screenChangeBar
+                  message: _drawerWidth > _shrinkLimitWidth
                       ? ""
                       : resourceToDisplayTextMap[resourceType]!,
                   child: ListTile(
@@ -968,10 +988,12 @@ class HomePageState extends State<HomePage> {
                       ),
                     ),
                     hoverColor: OnepieceColors.liteFancyBlue,
-                    title: constraints.maxWidth > screenChangeBar
+                    title: _drawerWidth > _shrinkLimitWidth
                         ? Text(
                             resourceToDisplayTextMap[resourceType]!,
+                            maxLines: 1,
                             textAlign: TextAlign.left,
+                            overflow: TextOverflow.clip,
                             style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: OnepieceFonts.sideMenuFontWeight,
