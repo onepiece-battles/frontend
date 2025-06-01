@@ -1,5 +1,6 @@
 # Start from the Dart image to get both Dart and Flutter SDKs
 FROM dart:3.3.4 AS build-env
+#FROM registry.cn-hangzhou.aliyuncs.com/dart:3.3.4 AS build-env
 
 
 ARG FLUTTER_VERSION=3.19.6
