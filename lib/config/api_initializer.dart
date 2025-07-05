@@ -1,6 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:one_piece_battles_flutter/repository/battle_dao.dart';
 import 'package:one_piece_battles_flutter/repository/character_dao.dart';
+import 'package:one_piece_battles_flutter/repository/chatting_dao.dart';
 import 'package:one_piece_battles_flutter/repository/email_dao.dart';
 import 'package:one_piece_battles_flutter/repository/file_dao.dart';
 import 'package:one_piece_battles_flutter/repository/fruit_dao.dart';
@@ -22,6 +23,7 @@ class ApiInitializer {
     // init dao apis with new api client
     getIt.registerLazySingleton<UserDao>(() => UserDao(apiClient));
     getIt.registerLazySingleton<CharacterDao>(() => CharacterDao(apiClient));
+    getIt.registerLazySingleton<ChattingDao>(() => ChattingDao(apiClient));
     getIt.registerLazySingleton<ImageDao>(() => ImageDao(apiClient));
     getIt.registerLazySingleton<IssueDao>(() => IssueDao(apiClient));
     getIt.registerLazySingleton<BattleDao>(() => BattleDao(apiClient));

@@ -60,7 +60,7 @@ try {
 
 ## Documentation for API Endpoints
 
-All URIs are relative to *https://onepiece-battles.com*
+All URIs are relative to *http://localhost:8081*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
@@ -76,6 +76,11 @@ Class | Method | HTTP request | Description
 *CharacterApi* | [**joinGroup**](doc//CharacterApi.md#joingroup) | **POST** /api/onepiece/character/join_group | 
 *CharacterApi* | [**listCharacters**](doc//CharacterApi.md#listcharacters) | **POST** /api/onepiece/character/list | 
 *CharacterApi* | [**updateCharacter**](doc//CharacterApi.md#updatecharacter) | **POST** /api/onepiece/character/update | 
+*ChattingApi* | [**createChat**](doc//ChattingApi.md#createchat) | **POST** /api/onepiece/chatting/create | 
+*ChattingApi* | [**joinChat**](doc//ChattingApi.md#joinchat) | **POST** /api/onepiece/chatting/join | 
+*ChattingApi* | [**listChat**](doc//ChattingApi.md#listchat) | **POST** /api/onepiece/chatting/list | 
+*ChattingApi* | [**retractMessage**](doc//ChattingApi.md#retractmessage) | **POST** /api/onepiece/chatting/retract_message | 
+*ChattingApi* | [**sendMessage**](doc//ChattingApi.md#sendmessage) | **POST** /api/onepiece/chatting/send_message | 
 *DataExportApi* | [**generatePdf**](doc//DataExportApi.md#generatepdf) | **POST** /api/onepiece/export/generate_pdf | 
 *EmailApi* | [**sendRetrievalEmail**](doc//EmailApi.md#sendretrievalemail) | **POST** /api/onepiece/email/send_password_retrieval_email | 
 *EmailApi* | [**verifyEmailAddress**](doc//EmailApi.md#verifyemailaddress) | **POST** /api/onepiece/email/verify_email_address | 
@@ -98,11 +103,16 @@ Class | Method | HTTP request | Description
 *IssueApi* | [**createIssue**](doc//IssueApi.md#createissue) | **POST** /api/onepiece/issue/create | 
 *IssueApi* | [**getIssueFullView**](doc//IssueApi.md#getissuefullview) | **POST** /api/onepiece/issue/get_issue_full_view | 
 *IssueApi* | [**listIssue**](doc//IssueApi.md#listissue) | **POST** /api/onepiece/issue/list | 
+*NotificationApi* | [**close**](doc//NotificationApi.md#close) | **POST** /api/onepiece/notification/close | 
+*NotificationApi* | [**create**](doc//NotificationApi.md#create) | **POST** /api/onepiece/notification/create | 
+*NotificationApi* | [**markReceived**](doc//NotificationApi.md#markreceived) | **POST** /api/onepiece/notification/update | 
 *RoleApi* | [**addRole**](doc//RoleApi.md#addrole) | **POST** /api/onepiece/iam/add_role | 
 *RoleApi* | [**assignResourceToRole**](doc//RoleApi.md#assignresourcetorole) | **POST** /api/onepiece/iam/assign_resource_permissions_to_role | 
 *SupportApi* | [**batchCreateFruit**](doc//SupportApi.md#batchcreatefruit) | **POST** /api/onepiece/support/batch_create_fruit | 
 *SupportApi* | [**updateCharacterBasic**](doc//SupportApi.md#updatecharacterbasic) | **POST** /api/onepiece/support/update_character_basic | Update Character Basic Information
 *SupportApi* | [**updateUri**](doc//SupportApi.md#updateuri) | **POST** /api/onepiece/support/update_uri | 
+*UserApi* | [**acceptFriend**](doc//UserApi.md#acceptfriend) | **POST** /api/onepiece/user/accept_friend | 
+*UserApi* | [**addFriend**](doc//UserApi.md#addfriend) | **POST** /api/onepiece/user/add_friend | 
 *UserApi* | [**assignRole**](doc//UserApi.md#assignrole) | **POST** /api/onepiece/user/assign_role | 
 *UserApi* | [**getUser**](doc//UserApi.md#getuser) | **POST** /api/onepiece/user/get | 
 *UserApi* | [**listUsers**](doc//UserApi.md#listusers) | **POST** /api/onepiece/user/list | 
@@ -118,10 +128,14 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
+ - [AcceptFriendRequest](doc//AcceptFriendRequest.md)
+ - [AcceptFriendResponse](doc//AcceptFriendResponse.md)
  - [AccountStatus](doc//AccountStatus.md)
  - [ActionRecord](doc//ActionRecord.md)
  - [AddCharacterRequest](doc//AddCharacterRequest.md)
  - [AddCharacterResponse](doc//AddCharacterResponse.md)
+ - [AddFriendRequest](doc//AddFriendRequest.md)
+ - [AddFriendResponse](doc//AddFriendResponse.md)
  - [AddGroupRequest](doc//AddGroupRequest.md)
  - [AddGroupResponse](doc//AddGroupResponse.md)
  - [AddRoleRequest](doc//AddRoleRequest.md)
@@ -161,14 +175,20 @@ Class | Method | HTTP request | Description
  - [CharacterListViewAllOf](doc//CharacterListViewAllOf.md)
  - [CharacterSortableField](doc//CharacterSortableField.md)
  - [CharacterSortableFieldsEnum](doc//CharacterSortableFieldsEnum.md)
+ - [Chat](doc//Chat.md)
+ - [CloseNotificationRequest](doc//CloseNotificationRequest.md)
+ - [CloseNotificationResponse](doc//CloseNotificationResponse.md)
  - [CreateBattleRequest](doc//CreateBattleRequest.md)
  - [CreateBattleResponse](doc//CreateBattleResponse.md)
  - [CreateCharacterRequest](doc//CreateCharacterRequest.md)
+ - [CreateChatRequest](doc//CreateChatRequest.md)
  - [CreateFruitRequest](doc//CreateFruitRequest.md)
  - [CreateGroupRequest](doc//CreateGroupRequest.md)
  - [CreateGroupResponse](doc//CreateGroupResponse.md)
  - [CreateIssueRequest](doc//CreateIssueRequest.md)
  - [CreateIssueResponse](doc//CreateIssueResponse.md)
+ - [CreateNotificationRequest](doc//CreateNotificationRequest.md)
+ - [CreateNotificationResponse](doc//CreateNotificationResponse.md)
  - [CurrentCharacter](doc//CurrentCharacter.md)
  - [DownloadFileRequest](doc//DownloadFileRequest.md)
  - [DownloadFileResponse](doc//DownloadFileResponse.md)
@@ -218,6 +238,7 @@ Class | Method | HTTP request | Description
  - [IssueSortableFieldEnum](doc//IssueSortableFieldEnum.md)
  - [IssueStatus](doc//IssueStatus.md)
  - [IssueType](doc//IssueType.md)
+ - [JoinChatRequest](doc//JoinChatRequest.md)
  - [JoinGroupRequest](doc//JoinGroupRequest.md)
  - [JoinGroupResponse](doc//JoinGroupResponse.md)
  - [LanguageCode](doc//LanguageCode.md)
@@ -227,6 +248,8 @@ Class | Method | HTTP request | Description
  - [ListBattleResponse](doc//ListBattleResponse.md)
  - [ListCharacterRequest](doc//ListCharacterRequest.md)
  - [ListCharacterResponse](doc//ListCharacterResponse.md)
+ - [ListChatRequest](doc//ListChatRequest.md)
+ - [ListChatResponse](doc//ListChatResponse.md)
  - [ListChildCharactersRequest](doc//ListChildCharactersRequest.md)
  - [ListChildCharactersResponse](doc//ListChildCharactersResponse.md)
  - [ListChildGroupsRequest](doc//ListChildGroupsRequest.md)
@@ -243,6 +266,9 @@ Class | Method | HTTP request | Description
  - [LoginResponse](doc//LoginResponse.md)
  - [LogoutRequest](doc//LogoutRequest.md)
  - [LogoutResponse](doc//LogoutResponse.md)
+ - [MarkNotificationReceived](doc//MarkNotificationReceived.md)
+ - [MarkNotificationReceivedResult](doc//MarkNotificationReceivedResult.md)
+ - [NotificationType](doc//NotificationType.md)
  - [OnepieceLocale](doc//OnepieceLocale.md)
  - [PasswordRetrievalRequest](doc//PasswordRetrievalRequest.md)
  - [PasswordRetrievalResponse](doc//PasswordRetrievalResponse.md)
@@ -252,6 +278,10 @@ Class | Method | HTTP request | Description
  - [RegisterResponse](doc//RegisterResponse.md)
  - [ResourcePermissionMap](doc//ResourcePermissionMap.md)
  - [ResourceType](doc//ResourceType.md)
+ - [RetractMessageRequest](doc//RetractMessageRequest.md)
+ - [RetractMessageResponse](doc//RetractMessageResponse.md)
+ - [SendMessageRequest](doc//SendMessageRequest.md)
+ - [SendMessageResponse](doc//SendMessageResponse.md)
  - [ShareResourceRequest](doc//ShareResourceRequest.md)
  - [ShareResourceResponse](doc//ShareResourceResponse.md)
  - [SortOrder](doc//SortOrder.md)

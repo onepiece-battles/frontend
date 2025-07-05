@@ -308,5 +308,6 @@
   "loginAsVisitor": "Visitor Login",
   "allResources": "All Resource",
   "myResource": "My Resource",
-  "excludeSystem": "No System Resource"
+  "excludeSystem": "No System Resource",
+  "message": "Messages"
 }

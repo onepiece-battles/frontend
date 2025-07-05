@@ -5,7 +5,6 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:get_it/get_it.dart';
 import 'package:string_validator/string_validator.dart';
 import 'package:go_router/go_router.dart';
@@ -918,6 +917,8 @@ class HomePageState extends State<HomePage> {
           'images/svgs/hat.svg', 20, 20, OnepieceColors.fancyBlue),
       ResourceType.ISSUE.toString(): const Icon(Icons.add_alert,
           color: OnepieceColors.fancyBlue, size: 20),
+      ResourceType.CHATTING.toString(): const Icon(Icons.message,
+          color: OnepieceColors.fancyBlue, size: 20),
       setting:
           const Icon(Icons.settings, color: OnepieceColors.fancyBlue, size: 20)
     };
@@ -929,6 +930,7 @@ class HomePageState extends State<HomePage> {
       ResourceType.CHARACTER.toString(): AppRouter.characterPath,
       ResourceType.ISSUE.toString(): AppRouter.issuePath,
       ResourceType.GROUP.toString(): AppRouter.groupPath,
+      ResourceType.CHATTING.toString(): AppRouter.chattingPath
     };
     Map<String, String> resourceToDisplayTextMap = {
       ResourceType.FRUIT.toString(): AppLocalizations.of(context)!.devilFruit,
@@ -939,6 +941,7 @@ class HomePageState extends State<HomePage> {
       ResourceType.CHARACTER.toString():
           AppLocalizations.of(context)!.character,
       ResourceType.ISSUE.toString(): AppLocalizations.of(context)!.feedback,
+      ResourceType.CHATTING.toString(): AppLocalizations.of(context)!.message
     };
     var currentLoginRoleResources =
         loginRoleResources.map((e) => e.toString()).toList();
