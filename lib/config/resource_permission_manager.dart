@@ -11,7 +11,8 @@ class ResourcePermissionManager {
     ResourceType.GROUP: 4,
     ResourceType.USER: 5,
     ResourceType.ISSUE: 6,
-    ResourceType.ROLE: 7
+    ResourceType.ROLE: 7,
+    ResourceType.CHATTING: 8
   };
 
   static void updateUserCache(User user) {

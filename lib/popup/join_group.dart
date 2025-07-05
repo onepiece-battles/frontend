@@ -1,18 +1,14 @@
 import 'dart:async';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/components/image_lazy_loader.dart';
 import 'package:openapi/api.dart';
 import 'package:get_it/get_it.dart';
-import 'package:path/path.dart';
 import '../constants/onepiece_colors.dart';
 import '../constants/onepiece_fonts.dart';
 import '../repository/character_dao.dart';
 import '../repository/group_dao.dart';
-import '../utils/base64_helper.dart';
 import '../utils/i18n_helper.dart';
 import '../utils/image_helper.dart';
 

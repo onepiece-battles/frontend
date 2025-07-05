@@ -9,6 +9,7 @@ import 'package:one_piece_battles_flutter/views/character/character_detail_view.
 import 'package:one_piece_battles_flutter/views/character/character_view.dart';
 import 'package:one_piece_battles_flutter/views/battle/create_battle_view.dart';
 import 'package:one_piece_battles_flutter/views/character/create_character_view.dart';
+import 'package:one_piece_battles_flutter/views/chatting/chatting_view.dart';
 import 'package:one_piece_battles_flutter/views/fruit/create_fruit_view.dart';
 import 'package:one_piece_battles_flutter/views/fruit/fruit_detail_view.dart';
 import 'package:one_piece_battles_flutter/views/fruit/fruit_view.dart';
@@ -49,6 +50,8 @@ class AppRouter {
       '/home/${ResourceType.USER.toString().toLowerCase()}';
   static final issuePath =
       '/home/${ResourceType.ISSUE.toString().toLowerCase()}';
+  static final chattingPath =
+      '/home/${ResourceType.CHATTING.toString().toLowerCase()}';
 
   static void updateRoutingState(String matchedLocation) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -216,6 +219,16 @@ class AppRouter {
                   },
                 ),
               ]),
+          GoRoute(
+            path: chattingPath,
+            name: "chatting",
+            parentNavigatorKey: _homeNavigatorState,
+            pageBuilder: (context, state) {
+              updateRoutingState(state.matchedLocation);
+              return NoTransitionPage(
+                  child: const ChattingView(), key: UniqueKey());
+            },
+          ),
           GoRoute(
             path: userManagementPath,
             name: "userManagement",

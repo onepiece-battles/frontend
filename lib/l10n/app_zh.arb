@@ -308,5 +308,6 @@
   "loginAsVisitor": "游客登陆",
   "allResources": "全部",
   "myResource": "我的资源",
-  "excludeSystem": "排除系统资源"
+  "excludeSystem": "排除系统资源",
+  "message": "消息"
 }

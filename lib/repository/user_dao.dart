@@ -47,4 +47,12 @@ class UserDao {
       UpdatePasswordRequest request) async {
     return await userApi.updatePassword(request);
   }
+
+  Future<AddFriendResponse?> addFriend(AddFriendRequest request) async {
+    return await userApi.addFriend(addFriendRequest: request);
+  }
+
+  Future<AcceptFriendResponse?> acceptFriend(AcceptFriendRequest request) async {
+    return await userApi.acceptFriend(acceptFriendRequest: request);
+  }
 }
