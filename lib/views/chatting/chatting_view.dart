@@ -4,8 +4,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:one_piece_battles_flutter/popup/chatting_options.dart';
 import 'package:one_piece_battles_flutter/views/chatting/create_chatting_view.dart';
 import 'package:openapi/api.dart';
+import 'package:popover/popover.dart';
 import '../../constants/button_style.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
@@ -24,6 +26,7 @@ class _ChattingViewState extends State<ChattingView> {
   TextEditingController searchChattingController = TextEditingController();
 
   List<Chat> chats = [];
+  late String selectedChatId;
 
   @override
   void initState() {
@@ -59,83 +62,81 @@ class _ChattingViewState extends State<ChattingView> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 0, 6, 0),
-                  child: SizedBox(
-                    width: 200,
-                    height: 35,
-                    child: TextFormField(
-                      controller: searchChattingController,
-                      onChanged: (value) {},
-                      decoration: InputDecoration(
-                        labelStyle: OnepieceFonts.dropDownItemStyle,
-                        floatingLabelBehavior: FloatingLabelBehavior.never,
-                        disabledBorder: const OutlineInputBorder(
-                            borderSide: BorderSide(
-                                color: OnepieceColors.menuHoverColor)),
-                        enabledBorder: const OutlineInputBorder(
-                            borderSide: BorderSide(
-                                color: OnepieceColors.menuHoverColor)),
-                        focusedBorder: const OutlineInputBorder(
-                            borderSide: BorderSide(
-                                color: OnepieceColors.fancyGreen, width: 1.5)),
-                        prefixIcon: const Icon(Icons.search),
-                        labelText: AppLocalizations.of(context)!.name,
-                      ),
+    return
+      Row(
+        children: [
+          Container(
+            width: 300,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(8.0,0,0,0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: 230,
+                        height: 35,
+                        child: TextFormField(
+                          controller: searchChattingController,
+                          onChanged: (value) {},
+                          decoration: InputDecoration(
+                            labelStyle: OnepieceFonts.dropDownItemStyle,
+                            floatingLabelBehavior: FloatingLabelBehavior.never,
+                            disabledBorder: const OutlineInputBorder(
+                                borderSide: BorderSide(
+                                    color: OnepieceColors.menuHoverColor)),
+                            enabledBorder: const OutlineInputBorder(
+                                borderSide: BorderSide(
+                                    color: OnepieceColors.menuHoverColor)),
+                            focusedBorder: const OutlineInputBorder(
+                                borderSide: BorderSide(
+                                    color: OnepieceColors.fancyGreen, width: 1.5)),
+                            prefixIcon: const Icon(Icons.search),
+                            labelText: AppLocalizations.of(context)!.name,
+                          ),
+                        ),
+                      ), // search
+                      ChattingOptions(
+                        context: context,
+                      )
+                    ], // create new group
+                  ),
+                  SizedBox(
+                    width: 350,
+                    height: 500,
+                    child: ListView.builder(
+                      itemCount: chats.length,
+                      itemBuilder: (context, index) {
+                        final chat = chats[index];
+                        return ListTile(
+                          title: Text(chat.name!), // Assuming Chat has 'lastMessage'
+                          onTap: () {
+                            // Handle chat tap if needed
+                          },
+                        );
+                      },
                     ),
                   ),
-                ), // search
-                SizedBox(
-                  height: 35,
-                  width: 120,
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 10.0),
-                    child: ElevatedButton(
-                        onPressed: () {
-                          _showDialog(context);
-                        },
-                        style: OnepieceButtonStyle.getDefaultStyle(),
-                        child: Text(
-                          AppLocalizations.of(context)!.create,
-                        )),
-                  ),
-                )
-              ], // create new group
-            ),
-            SizedBox(
-              width: 350,
-              height: 500,
-              child: ListView.builder(
-                itemCount: chats.length,
-                itemBuilder: (context, index) {
-                  final chat = chats[index];
-                  return ListTile(
-                    title: Text(chat.name!), // Assuming Chat has 'lastMessage'
-                    onTap: () {
-                      // Handle chat tap if needed
-                    },
-                  );
-                },
+                ],
               ),
             ),
-          ],
-        ),
-        Row(
-          children: [
-            Row(), // chatting title/ group name
-            Row(), // chatting content
-            Row(), // typping area
-          ],
-        )
-      ],
-    );
+          ),
+          Expanded(
+            child: Container(
+              color: OnepieceColors.liteFancyGreen,
+              child: Column(
+                children: [
+                  Row(), // chatting title/ group name
+                  Row(), // chatting content
+                  Row(), // typping area
+                ],
+              ),
+            ),
+          ),
+        ],
+      );
   }
 }
