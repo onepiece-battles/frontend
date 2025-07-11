@@ -309,5 +309,7 @@
   "allResources": "All Resource",
   "myResource": "My Resource",
   "excludeSystem": "No System Resource",
-  "message": "Messages"
+  "message": "Messages",
+  "createChatting": "New Chat",
+  "addFriend": "Add Friends"
 }

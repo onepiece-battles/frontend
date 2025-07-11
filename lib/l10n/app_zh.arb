@@ -309,5 +309,7 @@
   "allResources": "全部",
   "myResource": "我的资源",
   "excludeSystem": "排除系统资源",
-  "message": "消息"
+  "message": "消息",
+  "createChatting": "发起群聊",
+  "addFriend": "添加朋友"
 }

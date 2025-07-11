@@ -41,68 +41,70 @@ class _UserNavigationState extends State<UserNavigation> {
         bodyBuilder: (context) => Column(
           children: [
             SizedBox(
-                width: 160,
-                height: 35,
-                child: ElevatedButton(
-                  onPressed: () {
-                    if (getIt<User>().loginRole == UserRole.VISITOR) {
-                      context.go(AppRouter.registerPath);
-                    } else {
-                      context.goNamed('userProfile',
-                          extra: getIt<User>().id,
-                          pathParameters: {'name': getIt<User>().nickname});
-                      Navigator.pop(context);
-                    }
-                  },
-                  style: OnepieceButtonStyle.getDefaultStyle(),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      ImageHelper.getSvgIconWithColor(
-                          'images/svgs/profile.svg', 20, 15, Colors.white),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 8.0),
-                        child: Text(
-                          AppLocalizations.of(context)!.userProfile,
-                          style: OnepieceFonts.smallContentStyleWhite,
-                        ),
+              width: 160,
+              height: 35,
+              child: ElevatedButton(
+                onPressed: () {
+                  if (getIt<User>().loginRole == UserRole.VISITOR) {
+                    context.go(AppRouter.registerPath);
+                  } else {
+                    context.goNamed('userProfile',
+                        extra: getIt<User>().id,
+                        pathParameters: {'name': getIt<User>().nickname});
+                    Navigator.pop(context);
+                  }
+                },
+                style: OnepieceButtonStyle.getDefaultStyle(),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    ImageHelper.getSvgIconWithColor(
+                        'images/svgs/profile.svg', 20, 15, Colors.white),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8.0),
+                      child: Text(
+                        AppLocalizations.of(context)!.userProfile,
+                        style: OnepieceFonts.smallContentStyleWhite,
                       ),
-                    ],
-                  ),
-                )),
+                    ),
+                  ],
+                ),
+              ),
+            ),
             // const Divider(color: Colors.white),
             SizedBox(
-                width: 160,
-                height: 35,
-                child: ElevatedButton(
-                  onPressed: () {
-                    getIt<UserDao>()
-                        .logout(LogoutRequest(userId: getIt<User>().id))
-                        .then((value) {
-                      getIt.registerLazySingleton<User>(
-                          () => User(id: "", username: "", nickname: ""));
-                    });
-                    context.replace(AppRouter.loginPath);
-                  },
-                  style: OnepieceButtonStyle.getDefaultStyle(),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      const Icon(
-                        Icons.logout,
-                        color: Colors.white,
-                        size: 18,
+              width: 160,
+              height: 35,
+              child: ElevatedButton(
+                onPressed: () {
+                  getIt<UserDao>()
+                      .logout(LogoutRequest(userId: getIt<User>().id))
+                      .then((value) {
+                    getIt.registerLazySingleton<User>(
+                        () => User(id: "", username: "", nickname: ""));
+                  });
+                  context.replace(AppRouter.loginPath);
+                },
+                style: OnepieceButtonStyle.getDefaultStyle(),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    const Icon(
+                      Icons.logout,
+                      color: Colors.white,
+                      size: 18,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8.0),
+                      child: Text(
+                        AppLocalizations.of(context)!.logout,
+                        style: OnepieceFonts.smallContentStyleWhite,
                       ),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 8.0),
-                        child: Text(
-                          AppLocalizations.of(context)!.logout,
-                          style: OnepieceFonts.smallContentStyleWhite,
-                        ),
-                      ),
-                    ],
-                  ),
-                )),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),
