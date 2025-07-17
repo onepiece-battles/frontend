@@ -2,10 +2,13 @@ import 'dart:ui';
 
 import 'package:animated_toggle_switch/animated_toggle_switch.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' hide Notification;
+import 'package:flutter/material.dart' hide Notification;
 import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
+import 'package:one_piece_battles_flutter/popup/notification_list.dart';
+import 'package:one_piece_battles_flutter/repository/notification_dao.dart';
+import 'package:popover/popover.dart';
 import 'package:string_validator/string_validator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/app_router.dart';
@@ -52,6 +55,7 @@ class HomePageState extends State<HomePage> {
       .toList()
       .where((e) => !notShownResources.contains(e))
       .toList();
+  List<Notification> notifications = [];
 
   double _drawerWidth = 300;
   bool _isHovering = false;
@@ -70,15 +74,26 @@ class HomePageState extends State<HomePage> {
         }
       });
     });
+    _search();
+  }
+
+  _search() {
+    ListNotificationRequest request =
+        ListNotificationRequest(userId: getIt<User>().id, onlyNew: true);
+    Future<ListNotificationResponse?> notification =
+        getIt<NotificationDao>().list(request);
+    notification.then((value) => setState(() {
+          notifications = value!.notifications;
+        }));
   }
 
   @override
   Widget build(BuildContext context) {
-    // todo(yichi): replace RawKeyboardListener with un-deprecated ones.
-    return RawKeyboardListener(
+    return KeyboardListener(
       focusNode: FocusNode(),
-      onKey: (event) {
-        if (event.isKeyPressed(LogicalKeyboardKey.slash)) {
+      onKeyEvent: (event) {
+        if (HardwareKeyboard.instance
+            .isLogicalKeyPressed(LogicalKeyboardKey.slash)) {
           _showDialog(context);
         }
       },
@@ -123,7 +138,8 @@ class HomePageState extends State<HomePage> {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: ConstrainedBox(
-          constraints: BoxConstraints(minWidth: constraints.maxWidth-_drawerWidth-10),
+          constraints: BoxConstraints(
+              minWidth: constraints.maxWidth - _drawerWidth - 10),
           child: Row(
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -252,7 +268,12 @@ class HomePageState extends State<HomePage> {
       padding: const EdgeInsets.all(8.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          getNotification(context),
+          const SizedBox(
+            width: 30,
+          ),
           SizedBox(
             width: 75,
             height: 32,
@@ -376,6 +397,13 @@ class HomePageState extends State<HomePage> {
           )
         ],
       ),
+    );
+  }
+
+  Widget getNotification(BuildContext context) {
+    return NotificationList(
+      notifications: notifications,
+      context: context,
     );
   }
 
@@ -917,8 +945,8 @@ class HomePageState extends State<HomePage> {
           'images/svgs/hat.svg', 20, 20, OnepieceColors.fancyBlue),
       ResourceType.ISSUE.toString(): const Icon(Icons.add_alert,
           color: OnepieceColors.fancyBlue, size: 20),
-      ResourceType.CHATTING.toString(): const Icon(Icons.message,
-          color: OnepieceColors.fancyBlue, size: 20),
+      ResourceType.CHATTING.toString():
+          const Icon(Icons.message, color: OnepieceColors.fancyBlue, size: 20),
       setting:
           const Icon(Icons.settings, color: OnepieceColors.fancyBlue, size: 20)
     };

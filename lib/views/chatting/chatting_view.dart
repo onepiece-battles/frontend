@@ -7,8 +7,6 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:one_piece_battles_flutter/popup/chatting_options.dart';
 import 'package:one_piece_battles_flutter/views/chatting/create_chatting_view.dart';
 import 'package:openapi/api.dart';
-import 'package:popover/popover.dart';
-import '../../constants/button_style.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
 import 'package:one_piece_battles_flutter/repository/chatting_dao.dart';
@@ -65,7 +63,7 @@ class _ChattingViewState extends State<ChattingView> {
     return
       Row(
         children: [
-          Container(
+          SizedBox(
             width: 300,
             child: Padding(
               padding: const EdgeInsets.fromLTRB(8.0,0,0,0),

@@ -105,6 +105,7 @@ Class | Method | HTTP request | Description
 *IssueApi* | [**listIssue**](doc//IssueApi.md#listissue) | **POST** /api/onepiece/issue/list | 
 *NotificationApi* | [**close**](doc//NotificationApi.md#close) | **POST** /api/onepiece/notification/close | 
 *NotificationApi* | [**create**](doc//NotificationApi.md#create) | **POST** /api/onepiece/notification/create | 
+*NotificationApi* | [**listNotification**](doc//NotificationApi.md#listnotification) | **POST** /api/onepiece/notification/list | 
 *NotificationApi* | [**markReceived**](doc//NotificationApi.md#markreceived) | **POST** /api/onepiece/notification/update | 
 *RoleApi* | [**addRole**](doc//RoleApi.md#addrole) | **POST** /api/onepiece/iam/add_role | 
 *RoleApi* | [**assignResourceToRole**](doc//RoleApi.md#assignresourcetorole) | **POST** /api/onepiece/iam/assign_resource_permissions_to_role | 
@@ -260,6 +261,8 @@ Class | Method | HTTP request | Description
  - [ListGroupResponse](doc//ListGroupResponse.md)
  - [ListIssueRequest](doc//ListIssueRequest.md)
  - [ListIssueResponse](doc//ListIssueResponse.md)
+ - [ListNotificationRequest](doc//ListNotificationRequest.md)
+ - [ListNotificationResponse](doc//ListNotificationResponse.md)
  - [ListUsersRequest](doc//ListUsersRequest.md)
  - [ListUsersResponse](doc//ListUsersResponse.md)
  - [LoginRequest](doc//LoginRequest.md)
@@ -268,6 +271,7 @@ Class | Method | HTTP request | Description
  - [LogoutResponse](doc//LogoutResponse.md)
  - [MarkNotificationReceived](doc//MarkNotificationReceived.md)
  - [MarkNotificationReceivedResult](doc//MarkNotificationReceivedResult.md)
+ - [Notification](doc//Notification.md)
  - [NotificationType](doc//NotificationType.md)
  - [OnepieceLocale](doc//OnepieceLocale.md)
  - [PasswordRetrievalRequest](doc//PasswordRetrievalRequest.md)
