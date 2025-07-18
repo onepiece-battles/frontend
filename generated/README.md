@@ -120,6 +120,7 @@ Class | Method | HTTP request | Description
 *UserApi* | [**login**](doc//UserApi.md#login) | **POST** /api/onepiece/user/login | 
 *UserApi* | [**logout**](doc//UserApi.md#logout) | **POST** /api/onepiece/user/logout | 
 *UserApi* | [**register**](doc//UserApi.md#register) | **POST** /api/onepiece/user/register | 
+*UserApi* | [**rejectFriend**](doc//UserApi.md#rejectfriend) | **POST** /api/onepiece/user/reject_friend | 
 *UserApi* | [**shareResource**](doc//UserApi.md#shareresource) | **POST** /api/onepiece/user/share_resource | 
 *UserApi* | [**updatePassword**](doc//UserApi.md#updatepassword) | **POST** /api/onepiece/user/update_password_with_verification | 
 *UserApi* | [**updateRole**](doc//UserApi.md#updaterole) | **POST** /api/onepiece/user/update_login_role | 
@@ -280,6 +281,8 @@ Class | Method | HTTP request | Description
  - [Race](doc//Race.md)
  - [RegisterRequest](doc//RegisterRequest.md)
  - [RegisterResponse](doc//RegisterResponse.md)
+ - [RejectFriendRequest](doc//RejectFriendRequest.md)
+ - [RejectFriendResponse](doc//RejectFriendResponse.md)
  - [ResourcePermissionMap](doc//ResourcePermissionMap.md)
  - [ResourceType](doc//ResourceType.md)
  - [RetractMessageRequest](doc//RetractMessageRequest.md)

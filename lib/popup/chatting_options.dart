@@ -53,7 +53,7 @@ class _ChattingOptionsState extends State<ChattingOptions> {
                           borderRadius: BorderRadius.circular(10.0),
                         ),
                         alignment: AlignmentDirectional.center,
-                        child: const AddFriendView(),
+                        child: const CreateChattingView(),
                       );
                     }),
                   );
@@ -93,7 +93,7 @@ class _ChattingOptionsState extends State<ChattingOptions> {
                           borderRadius: BorderRadius.circular(10.0),
                         ),
                         alignment: AlignmentDirectional.center,
-                        child: const CreateChattingView(),
+                        child: const AddFriendView(),
                       );
                     }),
                   );

@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:one_piece_battles_flutter/components/square_image_loader.dart';
 import 'package:one_piece_battles_flutter/popup/chatting_options.dart';
 import 'package:one_piece_battles_flutter/views/chatting/create_chatting_view.dart';
 import 'package:openapi/api.dart';
@@ -110,7 +111,8 @@ class _ChattingViewState extends State<ChattingView> {
                       itemBuilder: (context, index) {
                         final chat = chats[index];
                         return ListTile(
-                          title: Text(chat.name!), // Assuming Chat has 'lastMessage'
+                          title: Text(chat.name!),
+                          leading: getLeading(chat.members.map((e) => e.imageUri!).toList()),// Assuming Chat has 'lastMessage'
                           onTap: () {
                             // Handle chat tap if needed
                           },
@@ -136,5 +138,33 @@ class _ChattingViewState extends State<ChattingView> {
           ),
         ],
       );
+  }
+
+  Widget getLeading(List<String> imageUrls){
+    final List<String> displayedImages = imageUrls.length > 9
+        ? imageUrls.sublist(0, 9)
+        : imageUrls;
+    return SizedBox(
+      width: 45,
+      height: 45,
+      child: GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          crossAxisSpacing: 1.0,
+          mainAxisSpacing: 1.0,
+        ),
+        itemCount: displayedImages.length,
+        itemBuilder: (context, index) {
+          return
+            SquareImageLoader(
+                key: UniqueKey(),
+                uriProvider: () =>  displayedImages[index],
+                width: 40,
+                borderWidth: 0);
+        },
+      ),
+    );
   }
 }
