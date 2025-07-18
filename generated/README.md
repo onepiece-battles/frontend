@@ -105,6 +105,7 @@ Class | Method | HTTP request | Description
 *IssueApi* | [**listIssue**](doc//IssueApi.md#listissue) | **POST** /api/onepiece/issue/list | 
 *NotificationApi* | [**close**](doc//NotificationApi.md#close) | **POST** /api/onepiece/notification/close | 
 *NotificationApi* | [**create**](doc//NotificationApi.md#create) | **POST** /api/onepiece/notification/create | 
+*NotificationApi* | [**listNotification**](doc//NotificationApi.md#listnotification) | **POST** /api/onepiece/notification/list | 
 *NotificationApi* | [**markReceived**](doc//NotificationApi.md#markreceived) | **POST** /api/onepiece/notification/update | 
 *RoleApi* | [**addRole**](doc//RoleApi.md#addrole) | **POST** /api/onepiece/iam/add_role | 
 *RoleApi* | [**assignResourceToRole**](doc//RoleApi.md#assignresourcetorole) | **POST** /api/onepiece/iam/assign_resource_permissions_to_role | 
@@ -119,6 +120,7 @@ Class | Method | HTTP request | Description
 *UserApi* | [**login**](doc//UserApi.md#login) | **POST** /api/onepiece/user/login | 
 *UserApi* | [**logout**](doc//UserApi.md#logout) | **POST** /api/onepiece/user/logout | 
 *UserApi* | [**register**](doc//UserApi.md#register) | **POST** /api/onepiece/user/register | 
+*UserApi* | [**rejectFriend**](doc//UserApi.md#rejectfriend) | **POST** /api/onepiece/user/reject_friend | 
 *UserApi* | [**shareResource**](doc//UserApi.md#shareresource) | **POST** /api/onepiece/user/share_resource | 
 *UserApi* | [**updatePassword**](doc//UserApi.md#updatepassword) | **POST** /api/onepiece/user/update_password_with_verification | 
 *UserApi* | [**updateRole**](doc//UserApi.md#updaterole) | **POST** /api/onepiece/user/update_login_role | 
@@ -260,6 +262,8 @@ Class | Method | HTTP request | Description
  - [ListGroupResponse](doc//ListGroupResponse.md)
  - [ListIssueRequest](doc//ListIssueRequest.md)
  - [ListIssueResponse](doc//ListIssueResponse.md)
+ - [ListNotificationRequest](doc//ListNotificationRequest.md)
+ - [ListNotificationResponse](doc//ListNotificationResponse.md)
  - [ListUsersRequest](doc//ListUsersRequest.md)
  - [ListUsersResponse](doc//ListUsersResponse.md)
  - [LoginRequest](doc//LoginRequest.md)
@@ -268,6 +272,7 @@ Class | Method | HTTP request | Description
  - [LogoutResponse](doc//LogoutResponse.md)
  - [MarkNotificationReceived](doc//MarkNotificationReceived.md)
  - [MarkNotificationReceivedResult](doc//MarkNotificationReceivedResult.md)
+ - [Notification](doc//Notification.md)
  - [NotificationType](doc//NotificationType.md)
  - [OnepieceLocale](doc//OnepieceLocale.md)
  - [PasswordRetrievalRequest](doc//PasswordRetrievalRequest.md)
@@ -276,6 +281,8 @@ Class | Method | HTTP request | Description
  - [Race](doc//Race.md)
  - [RegisterRequest](doc//RegisterRequest.md)
  - [RegisterResponse](doc//RegisterResponse.md)
+ - [RejectFriendRequest](doc//RejectFriendRequest.md)
+ - [RejectFriendResponse](doc//RejectFriendResponse.md)
  - [ResourcePermissionMap](doc//ResourcePermissionMap.md)
  - [ResourceType](doc//ResourceType.md)
  - [RetractMessageRequest](doc//RetractMessageRequest.md)

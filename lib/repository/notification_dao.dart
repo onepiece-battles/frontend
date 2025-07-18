@@ -12,6 +12,10 @@ class NotificationDao {
     return notificationApi.close(closeNotificationRequest: request);
   }
 
+  Future<ListNotificationResponse?> list(ListNotificationRequest request) async {
+    return notificationApi.listNotification(request);
+  }
+
   Future<CreateNotificationResponse?> create(CreateNotificationRequest request) async {
     return notificationApi.create(request);
   }

@@ -55,4 +55,8 @@ class UserDao {
   Future<AcceptFriendResponse?> acceptFriend(AcceptFriendRequest request) async {
     return await userApi.acceptFriend(acceptFriendRequest: request);
   }
+
+  Future<RejectFriendResponse?> rejectFriend(RejectFriendRequest request) async {
+    return await userApi.rejectFriend(rejectFriendRequest: request);
+  }
 }
