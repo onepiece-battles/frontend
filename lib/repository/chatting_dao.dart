@@ -29,4 +29,8 @@ class ChattingDao {
   Future<Chat?> joinChat(JoinChatRequest request) async {
     return await chattingApi.joinChat(request);
   }
+
+  Future<ListMessageResponse?> listMessage(ListMessageRequest request) async {
+    return await chattingApi.listMessage(request);
+  }
 }

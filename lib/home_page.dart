@@ -8,7 +8,6 @@ import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
 import 'package:one_piece_battles_flutter/popup/notification_list.dart';
 import 'package:one_piece_battles_flutter/repository/notification_dao.dart';
-import 'package:popover/popover.dart';
 import 'package:string_validator/string_validator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/app_router.dart';
@@ -116,7 +115,6 @@ class HomePageState extends State<HomePage> {
                         ),
                       ),
                       const Divider(
-                        height: 10,
                         thickness: 1.5,
                       ),
                       Expanded(

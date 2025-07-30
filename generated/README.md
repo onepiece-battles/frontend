@@ -79,6 +79,7 @@ Class | Method | HTTP request | Description
 *ChattingApi* | [**createChat**](doc//ChattingApi.md#createchat) | **POST** /api/onepiece/chatting/create | 
 *ChattingApi* | [**joinChat**](doc//ChattingApi.md#joinchat) | **POST** /api/onepiece/chatting/join | 
 *ChattingApi* | [**listChat**](doc//ChattingApi.md#listchat) | **POST** /api/onepiece/chatting/list | 
+*ChattingApi* | [**listMessage**](doc//ChattingApi.md#listmessage) | **POST** /api/onepiece/chatting/listMessage | 
 *ChattingApi* | [**retractMessage**](doc//ChattingApi.md#retractmessage) | **POST** /api/onepiece/chatting/retract_message | 
 *ChattingApi* | [**sendMessage**](doc//ChattingApi.md#sendmessage) | **POST** /api/onepiece/chatting/send_message | 
 *DataExportApi* | [**generatePdf**](doc//DataExportApi.md#generatepdf) | **POST** /api/onepiece/export/generate_pdf | 
@@ -262,6 +263,8 @@ Class | Method | HTTP request | Description
  - [ListGroupResponse](doc//ListGroupResponse.md)
  - [ListIssueRequest](doc//ListIssueRequest.md)
  - [ListIssueResponse](doc//ListIssueResponse.md)
+ - [ListMessageRequest](doc//ListMessageRequest.md)
+ - [ListMessageResponse](doc//ListMessageResponse.md)
  - [ListNotificationRequest](doc//ListNotificationRequest.md)
  - [ListNotificationResponse](doc//ListNotificationResponse.md)
  - [ListUsersRequest](doc//ListUsersRequest.md)
@@ -272,6 +275,7 @@ Class | Method | HTTP request | Description
  - [LogoutResponse](doc//LogoutResponse.md)
  - [MarkNotificationReceived](doc//MarkNotificationReceived.md)
  - [MarkNotificationReceivedResult](doc//MarkNotificationReceivedResult.md)
+ - [Message](doc//Message.md)
  - [Notification](doc//Notification.md)
  - [NotificationType](doc//NotificationType.md)
  - [OnepieceLocale](doc//OnepieceLocale.md)
