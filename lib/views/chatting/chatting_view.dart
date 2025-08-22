@@ -4,6 +4,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:one_piece_battles_flutter/components/square_image_loader.dart';
 import 'package:one_piece_battles_flutter/constants/button_style.dart';
 import 'package:one_piece_battles_flutter/popup/chatting_options.dart';
+import 'package:one_piece_battles_flutter/repository/message_dao.dart';
 import 'package:openapi/api.dart';
 import '../../components/message.dart';
 import '../../constants/onepiece_colors.dart';
@@ -102,7 +103,7 @@ class _ChattingViewState extends State<ChattingView> {
                             .map((e) => e.imageUri!)
                             .toList()), // Assuming Chat has 'lastMessage'
                         onTap: () {
-                          getIt<ChattingDao>()
+                          getIt<MessageDao>()
                               .listMessage(ListMessageRequest(
                               userId: getIt<User>().id,
                               chatId: chat.id,
@@ -183,7 +184,7 @@ class _ChattingViewState extends State<ChattingView> {
           children: [
             ElevatedButton(
               onPressed: () {
-                getIt<ChattingDao>()
+                getIt<MessageDao>()
                     .sendMessage(SendMessageRequest(
                         userId: getIt<User>().id,
                         chatId: selectedChat.id,
