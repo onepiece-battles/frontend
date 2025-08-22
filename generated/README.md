@@ -79,9 +79,6 @@ Class | Method | HTTP request | Description
 *ChattingApi* | [**createChat**](doc//ChattingApi.md#createchat) | **POST** /api/onepiece/chatting/create | 
 *ChattingApi* | [**joinChat**](doc//ChattingApi.md#joinchat) | **POST** /api/onepiece/chatting/join | 
 *ChattingApi* | [**listChat**](doc//ChattingApi.md#listchat) | **POST** /api/onepiece/chatting/list | 
-*ChattingApi* | [**listMessage**](doc//ChattingApi.md#listmessage) | **POST** /api/onepiece/chatting/listMessage | 
-*ChattingApi* | [**retractMessage**](doc//ChattingApi.md#retractmessage) | **POST** /api/onepiece/chatting/retract_message | 
-*ChattingApi* | [**sendMessage**](doc//ChattingApi.md#sendmessage) | **POST** /api/onepiece/chatting/send_message | 
 *DataExportApi* | [**generatePdf**](doc//DataExportApi.md#generatepdf) | **POST** /api/onepiece/export/generate_pdf | 
 *EmailApi* | [**sendRetrievalEmail**](doc//EmailApi.md#sendretrievalemail) | **POST** /api/onepiece/email/send_password_retrieval_email | 
 *EmailApi* | [**verifyEmailAddress**](doc//EmailApi.md#verifyemailaddress) | **POST** /api/onepiece/email/verify_email_address | 
@@ -104,6 +101,10 @@ Class | Method | HTTP request | Description
 *IssueApi* | [**createIssue**](doc//IssueApi.md#createissue) | **POST** /api/onepiece/issue/create | 
 *IssueApi* | [**getIssueFullView**](doc//IssueApi.md#getissuefullview) | **POST** /api/onepiece/issue/get_issue_full_view | 
 *IssueApi* | [**listIssue**](doc//IssueApi.md#listissue) | **POST** /api/onepiece/issue/list | 
+*MessageApi* | [**jumpToMessage**](doc//MessageApi.md#jumptomessage) | **POST** /api/onepiece/chatting/jumpToMessage | 
+*MessageApi* | [**listMessage**](doc//MessageApi.md#listmessage) | **POST** /api/onepiece/chatting/listMessage | 
+*MessageApi* | [**retractMessage**](doc//MessageApi.md#retractmessage) | **POST** /api/onepiece/chatting/retract_message | 
+*MessageApi* | [**sendMessage**](doc//MessageApi.md#sendmessage) | **POST** /api/onepiece/chatting/send_message | 
 *NotificationApi* | [**close**](doc//NotificationApi.md#close) | **POST** /api/onepiece/notification/close | 
 *NotificationApi* | [**create**](doc//NotificationApi.md#create) | **POST** /api/onepiece/notification/create | 
 *NotificationApi* | [**listNotification**](doc//NotificationApi.md#listnotification) | **POST** /api/onepiece/notification/list | 
@@ -244,6 +245,8 @@ Class | Method | HTTP request | Description
  - [JoinChatRequest](doc//JoinChatRequest.md)
  - [JoinGroupRequest](doc//JoinGroupRequest.md)
  - [JoinGroupResponse](doc//JoinGroupResponse.md)
+ - [JumpToMessageRequest](doc//JumpToMessageRequest.md)
+ - [JumpToMessageResponse](doc//JumpToMessageResponse.md)
  - [LanguageCode](doc//LanguageCode.md)
  - [ListBattleByIdsRequest](doc//ListBattleByIdsRequest.md)
  - [ListBattleByIdsResponse](doc//ListBattleByIdsResponse.md)

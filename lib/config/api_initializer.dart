@@ -7,6 +7,7 @@ import 'package:one_piece_battles_flutter/repository/file_dao.dart';
 import 'package:one_piece_battles_flutter/repository/fruit_dao.dart';
 import 'package:one_piece_battles_flutter/repository/group_dao.dart';
 import 'package:one_piece_battles_flutter/repository/image_dao.dart';
+import 'package:one_piece_battles_flutter/repository/message_dao.dart';
 import 'package:one_piece_battles_flutter/repository/notification_dao.dart';
 import 'package:one_piece_battles_flutter/repository/support_dao.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
@@ -34,5 +35,6 @@ class ApiInitializer {
     getIt.registerLazySingleton<SupportDao>(() => SupportDao(apiClient));
     getIt.registerLazySingleton<EmailDao>(() => EmailDao(apiClient));
     getIt.registerLazySingleton<NotificationDao>(() => NotificationDao(apiClient));
+    getIt.registerLazySingleton<MessageDao>(() => MessageDao(apiClient));
   }
 }
