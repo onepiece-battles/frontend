@@ -102,15 +102,14 @@ class _ChattingViewState extends State<ChattingView> {
                             .map((e) => e.imageUri!)
                             .toList()), // Assuming Chat has 'lastMessage'
                         onTap: () {
-                          selectedChatNotifier.value = chat;
-                          selectedChat = chat;
                           getIt<ChattingDao>()
                               .listMessage(ListMessageRequest(
-                                  userId: getIt<User>().id,
-                                  chatId: chat.id,
-                                  limit: 10))
+                              userId: getIt<User>().id,
+                              chatId: chat.id,
+                              limit: 10))
                               .then((value) => messages = value!.chats!);
-                          setState(() {});
+                          selectedChatNotifier.value = chat;
+                          selectedChat = chat;
                         },
                       );
                     },
@@ -141,14 +140,17 @@ class _ChattingViewState extends State<ChattingView> {
                                   onPressed: () {},
                                   icon: const Icon(Icons.add_box))
                             ],
-                          ), // chatting title/ group name
+                          ),
+                          Text(messages.length.toString()),
+                          // chatting title/ group name
                           Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
                             children: messages
                                 .map((e) => MessageItem(
                                       message: e,
                                       isMe: e.userId == getIt<User>().id!,
                                       preMessage: e.preMessage,
-                                      user: selectedChat.members.firstWhere(
+                                      user: selectedChat!.members.firstWhere(
                                           (user) => user.id == e.userId),
                                     ))
                                 .toList(),
