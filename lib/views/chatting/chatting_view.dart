@@ -1,15 +1,18 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:one_piece_battles_flutter/components/square_image_loader.dart';
+import 'package:one_piece_battles_flutter/components/web_socket_manager.dart';
 import 'package:one_piece_battles_flutter/constants/button_style.dart';
 import 'package:one_piece_battles_flutter/popup/chatting_options.dart';
-import 'package:one_piece_battles_flutter/repository/message_dao.dart';
 import 'package:openapi/api.dart';
 import '../../components/message.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
 import 'package:one_piece_battles_flutter/repository/chatting_dao.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -26,15 +29,35 @@ class _ChattingViewState extends State<ChattingView> {
   Map<String, double> chatLocationMap = {};
   Map<String, String> chatMessageMap = {};
   List<Chat> chats = [];
+  WebSocketManager webSocketManager = WebSocketManager(getIt<User>().id);
   List<Message> messages = [];
   late Chat selectedChat;
+  late String preMessageId;
   ValueNotifier<Chat?> selectedChatNotifier = ValueNotifier(null);
   bool isComposing = false;
 
   @override
   void initState() {
     super.initState();
+    webSocketManager.connect('ws://localhost:8081/chat?userId=${getIt<User>().id}');
+    webSocketManager.stream.listen((message) {
+      setState(() {
+        final Map<String, dynamic> json = jsonDecode(message);
+        final Message incomingMessage = Message.fromJson(json)!;
+        messages.add(incomingMessage);
+      });
+    }, onError: (error) {
+      print('WebSocket error: $error');
+    }, onDone: () {
+      print('WebSocket connection closed');
+    });
     listChat();
+  }
+
+  @override
+  void dispose() {
+    webSocketManager.disconnect();
+    super.dispose();
   }
 
   listChat() {
@@ -103,14 +126,7 @@ class _ChattingViewState extends State<ChattingView> {
                             .map((e) => e.imageUri!)
                             .toList()), // Assuming Chat has 'lastMessage'
                         onTap: () {
-                          getIt<MessageDao>()
-                              .listMessage(ListMessageRequest(
-                              userId: getIt<User>().id,
-                              chatId: chat.id,
-                              limit: 10))
-                              .then((value) => messages = value!.chats!);
-                          selectedChatNotifier.value = chat;
-                          selectedChat = chat;
+
                         },
                       );
                     },
@@ -184,14 +200,15 @@ class _ChattingViewState extends State<ChattingView> {
           children: [
             ElevatedButton(
               onPressed: () {
-                getIt<MessageDao>()
-                    .sendMessage(SendMessageRequest(
-                        userId: getIt<User>().id,
-                        chatId: selectedChat.id,
-                        content: typingController.text))
-                    .then((value) => value!.result!
-                        ? typingController.clear()
-                        : typingController.value);
+                final Message message = Message(
+                  content:  typingController.text,
+                  userId: getIt<User>().id,
+                  conversationId: selectedChat.id,
+                  preMessageId: preMessageId,
+                );
+                final String jsonMessage = jsonEncode(message.toJson());
+                webSocketManager.sendMessage(jsonMessage, selectedChat.id!);
+                typingController.clear();
               },
               style: OnepieceButtonStyle.getDefaultStyle(),
               child: Text(
