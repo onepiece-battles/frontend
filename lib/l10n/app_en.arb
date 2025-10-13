@@ -311,5 +311,10 @@
   "excludeSystem": "No System Resource",
   "message": "Messages",
   "createChatting": "New Chat",
-  "addFriend": "Add Friends"
+  "addFriend": "Add Friends",
+  "send": "Send",
+  "chatting": "Chatting",
+  "image": "Image",
+  "noChatting": "Empty Chatting Room",
+  "yesterday": "yesterday"
 }

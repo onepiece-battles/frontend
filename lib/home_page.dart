@@ -114,9 +114,6 @@ class HomePageState extends State<HomePage> {
                           child: getTopBar(context, constraints),
                         ),
                       ),
-                      const Divider(
-                        thickness: 1.5,
-                      ),
                       Expanded(
                         child: widget.mainScreen,
                       )
@@ -169,9 +166,10 @@ class HomePageState extends State<HomePage> {
           AppLocalizations.of(context)!.userManagement,
       ResourceType.BATTLE.toString().toLowerCase():
           AppLocalizations.of(context)!.battle,
-      // 'setting': AppLocalizations.of(context)!.settings,
       ResourceType.ISSUE.toString().toLowerCase():
           AppLocalizations.of(context)!.issue,
+      ResourceType.CHATTING.toString().toLowerCase():
+      AppLocalizations.of(context)!.chatting,
       'create': AppLocalizations.of(context)!.create,
       'profile': AppLocalizations.of(context)!.userProfile,
     };

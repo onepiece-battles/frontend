@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:one_piece_battles_flutter/components/square_image_loader.dart';
+import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
+import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:openapi/api.dart';
 
 class MessageItem extends StatelessWidget {
@@ -16,18 +18,39 @@ class MessageItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        SquareImageLoader(
-            key: UniqueKey(),
-            uriProvider: () => user.imageUri!,
-            width: 40,
-            borderWidth: 0),
-        Column(
-          children: [getChatting(), if (preMessage != null) getPreMessage()],
-        )
-      ],
-    );
+    return isMe
+        ? Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Column(
+                children: [
+                  getChatting(),
+                  if (preMessage != null) getPreMessage()
+                ],
+              ),
+              SquareImageLoader(
+                  key: UniqueKey(),
+                  uriProvider: () => user.imageUri!,
+                  width: 40,
+                  borderWidth: 0),
+            ],
+          )
+        : Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              SquareImageLoader(
+                  key: UniqueKey(),
+                  uriProvider: () => user.imageUri!,
+                  width: 40,
+                  borderWidth: 0),
+              Column(
+                children: [
+                  getChatting(),
+                  if (preMessage != null) getPreMessage()
+                ],
+              ),
+            ],
+          );
   }
 
   Widget getChatting() {
@@ -38,14 +61,14 @@ class MessageItem extends StatelessWidget {
         alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
         child: Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            color: isMe ? Colors.blue[200] : Colors.grey[300],
+            borderRadius: BorderRadius.circular(10),
+            color: isMe ? OnepieceColors.fancyBlue : Colors.grey[300],
           ),
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(8),
           child: message.content != null
               ? Text(
                   message.content!,
-                  style: const TextStyle(fontSize: 15),
+                  style: OnepieceFonts.tagStyle,
                 )
               : SquareImageLoader(
                   key: UniqueKey(),

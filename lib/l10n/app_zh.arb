@@ -311,5 +311,10 @@
   "excludeSystem": "排除系统资源",
   "message": "消息",
   "createChatting": "发起群聊",
-  "addFriend": "添加朋友"
+  "addFriend": "添加朋友",
+  "send": "发送",
+  "chatting": "聊天",
+  "image": "图片",
+  "noChatting": "当前无对话",
+  "yesterday": "昨天"
 }
