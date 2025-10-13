@@ -1,18 +1,18 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:one_piece_battles_flutter/components/chat_input_field.dart';
+import 'package:one_piece_battles_flutter/components/image_lazy_loader.dart';
 import 'package:one_piece_battles_flutter/components/square_image_loader.dart';
 import 'package:one_piece_battles_flutter/components/web_socket_manager.dart';
-import 'package:one_piece_battles_flutter/constants/button_style.dart';
 import 'package:one_piece_battles_flutter/popup/chatting_options.dart';
+import 'package:one_piece_battles_flutter/utils/time_helper.dart';
 import 'package:openapi/api.dart';
 import '../../components/message.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
 import 'package:one_piece_battles_flutter/repository/chatting_dao.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -28,24 +28,23 @@ class _ChattingViewState extends State<ChattingView> {
   TextEditingController typingController = TextEditingController();
   Map<String, double> chatLocationMap = {};
   Map<String, String> chatMessageMap = {};
+  String userId = getIt<User>().id;
   List<Chat> chats = [];
   WebSocketManager webSocketManager = WebSocketManager(getIt<User>().id);
-  List<Message> messages = [];
-  late Chat selectedChat;
-  late String preMessageId;
+  final ValueNotifier<List<Message>> messagesNotifier =
+      ValueNotifier<List<Message>>([]);
+  void preMessageId;
   ValueNotifier<Chat?> selectedChatNotifier = ValueNotifier(null);
   bool isComposing = false;
 
   @override
   void initState() {
     super.initState();
-    webSocketManager.connect('ws://localhost:8081/chat?userId=${getIt<User>().id}');
+    webSocketManager.connect('ws://localhost:8081/chat?userId=$userId');
     webSocketManager.stream.listen((message) {
-      setState(() {
-        final Map<String, dynamic> json = jsonDecode(message);
-        final Message incomingMessage = Message.fromJson(json)!;
-        messages.add(incomingMessage);
-      });
+      final Message incomingMessage = Message.fromJson(jsonDecode(message))!;
+      messagesNotifier.value = [...messagesNotifier.value, incomingMessage];
+      messagesNotifier.notifyListeners();
     }, onError: (error) {
       print('WebSocket error: $error');
     }, onDone: () {
@@ -61,17 +60,24 @@ class _ChattingViewState extends State<ChattingView> {
   }
 
   listChat() {
-    ListChatRequest listChatRequest = ListChatRequest(userId: getIt<User>().id);
+    ListChatRequest listChatRequest = ListChatRequest(userId: userId);
     Future<ListChatResponse?> chatting =
         getIt<ChattingDao>().listChat(listChatRequest);
-    chatting.then((value) => setState(() {
-          chats = value!.chats;
-        }));
+    chatting.then(
+      (value) => setState(() {
+        chats = value!.chats;
+        if (chats.isNotEmpty) {
+          selectedChatNotifier.value = chats.first;
+          selectedChatNotifier.notifyListeners();
+        }
+      }),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return
+      Row(
       children: [
         SizedBox(
           width: 300,
@@ -120,15 +126,60 @@ class _ChattingViewState extends State<ChattingView> {
                     itemCount: chats.length,
                     itemBuilder: (context, index) {
                       final chat = chats[index];
-                      return ListTile(
-                        title: Text(chat.name!),
-                        leading: getLeading(chat.members
-                            .map((e) => e.imageUri!)
-                            .toList()), // Assuming Chat has 'lastMessage'
-                        onTap: () {
-
-                        },
-                      );
+                      return ValueListenableBuilder(
+                          valueListenable: selectedChatNotifier,
+                          builder: (context, value, _) {
+                            return ListTile(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                              title: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        chat.group!
+                                            ? chat.name!
+                                            : getTargetMember(chat).nickname,
+                                        style: OnepieceFonts
+                                            .contentStyleBoldFancyBlue,
+                                      ),
+                                      Text(
+                                        TimeHelper.humanDateFromTimestamp(
+                                            1759970648516, context),
+                                        style: OnepieceFonts
+                                            .boldLiteFancySmallFont,
+                                      ),
+                                      // replace with real time
+                                    ],
+                                  ),
+                                  if (chat.message != null)
+                                    Text(chat.message!.content ??
+                                        AppLocalizations.of(context)!.image)
+                                  else
+                                    const Text(""),
+                                ],
+                              ),
+                              selected:
+                                  selectedChatNotifier.value!.id == chat.id,
+                              focusColor: OnepieceColors.liteFancyBlue,
+                              selectedTileColor: OnepieceColors.liteFancyBlue,
+                              leading: chat.group!
+                                  ? getLeading(chat.members
+                                      .map((e) => e.imageUri!)
+                                      .toList())
+                                  : getSingleLeading(
+                                      chat), // Assuming Chat has 'lastMessage'
+                              onTap: () {
+                                selectedChatNotifier.value = chat;
+                                selectedChatNotifier.notifyListeners();
+                              },
+                            );
+                          });
                     },
                   ),
                 ),
@@ -136,46 +187,86 @@ class _ChattingViewState extends State<ChattingView> {
             ),
           ),
         ),
+        const VerticalDivider(
+          thickness: 1.2,
+          color: OnepieceColors.liteFancyGreen,
+          indent: 10,
+          endIndent: 8,
+        ),
         Expanded(
           child: ValueListenableBuilder(
             valueListenable: selectedChatNotifier,
             builder: (context, value, _) {
               return selectedChatNotifier.value == null
-                  ? Container(
-                      color: OnepieceColors.liteFancyGreen,
+                  ? Center(
+                      child: Text(
+                        AppLocalizations.of(context)!.noChatting,
+                        style: OnepieceFonts.fancyBlueSmallTitle,
+                      ),
                     )
-                  : Container(
-                      color: OnepieceColors.liteFancyGreen,
-                      height: 800,
-                      child: Column(
+                  : Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(selectedChatNotifier.value!.name!),
-                              IconButton(
-                                  onPressed: () {},
-                                  icon: const Icon(Icons.add_box))
-                            ],
+                          Center(
+                            child: Text(
+                                style: OnepieceFonts.fancyBlueSmallTitle,
+                                selectedChatNotifier.value!.group!
+                                    ? selectedChatNotifier.value!.name!
+                                    : getTargetMember(
+                                            selectedChatNotifier.value!)
+                                        .nickname),
                           ),
-                          Text(messages.length.toString()),
-                          // chatting title/ group name
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: messages
-                                .map((e) => MessageItem(
-                                      message: e,
-                                      isMe: e.userId == getIt<User>().id!,
-                                      preMessage: e.preMessage,
-                                      user: selectedChat!.members.firstWhere(
-                                          (user) => user.id == e.userId),
-                                    ))
-                                .toList(),
-                          ), // chatting content
-                          getTypingArea(context) // typing area
+                          IconButton(
+                              onPressed: () {},
+                              icon: const Icon(Icons.add_box))
                         ],
                       ),
-                    );
+                      // chatting title/ group name
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          SizedBox(
+                            height:600,
+                            child: SingleChildScrollView(
+                              child: ValueListenableBuilder<List<Message>>(
+                                  valueListenable: messagesNotifier,
+                                  builder: (context, messages, _) {
+                                    return Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: messagesNotifier.value
+                                          .where((e) =>
+                                              e.conversationId ==
+                                              selectedChatNotifier
+                                                  .value!.id)
+                                          .map(
+                                            (e) => MessageItem(
+                                              message: e,
+                                              isMe: e.userId == userId!,
+                                              preMessage: e.preMessage,
+                                              user: selectedChatNotifier!
+                                                  .value!.members
+                                                  .firstWhere((user) =>
+                                                      user.id == e.userId),
+                                            ),
+                                          )
+                                          .toList(),
+                                    );
+                                  }),
+                            ),
+                          ),
+                          ChatInputField(
+                            webSocketManager: webSocketManager,
+                            selectedChatNotifier: selectedChatNotifier,
+                            textEditingController: typingController,
+                          )
+                        ],
+                      )
+                    ],
+                  );
             },
           ),
         ),
@@ -183,46 +274,12 @@ class _ChattingViewState extends State<ChattingView> {
     );
   }
 
-  Widget getTypingArea(BuildContext context) {
-    return Column(
-      children: [
-        const Row(
-          children: [Icon(Icons.access_alarms_rounded), Icon(Icons.face)],
-        ),
-        TextField(
-          controller: typingController,
-          textAlign: TextAlign.left,
-          maxLines: 10,
-          autofocus: true,
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                final Message message = Message(
-                  content:  typingController.text,
-                  userId: getIt<User>().id,
-                  conversationId: selectedChat.id,
-                  preMessageId: preMessageId,
-                );
-                final String jsonMessage = jsonEncode(message.toJson());
-                webSocketManager.sendMessage(jsonMessage, selectedChat.id!);
-                typingController.clear();
-              },
-              style: OnepieceButtonStyle.getDefaultStyle(),
-              child: Text(
-                AppLocalizations.of(context)!.sendEmail,
-                style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 24,
-                    color: OnepieceColors.fancyBlue),
-              ),
-            )
-          ],
-        ),
-      ],
-    );
+  User getTargetMember(Chat chat) {
+    if (chat.members.first.id == userId) {
+      return chat.members.last;
+    } else {
+      return chat.members.first;
+    }
   }
 
   Widget getLeading(List<String> imageUrls) {
@@ -247,6 +304,20 @@ class _ChattingViewState extends State<ChattingView> {
               width: 40,
               borderWidth: 0);
         },
+      ),
+    );
+  }
+
+  Widget getSingleLeading(Chat chat) {
+    return SizedBox(
+      width: 45,
+      height: 45,
+      child: ImageLazyLoader(
+        key: UniqueKey(),
+        uriProvider: () => getTargetMember(chat).imageUri!,
+        width: 40,
+        borderWidth: 1.5,
+        borderRadios: 3,
       ),
     );
   }
