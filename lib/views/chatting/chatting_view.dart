@@ -40,6 +40,7 @@ class _ChattingViewState extends State<ChattingView> {
   @override
   void initState() {
     super.initState();
+    listChat();
     webSocketManager.connect('ws://localhost:8081/chat?userId=$userId');
     webSocketManager.stream.listen((message) {
       final Message incomingMessage = Message.fromJson(jsonDecode(message))!;
@@ -50,7 +51,6 @@ class _ChattingViewState extends State<ChattingView> {
     }, onDone: () {
       print('WebSocket connection closed');
     });
-    listChat();
   }
 
   @override
@@ -76,8 +76,9 @@ class _ChattingViewState extends State<ChattingView> {
 
   @override
   Widget build(BuildContext context) {
-    return
-      Row(
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      mainAxisSize: MainAxisSize.max,
       children: [
         SizedBox(
           width: 300,
@@ -121,9 +122,9 @@ class _ChattingViewState extends State<ChattingView> {
                 ),
                 SizedBox(
                   width: 350,
-                  height: 500,
                   child: ListView.builder(
                     itemCount: chats.length,
+                    shrinkWrap: true,
                     itemBuilder: (context, index) {
                       final chat = chats[index];
                       return ValueListenableBuilder(
@@ -193,82 +194,67 @@ class _ChattingViewState extends State<ChattingView> {
           indent: 10,
           endIndent: 8,
         ),
-        Expanded(
-          child: ValueListenableBuilder(
-            valueListenable: selectedChatNotifier,
-            builder: (context, value, _) {
-              return selectedChatNotifier.value == null
-                  ? Center(
-                      child: Text(
-                        AppLocalizations.of(context)!.noChatting,
-                        style: OnepieceFonts.fancyBlueSmallTitle,
-                      ),
-                    )
-                  : Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        ValueListenableBuilder(
+          valueListenable: selectedChatNotifier,
+          builder: (context, value, _) {
+            return selectedChatNotifier.value == null
+                ? const Text("")
+                : Expanded(
+                    child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Center(
-                            child: Text(
-                                style: OnepieceFonts.fancyBlueSmallTitle,
-                                selectedChatNotifier.value!.group!
-                                    ? selectedChatNotifier.value!.name!
-                                    : getTargetMember(
-                                            selectedChatNotifier.value!)
-                                        .nickname),
-                          ),
-                          IconButton(
-                              onPressed: () {},
-                              icon: const Icon(Icons.add_box))
-                        ],
+                      Text(
+                          style: OnepieceFonts.fancyBlueSmallTitle,
+                          selectedChatNotifier.value!.group!
+                              ? selectedChatNotifier.value!.name!
+                              : getTargetMember(selectedChatNotifier.value!)
+                                  .nickname),
+                      ValueListenableBuilder<List<Message>>(
+                        valueListenable: messagesNotifier,
+                        builder: (context, value, _) {
+                          var selectedMessages = messagesNotifier.value.where(
+                              (e) =>
+                                  e.conversationId ==
+                                  selectedChatNotifier.value!.id);
+                          return Expanded(
+                              child: ListView.builder(
+                                padding: const EdgeInsets.fromLTRB(10,0,25,0),
+                            reverse: true,
+                            itemCount: selectedMessages.length,
+                            itemBuilder: (context, index) {
+                              final msg = selectedMessages.toList()[index];
+                              return MessageItem(
+                                message: msg,
+                                isMe: msg.userId == userId!,
+                                preMessage: msg.preMessage,
+                                user: selectedChatNotifier!.value!.members
+                                    .firstWhere(
+                                        (user) => user.id == msg.userId),
+                              ); // your widget
+                            },
+                          ));
+                        },
                       ),
-                      // chatting title/ group name
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          SizedBox(
-                            height:600,
-                            child: SingleChildScrollView(
-                              child: ValueListenableBuilder<List<Message>>(
-                                  valueListenable: messagesNotifier,
-                                  builder: (context, messages, _) {
-                                    return Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      children: messagesNotifier.value
-                                          .where((e) =>
-                                              e.conversationId ==
-                                              selectedChatNotifier
-                                                  .value!.id)
-                                          .map(
-                                            (e) => MessageItem(
-                                              message: e,
-                                              isMe: e.userId == userId!,
-                                              preMessage: e.preMessage,
-                                              user: selectedChatNotifier!
-                                                  .value!.members
-                                                  .firstWhere((user) =>
-                                                      user.id == e.userId),
-                                            ),
-                                          )
-                                          .toList(),
-                                    );
-                                  }),
-                            ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(0,10,15,10),
+                        child: ChatInputField(
+                          webSocketManager: webSocketManager,
+                          selectedChatNotifier: selectedChatNotifier,
+                          textEditingController: typingController,
+                          padding: EdgeInsets.only(
+                            left: 8,
+                            right: 8,
+                            bottom: MediaQuery.of(context)
+                                .viewInsets
+                                .bottom, // move above keyboard
+                            top: 6,
                           ),
-                          ChatInputField(
-                            webSocketManager: webSocketManager,
-                            selectedChatNotifier: selectedChatNotifier,
-                            textEditingController: typingController,
-                          )
-                        ],
+                        ),
                       )
                     ],
-                  );
-            },
-          ),
+                  ));
+          },
         ),
       ],
     );
