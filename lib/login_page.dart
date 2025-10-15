@@ -38,8 +38,8 @@ class _LoginPageState extends State<LoginPage> {
   bool _buttonEnabled = false;
   String verificationMessage = "";
   I18nText? verificationI18n = I18nText();
-  TextEditingController emailController = TextEditingController(text: "");
-  TextEditingController passwordController = TextEditingController(text: "");
+  TextEditingController emailController = TextEditingController(text: "onepiecebattles@163.com");
+  TextEditingController passwordController = TextEditingController(text: "abc");
   Logger logger = Logger('_LoginPageState');
   UserDao userDao = UserDao.empty();
 

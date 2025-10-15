@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:one_piece_battles_flutter/components/web_socket_manager.dart';
 import 'package:one_piece_battles_flutter/constants/button_style.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -22,7 +23,7 @@ class ChatInputField extends StatefulWidget {
   final Color sendButtonColor;
   final bool enabled;
 
-   ChatInputField({
+  ChatInputField({
     Key? key,
     required this.webSocketManager,
     required this.selectedChatNotifier,
@@ -60,17 +61,17 @@ class _ChatInputFieldState extends State<ChatInputField> {
   }
 
   void _handleSend() {
-      setState(() {
-        final SendMessageRequest request = SendMessageRequest(
-          content: textEditingController.text,
-          userId: getIt<User>().id,
-          chatId: widget.selectedChatNotifier.value!.id!,
-          preMessageId: null,
-        );
-        final String jsonMessage = jsonEncode(request.toJson());
-        widget.webSocketManager.sendMessage(jsonMessage);
-        textEditingController.clear();
-      });
+    setState(() {
+      final SendMessageRequest request = SendMessageRequest(
+        content: textEditingController.text,
+        userId: getIt<User>().id,
+        chatId: widget.selectedChatNotifier.value!.id!,
+        preMessageId: null,
+      );
+      final String jsonMessage = jsonEncode(request.toJson());
+      widget.webSocketManager.sendMessage(jsonMessage);
+      textEditingController.clear();
+    });
     _focusNode.requestFocus();
   }
 
@@ -89,36 +90,37 @@ class _ChatInputFieldState extends State<ChatInputField> {
       padding: widget.padding,
       child: Row(
         children: [
-          SizedBox(
-            height: 40,
-            width: 200,
-            child: TextField(
-              controller: textEditingController,
-              focusNode: _focusNode,
-              enabled: widget.enabled,
-              minLines: widget.minLines,
-              maxLines: widget.maxLines,
-              style: widget.textStyle,
-              textInputAction: TextInputAction.newline,
-              keyboardType: TextInputType.multiline,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.symmetric(horizontal: 10),
-                labelStyle: OnepieceFonts.dropDownItemStyle,
-                floatingLabelBehavior: FloatingLabelBehavior.never,
-                disabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                        color: OnepieceColors.menuHoverColor)),
-                enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                        color: OnepieceColors.menuHoverColor)),
-                focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                        color: OnepieceColors.iconGreen,
-                        width: 1.5)),
+          Expanded(
+            child: SizedBox(
+              height: 40,
+              width: 200,
+              child: TextField(
+                controller: textEditingController,
+                focusNode: _focusNode,
+                enabled: widget.enabled,
+                minLines: widget.minLines,
+                maxLines: widget.maxLines,
+                style: widget.textStyle,
+                textInputAction: TextInputAction.newline,
+                keyboardType: TextInputType.multiline,
+                decoration: const InputDecoration(
+                  contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                  labelStyle: OnepieceFonts.dropDownItemStyle,
+                  floatingLabelBehavior: FloatingLabelBehavior.never,
+                  disabledBorder: OutlineInputBorder(
+                      borderSide:
+                          BorderSide(color: OnepieceColors.menuHoverColor)),
+                  enabledBorder: OutlineInputBorder(
+                      borderSide:
+                          BorderSide(color: OnepieceColors.menuHoverColor)),
+                  focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                          color: OnepieceColors.iconGreen, width: 1.5)),
+                ),
+                onSubmitted: (_) {
+                  // onSubmitted typically triggered by "done" key; keep send via button
+                },
               ),
-              onSubmitted: (_) {
-                // onSubmitted typically triggered by "done" key; keep send via button
-              },
             ),
           ),
           const SizedBox(width: 8),
