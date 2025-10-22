@@ -61,10 +61,10 @@ class MessageItem extends StatelessWidget {
         alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
         child: Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: isMe ? OnepieceColors.fancyBlue : Colors.grey[300],
+            borderRadius: BorderRadius.circular(5),
+            color: isMe ? OnepieceColors.fancyBlue : Colors.grey[900],
           ),
-          padding: const EdgeInsets.all(8),
+          padding: const EdgeInsets.all(6.5),
           child: message.content != null
               ? Text(
                   message.content!,
