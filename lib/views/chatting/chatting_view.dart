@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:one_piece_battles_flutter/components/chat_input_field.dart';
 import 'package:one_piece_battles_flutter/components/image_lazy_loader.dart';
 import 'package:one_piece_battles_flutter/components/square_image_loader.dart';
 import 'package:one_piece_battles_flutter/components/web_socket_manager.dart';
@@ -10,6 +9,7 @@ import 'package:one_piece_battles_flutter/popup/chatting_options.dart';
 import 'package:one_piece_battles_flutter/utils/time_helper.dart';
 import 'package:openapi/api.dart';
 import '../../components/message.dart';
+import '../../constants/button_style.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
 import 'package:one_piece_battles_flutter/repository/chatting_dao.dart';
@@ -31,21 +31,30 @@ class _ChattingViewState extends State<ChattingView> {
   String userId = getIt<User>().id;
   List<Chat> chats = [];
   WebSocketManager webSocketManager = WebSocketManager(getIt<User>().id);
-  final ValueNotifier<List<Message>> messagesNotifier =
-      ValueNotifier<List<Message>>([]);
+  List<Message> messages = [];
   void preMessageId;
   ValueNotifier<Chat?> selectedChatNotifier = ValueNotifier(null);
   bool isComposing = false;
+  FocusNode focusNode = FocusNode();
+  bool canSend = false;
+  final _ctrl = ScrollController();
+  final ValueNotifier<List<Message>> messagesNotifier =
+      ValueNotifier<List<Message>>([]);
 
   @override
   void initState() {
     super.initState();
     listChat();
+    _connect();
+  }
+
+  Future<void> _connect() async {
     webSocketManager.connect('ws://localhost:8081/chat?userId=$userId');
     webSocketManager.stream.listen((message) {
       final Message incomingMessage = Message.fromJson(jsonDecode(message))!;
-      messagesNotifier.value = [...messagesNotifier.value, incomingMessage];
+      messagesNotifier.value.add(incomingMessage);
       messagesNotifier.notifyListeners();
+      _scrollToBottom();
     }, onError: (error) {
       print('WebSocket error: $error');
     }, onDone: () {
@@ -57,6 +66,12 @@ class _ChattingViewState extends State<ChattingView> {
   void dispose() {
     webSocketManager.disconnect();
     super.dispose();
+  }
+  void _scrollToBottom() {
+    setState(() {});
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _ctrl.jumpTo(_ctrl.position.maxScrollExtent);
+    });
   }
 
   listChat() {
@@ -159,8 +174,11 @@ class _ChattingViewState extends State<ChattingView> {
                                     ],
                                   ),
                                   if (chat.message != null)
-                                    Text(chat.message!.content ??
-                                        AppLocalizations.of(context)!.image)
+                                    Text(chat.message!.content != null
+                                        ? chat.message!.content!
+                                            .split('\n')
+                                            .first
+                                        : AppLocalizations.of(context)!.image)
                                   else
                                     const Text(""),
                                 ],
@@ -201,59 +219,148 @@ class _ChattingViewState extends State<ChattingView> {
                 ? const Text("")
                 : Expanded(
                     child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                          style: OnepieceFonts.fancyBlueSmallTitle,
-                          selectedChatNotifier.value!.group!
-                              ? selectedChatNotifier.value!.name!
-                              : getTargetMember(selectedChatNotifier.value!)
-                                  .nickname),
-                      ValueListenableBuilder<List<Message>>(
-                        valueListenable: messagesNotifier,
-                        builder: (context, value, _) {
-                          var selectedMessages = messagesNotifier.value.where(
-                              (e) =>
-                                  e.conversationId ==
-                                  selectedChatNotifier.value!.id);
-                          return Expanded(
-                              child: ListView.builder(
-                                padding: const EdgeInsets.fromLTRB(10,0,25,0),
-                            reverse: true,
-                            itemCount: selectedMessages.length,
-                            itemBuilder: (context, index) {
-                              final msg = selectedMessages.toList()[index];
-                              return MessageItem(
-                                message: msg,
-                                isMe: msg.userId == userId!,
-                                preMessage: msg.preMessage,
-                                user: selectedChatNotifier!.value!.members
-                                    .firstWhere(
-                                        (user) => user.id == msg.userId),
-                              ); // your widget
-                            },
-                          ));
-                        },
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(0,10,15,10),
-                        child: ChatInputField(
-                          webSocketManager: webSocketManager,
-                          selectedChatNotifier: selectedChatNotifier,
-                          textEditingController: typingController,
-                          padding: EdgeInsets.only(
-                            left: 8,
-                            right: 8,
-                            bottom: MediaQuery.of(context)
-                                .viewInsets
-                                .bottom, // move above keyboard
-                            top: 6,
-                          ),
-                        ),
-                      )
-                    ],
-                  ));
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                            style: OnepieceFonts.smallHeaderStyleFancyBlue,
+                            selectedChatNotifier.value!.group!
+                                ? selectedChatNotifier.value!.name!
+                                : getTargetMember(selectedChatNotifier.value!)
+                                    .nickname),
+                        ValueListenableBuilder<List<Message>>(
+                            valueListenable: messagesNotifier,
+                            builder: (context, messages, child) {
+                              return Expanded(
+                                  child: ListView.builder(
+                                    controller: _ctrl,
+                                padding:
+                                    const EdgeInsets.fromLTRB(10, 0, 25, 0),
+                                itemCount: messages
+                                    .where((e) =>
+                                        e.conversationId ==
+                                        selectedChatNotifier.value!.id)
+                                    .length,
+                                itemBuilder: (context, index) {
+                                  final msg = messages
+                                      .where((e) =>
+                                          e.conversationId ==
+                                          selectedChatNotifier.value!.id)
+                                      .toList()[index];
+                                  return MessageItem(
+                                    message: msg,
+                                    isMe: msg.userId == userId!,
+                                    preMessage: msg.preMessage,
+                                    user: selectedChatNotifier!.value!.members
+                                        .firstWhere(
+                                            (user) => user.id == msg.userId),
+                                  ); // your widget
+                                },
+                              ));
+                            }),
+                        StatefulBuilder(
+                          builder:
+                              (BuildContext context, StateSetter buttonState) {
+                            return Container(
+                              padding: const EdgeInsets.fromLTRB(8, 16, 23, 16),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: SizedBox(
+                                      height: 40,
+                                      width: 200,
+                                      child: TextField(
+                                        controller: typingController,
+                                        focusNode: FocusNode(),
+                                        enabled: true,
+                                        minLines: 1,
+                                        maxLines: 5,
+                                        textInputAction:
+                                            TextInputAction.newline,
+                                        keyboardType: TextInputType.multiline,
+                                        onChanged: (value) {
+                                          buttonState(() {
+                                            canSend = typingController.text
+                                                .trim()
+                                                .isNotEmpty;
+                                          });
+                                        },
+                                        decoration: const InputDecoration(
+                                          contentPadding: EdgeInsets.symmetric(
+                                              horizontal: 10),
+                                          labelStyle:
+                                              OnepieceFonts.dropDownItemStyle,
+                                          floatingLabelBehavior:
+                                              FloatingLabelBehavior.never,
+                                          disabledBorder: OutlineInputBorder(
+                                              borderSide: BorderSide(
+                                                  color: OnepieceColors
+                                                      .menuHoverColor)),
+                                          enabledBorder: OutlineInputBorder(
+                                              borderSide: BorderSide(
+                                                  color: OnepieceColors
+                                                      .menuHoverColor)),
+                                          focusedBorder: OutlineInputBorder(
+                                              borderSide: BorderSide(
+                                                  color:
+                                                      OnepieceColors.iconGreen,
+                                                  width: 1.5)),
+                                        ),
+                                        onSubmitted: (_) {
+                                          // onSubmitted typically triggered by "done" key; keep send via button
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  SizedBox(
+                                    height: 38,
+                                    child: ElevatedButton(
+                                      onPressed: canSend
+                                          ? () {
+                                              buttonState(() {
+                                                final SendMessageRequest
+                                                    request =
+                                                    SendMessageRequest(
+                                                  content:
+                                                      typingController.text,
+                                                  userId: getIt<User>().id,
+                                                  conversationId: selectedChatNotifier
+                                                      .value?.id!,
+                                                  preMessageId: null,
+                                                );
+                                                final String jsonMessage =
+                                                    jsonEncode(
+                                                        request.toJson());
+                                                webSocketManager
+                                                    .sendMessage(jsonMessage);
+                                                typingController.clear();
+                                                canSend = false;
+                                                focusNode.requestFocus();
+                                              });
+                                            }
+                                          : null,
+                                      style:
+                                          OnepieceButtonStyle.getDefaultStyle(),
+                                      child: Text(
+                                        AppLocalizations.of(context)!.send,
+                                        style: TextStyle(
+                                          color: canSend
+                                              ? Colors.white
+                                              : Colors.grey.shade600,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        )
+                      ],
+                    ),
+                  );
           },
         ),
       ],

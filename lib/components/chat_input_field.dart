@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:one_piece_battles_flutter/components/web_socket_manager.dart';
 import 'package:one_piece_battles_flutter/constants/button_style.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -9,8 +8,6 @@ import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:openapi/api.dart';
 import '../app_router.dart';
 import '../constants/onepiece_fonts.dart';
-
-typedef OnSendCallback = void Function(String text);
 
 class ChatInputField extends StatefulWidget {
   final WebSocketManager webSocketManager;
@@ -61,17 +58,15 @@ class _ChatInputFieldState extends State<ChatInputField> {
   }
 
   void _handleSend() {
-    setState(() {
-      final SendMessageRequest request = SendMessageRequest(
-        content: textEditingController.text,
-        userId: getIt<User>().id,
-        chatId: widget.selectedChatNotifier.value!.id!,
-        preMessageId: null,
-      );
-      final String jsonMessage = jsonEncode(request.toJson());
-      widget.webSocketManager.sendMessage(jsonMessage);
-      textEditingController.clear();
-    });
+    final SendMessageRequest request = SendMessageRequest(
+      content: textEditingController.text,
+      userId: getIt<User>().id,
+      conversationId: widget.selectedChatNotifier.value!.id!,
+      preMessageId: null,
+    );
+    final String jsonMessage = jsonEncode(request.toJson());
+    widget.webSocketManager.sendMessage(jsonMessage);
+    textEditingController.clear();
     _focusNode.requestFocus();
   }
 
