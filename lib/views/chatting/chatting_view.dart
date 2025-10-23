@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -67,6 +68,7 @@ class _ChattingViewState extends State<ChattingView> {
     webSocketManager.disconnect();
     super.dispose();
   }
+
   void _scrollToBottom() {
     setState(() {});
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -103,13 +105,14 @@ class _ChattingViewState extends State<ChattingView> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     SizedBox(
-                      width: 230,
+                      width: 240,
                       height: 35,
-                      child: TextFormField(
+                      child: Expanded(
+                          child: TextFormField(
                         controller: searchChattingController,
                         onChanged: (value) {},
                         decoration: InputDecoration(
@@ -128,7 +131,7 @@ class _ChattingViewState extends State<ChattingView> {
                           prefixIcon: const Icon(Icons.search),
                           labelText: AppLocalizations.of(context)!.name,
                         ),
-                      ),
+                      )),
                     ), // search
                     ChattingOptions(
                       context: context,
@@ -228,12 +231,22 @@ class _ChattingViewState extends State<ChattingView> {
                                 ? selectedChatNotifier.value!.name!
                                 : getTargetMember(selectedChatNotifier.value!)
                                     .nickname),
+                        const Center(
+                          child: SizedBox(
+                            width: 250,
+                            child: Divider(
+                              thickness: 1,
+                              color: OnepieceColors.liteFancyGreen,
+                            ),
+                          ),
+                        ),
                         ValueListenableBuilder<List<Message>>(
                             valueListenable: messagesNotifier,
                             builder: (context, messages, child) {
                               return Expanded(
                                   child: ListView.builder(
-                                    controller: _ctrl,
+                                controller: _ctrl,
+                                shrinkWrap: true,
                                 padding:
                                     const EdgeInsets.fromLTRB(10, 0, 25, 0),
                                 itemCount: messages
@@ -247,13 +260,16 @@ class _ChattingViewState extends State<ChattingView> {
                                           e.conversationId ==
                                           selectedChatNotifier.value!.id)
                                       .toList()[index];
-                                  return MessageItem(
-                                    message: msg,
-                                    isMe: msg.userId == userId!,
-                                    preMessage: msg.preMessage,
-                                    user: selectedChatNotifier!.value!.members
-                                        .firstWhere(
-                                            (user) => user.id == msg.userId),
+                                  return Padding(
+                                    padding: const EdgeInsets.only(bottom: 15.0),
+                                    child: MessageItem(
+                                      message: msg,
+                                      isMe: msg.userId == userId!,
+                                      preMessage: msg.preMessage,
+                                      user: selectedChatNotifier!.value!.members
+                                          .firstWhere(
+                                              (user) => user.id == msg.userId),
+                                    ),
                                   ); // your widget
                                 },
                               ));
@@ -263,94 +279,125 @@ class _ChattingViewState extends State<ChattingView> {
                               (BuildContext context, StateSetter buttonState) {
                             return Container(
                               padding: const EdgeInsets.fromLTRB(8, 16, 23, 16),
-                              child: Row(
+                              child: Column(
                                 children: [
-                                  Expanded(
-                                    child: SizedBox(
-                                      height: 40,
-                                      width: 200,
-                                      child: TextField(
-                                        controller: typingController,
-                                        focusNode: FocusNode(),
-                                        enabled: true,
-                                        minLines: 1,
-                                        maxLines: 5,
-                                        textInputAction:
-                                            TextInputAction.newline,
-                                        keyboardType: TextInputType.multiline,
-                                        onChanged: (value) {
-                                          buttonState(() {
-                                            canSend = typingController.text
-                                                .trim()
-                                                .isNotEmpty;
-                                          });
-                                        },
-                                        decoration: const InputDecoration(
-                                          contentPadding: EdgeInsets.symmetric(
-                                              horizontal: 10),
-                                          labelStyle:
-                                              OnepieceFonts.dropDownItemStyle,
-                                          floatingLabelBehavior:
-                                              FloatingLabelBehavior.never,
-                                          disabledBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
-                                                  color: OnepieceColors
-                                                      .menuHoverColor)),
-                                          enabledBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
-                                                  color: OnepieceColors
-                                                      .menuHoverColor)),
-                                          focusedBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
-                                                  color:
-                                                      OnepieceColors.iconGreen,
-                                                  width: 1.5)),
-                                        ),
-                                        onSubmitted: (_) {
-                                          // onSubmitted typically triggered by "done" key; keep send via button
-                                        },
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  SizedBox(
-                                    height: 38,
-                                    child: ElevatedButton(
-                                      onPressed: canSend
-                                          ? () {
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: SizedBox(
+                                          height: 40,
+                                          width: 200,
+                                          child: TextField(
+                                            controller: typingController,
+                                            focusNode: FocusNode(),
+                                            enabled: true,
+                                            minLines: 1,
+                                            maxLines: 5,
+                                            keyboardType: TextInputType.text, // not TextInputType.multiline
+                                            textInputAction: TextInputAction.send,
+                                            onSubmitted: (_) => {
                                               buttonState(() {
-                                                final SendMessageRequest
-                                                    request =
+                                                final SendMessageRequest request =
                                                     SendMessageRequest(
-                                                  content:
-                                                      typingController.text,
+                                                  content: typingController.text,
                                                   userId: getIt<User>().id,
-                                                  conversationId: selectedChatNotifier
-                                                      .value?.id!,
+                                                  conversationId:
+                                                      selectedChatNotifier
+                                                          .value?.id!,
                                                   preMessageId: null,
                                                 );
                                                 final String jsonMessage =
-                                                    jsonEncode(
-                                                        request.toJson());
+                                                    jsonEncode(request.toJson());
                                                 webSocketManager
                                                     .sendMessage(jsonMessage);
                                                 typingController.clear();
                                                 canSend = false;
                                                 focusNode.requestFocus();
+                                              })
+                                            },
+                                            onChanged: (value) {
+                                              buttonState(() {
+                                                canSend = typingController.text
+                                                    .trim()
+                                                    .isNotEmpty;
                                               });
-                                            }
-                                          : null,
-                                      style:
-                                          OnepieceButtonStyle.getDefaultStyle(),
-                                      child: Text(
-                                        AppLocalizations.of(context)!.send,
-                                        style: TextStyle(
-                                          color: canSend
-                                              ? Colors.white
-                                              : Colors.grey.shade600,
-                                          fontWeight: FontWeight.w600,
+                                            },
+                                            decoration: const InputDecoration(
+                                              contentPadding: EdgeInsets.symmetric(
+                                                  horizontal: 10),
+                                              labelStyle:
+                                                  OnepieceFonts.dropDownItemStyle,
+                                              floatingLabelBehavior:
+                                                  FloatingLabelBehavior.never,
+                                              disabledBorder: OutlineInputBorder(
+                                                  borderSide: BorderSide(
+                                                      color: OnepieceColors
+                                                          .menuHoverColor)),
+                                              enabledBorder: OutlineInputBorder(
+                                                  borderSide: BorderSide(
+                                                      color: OnepieceColors
+                                                          .menuHoverColor)),
+                                              focusedBorder: OutlineInputBorder(
+                                                  borderSide: BorderSide(
+                                                      color:
+                                                          OnepieceColors.iconGreen,
+                                                      width: 1.5)),
+                                            ),
+                                          ),
                                         ),
                                       ),
+                                      const SizedBox(width: 8),
+                                      SizedBox(
+                                        height: 38,
+                                        child: ElevatedButton(
+                                          onPressed: canSend
+                                              ? () {
+                                                  buttonState(() {
+                                                    final SendMessageRequest
+                                                        request =
+                                                        SendMessageRequest(
+                                                      content:
+                                                          typingController.text,
+                                                      userId: getIt<User>().id,
+                                                      conversationId:
+                                                          selectedChatNotifier
+                                                              .value?.id!,
+                                                      preMessageId: null,
+                                                    );
+                                                    final String jsonMessage =
+                                                        jsonEncode(
+                                                            request.toJson());
+                                                    webSocketManager
+                                                        .sendMessage(jsonMessage);
+                                                    typingController.clear();
+                                                    canSend = false;
+                                                    focusNode.requestFocus();
+                                                  });
+                                                }
+                                              : null,
+                                          style:
+                                              OnepieceButtonStyle.getDefaultStyle(),
+                                          child: Text(
+                                            AppLocalizations.of(context)!.send,
+                                            style: TextStyle(
+                                              color: canSend
+                                                  ? Colors.white
+                                                  : Colors.grey.shade600,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    height: 250,
+                                    child: EmojiPicker(
+                                      onEmojiSelected: (category, emoji) {
+                                        final newText = typingController.text + emoji.emoji;
+                                        typingController.text = newText;
+                                        typingController.selection = TextSelection.collapsed(offset: newText.length);
+                                      },
                                     ),
                                   ),
                                 ],
