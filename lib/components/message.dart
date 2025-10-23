@@ -21,31 +21,49 @@ class MessageItem extends StatelessWidget {
     return isMe
         ? Row(
             mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  getChatting(),
+                  const SizedBox(height: 5,),
+                  getContent(),
                   if (preMessage != null) getPreMessage()
                 ],
               ),
+              const SizedBox(width: 10,),
               SquareImageLoader(
                   key: UniqueKey(),
                   uriProvider: () => user.imageUri!,
                   width: 40,
-                  borderWidth: 0),
+                  borderWidth: 2),
             ],
           )
         : Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              SquareImageLoader(
-                  key: UniqueKey(),
-                  uriProvider: () => user.imageUri!,
-                  width: 40,
-                  borderWidth: 0),
               Column(
                 children: [
-                  getChatting(),
+                  const SizedBox(height: 7,),
+                  SquareImageLoader(
+                      key: UniqueKey(),
+                      uriProvider: () => user.imageUri!,
+                      width: 40,
+                      borderWidth: 2),
+                ],
+              ),
+              const SizedBox(width: 10,),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(user.nickname, style: OnepieceFonts.superSmallContentStyle,),
+                  const SizedBox(height: 7,),
+                  getContent(),
                   if (preMessage != null) getPreMessage()
                 ],
               ),
@@ -53,29 +71,25 @@ class MessageItem extends StatelessWidget {
           );
   }
 
-  Widget getChatting() {
-    return Container(
-      padding: const EdgeInsets.all(10),
-      margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-      child: Align(
-        alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(5),
-            color: isMe ? OnepieceColors.fancyBlue : Colors.grey[900],
-          ),
-          padding: const EdgeInsets.all(6.5),
-          child: message.content != null
-              ? Text(
-                  message.content!,
-                  style: OnepieceFonts.tagStyle,
-                )
-              : SquareImageLoader(
-                  key: UniqueKey(),
-                  uriProvider: () => message.imageContentUri!,
-                  width: 40,
-                  borderWidth: 0),
+  Widget getContent() {
+    return Align(
+      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(5),
+          color: isMe ? OnepieceColors.fancyBlue : Colors.grey[900],
         ),
+        padding: const EdgeInsets.all(6),
+        child: message.content != null
+            ? Text(
+                message.content!,
+                style: OnepieceFonts.tagStyle,
+              )
+            : SquareImageLoader(
+                key: UniqueKey(),
+                uriProvider: () => message.imageContentUri!,
+                width: 40,
+                borderWidth: 0),
       ),
     );
   }
