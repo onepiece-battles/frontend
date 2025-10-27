@@ -4,8 +4,8 @@ import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:one_piece_battles_flutter/graph/character_data.dart';
 import '../constants/onepiece_colors.dart';
 import '../utils/image_helper.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-
+// import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../../l10n/app_localizations.dart';
 class CharacterBarGraph extends StatelessWidget {
   final CharacterData characterData;
   final bool symmetric;

@@ -16,7 +16,7 @@ import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:provider/provider.dart';
 import 'package:one_piece_battles_flutter/utils/image_helper.dart';
 import 'package:openapi/api.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../../l10n/app_localizations.dart';
 import 'package:one_piece_battles_flutter/graph/character_data.dart';
 import '../../constants/onepiece_fonts.dart';
 import '../../utils/base64_helper.dart';
