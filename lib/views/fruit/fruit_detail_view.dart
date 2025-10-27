@@ -12,7 +12,7 @@ import '../../components/image_lazy_loader.dart';
 import '../../components/string_text_form_field.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../../l10n/app_localizations.dart';
 import '../../constants/onepiece_tag.dart';
 import '../../popup/onepiece_alert.dart';
 import '../../utils/image_helper.dart';

@@ -20,7 +20,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: '>=3.4.0 <4.0.0'
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -39,7 +39,7 @@ dependencies:
     sdk: flutter
   web_socket_channel: ^2.0.0
   google_fonts: ^6.2.1
-  intl: 0.18.1
+  intl: 0.20.2
   shared_preferences: ^2.2.3
   url_launcher: ^6.3.0
   material_design_icons_flutter: 5.0.6996
@@ -52,11 +52,11 @@ dependencies:
     path: generated
   image_picker_for_web: ^3.0.1
   image_picker: ^1.0.4
-  emoji_picker_flutter: ^2.2.0
+  emoji_picker_flutter: ^4.3.0
   animated_toggle_switch: ^0.8.2
   http: '^1.0.0'
   dropdown_search: ^5.0.5
-  openapi_generator_annotations: ^4.11.0
+  openapi_generator_annotations: ^6.1.0
   flutter_secure_storage: ^8.0.0
   logging: ^1.2.0
   get_it: ^7.6.0
@@ -79,8 +79,8 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  analyzer: ^6.0.0
-  openapi_generator: ^4.11.1
+  analyzer: ^6.1.0
+  openapi_generator: ^6.1.0
   build_runner: ^2.4.6
 
   # The "flutter_lints" package below contains a set of recommended lints to

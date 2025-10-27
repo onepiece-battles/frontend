@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:one_piece_battles_flutter/components/web_socket_manager.dart';
 import 'package:one_piece_battles_flutter/constants/button_style.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../../l10n/app_localizations.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:openapi/api.dart';
 import '../app_router.dart';

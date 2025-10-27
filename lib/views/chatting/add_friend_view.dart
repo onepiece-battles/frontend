@@ -9,7 +9,7 @@ import '../../components/image_lazy_loader.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
 import '../../repository/user_dao.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../../l10n/app_localizations.dart';
 
 Timer? _timer;
 

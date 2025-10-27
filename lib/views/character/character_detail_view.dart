@@ -15,7 +15,7 @@ import 'package:one_piece_battles_flutter/constants/onepiece_tag.dart';
 import 'package:one_piece_battles_flutter/repository/character_dao.dart';
 import 'package:one_piece_battles_flutter/repository/group_dao.dart';
 import 'package:openapi/api.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../../l10n/app_localizations.dart';
 import '../../popup/onepiece_alert.dart';
 import '../../repository/fruit_dao.dart';
 import '../../repository/image_dao.dart';

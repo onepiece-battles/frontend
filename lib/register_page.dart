@@ -1,6 +1,6 @@
 import 'package:animated_toggle_switch/animated_toggle_switch.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../../l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/app_router.dart';
@@ -354,12 +354,12 @@ class _RegisterPageState extends State<RegisterPage> {
                       context.go(AppRouter.loginPath);
                     },
                     style: ButtonStyle(
-                      overlayColor: MaterialStateProperty.resolveWith<Color?>(
-                        (Set<MaterialState> states) {
+                      overlayColor: WidgetStateProperty.resolveWith<Color?>(
+                        (Set<WidgetState> states) {
                           return Colors.transparent; // No splash color
                         },
                       ),
-                      padding: MaterialStateProperty.all<EdgeInsets>(
+                      padding: WidgetStateProperty.all<EdgeInsets>(
                           const EdgeInsets.symmetric(horizontal: 2.0)),
                       // OR Use NoSplash.splashFactory to remove splash effect altogether
                       splashFactory: NoSplash.splashFactory,
@@ -393,7 +393,7 @@ class _RegisterPageState extends State<RegisterPage> {
     Future<RegisterResponse?> response = userDao.register(request);
     response.then((value) => {
           if (value!.registerResult)
-            {handleRegisterSuccess(context)}
+            {handleRegisterSuccess()}
           else
             {
               setState(() {
@@ -405,18 +405,29 @@ class _RegisterPageState extends State<RegisterPage> {
         });
   }
 
-  void handleRegisterSuccess(BuildContext context) {
-    LoginRequest loginRequest = LoginRequest(
-        email: usernameController.text, password: passwordController.text);
-    Future<LoginResponse?> loginResponse = userDao.login(loginRequest);
-    loginResponse.then((value) {
-      ApiInitializer.initAuthInfo(value!.accessToken!);
+  Future<void> handleRegisterSuccess() async {
+    final loginRequest = LoginRequest(
+      email: usernameController.text,
+      password: passwordController.text,
+    );
+    try {
+      final LoginResponse? value = await userDao.login(loginRequest);
+      if (value == null) return;
+      ApiInitializer.initAuthInfo(value.accessToken!);
       ResourcePermissionManager.updateUserCache(value.user!);
-      saveUserCredentials(usernameController.text, passwordController.text);
-      context.goNamed('userHome',
-          extra: getIt<User>().id,
-          pathParameters: {'name': getIt<User>().nickname});
-    });
+      await saveUserCredentials(
+          usernameController.text, passwordController.text);
+      if (!mounted) return; // ensure widget still in tree before using context
+      context.goNamed(
+        'userHome',
+        extra: getIt<User>().id,
+        pathParameters: {'name': getIt<User>().nickname},
+      );
+    } catch (e, st) {
+      debugPrint('Login after register failed: $e\n$st');
+      if (!mounted) return;
+      // show error UI if needed
+    }
   }
 
   Future<void> saveUserCredentials(String username, String password) async {

@@ -12,7 +12,7 @@ import '../../constants/button_style.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
 import '../../repository/fruit_dao.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../../l10n/app_localizations.dart';
 import '../../utils/data_validator.dart';
 import '../../utils/image_helper.dart';
 import '../../utils/permission_check.dart';
