@@ -27,12 +27,16 @@ class MessageItem extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const SizedBox(height: 5,),
+                  const SizedBox(
+                    height: 5,
+                  ),
                   getContent(),
                   if (preMessage != null) getPreMessage()
                 ],
               ),
-              const SizedBox(width: 10,),
+              const SizedBox(
+                width: 10,
+              ),
               SquareImageLoader(
                   key: UniqueKey(),
                   uriProvider: () => user.imageUri!,
@@ -47,7 +51,9 @@ class MessageItem extends StatelessWidget {
             children: [
               Column(
                 children: [
-                  const SizedBox(height: 7,),
+                  const SizedBox(
+                    height: 7,
+                  ),
                   SquareImageLoader(
                       key: UniqueKey(),
                       uriProvider: () => user.imageUri!,
@@ -55,14 +61,21 @@ class MessageItem extends StatelessWidget {
                       borderWidth: 2),
                 ],
               ),
-              const SizedBox(width: 10,),
+              const SizedBox(
+                width: 10,
+              ),
               Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(user.nickname, style: OnepieceFonts.superSmallContentStyle,),
-                  const SizedBox(height: 7,),
+                  Text(
+                    user.nickname,
+                    style: OnepieceFonts.superSmallContentStyle,
+                  ),
+                  const SizedBox(
+                    height: 7,
+                  ),
                   getContent(),
                   if (preMessage != null) getPreMessage()
                 ],

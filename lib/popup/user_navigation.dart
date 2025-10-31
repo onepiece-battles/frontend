@@ -33,12 +33,12 @@ class _UserNavigationState extends State<UserNavigation> {
       hoverColor: Colors.transparent,
       onTap: () => showPopover(
         width: 160,
-        height: 70,
         arrowDxOffset: 3,
         direction: PopoverDirection.right,
         context: context,
         backgroundColor: OnepieceColors.fancyBlue,
         bodyBuilder: (context) => Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             SizedBox(
               width: 160,
