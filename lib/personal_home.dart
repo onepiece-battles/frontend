@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-// import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../l10n/app_localizations.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get_it/get_it.dart';
@@ -240,7 +239,6 @@ class _UserHomeState extends State<UserHome> {
                       });
                 },
                 child: ImageLazyLoader(
-                    // key: UniqueKey(),
                     uriProvider: () => characters[index].imageUri!,
                     width: 100,
                     borderWidth: 2,
@@ -499,8 +497,6 @@ class _UserHomeState extends State<UserHome> {
                                             anchor.click();
                                             // Remove the anchor element after the download has started.
                                             anchor.remove();
-                                            // Release the object URL to free up resources.
-                                            html.Url.revokeObjectUrl(url);
                                           });
                                         }
                                       : null,
