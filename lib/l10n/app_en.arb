@@ -316,5 +316,6 @@
   "chatting": "Chatting",
   "image": "Image",
   "noChatting": "Empty Chatting Room",
-  "yesterday": "yesterday"
+  "yesterday": "yesterday",
+  "cancelSelection": "Cancel"
 }

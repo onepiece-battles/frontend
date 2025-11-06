@@ -2005,6 +2005,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'yesterday'**
   String get yesterday;
+
+  /// No description provided for @cancelSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancelSelection;
 }
 
 class _AppLocalizationsDelegate

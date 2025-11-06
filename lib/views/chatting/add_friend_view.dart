@@ -182,7 +182,7 @@ class _AddFriendViewState extends State<AddFriendView> {
                                   selectedUserId = "";
                                 });
                               },
-                        child: Text(AppLocalizations.of(context)!.clearAll)),
+                        child: Text(AppLocalizations.of(context)!.cancelPopUp)),
                     ElevatedButton(
                         style: OnepieceButtonStyle.getDefaultStyle(),
                         onPressed: selectedUserId == "" || selectedUserId == null
@@ -197,9 +197,10 @@ class _AddFriendViewState extends State<AddFriendView> {
                                       selectedUserId = "";
                                     }
                                   });
+                                  Navigator.pop(context);
                                 });
                               },
-                        child: Text(AppLocalizations.of(context)!.confirm))
+                        child: Text(AppLocalizations.of(context)!.submitForm))
                   ],
                 ),
               )

@@ -961,4 +961,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get yesterday => '昨天';
+
+  @override
+  String get cancelSelection => '取消选择';
 }
