@@ -316,5 +316,6 @@
   "chatting": "聊天",
   "image": "图片",
   "noChatting": "当前无对话",
-  "yesterday": "昨天"
+  "yesterday": "昨天",
+  "cancelSelection": "取消选择"
 }
