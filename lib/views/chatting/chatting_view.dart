@@ -421,6 +421,7 @@ class _ChattingViewState extends State<ChattingView> {
                                             userId: getIt<User>().id,
                                             conversationId:
                                                 selectedChatNotifier.value?.id!,
+                                            type: MessageType.SEND_MESSAGE,
                                             preMessageId: null,
                                           );
                                           final String jsonMessage =

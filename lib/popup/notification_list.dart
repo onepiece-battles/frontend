@@ -63,7 +63,9 @@ class _NotificationListState extends State<NotificationList> {
                                                 CloseNotificationRequest(
                                                     notificationId: e.id));
                                             getIt<ChattingDao>().createChat(
-                                                CreateChatRequest(ids: [
+                                                CreateChatRequest(
+                                                    type: MessageType.CREATE_CHAT,
+                                                    ids: [
                                                   e.notificationSourceId!,
                                                   e.notificationTargetId!
                                                 ]));
