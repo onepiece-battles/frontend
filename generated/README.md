@@ -270,6 +270,7 @@ Class | Method | HTTP request | Description
  - [MarkNotificationReceived](doc//MarkNotificationReceived.md)
  - [MarkNotificationReceivedResult](doc//MarkNotificationReceivedResult.md)
  - [Message](doc//Message.md)
+ - [MessageType](doc//MessageType.md)
  - [Notification](doc//Notification.md)
  - [NotificationType](doc//NotificationType.md)
  - [OnepieceLocale](doc//OnepieceLocale.md)

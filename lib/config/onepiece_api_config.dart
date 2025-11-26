@@ -5,6 +5,7 @@ import 'package:openapi_generator_annotations/openapi_generator_annotations.dart
         pubAuthor: "yichi zhang", pubAuthorEmail: "onepiecebattles@163.com"),
     inputSpec: InputSpec(path: "onepiece-battles-api/api/openapi.yaml"),
     generatorName: Generator.dart,
+    skipIfSpecIsUnchanged: false,
     outputDirectory: 'generated',
     forceAlwaysRun: true)
 class OnepieceApiConfig {}
