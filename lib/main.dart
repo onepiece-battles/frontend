@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-// import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
 import '../../l10n/app_localizations.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:get_it/get_it.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:one_piece_battles_flutter/repository/battle_dao.dart';
 import 'package:one_piece_battles_flutter/repository/character_dao.dart';
 import 'package:one_piece_battles_flutter/repository/chatting_dao.dart';
@@ -20,13 +18,15 @@ import 'package:one_piece_battles_flutter/repository/support_dao.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
 import 'package:openapi/api.dart';
 import 'app_router.dart';
+import 'components/chat_notifier.dart';
+import 'components/web_socket_service.dart';
 import 'config/my_input_theme.dart';
 import 'constants/onepiece_colors.dart';
 import 'dart:html' as html; //
 
 final getIt = GetIt.instance;
 
-void setup() {
+void getItSetUp() {
   getIt.allowReassignment = true;
   getIt.registerLazySingleton<UserDao>(() => UserDao.empty());
   getIt.registerLazySingleton<CharacterDao>(() => CharacterDao.empty());
@@ -45,9 +45,23 @@ void setup() {
       () => User(id: "", username: "", nickname: ""));
 }
 
+void webSocketSetUp() {}
+
 void main() {
-  setup();
-  runApp(const MyApp());
+  getItSetUp();
+  final webSocketService = WebSocketService(); // Replace with your URL
+  runApp(
+    MultiProvider(providers: [
+      Provider<WebSocketService>(create: (_) => webSocketService),
+      ChangeNotifierProvider<ChatNotifier>(
+        create: (context) => ChatNotifier(
+          context.read<WebSocketService>(),
+        ),
+        lazy:
+            false, // Ensures ChatNotifier is created immediately and starts listening
+      ),
+    ], child: const MyApp()),
+  );
 }
 
 class MyApp extends StatefulWidget {

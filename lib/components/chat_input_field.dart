@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:one_piece_battles_flutter/components/web_socket_manager.dart';
+import 'package:one_piece_battles_flutter/components/web_socket_service.dart';
 import 'package:one_piece_battles_flutter/constants/button_style.dart';
 import '../../l10n/app_localizations.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
@@ -10,7 +10,7 @@ import '../app_router.dart';
 import '../constants/onepiece_fonts.dart';
 
 class ChatInputField extends StatefulWidget {
-  final WebSocketManager webSocketManager;
+  final WebSocketService webSocketManager;
   final TextEditingController textEditingController;
   ValueNotifier<Chat?> selectedChatNotifier;
   final int minLines;

@@ -1,5 +1,6 @@
 import 'package:animated_toggle_switch/animated_toggle_switch.dart';
 import 'package:flutter/material.dart';
+import 'package:one_piece_battles_flutter/components/web_socket_service.dart';
 import '../../l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
@@ -18,6 +19,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'constants/button_style.dart';
 import 'constants/onepiece_colors.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
 GetIt getIt = GetIt.instance;
 const locales = [Locale('zh', 'CN'), Locale('en', 'US')];
@@ -385,6 +387,7 @@ class _LoginPageState extends State<LoginPage> {
         // Ensure still mounted, then perform navigation using current context synchronously.
         if (!mounted) return;
         _route(response.user!, response.accessToken!, context);
+        context.read<WebSocketService>().connect(response.user!.id!);
         return;
       }
       final verification = response.verification!;
