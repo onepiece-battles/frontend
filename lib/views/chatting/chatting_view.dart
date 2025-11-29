@@ -3,15 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:one_piece_battles_flutter/components/image_lazy_loader.dart';
 import 'package:one_piece_battles_flutter/components/square_image_loader.dart';
-import 'package:one_piece_battles_flutter/components/web_socket_manager.dart';
 import 'package:one_piece_battles_flutter/popup/chatting_options.dart';
 import 'package:one_piece_battles_flutter/utils/time_helper.dart';
 import 'package:openapi/api.dart';
+import 'package:provider/provider.dart';
+import '../../components/chat_notifier.dart';
 import '../../components/message.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
-import 'package:one_piece_battles_flutter/repository/chatting_dao.dart';
-import 'package:flutter/foundation.dart' hide Category;
 import '../../l10n/app_localizations.dart';
 
 GetIt getIt = GetIt.instance;
@@ -28,76 +27,32 @@ class _ChattingViewState extends State<ChattingView> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   TextEditingController searchChattingController = TextEditingController();
   TextEditingController typingController = TextEditingController();
-  Map<String, double> chatLocationMap = {};
-  Map<String, String> chatMessageMap = {};
-  String userId = getIt<User>().id;
-  List<Chat> chats = [];
-  WebSocketManager webSocketManager = WebSocketManager(getIt<User>().id);
-  List<Message> messages = [];
   void preMessageId;
-  ValueNotifier<Chat?> selectedChatNotifier = ValueNotifier(null);
   bool isComposing = false;
   FocusNode focusNode = FocusNode();
   bool canSend = false;
   bool showEmojiPicker = false;
-  final ScrollController _ctrl = ScrollController();
-  final ValueNotifier<List<Message>> messagesNotifier =
-      ValueNotifier<List<Message>>([]);
 
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController();
-    listChat();
-    _connect();
-  }
-
-  Future<void> _connect() async {
-    webSocketManager.connect('ws://localhost:8081/chat?userId=$userId');
-    webSocketManager.stream.listen((message) {
-      final Message incomingMessage = Message.fromJson(jsonDecode(message))!;
-      messagesNotifier.value = [...messagesNotifier.value, incomingMessage];
-      _scrollToBottom();
-    }, onError: (error) {
-      if (kDebugMode) {
-        print('WebSocket error: $error');
-      }
-    }, onDone: () {
-      if (kDebugMode) {
-        print('WebSocket connection closed');
-      }
-    });
   }
 
   @override
   void dispose() {
-    webSocketManager.disconnect();
     _scrollController.dispose();
     super.dispose();
   }
 
-  void _scrollToBottom() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _ctrl.jumpTo(_ctrl.position.maxScrollExtent);
-    });
-  }
-
-  listChat() {
-    ListChatRequest listChatRequest = ListChatRequest(userId: userId);
-    Future<ListChatResponse?> chatting =
-        getIt<ChattingDao>().listChat(listChatRequest);
-    chatting.then(
-      (value) => setState(() {
-        chats = value!.chats;
-        if (chats.isNotEmpty) {
-          selectedChatNotifier.value = chats.first;
-        }
-      }),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
+    final chats = context.watch<ChatNotifier>().chats;
+    final activeChatId = context.watch<ChatNotifier>().activeChatId;
+    final activeChat = context.watch<ChatNotifier>().activeChat;
+    final messages = context.select<ChatNotifier, List<Message>>(
+      (notifier) => notifier.getMessagesForChat(activeChatId),
+    );
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       mainAxisSize: MainAxisSize.max,
@@ -153,70 +108,63 @@ class _ChattingViewState extends State<ChattingView> {
                       shrinkWrap: true,
                       itemBuilder: (context, index) {
                         final chat = chats[index];
-                        return ValueListenableBuilder(
-                            valueListenable: selectedChatNotifier,
-                            builder: (context, value, _) {
-                              return ListTile(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5),
-                                ),
-                                title: Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          chat.group!
-                                              ? chat.name!
-                                              : getTargetMember(chat).nickname,
-                                          style: OnepieceFonts
-                                              .contentStyleBoldFancyBlue,
-                                        ),
-                                        Text(
-                                          TimeHelper.humanDateFromTimestamp(
-                                              1759970648516, context),
-                                          style: OnepieceFonts
-                                              .boldLiteFancySmallFont,
-                                        ),
-                                        // replace with real time
-                                      ],
+                        return ListTile(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                          title: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    chat.group!
+                                        ? chat.name!
+                                        : getTargetMember(chat).nickname,
+                                    style:
+                                        OnepieceFonts.contentStyleBoldFancyBlue,
+                                  ),
+                                  Text(
+                                    TimeHelper.humanDateFromTimestamp(
+                                        1759970648516, context),
+                                    style: OnepieceFonts.boldLiteFancySmallFont,
+                                  ),
+                                  // replace with real time
+                                ],
+                              ),
+                              if (chat.message != null)
+                                Text(
+                                    style: const TextStyle(
+                                      color: OnepieceFonts.contentFontColor,
+                                      fontSize: OnepieceFonts.contentFontSize,
                                     ),
-                                    if (chat.message != null)
-                                      Text(
-                                          style: const TextStyle(
-                                            color:
-                                                OnepieceFonts.contentFontColor,
-                                            fontSize:
-                                                OnepieceFonts.contentFontSize,
-                                          ),
-                                          chat.message!.content != null
-                                              ? chat.message!.content!
-                                                  .split('\n')
-                                                  .first
-                                              : AppLocalizations.of(context)!
-                                                  .image)
-                                    else
-                                      const Text(""),
-                                  ],
-                                ),
-                                selected:
-                                    selectedChatNotifier.value!.id == chat.id,
-                                focusColor: OnepieceColors.liteFancyBlue,
-                                selectedTileColor: OnepieceColors.liteFancyBlue,
-                                leading: chat.group!
-                                    ? getLeading(chat.members
-                                        .map((e) => e.imageUri!)
-                                        .toList())
-                                    : getSingleLeading(
-                                        chat), // Assuming Chat has 'lastMessage'
-                                onTap: () {
-                                  selectedChatNotifier.value = chat;
-                                },
-                              );
-                            });
+                                    chat.message!.content != null
+                                        ? chat.message!.content!
+                                        .split('\n')
+                                        .first
+                                        : AppLocalizations.of(context)!
+                                        .image)
+                              else
+                                const Text(""),
+                            ],
+                          ),
+                          selected: activeChatId == chat.id,
+                          focusColor: OnepieceColors.liteFancyBlue,
+                          selectedTileColor: OnepieceColors.liteFancyBlue,
+                          leading: chat.group!
+                              ? getLeading(
+                                  chat.members.map((e) => e.imageUri!).toList())
+                              : getSingleLeading(
+                                  chat), // Assuming Chat has 'lastMessage'
+                          onTap: () {
+                            Provider.of<ChatNotifier>(context, listen: false)
+                                .setActiveChat(chat.id);
+                            _scrollToBottom(true);
+                          },
+                        );
                       },
                     ),
                   ),
@@ -232,244 +180,237 @@ class _ChattingViewState extends State<ChattingView> {
           endIndent: 8,
           width: 2,
         ),
-        ValueListenableBuilder(
-          valueListenable: selectedChatNotifier,
-          builder: (context, value, _) {
-            return selectedChatNotifier.value == null
-                ? const Text("")
-                : Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(left: 15.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.center,
+        if (activeChat == null) Text("please select one chat"),
+        if (activeChat != null)
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 15.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                          style: OnepieceFonts.smallContentFancyBlueStyle,
+                          activeChat!.group!
+                              ? activeChat.name!
+                              : getTargetMember(activeChat).nickname),
+                      IconButton(
+                        onPressed: () {
+                          final scaffold = _scaffoldKey.currentState;
+                          if (scaffold == null) return;
+                          if (scaffold.isEndDrawerOpen) {
+                            Navigator.of(context).pop(); // closes the drawer
+                          } else {
+                            scaffold.openEndDrawer();
+                          }
+                        },
+                        splashRadius: 0.1,
+                        hoverColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                        focusColor: Colors.transparent,
+                        icon: const Icon(
+                          Icons.more_horiz,
+                          color: OnepieceColors.fancyBlue,
+                          size: 20,
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+                const Divider(
+                  thickness: 1,
+                  color: OnepieceColors.liteFancyGreen,
+                  height: 3,
+                  indent: 0,
+                  endIndent: 0,
+                ),
+                Expanded(
+                  child: Scaffold(
+                      key: _scaffoldKey,
+                      drawerEnableOpenDragGesture: true,
+                      drawerScrimColor: Colors.transparent,
+                      endDrawer: Drawer(
+                        width: 200,
+                        elevation: 0.1,
+                        shadowColor: Colors.green,
+                        backgroundColor: OnepieceColors.menuBackgroundColor,
+                        shape: const RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.horizontal(left: Radius.circular(8)),
+                        ),
+                        child: SafeArea(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              Text(
-                                  style:
-                                      OnepieceFonts.smallContentFancyBlueStyle,
-                                  selectedChatNotifier.value!.group!
-                                      ? selectedChatNotifier.value!.name!
-                                      : getTargetMember(
-                                              selectedChatNotifier.value!)
-                                          .nickname),
-                              IconButton(
-                                onPressed: () {
-                                  final scaffold = _scaffoldKey.currentState;
-                                  if (scaffold == null) return;
-                                  if (scaffold.isEndDrawerOpen) {
-                                    Navigator.of(context)
-                                        .pop(); // closes the drawer
-                                  } else {
-                                    scaffold.openEndDrawer();
-                                  }
-                                },
-                                splashRadius: 0.1,
-                                hoverColor: Colors.transparent,
-                                highlightColor: Colors.transparent,
-                                focusColor: Colors.transparent,
-                                icon: const Icon(
-                                  Icons.more_horiz,
-                                  color: OnepieceColors.fancyBlue,
-                                  size: 20,
-                                ),
-                              )
+                              getUserWall(activeChat),
+                              const Divider(
+                                  thickness: 1,
+                                  indent: 10,
+                                  endIndent: 10,
+                                  color: Colors.black12),
                             ],
                           ),
                         ),
-                        const Divider(
-                          thickness: 1,
-                          color: OnepieceColors.liteFancyGreen,
-                          height: 3,
-                          indent: 0,
-                          endIndent: 0,
-                        ),
-                        ValueListenableBuilder<List<Message>>(
-                            valueListenable: messagesNotifier,
-                            builder: (context, messages, child) {
-                              return Expanded(
-                                child: Scaffold(
-                                    key: _scaffoldKey,
-                                    drawerEnableOpenDragGesture: true,
-                                    drawerScrimColor: Colors.transparent,
-                                    endDrawer: Drawer(
-                                      width: 200,
-                                      elevation: 0.1,
-                                      shadowColor: Colors.green,
-                                      backgroundColor:
-                                          OnepieceColors.menuBackgroundColor,
-                                      shape: const RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.horizontal(
-                                            left: Radius.circular(8)),
-                                      ),
-                                      child: SafeArea(
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          children: [
-                                            getUserWall(),
-                                            const Divider(
-                                                thickness: 1,
-                                                indent: 10,
-                                                endIndent: 10,
-                                                color: Colors.black12),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    body: ListView.builder(
-                                      controller: _ctrl,
-                                      shrinkWrap: true,
-                                      padding: const EdgeInsets.fromLTRB(
-                                          0, 0, 25, 0),
-                                      itemCount: messages
-                                          .where((e) =>
-                                              e.conversationId ==
-                                              selectedChatNotifier.value!.id)
-                                          .length,
-                                      itemBuilder: (context, index) {
-                                        final msg = messages
-                                            .where((e) =>
-                                                e.conversationId ==
-                                                selectedChatNotifier.value!.id)
-                                            .toList()[index];
-                                        return Padding(
-                                          padding: const EdgeInsets.only(
-                                              bottom: 15.0),
-                                          child: MessageItem(
-                                            message: msg,
-                                            isMe: msg.userId == userId,
-                                            preMessage: msg.preMessage,
-                                            user: selectedChatNotifier
-                                                .value!.members
-                                                .firstWhere((user) =>
-                                                    user.id == msg.userId),
-                                          ),
-                                        ); // your widget
-                                      },
-                                    )),
-                              );
-                            }),
-                        const Divider(
-                          height: 3,
-                          thickness: 1,
-                          color: OnepieceColors.liteFancyGreen,
-                        ),
-                        StatefulBuilder(
-                          builder:
-                              (BuildContext context, StateSetter buttonState) {
-                            return Container(
-                              padding: const EdgeInsets.fromLTRB(8, 6, 23, 6),
-                              child: Column(
-                                children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      IconButton(
-                                          onPressed: () {},
-                                          splashColor: Colors.transparent,
-                                          highlightColor: Colors.transparent,
-                                          hoverColor: Colors.transparent,
-                                          focusColor: Colors.transparent,
-                                          splashRadius: 0.1,
-                                          visualDensity: VisualDensity.compact,
-                                          enableFeedback: false,
-                                          icon: const Icon(
-                                            Icons.face,
-                                            size: 20,
-                                            color: OnepieceColors.fancyBlue,
-                                          )),
-                                      IconButton(
-                                          onPressed: () {},
-                                          splashColor: Colors.transparent,
-                                          highlightColor: Colors.transparent,
-                                          hoverColor: Colors.transparent,
-                                          focusColor: Colors.transparent,
-                                          splashRadius: 0.1,
-                                          visualDensity: VisualDensity.compact,
-                                          enableFeedback: false,
-                                          icon: const Icon(
-                                            Icons.image,
-                                            size: 20,
-                                            color: OnepieceColors.fancyBlue,
-                                          ))
-                                    ],
-                                  ),
-                                  SizedBox(
-                                    height: 100,
-                                    child: TextField(
-                                      controller: typingController,
-                                      enabled: true,
-                                      minLines: 3,
-                                      maxLines: 5,
-                                      keyboardType: TextInputType.multiline,
-                                      textInputAction: TextInputAction.send,
-                                      autofocus: true,
-                                      cursorHeight: 15,
-                                      focusNode: focusNode,
-                                      style: OnepieceFonts.smallContentStyle,
-                                      onSubmitted: (_) => {
-                                        buttonState(() {
-                                          final SendMessageRequest request =
-                                              SendMessageRequest(
+                      ),
+                      body: ListView.builder(
+                        controller: _scrollController,
+                        shrinkWrap: true,
+                        padding: const EdgeInsets.fromLTRB(0, 0, 25, 0),
+                        itemCount: messages.length,
+                        itemBuilder: (context, index) {
+                          final msg = messages[index];
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 15.0),
+                            child: MessageItem(
+                              message: msg,
+                              isMe: msg.userId == getIt<User>().id,
+                              preMessage: msg.preMessage,
+                              user: activeChat.members
+                                  .firstWhere((user) => user.id == msg.userId),
+                            ),
+                          ); // your widget
+                        },
+                      )),
+                ),
+                const Divider(
+                  height: 3,
+                  thickness: 1,
+                  color: OnepieceColors.liteFancyGreen,
+                ),
+                StatefulBuilder(
+                  builder: (BuildContext context, StateSetter buttonState) {
+                    return Container(
+                      padding: const EdgeInsets.fromLTRB(8, 6, 23, 6),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              IconButton(
+                                  onPressed: () {},
+                                  splashColor: Colors.transparent,
+                                  highlightColor: Colors.transparent,
+                                  hoverColor: Colors.transparent,
+                                  focusColor: Colors.transparent,
+                                  splashRadius: 0.1,
+                                  visualDensity: VisualDensity.compact,
+                                  enableFeedback: false,
+                                  icon: const Icon(
+                                    Icons.face,
+                                    size: 20,
+                                    color: OnepieceColors.fancyBlue,
+                                  )),
+                              IconButton(
+                                  onPressed: () {},
+                                  splashColor: Colors.transparent,
+                                  highlightColor: Colors.transparent,
+                                  hoverColor: Colors.transparent,
+                                  focusColor: Colors.transparent,
+                                  splashRadius: 0.1,
+                                  visualDensity: VisualDensity.compact,
+                                  enableFeedback: false,
+                                  icon: const Icon(
+                                    Icons.image,
+                                    size: 20,
+                                    color: OnepieceColors.fancyBlue,
+                                  ))
+                            ],
+                          ),
+                          SizedBox(
+                            height: 100,
+                            child: TextField(
+                              controller: typingController,
+                              enabled: true,
+                              minLines: 3,
+                              maxLines: 5,
+                              keyboardType: TextInputType.multiline,
+                              textInputAction: TextInputAction.send,
+                              autofocus: true,
+                              cursorHeight: 15,
+                              focusNode: focusNode,
+                              style: OnepieceFonts.smallContentStyle,
+                              onSubmitted: (_) => {
+                                buttonState(() {
+                                  final SendMessageRequest request =
+                                      SendMessageRequest(
+                                    content: typingController.text,
+                                    userId: getIt<User>().id,
+                                    conversationId: activeChat.id!,
+                                    type: MessageType.SEND_MESSAGE,
+                                    preMessageId: null,
+                                  );
+                                  final String jsonMessage =
+                                      jsonEncode(request.toJson());
+                                  Provider.of<ChatNotifier>(context,
+                                          listen: false)
+                                      .sendChatMessage(
+                                          activeChatId!,
+                                          jsonMessage,
+                                          Message(
+                                            id: null,
+                                            conversationId: activeChat.id,
+                                            preMessageId: null,
                                             content: typingController.text,
                                             userId: getIt<User>().id,
-                                            conversationId:
-                                                selectedChatNotifier.value?.id!,
-                                            type: MessageType.SEND_MESSAGE,
-                                            preMessageId: null,
-                                          );
-                                          final String jsonMessage =
-                                              jsonEncode(request.toJson());
-                                          webSocketManager
-                                              .sendMessage(jsonMessage);
-                                          typingController.clear();
-                                          canSend = false;
-                                          focusNode.requestFocus();
-                                        })
-                                      },
-                                      onChanged: (value) {
-                                        buttonState(() {
-                                          canSend = typingController.text
-                                              .trim()
-                                              .isNotEmpty;
-                                        });
-                                      },
-                                      decoration: const InputDecoration(
-                                        contentPadding: EdgeInsets.symmetric(
-                                            horizontal: 10),
-                                        labelStyle:
-                                            OnepieceFonts.dropDownItemStyle,
-                                        floatingLabelBehavior:
-                                            FloatingLabelBehavior.never,
-                                        border: InputBorder.none,
-                                        focusedBorder: InputBorder.none,
-                                        disabledBorder: InputBorder.none,
-                                        enabledBorder: InputBorder.none,
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                                          ));
+                                  _scrollToBottom(false);
+                                  typingController.clear();
+                                  canSend = false;
+                                  focusNode.requestFocus();
+                                })
+                              },
+                              onChanged: (value) {
+                                buttonState(() {
+                                  canSend =
+                                      typingController.text.trim().isNotEmpty;
+                                });
+                              },
+                              decoration: const InputDecoration(
+                                contentPadding:
+                                    EdgeInsets.symmetric(horizontal: 10),
+                                labelStyle: OnepieceFonts.dropDownItemStyle,
+                                floatingLabelBehavior:
+                                    FloatingLabelBehavior.never,
+                                border: InputBorder.none,
+                                focusedBorder: InputBorder.none,
+                                disabledBorder: InputBorder.none,
+                                enabledBorder: InputBorder.none,
                               ),
-                            );
-                          },
-                        )
-                      ],
-                    ),
-                  );
-          },
-        ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                )
+              ],
+            ),
+          )
       ],
     );
   }
 
-  Widget getUserWall() {
-    var members = selectedChatNotifier.value?.members ?? [];
+  void _scrollToBottom(bool direct) {
+    // Ensure scrolling occurs after the build cycle completes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: direct? Curves.ease: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+
+  Widget getUserWall(Chat activeChat) {
+    var members = activeChat.members;
     if (members.length == 2) {
       members =
           members.toList().where((e) => e.id != getIt<User>().id).toList();
@@ -509,7 +450,7 @@ class _ChattingViewState extends State<ChattingView> {
   }
 
   User getTargetMember(Chat chat) {
-    if (chat.members.first.id == userId) {
+    if (chat.members.first.id == getIt<User>().id) {
       return chat.members.last;
     } else {
       return chat.members.first;
