@@ -27,6 +27,7 @@ import 'main.dart';
 GetIt getIt = GetIt.instance;
 const locales = [Locale('zh', 'CN'), Locale('en', 'US')];
 List<ResourceType> notShownResources = [ResourceType.ROLE];
+
 // Define a ValueNotifier to track the navigation state changes
 final ValueNotifier<String> routeNotifier = ValueNotifier<String>('/home/abc');
 
@@ -40,7 +41,6 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
-  final String setting = "setting";
   final String profile = "profile";
   var _tabTextIndexSelected =
       I18nHelper.convertToOnepieceLocale(getIt<Locale>()).toString() ==
@@ -169,7 +169,7 @@ class HomePageState extends State<HomePage> {
       ResourceType.ISSUE.toString().toLowerCase():
           AppLocalizations.of(context)!.issue,
       ResourceType.CHATTING.toString().toLowerCase():
-      AppLocalizations.of(context)!.chatting,
+          AppLocalizations.of(context)!.chatting,
       'create': AppLocalizations.of(context)!.create,
       'profile': AppLocalizations.of(context)!.userProfile,
     };
@@ -485,21 +485,21 @@ class HomePageState extends State<HomePage> {
                                     minLeadingWidth: 2,
                                     dense: true,
                                     contentPadding:
-                                        const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                                        const EdgeInsets.fromLTRB(20, 0, 15, 0),
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(5),
+                                      borderRadius: BorderRadius.circular(10),
                                     ),
                                     leading: SizedBox(
                                       width: 20,
-                                      child: ImageHelper.getSvgIconWithColor(
-                                          'images/svgs/profile.svg',
-                                          18,
-                                          18,
-                                          OnepieceColors.fancyBlue),
+                                      child: ImageHelper.getSvgIcon(
+                                        'images/svgs/profile.svg',
+                                        18,
+                                        18,
+                                      ),
                                     ),
                                     selected: profile == resource,
                                     selectedTileColor:
-                                        OnepieceColors.liteFancyBlue,
+                                        OnepieceColors.fancyBlue,
                                     onTap: () {
                                       setState(
                                         () {
@@ -516,19 +516,6 @@ class HomePageState extends State<HomePage> {
                                         },
                                       );
                                     },
-                                    trailing: Padding(
-                                      padding:
-                                          const EdgeInsets.fromLTRB(0, 0, 3, 0),
-                                      child: Container(
-                                        width: 3,
-                                        height: 30,
-                                        decoration: BoxDecoration(
-                                            color: OnepieceColors
-                                                .menuBackgroundColor,
-                                            borderRadius:
-                                                BorderRadius.circular(3)),
-                                      ),
-                                    ),
                                     hoverColor: OnepieceColors.liteFancyBlue,
                                     title: Row(
                                       mainAxisAlignment:
@@ -548,9 +535,8 @@ class HomePageState extends State<HomePage> {
                                                 fontWeight: OnepieceFonts
                                                     .sideMenuFontWeight,
                                                 color: resource == "profile"
-                                                    ? OnepieceColors.fancyBlue
-                                                    : OnepieceColors
-                                                        .menuTextColor),
+                                                    ? Colors.white
+                                                    : Colors.black),
                                           ),
                                         ),
                                       ],
@@ -576,15 +562,15 @@ class HomePageState extends State<HomePage> {
                                 minLeadingWidth: 10,
                                 dense: true,
                                 contentPadding:
-                                    const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                                    const EdgeInsets.fromLTRB(20, 0, 15, 0),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5),
+                                  borderRadius: BorderRadius.circular(10),
                                 ),
-                                leading: ImageHelper.getSvgIconWithColor(
-                                    'images/svgs/logout.svg',
-                                    20,
-                                    20,
-                                    OnepieceColors.fancyBlue),
+                                leading: ImageHelper.getSvgIcon(
+                                  'images/svgs/logout.svg',
+                                  20,
+                                  20,
+                                ),
                                 onTap: () {
                                   setState(
                                     () {
@@ -602,19 +588,7 @@ class HomePageState extends State<HomePage> {
                                     },
                                   );
                                 },
-                                trailing: Padding(
-                                  padding:
-                                      const EdgeInsets.fromLTRB(0, 0, 3, 0),
-                                  child: Container(
-                                    width: 3,
-                                    height: 30,
-                                    decoration: BoxDecoration(
-                                        color:
-                                            OnepieceColors.menuBackgroundColor,
-                                        borderRadius: BorderRadius.circular(3)),
-                                  ),
-                                ),
-                                selectedColor: OnepieceColors.liteFancyBlue,
+                                selectedColor: OnepieceColors.fancyBlue,
                                 hoverColor: OnepieceColors.liteFancyBlue,
                                 title: _drawerWidth > _shrinkLimitWidth
                                     ? Text(
@@ -624,8 +598,7 @@ class HomePageState extends State<HomePage> {
                                             fontSize: 16,
                                             fontWeight: OnepieceFonts
                                                 .sideMenuFontWeight,
-                                            color:
-                                                OnepieceColors.menuTextColor),
+                                            color: Colors.black),
                                       )
                                     : const Text(""),
                               ),
@@ -930,21 +903,38 @@ class HomePageState extends State<HomePage> {
   Widget _getResourceMenu(BuildContext context, BoxConstraints constraints) {
     Map<String, Widget> resourceToIconMap = {
       ResourceType.FRUIT.toString(): ImageHelper.getSvgIconWithColor(
-          'images/svgs/fruit.svg', 20, 20, OnepieceColors.fancyBlue),
-      ResourceType.GROUP.toString(): ImageHelper.getSvgIconWithColor(
-          'images/svgs/flag.svg', 20, 20, OnepieceColors.fancyBlue),
-      ResourceType.USER.toString(): const Icon(Icons.manage_accounts,
-          color: OnepieceColors.fancyBlue, size: 20),
-      ResourceType.BATTLE.toString(): ImageHelper.getSvgIconWithColor(
-          'images/svgs/cannon.svg', 20, 20, OnepieceColors.fancyBlue),
-      ResourceType.CHARACTER.toString(): ImageHelper.getSvgIconWithColor(
-          'images/svgs/hat.svg', 20, 20, OnepieceColors.fancyBlue),
-      ResourceType.ISSUE.toString(): const Icon(Icons.add_alert,
-          color: OnepieceColors.fancyBlue, size: 20),
-      ResourceType.CHATTING.toString():
-          const Icon(Icons.message, color: OnepieceColors.fancyBlue, size: 20),
-      setting:
-          const Icon(Icons.settings, color: OnepieceColors.fancyBlue, size: 20)
+          'images/svgs/devil_fruit.svg', 20, 20, Colors.orange),
+      ResourceType.GROUP.toString(): ImageHelper.getSvgIcon(
+        'images/svgs/flag.svg',
+        20,
+        20,
+      ),
+      ResourceType.USER.toString(): ImageHelper.getSvgIcon(
+        'images/svgs/users.svg',
+        20,
+        20,
+      ),
+      ResourceType.BATTLE.toString(): ImageHelper.getSvgIcon(
+        'images/svgs/cannon.svg',
+        20,
+        20,
+      ),
+      ResourceType.CHARACTER.toString(): ImageHelper.getSvgIcon(
+        'images/svgs/hat.svg',
+        20,
+        20,
+      ),
+      ResourceType.CHATTING.toString(): ImageHelper.getSvgIcon(
+        'images/svgs/message1'
+        '.svg',
+        20,
+        20,
+      ),
+      ResourceType.ISSUE.toString(): ImageHelper.getSvgIcon(
+        'images/svgs/feedback.svg',
+        20,
+        20,
+      ),
     };
 
     Map<String, String> resourceToLocationMap = {
@@ -987,7 +977,7 @@ class HomePageState extends State<HomePage> {
             return Material(
               type: MaterialType.transparency,
               child: Container(
-                padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+                padding: const EdgeInsets.fromLTRB(3, 3, 4, 3),
                 decoration: const BoxDecoration(
                     borderRadius: BorderRadius.all(Radius.circular(5))),
                 child: Tooltip(
@@ -997,9 +987,9 @@ class HomePageState extends State<HomePage> {
                   child: ListTile(
                     dense: true,
                     minLeadingWidth: 10,
-                    contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                    contentPadding: const EdgeInsets.fromLTRB(20, 0, 15, 0),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                     leading: resourceToIconMap[resourceType],
                     selected: routeNotifier.value
@@ -1009,7 +999,7 @@ class HomePageState extends State<HomePage> {
                             .toList()
                             .first ==
                         resourceType.toLowerCase(),
-                    selectedTileColor: OnepieceColors.liteFancyBlue,
+                    selectedTileColor: OnepieceColors.fancyBlue,
                     onTap: () {
                       setState(
                         () {
@@ -1018,16 +1008,6 @@ class HomePageState extends State<HomePage> {
                         },
                       );
                     },
-                    trailing: Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 0, 3, 0),
-                      child: Container(
-                        width: 3,
-                        height: 30,
-                        decoration: BoxDecoration(
-                            color: OnepieceColors.menuBackgroundColor,
-                            borderRadius: BorderRadius.circular(3)),
-                      ),
-                    ),
                     hoverColor: OnepieceColors.liteFancyBlue,
                     title: _drawerWidth > _shrinkLimitWidth
                         ? Text(
@@ -1046,8 +1026,8 @@ class HomePageState extends State<HomePage> {
                                             .toList()
                                             .first ==
                                         resourceType.toLowerCase()
-                                    ? OnepieceColors.fancyBlue
-                                    : OnepieceColors.menuTextColor),
+                                    ? Colors.white
+                                    : Colors.black),
                           )
                         : const Text(""),
                   ),

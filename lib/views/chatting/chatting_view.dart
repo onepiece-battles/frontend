@@ -12,6 +12,7 @@ import '../../components/message.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
 import '../../l10n/app_localizations.dart';
+import '../../utils/image_helper.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -143,10 +144,9 @@ class _ChattingViewState extends State<ChattingView> {
                                     ),
                                     chat.message!.content != null
                                         ? chat.message!.content!
-                                        .split('\n')
-                                        .first
-                                        : AppLocalizations.of(context)!
-                                        .image)
+                                            .split('\n')
+                                            .first
+                                        : AppLocalizations.of(context)!.image)
                               else
                                 const Text(""),
                             ],
@@ -180,7 +180,13 @@ class _ChattingViewState extends State<ChattingView> {
           endIndent: 8,
           width: 2,
         ),
-        if (activeChat == null) Text("please select one chat"),
+        if (activeChat == null)
+          Expanded(
+            child: Center(
+              child: ImageHelper.getSvgIconWithColor('images/svgs/ship.svg',
+                  200, 200, OnepieceColors.liteFancyBlue),
+            ),
+          ),
         if (activeChat != null)
           Expanded(
             child: Column(
@@ -402,12 +408,11 @@ class _ChattingViewState extends State<ChattingView> {
         _scrollController.animateTo(
           _scrollController.position.maxScrollExtent,
           duration: const Duration(milliseconds: 300),
-          curve: direct? Curves.ease: Curves.easeOut,
+          curve: direct ? Curves.ease : Curves.easeOut,
         );
       }
     });
   }
-
 
   Widget getUserWall(Chat activeChat) {
     var members = activeChat.members;

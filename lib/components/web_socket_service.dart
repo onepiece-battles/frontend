@@ -26,10 +26,8 @@ class WebSocketService {
         onError: _onError,
         onDone: _onDone,
       );
-      print('WebSocket connected to $hostName$userId');
     } catch (e) {
-      print('WebSocket connection error: $e');
-      _scheduleReconnect();
+      print(e);
     }
   }
 
@@ -58,23 +56,11 @@ class WebSocketService {
 
 
   void _onError(Object error, StackTrace stackTrace) {
-    print('WebSocket error: $error');
     _onDone(); // Treat error as connection done to attempt reconnect
   }
 
   void _onDone() {
-    print('WebSocket connection closed.');
-    _scheduleReconnect();
-  }
-
-  void _scheduleReconnect() {
-    _reconnectTimer?.cancel();
-    _reconnectTimer = Timer(const Duration(seconds: 5), () {
-      print('Attempting to reconnect WebSocket...');
-      if (currentId!=null) {
-        connect(currentId!);
-      }
-    });
+    disconnect();
   }
 
   void disconnect() {
@@ -89,6 +75,7 @@ class WebSocketService {
     _reconnectTimer?.cancel();
     _channel?.sink.close();
     _messageController.close();
-    print('WebSocketService disposed.');
+    _channel = null;
+    currentId = null;
   }
 }
