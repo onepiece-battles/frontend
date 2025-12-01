@@ -36,6 +36,7 @@ class _ChattingOptionsState extends State<ChattingOptions> {
         height: 70,
         direction: PopoverDirection.top,
         context: context,
+        barrierColor: Colors.transparent,
         backgroundColor: OnepieceColors.fancyBlue,
         bodyBuilder: (context) => Column(
           children: [

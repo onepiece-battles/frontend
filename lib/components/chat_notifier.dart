@@ -55,6 +55,8 @@ class ChatNotifier with ChangeNotifier {
       (list) => [...list, message], // Append new message
       ifAbsent: () => [message], // Create list if chat not seen before
     );
+    Chat chat = _chats.firstWhere((e)=>e.id==message.conversationId);
+    chat.message = message;
 
     // 2. Update the main chats list (e.g., last message, unread count)
     int chatIndex =
@@ -100,7 +102,7 @@ class ChatNotifier with ChangeNotifier {
   }
 
   // Method for sending messages (can be called from ChatPage)
-  void sendChatMessage(String chatId, String content, Message message) {
+  void sendChatMessage(String chatId, String content) {
     // final tempMessageId = DateTime.now()
     //     .millisecondsSinceEpoch
     //     .toString(); // For optimistic update
@@ -115,12 +117,12 @@ class ChatNotifier with ChangeNotifier {
     _webSocketService.sendMessage(content);
 
     // Optimistically add to UI
-    _messagesByChatId.update(
-      chatId,
-      (list) => [...list, message],
-      ifAbsent: () => [message],
-    );
-    activeChat?.message = message;
+    // _messagesByChatId.update(
+    //   chatId,
+    //   (list) => [...list, message],
+    //   ifAbsent: () => [message],
+    // );
+    // activeChat?.message = message;
     notifyListeners();
 
     // Send via WebSocket (backend will persist and echo back)

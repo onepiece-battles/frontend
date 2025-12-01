@@ -62,6 +62,7 @@ class _NotificationListState extends State<NotificationList> {
         width: 300,
         direction: PopoverDirection.bottom,
         context: context,
+        barrierColor: Colors.transparent,
         backgroundColor: OnepieceColors.fancyBlue,
         bodyBuilder: (ctx) => // Use ctx for inner context
         _internalNotifications.isNotEmpty

@@ -225,7 +225,7 @@ class HomePageState extends State<HomePage> {
       padding: const EdgeInsets.fromLTRB(0, 0, 0, 4),
       child: IconButton(
         style: ButtonStyle(
-          overlayColor: MaterialStateProperty.all(Colors.transparent),
+          overlayColor: WidgetStateProperty.all(Colors.transparent),
         ),
         onPressed: () {
           context.goNamed('userHome',
@@ -837,12 +837,12 @@ class HomePageState extends State<HomePage> {
                 child: TextButton(
                   style: ButtonStyle(
                     padding: _drawerWidth <= _shrinkLimitWidth
-                        ? MaterialStateProperty.all<EdgeInsetsGeometry>(
+                        ? WidgetStateProperty.all<EdgeInsetsGeometry>(
                             const EdgeInsets.symmetric(
                                 horizontal:
                                     2.0), // Adjust the value to control the padding
                           )
-                        : MaterialStateProperty.all<EdgeInsetsGeometry>(
+                        : WidgetStateProperty.all<EdgeInsetsGeometry>(
                             const EdgeInsets.symmetric(
                                 horizontal:
                                     6.0), // Adjust the value to control the padding
