@@ -130,7 +130,7 @@ class _ChattingViewState extends State<ChattingView> {
                                   ),
                                   Text(
                                     TimeHelper.humanDateFromTimestamp(
-                                        1759970648516, context),
+                                        chat.message!.creationRecord!.actionTimestamp!, context),
                                     style: OnepieceFonts.boldLiteFancySmallFont,
                                   ),
                                   // replace with real time
@@ -201,7 +201,7 @@ class _ChattingViewState extends State<ChattingView> {
                     children: [
                       Text(
                           style: OnepieceFonts.smallContentFancyBlueStyle,
-                          activeChat!.group!
+                          activeChat.group!
                               ? activeChat.name!
                               : getTargetMember(activeChat).nickname),
                       IconButton(
@@ -265,7 +265,8 @@ class _ChattingViewState extends State<ChattingView> {
                       body: ListView.builder(
                         controller: _scrollController,
                         shrinkWrap: true,
-                        padding: const EdgeInsets.fromLTRB(0, 0, 25, 0),
+                        padding: const EdgeInsets.fromLTRB(15, 0, 20
+                            , 0),
                         itemCount: messages.length,
                         itemBuilder: (context, index) {
                           final msg = messages[index];
@@ -356,14 +357,7 @@ class _ChattingViewState extends State<ChattingView> {
                                           listen: false)
                                       .sendChatMessage(
                                           activeChatId!,
-                                          jsonMessage,
-                                          Message(
-                                            id: null,
-                                            conversationId: activeChat.id,
-                                            preMessageId: null,
-                                            content: typingController.text,
-                                            userId: getIt<User>().id,
-                                          ));
+                                          jsonMessage);
                                   _scrollToBottom(false);
                                   typingController.clear();
                                   canSend = false;
