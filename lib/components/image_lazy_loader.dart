@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import '../constants/onepiece_colors.dart';
-import '../utils/base64_helper.dart';
 import '../utils/image_helper.dart';
 import 'image_cache_manager.dart';
-
+import 'dart:typed_data';
 class ImageLazyLoader extends StatefulWidget {
   final String Function()? uriProvider;
   final double width;
@@ -32,7 +31,7 @@ class _ImageLazyLoaderState extends State<ImageLazyLoader> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<String>(
+    return FutureBuilder<Uint8List>(
         future: ImageCacheManager.getImage(widget.uriProvider!()),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done &&
@@ -43,7 +42,7 @@ class _ImageLazyLoaderState extends State<ImageLazyLoader> {
                 widget.borderWidth,
                 OnepieceColors.liteFancyBlue,
                 widget.borderRadios,
-                Base64Helper.decode(snapshot.data!));
+                snapshot.data!);
           } else if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(
               child: SizedBox(

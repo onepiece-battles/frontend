@@ -61,7 +61,7 @@ class _ChattingViewState extends State<ChattingView> {
         SizedBox(
           width: 300,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(8.0, 0, 0, 0),
+            padding: const EdgeInsets.fromLTRB(0.0, 0, 0, 0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
@@ -70,27 +70,30 @@ class _ChattingViewState extends State<ChattingView> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Expanded(
-                      child: SizedBox(
-                        width: 240,
-                        height: 35,
-                        child: TextFormField(
-                          controller: searchChattingController,
-                          onChanged: (value) {},
-                          decoration: InputDecoration(
-                            labelStyle: OnepieceFonts.dropDownItemStyle,
-                            floatingLabelBehavior: FloatingLabelBehavior.never,
-                            disabledBorder: const OutlineInputBorder(
-                                borderSide: BorderSide(
-                                    color: OnepieceColors.menuHoverColor)),
-                            enabledBorder: const OutlineInputBorder(
-                                borderSide: BorderSide(
-                                    color: OnepieceColors.menuHoverColor)),
-                            focusedBorder: const OutlineInputBorder(
-                                borderSide: BorderSide(
-                                    color: OnepieceColors.fancyGreen,
-                                    width: 1.5)),
-                            prefixIcon: const Icon(Icons.search),
-                            labelText: AppLocalizations.of(context)!.name,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 8.0),
+                        child: SizedBox(
+                          width: 240,
+                          height: 35,
+                          child: TextFormField(
+                            controller: searchChattingController,
+                            onChanged: (value) {},
+                            decoration: InputDecoration(
+                              labelStyle: OnepieceFonts.dropDownItemStyle,
+                              floatingLabelBehavior: FloatingLabelBehavior.never,
+                              disabledBorder: const OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: OnepieceColors.menuHoverColor)),
+                              enabledBorder: const OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: OnepieceColors.menuHoverColor)),
+                              focusedBorder: const OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: OnepieceColors.fancyGreen,
+                                      width: 1.5)),
+                              prefixIcon: const Icon(Icons.search),
+                              labelText: AppLocalizations.of(context)!.name,
+                            ),
                           ),
                         ),
                       ),
@@ -102,71 +105,84 @@ class _ChattingViewState extends State<ChattingView> {
                 ),
                 SizedBox(
                   width: 350,
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 5.0),
-                    child: ListView.builder(
-                      itemCount: chats.length,
-                      shrinkWrap: true,
-                      itemBuilder: (context, index) {
-                        final chat = chats[index];
-                        return ListTile(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5),
-                          ),
-                          title: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
+                  child: ListView.builder(
+                    itemCount: chats.length,
+                    shrinkWrap: true,
+                    itemBuilder: (context, index) {
+                      final chat = chats[index];
+                      return ListTile(
+                        // shape: RoundedRectangleBorder(
+                        //   borderRadius: BorderRadius.circular(5),
+                        // ),
+                        title: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment:
+                                  MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  chat.group!
+                                      ? chat.name!
+                                      : getTargetMember(chat).nickname,
+                                  style:
+                                      OnepieceFonts.contentStyleBoldFancyBlue,
+                                ),
+                                Text(
+                                  TimeHelper.humanDateFromTimestamp(
+                                      chat.message!.creationRecord!.actionTimestamp!, context),
+                                  style: OnepieceFonts.boldLiteFancySmallFont,
+                                ),
+                                // replace with real time
+                              ],
+                            ),
+                            if (chat.message != null)
                               Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
                                   Text(
-                                    chat.group!
-                                        ? chat.name!
-                                        : getTargetMember(chat).nickname,
-                                    style:
-                                        OnepieceFonts.contentStyleBoldFancyBlue,
+                                      style: const TextStyle(
+                                        color: OnepieceFonts.contentFontColor,
+                                        fontSize: OnepieceFonts.smallContentFontSize,
+                                      ),
+                                      chat.members.firstWhere((e)=>e.id==chat.message!.userId!).nickname
                                   ),
+                                  const Text(": ",  style:  TextStyle(
+                                    color: OnepieceFonts.contentFontColor,
+                                    fontSize: OnepieceFonts.smallContentFontSize,
+                                  ),),
                                   Text(
-                                    TimeHelper.humanDateFromTimestamp(
-                                        chat.message!.creationRecord!.actionTimestamp!, context),
-                                    style: OnepieceFonts.boldLiteFancySmallFont,
-                                  ),
-                                  // replace with real time
+                                      style: const TextStyle(
+                                        color: OnepieceFonts.contentFontColor,
+                                        fontSize: OnepieceFonts.smallContentFontSize,
+                                      ),
+                                      chat.message!.content != null
+                                          ? chat.message!.content!
+                                          .split('\n')
+                                          .first
+                                          : AppLocalizations.of(context)!.image)
                                 ],
-                              ),
-                              if (chat.message != null)
-                                Text(
-                                    style: const TextStyle(
-                                      color: OnepieceFonts.contentFontColor,
-                                      fontSize: OnepieceFonts.contentFontSize,
-                                    ),
-                                    chat.message!.content != null
-                                        ? chat.message!.content!
-                                            .split('\n')
-                                            .first
-                                        : AppLocalizations.of(context)!.image)
-                              else
-                                const Text(""),
-                            ],
-                          ),
-                          selected: activeChatId == chat.id,
-                          focusColor: OnepieceColors.liteFancyBlue,
-                          selectedTileColor: OnepieceColors.liteFancyBlue,
-                          leading: chat.group!
-                              ? getLeading(
-                                  chat.members.map((e) => e.imageUri!).toList())
-                              : getSingleLeading(
-                                  chat), // Assuming Chat has 'lastMessage'
-                          onTap: () {
-                            Provider.of<ChatNotifier>(context, listen: false)
-                                .setActiveChat(chat.id);
-                            _scrollToBottom(true);
-                          },
-                        );
-                      },
-                    ),
+                              )
+                            else
+                              const Text(""),
+                          ],
+                        ),
+                        selected: activeChatId == chat.id,
+                        focusColor: OnepieceColors.liteFancyBlue,
+                        selectedTileColor: OnepieceColors.liteFancyBlue,
+                        leading: chat.group!
+                            ? getLeading(
+                                chat.members.map((e) => e.imageUri!).toList())
+                            : getSingleLeading(
+                                chat), // Assuming Chat has 'lastMessage'
+                        onTap: () {
+                          Provider.of<ChatNotifier>(context, listen: false)
+                              .setActiveChat(chat.id);
+                          _scrollToBottom(0);
+                        },
+                      );
+                    },
                   ),
                 ),
               ],
@@ -358,7 +374,7 @@ class _ChattingViewState extends State<ChattingView> {
                                       .sendChatMessage(
                                           activeChatId!,
                                           jsonMessage);
-                                  _scrollToBottom(false);
+                                  _scrollToBottom(50);
                                   typingController.clear();
                                   canSend = false;
                                   focusNode.requestFocus();
@@ -395,14 +411,14 @@ class _ChattingViewState extends State<ChattingView> {
     );
   }
 
-  void _scrollToBottom(bool direct) {
+  void _scrollToBottom(int extendValue) {
     // Ensure scrolling occurs after the build cycle completes
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
-          curve: direct ? Curves.ease : Curves.easeOut,
+          _scrollController.position.maxScrollExtent+extendValue,
+          duration: const Duration(milliseconds: 100),
+          curve: Curves.easeOut,
         );
       }
     });

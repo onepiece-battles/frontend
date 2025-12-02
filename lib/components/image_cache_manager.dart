@@ -1,15 +1,16 @@
-import 'package:flutter/cupertino.dart';
-
+import 'dart:typed_data';
+import '../utils/base64_helper.dart';
 import '../utils/image_helper.dart';
 
 class ImageCacheManager {
-  static Map<String, String> uriToImageMap = {};
+  static Map<String, Uint8List> uriToImageMap = {};
 
-  static Future<String> getImage(String uri) async {
+  static Future<Uint8List> getImage(String uri) async {
     if (uriToImageMap[uri] == null) {
       String image = await ImageHelper.loadImageByUri(uri);
-      uriToImageMap[uri] = image;
-      return image;
+      Uint8List decodedImage = Base64Helper.decode(image);
+      uriToImageMap[uri] = decodedImage;
+      return decodedImage;
     }
     return uriToImageMap[uri]!;
   }
