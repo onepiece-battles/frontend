@@ -57,6 +57,9 @@ class ChatNotifier with ChangeNotifier {
     );
     Chat chat = _chats.firstWhere((e)=>e.id==message.conversationId);
     chat.message = message;
+    int index = _chats.indexWhere((e)=>e.id==message.conversationId);
+    Chat removedChat = _chats.removeAt(index);
+    _chats.insert(0, removedChat);
 
     // 2. Update the main chats list (e.g., last message, unread count)
     int chatIndex =
@@ -123,7 +126,6 @@ class ChatNotifier with ChangeNotifier {
     //   ifAbsent: () => [message],
     // );
     // activeChat?.message = message;
-    notifyListeners();
 
     // Send via WebSocket (backend will persist and echo back)
     // _webSocketService.sendMessage({
