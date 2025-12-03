@@ -34,8 +34,8 @@ class MessageItem extends StatelessWidget {
                   const SizedBox(
                     height: 5,
                   ),
-                  getContent(),
-                  if (preMessage != null) getPreMessage()
+                  getContent(context),
+                  if (preMessage != null) getPreMessage(context)
                 ],
               ),
               const SizedBox(
@@ -80,59 +80,60 @@ class MessageItem extends StatelessWidget {
                   const SizedBox(
                     height: 7,
                   ),
-                  getContent(),
-                  if (preMessage != null) getPreMessage()
+                  getContent(context),
+                  if (preMessage != null) getPreMessage(context)
                 ],
               ),
             ],
           );
   }
 
-  Widget getContent() {
+  Widget getContent(BuildContext context) {
     return Align(
-      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(5),
-          color: isMe ? OnepieceColors.fancyBlue : Colors.grey[900],
-        ),
-        padding: const EdgeInsets.all(6),
-        child: message.content != null
-            ? Text(
-                message.content!,
-                style: OnepieceFonts.tagStyle,
-              )
-            : SquareImageLoader(
-                key: UniqueKey(),
-                uriProvider: () => message.imageContentUri!,
-                width: 40,
-                borderWidth: 0),
-      ),
-    );
+        alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(5),
+            color: isMe ? OnepieceColors.fancyBlue : Colors.grey[900],
+          ),
+          padding: const EdgeInsets.all(6),
+          child: message.content != null
+              ?
+          Text(
+            message.content!,
+            style: OnepieceFonts.tagStyle,
+            softWrap: true,
+            textAlign: TextAlign.justify,
+          )
+              : SquareImageLoader(
+                  key: UniqueKey(),
+                  uriProvider: () => message.imageContentUri!,
+                  width: 40,
+                  borderWidth: 0),
+        ));
   }
 
-  Widget getPreMessage() {
+  Widget getPreMessage(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(
         vertical: 5,
       ),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(5),
-          color: Colors.grey[300],
-        ),
-        padding: const EdgeInsets.all(6),
-        child: preMessage!.content != null
-            ? Text(
-                "$preMessageNickname: ${preMessage!.content!}",
-                style: const TextStyle(fontSize: 10, color: Colors.white),
-              )
-            : SquareImageLoader(
-                key: UniqueKey(),
-                uriProvider: () => preMessage!.imageContentUri!,
-                width: 40,
-                borderWidth: 0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(5),
+        color: Colors.grey[300],
       ),
+      padding: const EdgeInsets.all(6),
+      child: preMessage!.content != null
+          ? Text(
+              softWrap: true,
+              "$preMessageNickname: ${preMessage!.content!}",
+              style: const TextStyle(fontSize: 10, color: Colors.white),
+            )
+          : SquareImageLoader(
+              key: UniqueKey(),
+              uriProvider: () => preMessage!.imageContentUri!,
+              width: 40,
+              borderWidth: 0),
     );
   }
 }
