@@ -31,7 +31,7 @@ class _ChattingViewState extends State<ChattingView> {
   FocusNode focusNode = FocusNode();
   bool showEmojiPicker = false;
   Map<String, Message?> chatIdToRepliedMessage = {};
-  Map<String, String> chatIdToCachedMessage = {};
+  Map<String, String?> chatIdToCachedMessage = {};
   final ValueNotifier<Message?> inputMessageNotifier = ValueNotifier(null);
   final ValueNotifier<Message?> inputPreMessageNotifier = ValueNotifier(null);
   String activeConversationId = "";
@@ -138,10 +138,12 @@ class _ChattingViewState extends State<ChattingView> {
                               ],
                             ),
                             if ((chatIdToRepliedMessage[chat.id] != null ||
-                                    chatIdToCachedMessage[chat.id] != null) &&
+                                    (chatIdToCachedMessage[chat.id] != null &&
+                                        chatIdToCachedMessage[chat.id]!
+                                            .isNotEmpty)) &&
                                 activeChatId != chat.id)
                               Text(
-                                AppLocalizations.of(context)!.draft,
+                                "[${AppLocalizations.of(context)!.draft}]",
                                 style: const TextStyle(
                                   color: Colors.red,
                                   fontSize: OnepieceFonts.smallContentFontSize,
@@ -318,6 +320,12 @@ class _ChattingViewState extends State<ChattingView> {
                                 preMessage: msg.preMessage,
                                 user: activeChat.members.firstWhere(
                                     (user) => user.id == msg.userId),
+                                preMessageNickname: msg.preMessage != null
+                                    ? activeChat.members
+                                        .firstWhere((e) =>
+                                            e.id == msg.preMessage!.userId!)
+                                        .nickname
+                                    : null,
                               ),
                               onSecondaryTap: () {
                                 chatIdToRepliedMessage[msg.conversationId!] =
@@ -375,60 +383,62 @@ class _ChattingViewState extends State<ChattingView> {
                                   ))
                             ],
                           ),
-                                  SizedBox(
-                                  height: 100,
-                                  child: TextField(
-                                    controller: typingController,
-                                    enabled: true,
-                                    minLines: 3,
-                                    maxLines: 5,
-                                    keyboardType: TextInputType.multiline,
-                                    textInputAction: TextInputAction.send,
-                                    autofocus: true,
-                                    cursorHeight: 15,
-                                    focusNode: focusNode,
-                                    style: OnepieceFonts.smallContentStyle,
-                                    onSubmitted: (_) => {
-                                      buttonState(() {
-                                        final SendMessageRequest request =
-                                            SendMessageRequest(
-                                          content: typingController.text,
-                                          userId: getIt<User>().id,
-                                          conversationId: activeChat.id!,
-                                          type: MessageType.SEND_MESSAGE,
-                                          preMessageId: null,
-                                        );
-                                        final String jsonMessage =
-                                            jsonEncode(request.toJson());
-                                        Provider.of<ChatNotifier>(context,
-                                                listen: false)
-                                            .sendChatMessage(
-                                                activeChatId!, jsonMessage);
-                                        _scrollToBottom(50);
-                                        typingController.clear();
-                                        focusNode.requestFocus();
-                                      })
-                                    },
-                                    onChanged: (value) {
-                                      buttonState(() {
-                                        chatIdToCachedMessage[activeChat.id!] =
-                                            typingController.text.trim();
-                                      });
-                                    },
-                                    decoration: const InputDecoration(
-                                      contentPadding:
-                                          EdgeInsets.symmetric(horizontal: 10),
-                                      labelStyle:
-                                          OnepieceFonts.dropDownItemStyle,
-                                      floatingLabelBehavior:
-                                          FloatingLabelBehavior.never,
-                                      border: InputBorder.none,
-                                      focusedBorder: InputBorder.none,
-                                      disabledBorder: InputBorder.none,
-                                      enabledBorder: InputBorder.none,
-                                    ),
-                                  ),
-                                ),
+                          SizedBox(
+                            height: 100,
+                            child: TextField(
+                              controller: typingController,
+                              enabled: true,
+                              minLines: 3,
+                              maxLines: 5,
+                              keyboardType: TextInputType.multiline,
+                              textInputAction: TextInputAction.send,
+                              autofocus: true,
+                              cursorHeight: 15,
+                              focusNode: focusNode,
+                              style: OnepieceFonts.smallContentStyle,
+                              onSubmitted: (_) => {
+                                buttonState(() {
+                                  final SendMessageRequest request =
+                                      SendMessageRequest(
+                                    content: typingController.text,
+                                    userId: getIt<User>().id,
+                                    conversationId: activeChat.id!,
+                                    type: MessageType.SEND_MESSAGE,
+                                    preMessageId:
+                                        inputPreMessageNotifier.value!.id,
+                                  );
+                                  final String jsonMessage =
+                                      jsonEncode(request.toJson());
+                                  Provider.of<ChatNotifier>(context,
+                                          listen: false)
+                                      .sendChatMessage(
+                                          activeChatId!, jsonMessage);
+                                  _scrollToBottom(50);
+                                  typingController.clear();
+                                  chatIdToRepliedMessage[activeChatId] = null;
+                                  inputPreMessageNotifier.value = null;
+                                  focusNode.requestFocus();
+                                })
+                              },
+                              onChanged: (value) {
+                                buttonState(() {
+                                  chatIdToCachedMessage[activeChat.id!] =
+                                      typingController.text.trim();
+                                });
+                              },
+                              decoration: const InputDecoration(
+                                contentPadding:
+                                    EdgeInsets.symmetric(horizontal: 10),
+                                labelStyle: OnepieceFonts.dropDownItemStyle,
+                                floatingLabelBehavior:
+                                    FloatingLabelBehavior.never,
+                                border: InputBorder.none,
+                                focusedBorder: InputBorder.none,
+                                disabledBorder: InputBorder.none,
+                                enabledBorder: InputBorder.none,
+                              ),
+                            ),
+                          ),
                           ValueListenableBuilder<Message?>(
                               valueListenable: inputPreMessageNotifier,
                               builder: (context, value, _) {
