@@ -24,7 +24,7 @@ class ChattingView extends StatefulWidget {
 }
 
 class _ChattingViewState extends State<ChattingView> {
-  late final ScrollController _scrollController;
+  final ScrollController scrollController = ScrollController();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   TextEditingController searchChattingController = TextEditingController();
   TextEditingController typingController = TextEditingController();
@@ -38,12 +38,11 @@ class _ChattingViewState extends State<ChattingView> {
   @override
   void initState() {
     super.initState();
-    _scrollController = ScrollController();
   }
 
   @override
   void dispose() {
-    _scrollController.dispose();
+    scrollController.dispose();
     super.dispose();
   }
 
@@ -109,6 +108,7 @@ class _ChattingViewState extends State<ChattingView> {
                   width: 350,
                   child: ListView.builder(
                     itemCount: chats.length,
+                    addAutomaticKeepAlives: true,
                     shrinkWrap: true,
                     itemBuilder: (context, index) {
                       final chat = chats[index];
@@ -150,40 +150,14 @@ class _ChattingViewState extends State<ChattingView> {
                                 ),
                               )
                             else if (chat.message != null)
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  Text(
-                                      style: const TextStyle(
-                                        color: OnepieceFonts.contentFontColor,
-                                        fontSize:
-                                            OnepieceFonts.smallContentFontSize,
-                                      ),
-                                      chat.members
-                                          .firstWhere((e) =>
-                                              e.id == chat.message!.userId!)
-                                          .nickname),
-                                  const Text(
-                                    ": ",
-                                    style: TextStyle(
-                                      color: OnepieceFonts.contentFontColor,
-                                      fontSize:
-                                          OnepieceFonts.smallContentFontSize,
-                                    ),
+                              Text(
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    color: OnepieceFonts.contentFontColor,
+                                    fontSize:
+                                        OnepieceFonts.superSmallContentFontSize,
                                   ),
-                                  Text(
-                                      style: const TextStyle(
-                                        color: OnepieceFonts.contentFontColor,
-                                        fontSize:
-                                            OnepieceFonts.smallContentFontSize,
-                                      ),
-                                      chat.message!.content != null
-                                          ? chat.message!.content!
-                                              .split('\n')
-                                              .first
-                                          : AppLocalizations.of(context)!.image)
-                                ],
-                              )
+                                  "${chat.members.firstWhere((e) => e.id == chat.message!.userId!).nickname}: ${chat.message!.content != null ? chat.message!.content!.split('\n').first : AppLocalizations.of(context)!.image}")
                             else
                               const Text(""),
                           ],
@@ -205,7 +179,7 @@ class _ChattingViewState extends State<ChattingView> {
                               chatIdToCachedMessage[activeConversationId] ?? "";
                           inputPreMessageNotifier.value = Message(
                               content:
-                                  chatIdToCachedMessage[activeChatId!] ?? "");
+                                  chatIdToCachedMessage[activeChatId] ?? "");
                         },
                       );
                     },
@@ -305,7 +279,8 @@ class _ChattingViewState extends State<ChattingView> {
                         ),
                       ),
                       body: ListView.builder(
-                        controller: _scrollController,
+                        controller: scrollController,
+                        addAutomaticKeepAlives: true,
                         shrinkWrap: true,
                         padding: const EdgeInsets.fromLTRB(15, 0, 20, 0),
                         itemCount: messages.length,
@@ -405,7 +380,7 @@ class _ChattingViewState extends State<ChattingView> {
                                     conversationId: activeChat.id!,
                                     type: MessageType.SEND_MESSAGE,
                                     preMessageId:
-                                        inputPreMessageNotifier.value!.id,
+                                        inputPreMessageNotifier.value?.id,
                                   );
                                   final String jsonMessage =
                                       jsonEncode(request.toJson());
@@ -413,9 +388,9 @@ class _ChattingViewState extends State<ChattingView> {
                                           listen: false)
                                       .sendChatMessage(
                                           activeChatId!, jsonMessage);
-                                  _scrollToBottom(50);
                                   typingController.clear();
                                   chatIdToRepliedMessage[activeChatId] = null;
+                                  chatIdToCachedMessage[activeChatId] = null;
                                   inputPreMessageNotifier.value = null;
                                   focusNode.requestFocus();
                                 })
@@ -501,9 +476,9 @@ class _ChattingViewState extends State<ChattingView> {
   void _scrollToBottom(int extendValue) {
     // Ensure scrolling occurs after the build cycle completes
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent + extendValue,
+      if (scrollController.hasClients) {
+        scrollController.animateTo(
+          scrollController.position.maxScrollExtent + extendValue,
           duration: const Duration(milliseconds: 100),
           curve: Curves.easeOut,
         );
