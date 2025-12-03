@@ -849,8 +849,8 @@ class _CharacterViewState extends State<CharacterView>
         .entries
         .map(
           (entry) => DataRow(
-            color: MaterialStateProperty.resolveWith<Color?>(
-                (Set<MaterialState> states) {
+            color: WidgetStateProperty.resolveWith<Color?>(
+                (Set<WidgetState> states) {
               if (entry.key.isEven) {
                 return OnepieceColors
                     .liteFancyGreen; // Use whatever color you need for even rows

@@ -9,12 +9,13 @@ class MessageItem extends StatelessWidget {
   final Message? preMessage;
   final User user;
   final bool isMe;
-  const MessageItem(
-      {super.key,
-      required this.message,
-      required this.preMessage,
-      required this.isMe,
-      required this.user});
+  const MessageItem({
+    super.key,
+    required this.message,
+    required this.preMessage,
+    required this.isMe,
+    required this.user,
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -970,4 +970,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cancelSelection => 'Cancel';
+
+  @override
+  String get draft => 'Draft';
 }

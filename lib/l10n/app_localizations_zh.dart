@@ -964,4 +964,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get cancelSelection => '取消选择';
+
+  @override
+  String get draft => '草稿';
 }
