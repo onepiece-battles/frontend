@@ -7,6 +7,7 @@ import 'package:openapi/api.dart';
 class MessageItem extends StatelessWidget {
   final Message message;
   final Message? preMessage;
+  final String? preMessageNickname;
   final User user;
   final bool isMe;
   const MessageItem({
@@ -15,6 +16,7 @@ class MessageItem extends StatelessWidget {
     required this.preMessage,
     required this.isMe,
     required this.user,
+    this.preMessageNickname,
   });
 
   @override
@@ -26,6 +28,7 @@ class MessageItem extends StatelessWidget {
             children: [
               Column(
                 mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.end,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const SizedBox(
@@ -110,18 +113,19 @@ class MessageItem extends StatelessWidget {
 
   Widget getPreMessage() {
     return Container(
-      padding: const EdgeInsets.all(10),
-      margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+      margin: const EdgeInsets.symmetric(
+        vertical: 5,
+      ),
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          color: isMe ? Colors.blue[200] : Colors.grey[300],
+          borderRadius: BorderRadius.circular(5),
+          color: Colors.grey[300],
         ),
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(6),
         child: preMessage!.content != null
             ? Text(
-                preMessage!.content!,
-                style: const TextStyle(fontSize: 15),
+                "$preMessageNickname: ${preMessage!.content!}",
+                style: const TextStyle(fontSize: 10, color: Colors.white),
               )
             : SquareImageLoader(
                 key: UniqueKey(),
