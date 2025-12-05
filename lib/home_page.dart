@@ -100,7 +100,8 @@ class HomePageState extends State<HomePage> {
         builder: (context, constraints) {
           return Scaffold(
             backgroundColor: Colors.grey[50],
-            body: Row(
+            body: SelectionArea(
+                child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 _getNavigationMenu(context, constraints),
@@ -121,7 +122,7 @@ class HomePageState extends State<HomePage> {
                   ),
                 ),
               ],
-            ),
+            )),
           );
         },
       ),
@@ -498,8 +499,7 @@ class HomePageState extends State<HomePage> {
                                       ),
                                     ),
                                     selected: profile == resource,
-                                    selectedTileColor:
-                                        OnepieceColors.fancyBlue,
+                                    selectedTileColor: OnepieceColors.fancyBlue,
                                     onTap: () {
                                       setState(
                                         () {

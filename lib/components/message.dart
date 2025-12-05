@@ -5,7 +5,8 @@ import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:openapi/api.dart';
 import 'package:popover/popover.dart';
-import '../../l10n/app_localizations.dart';
+
+import '../l10n/app_localizations.dart';
 
 class MessageItem extends StatelessWidget {
   final Message message;
@@ -103,32 +104,52 @@ class MessageItem extends StatelessWidget {
           color: isMe ? OnepieceColors.fancyBlue : Colors.grey[900],
         ),
         padding: const EdgeInsets.all(6),
-        child: SelectionArea(
-          child: Builder(builder: (innerContext) {
+        child: Builder(builder: (innerContext) {
           return GestureDetector(
             onSecondaryTap: () => showPopover(
-              // height: 25,
-              // width: 80,
+              arrowWidth: 6,
+              arrowHeight: 5,
               direction: PopoverDirection.top,
               arrowDyOffset: -8,
               context: innerContext,
               barrierColor: Colors.transparent,
-              backgroundColor: Colors.grey[500]!,
-              bodyBuilder: (ctx) => InkWell(
-                hoverColor: Colors.transparent,
-                splashColor: Colors.transparent,
-                highlightColor: Colors.transparent,
-                focusColor: Colors.transparent,
-                onTap: () {
-                  replyMessage(message);
-                  Navigator.of(ctx).pop();
-                },
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
-                    child: Text(
-                  AppLocalizations.of(context)!.reference,
-                  style: OnepieceFonts.superSmallContentStyleWhite,
-                )),
+              backgroundColor: Colors.grey[600]!,
+              bodyBuilder: (ctx) => Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  InkWell(
+                    onTap: () {
+                      replyMessage(message);
+                      Navigator.of(ctx).pop();
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        AppLocalizations.of(context)!.reference,
+                        style: OnepieceFonts.superSmallContentStyleWhite,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 15,
+                    width: 2,
+                    child: VerticalDivider(
+                      thickness: 1,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () {
+                      Clipboard.setData(ClipboardData(text: message.content!));
+                      Navigator.of(ctx).pop();
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(AppLocalizations.of(context)!.copy,
+                          style: OnepieceFonts.superSmallContentStyleWhite),
+                    ),
+                  )
+                ],
               ),
             ),
             child: message.content != null
@@ -145,7 +166,6 @@ class MessageItem extends StatelessWidget {
                     borderWidth: 0),
           );
         }),
-        ),
       ),
     );
   }

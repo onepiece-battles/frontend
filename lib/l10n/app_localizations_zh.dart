@@ -970,4 +970,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get reference => '引用';
+
+  @override
+  String get copy => '复制';
 }

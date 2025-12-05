@@ -319,5 +319,6 @@
   "yesterday": "yesterday",
   "cancelSelection": "Cancel",
   "draft": "Draft",
-  "reference": "Reference"
+  "reference": "Reference",
+  "copy": "Copy"
 }

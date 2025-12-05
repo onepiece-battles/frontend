@@ -319,5 +319,6 @@
   "yesterday": "昨天",
   "cancelSelection": "取消选择",
   "draft": "草稿",
-  "reference": "引用"
+  "reference": "引用",
+  "copy": "复制"
 }
