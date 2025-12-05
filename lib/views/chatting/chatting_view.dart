@@ -288,8 +288,7 @@ class _ChattingViewState extends State<ChattingView> {
                           final msg = messages[index];
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 15.0),
-                            child: GestureDetector(
-                              child: MessageItem(
+                            child: MessageItem(
                                 message: msg,
                                 isMe: msg.userId == getIt<User>().id,
                                 preMessage: msg.preMessage,
@@ -301,14 +300,12 @@ class _ChattingViewState extends State<ChattingView> {
                                             e.id == msg.preMessage!.userId!)
                                         .nickname
                                     : null,
-                              ),
-                              onSecondaryTap: () {
-                                chatIdToRepliedMessage[msg.conversationId!] =
-                                    msg;
-                                inputPreMessageNotifier.value = msg;
-                                focusNode.requestFocus();
-                              },
-                            ),
+                                replyMessage: (msg) {
+                                  chatIdToRepliedMessage[msg.conversationId!] =
+                                      msg;
+                                  inputPreMessageNotifier.value = msg;
+                                  focusNode.requestFocus();
+                                }),
                           ); // your widget
                         },
                       )),
@@ -321,6 +318,7 @@ class _ChattingViewState extends State<ChattingView> {
                 StatefulBuilder(
                   builder: (BuildContext context, StateSetter buttonState) {
                     return Container(
+                      height: 150,
                       padding: const EdgeInsets.fromLTRB(8, 6, 23, 6),
                       child: Column(
                         children: [
@@ -358,60 +356,62 @@ class _ChattingViewState extends State<ChattingView> {
                                   ))
                             ],
                           ),
-                          SizedBox(
-                            height: 100,
-                            child: TextField(
-                              controller: typingController,
-                              enabled: true,
-                              minLines: 3,
-                              maxLines: 5,
-                              keyboardType: TextInputType.multiline,
-                              textInputAction: TextInputAction.send,
-                              autofocus: true,
-                              cursorHeight: 15,
-                              focusNode: focusNode,
-                              style: OnepieceFonts.smallContentStyle,
-                              onSubmitted: (_) => {
-                                buttonState(() {
-                                  final SendMessageRequest request =
-                                      SendMessageRequest(
-                                    content: typingController.text,
-                                    userId: getIt<User>().id,
-                                    conversationId: activeChat.id!,
-                                    type: MessageType.SEND_MESSAGE,
-                                    preMessageId:
-                                        inputPreMessageNotifier.value?.id,
-                                  );
-                                  final String jsonMessage =
-                                      jsonEncode(request.toJson());
-                                  Provider.of<ChatNotifier>(context,
-                                          listen: false)
-                                      .sendChatMessage(
-                                          activeChatId!, jsonMessage);
-                                  typingController.clear();
-                                  chatIdToRepliedMessage[activeChatId] = null;
-                                  chatIdToCachedMessage[activeChatId] = null;
-                                  inputPreMessageNotifier.value = null;
-                                  focusNode.requestFocus();
-                                })
-                              },
-                              onChanged: (value) {
-                                buttonState(() {
-                                  chatIdToCachedMessage[activeChat.id!] =
-                                      typingController.text.trim();
-                                });
-                              },
-                              decoration: const InputDecoration(
-                                contentPadding:
-                                    EdgeInsets.symmetric(horizontal: 10),
-                                labelStyle: OnepieceFonts.dropDownItemStyle,
-                                floatingLabelBehavior:
-                                    FloatingLabelBehavior.never,
-                                border: InputBorder.none,
-                                focusedBorder: InputBorder.none,
-                                disabledBorder: InputBorder.none,
-                                enabledBorder: InputBorder.none,
-                              ),
+                          TextField(
+                            controller: typingController,
+                            enabled: true,
+                            minLines: 1,
+                            maxLines: 5,
+                            keyboardType: TextInputType.multiline,
+                            textInputAction: TextInputAction.send,
+                            autofocus: true,
+                            cursorHeight: 15,
+                            focusNode: focusNode,
+                            style: OnepieceFonts.smallContentStyle,
+                            onSubmitted: typingController.text.isEmpty
+                                ? null
+                                : (_) => {
+                                      buttonState(() {
+                                        final SendMessageRequest request =
+                                            SendMessageRequest(
+                                          content: typingController.text,
+                                          userId: getIt<User>().id,
+                                          conversationId: activeChat.id!,
+                                          type: MessageType.SEND_MESSAGE,
+                                          preMessageId:
+                                              inputPreMessageNotifier.value?.id,
+                                        );
+                                        final String jsonMessage =
+                                            jsonEncode(request.toJson());
+                                        Provider.of<ChatNotifier>(context,
+                                                listen: false)
+                                            .sendChatMessage(
+                                                activeChatId!, jsonMessage);
+                                        typingController.clear();
+                                        chatIdToRepliedMessage[activeChatId] =
+                                            null;
+                                        chatIdToCachedMessage[activeChatId] =
+                                            null;
+                                        inputPreMessageNotifier.value = null;
+                                        _scrollToBottom(0);
+                                        focusNode.requestFocus();
+                                      })
+                                    },
+                            onChanged: (value) {
+                              buttonState(() {
+                                chatIdToCachedMessage[activeChat.id!] =
+                                    typingController.text.trim();
+                              });
+                            },
+                            decoration: const InputDecoration(
+                              contentPadding:
+                                  EdgeInsets.symmetric(horizontal: 10),
+                              labelStyle: OnepieceFonts.dropDownItemStyle,
+                              floatingLabelBehavior:
+                                  FloatingLabelBehavior.never,
+                              border: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                              disabledBorder: InputBorder.none,
+                              enabledBorder: InputBorder.none,
                             ),
                           ),
                           ValueListenableBuilder<Message?>(

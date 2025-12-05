@@ -318,5 +318,6 @@
   "noChatting": "Empty Chatting Room",
   "yesterday": "yesterday",
   "cancelSelection": "Cancel",
-  "draft": "Draft"
+  "draft": "Draft",
+  "reference": "Reference"
 }

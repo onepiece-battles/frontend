@@ -20,7 +20,8 @@ class NotificationList extends StatefulWidget {
   const NotificationList({
     super.key,
     required this.notifications,
-    required BuildContext context, // Keep this if it's used elsewhere for context
+    required BuildContext
+        context, // Keep this if it's used elsewhere for context
     this.onRefresh, // Make it optional
   });
 
@@ -65,106 +66,159 @@ class _NotificationListState extends State<NotificationList> {
         barrierColor: Colors.transparent,
         backgroundColor: OnepieceColors.fancyBlue,
         bodyBuilder: (ctx) => // Use ctx for inner context
-        _internalNotifications.isNotEmpty
-            ? StatefulBuilder(
-          builder: (BuildContext notificationContext, StateSetter notificationState) {
-            return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: _internalNotifications
-                    .map(
-                      (e) => Padding(
-                    padding: const EdgeInsets.only(left: 8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded( // Use Expanded to prevent overflow for long text
-                          child: Text(I18nHelper.getDisplayNameFromI18n(e.content), style: OnepieceFonts.tagStyle,),
+            _internalNotifications.isNotEmpty
+                ? StatefulBuilder(
+                    builder: (BuildContext notificationContext,
+                        StateSetter notificationState) {
+                      return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: _internalNotifications
+                              .map(
+                                (e) => Padding(
+                                  padding: const EdgeInsets.only(left: 8.0),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        // Use Expanded to prevent overflow for long text
+                                        child: Text(
+                                          I18nHelper.getDisplayNameFromI18n(
+                                              e.content),
+                                          style: OnepieceFonts.tagStyle,
+                                        ),
+                                      ),
+                                      if (e.category ==
+                                          NotificationType.FRIEND_REQUEST)
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.end,
+                                          children: [
+                                            IconButton(
+                                                onPressed: () async {
+                                                  // Use async for await
+                                                  try {
+                                                    await getIt<UserDao>()
+                                                        .acceptFriend(
+                                                            AcceptFriendRequest(
+                                                                friendId: e
+                                                                    .notificationSourceId));
+                                                    await getIt<
+                                                            NotificationDao>()
+                                                        .close(
+                                                            CloseNotificationRequest(
+                                                                notificationId:
+                                                                    e.id));
+                                                    await getIt<ChattingDao>()
+                                                        .createChat(
+                                                            CreateChatRequest(
+                                                                type: MessageType
+                                                                    .CREATE_CHAT,
+                                                                ids: [
+                                                          e.notificationSourceId!,
+                                                          e.notificationTargetId!
+                                                        ]));
+                                                    notificationState(() {
+                                                      _internalNotifications
+                                                          .removeWhere((el) =>
+                                                              el.id == e.id);
+                                                    });
+                                                    widget.onRefresh
+                                                        ?.call(); // Notify parent
+                                                  } catch (error) {
+                                                    debugPrint(
+                                                        'Error accepting friend: $error');
+                                                    // Handle error (e.g., show a SnackBar)
+                                                  }
+                                                },
+                                                icon: const Icon(
+                                                  Icons.check,
+                                                  color: Colors.white,
+                                                )),
+                                            IconButton(
+                                                onPressed: () async {
+                                                  // Use async for await
+                                                  try {
+                                                    await getIt<UserDao>()
+                                                        .rejectFriend(
+                                                            RejectFriendRequest(
+                                                                friendId: e
+                                                                    .notificationSourceId));
+                                                    await getIt<
+                                                            NotificationDao>()
+                                                        .close(
+                                                            CloseNotificationRequest(
+                                                                notificationId:
+                                                                    e.id));
+                                                    notificationState(() {
+                                                      _internalNotifications
+                                                          .removeWhere((el) =>
+                                                              el.id == e.id);
+                                                    });
+                                                    widget.onRefresh
+                                                        ?.call(); // Notify parent
+                                                  } catch (error) {
+                                                    debugPrint(
+                                                        'Error rejecting friend: $error');
+                                                    // Handle error
+                                                  }
+                                                },
+                                                icon: const Icon(
+                                                  Icons.cancel_outlined,
+                                                  color: Colors.white,
+                                                ))
+                                          ],
+                                        )
+                                      else if (e.category ==
+                                              NotificationType
+                                                  .FRIEND_ACCEPTED ||
+                                          e.category ==
+                                              NotificationType.FRIEND_REJECT)
+                                        IconButton(
+                                            onPressed: () async {
+                                              // Use async for await
+                                              try {
+                                                await getIt<NotificationDao>()
+                                                    .close(
+                                                        CloseNotificationRequest(
+                                                            notificationId:
+                                                                e.id));
+                                                notificationState(() {
+                                                  _internalNotifications
+                                                      .removeWhere((el) =>
+                                                          el.id == e.id);
+                                                });
+                                                widget.onRefresh
+                                                    ?.call(); // Notify parent
+                                              } catch (error) {
+                                                debugPrint(
+                                                    'Error closing notification: $error');
+                                                // Handle error
+                                              }
+                                            },
+                                            icon: const Icon(
+                                              Icons.check,
+                                              color: Colors.white,
+                                            )),
+                                    ],
+                                  ),
+                                ),
+                              )
+                              .toList());
+                    },
+                  )
+                : Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          AppLocalizations.of(context)!.empty,
+                          style: OnepieceFonts.tagStyle,
                         ),
-                        if (e.category == NotificationType.FRIEND_REQUEST)
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              IconButton(
-                                  onPressed: () async { // Use async for await
-                                    try {
-                                      await getIt<UserDao>()
-                                          .acceptFriend(AcceptFriendRequest(
-                                          friendId: e.notificationSourceId));
-                                      await getIt<NotificationDao>().close(
-                                          CloseNotificationRequest(
-                                              notificationId: e.id));
-                                      await getIt<ChattingDao>().createChat(
-                                          CreateChatRequest(
-                                              type: MessageType.CREATE_CHAT,
-                                              ids: [
-                                                e.notificationSourceId!,
-                                                e.notificationTargetId!
-                                              ]));
-                                      notificationState(() {
-                                        _internalNotifications.removeWhere((el) => el.id == e.id);
-                                      });
-                                      widget.onRefresh?.call(); // Notify parent
-                                    } catch (error) {
-                                      debugPrint('Error accepting friend: $error');
-                                      // Handle error (e.g., show a SnackBar)
-                                    }
-                                  },
-                                  icon: const Icon(Icons.check, color: Colors.white,)),
-                              IconButton(
-                                  onPressed: () async { // Use async for await
-                                    try {
-                                      await getIt<UserDao>()
-                                          .rejectFriend(RejectFriendRequest(
-                                          friendId: e.notificationSourceId));
-                                      await getIt<NotificationDao>().close(
-                                          CloseNotificationRequest(
-                                              notificationId: e.id));
-                                      notificationState(() {
-                                        _internalNotifications.removeWhere((el) => el.id == e.id);
-                                      });
-                                      widget.onRefresh?.call(); // Notify parent
-                                    } catch (error) {
-                                      debugPrint('Error rejecting friend: $error');
-                                      // Handle error
-                                    }
-                                  },
-                                  icon: const Icon(Icons.cancel_outlined, color: Colors.white,))
-                            ],
-                          )
-                        else if (e.category == NotificationType.FRIEND_ACCEPTED ||
-                            e.category == NotificationType.FRIEND_REJECT)
-                          IconButton(
-                              onPressed: () async { // Use async for await
-                                try {
-                                  await getIt<NotificationDao>().close(
-                                      CloseNotificationRequest(
-                                          notificationId: e.id));
-                                  notificationState(() {
-                                    _internalNotifications.removeWhere((el) => el.id == e.id);
-                                  });
-                                  widget.onRefresh?.call(); // Notify parent
-                                } catch (error) {
-                                  debugPrint('Error closing notification: $error');
-                                  // Handle error
-                                }
-                              },
-                              icon: const Icon(Icons.check, color: Colors.white,)),
-                      ],
-                    ),
+                      )
+                    ],
                   ),
-                )
-                    .toList());
-          },
-        )
-            : Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(AppLocalizations.of(context)!.empty, style: OnepieceFonts.tagStyle,),
-            )
-          ],
-        ),
       ),
       child: ImageHelper.getSvgIcon(
         _internalNotifications.isEmpty // Check the internal list

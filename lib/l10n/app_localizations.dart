@@ -2017,6 +2017,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Draft'**
   String get draft;
+
+  /// No description provided for @reference.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference'**
+  String get reference;
 }
 
 class _AppLocalizationsDelegate
