@@ -976,4 +976,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reference => 'Reference';
+
+  @override
+  String get copy => 'Copy';
 }
