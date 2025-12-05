@@ -973,4 +973,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get draft => 'Draft';
+
+  @override
+  String get reference => 'Reference';
 }

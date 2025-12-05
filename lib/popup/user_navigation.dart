@@ -71,7 +71,6 @@ class _UserNavigationState extends State<UserNavigation> {
                 ),
               ),
             ),
-            // const Divider(color: Colors.white),
             SizedBox(
               width: 160,
               height: 35,

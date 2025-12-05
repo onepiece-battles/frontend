@@ -318,5 +318,6 @@
   "noChatting": "当前无对话",
   "yesterday": "昨天",
   "cancelSelection": "取消选择",
-  "draft": "草稿"
+  "draft": "草稿",
+  "reference": "引用"
 }

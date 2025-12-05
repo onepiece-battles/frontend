@@ -967,4 +967,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get draft => '草稿';
+
+  @override
+  String get reference => '引用';
 }
