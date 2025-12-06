@@ -5,7 +5,6 @@ import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:openapi/api.dart';
 import 'package:popover/popover.dart';
-
 import '../l10n/app_localizations.dart';
 
 class MessageItem extends StatelessWidget {
