@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:one_piece_battles_flutter/components/emoji_selection.dart';
 import 'package:one_piece_battles_flutter/components/image_lazy_loader.dart';
 import 'package:one_piece_battles_flutter/components/square_image_loader.dart';
 import 'package:one_piece_battles_flutter/popup/chatting_options.dart';
@@ -35,6 +36,7 @@ class _ChattingViewState extends State<ChattingView> {
   final ValueNotifier<Message?> inputMessageNotifier = ValueNotifier(null);
   final ValueNotifier<Message?> inputPreMessageNotifier = ValueNotifier(null);
   String activeConversationId = "";
+  bool emojiVisible = false;
   @override
   void initState() {
     super.initState();
@@ -321,27 +323,17 @@ class _ChattingViewState extends State<ChattingView> {
                       height: 150,
                       padding: const EdgeInsets.fromLTRB(8, 6, 23, 6),
                       child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              EmojiSelection(editingController: typingController),
                               IconButton(
                                   onPressed: () {},
-                                  splashColor: Colors.transparent,
-                                  highlightColor: Colors.transparent,
-                                  hoverColor: Colors.transparent,
-                                  focusColor: Colors.transparent,
-                                  splashRadius: 0.1,
-                                  visualDensity: VisualDensity.compact,
-                                  enableFeedback: false,
-                                  icon: const Icon(
-                                    Icons.face,
-                                    size: 20,
-                                    color: OnepieceColors.fancyBlue,
-                                  )),
-                              IconButton(
-                                  onPressed: () {},
+                                  padding: EdgeInsets.zero,
                                   splashColor: Colors.transparent,
                                   highlightColor: Colors.transparent,
                                   hoverColor: Colors.transparent,
@@ -359,6 +351,7 @@ class _ChattingViewState extends State<ChattingView> {
                           TextField(
                             controller: typingController,
                             enabled: true,
+                            textAlign: TextAlign.start,
                             minLines: 1,
                             maxLines: 5,
                             keyboardType: TextInputType.multiline,
@@ -404,7 +397,8 @@ class _ChattingViewState extends State<ChattingView> {
                             },
                             decoration: const InputDecoration(
                               contentPadding:
-                                  EdgeInsets.symmetric(horizontal: 10),
+                                  EdgeInsets.symmetric(horizontal: 10,vertical: 0),
+                              isDense: true,
                               labelStyle: OnepieceFonts.dropDownItemStyle,
                               floatingLabelBehavior:
                                   FloatingLabelBehavior.never,

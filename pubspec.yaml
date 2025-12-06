@@ -52,7 +52,7 @@ dependencies:
     path: generated
   image_picker_for_web: ^3.0.1
   image_picker: ^1.0.4
-  emoji_picker_flutter: ^4.3.0
+  emoji_picker_flutter: ^4.4.0
   animated_toggle_switch: ^0.8.2
   http: '^1.0.0'
   dropdown_search: ^5.0.5
