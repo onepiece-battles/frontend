@@ -1,15 +1,15 @@
 import 'dart:typed_data';
 import 'dart:ui';
-
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
-import 'package:one_piece_battles_flutter/repository/email_dao.dart';
-import 'package:one_piece_battles_flutter/utils/image_helper.dart';
-import 'package:flutter/material.dart';
-import '../../l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:openapi/api.dart';
+
+// Assuming these imports exist based on your original code
+import '../../l10n/app_localizations.dart';
 import '../../config/resource_permission_manager.dart';
 import '../../constants/button_style.dart';
 import '../../constants/onepiece_colors.dart';
@@ -18,15 +18,199 @@ import '../../popup/email_verification.dart';
 import '../../popup/onepiece_alert.dart';
 import '../../repository/image_dao.dart';
 import '../../repository/user_dao.dart';
+import '../../repository/email_dao.dart';
 import '../../utils/base64_helper.dart';
-import '../../utils/compare_uint8list.dart';
+import '../../utils/image_helper.dart';
 import '../../utils/onepiece_image_picker.dart';
 
-GetIt getIt = GetIt.instance;
+// --- 1. STATE MODEL ---
+// Holds the data for the screen. Immutable style preferred for safety.
+class UserProfileFormData {
+  final Uint8List? profileImage;
+  final String nickname;
+  final String username; // email
+  final String? imageName;
 
+  UserProfileFormData({
+    this.profileImage,
+    required this.nickname,
+    required this.username,
+    this.imageName,
+  });
+
+  // Helper to create copy for edits
+  UserProfileFormData copyWith({
+    Uint8List? profileImage,
+    String? nickname,
+    String? username,
+    String? imageName,
+  }) {
+    return UserProfileFormData(
+      profileImage: profileImage ?? this.profileImage,
+      nickname: nickname ?? this.nickname,
+      username: username ?? this.username,
+      imageName: imageName ?? this.imageName,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+          other is UserProfileFormData &&
+              runtimeType == other.runtimeType &&
+              listEquals(profileImage, other.profileImage) && // Use flutter/foundation
+              nickname == other.nickname &&
+              username == other.username;
+
+  @override
+  int get hashCode => Object.hash(nickname, username, profileImage);
+}
+
+// --- 2. CONTROLLER (LOGIC) ---
+// Handles API calls, validation, and updates the UI.
+class UserProfileController extends ChangeNotifier {
+  final String userId;
+  final UserDao _userDao = GetIt.I<UserDao>();
+  final ImageDao _imageDao = GetIt.I<ImageDao>();
+  final EmailDao _emailDao = GetIt.I<EmailDao>();
+
+  bool isLoading = true;
+  bool isSaving = false;
+
+  late User _currentUser;
+  late UserProfileFormData _originalData;
+  late UserProfileFormData _currentData;
+
+  // Getters for UI
+  UserProfileFormData get data => _currentData;
+  User get user => _currentUser; // For specific ID access
+  bool get hasChanges => _originalData != _currentData;
+  bool get isEmailVerified => _currentUser.emailVerified ?? false;
+
+  UserProfileController(this.userId) {
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      final response = await _userDao.get(GetUserRequest(userId: userId));
+      _currentUser = response!;
+
+      final imageBytes = Base64Helper.decode(GetIt.I<User>().profileImage ?? "");
+
+      _originalData = UserProfileFormData(
+        profileImage: imageBytes,
+        nickname: _currentUser.nickname,
+        username: _currentUser.username,
+      );
+
+      _currentData = _originalData.copyWith();
+    } catch (e) {
+      // Handle Error (Log it or show toast)
+      debugPrint("Error loading profile: $e");
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  void updateNickname(String newNickname) {
+    _currentData = _currentData.copyWith(nickname: newNickname);
+    notifyListeners();
+  }
+
+  void resetChanges() {
+    _currentData = _originalData.copyWith();
+    notifyListeners();
+  }
+
+  Future<void> pickImage(BuildContext context) async {
+    final XFile? pickedImage = await OnepieceImagePicker.pickWebImage();
+    if (pickedImage == null) return;
+
+    final Uint8List imageInByte = await pickedImage.readAsBytes();
+
+    // Validation
+    if (!ImageHelper.isValidImageSize(500 * 1024, imageInByte)) {
+      OnepieceAlert.getBasicAlertDialogFunc(
+          context,
+          AppLocalizations.of(context)!.alert,
+          AppLocalizations.of(context)!.imageSizeExceedsLimit);
+      return;
+    }
+
+    _currentData = _currentData.copyWith(
+      profileImage: imageInByte,
+      imageName: pickedImage.name,
+    );
+    notifyListeners();
+  }
+
+  Future<void> sendVerificationEmail(BuildContext context) async {
+    await _emailDao.verifyEmailAddress(
+        VerifyEmailAddressRequest(id: _currentUser.id, email: _currentUser.username)
+    );
+
+    if (context.mounted) {
+      showCupertinoModalPopup(
+        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+        context: context,
+        builder: (_) => Dialog(
+          child: EmailVerification(userId: _currentUser.id, email: _currentUser.username),
+        ),
+      );
+    }
+  }
+
+  Future<void> saveProfile(BuildContext context) async {
+    if (!hasChanges) return;
+
+    isSaving = true;
+    notifyListeners();
+
+    try {
+      // 1. Upload Image
+      final encodedImage = Base64Helper.encode(_currentData.profileImage!);
+      await _imageDao.addImage(UploadImageRequest(
+        resourceId: GetIt.I<User>().id,
+        image: encodedImage,
+        type: ResourceType.USER,
+      ));
+
+      // 2. Update User Data
+      final response = await _userDao.updateUser(UpdateUserRequest(
+        locale: OnepieceLocale.zhCN,
+        nickname: _currentData.nickname.trim(),
+        id: GetIt.I<User>().id,
+      ));
+
+      // 3. Update Cache & Router
+      ResourcePermissionManager.updateUserCache(response!.user!);
+
+      if (context.mounted) {
+        context.goNamed('userProfile',
+            extra: GetIt.I<User>().id,
+            pathParameters: {'name': GetIt.I<User>().nickname});
+      }
+
+      // Update internal state to match new saved state
+      _originalData = _currentData.copyWith();
+    } catch (e) {
+      debugPrint("Error saving: $e");
+      OnepieceAlert.getBasicAlertDialogFunc(context, "Error", "Failed to save profile");
+    } finally {
+      isSaving = false;
+      notifyListeners();
+    }
+  }
+}
+
+// --- 3. MAIN WIDGET ---
 class UserProfile extends StatefulWidget {
   final String userId;
-
   const UserProfile({super.key, required this.userId});
 
   @override
@@ -34,67 +218,26 @@ class UserProfile extends StatefulWidget {
 }
 
 class _UserProfileState extends State<UserProfile> {
-  final TextEditingController _nicknameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  late User user;
-  final UserProfileModel _originalData = UserProfileModel();
-  final UserProfileModel _realtimeData = UserProfileModel();
-  final ValueNotifier<String> _chosenImageName = ValueNotifier("");
-  final ValueNotifier<bool> _nicknameEditable = ValueNotifier(false);
-  final ValueNotifier<bool> _dataModified = ValueNotifier(false);
-  bool _emailVerified = false;
+  late UserProfileController _controller;
 
-  _loadData() {
-    return getIt<UserDao>().get(GetUserRequest(userId: widget.userId));
+  @override
+  void initState() {
+    super.initState();
+    _controller = UserProfileController(widget.userId);
   }
 
-  _prepareData(User user) {
-    this.user = user;
-    _nicknameController.text = user.nickname;
-    _emailController.text = user.username;
-    _emailVerified = user.emailVerified!;
-    _originalData
-        .setProfileImage(Base64Helper.decode(getIt<User>().profileImage!));
-    _originalData.setUsername(getIt<User>().username);
-    _originalData.setNickname(getIt<User>().nickname);
-    _realtimeData
-        .setProfileImage(Base64Helper.decode(getIt<User>().profileImage!));
-    _realtimeData.setUsername(getIt<User>().username);
-    _realtimeData.setNickname(getIt<User>().nickname);
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: _loadData(),
-      builder: (context, AsyncSnapshot snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
-          _prepareData(snapshot.data);
-          return SingleChildScrollView(
-              child: Column(
-            children: [
-              _getAvatar(context),
-              const Divider(
-                height: 10,
-                thickness: 1,
-              ),
-              _getName(context),
-              const Divider(
-                height: 10,
-                thickness: 1,
-              ),
-              _getEmail(context),
-              const Divider(
-                height: 10,
-                thickness: 1,
-              ),
-              Padding(
-                padding: const EdgeInsets.only(right: 8.0),
-                child: _getFootButtons(context),
-              )
-            ],
-          ));
-        } else {
+    return ListenableBuilder(
+      listenable: _controller,
+      builder: (context, _) {
+        if (_controller.isLoading) {
           return Center(
             child: Text(
               AppLocalizations.of(context)!.loading,
@@ -102,250 +245,218 @@ class _UserProfileState extends State<UserProfile> {
             ),
           );
         }
+
+        return SingleChildScrollView(
+          child: Column(
+            children: [
+              _AvatarSection(controller: _controller),
+              const Divider(height: 10, thickness: 1),
+              _NicknameSection(controller: _controller),
+              const Divider(height: 10, thickness: 1),
+              _EmailSection(controller: _controller),
+              const Divider(height: 10, thickness: 1),
+              _ActionButtons(controller: _controller),
+            ],
+          ),
+        );
       },
     );
   }
+}
 
-  Widget _getAvatar(BuildContext context) {
+// --- 4. SUB-COMPONENTS (Clean UI) ---
+
+class _AvatarSection extends StatelessWidget {
+  final UserProfileController controller;
+  const _AvatarSection({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.all(15.0),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(
-          AppLocalizations.of(context)!.avatarHeader,
-          style: OnepieceFonts.headerStyle,
-        ),
-        const SizedBox(
-          height: 10,
-        ),
-        Text(
-          AppLocalizations.of(context)!.avatarHeaderDescription,
-          style: OnepieceFonts.contentStyle,
-        ),
-        const SizedBox(
-          height: 10,
-        ),
-        ValueListenableBuilder(
-            valueListenable: _chosenImageName,
-            builder: (context, value, _) {
-              return Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(loc.avatarHeader, style: OnepieceFonts.headerStyle),
+          const SizedBox(height: 10),
+          Text(loc.avatarHeaderDescription, style: OnepieceFonts.contentStyle),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              ImageHelper.getRoundImageFrame(
+                  100, 100, 3,
+                  OnepieceColors.liteFancyBlue,
+                  100,
+                  controller.data.profileImage!
+              ),
+              const SizedBox(width: 10),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  ImageHelper.getRoundImageFrame(
-                      100,
-                      100,
-                      3,
-                      OnepieceColors.liteFancyBlue,
-                      100,
-                      _realtimeData.profileImage),
-                  const SizedBox(
-                    width: 10,
+                  Text(
+                    loc.uploadNewAvatar,
+                    style: const TextStyle(
+                      color: OnepieceFonts.headerFontColor,
+                      fontSize: OnepieceFonts.contentFontSize,
+                      fontWeight: OnepieceFonts.headerFontWeight,
+                    ),
                   ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  const SizedBox(height: 10),
+                  Row(
                     children: [
+                      ElevatedButton(
+                        style: OnepieceButtonStyle.getDefaultStyle(),
+                        onPressed: () => controller.pickImage(context),
+                        child: Text(loc.chooseFile),
+                      ),
+                      const SizedBox(width: 10),
                       Text(
-                        AppLocalizations.of(context)!.uploadNewAvatar,
-                        style: const TextStyle(
-                            color: OnepieceFonts.headerFontColor,
-                            fontSize: OnepieceFonts.contentFontSize,
-                            fontWeight: OnepieceFonts.headerFontWeight),
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      Row(
-                        children: [
-                          ElevatedButton(
-                            style: OnepieceButtonStyle.getDefaultStyle(),
-                            onPressed: () async {
-                              XFile? pickedImage =
-                                  await OnepieceImagePicker.pickWebImage();
-                              Uint8List imageInByte =
-                                  await pickedImage!.readAsBytes();
-                              if (!ImageHelper.isValidImageSize(
-                                  500 * 1024, imageInByte)) {
-                                OnepieceAlert.getBasicAlertDialogFunc(
-                                    context,
-                                    AppLocalizations.of(context)!.alert,
-                                    AppLocalizations.of(context)!
-                                        .imageSizeExceedsLimit);
-                                return;
-                              }
-                              _realtimeData.setProfileImage(imageInByte);
-                              if (!CompareUint8List.equals(
-                                  _realtimeData.profileImage,
-                                  _originalData.profileImage)) {
-                                _chosenImageName.value = pickedImage.name;
-                              }
-                              _dataModified.value = _checkModified();
-                            },
-                            child:
-                                Text(AppLocalizations.of(context)!.chooseFile),
-                          ),
-                          const SizedBox(
-                            width: 10,
-                          ),
-                          Text(
-                            !CompareUint8List.equals(_realtimeData.profileImage,
-                                    _originalData.profileImage)
-                                ? _chosenImageName.value
-                                : AppLocalizations.of(context)!.noFileChosen,
-                            style: OnepieceFonts.contentStyle,
-                          )
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      Text(
-                        AppLocalizations.of(context)!.maxFileSize500,
+                        controller.data.imageName ?? loc.noFileChosen,
                         style: OnepieceFonts.contentStyle,
                       )
                     ],
-                  )
+                  ),
+                  const SizedBox(height: 10),
+                  Text(loc.maxFileSize500, style: OnepieceFonts.contentStyle)
                 ],
-              );
-            })
-      ]),
+              )
+            ],
+          )
+        ],
+      ),
     );
   }
+}
 
-  Widget _getName(BuildContext context) {
+class _NicknameSection extends StatefulWidget {
+  final UserProfileController controller;
+  const _NicknameSection({required this.controller});
+
+  @override
+  State<_NicknameSection> createState() => _NicknameSectionState();
+}
+
+class _NicknameSectionState extends State<_NicknameSection> {
+  final TextEditingController _textController = TextEditingController();
+  bool _isEditable = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _textController.text = widget.controller.data.nickname;
+  }
+
+  @override
+  void didUpdateWidget(covariant _NicknameSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Sync text field if external change happened (e.g. reset)
+    if (_textController.text != widget.controller.data.nickname && !_isEditable) {
+      _textController.text = widget.controller.data.nickname;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(15.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(0, 0, 0, 15),
+            padding: const EdgeInsets.only(bottom: 15),
             child: Text(
               AppLocalizations.of(context)!.nickname,
               style: OnepieceFonts.headerStyle,
             ),
           ),
-          ValueListenableBuilder(
-              valueListenable: _nicknameEditable,
-              builder: (context, value, _) {
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    SizedBox(
-                      width: 300,
-                      child: TextFormField(
-                        onChanged: (value) {
-                          _realtimeData.setNickname(value);
-                          _dataModified.value = _checkModified();
-                          if (_originalData.nickname == value) {
-                            _nicknameEditable.value = false;
-                          }
-                        },
-                        decoration: const InputDecoration(
-                            contentPadding: EdgeInsets.fromLTRB(10, 0, 0, 0)),
-                        enabled: _nicknameEditable.value,
-                        controller: _nicknameController,
-                      ),
-                    ),
-                    InkWell(
-                      hoverColor: Colors.transparent,
-                      splashColor: Colors.transparent,
-                      onTap: () {
-                        _nicknameEditable.value = !_nicknameEditable.value;
-                      },
-                      child: SizedBox(
-                          width: 25,
-                          height: 25,
-                          child: !_nicknameEditable.value
-                              ? ImageHelper.getSvgIconWithColor(
-                                  'images/svgs/edit.svg',
-                                  150,
-                                  150,
-                                  OnepieceColors.fancyBlue)
-                              : ImageHelper.getSvgIconWithColor(
-                                  'images/svgs/check.svg',
-                                  150,
-                                  150,
-                                  OnepieceColors.fancyBlue)),
-                    ),
-                  ],
-                );
-              }),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              SizedBox(
+                width: 300,
+                child: TextFormField(
+                  controller: _textController,
+                  enabled: _isEditable,
+                  onChanged: (val) => widget.controller.updateNickname(val),
+                  decoration: const InputDecoration(
+                    contentPadding: EdgeInsets.only(left: 10),
+                  ),
+                ),
+              ),
+              InkWell(
+                onTap: () {
+                  setState(() {
+                    _isEditable = !_isEditable;
+                    if(!_isEditable) {
+                      // Ensure data is synced when closing edit
+                      _textController.text = widget.controller.data.nickname;
+                    }
+                  });
+                },
+                child: SizedBox(
+                  width: 25, height: 25,
+                  child: ImageHelper.getSvgIconWithColor(
+                      _isEditable ? 'images/svgs/check.svg' : 'images/svgs/edit.svg',
+                      150, 150, OnepieceColors.fancyBlue
+                  ),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
   }
+}
 
-  Widget _getEmail(BuildContext context) {
+class _EmailSection extends StatelessWidget {
+  final UserProfileController controller;
+  const _EmailSection({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+    final isVerified = controller.isEmailVerified;
+
     return Padding(
       padding: const EdgeInsets.all(15.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(0, 0, 0, 15),
+            padding: const EdgeInsets.only(bottom: 15),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(
-                  AppLocalizations.of(context)!.email,
-                  style: OnepieceFonts.headerStyle,
-                ),
-                const SizedBox(
-                  width: 10,
-                ),
+                Text(loc.email, style: OnepieceFonts.headerStyle),
+                const SizedBox(width: 10),
                 Tooltip(
-                  message: _emailVerified
-                      ? AppLocalizations.of(context)!.verified
-                      : AppLocalizations.of(context)!.notVerified,
+                  message: isVerified ? loc.verified : loc.notVerified,
                   child: SizedBox(
-                    width: 30,
-                    height: 30,
-                    child: _emailVerified
-                        ? ImageHelper.getSvgIconWithColor(
-                            'images/svgs/check-circle.svg',
-                            150,
-                            150,
-                            Colors.green)
-                        : ImageHelper.getSvgIconWithColor(
-                            'images/svgs/alert.svg', 150, 150, Colors.red),
+                    width: 30, height: 30,
+                    child: ImageHelper.getSvgIconWithColor(
+                      isVerified ? 'images/svgs/check-circle.svg' : 'images/svgs/alert.svg',
+                      150, 150,
+                      isVerified ? Colors.green : Colors.red,
+                    ),
                   ),
                 ),
               ],
             ),
           ),
           Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 6.0),
                 child: Text(
-                  user.username,
+                  controller.data.username,
                   style: OnepieceFonts.contentStyle,
                 ),
               ),
-              if (!_emailVerified)
+              if (!isVerified)
                 ElevatedButton(
-                  onPressed: () {
-                    getIt<EmailDao>()
-                        .verifyEmailAddress(VerifyEmailAddressRequest(
-                            id: user.id, email: user.username))
-                        .then((value) => {
-                              showCupertinoModalPopup(
-                                filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                                context: context,
-                                builder: ((context) {
-                                  return Dialog(
-                                    // backgroundColor: OnepieceColors.liteFancyBlue,
-                                    alignment: AlignmentDirectional.center,
-                                    child: EmailVerification(
-                                        userId: user.id, email: user.username),
-                                  );
-                                }),
-                              )
-                            });
-                  },
-                  child: Text(AppLocalizations.of(context)!.sendEmail),
+                  onPressed: () => controller.sendVerificationEmail(context),
+                  child: Text(loc.sendEmail),
                 ),
             ],
           ),
@@ -353,129 +464,41 @@ class _UserProfileState extends State<UserProfile> {
       ),
     );
   }
-
-  Row _getFootButtons(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        ValueListenableBuilder(
-            valueListenable: _dataModified,
-            builder: (context, value, _) {
-              return ElevatedButton(
-                onPressed: !_dataModified.value
-                    ? null
-                    : () {
-                        setState(() {
-                          _realtimeData.copy(_originalData);
-                          _dataModified.value = false;
-                          _nicknameEditable.value = false;
-                        });
-                      },
-                child: Text(AppLocalizations.of(context)!.cancelPopUp),
-              );
-            }),
-        ValueListenableBuilder(
-            valueListenable: _dataModified,
-            builder: (context, value, _) {
-              return Padding(
-                padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-                child: ElevatedButton(
-                    // style: OnepieceButtonStyle.getDefaultStyle(),
-                    onPressed: !_dataModified.value
-                        ? null
-                        : () {
-                            UpdateUserRequest updateUserRequest =
-                                UpdateUserRequest(
-                                    locale: OnepieceLocale.zhCN,
-                                    nickname: _realtimeData.nickname.trim(),
-                                    id: getIt<User>().id);
-                            var encodedImage =
-                                Base64Helper.encode(_realtimeData.profileImage);
-                            UploadImageRequest uploadImageRequest =
-                                UploadImageRequest(
-                                    resourceId: getIt<User>().id,
-                                    image: encodedImage,
-                                    type: ResourceType.USER);
-                            getIt<ImageDao>()
-                                .addImage(uploadImageRequest)
-                                .then((imageResponse) {
-                              getIt<UserDao>()
-                                  .updateUser(updateUserRequest)
-                                  .then((response) {
-                                ResourcePermissionManager.updateUserCache(
-                                    response!.user!);
-                                setState(() {
-                                  _dataModified.value = false;
-                                  context.goNamed('userProfile',
-                                      extra: getIt<User>().id,
-                                      pathParameters: {
-                                        'name': getIt<User>().nickname
-                                      });
-                                });
-                              });
-                            });
-                          },
-                    child: Text(AppLocalizations.of(context)!.submitForm)),
-              );
-            }),
-      ],
-    );
-  }
-
-  bool _checkModified() {
-    return _dataModified.value = _originalData != _realtimeData;
-  }
 }
 
-class UserProfileModel {
-  late Uint8List _profileImage;
-
-  // the _username is email
-  late String _username;
-  late String _nickname;
-
-  void copy(UserProfileModel model) {
-    setProfileImage(model.profileImage);
-    setNickname(model.nickname);
-    setUsername(model.username);
-  }
-
-  void setProfileImage(Uint8List profileImage) {
-    _profileImage = profileImage;
-  }
-
-  void setUsername(String username) {
-    _username = username;
-  }
-
-  void setNickname(String nickname) {
-    _nickname = nickname;
-  }
-
-  Uint8List get profileImage => _profileImage;
-
-  String get username => _username;
-
-  String get nickname => _nickname;
+class _ActionButtons extends StatelessWidget {
+  final UserProfileController controller;
+  const _ActionButtons({required this.controller});
 
   @override
-  bool operator ==(Object other) {
-    if (other is! UserProfileModel) {
-      return false;
-    }
-    if (username != other.username) {
-      return false;
-    }
-    if (nickname != other.nickname) {
-      return false;
-    }
-    if (!CompareUint8List.equals(profileImage, other.profileImage)) {
-      return false;
-    }
-    return true;
-  }
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
 
-  @override
-  int get hashCode =>
-      profileImage.hashCode + username.hashCode + nickname.hashCode;
+    return Padding(
+      padding: const EdgeInsets.only(right: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          ElevatedButton(
+            onPressed: controller.hasChanges
+                ? () => controller.resetChanges()
+                : null,
+            child: Text(loc.cancelPopUp),
+          ),
+          const SizedBox(width: 10),
+          ElevatedButton(
+            onPressed: (controller.hasChanges && !controller.isSaving)
+                ? () => controller.saveProfile(context)
+                : null,
+            child: controller.isSaving
+                ? const SizedBox(
+                width: 20, height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2)
+            )
+                : Text(loc.submitForm),
+          ),
+        ],
+      ),
+    );
+  }
 }
