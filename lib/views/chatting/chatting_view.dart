@@ -1,10 +1,14 @@
 import 'dart:convert';
+import 'dart:io';
+// import 'dart:nativewrappers/_internal/vm/lib/typed_data_patch.dart';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:one_piece_battles_flutter/components/emoji_selection.dart';
 import 'package:one_piece_battles_flutter/components/image_lazy_loader.dart';
 import 'package:one_piece_battles_flutter/components/square_image_loader.dart';
 import 'package:one_piece_battles_flutter/popup/chatting_options.dart';
+import 'package:one_piece_battles_flutter/utils/onepiece_image_picker.dart';
 import 'package:one_piece_battles_flutter/utils/time_helper.dart';
 import 'package:openapi/api.dart';
 import 'package:provider/provider.dart';
@@ -13,7 +17,11 @@ import '../../components/message.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
 import '../../l10n/app_localizations.dart';
+import '../../utils/base64_helper.dart';
 import '../../utils/image_helper.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:typed_data';
+
 
 GetIt getIt = GetIt.instance;
 
@@ -37,6 +45,7 @@ class _ChattingViewState extends State<ChattingView> {
   final ValueNotifier<Message?> inputPreMessageNotifier = ValueNotifier(null);
   String activeConversationId = "";
   bool emojiVisible = false;
+  Uint8List? _selectedImage;
   @override
   void initState() {
     super.initState();
@@ -330,9 +339,15 @@ class _ChattingViewState extends State<ChattingView> {
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              EmojiSelection(editingController: typingController),
+                              EmojiSelection(
+                                  editingController: typingController),
                               IconButton(
-                                  onPressed: () {},
+                                  onPressed: () async {
+                                    final XFile? pickedImage = await OnepieceImagePicker.pickWebImage();
+                                    if (pickedImage == null) return;
+                                    _selectedImage = (await pickedImage.readAsBytes()) as Uint8List;
+                                    buttonState(() {});
+                                  },
                                   padding: EdgeInsets.zero,
                                   splashColor: Colors.transparent,
                                   highlightColor: Colors.transparent,
@@ -352,7 +367,7 @@ class _ChattingViewState extends State<ChattingView> {
                             controller: typingController,
                             enabled: true,
                             textAlign: TextAlign.start,
-                            minLines: 1,
+                            minLines: 3,
                             maxLines: 5,
                             keyboardType: TextInputType.multiline,
                             textInputAction: TextInputAction.send,
@@ -396,8 +411,8 @@ class _ChattingViewState extends State<ChattingView> {
                               });
                             },
                             decoration: const InputDecoration(
-                              contentPadding:
-                                  EdgeInsets.symmetric(horizontal: 10,vertical: 0),
+                              contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 0),
                               isDense: true,
                               labelStyle: OnepieceFonts.dropDownItemStyle,
                               floatingLabelBehavior:
@@ -408,6 +423,36 @@ class _ChattingViewState extends State<ChattingView> {
                               enabledBorder: InputBorder.none,
                             ),
                           ),
+                          if (_selectedImage != null)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 10.0),
+                              child: Stack(
+                                children: [
+                                  // Display the Image
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: ImageHelper.getSquareImageFrame(50, 50, 2, Colors.white, _selectedImage!),
+                                  ),
+                                  // Close 'X' Button
+                                  Positioned(
+                                    right: 0,
+                                    top: 0,
+                                    child: InkWell(
+                                      onTap: () {
+                                        _selectedImage = null;
+                                        buttonState(() {});
+                                      },
+                                      child: const CircleAvatar(
+                                        backgroundColor: Colors.black54,
+                                        radius: 10,
+                                        child: Icon(Icons.close,
+                                            size: 12, color: Colors.white),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ValueListenableBuilder<Message?>(
                               valueListenable: inputPreMessageNotifier,
                               builder: (context, value, _) {
