@@ -38,6 +38,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   web_socket_channel: ^2.0.0
+  web: ^1.0.0
   google_fonts: ^6.2.1
   intl: 0.20.2
   shared_preferences: ^2.2.3

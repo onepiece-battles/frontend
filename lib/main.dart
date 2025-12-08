@@ -1,7 +1,7 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
+import 'package:web/web.dart' as web;
 import '../../l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:one_piece_battles_flutter/repository/battle_dao.dart';
@@ -21,9 +21,9 @@ import 'package:openapi/api.dart';
 import 'app_router.dart';
 import 'components/chat_notifier.dart';
 import 'components/web_socket_service.dart';
+import 'config/configure_web.dart';
 import 'config/my_input_theme.dart';
 import 'constants/onepiece_colors.dart';
-import 'dart:html' as html; //
 
 final getIt = GetIt.instance;
 
@@ -49,6 +49,7 @@ void getItSetUp() {
 void webSocketSetUp() {}
 
 void main() {
+  configureApp();
   getItSetUp();
   final webSocketService = WebSocketService(); // Replace with your URL
   runApp(
@@ -88,7 +89,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _setTitle(String title) {
-    html.document.title = title; // Set the title dynamically
+    web.document.title = title; // Set the title dynamically
   }
 
   setLocale(Locale locale) {
