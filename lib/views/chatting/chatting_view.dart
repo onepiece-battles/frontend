@@ -1,6 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
-// import 'dart:nativewrappers/_internal/vm/lib/typed_data_patch.dart';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -20,8 +18,6 @@ import '../../l10n/app_localizations.dart';
 import '../../utils/base64_helper.dart';
 import '../../utils/image_helper.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:typed_data';
-
 
 GetIt getIt = GetIt.instance;
 
@@ -41,11 +37,11 @@ class _ChattingViewState extends State<ChattingView> {
   bool showEmojiPicker = false;
   Map<String, Message?> chatIdToRepliedMessage = {};
   Map<String, String?> chatIdToCachedMessage = {};
+  Map<String,  Uint8List?> chatIdToCachedImage = {};
   final ValueNotifier<Message?> inputMessageNotifier = ValueNotifier(null);
   final ValueNotifier<Message?> inputPreMessageNotifier = ValueNotifier(null);
   String activeConversationId = "";
   bool emojiVisible = false;
-  Uint8List? _selectedImage;
   @override
   void initState() {
     super.initState();
@@ -329,7 +325,7 @@ class _ChattingViewState extends State<ChattingView> {
                 StatefulBuilder(
                   builder: (BuildContext context, StateSetter buttonState) {
                     return Container(
-                      height: 150,
+                      height: 200,
                       padding: const EdgeInsets.fromLTRB(8, 6, 23, 6),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.start,
@@ -342,27 +338,63 @@ class _ChattingViewState extends State<ChattingView> {
                               EmojiSelection(
                                   editingController: typingController),
                               IconButton(
-                                  onPressed: () async {
-                                    final XFile? pickedImage = await OnepieceImagePicker.pickWebImage();
-                                    if (pickedImage == null) return;
-                                    _selectedImage = (await pickedImage.readAsBytes()) as Uint8List;
-                                    buttonState(() {});
-                                  },
-                                  padding: EdgeInsets.zero,
-                                  splashColor: Colors.transparent,
-                                  highlightColor: Colors.transparent,
-                                  hoverColor: Colors.transparent,
-                                  focusColor: Colors.transparent,
-                                  splashRadius: 0.1,
-                                  visualDensity: VisualDensity.compact,
-                                  enableFeedback: false,
-                                  icon: const Icon(
-                                    Icons.image,
-                                    size: 20,
-                                    color: OnepieceColors.fancyBlue,
-                                  ))
+                                onPressed: () async {
+                                  final XFile? pickedImage =
+                                      await OnepieceImagePicker.pickWebImage();
+                                  if (pickedImage == null) return;
+                                  chatIdToCachedImage[activeChatId!] = (await pickedImage
+                                      .readAsBytes()) as Uint8List;
+                                  focusNode.requestFocus();
+                                  buttonState(() {});
+                                },
+                                padding: EdgeInsets.zero,
+                                splashColor: Colors.transparent,
+                                highlightColor: Colors.transparent,
+                                hoverColor: Colors.transparent,
+                                focusColor: Colors.transparent,
+                                splashRadius: 0.1,
+                                visualDensity: VisualDensity.compact,
+                                enableFeedback: false,
+                                icon: const Icon(
+                                  Icons.image,
+                                  size: 20,
+                                  color: OnepieceColors.fancyBlue,
+                                ),
+                              )
                             ],
                           ),
+                          if ( chatIdToCachedImage[activeChatId!] != null)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 10.0),
+                              child: Stack(
+                                alignment: AlignmentDirectional.topStart,
+                                children: [
+                                  // Display the Image
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: ImageHelper.getSquareImageFrame(50,
+                                        50, 2, Colors.white,  chatIdToCachedImage[activeChatId]!),
+                                  ),
+                                  // Close 'X' Button
+                                  Positioned(
+                                    right: -2,
+                                    top: -2,
+                                    child: InkWell(
+                                      onTap: () {
+                                        chatIdToCachedImage[activeChatId] = null;
+                                        buttonState(() {});
+                                      },
+                                      child: const CircleAvatar(
+                                        backgroundColor: Colors.black54,
+                                        radius: 8,
+                                        child: Icon(Icons.close,
+                                            size: 8, color: Colors.white),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           TextField(
                             controller: typingController,
                             enabled: true,
@@ -375,25 +407,36 @@ class _ChattingViewState extends State<ChattingView> {
                             cursorHeight: 15,
                             focusNode: focusNode,
                             style: OnepieceFonts.smallContentStyle,
-                            onSubmitted: typingController.text.isEmpty
+                            onSubmitted: typingController.text.isEmpty &&
+                                chatIdToCachedImage[activeChatId] == null
                                 ? null
                                 : (_) => {
                                       buttonState(() {
                                         final SendMessageRequest request =
                                             SendMessageRequest(
-                                          content: typingController.text,
+                                          content: typingController.text
+                                                  .trim()
+                                                  .isNotEmpty
+                                              ? typingController.text.trim()
+                                              : null,
                                           userId: getIt<User>().id,
+                                          profileImage:  chatIdToCachedImage[activeChatId] == null
+                                              ? null
+                                              : Base64Helper.encode(
+                                              chatIdToCachedImage[activeChatId]!),
                                           conversationId: activeChat.id!,
                                           type: MessageType.SEND_MESSAGE,
                                           preMessageId:
                                               inputPreMessageNotifier.value?.id,
                                         );
+                                        print("sending message");
                                         final String jsonMessage =
                                             jsonEncode(request.toJson());
                                         Provider.of<ChatNotifier>(context,
                                                 listen: false)
                                             .sendChatMessage(
-                                                activeChatId!, jsonMessage);
+                                                activeChatId, jsonMessage);
+                                        chatIdToCachedImage[activeChatId]=null;
                                         typingController.clear();
                                         chatIdToRepliedMessage[activeChatId] =
                                             null;
@@ -423,36 +466,6 @@ class _ChattingViewState extends State<ChattingView> {
                               enabledBorder: InputBorder.none,
                             ),
                           ),
-                          if (_selectedImage != null)
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 10.0),
-                              child: Stack(
-                                children: [
-                                  // Display the Image
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: ImageHelper.getSquareImageFrame(50, 50, 2, Colors.white, _selectedImage!),
-                                  ),
-                                  // Close 'X' Button
-                                  Positioned(
-                                    right: 0,
-                                    top: 0,
-                                    child: InkWell(
-                                      onTap: () {
-                                        _selectedImage = null;
-                                        buttonState(() {});
-                                      },
-                                      child: const CircleAvatar(
-                                        backgroundColor: Colors.black54,
-                                        radius: 10,
-                                        child: Icon(Icons.close,
-                                            size: 12, color: Colors.white),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
                           ValueListenableBuilder<Message?>(
                               valueListenable: inputPreMessageNotifier,
                               builder: (context, value, _) {

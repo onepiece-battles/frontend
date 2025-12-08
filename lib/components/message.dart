@@ -151,18 +151,25 @@ class MessageItem extends StatelessWidget {
                 ],
               ),
             ),
-            child: message.content != null
-                ? Text(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                if (message.content != null)
+                  Text(
                     message.content!,
                     style: OnepieceFonts.tagStyle,
                     softWrap: true,
                     textAlign: TextAlign.justify,
-                  )
-                : SquareImageLoader(
-                    key: UniqueKey(),
-                    uriProvider: () => message.imageContentUri!,
-                    width: 40,
-                    borderWidth: 0),
+                  ),
+                if (message.imageContentUri != null)
+                  SquareImageLoader(
+                      key: UniqueKey(),
+                      uriProvider: () => message.imageContentUri!,
+                      width: 40,
+                      borderWidth: 0)
+              ],
+            ),
           );
         }),
       ),
@@ -171,25 +178,31 @@ class MessageItem extends StatelessWidget {
 
   Widget getPreMessage(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(
-        vertical: 5,
-      ),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(5),
-        color: Colors.grey[300],
-      ),
-      padding: const EdgeInsets.all(6),
-      child: preMessage!.content != null
-          ? Text(
-              softWrap: true,
-              "$preMessageNickname: ${preMessage!.content!}",
-              style: const TextStyle(fontSize: 10, color: Colors.white),
-            )
-          : SquareImageLoader(
-              key: UniqueKey(),
-              uriProvider: () => preMessage!.imageContentUri!,
-              width: 40,
-              borderWidth: 0),
-    );
+        margin: const EdgeInsets.symmetric(
+          vertical: 5,
+        ),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(5),
+          color: Colors.grey[300],
+        ),
+        padding: const EdgeInsets.all(6),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (preMessage!.content != null)
+              Text(
+                softWrap: true,
+                "$preMessageNickname: ${preMessage!.content!}",
+                style: const TextStyle(fontSize: 10, color: Colors.white),
+              ),
+            if (preMessage!.imageContentUri != null)
+              SquareImageLoader(
+                  key: UniqueKey(),
+                  uriProvider: () => preMessage!.imageContentUri!,
+                  width: 40,
+                  borderWidth: 0)
+          ],
+        ));
   }
 }
