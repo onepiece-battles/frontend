@@ -1,9 +1,9 @@
 # Start from the Dart image to get both Dart and Flutter SDKs
-FROM dart:3.3.4 AS build-env
+FROM dart:3.9.2 AS build-env
 #FROM registry.cn-hangzhou.aliyuncs.com/dart:3.3.4 AS build-env
 
 
-ARG FLUTTER_VERSION=3.19.6
+ARG FLUTTER_VERSION=3.38.4
 # Install Flutter
 RUN git clone --branch $FLUTTER_VERSION https://github.com/flutter/flutter.git /usr/local/flutter
 ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PATH}"
