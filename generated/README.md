@@ -61,7 +61,7 @@ try {
 
 ## Documentation for API Endpoints
 
-All URIs are relative to *https://onepiece-battles.com*
+All URIs are relative to *http://localhost:8081*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
@@ -119,6 +119,7 @@ Class | Method | HTTP request | Description
 *UserApi* | [**addFriend**](doc//UserApi.md#addfriend) | **POST** /api/onepiece/user/add_friend | 
 *UserApi* | [**assignRole**](doc//UserApi.md#assignrole) | **POST** /api/onepiece/user/assign_role | 
 *UserApi* | [**getUser**](doc//UserApi.md#getuser) | **POST** /api/onepiece/user/get | 
+*UserApi* | [**listFriend**](doc//UserApi.md#listfriend) | **POST** /api/onepiece/user/list_friend | 
 *UserApi* | [**listUsers**](doc//UserApi.md#listusers) | **POST** /api/onepiece/user/list | 
 *UserApi* | [**login**](doc//UserApi.md#login) | **POST** /api/onepiece/user/login | 
 *UserApi* | [**logout**](doc//UserApi.md#logout) | **POST** /api/onepiece/user/logout | 
@@ -251,6 +252,8 @@ Class | Method | HTTP request | Description
  - [ListChildCharactersResponse](doc//ListChildCharactersResponse.md)
  - [ListChildGroupsRequest](doc//ListChildGroupsRequest.md)
  - [ListChildGroupsResponse](doc//ListChildGroupsResponse.md)
+ - [ListFriendRequest](doc//ListFriendRequest.md)
+ - [ListFriendResponse](doc//ListFriendResponse.md)
  - [ListFruitRequest](doc//ListFruitRequest.md)
  - [ListFruitResponse](doc//ListFruitResponse.md)
  - [ListGroupRequest](doc//ListGroupRequest.md)

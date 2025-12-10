@@ -1,7 +1,6 @@
-import 'dart:async';
-
-import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
+import 'package:flutter/material.dart';
+import 'package:one_piece_battles_flutter/constants/button_style.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
 import 'package:openapi/api.dart';
 import '../../app_router.dart';
@@ -17,126 +16,89 @@ class CreateChattingView extends StatefulWidget {
   State<CreateChattingView> createState() => _CreateChattingViewState();
 }
 
-Timer? _timer;
 class _CreateChattingViewState extends State<CreateChattingView> {
   TextEditingController searchFriendController = TextEditingController();
   ScrollController userListController = ScrollController();
-  Set<String> selectedUserIds = {getIt<User>().id};
-  UserFilter userFilter = UserFilter();
+  Set<String> selectedUserIds = {};
   List<User> users = [];
 
-  listUser(String name) {
+  _listUser() {
     getIt<UserDao>()
-        .listUser(ListUsersRequest(
-            pageSize: 10,
-            pageIndex: 1,
-            userFilter: UserFilter(nickname: searchFriendController.text)))
-        .then((value) => setState(() {
-              users = value!.users;
-            }));
+        .listFriend(
+          ListFriendRequest(
+            userId: getIt<User>().id,
+          ),
+        )
+        .then(
+          (value) => setState(() {
+            users = value!.users;
+          }),
+        );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _listUser();
   }
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 400,
-      height: 1000,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          getUserSelection(context)
-        ],
-      ),
-    );
-  }
-
-  Widget getSearchBar() {
-    return SizedBox(
-      width: 200,
-      height: 35,
-      child: TextFormField(
-        controller: searchFriendController,
-        decoration: InputDecoration(
-          floatingLabelBehavior: FloatingLabelBehavior.never,
-          disabledBorder: const OutlineInputBorder(
-              borderSide: BorderSide(color: OnepieceColors.menuHoverColor)),
-          enabledBorder: const OutlineInputBorder(
-              borderSide: BorderSide(color: OnepieceColors.menuHoverColor)),
-          focusedBorder: const OutlineInputBorder(
-              borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
-          prefixIcon: const Icon(Icons.search),
-          hintText: AppLocalizations.of(context)!.name,
-        ),
-        onChanged: (value) {
-          setState(() {
-            searchFriendController.text = value;
-            listUser(value);
-          });
-        },
-      ),
-    );
+    return getUserSelection(context);
   }
 
   Widget getUserSelection(BuildContext context) {
     return StatefulBuilder(builder: (context, userSearchState) {
       return Container(
+        width: 350,
         decoration: const BoxDecoration(
-          color: OnepieceColors.liteFancyGreen,
+          color: Colors.white,
           borderRadius: BorderRadius.all(Radius.circular(10.0)),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Padding(
-              padding: const EdgeInsets.all(15.0),
+              padding: const EdgeInsets.all(10.0),
               child: SizedBox(
-                width: 400,
-                height: 60,
+                width: 300,
+                height: 35,
                 child: TextFormField(
                   controller: searchFriendController,
                   decoration: InputDecoration(
                     floatingLabelBehavior: FloatingLabelBehavior.never,
                     disabledBorder: const OutlineInputBorder(
                         borderSide:
-                        BorderSide(color: OnepieceColors.menuHoverColor)),
+                            BorderSide(color: OnepieceColors.menuHoverColor)),
                     enabledBorder: const OutlineInputBorder(
                         borderSide:
-                        BorderSide(color: OnepieceColors.menuHoverColor)),
+                            BorderSide(color: OnepieceColors.menuHoverColor)),
                     focusedBorder: const OutlineInputBorder(
                         borderSide:
-                        BorderSide(color: OnepieceColors.fancyGreen)),
-                    prefixIcon: const Icon(Icons.search),
+                            BorderSide(color: OnepieceColors.fancyGreen)),
+                    prefixIcon: const Icon(Icons.search, size: 20,),
                     labelText: AppLocalizations.of(context)!.userNameLabel,
+                    labelStyle: OnepieceFonts.smallContentStyle
                   ),
                   onChanged: (value) {
-                    if (_timer?.isActive ?? false) _timer?.cancel();
-                    _timer = Timer(const Duration(milliseconds: 500), () {
-                      userFilter.nickname = value;
-                      ListUsersRequest listUserRequest =
-                      ListUsersRequest(
-                          pageSize: 20,
-                          pageIndex: 1,
-                          // do not need to sort in this case.
-                          sortKeys: [],
-                          userFilter: userFilter);
-                      Future<ListUsersResponse?> listUserResponse =
-                      getIt<UserDao>()
-                          .listUser(listUserRequest);
-                      listUserResponse.then((value) {
-                        userSearchState(() {
-                          users = value!.users;
-                        });
-                      });
+                    userSearchState(() {
+                      if (value.isEmpty) {
+                        _listUser();
+                      } else {
+                        users = users
+                            .where((e) => e.nickname.toLowerCase().contains(
+                                searchFriendController.text.toLowerCase()))
+                            .toList();
+                      }
                     });
                   },
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 10.0),
-              child: SizedBox(
-                width: 400,
-                height: 400,
+
+             SizedBox(
+                width: 300,
                 child: ListView.builder(
                   shrinkWrap: true,
                   physics: const AlwaysScrollableScrollPhysics(),
@@ -177,37 +139,24 @@ class _CreateChattingViewState extends State<CreateChattingView> {
                                 children: [
                                   Padding(
                                     padding:
-                                    const EdgeInsets.fromLTRB(3, 3, 8, 3),
+                                        const EdgeInsets.fromLTRB(0, 3, 8, 3),
                                     child: ImageLazyLoader(
                                         key: UniqueKey(),
                                         uriProvider: () => user.imageUri!,
-                                        width: 50,
+                                        width: 40,
                                         borderWidth: 2,
-                                        borderRadios: 6),
+                                        borderRadios: 5),
                                   ),
                                   Column(
                                     crossAxisAlignment:
-                                    CrossAxisAlignment.start,
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      Text(
-                                              user.nickname,
+                                      Text(user.nickname,
                                           style: OnepieceFonts
                                               .smallContentStyleWhite),
                                     ],
                                   ),
                                 ],
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(20, 0, 3, 0),
-                                child: selectedUserIds.contains(user.id)
-                                    ? const Icon(
-                                  Icons.check_circle,
-                                  size: 20,
-                                )
-                                    : const Icon(
-                                  Icons.check_circle_outline,
-                                  size: 20,
-                                ),
                               ),
                             ],
                           ),
@@ -217,26 +166,40 @@ class _CreateChattingViewState extends State<CreateChattingView> {
                   },
                 ),
               ),
-            ),
-            Row(
-              children: [
-                ElevatedButton(onPressed: (){
-                  userSearchState(() {
-                    selectedUserIds = {};
-                  });
-                }, child: Text("clear")),
-                ElevatedButton(onPressed: (){
-                  userSearchState(() {
-                    getIt<ChattingDao>().createChat(CreateChatRequest(ids: selectedUserIds.toList()));
-                    selectedUserIds = {};
-                  });
-                }, child: Text("confirm"))
-              ],
+            Padding(
+              padding: const EdgeInsets.fromLTRB(30.0,10,30,10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ElevatedButton(
+                      onPressed: selectedUserIds.isEmpty? null: () {
+                        userSearchState(() {
+                          selectedUserIds = {};
+                        });
+                      },
+                      style: OnepieceButtonStyle.getDefaultStyle(),
+                      child: Text(
+                          style: OnepieceFonts.smallContentStyleWhite,
+                          AppLocalizations.of(context)!.clearAll)),
+                  ElevatedButton(
+                      onPressed: selectedUserIds.isEmpty? null: () {
+                        userSearchState(() {
+                          selectedUserIds.add(getIt<User>().id);
+                          getIt<ChattingDao>().createChat(
+                              CreateChatRequest(ids: selectedUserIds.toList()));
+                          selectedUserIds = {};
+                        });
+                      },
+                      style: OnepieceButtonStyle.getDefaultStyle(),
+                      child: Text(
+                          style: OnepieceFonts.smallContentStyleWhite,
+                          AppLocalizations.of(context)!.confirm))
+                ],
+              ),
             )
           ],
         ),
       );
     });
   }
-
 }
