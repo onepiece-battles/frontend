@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:one_piece_battles_flutter/components/original_image_loader.dart';
 import 'package:one_piece_battles_flutter/components/square_image_loader.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
@@ -99,10 +100,10 @@ class MessageItem extends StatelessWidget {
       onExit: (_) => BrowserContextMenu.enableContextMenu(),
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(5),
+          borderRadius: BorderRadius.circular(10),
           color: isMe ? OnepieceColors.fancyBlue : Colors.grey[900],
         ),
-        padding: const EdgeInsets.all(6),
+        padding: EdgeInsets.all(message.content==null?0:6),
         child: Builder(builder: (innerContext) {
           return GestureDetector(
             onSecondaryTap: () => showPopover(
@@ -154,20 +155,20 @@ class MessageItem extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (message.content != null)
                   Text(
                     message.content!,
                     style: OnepieceFonts.tagStyle,
                     softWrap: true,
-                    textAlign: TextAlign.justify,
+                    textAlign: TextAlign.start,
                   ),
                 if (message.imageContentUri != null)
-                  SquareImageLoader(
+                  OriginalImageLoader(
                       key: UniqueKey(),
                       uriProvider: () => message.imageContentUri!,
-                      width: 40,
-                      borderWidth: 0)
+                      maxWidth: 150)
               ],
             ),
           );
@@ -182,7 +183,7 @@ class MessageItem extends StatelessWidget {
           vertical: 5,
         ),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(5),
+          borderRadius: BorderRadius.circular(8),
           color: Colors.grey[300],
         ),
         padding: const EdgeInsets.all(6),
@@ -192,16 +193,18 @@ class MessageItem extends StatelessWidget {
           children: [
             if (preMessage!.content != null)
               Text(
+                textAlign: TextAlign.start,
                 softWrap: true,
                 "$preMessageNickname: ${preMessage!.content!}",
                 style: const TextStyle(fontSize: 10, color: Colors.white),
               ),
             if (preMessage!.imageContentUri != null)
-              SquareImageLoader(
-                  key: UniqueKey(),
-                  uriProvider: () => preMessage!.imageContentUri!,
-                  width: 40,
-                  borderWidth: 0)
+              OriginalImageLoader(
+                key: UniqueKey(),
+
+                uriProvider: () => preMessage!.imageContentUri!,
+                maxWidth: 100,
+              )
           ],
         ));
   }

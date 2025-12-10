@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:one_piece_battles_flutter/components/image_lazy_loader.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import '../../l10n/app_localizations.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
 import 'package:openapi/api.dart';
 import 'package:popover/popover.dart';
-
 import '../app_router.dart';
 import '../constants/button_style.dart';
-import '../utils/base64_helper.dart';
 import '../utils/image_helper.dart';
 
 GetIt getIt = GetIt.instance;
@@ -108,20 +107,18 @@ class _UserNavigationState extends State<UserNavigation> {
         ),
       ),
       child: widget.constraints.maxWidth > 1500
-          ? ImageHelper.getRoundImageFrame(
-              70,
-              70,
-              3,
-              OnepieceColors.liteFancyBlue,
-              70,
-              Base64Helper.decode(getIt<User>().profileImage!))
-          : ImageHelper.getRoundImageFrame(
-              60,
-              60,
-              3,
-              OnepieceColors.liteFancyBlue,
-              60,
-              Base64Helper.decode(getIt<User>().profileImage!)),
+          ? ImageLazyLoader(
+              uriProvider: () => getIt<User>().imageUri!,
+              width: 70,
+              borderWidth: 3,
+              borderRadios: 70,
+            )
+          : ImageLazyLoader(
+        uriProvider: () => getIt<User>().imageUri!,
+        width: 60,
+        borderWidth: 3,
+        borderRadios: 60,
+      ),
     );
   }
 }

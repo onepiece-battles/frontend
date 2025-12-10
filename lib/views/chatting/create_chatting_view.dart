@@ -18,6 +18,7 @@ class CreateChattingView extends StatefulWidget {
 }
 
 Timer? _timer;
+
 class _CreateChattingViewState extends State<CreateChattingView> {
   TextEditingController searchFriendController = TextEditingController();
   ScrollController userListController = ScrollController();
@@ -25,15 +26,24 @@ class _CreateChattingViewState extends State<CreateChattingView> {
   UserFilter userFilter = UserFilter();
   List<User> users = [];
 
-  listUser(String name) {
+  _listUser(String name) {
     getIt<UserDao>()
-        .listUser(ListUsersRequest(
+        .listUser(
+          ListUsersRequest(
             pageSize: 10,
             pageIndex: 1,
-            userFilter: UserFilter(nickname: searchFriendController.text)))
+            userFilter:
+                UserFilter(nickname: searchFriendController.text, friend: true),
+          ),
+        )
         .then((value) => setState(() {
               users = value!.users;
             }));
+  }
+  @override
+  void initState() {
+    super.initState();
+    _listUser("");
   }
 
   @override
@@ -43,9 +53,7 @@ class _CreateChattingViewState extends State<CreateChattingView> {
       height: 1000,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          getUserSelection(context)
-        ],
+        children: [getUserSelection(context)],
       ),
     );
   }
@@ -70,7 +78,7 @@ class _CreateChattingViewState extends State<CreateChattingView> {
         onChanged: (value) {
           setState(() {
             searchFriendController.text = value;
-            listUser(value);
+            _listUser(value);
           });
         },
       ),
@@ -98,13 +106,13 @@ class _CreateChattingViewState extends State<CreateChattingView> {
                     floatingLabelBehavior: FloatingLabelBehavior.never,
                     disabledBorder: const OutlineInputBorder(
                         borderSide:
-                        BorderSide(color: OnepieceColors.menuHoverColor)),
+                            BorderSide(color: OnepieceColors.menuHoverColor)),
                     enabledBorder: const OutlineInputBorder(
                         borderSide:
-                        BorderSide(color: OnepieceColors.menuHoverColor)),
+                            BorderSide(color: OnepieceColors.menuHoverColor)),
                     focusedBorder: const OutlineInputBorder(
                         borderSide:
-                        BorderSide(color: OnepieceColors.fancyGreen)),
+                            BorderSide(color: OnepieceColors.fancyGreen)),
                     prefixIcon: const Icon(Icons.search),
                     labelText: AppLocalizations.of(context)!.userNameLabel,
                   ),
@@ -112,16 +120,14 @@ class _CreateChattingViewState extends State<CreateChattingView> {
                     if (_timer?.isActive ?? false) _timer?.cancel();
                     _timer = Timer(const Duration(milliseconds: 500), () {
                       userFilter.nickname = value;
-                      ListUsersRequest listUserRequest =
-                      ListUsersRequest(
+                      ListUsersRequest listUserRequest = ListUsersRequest(
                           pageSize: 20,
                           pageIndex: 1,
                           // do not need to sort in this case.
                           sortKeys: [],
                           userFilter: userFilter);
                       Future<ListUsersResponse?> listUserResponse =
-                      getIt<UserDao>()
-                          .listUser(listUserRequest);
+                          getIt<UserDao>().listUser(listUserRequest);
                       listUserResponse.then((value) {
                         userSearchState(() {
                           users = value!.users;
@@ -177,7 +183,7 @@ class _CreateChattingViewState extends State<CreateChattingView> {
                                 children: [
                                   Padding(
                                     padding:
-                                    const EdgeInsets.fromLTRB(3, 3, 8, 3),
+                                        const EdgeInsets.fromLTRB(3, 3, 8, 3),
                                     child: ImageLazyLoader(
                                         key: UniqueKey(),
                                         uriProvider: () => user.imageUri!,
@@ -187,10 +193,9 @@ class _CreateChattingViewState extends State<CreateChattingView> {
                                   ),
                                   Column(
                                     crossAxisAlignment:
-                                    CrossAxisAlignment.start,
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      Text(
-                                              user.nickname,
+                                      Text(user.nickname,
                                           style: OnepieceFonts
                                               .smallContentStyleWhite),
                                     ],
@@ -201,13 +206,13 @@ class _CreateChattingViewState extends State<CreateChattingView> {
                                 padding: const EdgeInsets.fromLTRB(20, 0, 3, 0),
                                 child: selectedUserIds.contains(user.id)
                                     ? const Icon(
-                                  Icons.check_circle,
-                                  size: 20,
-                                )
+                                        Icons.check_circle,
+                                        size: 20,
+                                      )
                                     : const Icon(
-                                  Icons.check_circle_outline,
-                                  size: 20,
-                                ),
+                                        Icons.check_circle_outline,
+                                        size: 20,
+                                      ),
                               ),
                             ],
                           ),
@@ -220,17 +225,22 @@ class _CreateChattingViewState extends State<CreateChattingView> {
             ),
             Row(
               children: [
-                ElevatedButton(onPressed: (){
-                  userSearchState(() {
-                    selectedUserIds = {};
-                  });
-                }, child: Text("clear")),
-                ElevatedButton(onPressed: (){
-                  userSearchState(() {
-                    getIt<ChattingDao>().createChat(CreateChatRequest(ids: selectedUserIds.toList()));
-                    selectedUserIds = {};
-                  });
-                }, child: Text("confirm"))
+                ElevatedButton(
+                    onPressed: () {
+                      userSearchState(() {
+                        selectedUserIds = {};
+                      });
+                    },
+                    child: Text("clear")),
+                ElevatedButton(
+                    onPressed: () {
+                      userSearchState(() {
+                        getIt<ChattingDao>().createChat(
+                            CreateChatRequest(ids: selectedUserIds.toList()));
+                        selectedUserIds = {};
+                      });
+                    },
+                    child: Text("confirm"))
               ],
             )
           ],
@@ -238,5 +248,4 @@ class _CreateChattingViewState extends State<CreateChattingView> {
       );
     });
   }
-
 }

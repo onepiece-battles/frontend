@@ -34,6 +34,20 @@ class ImageHelper {
     );
   }
 
+  static Widget getOriginalImageFrame( Color borderColor,
+      Uint8List imageData, double maxWidth) {
+    return Container(
+      constraints: BoxConstraints(maxWidth: maxWidth),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: FittedBox(
+          fit: BoxFit.fill,
+          child: Image.memory(imageData),
+        ),
+      ),
+    );
+  }
+
   static Widget getCircleImageFrame(double width, double height,
       double? borderWidth, Color? borderColor, Uint8List imageData) {
     return Container(

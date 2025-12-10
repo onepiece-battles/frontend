@@ -387,7 +387,7 @@ class _LoginPageState extends State<LoginPage> {
         // Ensure still mounted, then perform navigation using current context synchronously.
         if (!mounted) return;
         _route(response.user!, response.accessToken!, context);
-        context.read<WebSocketService>().connect(response.user!.id!);
+        context.read<WebSocketService>().connect(response.user!.id);
         return;
       }
       final verification = response.verification!;

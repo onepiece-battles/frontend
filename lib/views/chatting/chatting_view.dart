@@ -37,7 +37,7 @@ class _ChattingViewState extends State<ChattingView> {
   bool showEmojiPicker = false;
   Map<String, Message?> chatIdToRepliedMessage = {};
   Map<String, String?> chatIdToCachedMessage = {};
-  Map<String,  Uint8List?> chatIdToCachedImage = {};
+  Map<String, Uint8List?> chatIdToCachedImage = {};
   final ValueNotifier<Message?> inputMessageNotifier = ValueNotifier(null);
   final ValueNotifier<Message?> inputPreMessageNotifier = ValueNotifier(null);
   String activeConversationId = "";
@@ -178,6 +178,11 @@ class _ChattingViewState extends State<ChattingView> {
                             : getSingleLeading(
                                 chat), // Assuming Chat has 'lastMessage'
                         onTap: () {
+                          // save last active chat caches
+                          if (activeChat!=null) {
+                            chatIdToCachedMessage[activeChat.id!] =
+                                typingController.text.trim();
+                          }
                           Provider.of<ChatNotifier>(context, listen: false)
                               .setActiveChat(chat.id);
                           _scrollToBottom(0);
@@ -315,7 +320,8 @@ class _ChattingViewState extends State<ChattingView> {
                                 }),
                           ); // your widget
                         },
-                      )),
+                      ),
+                  ),
                 ),
                 const Divider(
                   height: 3,
@@ -342,8 +348,9 @@ class _ChattingViewState extends State<ChattingView> {
                                   final XFile? pickedImage =
                                       await OnepieceImagePicker.pickWebImage();
                                   if (pickedImage == null) return;
-                                  chatIdToCachedImage[activeChatId!] = (await pickedImage
-                                      .readAsBytes()) as Uint8List;
+                                  chatIdToCachedImage[activeChatId!] =
+                                      (await pickedImage.readAsBytes())
+                                          as Uint8List;
                                   focusNode.requestFocus();
                                   buttonState(() {});
                                 },
@@ -363,7 +370,7 @@ class _ChattingViewState extends State<ChattingView> {
                               )
                             ],
                           ),
-                          if ( chatIdToCachedImage[activeChatId!] != null)
+                          if (chatIdToCachedImage[activeChatId!] != null)
                             Padding(
                               padding: const EdgeInsets.only(bottom: 10.0),
                               child: Stack(
@@ -372,8 +379,12 @@ class _ChattingViewState extends State<ChattingView> {
                                   // Display the Image
                                   ClipRRect(
                                     borderRadius: BorderRadius.circular(8),
-                                    child: ImageHelper.getSquareImageFrame(50,
-                                        50, 2, Colors.white,  chatIdToCachedImage[activeChatId]!),
+                                    child: ImageHelper.getSquareImageFrame(
+                                        50,
+                                        50,
+                                        2,
+                                        Colors.white,
+                                        chatIdToCachedImage[activeChatId]!),
                                   ),
                                   // Close 'X' Button
                                   Positioned(
@@ -381,7 +392,8 @@ class _ChattingViewState extends State<ChattingView> {
                                     top: -2,
                                     child: InkWell(
                                       onTap: () {
-                                        chatIdToCachedImage[activeChatId] = null;
+                                        chatIdToCachedImage[activeChatId] =
+                                            null;
                                         buttonState(() {});
                                       },
                                       child: const CircleAvatar(
@@ -408,7 +420,7 @@ class _ChattingViewState extends State<ChattingView> {
                             focusNode: focusNode,
                             style: OnepieceFonts.smallContentStyle,
                             onSubmitted: typingController.text.isEmpty &&
-                                chatIdToCachedImage[activeChatId] == null
+                                    chatIdToCachedImage[activeChatId] == null
                                 ? null
                                 : (_) => {
                                       buttonState(() {
@@ -420,10 +432,13 @@ class _ChattingViewState extends State<ChattingView> {
                                               ? typingController.text.trim()
                                               : null,
                                           userId: getIt<User>().id,
-                                          profileImage:  chatIdToCachedImage[activeChatId] == null
+                                          profileImage: chatIdToCachedImage[
+                                                      activeChatId] ==
+                                                  null
                                               ? null
                                               : Base64Helper.encode(
-                                              chatIdToCachedImage[activeChatId]!),
+                                                  chatIdToCachedImage[
+                                                      activeChatId]!),
                                           conversationId: activeChat.id!,
                                           type: MessageType.SEND_MESSAGE,
                                           preMessageId:
@@ -436,7 +451,8 @@ class _ChattingViewState extends State<ChattingView> {
                                                 listen: false)
                                             .sendChatMessage(
                                                 activeChatId, jsonMessage);
-                                        chatIdToCachedImage[activeChatId]=null;
+                                        chatIdToCachedImage[activeChatId] =
+                                            null;
                                         typingController.clear();
                                         chatIdToRepliedMessage[activeChatId] =
                                             null;
@@ -447,12 +463,12 @@ class _ChattingViewState extends State<ChattingView> {
                                         focusNode.requestFocus();
                                       })
                                     },
-                            onChanged: (value) {
-                              buttonState(() {
-                                chatIdToCachedMessage[activeChat.id!] =
-                                    typingController.text.trim();
-                              });
-                            },
+                            // onChanged: (value) {
+                            //   buttonState(() {
+                            //     chatIdToCachedMessage[activeChat.id!] =
+                            //         typingController.text.trim();
+                            //   });
+                            // },
                             decoration: const InputDecoration(
                               contentPadding: EdgeInsets.symmetric(
                                   horizontal: 10, vertical: 0),
@@ -479,7 +495,7 @@ class _ChattingViewState extends State<ChattingView> {
                                       padding: const EdgeInsets.fromLTRB(
                                           10, 0, 0, 0),
                                       child: Container(
-                                        height: 25,
+                                        height: 75,
                                         decoration: const BoxDecoration(
                                             borderRadius: BorderRadius.all(
                                                 Radius.circular(5)),
@@ -487,9 +503,34 @@ class _ChattingViewState extends State<ChattingView> {
                                                 OnepieceColors.liteFancyGreen),
                                         child: Padding(
                                           padding: const EdgeInsets.all(4.0),
-                                          child: Text(
-                                            "${activeChat.members.firstWhere((e) => e.id == chatIdToRepliedMessage[activeChatId]!.userId!).nickname}: ${chatIdToRepliedMessage[activeChatId]!.content!}",
-                                            style: OnepieceFonts.tagStyle,
+                                          child:
+                                              Column(
+                                                mainAxisAlignment: MainAxisAlignment.start,
+                                                crossAxisAlignment: CrossAxisAlignment.end,
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              if (chatIdToRepliedMessage[
+                                                          activeChatId]!
+                                                      .content !=
+                                                  null)
+                                                Text(
+                                                  "${activeChat.members.firstWhere((e) => e.id == chatIdToRepliedMessage[activeChatId]!.userId!).nickname}: ${chatIdToRepliedMessage[activeChatId]!.content!}",
+                                                  style: OnepieceFonts.tagStyle,
+                                                ),
+                                              if (chatIdToRepliedMessage[
+                                                          activeChatId]!
+                                                      .imageContentUri !=
+                                                  null)
+                                                SquareImageLoader(
+                                                  key: UniqueKey(),
+                                                  uriProvider: () =>
+                                                      chatIdToRepliedMessage[
+                                                              activeChatId]!
+                                                          .imageContentUri!,
+                                                  width: 40,
+                                                  borderWidth: 1,
+                                                )
+                                            ],
                                           ),
                                         ),
                                       ),
