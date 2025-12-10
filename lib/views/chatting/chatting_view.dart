@@ -48,6 +48,9 @@ class _ChattingViewState extends State<ChattingView> {
   final ValueNotifier<Message?> inputMessageNotifier = ValueNotifier(null);
   final ValueNotifier<Message?> inputPreMessageNotifier = ValueNotifier(null);
   String activeConversationId = "";
+  // ADD THESE TWO:
+  String _lastProcessedChatId = "";
+  int _previousMsgCount = 0;
 
   @override
   void initState() {
@@ -71,6 +74,38 @@ class _ChattingViewState extends State<ChattingView> {
     final messages = context.select<ChatNotifier, List<Message>>(
           (notifier) => notifier.getMessagesForChat(activeChatId),
     );
+    // --- SMART AUTO-SCROLL LOGIC START ---
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // 1. Detect if we just switched to a different chat
+      if (activeChatId != _lastProcessedChatId) {
+        _lastProcessedChatId = activeConversationId;
+        _previousMsgCount = messages.length;
+        // We do nothing here, because onTap handles the scroll restoration
+        return;
+      }
+
+      // 2. Detect if a new message arrived in the SAME chat
+      if (messages.length > _previousMsgCount) {
+        _previousMsgCount = messages.length;
+
+        // 3. Check where the user is currently looking
+        if (scrollController.hasClients) {
+          final double maxScroll = scrollController.position.maxScrollExtent;
+          final double currentScroll = scrollController.offset;
+
+          // Calculate distance from bottom
+          // We use the NEW maxScroll, so we add a threshold (e.g. 500px)
+          // to account for the height of the new message(s) that just rendered.
+          final double distanceFromBottom = maxScroll - currentScroll;
+
+          // If user is within 500px of the bottom, pull them down to the newest message.
+          // If they are 2000px up (history), this condition fails, and they stay put.
+          if (distanceFromBottom < 500) {
+            _scrollToBottom(0);
+          }
+        }
+      }
+    });
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
@@ -378,274 +413,243 @@ class _ChattingViewState extends State<ChattingView> {
                         // Input Area
                         StatefulBuilder(
                           builder: (BuildContext context, StateSetter buttonState) {
-                            final bool canSend =
-                                typingController.text.trim().isNotEmpty ||
+                            // FIX: Wrap in ValueListenableBuilder to listen to controller changes (Emoji & Typing)
+                            return ValueListenableBuilder<TextEditingValue>(
+                              valueListenable: typingController,
+                              builder: (context, textValue, child) {
+
+                                // Calculate if send is allowed based on LIVE text value or Image presence
+                                final bool canSend = textValue.text.trim().isNotEmpty ||
                                     chatIdToCachedImage[activeChatId] != null;
 
-                            return Container(
-                              height: 200,
-                              padding: const EdgeInsets.fromLTRB(8, 6, 23, 6),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Row(
+                                return Container(
+                                  height: 200,
+                                  padding: const EdgeInsets.fromLTRB(8, 6, 23, 6),
+                                  child: Column(
                                     mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      EmojiSelection(
-                                          editingController: typingController),
-                                      IconButton(
-                                        onPressed: () async {
-                                          final XFile? pickedImage =
-                                          await OnepieceImagePicker
-                                              .pickWebImage();
-
-                                          if (!context.mounted || pickedImage == null) return;
-
-                                          chatIdToCachedImage[activeChatId!] =
-                                          await pickedImage.readAsBytes();
-
-                                          buttonState(() {});
-
-                                          // CRITICAL FIX: Safe Focus Request
-                                          Future.delayed(Duration.zero, () {
-                                            if (focusNode.canRequestFocus) {
-                                              focusNode.requestFocus();
-                                            }
-                                          });
-                                        },
-                                        padding: EdgeInsets.zero,
-                                        splashColor: Colors.transparent,
-                                        highlightColor: Colors.transparent,
-                                        hoverColor: Colors.transparent,
-                                        focusColor: Colors.transparent,
-                                        splashRadius: 0.1,
-                                        visualDensity: VisualDensity.compact,
-                                        enableFeedback: false,
-                                        icon: const Icon(
-                                          Icons.image,
-                                          size: 20,
-                                          color: OnepieceColors.fancyBlue,
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                  if (chatIdToCachedImage[activeChatId!] != null)
-                                    Padding(
-                                      padding: const EdgeInsets.only(bottom: 10.0),
-                                      child: Stack(
-                                        alignment: AlignmentDirectional.topStart,
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          ClipRRect(
-                                            borderRadius:
-                                            BorderRadius.circular(8),
-                                            child:
-                                            ImageHelper.getSquareImageFrame(
-                                                50,
-                                                50,
-                                                2,
-                                                Colors.white,
-                                                chatIdToCachedImage[
-                                                activeChatId]!),
-                                          ),
-                                          Positioned(
-                                            right: -2,
-                                            top: -2,
-                                            child: InkWell(
-                                              onTap: () {
-                                                chatIdToCachedImage[
-                                                activeChatId] = null;
-                                                buttonState(() {});
-                                              },
-                                              child: const CircleAvatar(
-                                                backgroundColor: Colors.black54,
-                                                radius: 8,
-                                                child: Icon(Icons.close,
-                                                    size: 8,
-                                                    color: Colors.white),
-                                              ),
+                                          EmojiSelection(editingController: typingController),
+                                          IconButton(
+                                            onPressed: () async {
+                                              final XFile? pickedImage =
+                                              await OnepieceImagePicker.pickWebImage();
+
+                                              if (!context.mounted || pickedImage == null) return;
+
+                                              chatIdToCachedImage[activeChatId!] =
+                                              await pickedImage.readAsBytes();
+
+                                              // Update state for Image
+                                              buttonState(() {});
+
+                                              Future.delayed(Duration.zero, () {
+                                                if (focusNode.canRequestFocus) {
+                                                  focusNode.requestFocus();
+                                                }
+                                              });
+                                            },
+                                            padding: EdgeInsets.zero,
+                                            splashColor: Colors.transparent,
+                                            highlightColor: Colors.transparent,
+                                            hoverColor: Colors.transparent,
+                                            focusColor: Colors.transparent,
+                                            splashRadius: 0.1,
+                                            visualDensity: VisualDensity.compact,
+                                            enableFeedback: false,
+                                            icon: const Icon(
+                                              Icons.image,
+                                              size: 20,
+                                              color: OnepieceColors.fancyBlue,
                                             ),
-                                          ),
+                                          )
                                         ],
                                       ),
-                                    ),
-                                  TextField(
-                                    controller: typingController,
-                                    enabled: true,
-                                    textAlign: TextAlign.start,
-                                    minLines: 3,
-                                    maxLines: 5,
-                                    keyboardType: TextInputType.multiline,
-                                    textInputAction: TextInputAction.send,
-                                    autofocus: true,
-                                    cursorHeight: 15,
-                                    focusNode: focusNode,
-                                    style: OnepieceFonts.smallContentStyle,
-                                    onChanged: (value) {
-                                      // Updates state to enable/disable send button
-                                      buttonState(() {});
-                                    },
-                                    // CRITICAL FIX: Use (_) {} syntax instead of arrow syntax
-                                    onSubmitted: !canSend
-                                        ? null
-                                        : (_) {
-                                      buttonState(() {
-                                        final SendMessageRequest request =
-                                        SendMessageRequest(
-                                          content: typingController.text
-                                              .trim()
-                                              .isNotEmpty
-                                              ? typingController.text
-                                              .trim()
-                                              : null,
-                                          userId: getIt<User>().id,
-                                          profileImage: chatIdToCachedImage[
-                                          activeChatId] ==
-                                              null
-                                              ? null
-                                              : Base64Helper.encode(
-                                              chatIdToCachedImage[
-                                              activeChatId]!),
-                                          conversationId: activeChat.id!,
-                                          type: MessageType.SEND_MESSAGE,
-                                          preMessageId:
-                                          inputPreMessageNotifier
-                                              .value?.id,
-                                        );
-
-                                        final String jsonMessage =
-                                        jsonEncode(request.toJson());
-
-                                        Provider.of<ChatNotifier>(context,
-                                            listen: false)
-                                            .sendChatMessage(activeChatId,
-                                            jsonMessage);
-
-                                        chatIdToCachedImage[activeChatId] =
-                                        null;
-                                        chatIdToRepliedMessage[
-                                        activeChatId] = null;
-                                        chatIdToCachedMessage[activeChatId] =
-                                        null;
-                                        inputPreMessageNotifier.value =
-                                        null;
-                                        typingController.clear();
-
-                                        // CRITICAL FIX: Delay focus to prevent engine crash
-                                        Future.delayed(Duration.zero, () {
-                                          if (focusNode.canRequestFocus) {
-                                            focusNode.requestFocus();
-                                          }
-                                          _scrollToBottom(0);
-                                        });
-                                      });
-                                    },
-                                    decoration: const InputDecoration(
-                                      contentPadding: EdgeInsets.symmetric(
-                                          horizontal: 10, vertical: 0),
-                                      isDense: true,
-                                      labelStyle:
-                                      OnepieceFonts.dropDownItemStyle,
-                                      floatingLabelBehavior:
-                                      FloatingLabelBehavior.never,
-                                      border: InputBorder.none,
-                                      focusedBorder: InputBorder.none,
-                                      disabledBorder: InputBorder.none,
-                                      enabledBorder: InputBorder.none,
-                                    ),
-                                  ),
-                                  ValueListenableBuilder<Message?>(
-                                      valueListenable: inputPreMessageNotifier,
-                                      builder: (context, value, _) {
-                                        if (chatIdToRepliedMessage[
-                                        activeChatId] ==
-                                            null) {
-                                          return const Text("");
-                                        } else {
-                                          return Row(
+                                      if (chatIdToCachedImage[activeChatId!] != null)
+                                        Padding(
+                                          padding: const EdgeInsets.only(bottom: 10.0),
+                                          child: Stack(
+                                            alignment: AlignmentDirectional.topStart,
                                             children: [
-                                              Padding(
-                                                padding:
-                                                const EdgeInsets.fromLTRB(
-                                                    10, 0, 0, 0),
-                                                child: Container(
-                                                  decoration: const BoxDecoration(
-                                                      borderRadius:
-                                                      BorderRadius.all(
-                                                          Radius.circular(
-                                                              5)),
-                                                      color: OnepieceColors
-                                                          .liteFancyGreen),
-                                                  child: Padding(
-                                                    padding:
-                                                    const EdgeInsets.all(4.0),
-                                                    child: Column(
-                                                      mainAxisAlignment:
-                                                      MainAxisAlignment.start,
-                                                      crossAxisAlignment:
-                                                      CrossAxisAlignment.end,
-                                                      mainAxisSize:
-                                                      MainAxisSize.min,
-                                                      children: [
-                                                        if (chatIdToRepliedMessage[
-                                                        activeChatId]!
-                                                            .content !=
-                                                            null)
-                                                          Text(
-                                                            "${activeChat.members.firstWhere((e) => e.id == chatIdToRepliedMessage[activeChatId]!.userId!).nickname}: ${chatIdToRepliedMessage[activeChatId]!.content!}",
-                                                            style: OnepieceFonts
-                                                                .tagStyle,
-                                                          ),
-                                                        if (chatIdToRepliedMessage[
-                                                        activeChatId]!
-                                                            .imageContentUri !=
-                                                            null)
-                                                          SquareImageLoader(
-                                                            key: UniqueKey(),
-                                                            uriProvider: () =>
-                                                            chatIdToRepliedMessage[
-                                                            activeChatId]!
-                                                                .imageContentUri!,
-                                                            width: 40,
-                                                            borderWidth: 1,
-                                                          )
-                                                      ],
-                                                    ),
+                                              ClipRRect(
+                                                borderRadius: BorderRadius.circular(8),
+                                                child: ImageHelper.getSquareImageFrame(
+                                                    50,
+                                                    50,
+                                                    2,
+                                                    Colors.white,
+                                                    chatIdToCachedImage[activeChatId]!),
+                                              ),
+                                              Positioned(
+                                                right: -2,
+                                                top: -2,
+                                                child: InkWell(
+                                                  onTap: () {
+                                                    chatIdToCachedImage[activeChatId] = null;
+                                                    buttonState(() {});
+                                                  },
+                                                  child: const CircleAvatar(
+                                                    backgroundColor: Colors.black54,
+                                                    radius: 8,
+                                                    child: Icon(Icons.close,
+                                                        size: 8, color: Colors.white),
                                                   ),
                                                 ),
                                               ),
-                                              IconButton(
-                                                onPressed: () {
-                                                  chatIdToRepliedMessage[
-                                                  activeChatId] = null;
-                                                  inputPreMessageNotifier.value =
-                                                  null;
-
-                                                  // Safe Focus Request
-                                                  Future.delayed(Duration.zero, () {
-                                                    if (focusNode.canRequestFocus) {
-                                                      focusNode.requestFocus();
-                                                    }
-                                                  });
-                                                },
-                                                icon: const Icon(
-                                                    size: 20,
-                                                    color: OnepieceColors
-                                                        .liteFancyGreen,
-                                                    Icons.cancel_rounded),
-                                                style: ButtonStyle(
-                                                  overlayColor:
-                                                  WidgetStateProperty.all(
-                                                      Colors.transparent),
-                                                ),
-                                              )
                                             ],
-                                          );
-                                        }
-                                      }),
-                                ],
-                              ),
+                                          ),
+                                        ),
+                                      TextField(
+                                        controller: typingController,
+                                        enabled: true,
+                                        textAlign: TextAlign.start,
+                                        minLines: 3,
+                                        maxLines: 5,
+                                        keyboardType: TextInputType.multiline,
+                                        textInputAction: TextInputAction.send,
+                                        autofocus: true,
+                                        cursorHeight: 15,
+                                        focusNode: focusNode,
+                                        style: OnepieceFonts.smallContentStyle,
+                                        // Note: onChanged is no longer strictly needed for buttonState
+                                        // because ValueListenableBuilder handles it, but keeping it empty is fine.
+                                        onChanged: (value) {},
+
+                                        // Logic is now reactive to emojis
+                                        onSubmitted: !canSend
+                                            ? null
+                                            : (_) {
+                                          // Use buttonState to wrap the send logic purely for safety,
+                                          // though logic execution doesn't strictly need UI rebuild here.
+                                          buttonState(() {
+                                            final SendMessageRequest request =
+                                            SendMessageRequest(
+                                              content: typingController.text.trim().isNotEmpty
+                                                  ? typingController.text.trim()
+                                                  : null,
+                                              userId: getIt<User>().id,
+                                              profileImage:
+                                              chatIdToCachedImage[activeChatId] == null
+                                                  ? null
+                                                  : Base64Helper.encode(
+                                                  chatIdToCachedImage[activeChatId]!),
+                                              conversationId: activeChat.id!,
+                                              type: MessageType.SEND_MESSAGE,
+                                              preMessageId: inputPreMessageNotifier.value?.id,
+                                            );
+
+                                            final String jsonMessage =
+                                            jsonEncode(request.toJson());
+
+                                            Provider.of<ChatNotifier>(context, listen: false)
+                                                .sendChatMessage(activeChatId, jsonMessage);
+
+                                            // Reset UI
+                                            chatIdToCachedImage[activeChatId] = null;
+                                            chatIdToRepliedMessage[activeChatId] = null;
+                                            chatIdToCachedMessage[activeChatId] = null;
+                                            inputPreMessageNotifier.value = null;
+                                            typingController.clear();
+
+                                            // Engine Crash Fix & Scroll
+                                            Future.delayed(Duration.zero, () {
+                                              if (focusNode.canRequestFocus) {
+                                                focusNode.requestFocus();
+                                              }
+                                              _scrollToBottom(0);
+                                            });
+                                          });
+                                        },
+                                        decoration: const InputDecoration(
+                                          contentPadding:
+                                          EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                                          isDense: true,
+                                          labelStyle: OnepieceFonts.dropDownItemStyle,
+                                          floatingLabelBehavior: FloatingLabelBehavior.never,
+                                          border: InputBorder.none,
+                                          focusedBorder: InputBorder.none,
+                                          disabledBorder: InputBorder.none,
+                                          enabledBorder: InputBorder.none,
+                                        ),
+                                      ),
+                                      ValueListenableBuilder<Message?>(
+                                          valueListenable: inputPreMessageNotifier,
+                                          builder: (context, value, _) {
+                                            if (chatIdToRepliedMessage[activeChatId] == null) {
+                                              return const Text("");
+                                            } else {
+                                              return Row(
+                                                children: [
+                                                  Padding(
+                                                    padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+                                                    child: Container(
+                                                      decoration: const BoxDecoration(
+                                                          borderRadius:
+                                                          BorderRadius.all(Radius.circular(5)),
+                                                          color: OnepieceColors.liteFancyGreen),
+                                                      child: Padding(
+                                                        padding: const EdgeInsets.all(4.0),
+                                                        child: Column(
+                                                          mainAxisAlignment: MainAxisAlignment.start,
+                                                          crossAxisAlignment:
+                                                          CrossAxisAlignment.end,
+                                                          mainAxisSize: MainAxisSize.min,
+                                                          children: [
+                                                            if (chatIdToRepliedMessage[activeChatId]!
+                                                                .content !=
+                                                                null)
+                                                              Text(
+                                                                "${activeChat.members.firstWhere((e) => e.id == chatIdToRepliedMessage[activeChatId]!.userId!).nickname}: ${chatIdToRepliedMessage[activeChatId]!.content!}",
+                                                                style: OnepieceFonts.tagStyle,
+                                                              ),
+                                                            if (chatIdToRepliedMessage[activeChatId]!
+                                                                .imageContentUri !=
+                                                                null)
+                                                              SquareImageLoader(
+                                                                key: UniqueKey(),
+                                                                uriProvider: () =>
+                                                                chatIdToRepliedMessage[
+                                                                activeChatId]!
+                                                                    .imageContentUri!,
+                                                                width: 40,
+                                                                borderWidth: 1,
+                                                              )
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  IconButton(
+                                                    onPressed: () {
+                                                      chatIdToRepliedMessage[activeChatId] = null;
+                                                      inputPreMessageNotifier.value = null;
+                                                      Future.delayed(Duration.zero, () {
+                                                        if (focusNode.canRequestFocus) {
+                                                          focusNode.requestFocus();
+                                                        }
+                                                      });
+                                                    },
+                                                    icon: const Icon(
+                                                        size: 20,
+                                                        color: OnepieceColors.liteFancyGreen,
+                                                        Icons.cancel_rounded),
+                                                    style: ButtonStyle(
+                                                      overlayColor: WidgetStateProperty.all(
+                                                          Colors.transparent),
+                                                    ),
+                                                  )
+                                                ],
+                                              );
+                                            }
+                                          }),
+                                    ],
+                                  ),
+                                );
+                              },
                             );
                           },
                         )
