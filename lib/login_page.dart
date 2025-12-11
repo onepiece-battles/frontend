@@ -1,5 +1,6 @@
 import 'package:animated_toggle_switch/animated_toggle_switch.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:one_piece_battles_flutter/components/web_socket_service.dart';
 import '../../l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
@@ -174,26 +175,19 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 const SizedBox(
-                  height: 160,
+                  height: 60,
                 ),
                 const Image(
                   image: AssetImage(PathConstants.luffyFlag),
                 ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  height: 40,
-                  child: Text(
-                    AppLocalizations.of(context)!.welcome,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 24,
-                        color: OnepieceColors.fancyBlue),
-                  ),
+                const SizedBox(
+                  height: 50,
+                ),
+                Text(
+                  AppLocalizations.of(context)!.welcome,
+                  style: GoogleFonts.lobster(fontSize: 24),
                 ),
                 const SizedBox(height: 90),
-                const SizedBox(
-                  height: 20,
-                ),
                 SizedBox(
                   width: 300,
                   child: TextFormField(
