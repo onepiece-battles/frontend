@@ -189,10 +189,7 @@ class _CreateGroupViewState extends State<CreateGroupView> {
               children: [
                 Text(
                   AppLocalizations.of(context)!.uploadGroupEmblem,
-                  style: const TextStyle(
-                      color: OnepieceFonts.headerFontColor,
-                      fontSize: OnepieceFonts.contentFontSize,
-                      fontWeight: OnepieceFonts.headerFontWeight),
+                  style: OnepieceFonts.contentStyle,
                 ),
                 const SizedBox(
                   height: 10,

@@ -717,10 +717,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
               children: [
                 Text(
                   AppLocalizations.of(context)!.uploadNewAvatar,
-                  style: const TextStyle(
-                      color: OnepieceFonts.headerFontColor,
-                      fontSize: OnepieceFonts.contentFontSize,
-                      fontWeight: OnepieceFonts.headerFontWeight),
+                  style: OnepieceFonts.contentStyle,
                 ),
                 const SizedBox(
                   height: 10,

@@ -16,7 +16,7 @@ class ICP extends StatelessWidget {
           onPressed: () {
             _launchURL("https://beian.miit.gov.cn/");
           },
-          child: const Text(
+          child: Text(
             "沪ICP备2024075390号",
             style: OnepieceFonts.superSmallContentStyleWhite,
           )),

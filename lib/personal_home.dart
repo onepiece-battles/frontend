@@ -394,10 +394,10 @@ class _UserHomeState extends State<UserHome> {
                             )
                           ],
                         ),
-                        const Center(
+                        Center(
                           child: Text(
                             "vs",
-                            style: OnepieceFonts.contentStyleBoldFancyBlue,
+                            style: OnepieceFonts.boldFancyBlueHintFont,
                           ),
                         ),
                         Column(

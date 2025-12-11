@@ -19,7 +19,6 @@ import 'package:openapi/api.dart';
 import '../../l10n/app_localizations.dart';
 import 'package:one_piece_battles_flutter/graph/character_data.dart';
 import '../../constants/onepiece_fonts.dart';
-import '../../utils/base64_helper.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -275,8 +274,8 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                 )
               ],
             ),
-            const Padding(
-              padding: EdgeInsets.only(left: 17.0),
+            Padding(
+              padding: const EdgeInsets.only(left: 17.0),
               child: Text(
                 "|",
                 style: OnepieceFonts.fancyBlueHintFont,
@@ -309,8 +308,8 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                       )
                     ],
                   ),
-            const Padding(
-              padding: EdgeInsets.only(left: 17.0),
+            Padding(
+              padding: const EdgeInsets.only(left: 17.0),
               child: Text(
                 "|",
                 style: OnepieceFonts.fancyBlueHintFont,
@@ -619,8 +618,8 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                 )
               ],
             ),
-            const Padding(
-              padding: EdgeInsets.only(left: 17.0),
+            Padding(
+              padding: const EdgeInsets.only(left: 17.0),
               child: Text(
                 "|",
                 style: OnepieceFonts.fancyBlueHintFont,
@@ -653,8 +652,8 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                       )
                     ],
                   ),
-            const Padding(
-              padding: EdgeInsets.only(left: 17.0),
+            Padding(
+              padding: const EdgeInsets.only(left: 17.0),
               child: Text(
                 "|",
                 style: OnepieceFonts.fancyBlueHintFont,

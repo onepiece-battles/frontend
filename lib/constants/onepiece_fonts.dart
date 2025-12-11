@@ -1,151 +1,190 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 
 class OnepieceFonts {
-  static const double maxSize = 65;
-  static const double loadingSize = 30;
-  static const double headerFontSize = 27;
-  static const double smallHeaderFontSize = 20;
-  static const FontWeight headerFontWeight = FontWeight.bold;
-  static const Color headerFontColor = Colors.black;
-  static const double contentFontSize = 16;
-  static const double bigContentFontSize = 22;
-  static const double tableHeaderFontSize = 15;
-  static const double dropDownFontSize = 14;
-  static const double smallContentFontSize = 14;
-  static const double superSmallContentFontSize = 12;
-  static const Color contentFontColor = Colors.black54;
-  static const FontWeight sideMenuFontWeight = FontWeight.w500;
-  static const double tagFont = 12;
+  // ===========================================================================
+  // 1. Dimensions & Weights
+  // ===========================================================================
 
-  static const TextStyle contentStyle = TextStyle(
-      color: OnepieceFonts.contentFontColor,
-      fontSize: OnepieceFonts.contentFontSize);
-  static const pageInputStyle = TextStyle(
-      color: OnepieceFonts.contentFontColor,
-      fontSize: OnepieceFonts.contentFontSize,
-      height: 1);
-  static const TextStyle contentStyleAlert =
-      TextStyle(color: Colors.red, fontSize: OnepieceFonts.contentFontSize);
-  static const TextStyle contentStylePass =
-      TextStyle(color: Colors.green, fontSize: OnepieceFonts.contentFontSize);
-  static const TextStyle tagStyle = TextStyle(
-      color: Colors.white,
-      fontWeight: FontWeight.w400,
-      fontSize: OnepieceFonts.tagFont);
-  static const TextStyle hintFont = TextStyle(
-      color: OnepieceColors.menuIconColor,
-      fontSize: OnepieceFonts.contentFontSize);
-  static const TextStyle fancyBlueHintFont = TextStyle(
-      color: OnepieceColors.fancyBlue, fontSize: OnepieceFonts.contentFontSize);
-  static const TextStyle whiteHintFont =
-      TextStyle(color: Colors.white, fontSize: OnepieceFonts.contentFontSize);
-  static const TextStyle boldFancyWhiteSmallFont = TextStyle(
-      color: Colors.white,
-      fontSize: OnepieceFonts.superSmallContentFontSize,
-      fontWeight: FontWeight.w600);
-  static const TextStyle boldFancySmallFont = TextStyle(
-      color: OnepieceColors.fancyBlue,
-      fontSize: OnepieceFonts.superSmallContentFontSize,
-      fontWeight: FontWeight.w600);
-  static const TextStyle boldLiteFancySmallFont = TextStyle(
-      color: OnepieceColors.liteFancyBlue,
-      fontSize: OnepieceFonts.superSmallContentFontSize,
-      fontWeight: FontWeight.w600);
-  static const TextStyle boldFancyBlueHintFont = TextStyle(
-      color: OnepieceColors.fancyBlue,
-      fontSize: OnepieceFonts.contentFontSize,
-      fontWeight: FontWeight.w600);
-  static const TextStyle boldLiteFancyBlueHintFont = TextStyle(
-      color: OnepieceColors.liteFancyBlue,
-      fontSize: OnepieceFonts.contentFontSize,
-      fontWeight: FontWeight.w600);
-  static const TextStyle fancyBlueSmallTitle = TextStyle(
-      color: OnepieceColors.fancyBlue,
-      fontSize: OnepieceFonts.bigContentFontSize);
-  static const TextStyle liteFancyBlueHintFont = TextStyle(
-      color: OnepieceColors.liteFancyBlue,
-      fontSize: OnepieceFonts.contentFontSize);
-  static const TextStyle deepBlackHintFont = TextStyle(
-      color: OnepieceColors.black, fontSize: OnepieceFonts.contentFontSize);
+  static const double sizeMax = 65;
+  static const double sizeLoading = 30;
+
+  static const double sizeHeader = 27;
+  static const double sizeHeaderSmall = 20;
+  static const double sizeHeaderTable = 15;
+
+  static const double sizeContentBig = 22;
+  static const double sizeContent = 16;
+  static const double sizeContentSmall = 14;
+  static const double sizeContentSuperSmall = 12; // Also used for tags
+
+  static const FontWeight weightHeader = FontWeight.bold;
+  static const FontWeight weightSemiBold = FontWeight.w600;
+  static const FontWeight weightMedium = FontWeight.w500;
+  static const FontWeight weightRegular = FontWeight.w400;
+
+  // ===========================================================================
+  // 2. Base Styles (Private)
+  // Use these as parents for the public styles below
+  // ===========================================================================
+
+  static const TextStyle _baseHeader = TextStyle(
+    color: Colors.black,
+    fontSize: sizeHeader,
+    fontWeight: weightHeader,
+  );
+
+  static const TextStyle _baseContent = TextStyle(
+    color: Colors.black54, // default content color
+    fontSize: sizeContent,
+    height: 1,
+  );
+
+  static const TextStyle _baseSmall = TextStyle(
+    color: Colors.black54,
+    fontSize: sizeContentSmall,
+  );
+
+  static const TextStyle _baseSuperSmall = TextStyle(
+    color: Colors.black54,
+    fontSize: sizeContentSuperSmall,
+  );
+
+  // ===========================================================================
+  // 3. Public Styles
+  // ===========================================================================
+
+  // --- Special Fonts ---
+  static final TextStyle contentStyle = GoogleFonts.roboto();
   static const TextStyle loadingFont = TextStyle(
-      color: OnepieceColors.fancyBlue, fontSize: OnepieceFonts.loadingSize);
-  static const TextStyle smallContentStyle = TextStyle(
-      color: OnepieceFonts.contentFontColor,
-      fontSize: OnepieceFonts.smallContentFontSize);
-  static const TextStyle smallContentFancyBlueStyle = TextStyle(
       color: OnepieceColors.fancyBlue,
-      fontWeight: FontWeight.w600,
-      fontSize: OnepieceFonts.smallContentFontSize);
-  static const TextStyle superSmallContentStyle = TextStyle(
-      color: OnepieceFonts.contentFontColor,
-      fontSize: OnepieceFonts.superSmallContentFontSize);
-  static const TextStyle smallContentStyleWhite = TextStyle(
-      color: Colors.white, fontSize: OnepieceFonts.smallContentFontSize);
-  static const TextStyle superSmallContentStyleWhite = TextStyle(
-      color: Colors.white, fontSize: OnepieceFonts.superSmallContentFontSize);
-  static const TextStyle contentStyleBold = TextStyle(
-      color: OnepieceFonts.contentFontColor,
-      fontSize: OnepieceFonts.contentFontSize,
-      fontWeight: FontWeight.w600);
+      fontSize: sizeLoading
+  );
 
-  static const TextStyle alertTitle = TextStyle(
-      color: Colors.red,
-      fontSize: OnepieceFonts.contentFontSize,
-      fontWeight: FontWeight.w600);
+  // --- Headers ---
+  static const TextStyle headerStyle = _baseHeader;
 
-  static const TextStyle contentStyleBoldWhite = TextStyle(
-      color: Colors.white,
-      fontSize: OnepieceFonts.contentFontSize,
-      fontWeight: FontWeight.w600);
+  static TextStyle get headerStyleWhite =>
+      _baseHeader.copyWith(color: Colors.white);
 
-  static const TextStyle contentStyleBoldFancyBlue = TextStyle(
-      color: OnepieceColors.fancyBlue,
-      fontSize: OnepieceFonts.contentFontSize,
-      fontWeight: FontWeight.w600);
+  static TextStyle get smallHeaderStyle =>
+      _baseHeader.copyWith(fontSize: sizeHeaderSmall);
 
-  static const TextStyle headerStyle = TextStyle(
-      color: OnepieceFonts.headerFontColor,
-      fontSize: OnepieceFonts.headerFontSize,
-      fontWeight: OnepieceFonts.headerFontWeight);
+  static TextStyle get smallHeaderStyleWhite =>
+      _baseHeader.copyWith(fontSize: sizeHeaderSmall, color: Colors.white);
+
+  static TextStyle get smallHeaderStyleFancyBlue =>
+      _baseHeader.copyWith(fontSize: sizeHeaderSmall, color: OnepieceColors.fancyBlue);
 
   static const TextStyle fancyMax = TextStyle(
       color: OnepieceColors.fancyBlue,
-      fontSize: OnepieceFonts.maxSize,
-      fontWeight: OnepieceFonts.headerFontWeight);
+      fontSize: sizeMax,
+      fontWeight: weightHeader);
 
-  static const TextStyle smallHeaderStyle = TextStyle(
-      color: OnepieceFonts.headerFontColor,
-      fontSize: OnepieceFonts.smallHeaderFontSize,
-      fontWeight: OnepieceFonts.headerFontWeight);
+  // --- Content / Body ---
+  static const TextStyle pageInputStyle = _baseContent;
 
-  static const TextStyle smallHeaderStyleWhite = TextStyle(
-      color: Colors.white,
-      fontSize: OnepieceFonts.smallHeaderFontSize,
-      fontWeight: OnepieceFonts.headerFontWeight);
+  static TextStyle get contentStyleBold =>
+      _baseContent.copyWith(fontWeight: weightSemiBold);
 
-  static const TextStyle smallHeaderStyleFancyBlue = TextStyle(
-      color: OnepieceColors.fancyBlue,
-      fontSize: OnepieceFonts.smallHeaderFontSize,
-      fontWeight: OnepieceFonts.headerFontWeight);
+  static TextStyle get contentStyleBoldWhite =>
+      _baseContent.copyWith(fontWeight: weightSemiBold, color: Colors.white);
 
-  static const TextStyle headerStyleWhite = TextStyle(
-      color: Colors.white,
-      fontSize: OnepieceFonts.headerFontSize,
-      fontWeight: OnepieceFonts.headerFontWeight);
+  static TextStyle get contentStyleBoldFancyBlue =>
+      _baseContent.copyWith(fontWeight: weightSemiBold, color: OnepieceColors.fancyBlue);
 
+  static TextStyle get contentStyleAlert =>
+      _baseContent.copyWith(color: Colors.red);
+
+  static TextStyle get contentStylePass =>
+      _baseContent.copyWith(color: Colors.green);
+
+  static TextStyle get alertTitle =>
+      _baseContent.copyWith(color: Colors.red, fontWeight: weightSemiBold);
+
+  static TextStyle get fancyBlueSmallTitle =>
+      _baseContent.copyWith(color: OnepieceColors.fancyBlue, fontSize: sizeContentBig);
+
+  // --- Hints ---
+  static TextStyle get hintFont =>
+      _baseContent.copyWith(color: OnepieceColors.menuIconColor);
+
+  static TextStyle get deepBlackHintFont =>
+      _baseContent.copyWith(color: OnepieceColors.black);
+
+  static TextStyle get whiteHintFont =>
+      _baseContent.copyWith(color: Colors.white);
+
+  static TextStyle get fancyBlueHintFont =>
+      _baseContent.copyWith(color: OnepieceColors.fancyBlue);
+
+  static TextStyle get liteFancyBlueHintFont =>
+      _baseContent.copyWith(color: OnepieceColors.liteFancyBlue);
+
+  static TextStyle get boldFancyBlueHintFont =>
+      _baseContent.copyWith(color: OnepieceColors.fancyBlue, fontWeight: weightSemiBold);
+
+  static TextStyle get boldLiteFancyBlueHintFont =>
+      _baseContent.copyWith(color: OnepieceColors.liteFancyBlue, fontWeight: weightSemiBold);
+
+  // --- Small & Super Small Content ---
+  static const TextStyle smallContentStyle = _baseSmall;
+
+  static TextStyle get smallContentStyleWhite =>
+      _baseSmall.copyWith(color: Colors.white);
+
+  static TextStyle get smallContentFancyBlueStyle =>
+      _baseSmall.copyWith(color: OnepieceColors.fancyBlue, fontWeight: weightSemiBold);
+
+  static const TextStyle superSmallContentStyle = _baseSuperSmall;
+
+  static TextStyle get superSmallContentStyleWhite =>
+      _baseSuperSmall.copyWith(color: Colors.white);
+
+  static TextStyle get boldFancyWhiteSmallFont =>
+      _baseSuperSmall.copyWith(color: Colors.white, fontWeight: weightSemiBold);
+
+  static TextStyle get boldFancySmallFont =>
+      _baseSuperSmall.copyWith(color: OnepieceColors.fancyBlue, fontWeight: weightSemiBold);
+
+  static TextStyle get boldLiteFancySmallFont =>
+      _baseSuperSmall.copyWith(color: OnepieceColors.liteFancyBlue, fontWeight: weightSemiBold);
+
+  // --- UI Elements (Tables, Tags, Dropdowns) ---
   static const TextStyle tableHeaderStyle = TextStyle(
-      color: OnepieceFonts.contentFontColor,
-      fontSize: OnepieceFonts.tableHeaderFontSize,
-      fontWeight: OnepieceFonts.headerFontWeight);
-  static const TextStyle selectedTableHeaderStyle = TextStyle(
-      color: OnepieceColors.fancyBlue,
-      fontSize: OnepieceFonts.tableHeaderFontSize,
-      fontWeight: OnepieceFonts.headerFontWeight);
-  static const TextStyle dropDownItemStyle = TextStyle(
-      color: OnepieceFonts.contentFontColor,
-      fontSize: OnepieceFonts.dropDownFontSize);
+      color: Colors.black54,
+      fontSize: sizeHeaderTable,
+      fontWeight: weightHeader);
 
+  static TextStyle get selectedTableHeaderStyle =>
+      tableHeaderStyle.copyWith(color: OnepieceColors.fancyBlue);
+
+  static const TextStyle dropDownItemStyle = TextStyle(
+      color: Colors.black54,
+      fontSize: sizeContentSmall);
+
+  static const TextStyle tagStyle = TextStyle(
+      color: Colors.white,
+      fontWeight: weightRegular,
+      fontSize: sizeContentSuperSmall);
+
+  static const TextStyle navigationTopBarStyleClickable = TextStyle(
+      color: OnepieceColors.fancyBlue,
+      fontSize: 16,
+      fontWeight: FontWeight.w700);
+
+  static const TextStyle navigationTopBarStyleBold = TextStyle(
+      color: Colors.black54,
+      fontSize: 16,
+      fontWeight: FontWeight.w700);
+
+  static const TextStyle tableHeightStyle = TextStyle(
+      color: OnepieceColors.fancyBlue,
+      fontSize: 16,
+      fontWeight: FontWeight.w700);
+
+  // --- Italic / Special ---
   static const TextStyle emailFont = TextStyle(
       color: Colors.white,
       fontSize: 14,
@@ -157,17 +196,4 @@ class OnepieceFonts {
       fontSize: 10,
       fontWeight: FontWeight.normal,
       fontStyle: FontStyle.italic);
-
-  static const TextStyle navigationTopBarStyleClickable = TextStyle(
-      color: OnepieceColors.fancyBlue,
-      fontSize: 16,
-      fontWeight: FontWeight.w700);
-
-  static const TextStyle tableHeightStyle = TextStyle(
-      color: OnepieceColors.fancyBlue,
-      fontSize: 16,
-      fontWeight: FontWeight.w700);
-
-  static const TextStyle navigationTopBarStyleBold = TextStyle(
-      color: contentFontColor, fontSize: 16, fontWeight: FontWeight.w700);
 }

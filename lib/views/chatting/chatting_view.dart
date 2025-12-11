@@ -200,18 +200,12 @@ class _ChattingViewState extends State<ChattingView> {
                               activeChatId != chat.id)
                             Text(
                               "[${AppLocalizations.of(context)!.draft}]",
-                              style: const TextStyle(
-                                color: Colors.red,
-                                fontSize: OnepieceFonts.smallContentFontSize,
-                              ),
+                              style: OnepieceFonts.smallContentStyle.copyWith(color: Colors.red),
                             )
                           else if (chat.message != null)
                             Text(
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  color: OnepieceFonts.contentFontColor,
-                                  fontSize: OnepieceFonts.superSmallContentFontSize,
-                                ),
+                                style: OnepieceFonts.superSmallContentStyle,
                                 "${chat.members.firstWhere((e) => e.id == chat.message!.userId!).nickname}: ${chat.message!.content != null ? chat.message!.content!.split('\n').first : AppLocalizations.of(context)!.image}")
                           else
                             const Text(""),

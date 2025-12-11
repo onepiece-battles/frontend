@@ -598,7 +598,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get verified => 'Verified';
 
   @override
-  String get welcome => 'Welcome to OnePiece!';
+  String get welcome => 'Onepiece Battles';
 
   @override
   String get winner => 'Winner';

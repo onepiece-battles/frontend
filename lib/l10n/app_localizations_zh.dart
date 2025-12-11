@@ -594,7 +594,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get verified => '已验证';
 
   @override
-  String get welcome => '欢迎光临海贼王！';
+  String get welcome => 'Onepiece Battles!';
 
   @override
   String get winner => '获胜者';

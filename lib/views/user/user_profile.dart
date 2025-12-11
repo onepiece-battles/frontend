@@ -296,11 +296,7 @@ class _AvatarSection extends StatelessWidget {
                 children: [
                   Text(
                     loc.uploadNewAvatar,
-                    style: const TextStyle(
-                      color: OnepieceFonts.headerFontColor,
-                      fontSize: OnepieceFonts.contentFontSize,
-                      fontWeight: OnepieceFonts.headerFontWeight,
-                    ),
+                    style: OnepieceFonts.contentStyle,
                   ),
                   const SizedBox(height: 10),
                   Row(
