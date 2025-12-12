@@ -67,19 +67,28 @@ class _ChattingViewState extends State<ChattingView> {
     super.dispose();
   }
 
-  /// ROBUST BACK NAVIGATION
+  /// ROBUST BACK NAVIGATION & CACHING
   void _clearActiveChat() {
-    // 1. Unfocus keyboard immediately (Fixes "First click does nothing" issue)
+    // 1. SAVE DRAFT: Before we clear the view, save what was typed
+    if (activeConversationId.isNotEmpty) {
+      // Save text
+      chatIdToCachedMessage[activeConversationId] = typingController.text;
+      // Note: We don't need to explicitly save chatIdToRepliedMessage here
+      // because we write to that map directly in the UI callbacks.
+    }
+
+    // 2. Unfocus keyboard
     FocusScope.of(context).unfocus();
 
-    // 2. Update Provider
+    // 3. Update Provider
     Provider.of<ChatNotifier>(context, listen: false).setActiveChat(null);
 
-    // 3. Update Local State and Rebuild
+    // 4. Update Local State and Rebuild safely
     if (mounted) {
       setState(() {
         activeConversationId = "";
-        typingController.clear();
+        typingController.clear(); // Clear the controller visually
+        inputPreMessageNotifier.value = null; // Clear reply preview visually
       });
     }
   }
@@ -99,7 +108,6 @@ class _ChattingViewState extends State<ChattingView> {
 
     // --- SMART AUTO-SCROLL LOGIC ---
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Logic only runs if we have a valid chat and ID
       if (activeChatId == null) return;
 
       if (activeChatId != _lastProcessedChatId) {
@@ -114,7 +122,7 @@ class _ChattingViewState extends State<ChattingView> {
           final double maxScroll = scrollController.position.maxScrollExtent;
           final double currentScroll = scrollController.offset;
           final double distanceFromBottom = maxScroll - currentScroll;
-          // Pull down if user is within 500px of bottom
+
           if (distanceFromBottom < 500) {
             _scrollToBottom(0);
           }
@@ -125,18 +133,19 @@ class _ChattingViewState extends State<ChattingView> {
     return LayoutBuilder(
       builder: (context, constraints) {
         // Breakpoint
-        bool isMobile = constraints.maxWidth < 500;
+        bool isMobile = constraints.maxWidth < 800;
 
         // --- MOBILE LAYOUT ---
         if (isMobile) {
           // Verify both ID and Object are present to avoid NPE
           if (activeChatId != null && activeChat != null) {
-            return WillPopScope(
-              onWillPop: () async {
-                _clearActiveChat();
-                return false; // Prevent app exit
+            // Using onPopInvokedWithResult
+            return PopScope(
+              canPop: false, // Prevent system back navigation
+              onPopInvokedWithResult: (bool didPop, dynamic result) {
+                if (didPop) return; // If system already popped, don't do anything
+                _clearActiveChat(); // Run our custom back logic (saves draft)
               },
-              // Pass activeChatId as NON-NULLABLE String
               child: _buildChatView(
                 context,
                 activeChat,
@@ -232,6 +241,7 @@ class _ChattingViewState extends State<ChattingView> {
             ChattingOptions(context: context)
           ],
         ),
+
         Expanded(
           child: ListView.builder(
             itemCount: chats.length,
@@ -293,17 +303,17 @@ class _ChattingViewState extends State<ChattingView> {
                     ? getLeading(chat.members.map((e) => e.imageUri!).toList())
                     : getSingleLeading(chat),
                 onTap: () {
-                  // 1. Save scroll position for current chat before switching
+                  // 1. Save scroll position for OLD chat
                   if (scrollController.hasClients &&
                       activeConversationId.isNotEmpty) {
                     chatIdToScrollOffset[activeConversationId] =
                         scrollController.offset;
                   }
 
-                  // 2. Save text draft
+                  // 2. Save text draft for OLD chat
                   if (activeConversationId.isNotEmpty) {
                     chatIdToCachedMessage[activeConversationId] =
-                        typingController.text.trim();
+                        typingController.text; // Removed .trim() to save spaces
                   }
 
                   // 3. Switch Active Chat
@@ -316,13 +326,14 @@ class _ChattingViewState extends State<ChattingView> {
                     activeConversationId = newChatId;
                   });
 
-                  // 5. Restore text draft
+                  // 5. RESTORE text draft for NEW chat
                   typingController.text =
                       chatIdToCachedMessage[newChatId] ?? "";
-                  inputPreMessageNotifier.value =
-                      Message(content: chatIdToCachedMessage[newChatId] ?? "");
 
-                  // 6. Restore Scroll Position
+                  // 6. RESTORE Reply Context for NEW chat
+                  inputPreMessageNotifier.value = chatIdToRepliedMessage[newChatId];
+
+                  // 7. RESTORE Scroll Position
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     if (chatIdToScrollOffset.containsKey(newChatId)) {
                       if (scrollController.hasClients) {
@@ -345,7 +356,6 @@ class _ChattingViewState extends State<ChattingView> {
   // ---------------------------------------------------------------------------
   // RIGHT SIDE: Active Chat View
   // ---------------------------------------------------------------------------
-  // NOTE: activeChatId is now REQUIRED and NON-NULLABLE to prevent NPE
   Widget _buildChatView(BuildContext context, Chat activeChat,
       String activeChatId, List<Message> messages,
       {required bool isMobile}) {
@@ -495,7 +505,6 @@ class _ChattingViewState extends State<ChattingView> {
                     return ValueListenableBuilder<TextEditingValue>(
                       valueListenable: typingController,
                       builder: (context, textValue, child) {
-                        // Use the non-nullable activeChatId safely
                         final bool canSend = textValue.text.trim().isNotEmpty ||
                             chatIdToCachedImage[activeChatId] != null;
 
@@ -519,7 +528,9 @@ class _ChattingViewState extends State<ChattingView> {
                                           .pickWebImage();
 
                                       if (!context.mounted ||
-                                          pickedImage == null) return;
+                                          pickedImage == null) {
+                                        return;
+                                      }
 
                                       chatIdToCachedImage[activeChatId] =
                                       await pickedImage.readAsBytes();
@@ -629,7 +640,6 @@ class _ChattingViewState extends State<ChattingView> {
                                         .sendChatMessage(
                                         activeChatId, jsonMessage);
 
-                                    // Cleanup
                                     chatIdToCachedImage[activeChatId] =
                                     null;
                                     chatIdToRepliedMessage[activeChatId] =
