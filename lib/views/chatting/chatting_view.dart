@@ -69,18 +69,15 @@ class _ChattingViewState extends State<ChattingView> {
 
   /// ROBUST BACK NAVIGATION & CACHING
   void _clearActiveChat() {
-    // 1. SAVE DRAFT: Before we clear the view, save what was typed
+    // 1. Cache the draft before leaving
     if (activeConversationId.isNotEmpty) {
       chatIdToCachedMessage[activeConversationId] = typingController.text;
     }
-
-    // 2. Unfocus keyboard
+    // 2. Clear focus
     FocusScope.of(context).unfocus();
-
     // 3. Update Provider
     Provider.of<ChatNotifier>(context, listen: false).setActiveChat(null);
-
-    // 4. Update Local State and Rebuild safely
+    // 4. Reset local UI state
     if (mounted) {
       setState(() {
         activeConversationId = "";
@@ -92,13 +89,13 @@ class _ChattingViewState extends State<ChattingView> {
 
   @override
   Widget build(BuildContext context) {
-    // Watch Provider Data
+    // WATCH: This triggers a rebuild whenever ChatNotifier calls notifyListeners()
+    // This allows Chat B's unread count to update even if you are in Chat A.
     final chatNotifier = context.watch<ChatNotifier>();
     final chats = chatNotifier.chats;
     final String? activeChatId = chatNotifier.activeChatId;
     final Chat? activeChat = chatNotifier.activeChat;
 
-    // Get Messages safely
     final messages = activeChatId != null
         ? chatNotifier.getMessagesForChat(activeChatId)
         : <Message>[];
@@ -129,8 +126,7 @@ class _ChattingViewState extends State<ChattingView> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Breakpoint
-        bool isMobile = constraints.maxWidth < 800;
+        bool isMobile = constraints.maxWidth < 500;
 
         // --- MOBILE LAYOUT ---
         if (isMobile) {
@@ -243,6 +239,8 @@ class _ChattingViewState extends State<ChattingView> {
             itemBuilder: (context, index) {
               final chat = chats[index];
               return ListTile(
+                // Use Key to help Flutter track items if list reorders when new msg comes
+                key: ValueKey(chat.id),
                 title: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -251,6 +249,7 @@ class _ChattingViewState extends State<ChattingView> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Chat Name
                         Expanded(
                           child: Text(
                             chat.group!
@@ -261,16 +260,48 @@ class _ChattingViewState extends State<ChattingView> {
                           ),
                         ),
                         const SizedBox(width: 5),
-                        if (chat.message != null)
-                          Text(
-                            TimeHelper.humanDateFromTimestamp(
-                                chat.message!.creationRecord!.actionTimestamp!,
-                                context),
-                            style: OnepieceFonts.boldLiteFancySmallFont,
-                          ),
+
+                        // RIGHT COLUMN: Date & Unread Badge
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            if (chat.message != null)
+                              Text(
+                                TimeHelper.humanDateFromTimestamp(
+                                    chat.message!.creationRecord!.actionTimestamp!,
+                                    context),
+                                style: OnepieceFonts.boldLiteFancySmallFont,
+                              ),
+
+                            // --- UNREAD COUNT BADGE ---
+                            if (chat.unreadCount != null && chat.unreadCount! > 0)
+                              Container(
+                                margin: const EdgeInsets.only(top: 5),
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Colors.red,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                constraints: const BoxConstraints(
+                                  minWidth: 20,
+                                  minHeight: 20,
+                                ),
+                                child: Text(
+                                  chat.unreadCount! > 99 ? '99+' : chat.unreadCount.toString(),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                          ],
+                        ),
                       ],
                     ),
                     const SizedBox(height: 8),
+                    // Draft Indicator OR Last Message Preview
                     if ((chatIdToRepliedMessage[chat.id] != null ||
                         (chatIdToCachedMessage[chat.id] != null &&
                             chatIdToCachedMessage[chat.id]!.isNotEmpty)) &&
@@ -297,37 +328,33 @@ class _ChattingViewState extends State<ChattingView> {
                     ? getLeading(chat.members.map((e) => e.imageUri!).toList())
                     : getSingleLeading(chat),
                 onTap: () {
-                  // 1. Save scroll position for OLD chat
+                  // 1. Save state for PREVIOUS chat
                   if (scrollController.hasClients &&
                       activeConversationId.isNotEmpty) {
                     chatIdToScrollOffset[activeConversationId] =
                         scrollController.offset;
                   }
-
-                  // 2. Save text draft for OLD chat
                   if (activeConversationId.isNotEmpty) {
                     chatIdToCachedMessage[activeConversationId] =
                         typingController.text;
                   }
 
-                  // 3. Switch Active Chat
+                  // 2. Switch to NEW chat
                   final newChatId = chat.id!;
                   Provider.of<ChatNotifier>(context, listen: false)
                       .setActiveChat(newChatId);
 
-                  // 4. Update Local State
+                  // 3. Update local tracker
                   setState(() {
                     activeConversationId = newChatId;
                   });
 
-                  // 5. RESTORE text draft for NEW chat
+                  // 4. Restore state for NEW chat
                   typingController.text =
                       chatIdToCachedMessage[newChatId] ?? "";
-
-                  // 6. RESTORE Reply Context for NEW chat
                   inputPreMessageNotifier.value = chatIdToRepliedMessage[newChatId];
 
-                  // 7. RESTORE Scroll Position
+                  // 5. Restore scroll
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     if (chatIdToScrollOffset.containsKey(newChatId)) {
                       if (scrollController.hasClients) {
@@ -449,10 +476,8 @@ class _ChattingViewState extends State<ChattingView> {
               mainAxisAlignment: MainAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Messages List
                 Expanded(
                   child: ListView.builder(
-                    // KEY FIX: Use PageStorageKey to preserve state/scroll during parent rebuilds
                     key: PageStorageKey('chat_list_$activeChatId'),
                     controller: scrollController,
                     addAutomaticKeepAlives: true,
@@ -464,7 +489,6 @@ class _ChattingViewState extends State<ChattingView> {
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 15.0),
                         child: MessageItem(
-                          // KEY FIX: Add ValueKey to avoid unnecessary rebuilds of row items
                             key: ValueKey(msg.id),
                             message: msg,
                             isMe: msg.userId == getIt<User>().id,
@@ -478,12 +502,8 @@ class _ChattingViewState extends State<ChattingView> {
                                 .nickname
                                 : null,
                             replyMessage: (msg) {
-                              // NO SETSTATE HERE!
-                              // We only update the Notifier (Reply Preview)
                               chatIdToRepliedMessage[msg.conversationId!] = msg;
                               inputPreMessageNotifier.value = msg;
-
-                              // Handle Focus
                               Future.delayed(Duration.zero, () {
                                 if (focusNode.canRequestFocus) {
                                   focusNode.requestFocus();
@@ -499,7 +519,6 @@ class _ChattingViewState extends State<ChattingView> {
                   thickness: 1,
                   color: OnepieceColors.liteFancyGreen,
                 ),
-                // Input Area
                 StatefulBuilder(
                   builder: (BuildContext context, StateSetter buttonState) {
                     return ValueListenableBuilder<TextEditingValue>(
