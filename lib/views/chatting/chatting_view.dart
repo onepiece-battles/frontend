@@ -71,10 +71,7 @@ class _ChattingViewState extends State<ChattingView> {
   void _clearActiveChat() {
     // 1. SAVE DRAFT: Before we clear the view, save what was typed
     if (activeConversationId.isNotEmpty) {
-      // Save text
       chatIdToCachedMessage[activeConversationId] = typingController.text;
-      // Note: We don't need to explicitly save chatIdToRepliedMessage here
-      // because we write to that map directly in the UI callbacks.
     }
 
     // 2. Unfocus keyboard
@@ -87,8 +84,8 @@ class _ChattingViewState extends State<ChattingView> {
     if (mounted) {
       setState(() {
         activeConversationId = "";
-        typingController.clear(); // Clear the controller visually
-        inputPreMessageNotifier.value = null; // Clear reply preview visually
+        typingController.clear();
+        inputPreMessageNotifier.value = null;
       });
     }
   }
@@ -137,14 +134,12 @@ class _ChattingViewState extends State<ChattingView> {
 
         // --- MOBILE LAYOUT ---
         if (isMobile) {
-          // Verify both ID and Object are present to avoid NPE
           if (activeChatId != null && activeChat != null) {
-            // Using onPopInvokedWithResult
             return PopScope(
-              canPop: false, // Prevent system back navigation
+              canPop: false,
               onPopInvokedWithResult: (bool didPop, dynamic result) {
-                if (didPop) return; // If system already popped, don't do anything
-                _clearActiveChat(); // Run our custom back logic (saves draft)
+                if (didPop) return;
+                _clearActiveChat();
               },
               child: _buildChatView(
                 context,
@@ -155,7 +150,6 @@ class _ChattingViewState extends State<ChattingView> {
               ),
             );
           }
-          // Default to List
           return _buildChatList(context, chats, activeChatId, isMobile: true);
         }
 
@@ -313,7 +307,7 @@ class _ChattingViewState extends State<ChattingView> {
                   // 2. Save text draft for OLD chat
                   if (activeConversationId.isNotEmpty) {
                     chatIdToCachedMessage[activeConversationId] =
-                        typingController.text; // Removed .trim() to save spaces
+                        typingController.text;
                   }
 
                   // 3. Switch Active Chat
@@ -372,7 +366,6 @@ class _ChattingViewState extends State<ChattingView> {
               Expanded(
                 child: Row(
                   children: [
-                    // --- BACK BUTTON (Mobile Only) ---
                     if (isMobile)
                       Container(
                         margin: const EdgeInsets.only(right: 5),
@@ -386,7 +379,6 @@ class _ChattingViewState extends State<ChattingView> {
                           },
                         ),
                       ),
-
                     Expanded(
                       child: Text(
                         style: OnepieceFonts.smallContentFancyBlueStyle,
@@ -460,6 +452,8 @@ class _ChattingViewState extends State<ChattingView> {
                 // Messages List
                 Expanded(
                   child: ListView.builder(
+                    // KEY FIX: Use PageStorageKey to preserve state/scroll during parent rebuilds
+                    key: PageStorageKey('chat_list_$activeChatId'),
                     controller: scrollController,
                     addAutomaticKeepAlives: true,
                     shrinkWrap: true,
@@ -470,6 +464,8 @@ class _ChattingViewState extends State<ChattingView> {
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 15.0),
                         child: MessageItem(
+                          // KEY FIX: Add ValueKey to avoid unnecessary rebuilds of row items
+                            key: ValueKey(msg.id),
                             message: msg,
                             isMe: msg.userId == getIt<User>().id,
                             preMessage: msg.preMessage,
@@ -482,8 +478,12 @@ class _ChattingViewState extends State<ChattingView> {
                                 .nickname
                                 : null,
                             replyMessage: (msg) {
+                              // NO SETSTATE HERE!
+                              // We only update the Notifier (Reply Preview)
                               chatIdToRepliedMessage[msg.conversationId!] = msg;
                               inputPreMessageNotifier.value = msg;
+
+                              // Handle Focus
                               Future.delayed(Duration.zero, () {
                                 if (focusNode.canRequestFocus) {
                                   focusNode.requestFocus();
