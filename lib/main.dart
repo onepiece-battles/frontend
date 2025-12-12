@@ -49,6 +49,14 @@ void getItSetUp() {
 void webSocketSetUp() {}
 
 void main() {
+  final styleElement = web.document.createElement('style');
+  styleElement.textContent = '''
+    html, body {
+      overscroll-behavior-x: none !important;
+      overflow-x: hidden;
+    }
+  ''';
+  web.document.head?.appendChild(styleElement);
   configureApp();
   getItSetUp();
   final webSocketService = WebSocketService(); // Replace with your URL
@@ -79,6 +87,14 @@ class MyApp extends StatefulWidget {
   }
 }
 
+class MyCustomScrollBehavior extends MaterialScrollBehavior {
+  // Override behavior to use ClampingScrollPhysics for all platforms
+  @override
+  ScrollPhysics getScrollPhysics(BuildContext context) {
+    return const ClampingScrollPhysics();
+  }
+}
+
 class _MyAppState extends State<MyApp> {
   Locale _locale = const Locale('zh', 'CN');
 
@@ -103,6 +119,7 @@ class _MyAppState extends State<MyApp> {
     getIt.registerLazySingleton<Locale>(() => _locale);
     return MaterialApp.router(
       locale: _locale,
+      scrollBehavior: MyCustomScrollBehavior(),
       theme: ThemeData(
         fontFamily:
             getIt<Locale>().languageCode == "en" ? 'Roboto' : 'Noto Sans SC',
