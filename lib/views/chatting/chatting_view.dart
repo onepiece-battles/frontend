@@ -68,16 +68,22 @@ class _ChattingViewState extends State<ChattingView> {
   }
 
   /// ROBUST BACK NAVIGATION & CACHING
+  /// ROBUST BACK NAVIGATION & CACHING
   void _clearActiveChat() {
     // 1. Cache the draft before leaving
     if (activeConversationId.isNotEmpty) {
       chatIdToCachedMessage[activeConversationId] = typingController.text;
     }
-    // 2. Clear focus
-    FocusScope.of(context).unfocus();
-    // 3. Update Provider
+
+    // REMOVE THIS LINE:
+    // FocusScope.of(context).unfocus();
+
+    // 2. Update Provider
+    // This triggers a rebuild. The ChatView will be unmounted,
+    // which automatically disposes the TextField and closes the keyboard.
     Provider.of<ChatNotifier>(context, listen: false).setActiveChat(null);
-    // 4. Reset local UI state
+
+    // 3. Reset local UI state
     if (mounted) {
       setState(() {
         activeConversationId = "";
@@ -86,6 +92,7 @@ class _ChattingViewState extends State<ChattingView> {
       });
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -571,7 +578,7 @@ class _ChattingViewState extends State<ChattingView> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   EmojiSelection(
-                                      editingController: typingController),
+                                      editingController: typingController, focusNode: focusNode,),
                                   IconButton(
                                     onPressed: () async {
                                       final XFile? pickedImage =
