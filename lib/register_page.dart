@@ -10,12 +10,14 @@ import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'components/icp.dart';
+import 'components/web_socket_service.dart';
 import 'config/api_initializer.dart';
 import 'config/resource_permission_manager.dart';
 import 'constants/button_style.dart';
 import 'constants/path_constants.dart';
 import 'home_page.dart';
 import 'main.dart';
+import 'package:provider/provider.dart';
 
 GetIt getIt = GetIt.instance;
 const Map<String, Locale> localesMap = {
@@ -419,10 +421,9 @@ class _RegisterPageState extends State<RegisterPage> {
           usernameController.text, passwordController.text);
       if (!mounted) return; // ensure widget still in tree before using context
       context.goNamed(
-        'userHome',
-        extra: getIt<User>().id,
-        pathParameters: {'name': getIt<User>().nickname},
+        'characters',
       );
+      context.read<WebSocketService>().connect(value.user!.id);
     } catch (e, st) {
       debugPrint('Login after register failed: $e\n$st');
       if (!mounted) return;

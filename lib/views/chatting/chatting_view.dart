@@ -89,10 +89,23 @@ class _ChattingViewState extends State<ChattingView> {
 
   @override
   Widget build(BuildContext context) {
-    // WATCH: This triggers a rebuild whenever ChatNotifier calls notifyListeners()
-    // This allows Chat B's unread count to update even if you are in Chat A.
+    // 1. WATCH the Notifier. Any update (including WS new chat) triggers this build.
     final chatNotifier = context.watch<ChatNotifier>();
-    final chats = chatNotifier.chats;
+
+    // 2. CREATE A SORTED COPY of the list.
+    // We create a new list reference so Flutter knows to repaint.
+    final List<Chat> sortedChats = List<Chat>.from(chatNotifier.chats);
+
+    // 3. SORT LOGIC:
+    // If message is null, it's a brand new chat -> give it current time (top priority).
+    // Otherwise use the message timestamp.
+    sortedChats.sort((a, b) {
+      final int timeA = a.message?.creationRecord?.actionTimestamp ?? DateTime.now().millisecondsSinceEpoch;
+      final int timeB = b.message?.creationRecord?.actionTimestamp ?? DateTime.now().millisecondsSinceEpoch;
+      // Descending order (Newest first)
+      return timeB.compareTo(timeA);
+    });
+
     final String? activeChatId = chatNotifier.activeChatId;
     final Chat? activeChat = chatNotifier.activeChat;
 
@@ -146,7 +159,8 @@ class _ChattingViewState extends State<ChattingView> {
               ),
             );
           }
-          return _buildChatList(context, chats, activeChatId, isMobile: true);
+          // Pass sortedChats here
+          return _buildChatList(context, sortedChats, activeChatId, isMobile: true);
         }
 
         // --- DESKTOP LAYOUT ---
@@ -156,8 +170,9 @@ class _ChattingViewState extends State<ChattingView> {
           children: [
             SizedBox(
               width: 300,
+              // Pass sortedChats here
               child: _buildChatList(
-                  context, chats, activeChatId, isMobile: false),
+                  context, sortedChats, activeChatId, isMobile: false),
             ),
             const VerticalDivider(
               thickness: 1.2,
@@ -194,6 +209,16 @@ class _ChattingViewState extends State<ChattingView> {
   // ---------------------------------------------------------------------------
   Widget _buildChatList(BuildContext context, List<Chat> chats,
       String? activeChatId, {required bool isMobile}) {
+
+    // Apply Search Filter locally on the sorted list
+    final searchText = searchChattingController.text.toLowerCase();
+    final displayChats = searchText.isEmpty
+        ? chats
+        : chats.where((chat) {
+      final name = chat.group! ? chat.name! : getTargetMember(chat).nickname;
+      return (name ?? "").toLowerCase().contains(searchText);
+    }).toList();
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
@@ -208,7 +233,10 @@ class _ChattingViewState extends State<ChattingView> {
                   height: 35,
                   child: TextFormField(
                     controller: searchChattingController,
-                    onChanged: (value) {},
+                    onChanged: (value) {
+                      // Trigger rebuild when searching
+                      setState(() {});
+                    },
                     decoration: InputDecoration(
                       labelStyle: OnepieceFonts.dropDownItemStyle,
                       floatingLabelBehavior: FloatingLabelBehavior.never,
@@ -234,12 +262,12 @@ class _ChattingViewState extends State<ChattingView> {
 
         Expanded(
           child: ListView.builder(
-            itemCount: chats.length,
+            itemCount: displayChats.length,
             addAutomaticKeepAlives: true,
             itemBuilder: (context, index) {
-              final chat = chats[index];
+              final chat = displayChats[index];
               return ListTile(
-                // Use Key to help Flutter track items if list reorders when new msg comes
+                // Key is crucial for reordering animations/updates
                 key: ValueKey(chat.id),
                 title: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -271,6 +299,12 @@ class _ChattingViewState extends State<ChattingView> {
                                     chat.message!.creationRecord!.actionTimestamp!,
                                     context),
                                 style: OnepieceFonts.boldLiteFancySmallFont,
+                              )
+                            else
+                            // Fallback for new chats without messages
+                              const Text(
+                                "New",
+                                style: TextStyle(fontSize: 10, color: Colors.green),
                               ),
 
                             // --- UNREAD COUNT BADGE ---
@@ -317,8 +351,6 @@ class _ChattingViewState extends State<ChattingView> {
                           maxLines: 1,
                           style: OnepieceFonts.superSmallContentStyle,
                           "${chat.members.firstWhere((e) => e.id == chat.message!.userId!).nickname}: ${chat.message!.content != null ? chat.message!.content!.split('\n').first : AppLocalizations.of(context)!.image}")
-                    else
-                      const Text(""),
                   ],
                 ),
                 selected: activeChatId == chat.id,
@@ -656,8 +688,7 @@ class _ChattingViewState extends State<ChattingView> {
 
                                     Provider.of<ChatNotifier>(context,
                                         listen: false)
-                                        .sendChatMessage(
-                                        activeChatId, jsonMessage);
+                                        .sendChatMessage( jsonMessage);
 
                                     chatIdToCachedImage[activeChatId] =
                                     null;
