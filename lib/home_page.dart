@@ -21,6 +21,7 @@ import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:one_piece_battles_flutter/utils/image_helper.dart';
 import 'package:one_piece_battles_flutter/popup/create_feedback_popup.dart';
 import 'package:openapi/api.dart';
+import 'components/web_socket_service.dart';
 import 'constants/onepiece_colors.dart';
 import 'main.dart';
 
@@ -551,6 +552,7 @@ class HomePageState extends State<HomePage> {
                                       getIt<UserDao>()
                                           .logout(LogoutRequest(userId: getIt<User>().id))
                                           .then((value) {
+                                        getIt<WebSocketService>().disconnect();
                                         getIt.registerLazySingleton<User>(() =>
                                             User(id: "", username: "", nickname: ""));
                                       });

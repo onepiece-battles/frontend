@@ -43,6 +43,7 @@ class ChatNotifier with ChangeNotifier {
     if (data is Message) {
       _handleIncomingMessage(data);
     } else if (data is Chat) {
+      print('data is chat');
       _handleChatUpdate(data);
     }
     // Any other global state changes might also trigger notifyListeners()
@@ -62,8 +63,8 @@ class ChatNotifier with ChangeNotifier {
     _chats.insert(0, removedChat);
 
     // 2. Update the main chats list (e.g., last message, unread count)
-    int chatIndex =
-        _chats.indexWhere((chat) => chat.id == message.conversationId);
+    // int chatIndex =
+    //     _chats.indexWhere((chat) => chat.id == message.conversationId);
     // if (chatIndex != -1) {
     // int newUnreadCount = _chats[chatIndex].unreadCount;
     // Increment unread count only if chat is NOT currently active
@@ -105,7 +106,7 @@ class ChatNotifier with ChangeNotifier {
   }
 
   // Method for sending messages (can be called from ChatPage)
-  void sendChatMessage(String chatId, String content) {
+  void sendChatMessage(String content) {
     // final tempMessageId = DateTime.now()
     //     .millisecondsSinceEpoch
     //     .toString(); // For optimistic update

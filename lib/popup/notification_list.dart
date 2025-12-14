@@ -1,10 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart' hide Notification;
 import 'package:get_it/get_it.dart';
-import 'package:one_piece_battles_flutter/repository/chatting_dao.dart';
 import 'package:one_piece_battles_flutter/repository/notification_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
 import 'package:popover/popover.dart';
+import 'package:provider/provider.dart';
+import '../components/chat_notifier.dart';
 import '../constants/onepiece_colors.dart';
 import '../constants/onepiece_fonts.dart';
 import '../l10n/app_localizations.dart';
@@ -96,6 +99,23 @@ class _NotificationListState extends State<NotificationList> {
                                           children: [
                                             IconButton(
                                                 onPressed: () async {
+                                                  Navigator.of(ctx).pop();
+                                                  final CreateChatRequest
+                                                  request =
+                                                  CreateChatRequest(
+                                                      type: MessageType
+                                                          .CREATE_CHAT,
+                                                      ids: [
+                                                        e.notificationSourceId!,
+                                                        e.notificationTargetId!
+                                                      ]);
+                                                  final String jsonMessage =
+                                                  jsonEncode(
+                                                      request.toJson());
+                                                  Provider.of<ChatNotifier>(
+                                                      context,
+                                                      listen: false)
+                                                      .sendChatMessage(jsonMessage);
                                                   // Use async for await
                                                   try {
                                                     await getIt<UserDao>()
@@ -109,15 +129,7 @@ class _NotificationListState extends State<NotificationList> {
                                                             CloseNotificationRequest(
                                                                 notificationId:
                                                                     e.id));
-                                                    await getIt<ChattingDao>()
-                                                        .createChat(
-                                                            CreateChatRequest(
-                                                                type: MessageType
-                                                                    .CREATE_CHAT,
-                                                                ids: [
-                                                          e.notificationSourceId!,
-                                                          e.notificationTargetId!
-                                                        ]));
+
                                                     notificationState(() {
                                                       _internalNotifications
                                                           .removeWhere((el) =>
@@ -178,6 +190,7 @@ class _NotificationListState extends State<NotificationList> {
                                             onPressed: () async {
                                               // Use async for await
                                               try {
+                                                Navigator.of(ctx).pop();
                                                 await getIt<NotificationDao>()
                                                     .close(
                                                         CloseNotificationRequest(
@@ -188,8 +201,8 @@ class _NotificationListState extends State<NotificationList> {
                                                       .removeWhere((el) =>
                                                           el.id == e.id);
                                                 });
-                                                widget.onRefresh
-                                                    ?.call(); // Notify parent
+                                                // widget.onRefresh
+                                                //     ?.call(); // Notify parent
                                               } catch (error) {
                                                 debugPrint(
                                                     'Error closing notification: $error');

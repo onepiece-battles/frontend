@@ -42,6 +42,7 @@ void getItSetUp() {
   getIt.registerLazySingleton<EmailDao>(() => EmailDao.empty());
   getIt.registerLazySingleton<NotificationDao>(() => NotificationDao.empty());
   getIt.registerLazySingleton<MessageDao>(() => MessageDao.empty());
+  getIt.registerLazySingleton<WebSocketService>(() => WebSocketService());
   getIt.registerLazySingleton<User>(
       () => User(id: "", username: "", nickname: ""));
 }
