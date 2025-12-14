@@ -6,7 +6,8 @@ import '../constants/onepiece_colors.dart';
 
 class EmojiSelection extends StatefulWidget {
   final TextEditingController editingController;
-  const EmojiSelection({super.key, required this.editingController});
+  final   FocusNode focusNode;
+  const EmojiSelection({super.key, required this.editingController, required this.focusNode});
 
   @override
   State<EmojiSelection> createState() => _EmojiSelectionState();
@@ -14,6 +15,7 @@ class EmojiSelection extends StatefulWidget {
 
 class _EmojiSelectionState extends State<EmojiSelection> {
   TextEditingController emojiController = TextEditingController();
+
 
   static const config = Config(
     height: 250,
@@ -113,6 +115,7 @@ class _EmojiSelectionState extends State<EmojiSelection> {
     if (cursorPosition < 0) {
       // If no cursor position, add to end
       widget.editingController.text += emoji.emoji;
+      widget.focusNode.requestFocus();
     } else {
       final newText =
           text.replaceRange(selection.start, selection.end, emoji.emoji);
