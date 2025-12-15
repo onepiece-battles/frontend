@@ -38,6 +38,11 @@ class _ChattingViewState extends State<ChattingView> {
   TextEditingController searchChattingController = TextEditingController();
   TextEditingController typingController = TextEditingController();
   FocusNode focusNode = FocusNode();
+  // 1. ADD THIS CONTROLLER
+  TextEditingController chatNameController = TextEditingController();
+
+  // 2. ADD THIS TRACKER (to prevent overwriting text while typing)
+  String? _currentNameChatId;
 
   // Local State Caches
   Map<String, Message?> chatIdToRepliedMessage = {};
@@ -64,6 +69,7 @@ class _ChattingViewState extends State<ChattingView> {
     searchChattingController.dispose();
     typingController.dispose();
     focusNode.dispose();
+    chatNameController.dispose();
     super.dispose();
   }
 
@@ -93,7 +99,6 @@ class _ChattingViewState extends State<ChattingView> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     // 1. WATCH the Notifier. Any update (including WS new chat) triggers this build.
@@ -107,8 +112,10 @@ class _ChattingViewState extends State<ChattingView> {
     // If message is null, it's a brand new chat -> give it current time (top priority).
     // Otherwise use the message timestamp.
     sortedChats.sort((a, b) {
-      final int timeA = a.message?.creationRecord?.actionTimestamp ?? DateTime.now().millisecondsSinceEpoch;
-      final int timeB = b.message?.creationRecord?.actionTimestamp ?? DateTime.now().millisecondsSinceEpoch;
+      final int timeA = a.message?.creationRecord?.actionTimestamp ??
+          DateTime.now().millisecondsSinceEpoch;
+      final int timeB = b.message?.creationRecord?.actionTimestamp ??
+          DateTime.now().millisecondsSinceEpoch;
       // Descending order (Newest first)
       return timeB.compareTo(timeA);
     });
@@ -167,7 +174,8 @@ class _ChattingViewState extends State<ChattingView> {
             );
           }
           // Pass sortedChats here
-          return _buildChatList(context, sortedChats, activeChatId, isMobile: true);
+          return _buildChatList(context, sortedChats, activeChatId,
+              isMobile: true);
         }
 
         // --- DESKTOP LAYOUT ---
@@ -178,8 +186,8 @@ class _ChattingViewState extends State<ChattingView> {
             SizedBox(
               width: 300,
               // Pass sortedChats here
-              child: _buildChatList(
-                  context, sortedChats, activeChatId, isMobile: false),
+              child: _buildChatList(context, sortedChats, activeChatId,
+                  isMobile: false),
             ),
             const VerticalDivider(
               thickness: 1.2,
@@ -191,19 +199,19 @@ class _ChattingViewState extends State<ChattingView> {
             Expanded(
               child: (activeChatId != null && activeChat != null)
                   ? _buildChatView(
-                context,
-                activeChat,
-                activeChatId,
-                messages,
-                isMobile: false,
-              )
+                      context,
+                      activeChat,
+                      activeChatId,
+                      messages,
+                      isMobile: false,
+                    )
                   : Center(
-                child: ImageHelper.getSvgIconWithColor(
-                    'images/svgs/ship.svg',
-                    200,
-                    200,
-                    OnepieceColors.liteFancyBlue),
-              ),
+                      child: ImageHelper.getSvgIconWithColor(
+                          'images/svgs/ship.svg',
+                          200,
+                          200,
+                          OnepieceColors.liteFancyBlue),
+                    ),
             ),
           ],
         );
@@ -214,17 +222,18 @@ class _ChattingViewState extends State<ChattingView> {
   // ---------------------------------------------------------------------------
   // LEFT SIDE: Chat List
   // ---------------------------------------------------------------------------
-  Widget _buildChatList(BuildContext context, List<Chat> chats,
-      String? activeChatId, {required bool isMobile}) {
-
+  Widget _buildChatList(
+      BuildContext context, List<Chat> chats, String? activeChatId,
+      {required bool isMobile}) {
     // Apply Search Filter locally on the sorted list
     final searchText = searchChattingController.text.toLowerCase();
     final displayChats = searchText.isEmpty
         ? chats
         : chats.where((chat) {
-      final name = chat.group! ? chat.name! : getTargetMember(chat).nickname;
-      return (name ?? "").toLowerCase().contains(searchText);
-    }).toList();
+            final name =
+                chat.group! ? chat.name! : getTargetMember(chat).nickname;
+            return name.toLowerCase().contains(searchText);
+          }).toList();
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
@@ -249,10 +258,10 @@ class _ChattingViewState extends State<ChattingView> {
                       floatingLabelBehavior: FloatingLabelBehavior.never,
                       disabledBorder: const OutlineInputBorder(
                           borderSide:
-                          BorderSide(color: OnepieceColors.menuHoverColor)),
+                              BorderSide(color: OnepieceColors.menuHoverColor)),
                       enabledBorder: const OutlineInputBorder(
                           borderSide:
-                          BorderSide(color: OnepieceColors.menuHoverColor)),
+                              BorderSide(color: OnepieceColors.menuHoverColor)),
                       focusedBorder: const OutlineInputBorder(
                           borderSide: BorderSide(
                               color: OnepieceColors.fancyGreen, width: 1.5)),
@@ -266,7 +275,6 @@ class _ChattingViewState extends State<ChattingView> {
             ChattingOptions(context: context)
           ],
         ),
-
         Expanded(
           child: ListView.builder(
             itemCount: displayChats.length,
@@ -303,22 +311,26 @@ class _ChattingViewState extends State<ChattingView> {
                             if (chat.message != null)
                               Text(
                                 TimeHelper.humanDateFromTimestamp(
-                                    chat.message!.creationRecord!.actionTimestamp!,
+                                    chat.message!.creationRecord!
+                                        .actionTimestamp!,
                                     context),
                                 style: OnepieceFonts.boldLiteFancySmallFont,
                               )
                             else
-                            // Fallback for new chats without messages
+                              // Fallback for new chats without messages
                               const Text(
                                 "New",
-                                style: TextStyle(fontSize: 10, color: Colors.green),
+                                style: TextStyle(
+                                    fontSize: 10, color: Colors.green),
                               ),
 
                             // --- UNREAD COUNT BADGE ---
-                            if (chat.unreadCount != null && chat.unreadCount! > 0)
+                            if (chat.unreadCount != null &&
+                                chat.unreadCount! > 0)
                               Container(
                                 margin: const EdgeInsets.only(top: 5),
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 6, vertical: 2),
                                 decoration: BoxDecoration(
                                   color: Colors.red,
                                   borderRadius: BorderRadius.circular(10),
@@ -328,7 +340,9 @@ class _ChattingViewState extends State<ChattingView> {
                                   minHeight: 20,
                                 ),
                                 child: Text(
-                                  chat.unreadCount! > 99 ? '99+' : chat.unreadCount.toString(),
+                                  chat.unreadCount! > 99
+                                      ? '99+'
+                                      : chat.unreadCount.toString(),
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 11,
@@ -344,8 +358,8 @@ class _ChattingViewState extends State<ChattingView> {
                     const SizedBox(height: 8),
                     // Draft Indicator OR Last Message Preview
                     if ((chatIdToRepliedMessage[chat.id] != null ||
-                        (chatIdToCachedMessage[chat.id] != null &&
-                            chatIdToCachedMessage[chat.id]!.isNotEmpty)) &&
+                            (chatIdToCachedMessage[chat.id] != null &&
+                                chatIdToCachedMessage[chat.id]!.isNotEmpty)) &&
                         activeChatId != chat.id)
                       Text(
                         "[${AppLocalizations.of(context)!.draft}]",
@@ -391,14 +405,15 @@ class _ChattingViewState extends State<ChattingView> {
                   // 4. Restore state for NEW chat
                   typingController.text =
                       chatIdToCachedMessage[newChatId] ?? "";
-                  inputPreMessageNotifier.value = chatIdToRepliedMessage[newChatId];
+                  inputPreMessageNotifier.value =
+                      chatIdToRepliedMessage[newChatId];
 
                   // 5. Restore scroll
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     if (chatIdToScrollOffset.containsKey(newChatId)) {
                       if (scrollController.hasClients) {
-                        scrollController.jumpTo(
-                            chatIdToScrollOffset[newChatId]!);
+                        scrollController
+                            .jumpTo(chatIdToScrollOffset[newChatId]!);
                       }
                     } else {
                       _scrollToBottom(0);
@@ -419,6 +434,13 @@ class _ChattingViewState extends State<ChattingView> {
   Widget _buildChatView(BuildContext context, Chat activeChat,
       String activeChatId, List<Message> messages,
       {required bool isMobile}) {
+    if (_currentNameChatId != activeChatId) {
+      _currentNameChatId = activeChatId;
+      // If it's a group, use group name, else use the other person's nickname
+      chatNameController.text = activeChat.group!
+          ? (activeChat.name ?? "")
+          : getTargetMember(activeChat).nickname;
+    }
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -443,6 +465,9 @@ class _ChattingViewState extends State<ChattingView> {
                           onPressed: () {
                             _clearActiveChat();
                           },
+                          hoverColor: Colors.transparent,
+                          highlightColor: Colors.transparent,
+                          splashColor: Colors.transparent,
                         ),
                       ),
                     Expanded(
@@ -467,7 +492,10 @@ class _ChattingViewState extends State<ChattingView> {
                     scaffold.openEndDrawer();
                   }
                 },
-                splashRadius: 20,
+                hoverColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                splashColor: Colors.transparent,
+                splashRadius: 1,
                 icon: const Icon(
                   Icons.more_horiz,
                   color: OnepieceColors.fancyBlue,
@@ -507,6 +535,9 @@ class _ChattingViewState extends State<ChattingView> {
                         indent: 10,
                         endIndent: 10,
                         color: Colors.black12),
+                    // 2. ADD THIS NEW WIDGET
+                    if (activeChat.group!)
+                      _buildEditableChatName(activeChat, context),
                   ],
                 ),
               ),
@@ -536,9 +567,9 @@ class _ChattingViewState extends State<ChattingView> {
                                 .firstWhere((user) => user.id == msg.userId),
                             preMessageNickname: msg.preMessage != null
                                 ? activeChat.members
-                                .firstWhere((e) =>
-                            e.id == msg.preMessage!.userId!)
-                                .nickname
+                                    .firstWhere(
+                                        (e) => e.id == msg.preMessage!.userId!)
+                                    .nickname
                                 : null,
                             replyMessage: (msg) {
                               chatIdToRepliedMessage[msg.conversationId!] = msg;
@@ -578,12 +609,14 @@ class _ChattingViewState extends State<ChattingView> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   EmojiSelection(
-                                      editingController: typingController, focusNode: focusNode,),
+                                    editingController: typingController,
+                                    focusNode: focusNode,
+                                  ),
                                   IconButton(
                                     onPressed: () async {
                                       final XFile? pickedImage =
-                                      await OnepieceImagePicker
-                                          .pickWebImage();
+                                          await OnepieceImagePicker
+                                              .pickWebImage();
 
                                       if (!context.mounted ||
                                           pickedImage == null) {
@@ -591,7 +624,7 @@ class _ChattingViewState extends State<ChattingView> {
                                       }
 
                                       chatIdToCachedImage[activeChatId] =
-                                      await pickedImage.readAsBytes();
+                                          await pickedImage.readAsBytes();
                                       buttonState(() {});
                                       Future.delayed(Duration.zero, () {
                                         if (focusNode.canRequestFocus) {
@@ -628,8 +661,7 @@ class _ChattingViewState extends State<ChattingView> {
                                             50,
                                             2,
                                             Colors.white,
-                                            chatIdToCachedImage[
-                                            activeChatId]!),
+                                            chatIdToCachedImage[activeChatId]!),
                                       ),
                                       Positioned(
                                         right: -2,
@@ -637,7 +669,7 @@ class _ChattingViewState extends State<ChattingView> {
                                         child: InkWell(
                                           onTap: () {
                                             chatIdToCachedImage[activeChatId] =
-                                            null;
+                                                null;
                                             buttonState(() {});
                                           },
                                           child: const CircleAvatar(
@@ -667,60 +699,60 @@ class _ChattingViewState extends State<ChattingView> {
                                 onSubmitted: !canSend
                                     ? null
                                     : (_) {
-                                  buttonState(() {
-                                    final SendMessageRequest request =
-                                    SendMessageRequest(
-                                      content: typingController.text
-                                          .trim()
-                                          .isNotEmpty
-                                          ? typingController.text.trim()
-                                          : null,
-                                      userId: getIt<User>().id,
-                                      profileImage: chatIdToCachedImage[
-                                      activeChatId] ==
-                                          null
-                                          ? null
-                                          : Base64Helper.encode(
-                                          chatIdToCachedImage[
-                                          activeChatId]!),
-                                      conversationId: activeChat.id!,
-                                      type: MessageType.SEND_MESSAGE,
-                                      preMessageId:
-                                      inputPreMessageNotifier
-                                          .value?.id,
-                                    );
+                                        buttonState(() {
+                                          final SendMessageRequest request =
+                                              SendMessageRequest(
+                                            content: typingController.text
+                                                    .trim()
+                                                    .isNotEmpty
+                                                ? typingController.text.trim()
+                                                : null,
+                                            userId: getIt<User>().id,
+                                            profileImage: chatIdToCachedImage[
+                                                        activeChatId] ==
+                                                    null
+                                                ? null
+                                                : Base64Helper.encode(
+                                                    chatIdToCachedImage[
+                                                        activeChatId]!),
+                                            conversationId: activeChat.id!,
+                                            type: MessageType.SEND_MESSAGE,
+                                            preMessageId:
+                                                inputPreMessageNotifier
+                                                    .value?.id,
+                                          );
 
-                                    final String jsonMessage =
-                                    jsonEncode(request.toJson());
+                                          final String jsonMessage =
+                                              jsonEncode(request.toJson());
 
-                                    Provider.of<ChatNotifier>(context,
-                                        listen: false)
-                                        .sendChatMessage( jsonMessage);
+                                          Provider.of<ChatNotifier>(context,
+                                                  listen: false)
+                                              .sendChatMessage(jsonMessage);
 
-                                    chatIdToCachedImage[activeChatId] =
-                                    null;
-                                    chatIdToRepliedMessage[activeChatId] =
-                                    null;
-                                    chatIdToCachedMessage[activeChatId] =
-                                    null;
-                                    inputPreMessageNotifier.value = null;
-                                    typingController.clear();
+                                          chatIdToCachedImage[activeChatId] =
+                                              null;
+                                          chatIdToRepliedMessage[activeChatId] =
+                                              null;
+                                          chatIdToCachedMessage[activeChatId] =
+                                              null;
+                                          inputPreMessageNotifier.value = null;
+                                          typingController.clear();
 
-                                    Future.delayed(Duration.zero, () {
-                                      if (focusNode.canRequestFocus) {
-                                        focusNode.requestFocus();
-                                      }
-                                      _scrollToBottom(0);
-                                    });
-                                  });
-                                },
+                                          Future.delayed(Duration.zero, () {
+                                            if (focusNode.canRequestFocus) {
+                                              focusNode.requestFocus();
+                                            }
+                                            _scrollToBottom(0);
+                                          });
+                                        });
+                                      },
                                 decoration: const InputDecoration(
                                   contentPadding: EdgeInsets.symmetric(
                                       horizontal: 10, vertical: 0),
                                   isDense: true,
                                   labelStyle: OnepieceFonts.dropDownItemStyle,
                                   floatingLabelBehavior:
-                                  FloatingLabelBehavior.never,
+                                      FloatingLabelBehavior.never,
                                   border: InputBorder.none,
                                   focusedBorder: InputBorder.none,
                                   disabledBorder: InputBorder.none,
@@ -742,24 +774,24 @@ class _ChattingViewState extends State<ChattingView> {
                                             child: Container(
                                               decoration: const BoxDecoration(
                                                   borderRadius:
-                                                  BorderRadius.all(
-                                                      Radius.circular(5)),
+                                                      BorderRadius.all(
+                                                          Radius.circular(5)),
                                                   color: OnepieceColors
                                                       .liteFancyGreen),
                                               child: Padding(
                                                 padding:
-                                                const EdgeInsets.all(4.0),
+                                                    const EdgeInsets.all(4.0),
                                                 child: Column(
                                                   mainAxisAlignment:
-                                                  MainAxisAlignment.start,
+                                                      MainAxisAlignment.start,
                                                   crossAxisAlignment:
-                                                  CrossAxisAlignment.end,
+                                                      CrossAxisAlignment.end,
                                                   mainAxisSize:
-                                                  MainAxisSize.min,
+                                                      MainAxisSize.min,
                                                   children: [
                                                     if (chatIdToRepliedMessage[
-                                                    activeChatId]!
-                                                        .content !=
+                                                                activeChatId]!
+                                                            .content !=
                                                         null)
                                                       Text(
                                                         "${activeChat.members.firstWhere((e) => e.id == chatIdToRepliedMessage[activeChatId]!.userId!).nickname}: ${chatIdToRepliedMessage[activeChatId]!.content!}",
@@ -767,15 +799,15 @@ class _ChattingViewState extends State<ChattingView> {
                                                             .tagStyle,
                                                       ),
                                                     if (chatIdToRepliedMessage[
-                                                    activeChatId]!
-                                                        .imageContentUri !=
+                                                                activeChatId]!
+                                                            .imageContentUri !=
                                                         null)
                                                       SquareImageLoader(
                                                         key: UniqueKey(),
                                                         uriProvider: () =>
-                                                        chatIdToRepliedMessage[
-                                                        activeChatId]!
-                                                            .imageContentUri!,
+                                                            chatIdToRepliedMessage[
+                                                                    activeChatId]!
+                                                                .imageContentUri!,
                                                         width: 40,
                                                         borderWidth: 1,
                                                       )
@@ -787,9 +819,9 @@ class _ChattingViewState extends State<ChattingView> {
                                           IconButton(
                                             onPressed: () {
                                               chatIdToRepliedMessage[
-                                              activeChatId] = null;
+                                                  activeChatId] = null;
                                               inputPreMessageNotifier.value =
-                                              null;
+                                                  null;
                                               Future.delayed(Duration.zero, () {
                                                 if (focusNode.canRequestFocus) {
                                                   focusNode.requestFocus();
@@ -802,8 +834,9 @@ class _ChattingViewState extends State<ChattingView> {
                                                     .liteFancyGreen,
                                                 Icons.cancel_rounded),
                                             style: ButtonStyle(
-                                              overlayColor: WidgetStateProperty
-                                                  .all(Colors.transparent),
+                                              overlayColor:
+                                                  WidgetStateProperty.all(
+                                                      Colors.transparent),
                                             ),
                                           )
                                         ],
@@ -847,41 +880,152 @@ class _ChattingViewState extends State<ChattingView> {
   }
 
   Widget getUserWall(Chat activeChat) {
+    // 1. Filter logic
     var members = activeChat.members;
     if (members.length == 2) {
       members =
           members.toList().where((e) => e.id != getIt<User>().id).toList();
     }
-    return SizedBox(
-      width: 180,
-      height: 120,
-      child: GridView.builder(
-        padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
-        itemCount: members.length,
-        shrinkWrap: true,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 4,
-          mainAxisSpacing: 2,
-          crossAxisSpacing: 2,
-          childAspectRatio: 1,
+
+    return ConstrainedBox(
+      constraints: const BoxConstraints(
+        maxHeight: 500,
+      ),
+      child: SizedBox(
+        width: 180,
+        child: GridView.builder(
+          padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
+          itemCount: members.length + 1,
+          shrinkWrap: true,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 4,
+            mainAxisSpacing: 8, // Increased spacing between rows
+            crossAxisSpacing: 4,
+            // 2. IMPORTANT: Ratio < 1 makes the cell taller to fit the text
+            childAspectRatio: 0.70,
+          ),
+          itemBuilder: (context, index) {
+            // --- OPTION A: Add Button ---
+            if (index == members.length) {
+              return Column(
+                children: [
+                  Container(
+                    height: 40,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(3),
+                      border: Border.all(
+                          color: OnepieceColors.fancyBlue, width: 1.5),
+                      color: Colors.white,
+                    ),
+                    child: IconButton(
+                      splashRadius: 1,
+                      iconSize: 20,
+                      disabledColor: Colors.transparent,
+                      hoverColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
+                      splashColor: Colors.transparent,
+                      focusColor: Colors.transparent,
+                      color: OnepieceColors.fancyBlue,
+                      onPressed: () {},
+                      icon: const Icon(Icons.add,),
+                    ),
+                  ),
+                ],
+              );
+            }
+
+            // --- OPTION B: User Profile ---
+            final member = members[index];
+            final uri = member.imageUri ?? '';
+
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Image takes up available vertical space
+                SquareImageLoader(
+                  uriProvider: () => uri,
+                  width: 40, // Acts as max width/quality
+                  borderWidth: 2,
+                ),
+                const SizedBox(height: 2),
+                // Username Text
+                Text(
+                  member.nickname,
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow:
+                      TextOverflow.ellipsis, // cuts off long names: "Luff..."
+                  style: const TextStyle(
+                    fontSize: 9, // Small font to fit
+                    color: OnepieceColors.fancyBlue,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            );
+          },
         ),
-        itemBuilder: (context, index) {
-          final uri = members[index].imageUri ?? '';
-          return InkWell(
-            splashColor: Colors.transparent,
-            hoverColor: Colors.transparent,
-            onTap: () {},
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(3),
-              child: ImageLazyLoader(
-                uriProvider: () => uri,
-                width: 30,
-                borderWidth: 2,
-                borderRadios: 2,
+      ),
+    );
+  }
+
+  Widget _buildEditableChatName(Chat activeChat, BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            AppLocalizations.of(context)!
+                .name, // Ensure you have this key or use string
+            style:
+                const TextStyle(fontSize: 10, color: OnepieceColors.fancyBlue),
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: chatNameController,
+                  style: OnepieceFonts.smallContentFancyBlueStyle,
+                  decoration: const InputDecoration(
+                    isDense: true,
+                    contentPadding: EdgeInsets.symmetric(vertical: 5),
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.black12),
+                    ),
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: OnepieceColors.fancyGreen),
+                    ),
+                  ),
+                ),
               ),
-            ),
-          );
-        },
+              IconButton(
+                onPressed: () {
+                  final newName = chatNameController.text.trim();
+                  if (newName.isNotEmpty && newName != activeChat.name) {
+                    // CALL YOUR API HERE
+                    // Example:
+                    // Provider.of<ChatNotifier>(context, listen: false)
+                    //    .updateGroupName(activeChat.id!, newName);
+
+                    // Close the drawer (Optional)
+                    Navigator.of(context).pop();
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Group name updated")),
+                    );
+                  }
+                },
+                icon: const Icon(Icons.check_circle,
+                    color: OnepieceColors.fancyGreen, size: 20),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                splashRadius: 20,
+              )
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -896,7 +1040,7 @@ class _ChattingViewState extends State<ChattingView> {
 
   Widget getLeading(List<String> imageUrls) {
     final List<String> displayedImages =
-    imageUrls.length > 9 ? imageUrls.sublist(0, 9) : imageUrls;
+        imageUrls.length > 9 ? imageUrls.sublist(0, 9) : imageUrls;
     return Container(
       width: 45,
       height: 45,
