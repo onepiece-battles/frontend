@@ -578,65 +578,65 @@ class HomePageState extends State<HomePage> {
                   )),
                 ],
               ),
-              Container(
-                decoration: const BoxDecoration(
-                  color: OnepieceColors.menuBackgroundColor,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(5.0),
-                  child: TextButton(
-                    style: TextButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      padding: const EdgeInsets.all(5),
-                      backgroundColor: OnepieceColors.menuBackgroundColor,
-                      foregroundColor: OnepieceColors.menuHoverColor,
-                      elevation: 1.0,
-                    ),
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: ((context) {
-                          return Dialog(
-                            surfaceTintColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10.0),
-                            ),
-                            alignment: AlignmentDirectional.bottomStart,
-                            child: const CreateFeedbackPopup(),
-                          );
-                        }),
-                      );
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 5),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          ImageHelper.getSvgIcon(
-                            'images/svgs/menu_question.svg',
-                            21,
-                            21,
-                          ),
-                          if (_drawerWidth > _shrinkLimitWidth)
-                            const SizedBox(width: 6),
-                          if (_drawerWidth > _shrinkLimitWidth)
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 2.0),
-                              child: Text(
-                                  AppLocalizations.of(context)!.feedback,
-                                  style: const TextStyle(
-                                      color: OnepieceColors.menuTextColor,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500)),
-                            )
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+              // Container(
+              //   decoration: const BoxDecoration(
+              //     color: OnepieceColors.menuBackgroundColor,
+              //   ),
+              //   child: Padding(
+              //     padding: const EdgeInsets.all(5.0),
+              //     child: TextButton(
+              //       style: TextButton.styleFrom(
+              //         shape: RoundedRectangleBorder(
+              //           borderRadius: BorderRadius.circular(6),
+              //         ),
+              //         padding: const EdgeInsets.all(5),
+              //         backgroundColor: OnepieceColors.menuBackgroundColor,
+              //         foregroundColor: OnepieceColors.menuHoverColor,
+              //         elevation: 1.0,
+              //       ),
+              //       onPressed: () {
+              //         showDialog(
+              //           context: context,
+              //           builder: ((context) {
+              //             return Dialog(
+              //               surfaceTintColor: Colors.white,
+              //               shape: RoundedRectangleBorder(
+              //                 borderRadius: BorderRadius.circular(10.0),
+              //               ),
+              //               alignment: AlignmentDirectional.bottomStart,
+              //               child: const CreateFeedbackPopup(),
+              //             );
+              //           }),
+              //         );
+              //       },
+              //       child: Padding(
+              //         padding: const EdgeInsets.symmetric(vertical: 5),
+              //         child: Row(
+              //           mainAxisAlignment: MainAxisAlignment.start,
+              //           children: [
+              //             ImageHelper.getSvgIcon(
+              //               'images/svgs/menu_question.svg',
+              //               21,
+              //               21,
+              //             ),
+              //             if (_drawerWidth > _shrinkLimitWidth)
+              //               const SizedBox(width: 6),
+              //             if (_drawerWidth > _shrinkLimitWidth)
+              //               Padding(
+              //                 padding: const EdgeInsets.only(bottom: 2.0),
+              //                 child: Text(
+              //                     AppLocalizations.of(context)!.feedback,
+              //                     style: const TextStyle(
+              //                         color: OnepieceColors.menuTextColor,
+              //                         fontSize: 16,
+              //                         fontWeight: FontWeight.w500)),
+              //               )
+              //           ],
+              //         ),
+              //       ),
+              //     ),
+              //   ),
+              // ),
             ],
           ),
         ),

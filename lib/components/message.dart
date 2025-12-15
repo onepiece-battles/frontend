@@ -29,69 +29,75 @@ class MessageItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return isMe
         ? Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const SizedBox(
-                    height: 5,
-                  ),
-                  getContent(context),
-                  if (preMessage != null) getPreMessage(context)
-                ],
-              ),
-              const SizedBox(
-                width: 10,
-              ),
-              SquareImageLoader(
-                  key: UniqueKey(),
-                  uriProvider: () => user.imageUri!,
-                  width: 40,
-                  borderWidth: 2),
-            ],
-          )
-        : Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.end,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 1. WRAP THE SENDER COLUMN IN FLEXIBLE
+        Flexible(
+          child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.end,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Column(
-                children: [
-                  const SizedBox(
-                    height: 7,
-                  ),
-                  SquareImageLoader(
-                      key: UniqueKey(),
-                      uriProvider: () => user.imageUri!,
-                      width: 40,
-                      borderWidth: 2),
-                ],
+              const SizedBox(
+                height: 5,
+              ),
+              getContent(context),
+              if (preMessage != null) getPreMessage(context)
+            ],
+          ),
+        ),
+        const SizedBox(
+          width: 10,
+        ),
+        SquareImageLoader(
+            key: UniqueKey(),
+            uriProvider: () => user.imageUri!,
+            width: 40,
+            borderWidth: 2),
+      ],
+    )
+        : Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Column(
+          children: [
+            const SizedBox(
+              height: 7,
+            ),
+            SquareImageLoader(
+                key: UniqueKey(),
+                uriProvider: () => user.imageUri!,
+                width: 40,
+                borderWidth: 2),
+          ],
+        ),
+        const SizedBox(
+          width: 10,
+        ),
+        // 2. WRAP THE RECEIVER COLUMN IN FLEXIBLE
+        Flexible(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                user.nickname,
+                style: OnepieceFonts.superSmallContentStyle,
               ),
               const SizedBox(
-                width: 10,
+                height: 7,
               ),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    user.nickname,
-                    style: OnepieceFonts.superSmallContentStyle,
-                  ),
-                  const SizedBox(
-                    height: 7,
-                  ),
-                  getContent(context),
-                  if (preMessage != null) getPreMessage(context)
-                ],
-              ),
+              getContent(context),
+              if (preMessage != null) getPreMessage(context)
             ],
-          );
+          ),
+        ),
+      ],
+    );
   }
 
   Widget getContent(BuildContext context) {
