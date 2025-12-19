@@ -74,29 +74,30 @@ class _ChattingViewState extends State<ChattingView> {
   }
 
   /// ROBUST BACK NAVIGATION & CACHING
-  /// ROBUST BACK NAVIGATION & CACHING
   void _clearActiveChat() {
-    // 1. Cache the draft before leaving
+    // 1. Unfocus keyboard
+    FocusScope.of(context).unfocus();
+
+    // 2. Cache current text
     if (activeConversationId.isNotEmpty) {
       chatIdToCachedMessage[activeConversationId] = typingController.text;
     }
 
-    // REMOVE THIS LINE:
-    // FocusScope.of(context).unfocus();
+    // 3. Reset Local Variables
+    // Do NOT call setState here. Let the Provider update trigger the rebuild.
+    // Calling setState immediately before a provider update can cause race conditions.
+    activeConversationId = "";
+    _lastProcessedChatId = "";
+    _currentNameChatId = null;
 
-    // 2. Update Provider
-    // This triggers a rebuild. The ChatView will be unmounted,
-    // which automatically disposes the TextField and closes the keyboard.
+    // 4. Update Provider
+    // This will notify listeners and rebuild the widget tree automatically.
     Provider.of<ChatNotifier>(context, listen: false).setActiveChat(null);
 
-    // 3. Reset local UI state
-    if (mounted) {
-      setState(() {
-        activeConversationId = "";
-        typingController.clear();
-        inputPreMessageNotifier.value = null;
-      });
-    }
+    // 5. Clear controllers manually
+    typingController.clear();
+    chatNameController.clear();
+    inputPreMessageNotifier.value = null;
   }
 
   @override
@@ -374,41 +375,47 @@ class _ChattingViewState extends State<ChattingView> {
                           "${chat.members.firstWhere((e) => e.id == chat.message!.userId!).nickname}: ${chat.message!.content != null ? chat.message!.content!.split('\n').first : AppLocalizations.of(context)!.image}")
                   ],
                 ),
-                selected: activeChatId == chat.id,
+                selected:
+                    activeChatId == chat.id,
                 focusColor: OnepieceColors.liteFancyBlue,
                 selectedTileColor: OnepieceColors.liteFancyBlue,
                 leading: chat.group!
                     ? getLeading(chat.members.map((e) => e.imageUri!).toList())
                     : getSingleLeading(chat),
+                // inside ListView.builder -> ListTile
+                // Inside _buildChatList -> ListView.builder -> ListTile
                 onTap: () {
-                  // 1. Save state for PREVIOUS chat
-                  if (scrollController.hasClients &&
-                      activeConversationId.isNotEmpty) {
-                    chatIdToScrollOffset[activeConversationId] =
-                        scrollController.offset;
-                  }
+                  final newChatId = chat.id!;
+
+                  // 1. If clicking the SAME chat that is already active (rare but possible), do nothing
+                  if (activeConversationId == newChatId) return;
+
+                  // 2. Handle Focus & Cache for the OLD chat (if any)
+                  FocusScope.of(context).unfocus();
                   if (activeConversationId.isNotEmpty) {
                     chatIdToCachedMessage[activeConversationId] =
                         typingController.text;
+                    if (scrollController.hasClients) {
+                      chatIdToScrollOffset[activeConversationId] =
+                          scrollController.offset;
+                    }
                   }
 
-                  // 2. Switch to NEW chat
-                  final newChatId = chat.id!;
-                  Provider.of<ChatNotifier>(context, listen: false)
-                      .setActiveChat(newChatId);
+                  // 3. Update Local State for the NEW chat
+                  activeConversationId = newChatId;
+                  _lastProcessedChatId = ""; // Reset scroll logic
 
-                  // 3. Update local tracker
-                  setState(() {
-                    activeConversationId = newChatId;
-                  });
-
-                  // 4. Restore state for NEW chat
+                  // 4. Restore Drafts for NEW chat
                   typingController.text =
                       chatIdToCachedMessage[newChatId] ?? "";
                   inputPreMessageNotifier.value =
                       chatIdToRepliedMessage[newChatId];
 
-                  // 5. Restore scroll
+                  // 5. Update Provider (This triggers the view switch)
+                  Provider.of<ChatNotifier>(context, listen: false)
+                      .setActiveChat(newChatId);
+
+                  // 6. Handle Scroll (Post Frame)
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     if (chatIdToScrollOffset.containsKey(newChatId)) {
                       if (scrollController.hasClients) {
@@ -457,17 +464,17 @@ class _ChattingViewState extends State<ChattingView> {
                     if (isMobile)
                       Container(
                         margin: const EdgeInsets.only(right: 5),
-                        child: IconButton(
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(),
-                          icon: const Icon(Icons.arrow_back,
-                              size: 24, color: OnepieceColors.fancyBlue),
-                          onPressed: () {
+                        child: GestureDetector(
+                          behavior: HitTestBehavior
+                              .translucent, // Ensures tap is caught
+                          onTap: () {
                             _clearActiveChat();
                           },
-                          hoverColor: Colors.transparent,
-                          highlightColor: Colors.transparent,
-                          splashColor: Colors.transparent,
+                          child: const Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Icon(Icons.arrow_back,
+                                size: 24, color: OnepieceColors.fancyBlue),
+                          ),
                         ),
                       ),
                     Expanded(
@@ -928,7 +935,9 @@ class _ChattingViewState extends State<ChattingView> {
                       focusColor: Colors.transparent,
                       color: OnepieceColors.fancyBlue,
                       onPressed: () {},
-                      icon: const Icon(Icons.add,),
+                      icon: const Icon(
+                        Icons.add,
+                      ),
                     ),
                   ),
                 ],

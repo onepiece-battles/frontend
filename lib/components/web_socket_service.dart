@@ -7,10 +7,11 @@ class WebSocketService {
   // Broadcast controller so multiple UI widgets can listen to updates
   final StreamController<dynamic> _messageController = StreamController.broadcast();
   Stream<dynamic> get incomingMessages => _messageController.stream;
+  Timer? _pingTimer;
 
   WebSocketChannel? _channel;
   String? currentId;
-  final String hostName = 'ws://localhost:8081/chat?userId=';
+  final String hostName = 'wss://onepiece-battles.com/chat?userId=';
 
   // Timer for auto-reconnect
   Timer? _reconnectTimer;
@@ -37,18 +38,35 @@ class WebSocketService {
 
     try {
       print("Connecting to WebSocket...");
+
       _channel = WebSocketChannel.connect(Uri.parse('$hostName$currentId'));
 
       _channel!.stream.listen(
         _onData,
         onError: _onError,
         onDone: _onDone,
-        cancelOnError: true,
+        cancelOnError: false,
       );
+      _startPing();
     } catch (e) {
       print("Connection failed: $e");
       _scheduleReconnect();
     }
+  }
+
+  void _startPing() {
+    _pingTimer?.cancel();
+    // Send a ping every 30 seconds (less than the 60s timeout)
+    _pingTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
+      // Determine what your server expects as a ping.
+      // Often it's just the string "ping" or a specific JSON object.
+      sendMessage('ping');
+    });
+  }
+
+  void _stopPing() {
+    _pingTimer?.cancel();
+    _pingTimer = null;
   }
 
   void sendMessage(String message) {
@@ -86,6 +104,7 @@ class WebSocketService {
 
   void _onDone() {
     print("WebSocket connection closed.");
+    _stopPing();
     _channel = null;
 
     // Only attempt to reconnect if the user didn't intentionally log out
@@ -110,6 +129,7 @@ class WebSocketService {
   /// Call this specifically when the User Logs Out
   void disconnect() {
     print("Disconnecting WebSocket (Intentional Logout)");
+    _stopPing();
 
     // 1. Mark as intentional so we don't reconnect
     _isIntentionalDisconnect = true;
