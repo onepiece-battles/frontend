@@ -6,36 +6,87 @@ import 'package:flutter/cupertino.dart' hide Notification;
 import 'package:flutter/material.dart' hide Notification;
 import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
-import 'package:one_piece_battles_flutter/components/chat_notifier.dart';
-import 'package:one_piece_battles_flutter/popup/notification_list.dart';
-import 'package:one_piece_battles_flutter/repository/notification_dao.dart';
-import 'package:string_validator/string_validator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/app_router.dart';
 import 'package:one_piece_battles_flutter/config/resource_permission_manager.dart';
+import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
-import '../../l10n/app_localizations.dart';
+import 'package:one_piece_battles_flutter/popup/notification_list.dart';
 import 'package:one_piece_battles_flutter/popup/search_popup.dart';
 import 'package:one_piece_battles_flutter/popup/user_navigation.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:one_piece_battles_flutter/utils/image_helper.dart';
-import 'package:one_piece_battles_flutter/popup/create_feedback_popup.dart';
 import 'package:openapi/api.dart';
+import 'package:string_validator/string_validator.dart';
+
+import '../../l10n/app_localizations.dart';
 import 'components/web_socket_service.dart';
-import 'constants/onepiece_colors.dart';
 import 'main.dart';
 
 GetIt getIt = GetIt.instance;
+
+// --- CONFIGURATION & CONSTANTS ---
 const locales = [Locale('zh', 'CN'), Locale('en', 'US')];
 const List<ResourceType> notShownResources = [ResourceType.ROLE];
-
-// Define a ValueNotifier to track the navigation state changes
 final ValueNotifier<String> routeNotifier = ValueNotifier<String>('/home/abc');
+
+class MenuConfig {
+  static const double shrinkLimitWidth = 120;
+  static const double minDrawerWidth = 75;
+  static const double maxDrawerWidth = 350;
+
+  static Map<String, Widget> getResourceIcons() {
+    return {
+      ResourceType.FRUIT.toString(): ImageHelper.getSvgIconWithColor(
+          'images/svgs/devil_fruit.svg', 20, 20, Colors.orange),
+      ResourceType.GROUP.toString():
+      ImageHelper.getSvgIcon('images/svgs/flag.svg', 20, 20),
+      ResourceType.USER.toString():
+      ImageHelper.getSvgIcon('images/svgs/users.svg', 20, 20),
+      ResourceType.BATTLE.toString():
+      ImageHelper.getSvgIcon('images/svgs/cannon.svg', 20, 20),
+      ResourceType.CHARACTER.toString():
+      ImageHelper.getSvgIcon('images/svgs/hat.svg', 20, 20),
+      ResourceType.CHATTING.toString():
+      ImageHelper.getSvgIcon('images/svgs/message1.svg', 20, 20),
+      ResourceType.ISSUE.toString():
+      ImageHelper.getSvgIcon('images/svgs/feedback.svg', 20, 20),
+    };
+  }
+
+  static Map<String, String> getResourceRoutes() {
+    return {
+      ResourceType.FRUIT.toString(): AppRouter.fruitPath,
+      ResourceType.USER.toString(): AppRouter.userManagementPath,
+      ResourceType.BATTLE.toString(): AppRouter.battlePath,
+      ResourceType.CHARACTER.toString(): AppRouter.characterPath,
+      ResourceType.ISSUE.toString(): AppRouter.issuePath,
+      ResourceType.GROUP.toString(): AppRouter.groupPath,
+      ResourceType.CHATTING.toString(): AppRouter.chattingPath
+    };
+  }
+
+  static String getResourceDisplayName(BuildContext context, String type) {
+    final map = {
+      ResourceType.FRUIT.toString(): AppLocalizations.of(context)!.devilFruit,
+      ResourceType.GROUP.toString(): AppLocalizations.of(context)!.group,
+      ResourceType.USER.toString():
+      AppLocalizations.of(context)!.userManagement,
+      ResourceType.BATTLE.toString(): AppLocalizations.of(context)!.battle,
+      ResourceType.CHARACTER.toString():
+      AppLocalizations.of(context)!.character,
+      ResourceType.ISSUE.toString(): AppLocalizations.of(context)!.feedback,
+      ResourceType.CHATTING.toString(): AppLocalizations.of(context)!.message,
+    };
+    return map[type] ?? type;
+  }
+}
+
+// --- MAIN PAGE ---
 
 class HomePage extends StatefulWidget {
   final Widget mainScreen;
-
   const HomePage({super.key, required this.mainScreen});
 
   @override
@@ -43,20 +94,93 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
-  final String profile = "profile";
-  var _tabTextIndexSelected =
-      I18nHelper.convertToOnepieceLocale(getIt<Locale>()).toString() ==
-              (OnepieceLocale.zhCN.toString())
-          ? 0
-          : 1;
-  UserRole selectedRole = getIt<User>().loginRole!;
+  // Using a GlobalKey to access SideMenu state for refreshing resources if needed
+  final GlobalKey<_SideMenuState> _sideMenuKey = GlobalKey();
+
+  @override
+  Widget build(BuildContext context) {
+    return KeyboardListener(
+      focusNode: FocusNode(),
+      onKeyEvent: (event) {
+        if (HardwareKeyboard.instance
+            .isLogicalKeyPressed(LogicalKeyboardKey.slash)) {
+          _showSearchDialog(context);
+        }
+      },
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return Scaffold(
+            backgroundColor: Colors.grey[50],
+            body: SelectionArea(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SideMenu(
+                    key: _sideMenuKey,
+                    constraints: constraints,
+                  ),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          height: 55,
+                          child: Padding(
+                            padding: const EdgeInsets.all(5.0),
+                            child: TopNavigationBar(
+                              constraints: constraints,
+                              onRoleChanged: () {
+                                // Trigger side menu resource refresh
+                                _sideMenuKey.currentState?._initResources();
+                              },
+                            ),
+                          ),
+                        ),
+                        Expanded(child: widget.mainScreen),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+void _showSearchDialog(BuildContext context) {
+  showCupertinoModalPopup(
+    filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+    context: context,
+    builder: ((context) {
+      return Dialog(
+        backgroundColor: OnepieceColors.liteFancyGreen,
+        alignment: Alignment.topCenter,
+        shape:
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+        child: const SearchPopup(),
+      );
+    }),
+  );
+}
+
+// --- SIDE MENU (DRAWER) ---
+
+class SideMenu extends StatefulWidget {
+  final BoxConstraints constraints;
+  const SideMenu({super.key, required this.constraints});
+
+  @override
+  State<SideMenu> createState() => _SideMenuState();
+}
+
+class _SideMenuState extends State<SideMenu> {
+  double _drawerWidth = 300;
+  bool _isHoveringResize = false;
   late List<ResourceType> loginRoleResources;
 
-  double _drawerWidth = 300;
-  bool _isHovering = false;
-  final double _shrinkLimitWidth = 120;
-
-  // Caching variables to prevent flickering
+  // Caching variables
   Widget? _cachedUserNavigation;
   BoxConstraints? _cachedConstraints;
 
@@ -68,8 +192,8 @@ class HomePageState extends State<HomePage> {
       double width = MediaQuery.of(context).size.width;
       setState(() {
         if (width < 800) {
-          _drawerWidth = 75;
-        } else if (width > 1000) {
+          _drawerWidth = MenuConfig.minDrawerWidth;
+        } else {
           _drawerWidth = 300;
         }
       });
@@ -82,665 +206,140 @@ class HomePageState extends State<HomePage> {
         .map((e) => e.resourceType!)
         .where((e) => !notShownResources.contains(e))
         .toList();
+    if (mounted) setState(() {});
   }
 
-  // Optimized method to cache UserNavigation
-  Widget _getUserNavigation(BuildContext context, BoxConstraints constraints) {
-    // If we have a cached widget and constraints match (value equality), reuse it.
-    // This stops reconstruction on setState (popups) and simple layout passes.
-    if (_cachedUserNavigation != null && _cachedConstraints == constraints) {
+  Widget _getUserNavigation(BuildContext context) {
+    if (_cachedUserNavigation != null &&
+        _cachedConstraints == widget.constraints) {
       return _cachedUserNavigation!;
     }
-    _cachedConstraints = constraints;
-    // We assume UserNavigation might depend on constraints, so we recreate if they change.
-    _cachedUserNavigation =
-        UserNavigation(context: context, constraints: constraints);
+    _cachedConstraints = widget.constraints;
+    _cachedUserNavigation = UserNavigation(
+        context: context, constraints: widget.constraints);
     return _cachedUserNavigation!;
   }
 
   @override
   Widget build(BuildContext context) {
-    return KeyboardListener(
-      focusNode: FocusNode(),
-      onKeyEvent: (event) {
-        if (HardwareKeyboard.instance
-            .isLogicalKeyPressed(LogicalKeyboardKey.slash)) {
-          _showDialog(context);
-        }
-      },
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          return Scaffold(
-            backgroundColor: Colors.grey[50],
-            body: SelectionArea(
-                child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _getNavigationMenu(context, constraints),
-                Expanded(
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        height: 55,
-                        child: Padding(
-                          padding: const EdgeInsets.all(5.0),
-                          child: getTopBar(context, constraints),
-                        ),
-                      ),
-                      Expanded(
-                        child: widget.mainScreen,
-                      )
-                    ],
-                  ),
-                ),
-              ],
-            )),
-          );
-        },
-      ),
-    );
-  }
+    bool isExpanded = _drawerWidth > MenuConfig.shrinkLimitWidth;
 
-  Widget getTopBar(BuildContext context, BoxConstraints constraints) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: ConstrainedBox(
-          constraints: BoxConstraints(
-              minWidth: constraints.maxWidth - _drawerWidth - 10),
-          child: Row(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                _getRoutingBar(context),
-                const SizedBox(width: 100),
-                _getRightControlPanel(context)
-              ])),
-    );
-  }
-
-  Widget _getRoutingBar(BuildContext context) {
-    List<String> routes = GoRouterState.of(context)
-        .matchedLocation
-        .split("/")
-        .where((element) => element != '' && element != "home")
-        .toList();
-
-    // Moved map inside but could be static/const if context dependency removed
-    final Map<String, String> routePathToDisplayName = {
-      ResourceType.CHARACTER.toString().toLowerCase():
-          AppLocalizations.of(context)!.character,
-      ResourceType.FRUIT.toString().toLowerCase():
-          AppLocalizations.of(context)!.devilFruit,
-      ResourceType.GROUP.toString().toLowerCase():
-          AppLocalizations.of(context)!.group,
-      ResourceType.USER.toString().toLowerCase():
-          AppLocalizations.of(context)!.userManagement,
-      ResourceType.BATTLE.toString().toLowerCase():
-          AppLocalizations.of(context)!.battle,
-      ResourceType.ISSUE.toString().toLowerCase():
-          AppLocalizations.of(context)!.issue,
-      ResourceType.CHATTING.toString().toLowerCase():
-          AppLocalizations.of(context)!.chatting,
-      'create': AppLocalizations.of(context)!.create,
-      'profile': AppLocalizations.of(context)!.userProfile,
-    };
-
-    var list = <Widget>[];
-    int routeLength = routes.length;
-    var currentPath = AppRouter.homePath;
-
-    var detailList = routes.asMap().entries.map((entry) {
-      String? text;
-      if (routePathToDisplayName.containsKey(entry.value)) {
-        text = routePathToDisplayName[entry.value];
-      } else if (isUUID(entry.value)) {
-        text = AppLocalizations.of(context)!.detailInformation;
-      } else {
-        text = Uri.decodeFull(entry.value);
-      }
-
-      final isLast = routeLength == (entry.key + 1);
-
-      if (!isLast) {
-        return [
-          _getMiddleArrow(),
-          TextButton(
-            onPressed: () {
-              var decodedUri = Uri.decodeFull(entry.value);
-              if (decodedUri == getIt<User>().nickname) {
-                context.goNamed('userHome',
-                    extra: getIt<User>().id,
-                    pathParameters: {'name': getIt<User>().nickname});
-              } else {
-                context.go("$currentPath/$decodedUri");
-              }
-            },
-            child: Text(
-              text!,
-              style: OnepieceFonts.navigationTopBarStyleClickable,
-            ),
-          )
-        ];
-      } else {
-        return [
-          _getMiddleArrow(),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 5),
-            child: Text(
-              text!,
-              style: OnepieceFonts.navigationTopBarStyleBold,
-            ),
-          )
-        ];
-      }
-    }).expand((element) => element);
-
-    var home = Padding(
-      padding: const EdgeInsets.fromLTRB(0, 0, 0, 4),
-      child: IconButton(
-        style: ButtonStyle(
-          overlayColor: WidgetStateProperty.all(Colors.transparent),
-        ),
-        onPressed: () {
-          context.goNamed('userHome',
-              extra: getIt<User>().id,
-              pathParameters: {'name': getIt<User>().nickname});
-        },
-        icon: const Icon(
-          shadows: [
-            Shadow(
-              offset: Offset(2.0, 2.0),
-              blurRadius: 3.0,
-              color: Colors.grey,
-            ),
-          ],
-          Icons.home,
-          color: OnepieceColors.fancyBlue,
-          size: 30,
-        ),
-      ),
-    );
-    list.add(home);
-    list.addAll(detailList);
-
-    return ValueListenableBuilder<String>(
-        valueListenable: routeNotifier,
-        builder: (context, value, child) {
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: list,
-          );
-        });
-  }
-
-  Padding _getRightControlPanel(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          getNotification(context),
-          const SizedBox(width: 30),
-          SizedBox(
-            width: 75,
-            height: 32,
-            child: AnimatedToggleSwitch<bool>.dual(
-              current: _tabTextIndexSelected == 1,
-              first: false,
-              second: true,
-              spacing: 1.0,
-              style: const ToggleStyle(
-                borderColor: Colors.transparent,
-                backgroundColor: OnepieceColors.menuSelectedTileColor,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black26,
-                    spreadRadius: 1,
-                    blurRadius: 2,
-                    offset: Offset(0, 1.5),
-                  ),
-                ],
-              ),
-              borderWidth: 3.0,
-              height: 35,
-              onChanged: (b) {
-                setState(() {
-                  _tabTextIndexSelected = _tabTextIndexSelected == 0 ? 1 : 0;
-                  Locale locale =
-                      _tabTextIndexSelected == 0 ? locales.first : locales.last;
-
-                  getIt<UserDao>().updateUser(UpdateUserRequest(
-                      id: getIt<User>().id,
-                      nickname: getIt<User>().nickname,
-                      locale: I18nHelper.convertToOnepieceLocale(locale)));
-                  MyApp.setLocale(context, locale);
-                });
-              },
-              styleBuilder: (b) =>
-                  const ToggleStyle(indicatorColor: OnepieceColors.fancyBlue),
-              iconBuilder: (value) => value
-                  ? const Text("En", style: _toggleTextStyle)
-                  : const Text("文", style: _toggleTextStyle),
-              textBuilder: (value) => value
-                  ? const Center(child: Text('文', style: _toggleTextDarkStyle))
-                  : const Center(
-                      child: Text('En', style: _toggleTextDarkStyle)),
-            ),
-          ),
-          const SizedBox(width: 30),
-          SizedBox(
-            width: 140,
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton2(
-                isExpanded: true,
-                value: selectedRole,
-                onChanged: (UserRole? value) {
-                  if (value == null) return;
-                  selectedRole = value;
-                  UpdateLoginRoleRequest request =
-                      UpdateLoginRoleRequest(role: selectedRole);
-                  getIt<UserDao>().updateLoginRole(request).then((res) {
-                    var currentUser = getIt<User>();
-                    currentUser.loginRoleId = res!.currentRoleId;
-                    currentUser.loginRole = res.currentRole;
-                    currentUser.loginRoleResourcesPermissionMap =
-                        res.resourcePermissionMap;
-                    ResourcePermissionManager.updateUserCache(currentUser);
-                    setState(() {
-                      _initResources();
-                    });
-                    context.goNamed('characters');
-                  });
-                },
-                buttonStyleData: ButtonStyleData(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  elevation: 2,
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      color: OnepieceColors.menuSelectedTileColor),
-                  height: 40,
-                  width: 140,
-                ),
-                menuItemStyleData: const MenuItemStyleData(height: 30),
-                items: getItems(context),
-              ),
-            ),
-          )
-        ],
-      ),
-    );
-  }
-
-  // Extracted constants for styles to be const
-  static const TextStyle _toggleTextStyle =
-      TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600);
-  static const TextStyle _toggleTextDarkStyle = TextStyle(
-      color: Colors.black87, fontSize: 12, fontWeight: FontWeight.w600);
-
-  Widget getNotification(BuildContext context) {
-    return NotificationList(
-      context: context,
-    );
-  }
-
-  List<DropdownMenuItem<UserRole>> getItems(BuildContext context) {
-    final Map<UserRole, String> userRoleToDisplayNameMap = {
-      UserRole.NIKA: AppLocalizations.of(context)!.roleNika,
-      UserRole.NORMAL: AppLocalizations.of(context)!.roleNormal,
-      UserRole.VISITOR: AppLocalizations.of(context)!.roleVisitor,
-      UserRole.ADMIN: AppLocalizations.of(context)!.roleAdmin
-    };
-    return getIt<User>().userRoles.map((UserRole userRole) {
-      return DropdownMenuItem<UserRole>(
-        value: userRole,
-        child: Text(
-          userRoleToDisplayNameMap[userRole]!,
-          style: _toggleTextDarkStyle,
-        ),
-      );
-    }).toList();
-  }
-
-  Widget _getNavigationMenu(BuildContext context, BoxConstraints constraints) {
     return Stack(
-      alignment: Alignment.centerLeft,
       children: [
         Container(
           width: _drawerWidth,
           color: OnepieceColors.menuBackgroundColor,
-          child: Stack(
-            alignment: Alignment.bottomCenter,
+          child: Column(
             children: [
-              Column(
-                children: [
-                  _getDrawerHeader(context, constraints),
-                  Expanded(
-                      child: SingleChildScrollView(
-                    scrollDirection: Axis.vertical,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(8, 10, 0, 10),
-                          child: Text(AppLocalizations.of(context)!.route,
-                              style: const TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.w800)),
-                        ),
-                        _getResourceMenu(context, constraints),
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(8, 10, 0, 10),
-                          child: Text(AppLocalizations.of(context)!.user,
-                              style: const TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.w800)),
-                        ),
-                        ValueListenableBuilder<String>(
-                          valueListenable: routeNotifier,
-                          builder: (context, value, child) {
-                            var parts = routeNotifier.value.split("/");
-                            var resource = parts
-                                    .where((e) => e != '' && e != "home")
-                                    .lastOrNull ??
-                                "";
+              // 1. Fixed Header
+              _buildHeader(context, isExpanded),
 
-                            return Material(
-                              type: MaterialType.transparency,
-                              child: Container(
-                                padding: const EdgeInsets.all(3),
-                                decoration: const BoxDecoration(
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(5))),
-                                child: Tooltip(
-                                  message: _drawerWidth > _shrinkLimitWidth
-                                      ? ""
-                                      : AppLocalizations.of(context)!.myAccount,
-                                  child: ListTile(
-                                    minLeadingWidth: 2,
-                                    dense: true,
-                                    contentPadding:
-                                        const EdgeInsets.fromLTRB(20, 0, 15, 0),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    leading: SizedBox(
-                                      width: 20,
-                                      child: ImageHelper.getSvgIcon(
-                                        'images/svgs/profile.svg',
-                                        18,
-                                        18,
-                                      ),
-                                    ),
-                                    selected: profile == resource,
-                                    selectedTileColor: OnepieceColors.fancyBlue,
-                                    onTap: () {
-                                      if (getIt<User>().loginRole ==
-                                          UserRole.VISITOR) {
-                                        context.go(AppRouter.registerPath);
-                                      } else {
-                                        context.goNamed('userProfile',
-                                            extra: getIt<User>().id,
-                                            pathParameters: {
-                                              'name': getIt<User>().nickname
-                                            });
-                                      }
-                                    },
-                                    hoverColor: OnepieceColors.liteFancyBlue,
-                                    title: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Flexible(
-                                          child: Text(
-                                            _drawerWidth > _shrinkLimitWidth
-                                                ? AppLocalizations.of(context)!
-                                                    .myAccount
-                                                : "",
-                                            textAlign: TextAlign.left,
-                                            maxLines: 1,
-                                            style: TextStyle(
-                                                fontSize: 16,
-                                                fontWeight:
-                                                    OnepieceFonts.weightRegular,
-                                                color: resource == "profile"
-                                                    ? Colors.white
-                                                    : Colors.black),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                        Material(
-                          type: MaterialType.transparency,
-                          child: Container(
-                            padding: const EdgeInsets.all(3),
-                            decoration: const BoxDecoration(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(5))),
-                            child: Tooltip(
-                              message: _drawerWidth > _shrinkLimitWidth
-                                  ? ""
-                                  : AppLocalizations.of(context)!.logout,
-                              child: ListTile(
-                                minLeadingWidth: 10,
-                                dense: true,
-                                contentPadding:
-                                    const EdgeInsets.fromLTRB(20, 0, 15, 0),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                leading: ImageHelper.getSvgIcon(
-                                  'images/svgs/logout.svg',
-                                  20,
-                                  20,
-                                ),
-                                onTap: () {
-                                  getIt<UserDao>()
-                                      .logout(LogoutRequest(
-                                          userId: getIt<User>().id))
-                                      .then((value) {
-                                    getIt<WebSocketService>().dispose();
-                                    getIt.registerLazySingleton<User>(() =>
-                                        User(
-                                            id: "",
-                                            username: "",
-                                            nickname: ""));
-                                  });
-                                  context.replace(AppRouter.loginPath);
-                                },
-                                selectedColor: OnepieceColors.fancyBlue,
-                                hoverColor: OnepieceColors.liteFancyBlue,
-                                title: _drawerWidth > _shrinkLimitWidth
-                                    ? Text(
-                                        AppLocalizations.of(context)!.logout,
-                                        maxLines: 1,
-                                        style: const TextStyle(
-                                            fontSize: 16,
-                                            fontWeight:
-                                                OnepieceFonts.weightRegular,
-                                            color: Colors.black),
-                                      )
-                                    : const Text(""),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 40),
-                      ],
-                    ),
-                  )),
-                ],
+              // 2. Scrollable Content (Resources + Profile/Logout)
+              // Using Expanded + ListView ensures it scrolls on phones/small laptops
+              Expanded(
+                child: ListView(
+                  padding: EdgeInsets.zero,
+                  children: [
+                    if (isExpanded)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(8, 10, 0, 10),
+                        child: Text(AppLocalizations.of(context)!.route,
+                            style: const TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.w800)),
+                      ),
+                    _buildResourceList(context, isExpanded),
+                    if (isExpanded)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(8, 20, 0, 10),
+                        child: Text(AppLocalizations.of(context)!.user,
+                            style: const TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.w800)),
+                      ),
+                    _buildUserActions(context, isExpanded),
+                    const SizedBox(height: 40), // Bottom padding
+                  ],
+                ),
               ),
-              // Container(
-              //   decoration: const BoxDecoration(
-              //     color: OnepieceColors.menuBackgroundColor,
-              //   ),
-              //   child: Padding(
-              //     padding: const EdgeInsets.all(5.0),
-              //     child: TextButton(
-              //       style: TextButton.styleFrom(
-              //         shape: RoundedRectangleBorder(
-              //           borderRadius: BorderRadius.circular(6),
-              //         ),
-              //         padding: const EdgeInsets.all(5),
-              //         backgroundColor: OnepieceColors.menuBackgroundColor,
-              //         foregroundColor: OnepieceColors.menuHoverColor,
-              //         elevation: 1.0,
-              //       ),
-              //       onPressed: () {
-              //         showDialog(
-              //           context: context,
-              //           builder: ((context) {
-              //             return Dialog(
-              //               surfaceTintColor: Colors.white,
-              //               shape: RoundedRectangleBorder(
-              //                 borderRadius: BorderRadius.circular(10.0),
-              //               ),
-              //               alignment: AlignmentDirectional.bottomStart,
-              //               child: const CreateFeedbackPopup(),
-              //             );
-              //           }),
-              //         );
-              //       },
-              //       child: Padding(
-              //         padding: const EdgeInsets.symmetric(vertical: 5),
-              //         child: Row(
-              //           mainAxisAlignment: MainAxisAlignment.start,
-              //           children: [
-              //             ImageHelper.getSvgIcon(
-              //               'images/svgs/menu_question.svg',
-              //               21,
-              //               21,
-              //             ),
-              //             if (_drawerWidth > _shrinkLimitWidth)
-              //               const SizedBox(width: 6),
-              //             if (_drawerWidth > _shrinkLimitWidth)
-              //               Padding(
-              //                 padding: const EdgeInsets.only(bottom: 2.0),
-              //                 child: Text(
-              //                     AppLocalizations.of(context)!.feedback,
-              //                     style: const TextStyle(
-              //                         color: OnepieceColors.menuTextColor,
-              //                         fontSize: 16,
-              //                         fontWeight: FontWeight.w500)),
-              //               )
-              //           ],
-              //         ),
-              //       ),
-              //     ),
-              //   ),
-              // ),
             ],
           ),
         ),
+
+        // Resize Handle
         Positioned(
           left: _drawerWidth - 10,
           top: 0,
           bottom: 0,
-          child: MouseRegion(
-            cursor: SystemMouseCursors.resizeLeftRight,
-            onEnter: (_) => setState(() => _isHovering = true),
-            onExit: (_) => setState(() => _isHovering = false),
-            child: GestureDetector(
-              onTapDown: (_) => setState(() => _isHovering = true),
-              onTapUp: (_) => setState(() => _isHovering = false),
-              onTapCancel: () => setState(() => _isHovering = false),
-              onHorizontalDragUpdate: (details) {
-                setState(() {
-                  _drawerWidth += details.delta.dx;
-                  _drawerWidth = _drawerWidth.clamp(75.0, 350.0);
-                });
-              },
-              child: Container(
-                width: 8,
-                height: 30,
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.horizontal(
-                      left: Radius.circular(8), right: Radius.circular(8)),
-                  color: _isHovering
-                      ? OnepieceColors.liteFancyBlue
-                      : Colors.transparent,
-                  boxShadow: _isHovering
-                      ? const [
-                          BoxShadow(
-                            color: OnepieceColors.liteFancyBlue,
-                            spreadRadius: 2,
-                            blurRadius: 10,
-                            offset: Offset(0, 4),
-                          ),
-                        ]
-                      : [],
-                ),
-                child: Center(
-                  child: SizedBox(
-                    height: 30,
-                    child: VerticalDivider(
-                      width: 5,
-                      color: _isHovering
-                          ? OnepieceColors.fancyBlue
-                          : Colors.transparent,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
+          child: _buildResizeHandle(),
         ),
       ],
     );
   }
 
-  Widget _getDrawerHeader(BuildContext context, BoxConstraints constraints) {
+  Widget _buildResizeHandle() {
+    return MouseRegion(
+      cursor: SystemMouseCursors.resizeLeftRight,
+      onEnter: (_) => setState(() => _isHoveringResize = true),
+      onExit: (_) => setState(() => _isHoveringResize = false),
+      child: GestureDetector(
+        onTapDown: (_) => setState(() => _isHoveringResize = true),
+        onTapUp: (_) => setState(() => _isHoveringResize = false),
+        onTapCancel: () => setState(() => _isHoveringResize = false),
+        onHorizontalDragUpdate: (details) {
+          setState(() {
+            _drawerWidth += details.delta.dx;
+            _drawerWidth = _drawerWidth.clamp(
+                MenuConfig.minDrawerWidth, MenuConfig.maxDrawerWidth);
+          });
+        },
+        child: Container(
+          width: 8,
+          color: Colors.transparent, // Hit test target
+          child: Center(
+            child: Container(
+              width: 4,
+              height: 30,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(4),
+                color: _isHoveringResize
+                    ? OnepieceColors.fancyBlue
+                    : Colors.transparent,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context, bool isExpanded) {
     return Container(
       width: _drawerWidth,
       height: 180,
       color: OnepieceColors.deepFancyBlue,
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(8, 15, 0, 0),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // USING THE CACHED WIDGET HERE
-                _getUserNavigation(context, constraints),
-
-                if (_drawerWidth > _shrinkLimitWidth)
+                _getUserNavigation(context),
+                if (isExpanded)
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8),
-                          child: Text(
-                            getIt<User>().nickname,
-                            style: OnepieceFonts.headerStyleWhite,
-                            maxLines: 1,
-                          ),
+                          child: Text(getIt<User>().nickname,
+                              style: OnepieceFonts.headerStyleWhite,
+                              maxLines: 1),
                         ),
-                        Tooltip(
-                          message: getIt<User>().username,
-                          child: Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Text(
-                              getIt<User>().username,
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Text(getIt<User>().username,
                               style: OnepieceFonts.contentStyleWhite,
-                              maxLines: 1,
-                            ),
-                          ),
+                              maxLines: 1),
                         ),
                       ],
                     ),
@@ -748,219 +347,480 @@ class HomePageState extends State<HomePage> {
               ],
             ),
           ),
-          if (_drawerWidth <= _shrinkLimitWidth)
+          if (!isExpanded) ...[
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10.0),
-              child: Tooltip(
-                message: getIt<User>().nickname,
-                child: Text(
-                  getIt<User>().nickname,
-                  style: OnepieceFonts.contentStyleBoldWhite,
-                  maxLines: 1,
-                  overflow: TextOverflow.clip,
-                ),
-              ),
+              child: Text(getIt<User>().nickname,
+                  style: OnepieceFonts.contentStyleBoldWhite, maxLines: 1),
             ),
-          if (_drawerWidth <= _shrinkLimitWidth)
-            Tooltip(
-              message: getIt<User>().username,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                child: Text(
-                  getIt<User>().username,
-                  style: OnepieceFonts.contentStyleWhite,
-                  maxLines: 1,
-                  overflow: TextOverflow.clip,
-                ),
-              ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10.0),
+              child: Text(getIt<User>().username,
+                  style: OnepieceFonts.contentStyleWhite, maxLines: 1),
             ),
-          if (_drawerWidth > _shrinkLimitWidth) const SizedBox(height: 20),
-          const SizedBox(height: 10),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Material(
-              type: MaterialType.transparency,
-              child: Container(
-                width: _drawerWidth - 20,
-                height: 33,
-                decoration: const BoxDecoration(
-                  color: OnepieceColors.fancyGreen,
-                  borderRadius: BorderRadius.all(Radius.circular(3.0)),
-                ),
-                child: TextButton(
-                  style: ButtonStyle(
-                    padding: WidgetStateProperty.all<EdgeInsetsGeometry>(
-                      EdgeInsets.symmetric(
-                          horizontal:
-                              _drawerWidth <= _shrinkLimitWidth ? 2.0 : 6.0),
-                    ),
-                  ),
-                  child: Row(
-                      mainAxisAlignment: _drawerWidth > _shrinkLimitWidth
-                          ? MainAxisAlignment.spaceBetween
-                          : MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.search,
-                          size: 20,
-                          color: Colors.white,
-                        ),
-                        if (_drawerWidth > 200)
-                          Text(
-                            AppLocalizations.of(context)!.searchResource,
-                            style: OnepieceFonts.superSmallContentStyleWhite,
-                          ),
-                        if (_drawerWidth > _shrinkLimitWidth)
-                          Text(
-                            AppLocalizations.of(context)!
-                                .searchResourceShortcut,
-                            style: OnepieceFonts.superSmallContentStyleWhite,
-                          ),
-                      ]),
-                  onPressed: () {
-                    _showDialog(context);
-                  },
-                ),
-              ),
-            ),
-          ),
+          ],
+          const Spacer(),
+          _buildSearchButton(context, isExpanded),
+          const SizedBox(height: 15),
         ],
       ),
     );
   }
 
-  void _showDialog(BuildContext context) {
-    showCupertinoModalPopup(
-      filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-      context: context,
-      builder: ((context) {
-        return Dialog(
-          backgroundColor: OnepieceColors.liteFancyGreen,
-          alignment: Alignment.topCenter,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10.0),
+  Widget _buildSearchButton(BuildContext context, bool isExpanded) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: Material(
+        color: OnepieceColors.fancyGreen,
+        borderRadius: BorderRadius.circular(3.0),
+        child: InkWell(
+          onTap: () => _showSearchDialog(context),
+          child: Container(
+            height: 33,
+            padding: EdgeInsets.symmetric(horizontal: isExpanded ? 6.0 : 2.0),
+            child: Row(
+              mainAxisAlignment: isExpanded
+                  ? MainAxisAlignment.spaceBetween
+                  : MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.search, size: 20, color: Colors.white),
+                if (isExpanded)
+                  Text(AppLocalizations.of(context)!.searchResourceShortcut,
+                      style: OnepieceFonts.superSmallContentStyleWhite),
+              ],
+            ),
           ),
-          child: const SearchPopup(),
-        );
-      }),
+        ),
+      ),
     );
   }
 
-  Widget _getResourceMenu(BuildContext context, BoxConstraints constraints) {
-    Map<String, Widget> resourceToIconMap = {
-      ResourceType.FRUIT.toString(): ImageHelper.getSvgIconWithColor(
-          'images/svgs/devil_fruit.svg', 20, 20, Colors.orange),
-      ResourceType.GROUP.toString():
-          ImageHelper.getSvgIcon('images/svgs/flag.svg', 20, 20),
-      ResourceType.USER.toString():
-          ImageHelper.getSvgIcon('images/svgs/users.svg', 20, 20),
-      ResourceType.BATTLE.toString():
-          ImageHelper.getSvgIcon('images/svgs/cannon.svg', 20, 20),
-      ResourceType.CHARACTER.toString():
-          ImageHelper.getSvgIcon('images/svgs/hat.svg', 20, 20),
-      ResourceType.CHATTING.toString():
-          ImageHelper.getSvgIcon('images/svgs/message1.svg', 20, 20),
-      ResourceType.ISSUE.toString():
-          ImageHelper.getSvgIcon('images/svgs/feedback.svg', 20, 20),
-    };
-
-    Map<String, String> resourceToLocationMap = {
-      ResourceType.FRUIT.toString(): AppRouter.fruitPath,
-      ResourceType.USER.toString(): AppRouter.userManagementPath,
-      ResourceType.BATTLE.toString(): AppRouter.battlePath,
-      ResourceType.CHARACTER.toString(): AppRouter.characterPath,
-      ResourceType.ISSUE.toString(): AppRouter.issuePath,
-      ResourceType.GROUP.toString(): AppRouter.groupPath,
-      ResourceType.CHATTING.toString(): AppRouter.chattingPath
-    };
-
-    Map<String, String> resourceToDisplayTextMap = {
-      ResourceType.FRUIT.toString(): AppLocalizations.of(context)!.devilFruit,
-      ResourceType.GROUP.toString(): AppLocalizations.of(context)!.group,
-      ResourceType.USER.toString():
-          AppLocalizations.of(context)!.userManagement,
-      ResourceType.BATTLE.toString(): AppLocalizations.of(context)!.battle,
-      ResourceType.CHARACTER.toString():
-          AppLocalizations.of(context)!.character,
-      ResourceType.ISSUE.toString(): AppLocalizations.of(context)!.feedback,
-      ResourceType.CHATTING.toString(): AppLocalizations.of(context)!.message
-    };
-
-    var currentLoginRoleResources =
-        loginRoleResources.map((e) => e.toString()).toList();
-
-    // filter out user resource if the role is not nika/admin
+  Widget _buildResourceList(BuildContext context, bool isExpanded) {
+    // Filter resources
+    var displayResources = loginRoleResources.map((e) => e.toString()).toList();
     if (getIt<User>().loginRole != UserRole.NIKA &&
         getIt<User>().loginRole != UserRole.ADMIN) {
-      currentLoginRoleResources.remove(ResourceType.USER.toString());
-      currentLoginRoleResources.remove(ResourceType.ISSUE.toString());
+      displayResources.remove(ResourceType.USER.toString());
+      displayResources.remove(ResourceType.ISSUE.toString());
     }
+
+    final icons = MenuConfig.getResourceIcons();
+    final routes = MenuConfig.getResourceRoutes();
 
     return ValueListenableBuilder<String>(
       valueListenable: routeNotifier,
-      builder: (context, value, child) {
-        var firstPath =
-            value.split("/").where((e) => e != '' && e != "home").firstOrNull;
+      builder: (context, currentRoute, child) {
+        var firstPath = currentRoute
+            .split("/")
+            .where((e) => e.isNotEmpty && e != "home")
+            .firstOrNull;
 
-        return ListView.builder(
-          shrinkWrap: true,
-          itemCount: currentLoginRoleResources.length,
-          itemBuilder: (context, index) {
-            String resourceType = currentLoginRoleResources[index];
+        return Column(
+          children: displayResources.map((resourceType) {
             bool isSelected = firstPath == resourceType.toLowerCase();
-
-            return Material(
-              type: MaterialType.transparency,
-              child: Container(
-                padding: const EdgeInsets.fromLTRB(3, 3, 4, 3),
-                decoration: const BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(5))),
-                child: Tooltip(
-                  message: _drawerWidth > _shrinkLimitWidth
-                      ? ""
-                      : resourceToDisplayTextMap[resourceType]!,
-                  child: ListTile(
-                    dense: true,
-                    minLeadingWidth: 10,
-                    contentPadding: const EdgeInsets.fromLTRB(20, 0, 15, 0),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    leading: resourceToIconMap[resourceType],
-                    selected: isSelected,
-                    selectedTileColor: OnepieceColors.fancyBlue,
-                    onTap: () {
-                      GoRouter.of(context)
-                          .go(resourceToLocationMap[resourceType]!);
-                    },
-                    hoverColor: OnepieceColors.liteFancyBlue,
-                    title: _drawerWidth > _shrinkLimitWidth
-                        ? Text(resourceToDisplayTextMap[resourceType]!,
-                            maxLines: 1,
-                            textAlign: TextAlign.left,
-                            overflow: TextOverflow.clip,
-                            style: OnepieceFonts.contentStyle.copyWith(
-                                fontSize: 16,
-                                color:
-                                    isSelected ? Colors.white : Colors.black))
-                        : const Text(""),
-                  ),
-                ),
-              ),
+            return _buildMenuItem(
+              context: context,
+              icon: icons[resourceType] ?? const SizedBox(),
+              text: MenuConfig.getResourceDisplayName(context, resourceType),
+              isSelected: isSelected,
+              isExpanded: isExpanded,
+              onTap: () => context.go(routes[resourceType]!),
             );
-          },
+          }).toList(),
         );
       },
     );
   }
 
-  Widget _getMiddleArrow() {
-    return const Padding(
-      padding: EdgeInsets.symmetric(horizontal: 5),
-      child: Icon(
-        Icons.arrow_forward_ios,
-        size: 15,
+  Widget _buildUserActions(BuildContext context, bool isExpanded) {
+    return ValueListenableBuilder<String>(
+      valueListenable: routeNotifier,
+      builder: (context, currentRoute, _) {
+        var resource = currentRoute
+            .split("/")
+            .where((e) => e.isNotEmpty && e != "home")
+            .lastOrNull ??
+            "";
+
+        return Column(
+          children: [
+            _buildMenuItem(
+              context: context,
+              icon: SizedBox(
+                width: 20,
+                child:
+                ImageHelper.getSvgIcon('images/svgs/profile.svg', 18, 18),
+              ),
+              text: AppLocalizations.of(context)!.myAccount,
+              isSelected: resource == "profile",
+              isExpanded: isExpanded,
+              onTap: () {
+                if (getIt<User>().loginRole == UserRole.VISITOR) {
+                  context.go(AppRouter.registerPath);
+                } else {
+                  context.goNamed('userProfile',
+                      extra: getIt<User>().id,
+                      pathParameters: {'name': getIt<User>().nickname});
+                }
+              },
+            ),
+            _buildMenuItem(
+              context: context,
+              icon: ImageHelper.getSvgIcon('images/svgs/logout.svg', 20, 20),
+              text: AppLocalizations.of(context)!.logout,
+              isSelected: false,
+              isExpanded: isExpanded,
+              onTap: () {
+                getIt<UserDao>()
+                    .logout(LogoutRequest(userId: getIt<User>().id))
+                    .then((value) {
+                  getIt<WebSocketService>().dispose();
+                  getIt.registerLazySingleton<User>(
+                          () => User(id: "", username: "", nickname: ""));
+                });
+                context.replace(AppRouter.loginPath);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildMenuItem({
+    required BuildContext context,
+    required Widget icon,
+    required String text,
+    required bool isSelected,
+    required bool isExpanded,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      type: MaterialType.transparency,
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+        decoration: const BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(5)),
+        ),
+        child: Tooltip(
+          message: isExpanded ? "" : text,
+          child: ListTile(
+            dense: true,
+            minLeadingWidth: 10,
+            contentPadding: const EdgeInsets.fromLTRB(20, 0, 15, 0),
+            shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            leading: icon,
+            selected: isSelected,
+            selectedTileColor: OnepieceColors.fancyBlue,
+            onTap: onTap,
+            hoverColor: OnepieceColors.liteFancyBlue,
+            title: isExpanded
+                ? Text(
+              text,
+              maxLines: 1,
+              overflow: TextOverflow.clip,
+              style: OnepieceFonts.contentStyle.copyWith(
+                fontSize: 16,
+                color: isSelected ? Colors.white : Colors.black,
+              ),
+            )
+                : const SizedBox(),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// --- TOP NAVIGATION BAR ---
+
+class TopNavigationBar extends StatefulWidget {
+  final BoxConstraints constraints;
+  final VoidCallback onRoleChanged;
+
+  const TopNavigationBar({
+    super.key,
+    required this.constraints,
+    required this.onRoleChanged,
+  });
+
+  @override
+  State<TopNavigationBar> createState() => _TopNavigationBarState();
+}
+
+class _TopNavigationBarState extends State<TopNavigationBar> {
+  var _tabTextIndexSelected =
+  I18nHelper.convertToOnepieceLocale(getIt<Locale>()).toString() ==
+      (OnepieceLocale.zhCN.toString())
+      ? 0
+      : 1;
+  UserRole selectedRole = getIt<User>().loginRole!;
+
+  static const TextStyle _toggleTextStyle =
+  TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600);
+  static const TextStyle _toggleTextDarkStyle = TextStyle(
+      color: Colors.black87, fontSize: 12, fontWeight: FontWeight.w600);
+
+  @override
+  Widget build(BuildContext context) {
+    // 1. Calculate available width for the top bar
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // 2. Define the minimum width needed for the UI to not break
+        const double minContentWidth = 500;
+        // 3. Create the Row with spaceBetween
+        Widget content = Container(
+          // Ensure the container fills the width if space allows,
+          // or takes the min width if screen is small
+          width: constraints.maxWidth > minContentWidth
+              ? constraints.maxWidth
+              : minContentWidth,
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          child: Row(
+            mainAxisSize: MainAxisSize.max, // Force row to take full width
+            mainAxisAlignment:
+            MainAxisAlignment.spaceBetween, // Push items to edges
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Breadcrumbs on the left
+              Flexible(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: _buildBreadcrumbs(context),
+                ),
+              ),
+
+              const SizedBox(width: 20), // Spacing between sections
+
+              // Controls on the right
+              _buildRightControls(context),
+            ],
+          ),
+        );
+
+        // 4. Wrap in ScrollView only if screen is smaller than minContentWidth
+        if (constraints.maxWidth < minContentWidth) {
+          return SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: content,
+          );
+        }
+
+        return content;
+      },
+    );
+  }
+
+  Widget _buildBreadcrumbs(BuildContext context) {
+    // Map definitions
+    final Map<String, String> routeDisplayName = {
+      ResourceType.CHARACTER.toString().toLowerCase():
+      AppLocalizations.of(context)!.character,
+      ResourceType.FRUIT.toString().toLowerCase():
+      AppLocalizations.of(context)!.devilFruit,
+      ResourceType.GROUP.toString().toLowerCase():
+      AppLocalizations.of(context)!.group,
+      ResourceType.USER.toString().toLowerCase():
+      AppLocalizations.of(context)!.userManagement,
+      ResourceType.BATTLE.toString().toLowerCase():
+      AppLocalizations.of(context)!.battle,
+      ResourceType.ISSUE.toString().toLowerCase():
+      AppLocalizations.of(context)!.issue,
+      ResourceType.CHATTING.toString().toLowerCase():
+      AppLocalizations.of(context)!.chatting,
+      'create': AppLocalizations.of(context)!.create,
+      'profile': AppLocalizations.of(context)!.userProfile,
+    };
+
+    return ValueListenableBuilder<String>(
+      valueListenable: routeNotifier,
+      builder: (context, _, __) {
+        List<String> routes = GoRouterState.of(context)
+            .matchedLocation
+            .split("/")
+            .where((e) => e.isNotEmpty && e != "home")
+            .toList();
+
+        List<Widget> crumbs = [];
+
+        // Home Button
+        crumbs.add(
+          IconButton(
+            onPressed: () {
+              context.goNamed('userHome',
+                  extra: getIt<User>().id,
+                  pathParameters: {'name': getIt<User>().nickname});
+            },
+            icon: const Icon(
+              Icons.home,
+              color: OnepieceColors.fancyBlue,
+              size: 30,
+              shadows: [
+                Shadow(
+                    offset: Offset(2.0, 2.0),
+                    blurRadius: 3.0,
+                    color: Colors.grey)
+              ],
+            ),
+          ),
+        );
+
+        for (int i = 0; i < routes.length; i++) {
+          String part = routes[i];
+          String text;
+          if (routeDisplayName.containsKey(part)) {
+            text = routeDisplayName[part]!;
+          } else if (isUUID(part)) {
+            text = AppLocalizations.of(context)!.detailInformation;
+          } else {
+            text = Uri.decodeFull(part);
+          }
+
+          bool isLast = i == routes.length - 1;
+          crumbs.add(const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 5),
+            child: Icon(Icons.arrow_forward_ios, size: 15),
+          ));
+
+          if (!isLast) {
+            crumbs.add(TextButton(
+              onPressed: () {
+                if (Uri.decodeFull(part) == getIt<User>().nickname) {
+                  context.goNamed('userHome',
+                      extra: getIt<User>().id,
+                      pathParameters: {'name': getIt<User>().nickname});
+                } else {
+                  context.go("${AppRouter.homePath}/$part");
+                }
+              },
+              child: Text(text,
+                  style: OnepieceFonts.navigationTopBarStyleClickable),
+            ));
+          } else {
+            crumbs.add(Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 5),
+              child: Text(text, style: OnepieceFonts.navigationTopBarStyleBold),
+            ));
+          }
+        }
+        return Row(children: crumbs);
+      },
+    );
+  }
+
+  Widget _buildRightControls(BuildContext context) {
+    return SizedBox(
+      height: 30,
+      child: Row(
+        mainAxisSize:
+        MainAxisSize.min, // Important: Don't let this row expand infinitely
+        children: [
+          NotificationList(context: context),
+          const SizedBox(width: 20),
+          _buildLocaleToggle(),
+          const SizedBox(width: 20),
+          _buildRoleDropdown(context),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLocaleToggle() {
+    return SizedBox(
+      width: 75,
+      height: 32,
+      child: AnimatedToggleSwitch<bool>.dual(
+        current: _tabTextIndexSelected == 1,
+        first: false,
+        second: true,
+        spacing: 1.0,
+        style: const ToggleStyle(
+          borderColor: Colors.transparent,
+          backgroundColor: OnepieceColors.menuSelectedTileColor,
+          boxShadow: [
+            BoxShadow(
+                color: Colors.black26,
+                spreadRadius: 1,
+                blurRadius: 2,
+                offset: Offset(0, 1.5)),
+          ],
+        ),
+        borderWidth: 3.0,
+        height: 35,
+        onChanged: (b) {
+          setState(() {
+            _tabTextIndexSelected = _tabTextIndexSelected == 0 ? 1 : 0;
+            Locale locale =
+            _tabTextIndexSelected == 0 ? locales.first : locales.last;
+
+            getIt<UserDao>().updateUser(UpdateUserRequest(
+                id: getIt<User>().id,
+                nickname: getIt<User>().nickname,
+                locale: I18nHelper.convertToOnepieceLocale(locale)));
+            MyApp.setLocale(context, locale);
+          });
+        },
+        styleBuilder: (b) =>
+        const ToggleStyle(indicatorColor: OnepieceColors.fancyBlue),
+        iconBuilder: (value) => value
+            ? const Text("En", style: _toggleTextStyle)
+            : const Text("文", style: _toggleTextStyle),
+        textBuilder: (value) => value
+            ? const Center(child: Text('文', style: _toggleTextDarkStyle))
+            : const Center(child: Text('En', style: _toggleTextDarkStyle)),
+      ),
+    );
+  }
+
+  Widget _buildRoleDropdown(BuildContext context) {
+    final Map<UserRole, String> roleNames = {
+      UserRole.NIKA: AppLocalizations.of(context)!.roleNika,
+      UserRole.NORMAL: AppLocalizations.of(context)!.roleNormal,
+      UserRole.VISITOR: AppLocalizations.of(context)!.roleVisitor,
+      UserRole.ADMIN: AppLocalizations.of(context)!.roleAdmin
+    };
+
+    return SizedBox(
+      width: 140,
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton2(
+          isExpanded: true,
+          value: selectedRole,
+          onChanged: (UserRole? value) {
+            if (value == null) return;
+            selectedRole = value;
+            getIt<UserDao>()
+                .updateLoginRole(UpdateLoginRoleRequest(role: selectedRole))
+                .then((res) {
+              var currentUser = getIt<User>();
+              currentUser.loginRoleId = res!.currentRoleId;
+              currentUser.loginRole = res.currentRole;
+              currentUser.loginRoleResourcesPermissionMap =
+                  res.resourcePermissionMap;
+              ResourcePermissionManager.updateUserCache(currentUser);
+
+              widget.onRoleChanged();
+              context.goNamed('characters');
+            });
+          },
+          buttonStyleData: ButtonStyleData(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            elevation: 2,
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                color: OnepieceColors.menuSelectedTileColor),
+            height: 40,
+            width: 140,
+          ),
+          menuItemStyleData: const MenuItemStyleData(height: 30),
+          items: getIt<User>().userRoles.map((UserRole role) {
+            return DropdownMenuItem<UserRole>(
+              value: role,
+              child: Text(roleNames[role]!, style: _toggleTextDarkStyle),
+            );
+          }).toList(),
+        ),
       ),
     );
   }

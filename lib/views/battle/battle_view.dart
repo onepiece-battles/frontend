@@ -13,7 +13,6 @@ import 'package:logging/logging.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
-import '../../utils/base64_helper.dart';
 import '../../utils/data_validator.dart';
 import '../../utils/image_helper.dart';
 import '../../utils/permission_check.dart';
@@ -342,107 +341,6 @@ class _BattleViewState extends State<BattleView> {
     );
   }
 
-  Widget _getBattleTypeFilter(BuildContext context) {
-    Map<BattleType, String> battleTypeToDisplayValue = {
-      BattleType.SINGLE: AppLocalizations.of(context)!.singleBattle,
-      BattleType.GROUP: AppLocalizations.of(context)!.groupBattle,
-    };
-    return Padding(
-      padding: const EdgeInsets.only(right: 6),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton2(
-          isExpanded: true,
-          value: selectedBattleTypes.isEmpty ? null : selectedBattleTypes.last,
-          hint: Text(
-            AppLocalizations.of(context)!.battleTypeHint,
-            style: OnepieceFonts.dropDownItemStyle,
-          ),
-          onChanged: (value) {},
-          selectedItemBuilder: (context) {
-            return BattleType.values.map(
-              (item) {
-                return Container(
-                  alignment: AlignmentDirectional.center,
-                  child: Text(
-                    selectedBattleTypes
-                        .map((selectedType) {
-                          return battleTypeToDisplayValue[selectedType];
-                        })
-                        .toSet()
-                        .join(', '),
-                    style: const TextStyle(
-                      fontSize: 16,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    maxLines: 1,
-                  ),
-                );
-              },
-            ).toList();
-          },
-          buttonStyleData: ButtonStyleData(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            height: 35,
-            width: 200,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(3),
-              color: OnepieceColors.menuBackgroundColor,
-            ),
-          ),
-          menuItemStyleData: const MenuItemStyleData(
-            height: 35,
-          ),
-          items: BattleType.values.map((BattleType battleType) {
-            return DropdownMenuItem<BattleType>(
-              value: battleType,
-              enabled: false,
-              child: StatefulBuilder(
-                builder: (context, menuSetState) {
-                  final isSelected = selectedBattleTypes.contains(battleType);
-                  return InkWell(
-                    hoverColor: Colors.transparent,
-                    splashColor: Colors.transparent,
-                    onTap: () {
-                      isSelected
-                          ? selectedBattleTypes.remove(battleType)
-                          : selectedBattleTypes.add(battleType);
-                      battleFilter.battleTypes = selectedBattleTypes;
-                      // //This rebuilds the StatefulWidget to update the button's text
-                      setState(() {});
-                      //This rebuilds the dropdownMenu Widget to update the check mark
-                      menuSetState(() {});
-                      _search(true);
-                    },
-                    child: Container(
-                      height: double.infinity,
-                      padding: const EdgeInsets.symmetric(horizontal: 6.0),
-                      child: Row(
-                        children: [
-                          if (isSelected)
-                            const Icon(Icons.check_box_outlined)
-                          else
-                            const Icon(Icons.check_box_outline_blank),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              battleTypeToDisplayValue[battleType]!,
-                              style: const TextStyle(
-                                fontSize: 16,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-            );
-          }).toList(),
-        ),
-      ),
-    );
-  }
 
   Widget _getBattleStatusFilter(BuildContext context) {
     Map<BattleStatus, String> battleStatusToDisplayName = {
@@ -678,8 +576,8 @@ class _BattleViewState extends State<BattleView> {
         .entries
         .map(
           (entry) => DataRow(
-            color: MaterialStateProperty.resolveWith<Color?>(
-                (Set<MaterialState> states) {
+            color: WidgetStateProperty.resolveWith<Color?>(
+                (Set<WidgetState> states) {
               if (entry.key.isEven) {
                 return OnepieceColors
                     .liteFancyGreen; // Use whatever color you need for even rows

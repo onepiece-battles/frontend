@@ -9,7 +9,6 @@ import 'package:one_piece_battles_flutter/components/image_lazy_loader.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:one_piece_battles_flutter/repository/character_dao.dart';
-import 'package:one_piece_battles_flutter/utils/data_validator.dart';
 import 'package:one_piece_battles_flutter/utils/permission_check.dart';
 import 'package:openapi/api.dart';
 import 'package:toggle_switch/toggle_switch.dart';
@@ -29,23 +28,47 @@ class CharacterView extends StatefulWidget {
 
 class _CharacterViewState extends State<CharacterView>
     with AutomaticKeepAliveClientMixin {
-  Logger logger = Logger('CharacterView');
-  TextEditingController searchNameController = TextEditingController();
-  TextEditingController pageNumberController = TextEditingController(text: "0");
+  final Logger logger = Logger('CharacterView');
+  final GlobalKey _tableKey = GlobalKey();
+
+  // Controllers
+  final TextEditingController searchNameController = TextEditingController();
+  final TextEditingController pageNumberController =
+      TextEditingController(text: "0");
+  final ScrollController scrollController = ScrollController();
+  final ScrollController controlPanelController = ScrollController();
+  final ScrollController tableController = ScrollController();
+
+  // Data & Filter State
   CharacterFilter characterFilter = CharacterFilter();
   List<CharacterListView> currentCharacterList = [];
   List<CharacterSortableField> sortKeys = [
     CharacterSortableField(
         sortKey: CharacterSortableFieldsEnum.score, sortOrder: SortOrder.DESC)
   ];
-  final GlobalKey _tableKey = GlobalKey();
 
-  // sorting related fields
-  Map<SortOrder?, String> sortOrderToPath = const {
+  // Selections
+  List<BattleStyle> selectedBattleStyles = [];
+  List<Race> selectedRaces = [];
+  List<Haki> selectedHakis = [];
+
+  // Pagination State
+  int selectedPageNum = 1;
+  int totalPageNum = 0;
+  int itemCountPerPage = 10;
+  int totalItemCount = 0;
+  bool preButtonEnabled = false;
+  bool nextButtonEnabled = false;
+  bool confirmButtonEnabled = false;
+  int initialLabelIndex = 0;
+
+  // Constants / Maps
+  final Map<SortOrder?, String> sortOrderToPath = {
     null: 'images/svgs/sort-solid.svg',
     SortOrder.ASC: 'images/svgs/sort-up-solid.svg',
     SortOrder.DESC: 'images/svgs/sort-down-solid.svg'
   };
+
   Map<CharacterSortableFieldsEnum, SortOrder?> sortableEnumToSortOrderMap = {
     CharacterSortableFieldsEnum.name: null,
     CharacterSortableFieldsEnum.score: SortOrder.DESC,
@@ -57,26 +80,50 @@ class _CharacterViewState extends State<CharacterView>
     CharacterSortableFieldsEnum.blood: null,
     CharacterSortableFieldsEnum.speed: null,
   };
-  List<BattleStyle> selectedBattleStyles = [];
-  List<Race> selectedRaces = [];
-  List<Haki> selectedHakis = [];
-  ScrollController scrollController = ScrollController();
-  ScrollController controlPanelController = ScrollController();
-  ScrollController tableController = ScrollController();
 
-  int selectedPageNum = 1;
-  int totalPageNum = 0;
-  int itemCountPerPage = 10;
-  int totalItemCount = 0;
-  bool preButtonEnabled = false;
-  bool nextButtonEnabled = false;
-  bool confirmButtonEnabled = false;
+  // Cached display maps to avoid rebuilding in build()
+  late Map<BattleStyle, String> battleStyleToDisplayValue;
+  late Map<Race, String> raceEnumToDisplayName;
+  late Map<Haki, String> hakiEnumValueToDisplayValue;
 
-  bool? onlyShowSystemResource = false;
-  bool donNotShowSystemResource = false;
-  bool fruitOwnersOnly = false;
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Initialize localized maps here as context is available
+    final loc = AppLocalizations.of(context)!;
+    battleStyleToDisplayValue = {
+      BattleStyle.BODY: loc.body,
+      BattleStyle.SCIENCE: loc.science,
+      BattleStyle.KATANA: loc.katana,
+      BattleStyle.SHOOTER: loc.shoot,
+      BattleStyle.STICK: loc.stick,
+      BattleStyle.RIFLE: loc.rifle,
+      BattleStyle.SWORD: loc.sword
+    };
+    raceEnumToDisplayName = {
+      Race.HUMAN: loc.human,
+      Race.FISH_MAN: loc.fishman,
+      Race.MERFOLK: loc.merfolk,
+      Race.GIANT: loc.giant,
+      Race.LONG_ARM: loc.longArm,
+      Race.LONG_LEG: loc.longLeg,
+      Race.SNAKE_NECK: loc.snakeNeck,
+      Race.THREE_EYE: loc.threeEye,
+      Race.LUNARIAN: loc.lunarian,
+      Race.MINK: loc.mink,
+      Race.WORLD_NOBEL: loc.worldNobel,
+      Race.DWARVES: loc.dwarves,
+      Race.NO_LIFE_OBJECT: loc.lifeless_object,
+      Race.ANIMAL: loc.animal,
+      Race.SOUL: loc.soul,
+    };
+    hakiEnumValueToDisplayValue = {
+      Haki.busoshoku: loc.busoshoku,
+      Haki.haoshoku: loc.haoshoku,
+      Haki.kenbunshoku: loc.kenbunshoku,
+    };
+  }
 
-  int initialLabelIndex = 0;
   @override
   void initState() {
     super.initState();
@@ -93,29 +140,17 @@ class _CharacterViewState extends State<CharacterView>
         pageIndex: selectedPageNum,
         sortKeys: sortKeys,
         characterFilter: characterFilter);
-    Future<ListCharacterResponse?> listCharacterResponse =
-        getIt<CharacterDao>().listCharacter(listCharacterRequest);
 
-    listCharacterResponse.then((value) {
+    getIt<CharacterDao>().listCharacter(listCharacterRequest).then((value) {
+      if (!mounted) return;
       setState(() {
         currentCharacterList = value!.characters;
-        if (currentCharacterList.isEmpty) {
-          pageNumberController.text = "0";
-        } else {
-          pageNumberController.text = selectedPageNum.toString();
-        }
+        pageNumberController.text =
+            currentCharacterList.isEmpty ? "0" : selectedPageNum.toString();
         totalItemCount = value.totalSize!;
         totalPageNum = (totalItemCount / itemCountPerPage).ceil();
-        if (selectedPageNum <= 1) {
-          preButtonEnabled = false;
-        } else {
-          preButtonEnabled = true;
-        }
-        if (selectedPageNum >= totalPageNum) {
-          nextButtonEnabled = false;
-        } else {
-          nextButtonEnabled = true;
-        }
+        preButtonEnabled = selectedPageNum > 1;
+        nextButtonEnabled = selectedPageNum < totalPageNum;
       });
     });
   }
@@ -128,63 +163,51 @@ class _CharacterViewState extends State<CharacterView>
       child: Column(
         children: [
           Expanded(
-              child: SingleChildScrollView(
-            controller: scrollController,
-            scrollDirection: Axis.vertical,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _createHeader(context),
-                SizedBox(
-                    width: 1900,
-                    height: 90,
-                    child: Scrollbar(
-                      controller: controlPanelController,
-                      trackVisibility: true,
-                      thickness: 5,
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        controller: controlPanelController,
-                        child: Padding(
-                          padding: const EdgeInsets.only(bottom: 6.0),
-                          child: _createControlPanel(context),
-                        ),
-                      ),
-                    )),
-                Scrollbar(
-                  trackVisibility: true,
-                  thickness: 5,
-                  controller: tableController,
-                  child: SingleChildScrollView(
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _createHeader(),
+                  // Wrap control panel in simpler scroll container
+                  SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
-                    controller: tableController,
-                    child: _createCharacterTable(context),
+                    controller: controlPanelController,
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 6.0),
+                      child: _createControlPanel(),
+                    ),
                   ),
-                ),
-                const SizedBox(
-                  height: 15,
-                ),
-              ],
+                  const SizedBox(height: 10),
+                  // Data Table Area
+                  Scrollbar(
+                    trackVisibility: true,
+                    thickness: 5,
+                    controller: tableController,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      controller: tableController,
+                      child: _createCharacterTable(),
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+                ],
+              ),
             ),
-          )),
-          const SizedBox(
-            height: 15,
           ),
           if (totalPageNum > 1)
-            Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Center(child: _getPageFoot(context)),
-              ],
-            )
+            Padding(
+              padding: const EdgeInsets.only(top: 15.0),
+              child: _getPageFoot(),
+            ),
         ],
       ),
     );
   }
 
-  Widget _createHeader(BuildContext context) {
+  Widget _createHeader() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(0, 0, 0, 20),
+      padding: const EdgeInsets.only(bottom: 20),
       child: Text(
         AppLocalizations.of(context)!.character,
         style: OnepieceFonts.headerStyle,
@@ -192,448 +215,203 @@ class _CharacterViewState extends State<CharacterView>
     );
   }
 
-  Widget _createControlPanel(BuildContext context) {
-    Map<BattleStyle, String> battleStyleToDisplayValue = <BattleStyle, String>{
-      BattleStyle.BODY: AppLocalizations.of(context)!.body,
-      BattleStyle.SCIENCE: AppLocalizations.of(context)!.science,
-      BattleStyle.KATANA: AppLocalizations.of(context)!.katana,
-      BattleStyle.SHOOTER: AppLocalizations.of(context)!.shoot,
-      BattleStyle.STICK: AppLocalizations.of(context)!.stick,
-      BattleStyle.RIFLE: AppLocalizations.of(context)!.rifle,
-      BattleStyle.SWORD: AppLocalizations.of(context)!.sword
-    };
-    Map<Race, String> raceEnumToDisplayName = {
-      Race.HUMAN: AppLocalizations.of(context)!.human,
-      Race.FISH_MAN: AppLocalizations.of(context)!.fishman,
-      Race.MERFOLK: AppLocalizations.of(context)!.merfolk,
-      Race.GIANT: AppLocalizations.of(context)!.giant,
-      Race.LONG_ARM: AppLocalizations.of(context)!.longArm,
-      Race.LONG_LEG: AppLocalizations.of(context)!.longLeg,
-      Race.SNAKE_NECK: AppLocalizations.of(context)!.snakeNeck,
-      Race.THREE_EYE: AppLocalizations.of(context)!.threeEye,
-      Race.LUNARIAN: AppLocalizations.of(context)!.lunarian,
-      Race.MINK: AppLocalizations.of(context)!.mink,
-      Race.WORLD_NOBEL: AppLocalizations.of(context)!.worldNobel,
-      Race.DWARVES: AppLocalizations.of(context)!.dwarves,
-      Race.NO_LIFE_OBJECT: AppLocalizations.of(context)!.lifeless_object,
-      Race.ANIMAL: AppLocalizations.of(context)!.animal,
-      Race.SOUL: AppLocalizations.of(context)!.soul,
-    };
-    Map<Haki, String> hakiEnumValueToDisplayValue = {
-      Haki.busoshoku: AppLocalizations.of(context)!.busoshoku,
-      Haki.haoshoku: AppLocalizations.of(context)!.haoshoku,
-      Haki.kenbunshoku: AppLocalizations.of(context)!.kenbunshoku,
-    };
+  Widget _createControlPanel() {
     return Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              if (PermissionCheck.checkPermission(
-                  getIt<User>().loginRoleResourcesPermissionMap,
-                  ResourceType.CHARACTER,
-                  Permission.CREATE))
-                SizedBox(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            if (PermissionCheck.checkPermission(
+                getIt<User>().loginRoleResourcesPermissionMap,
+                ResourceType.CHARACTER,
+                Permission.CREATE))
+              Padding(
+                padding: const EdgeInsets.only(right: 10.0),
+                child: SizedBox(
                   height: 35,
                   width: 120,
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 10.0),
-                    child: ElevatedButton(
-                        onPressed: () {
-                          context.goNamed("createCharacter");
-                        },
-                        style: OnepieceButtonStyle.getDefaultStyle(),
-                        child: Text(
-                          AppLocalizations.of(context)!.create,
-                        )),
-                  ),
-                ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 0, 6, 0),
-                child: SizedBox(
-                  width: 200,
-                  height: 35,
-                  child: TextFormField(
-                    controller: searchNameController,
-                    onChanged: (value) {
-                      characterFilter.name = value;
-                      _search(true);
-                    },
-                    decoration: InputDecoration(
-                      labelStyle: OnepieceFonts.dropDownItemStyle,
-                      floatingLabelBehavior: FloatingLabelBehavior.never,
-                      disabledBorder: const OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: OnepieceColors.menuHoverColor)),
-                      enabledBorder: const OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: OnepieceColors.menuHoverColor)),
-                      focusedBorder: const OutlineInputBorder(
-                          borderSide: BorderSide(
-                              color: OnepieceColors.fancyGreen, width: 1.5)),
-                      prefixIcon: const Icon(Icons.search),
-                      labelText: AppLocalizations.of(context)!.name,
-                    ),
+                  child: ElevatedButton(
+                    onPressed: () => context.goNamed("createCharacter"),
+                    style: OnepieceButtonStyle.getDefaultStyle(),
+                    child: Text(AppLocalizations.of(context)!.create),
                   ),
                 ),
               ),
+            SizedBox(
+              width: 200,
+              height: 35,
+              child: TextFormField(
+                controller: searchNameController,
+                onChanged: (value) {
+                  characterFilter.name = value;
+                  _search(true);
+                },
+                decoration: InputDecoration(
+                  labelStyle: OnepieceFonts.dropDownItemStyle,
+                  floatingLabelBehavior: FloatingLabelBehavior.never,
+                  border: const OutlineInputBorder(
+                      borderSide:
+                          BorderSide(color: OnepieceColors.menuHoverColor)),
+                  focusedBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(
+                          color: OnepieceColors.fancyGreen, width: 1.5)),
+                  prefixIcon: const Icon(Icons.search),
+                  labelText: AppLocalizations.of(context)!.name,
+                  contentPadding:
+                      const EdgeInsets.symmetric(vertical: 0, horizontal: 10),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        SizedBox(
+          height: 36,
+          child: ToggleSwitch(
+            customWidths: const [150, 150, 150, 180],
+            cornerRadius: 4,
+            minHeight: 35.0,
+            fontSize: 14.0,
+            initialLabelIndex: initialLabelIndex,
+            activeBgColor: const [OnepieceColors.fancyBlue],
+            inactiveBgColor: OnepieceColors.liteFancyGreen,
+            inactiveFgColor: Colors.grey[600],
+            totalSwitches: 4,
+            labels: [
+              AppLocalizations.of(context)!.allResources,
+              AppLocalizations.of(context)!.myResource,
+              AppLocalizations.of(context)!.systemResource,
+              AppLocalizations.of(context)!.excludeSystem
             ],
+            onToggle: (index) {
+              initialLabelIndex = index!;
+              characterFilter.systemResource =
+                  (index == 2) ? true : (index == 3 ? false : null);
+              characterFilter.userId = (index == 1) ? getIt<User>().id : null;
+              _search(true);
+            },
           ),
-          const SizedBox(
-            height: 10,
+        ),
+        const SizedBox(height: 10),
+        Row(children: [
+          _buildDropdown<BattleStyle>(
+            items: BattleStyle.values,
+            selectedItems: selectedBattleStyles,
+            displayMap: battleStyleToDisplayValue,
+            hint: AppLocalizations.of(context)!.battleStyle,
+            onChanged: (list) {
+              characterFilter.battleStyles = list;
+              _search(true);
+            },
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              SizedBox(
-                height: 36,
-                child: ToggleSwitch(
-                  customWidths: const [150, 150, 150, 180],
-                  cornerRadius: 4,
-                  minWidth: 150.0,
-                  minHeight: 35.0,
-                  fontSize: 14.0,
-                  dividerColor: Colors.white,
-                  initialLabelIndex: initialLabelIndex,
-                  activeBgColor: const [OnepieceColors.fancyBlue],
-                  activeFgColor: Colors.white,
-                  inactiveBgColor: OnepieceColors.liteFancyGreen,
-                  inactiveFgColor: Colors.grey[600],
-                  totalSwitches: 4,
-                  labels: [
-                    AppLocalizations.of(context)!.allResources,
-                    AppLocalizations.of(context)!.myResource,
-                    AppLocalizations.of(context)!.systemResource,
-                    AppLocalizations.of(context)!.excludeSystem
-                  ],
-                  onToggle: (index) {
-                    initialLabelIndex = index!;
-                    // show all resources
-                    if (index == 0) {
-                      characterFilter.systemResource = null;
-                      characterFilter.userId = null;
-                    }
-                    // show my resource
-                    if (index == 1) {
-                      characterFilter.systemResource = null;
-                      characterFilter.userId = getIt<User>().id;
-                    }
-                    // only show system resource
-                    if (index == 2) {
-                      characterFilter.systemResource = true;
-                      characterFilter.userId = null;
-                    }
-                    // do not show system resource
-                    if (index == 3) {
-                      characterFilter.systemResource = false;
-                      characterFilter.userId = null;
-                    }
-                    _search(true);
-                  },
-                ),
-              ),
-              const SizedBox(
-                width: 5,
-              ),
-              DropdownButtonHideUnderline(
-                child: DropdownButton2(
-                  isExpanded: true,
-                  value: selectedBattleStyles.isEmpty
-                      ? null
-                      : selectedBattleStyles.last,
-                  hint: Text(
-                    AppLocalizations.of(context)!.battleStyle,
-                    style: OnepieceFonts.dropDownItemStyle,
-                  ),
-                  onChanged: (value) {},
-                  selectedItemBuilder: (context) {
-                    return BattleStyle.values.map(
-                      (item) {
-                        return Container(
-                          alignment: AlignmentDirectional.center,
-                          child: Text(
-                            selectedBattleStyles
-                                .map((selectedType) {
-                                  return battleStyleToDisplayValue[
-                                      selectedType];
-                                })
-                                .toSet()
-                                .join(', '),
-                            style: const TextStyle(
-                              fontSize: 16,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            maxLines: 1,
-                          ),
-                        );
-                      },
-                    ).toList();
-                  },
-                  buttonStyleData: ButtonStyleData(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    height: 35,
-                    width: 200,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(3),
-                      color: OnepieceColors.liteFancyGreen,
-                    ),
-                  ),
-                  menuItemStyleData: const MenuItemStyleData(
-                    height: 35,
-                  ),
-                  items: BattleStyle.values.map((BattleStyle battleStyle) {
-                    return DropdownMenuItem<BattleStyle>(
-                      value: battleStyle,
-                      enabled: false,
-                      child: StatefulBuilder(
-                        builder: (context, menuSetState) {
-                          final isSelected =
-                              selectedBattleStyles.contains(battleStyle);
-                          return InkWell(
-                            hoverColor: Colors.transparent,
-                            splashColor: Colors.transparent,
-                            onTap: () {
-                              isSelected
-                                  ? selectedBattleStyles.remove(battleStyle)
-                                  : selectedBattleStyles.add(battleStyle);
-                              characterFilter.battleStyles =
-                                  selectedBattleStyles;
-                              // //This rebuilds the StatefulWidget to update the button's text
-                              setState(() {});
-                              //This rebuilds the dropdownMenu Widget to update the check mark
-                              menuSetState(() {});
-                              _search(true);
-                            },
-                            child: Container(
-                              height: double.infinity,
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 3.0),
-                              child: Row(
-                                children: [
-                                  if (isSelected)
-                                    const Icon(Icons.check_box_outlined)
-                                  else
-                                    const Icon(Icons.check_box_outline_blank),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      battleStyleToDisplayValue[battleStyle]!,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-              const SizedBox(
-                width: 6,
-              ),
-              DropdownButtonHideUnderline(
-                child: DropdownButton2(
-                  isExpanded: true,
-                  value: selectedHakis.isEmpty ? null : selectedHakis.last,
-                  hint: Text(
-                    AppLocalizations.of(context)!.hakis,
-                    style: OnepieceFonts.dropDownItemStyle,
-                  ),
-                  onChanged: (value) {},
-                  selectedItemBuilder: (context) {
-                    return Haki.values.map(
-                      (item) {
-                        return Container(
-                          alignment: AlignmentDirectional.center,
-                          child: Text(
-                            selectedHakis
-                                .map((selectedType) {
-                                  return hakiEnumValueToDisplayValue[
-                                      selectedType];
-                                })
-                                .toSet()
-                                .join(', '),
-                            style: const TextStyle(
-                              fontSize: 16,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            maxLines: 1,
-                          ),
-                        );
-                      },
-                    ).toList();
-                  },
-                  buttonStyleData: ButtonStyleData(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    height: 35,
-                    width: 200,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(3),
-                      color: OnepieceColors.liteFancyGreen,
-                    ),
-                  ),
-                  menuItemStyleData: const MenuItemStyleData(
-                    height: 35,
-                  ),
-                  items: Haki.values.map((Haki haki) {
-                    return DropdownMenuItem<Haki>(
-                      value: haki,
-                      enabled: false,
-                      child: StatefulBuilder(
-                        builder: (context, menuSetState) {
-                          final isSelected = selectedHakis.contains(haki);
-                          return InkWell(
-                            hoverColor: Colors.transparent,
-                            splashColor: Colors.transparent,
-                            onTap: () {
-                              isSelected
-                                  ? selectedHakis.remove(haki)
-                                  : selectedHakis.add(haki);
-                              characterFilter.hakis = selectedHakis;
-                              debugPrint('$selectedHakis');
-                              // //This rebuilds the StatefulWidget to update the button's text
-                              setState(() {});
-                              //This rebuilds the dropdownMenu Widget to update the check mark
-                              menuSetState(() {});
-                              _search(true);
-                            },
-                            child: Container(
-                              height: double.infinity,
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 3.0),
-                              child: Row(
-                                children: [
-                                  if (isSelected)
-                                    const Icon(Icons.check_box_outlined)
-                                  else
-                                    const Icon(Icons.check_box_outline_blank),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      hakiEnumValueToDisplayValue[haki]!,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-              const SizedBox(
-                width: 6,
-              ),
-              DropdownButtonHideUnderline(
-                child: DropdownButton2(
-                  isExpanded: true,
-                  value: selectedRaces.isEmpty ? null : selectedRaces.last,
-                  hint: Text(
-                    AppLocalizations.of(context)!.race,
-                    style: OnepieceFonts.dropDownItemStyle,
-                  ),
-                  onChanged: (value) {},
-                  selectedItemBuilder: (context) {
-                    return Race.values.map(
-                      (item) {
-                        return Container(
-                          alignment: AlignmentDirectional.center,
-                          child: Text(
-                            selectedRaces
-                                .map((selectedRace) {
-                                  return raceEnumToDisplayName[selectedRace];
-                                })
-                                .toSet()
-                                .join(', '),
-                            style: const TextStyle(
-                              fontSize: 16,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            maxLines: 1,
-                          ),
-                        );
-                      },
-                    ).toList();
-                  },
-                  buttonStyleData: ButtonStyleData(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    height: 35,
-                    width: 250,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(3),
-                      color: OnepieceColors.liteFancyGreen,
-                    ),
-                  ),
-                  menuItemStyleData: const MenuItemStyleData(
-                    height: 35,
-                  ),
-                  items: Race.values.map((Race race) {
-                    return DropdownMenuItem<Race>(
-                      value: race,
-                      enabled: false,
-                      child: StatefulBuilder(
-                        builder: (context, menuSetState) {
-                          final isSelected = selectedRaces.contains(race);
-                          return InkWell(
-                            hoverColor: Colors.transparent,
-                            splashColor: Colors.transparent,
-                            onTap: () {
-                              isSelected
-                                  ? selectedRaces.remove(race)
-                                  : selectedRaces.add(race);
-                              characterFilter.races = selectedRaces;
-                              // //This rebuilds the StatefulWidget to update the button's text
-                              setState(() {});
-                              //This rebuilds the dropdownMenu Widget to update the check mark
-                              menuSetState(() {});
-                              _search(true);
-                            },
-                            child: Container(
-                              height: double.infinity,
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 3.0),
-                              child: Row(
-                                children: [
-                                  if (isSelected)
-                                    const Icon(Icons.check_box_outlined)
-                                  else
-                                    const Icon(Icons.check_box_outline_blank),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      raceEnumToDisplayName[race]!,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-            ],
+          const SizedBox(width: 6),
+          _buildDropdown<Haki>(
+            items: Haki.values,
+            selectedItems: selectedHakis,
+            displayMap: hakiEnumValueToDisplayValue,
+            hint: AppLocalizations.of(context)!.hakis,
+            onChanged: (list) {
+              characterFilter.hakis = list;
+              _search(true);
+            },
           ),
-        ]);
+          const SizedBox(width: 6),
+          _buildDropdown<Race>(
+            items: Race.values,
+            selectedItems: selectedRaces,
+            displayMap: raceEnumToDisplayName,
+            hint: AppLocalizations.of(context)!.race,
+            width: 250,
+            onChanged: (list) {
+              characterFilter.races = list;
+              _search(true);
+            },
+          ),
+        ])
+      ],
+    );
   }
 
-  DataTable _createCharacterTable(BuildContext context) {
+  // Generic Dropdown Builder to reduce repetition
+  Widget _buildDropdown<T>({
+    required List<T> items,
+    required List<T> selectedItems,
+    required Map<T, String> displayMap,
+    required String hint,
+    required Function(List<T>) onChanged,
+    double width = 200,
+  }) {
+    return DropdownButtonHideUnderline(
+      child: DropdownButton2(
+        isExpanded: true,
+        value: selectedItems.isEmpty ? null : selectedItems.last,
+        hint: Text(hint, style: OnepieceFonts.dropDownItemStyle),
+        onChanged: (value) {}, // Handled by MenuItem onTap
+        selectedItemBuilder: (context) {
+          return items.map((item) {
+            return Container(
+              alignment: AlignmentDirectional.centerStart,
+              child: Text(
+                selectedItems.map((e) => displayMap[e]).join(', '),
+                style: const TextStyle(
+                    fontSize: 16, overflow: TextOverflow.ellipsis),
+                maxLines: 1,
+              ),
+            );
+          }).toList();
+        },
+        buttonStyleData: ButtonStyleData(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          height: 35,
+          width: width,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(3),
+            color: OnepieceColors.liteFancyGreen,
+          ),
+        ),
+        menuItemStyleData: const MenuItemStyleData(height: 35),
+        items: items.map((T item) {
+          return DropdownMenuItem<T>(
+            value: item,
+            enabled:
+                false, // Disable default selection to handle multi-select manually
+            child: StatefulBuilder(
+              builder: (context, menuSetState) {
+                final isSelected = selectedItems.contains(item);
+                return InkWell(
+                  onTap: () {
+                    isSelected
+                        ? selectedItems.remove(item)
+                        : selectedItems.add(item);
+                    onChanged(selectedItems);
+                    setState(() {});
+                    menuSetState(() {});
+                  },
+                  child: Container(
+                    height: double.infinity,
+                    padding: const EdgeInsets.symmetric(horizontal: 3.0),
+                    child: Row(
+                      children: [
+                        Icon(isSelected
+                            ? Icons.check_box_outlined
+                            : Icons.check_box_outline_blank),
+                        const SizedBox(width: 8),
+                        Expanded(
+                            child: Text(displayMap[item]!,
+                                style: const TextStyle(fontSize: 16))),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  DataTable _createCharacterTable() {
     return DataTable(
       key: _tableKey,
       showCheckboxColumn: false,
@@ -642,420 +420,269 @@ class _CharacterViewState extends State<CharacterView>
       border: const TableBorder(
           top: BorderSide(color: OnepieceColors.themeColor),
           bottom: BorderSide(color: OnepieceColors.themeColor)),
-      columns: _createColumns(context),
-      rows: _createRows(context),
-      columnSpacing: 10,
+      columns: _createColumns(),
+      rows: _createRows(),
+      columnSpacing: 20, // Increased slightly for breathing room
+      horizontalMargin: 10,
     );
   }
 
-  List<DataColumn> _createColumns(BuildContext context) {
+  List<DataColumn> _createColumns() {
     return [
       DataColumn(
         label: Tooltip(
-          preferBelow: true,
           message: AppLocalizations.of(context)!.resetSort,
           child: ImageHelper.getIconButtonFromSvg(
               'images/svgs/reset.svg', OnepieceColors.fancyBlue, 25, 25, () {
-            sortKeys = [];
-            sortableEnumToSortOrderMap = {
-              CharacterSortableFieldsEnum.name: null,
-              CharacterSortableFieldsEnum.fruitLimit: null,
-              CharacterSortableFieldsEnum.groupGain: null,
-              CharacterSortableFieldsEnum.attack: null,
-              CharacterSortableFieldsEnum.defense: null,
-              CharacterSortableFieldsEnum.intelligence: null,
-              CharacterSortableFieldsEnum.blood: null,
-              CharacterSortableFieldsEnum.speed: null,
-            };
-            _search(false);
+            setState(() {
+              sortKeys.clear();
+              sortableEnumToSortOrderMap.updateAll((key, value) => null);
+              _search(false);
+            });
           }),
         ),
       ),
-      _createSingleColumn(
-          AppLocalizations.of(context)!.characterName, null, 80, null),
-      _createSingleColumn(AppLocalizations.of(context)!.hakis, null, 250, null),
+      _createSingleColumn(AppLocalizations.of(context)!.characterName, null),
+      _createSingleColumn(AppLocalizations.of(context)!.hakis, null),
       _createSingleColumn(AppLocalizations.of(context)!.combatPower,
-          CharacterSortableFieldsEnum.score, 80, null),
-      _createSingleColumn(AppLocalizations.of(context)!.race, null, 150, null),
+          CharacterSortableFieldsEnum.score),
+      _createSingleColumn(AppLocalizations.of(context)!.race, null),
+      _createSingleColumn(AppLocalizations.of(context)!.battleStyle, null),
       _createSingleColumn(
-          AppLocalizations.of(context)!.battleStyle, null, 100, null),
+        AppLocalizations.of(context)!.bounty,
+        null,
+        iconPath: 'images/character_digits_icon/bounty.svg',
+      ),
       _createSingleColumn(
-          AppLocalizations.of(context)!.bounty,
-          null,
-          100,
-          ImageHelper.getTextFormFieldIcon(
-              'images/character_digits_icon/bounty.svg', true, 20)),
+        AppLocalizations.of(context)!.characterAttack,
+        CharacterSortableFieldsEnum.attack,
+        iconPath: 'images/character_digits_icon/attack.svg',
+      ),
       _createSingleColumn(
-          AppLocalizations.of(context)!.characterAttack,
-          CharacterSortableFieldsEnum.attack,
-          110,
-          ImageHelper.getTextFormFieldIcon(
-              'images/character_digits_icon/attack.svg', true, 20)),
+        AppLocalizations.of(context)!.characterDefense,
+        CharacterSortableFieldsEnum.defense,
+        iconPath: 'images/character_digits_icon/defense.svg',
+      ),
       _createSingleColumn(
-          AppLocalizations.of(context)!.characterDefense,
-          CharacterSortableFieldsEnum.defense,
-          110,
-          ImageHelper.getTextFormFieldIcon(
-              'images/character_digits_icon/defense.svg', true, 20)),
+        AppLocalizations.of(context)!.characterIntelligence,
+        CharacterSortableFieldsEnum.intelligence,
+        iconPath: 'images/character_digits_icon/intelligence.svg',
+      ),
       _createSingleColumn(
-          AppLocalizations.of(context)!.characterIntelligence,
-          CharacterSortableFieldsEnum.intelligence,
-          130,
-          ImageHelper.getTextFormFieldIcon(
-              'images/character_digits_icon/intelligence.svg', true, 20)),
+        AppLocalizations.of(context)!.characterBlood,
+        CharacterSortableFieldsEnum.blood,
+        iconPath: 'images/character_digits_icon/blood.svg',
+      ),
       _createSingleColumn(
-          AppLocalizations.of(context)!.characterBlood,
-          CharacterSortableFieldsEnum.blood,
-          110,
-          ImageHelper.getTextFormFieldIcon(
-              'images/character_digits_icon/blood.svg', true, 20)),
+        AppLocalizations.of(context)!.characterSpeed,
+        CharacterSortableFieldsEnum.speed,
+        iconPath: 'images/character_digits_icon/speed.svg',
+      ),
       _createSingleColumn(
-          AppLocalizations.of(context)!.characterSpeed,
-          CharacterSortableFieldsEnum.speed,
-          110,
-          ImageHelper.getTextFormFieldIcon(
-              'images/character_digits_icon/speed.svg', true, 20)),
-      _createSingleColumn(
-          AppLocalizations.of(context)!.groupGain,
-          CharacterSortableFieldsEnum.groupGain,
-          150,
-          ImageHelper.getTextFormFieldIcon(
-              'images/character_digits_icon/group_gain.svg', true, 20)),
+        AppLocalizations.of(context)!.groupGain,
+        CharacterSortableFieldsEnum.groupGain,
+        iconPath: 'images/character_digits_icon/group_gain.svg',
+      ),
       _createSingleColumn(AppLocalizations.of(context)!.fruitLimit,
-          CharacterSortableFieldsEnum.fruitLimit, 115, null),
+          CharacterSortableFieldsEnum.fruitLimit),
     ];
   }
 
+  // Refactored to be flexible width
   DataColumn _createSingleColumn(
-      String displayText,
-      CharacterSortableFieldsEnum? characterSortableFieldsEnum,
-      double? width,
-      Widget? icon) {
+      String displayText, CharacterSortableFieldsEnum? sortEnum,
+      {String? iconPath}) {
+    final isSorted =
+        sortEnum != null && sortableEnumToSortOrderMap[sortEnum] != null;
+    final sortOrder =
+        sortEnum != null ? sortableEnumToSortOrderMap[sortEnum] : null;
+
     return DataColumn(
       label: InkWell(
-        hoverColor: Colors.transparent,
-        splashColor: Colors.transparent,
-        onTap: characterSortableFieldsEnum == null
+        onTap: sortEnum == null
             ? null
             : () {
                 setState(() {
-                  var sortOrder =
-                      sortableEnumToSortOrderMap[characterSortableFieldsEnum];
-                  var sortKey = characterSortableFieldsEnum;
+                  // Logic to cycle: None -> Desc -> Asc -> None (or similar)
+                  // Simplified logic based on existing code:
+                  SortOrder? newOrder;
                   if (sortOrder == null) {
-                    sortOrder = SortOrder.ASC;
+                    newOrder = SortOrder.ASC;
                   } else if (sortOrder == SortOrder.ASC) {
-                    sortOrder = SortOrder.DESC;
+                    newOrder = SortOrder.DESC;
                   } else {
-                    sortOrder = null;
+                    newOrder = null;
                   }
-                  sortableEnumToSortOrderMap[characterSortableFieldsEnum] =
-                      sortOrder;
-                  sortKeys.removeWhere((element) => element.sortKey == sortKey);
-                  if (sortOrder != null) {
+
+                  sortableEnumToSortOrderMap[sortEnum] = newOrder;
+                  sortKeys
+                      .removeWhere((element) => element.sortKey == sortEnum);
+
+                  if (newOrder != null) {
                     sortKeys.insert(
                         0,
                         CharacterSortableField(
-                            sortKey: sortKey, sortOrder: sortOrder));
+                            sortKey: sortEnum, sortOrder: newOrder));
                   }
                   _search(false);
                 });
               },
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(5, 10, 0, 10),
-          child: SizedBox(
-            width: width,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    if (icon != null)
-                      Padding(
-                        padding: const EdgeInsets.only(right: 1.0),
-                        child: icon,
-                      ),
-                    Text(
-                      displayText,
-                      style: sortableEnumToSortOrderMap[
-                                  characterSortableFieldsEnum] ==
-                              null
-                          ? OnepieceFonts.tableHeaderStyle
-                          : OnepieceFonts.selectedTableHeaderStyle,
-                    ),
-                  ],
-                ),
-                const SizedBox(
-                  width: 5,
-                ),
-                if (characterSortableFieldsEnum != null)
-                  Padding(
-                    padding: const EdgeInsets.all(5.0),
-                    child: ImageHelper.getSvgIconWithColor(
-                      sortOrderToPath[sortableEnumToSortOrderMap[
-                          characterSortableFieldsEnum]]!,
-                      12,
-                      12,
-                      sortableEnumToSortOrderMap[characterSortableFieldsEnum] ==
-                              null
-                          ? Colors.grey
-                          : OnepieceColors.themeColor,
-                    ),
-                  ),
-              ],
+        child: Row(
+          mainAxisSize: MainAxisSize.min, // Important for auto-width
+          children: [
+            if (iconPath != null)
+              Padding(
+                padding: const EdgeInsets.only(right: 4.0),
+                child: ImageHelper.getTextFormFieldIcon(iconPath, true, 20),
+              ),
+            Text(
+              displayText,
+              style: isSorted
+                  ? OnepieceFonts.selectedTableHeaderStyle
+                  : OnepieceFonts.tableHeaderStyle,
             ),
-          ),
+            if (sortEnum != null)
+              Padding(
+                padding: const EdgeInsets.only(left: 4.0),
+                child: ImageHelper.getSvgIconWithColor(
+                  sortOrderToPath[sortOrder]!,
+                  12,
+                  12,
+                  isSorted ? OnepieceColors.themeColor : Colors.grey,
+                ),
+              ),
+          ],
         ),
       ),
     );
   }
 
-  List<DataRow> _createRows(BuildContext context) {
-    Map<Haki, String> hakiEnumValueToDisplayValue = {
-      Haki.busoshoku: AppLocalizations.of(context)!.busoshoku,
-      Haki.haoshoku: AppLocalizations.of(context)!.haoshoku,
-      Haki.kenbunshoku: AppLocalizations.of(context)!.kenbunshoku,
-    };
-    Map<BattleStyle, String> battleStyleToDisplayValue = <BattleStyle, String>{
-      BattleStyle.BODY: AppLocalizations.of(context)!.body,
-      BattleStyle.SCIENCE: AppLocalizations.of(context)!.science,
-      BattleStyle.KATANA: AppLocalizations.of(context)!.katana,
-      BattleStyle.SHOOTER: AppLocalizations.of(context)!.shoot,
-      BattleStyle.STICK: AppLocalizations.of(context)!.stick,
-      BattleStyle.RIFLE: AppLocalizations.of(context)!.rifle,
-      BattleStyle.SWORD: AppLocalizations.of(context)!.sword
-    };
-    Map<Race, String> raceEnumToDisplayName = {
-      Race.HUMAN: AppLocalizations.of(context)!.human,
-      Race.FISH_MAN: AppLocalizations.of(context)!.fishman,
-      Race.MERFOLK: AppLocalizations.of(context)!.merfolk,
-      Race.GIANT: AppLocalizations.of(context)!.giant,
-      Race.LONG_ARM: AppLocalizations.of(context)!.longArm,
-      Race.LONG_LEG: AppLocalizations.of(context)!.longLeg,
-      Race.SNAKE_NECK: AppLocalizations.of(context)!.snakeNeck,
-      Race.THREE_EYE: AppLocalizations.of(context)!.threeEye,
-      Race.LUNARIAN: AppLocalizations.of(context)!.lunarian,
-      Race.MINK: AppLocalizations.of(context)!.mink,
-      Race.WORLD_NOBEL: AppLocalizations.of(context)!.worldNobel,
-      Race.DWARVES: AppLocalizations.of(context)!.dwarves,
-      Race.NO_LIFE_OBJECT: AppLocalizations.of(context)!.lifeless_object,
-      Race.ANIMAL: AppLocalizations.of(context)!.animal,
-      Race.SOUL: AppLocalizations.of(context)!.soul,
-    };
-    return currentCharacterList
-        .asMap()
-        .entries
-        .map(
-          (entry) => DataRow(
-            color: WidgetStateProperty.resolveWith<Color?>(
-                (Set<WidgetState> states) {
-              if (entry.key.isEven) {
-                return OnepieceColors
-                    .liteFancyGreen; // Use whatever color you need for even rows
-              }
-              return null; // Use default (transparent) color for odd rows
-            }),
-            onSelectChanged: (value) {
-              context.goNamed('characterDetails',
-                  extra: entry.value.id,
-                  pathParameters: {
-                    'name': I18nHelper.getDisplayNameFromI18n(entry.value.name)
-                  });
-            },
-            cells: [
-              DataCell(
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                  child: ImageLazyLoader(
-                      key: UniqueKey(),
-                      uriProvider: () => entry.value.imageUri!,
-                      width: 40,
-                      borderWidth: 1.5,
-                      borderRadios: 40),
-                ),
-              ),
-              DataCell(Padding(
-                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child:
-                    Text(I18nHelper.getDisplayNameFromI18n(entry.value.name)),
-              )),
-              DataCell(Padding(
-                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: Row(
-                  children: [
-                    ...entry.value.hakis.toList()
-                      ..sort((a, b) => a.toString().compareTo(b.toString()))
-                  ]
-                      .map((e) => Padding(
-                            padding: const EdgeInsets.only(right: 5),
-                            child: OnepieceTag.getHakiTag(
-                                e, hakiEnumValueToDisplayValue[e]!),
-                          ))
-                      .toList(),
-                ),
-              )),
-              DataCell(Padding(
-                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: Text(
-                  entry.value.score.toString(),
-                  style: OnepieceFonts.boldFancySmallFont,
-                ),
-              )),
-              DataCell(Padding(
-                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: Text(raceEnumToDisplayName[entry.value.race]!),
-              )),
-              DataCell(Padding(
-                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child:
-                    Text(battleStyleToDisplayValue[entry.value.battleStyle]!),
-              )),
-              DataCell(Padding(
-                padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-                child: Text(
-                  textAlign: TextAlign.right,
-                  entry.value.bounty == null
-                      ? ""
-                      : entry.value.bounty.toString(),
-                  style: GoogleFonts.lobster(),
-                ),
-              )),
-              DataCell(Padding(
-                padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-                child: Text(entry.value.attack.toString()),
-              )),
-              DataCell(Padding(
-                padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-                child: Text(entry.value.defense.toString()),
-              )),
-              DataCell(Padding(
-                padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-                child: Text(entry.value.intelligence.toString()),
-              )),
-              DataCell(Padding(
-                padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-                child: Text(entry.value.blood.toString()),
-              )),
-              DataCell(Padding(
-                padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-                child: Text(entry.value.speed.toString()),
-              )),
-              DataCell(Padding(
-                padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-                child: Text(entry.value.groupGain.toString()),
-              )),
-              DataCell(Padding(
-                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: Text(entry.value.maximumFruitCount.toString()),
-              )),
-            ],
+  List<DataRow> _createRows() {
+    return currentCharacterList.asMap().entries.map((entry) {
+      final character = entry.value;
+      final isEven = entry.key.isEven;
+
+      return DataRow(
+        color: WidgetStateProperty.all(
+            isEven ? OnepieceColors.liteFancyGreen : null),
+        onSelectChanged: (_) {
+          context.goNamed('characterDetails',
+              extra: character.id,
+              pathParameters: {
+                'name': I18nHelper.getDisplayNameFromI18n(character.name)
+              });
+        },
+        cells: [
+          DataCell(
+            Padding(
+              padding: const EdgeInsets.all(3.0),
+              child: ImageLazyLoader(
+                  key: UniqueKey(),
+                  uriProvider: () => character.imageUri!,
+                  width: 40,
+                  borderWidth: 1.5,
+                  borderRadios: 40),
+            ),
           ),
-        )
-        .toList();
+          DataCell(Text(I18nHelper.getDisplayNameFromI18n(character.name))),
+          DataCell(Row(
+            mainAxisSize: MainAxisSize.min,
+            children: (character.hakis.toList()
+                  ..sort((a, b) => a.toString().compareTo(b.toString())))
+                .map((e) => Padding(
+                      padding: const EdgeInsets.only(right: 5),
+                      child: OnepieceTag.getHakiTag(
+                          e, hakiEnumValueToDisplayValue[e]!),
+                    ))
+                .toList(),
+          )),
+          DataCell(Text(character.score.toString(),
+              style: OnepieceFonts.boldFancySmallFont)),
+          DataCell(Text(raceEnumToDisplayName[character.race] ?? '')),
+          DataCell(
+              Text(battleStyleToDisplayValue[character.battleStyle] ?? '')),
+          DataCell(Text(
+            character.bounty?.toString() ?? "",
+            style: GoogleFonts.lobster(),
+            textAlign: TextAlign.right,
+          )),
+          DataCell(Text(character.attack.toString())),
+          DataCell(Text(character.defense.toString())),
+          DataCell(Text(character.intelligence.toString())),
+          DataCell(Text(character.blood.toString())),
+          DataCell(Text(character.speed.toString())),
+          DataCell(Text(character.groupGain.toString())),
+          DataCell(Text(character.maximumFruitCount.toString())),
+        ],
+      );
+    }).toList();
   }
 
-  Widget _getPageFoot(BuildContext context) {
-    return StatefulBuilder(
-        builder: (BuildContext context, StateSetter footState) {
-      List<Widget> widgetList = [];
-      ElevatedButton prePage = ElevatedButton(
-          style: OnepieceButtonStyle.getDefaultStyle(),
-          onPressed: !preButtonEnabled
-              ? null
-              : () {
-                  selectedPageNum = selectedPageNum - 1;
-                  _search(false);
-                },
-          child: const Icon(Icons.arrow_back));
-      ElevatedButton nextPage = ElevatedButton(
-          style: OnepieceButtonStyle.getDefaultStyle(),
-          onPressed: !nextButtonEnabled
-              ? null
-              : () {
-                  selectedPageNum = selectedPageNum + 1;
-                  _search(false);
-                },
-          child: const Icon(Icons.arrow_forward));
-      Widget pageNumber = SizedBox(
-        width: 35,
-        height: 28,
-        child: TextFormField(
-            style: OnepieceFonts.pageInputStyle,
-            textAlign: TextAlign.center,
-            textAlignVertical: TextAlignVertical.center,
-            decoration: const InputDecoration(
-              contentPadding: EdgeInsets.fromLTRB(0, 0, 0, 20),
-              enabledBorder: UnderlineInputBorder(),
-              focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: OnepieceColors.themeColor)),
-            ),
-            controller: pageNumberController,
-            onChanged: (value) {
-              footState(() {
-                if (!DataValidator.isInt(pageNumberController.text.trim())) {
-                  confirmButtonEnabled = false;
-                } else {
-                  int currentTypedPage =
-                      int.parse(pageNumberController.text.trim());
-                  if (currentTypedPage < 1 ||
-                      currentTypedPage > totalPageNum ||
-                      currentTypedPage == selectedPageNum) {
-                    confirmButtonEnabled = false;
-                  } else {
-                    confirmButtonEnabled = true;
+  Widget _getPageFoot() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        ElevatedButton(
+            style: OnepieceButtonStyle.getDefaultStyle(),
+            onPressed: preButtonEnabled
+                ? () {
+                    selectedPageNum--;
+                    _search(false);
                   }
-                }
-              });
-            }),
-      );
-      ElevatedButton confirmPage = ElevatedButton(
-          style: OnepieceButtonStyle.getDefaultStyle(),
-          onPressed: !confirmButtonEnabled
-              ? null
-              : () {
-                  selectedPageNum = int.parse(pageNumberController.text);
-                  confirmButtonEnabled = false;
-                  _search(false);
-                },
-          child: Text(
-            AppLocalizations.of(context)!.jumpToPage,
-            textAlign: TextAlign.left,
-          ));
-      widgetList.add(Padding(
-        padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
-        child: prePage,
-      ));
-      widgetList.add(pageNumber);
-      var totalPageCount = ClipRRect(
-        borderRadius: BorderRadius.circular(3),
-        child: Container(
-            height: 28,
-            color: OnepieceColors.menuBackgroundColor,
-            alignment: AlignmentDirectional.center,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(3, 0, 3, 3),
-              child: Text(
-                "/$totalPageNum",
-                style: OnepieceFonts.contentStyle,
+                : null,
+            child: const Icon(Icons.arrow_back)),
+        const SizedBox(width: 8),
+        SizedBox(
+          width: 35,
+          child: TextFormField(
+              style: OnepieceFonts.pageInputStyle,
+              textAlign: TextAlign.center,
+              controller: pageNumberController,
+              decoration: const InputDecoration(
+                contentPadding:
+                    EdgeInsets.only(bottom: 10), // Adjust for alignment
+                enabledBorder: UnderlineInputBorder(),
+                focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: OnepieceColors.themeColor)),
               ),
-            )),
-      );
-      widgetList.add(totalPageCount);
-      widgetList.add(Padding(
-        padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-        child: confirmPage,
-      ));
-      widgetList.add(Padding(
-        padding: const EdgeInsets.fromLTRB(8.0, 0, 0, 0),
-        child: nextPage,
-      ));
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: widgetList,
-      );
-    });
+              onChanged: (value) {
+                setState(() {
+                  final page = int.tryParse(value);
+                  confirmButtonEnabled = page != null &&
+                      page > 0 &&
+                      page <= totalPageNum &&
+                      page != selectedPageNum;
+                });
+              }),
+        ),
+        Container(
+            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+            decoration: BoxDecoration(
+                color: OnepieceColors.menuBackgroundColor,
+                borderRadius: BorderRadius.circular(3)),
+            child: Text("/$totalPageNum", style: OnepieceFonts.contentStyle)),
+        const SizedBox(width: 8),
+        ElevatedButton(
+            style: OnepieceButtonStyle.getDefaultStyle(),
+            onPressed: confirmButtonEnabled
+                ? () {
+                    selectedPageNum = int.parse(pageNumberController.text);
+                    _search(false);
+                  }
+                : null,
+            child: Text(AppLocalizations.of(context)!.jumpToPage)),
+        const SizedBox(width: 8),
+        ElevatedButton(
+            style: OnepieceButtonStyle.getDefaultStyle(),
+            onPressed: nextButtonEnabled
+                ? () {
+                    selectedPageNum++;
+                    _search(false);
+                  }
+                : null,
+            child: const Icon(Icons.arrow_forward)),
+      ],
+    );
   }
 
   @override
