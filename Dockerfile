@@ -28,8 +28,8 @@ COPY --from=build-env /app/build/web /usr/share/nginx/html
 
 # replace with new nginx config file
 COPY nginx.conf /etc/nginx/nginx.conf
-COPY onepiece-battles.com.pem /etc/nginx/ssl/onepiece-battles.com.pem
-COPY onepiece-battles.com.key /etc/nginx/ssl/onepiece-battles.com.key
+COPY www.onepiece-battles.com.pem /etc/nginx/ssl/www.onepiece-battles.com.pem
+COPY www.onepiece-battles.com.key /etc/nginx/ssl/www.onepiece-battles.com.key
 
 # Expose port 80
 EXPOSE 80

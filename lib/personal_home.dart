@@ -1,20 +1,21 @@
 import 'dart:convert';
+import 'dart:html' as html;
 
 import 'package:flutter/material.dart';
-import '../../l10n/app_localizations.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:openapi/api.dart';
+
+import '../../l10n/app_localizations.dart';
 import 'package:one_piece_battles_flutter/components/image_lazy_loader.dart';
 import 'package:one_piece_battles_flutter/repository/battle_dao.dart';
 import 'package:one_piece_battles_flutter/repository/character_dao.dart';
 import 'package:one_piece_battles_flutter/repository/file_dao.dart';
 import 'package:one_piece_battles_flutter/repository/group_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
-import 'package:openapi/api.dart';
 import 'constants/onepiece_colors.dart';
 import 'constants/onepiece_fonts.dart';
-import 'dart:html' as html;
 
 GetIt getIt = GetIt.instance;
 
@@ -33,6 +34,8 @@ class _UserHomeState extends State<UserHome> {
   List<CharacterListView> characters = [];
   List<GroupListView> groups = [];
   List<BattleListView> battles = [];
+
+  // ... [Keep your API call methods: listCharacters, listGroups, listBattles, _updateData, initState unchanged] ...
 
   Future<ListCharacterResponse?> listCharacters() async {
     ListCharacterRequest listCharacterRequest = ListCharacterRequest(
@@ -84,102 +87,119 @@ class _UserHomeState extends State<UserHome> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: myFuture as Future<List<dynamic>>,
-        builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            _updateData(snapshot.data!);
-            return SingleChildScrollView(
-              scrollDirection: Axis.vertical,
-              child: Padding(
-                  padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      _getHeader(context),
-                      // show only if this user has more than one role
-                      if (getIt<User>().userRoles.length > 1)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: SizedBox(
-                            height: 35,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Text(
-                                  AppLocalizations.of(context)!
-                                      .showAllRoleResources,
-                                  style: OnepieceFonts.smallContentStyle,
-                                ),
-                                IconButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      currentRoleOnly = !currentRoleOnly;
-                                      myFuture = Future.wait([
-                                        listCharacters(),
-                                        listGroups(),
-                                        listBattles()
-                                      ]);
-                                    });
-                                  },
-                                  hoverColor: Colors.transparent,
-                                  splashRadius: 1,
-                                  icon: !currentRoleOnly
-                                      ? const Icon(
-                                          Icons.check_box,
-                                          color: OnepieceColors.fancyBlue,
-                                          size: 20,
-                                        )
-                                      : const Icon(
-                                          Icons.check_box_outline_blank,
-                                          color: OnepieceColors.fancyBlue,
-                                          size: 20,
-                                        ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 20, 0, 10),
-                        child: Text(
-                          AppLocalizations.of(context)!.myCharacters,
-                          style: OnepieceFonts.contentStyleBoldFancyBlue,
-                        ),
-                      ),
-                      _getCharacterWall(context),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 20, 0, 10),
-                        child: Text(
-                          AppLocalizations.of(context)!.myGroups,
-                          style: OnepieceFonts.contentStyleBoldFancyBlue,
-                        ),
-                      ),
-                      _getGroupWall(context),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 20, 0, 10),
-                        child: Text(
-                          AppLocalizations.of(context)!.myBattles,
-                          style: OnepieceFonts.contentStyleBoldFancyBlue,
-                        ),
-                      ),
-                      _getBattleWall(context),
-                      const SizedBox(
-                        height: 100,
-                      )
-                    ],
-                  )),
-            );
-          } else {
-            return Center(
-              child: Text(
-                AppLocalizations.of(context)!.loading,
-                style: OnepieceFonts.loadingFont,
+      future: myFuture as Future<List<dynamic>>,
+      builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          _updateData(snapshot.data!);
+
+          // REFACTORED: Use CustomScrollView with Slivers
+          return CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: [
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    _getHeader(context),
+                    // Show only if this user has more than one role
+                    if (getIt<User>().userRoles.length > 1) _getRoleToggle(),
+
+                    // Section Title: Characters
+                    _getSectionTitle(AppLocalizations.of(context)!.myCharacters),
+                  ]),
+                ),
               ),
-            );
-          }
-        });
+
+              // Character Grid
+              _getCharacterSliverGrid(context),
+
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    // Section Title: Groups
+                    _getSectionTitle(AppLocalizations.of(context)!.myGroups),
+                  ]),
+                ),
+              ),
+
+              // Group Grid
+              _getGroupSliverGrid(context),
+
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    // Section Title: Battles
+                    _getSectionTitle(AppLocalizations.of(context)!.myBattles),
+                  ]),
+                ),
+              ),
+
+              // Battle Grid
+              _getBattleSliverGrid(context),
+
+              // Bottom spacing
+              const SliverToBoxAdapter(
+                child: SizedBox(height: 100),
+              ),
+            ],
+          );
+        } else {
+          return Center(
+            child: Text(
+              AppLocalizations.of(context)!.loading,
+              style: OnepieceFonts.loadingFont,
+            ),
+          );
+        }
+      },
+    );
+  }
+
+  Widget _getRoleToggle() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: SizedBox(
+        height: 35,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              AppLocalizations.of(context)!.showAllRoleResources,
+              style: OnepieceFonts.smallContentStyle,
+            ),
+            IconButton(
+              onPressed: () {
+                setState(() {
+                  currentRoleOnly = !currentRoleOnly;
+                  myFuture = Future.wait(
+                      [listCharacters(), listGroups(), listBattles()]);
+                });
+              },
+              hoverColor: Colors.transparent,
+              splashRadius: 1,
+              icon: Icon(
+                !currentRoleOnly ? Icons.check_box : Icons.check_box_outline_blank,
+                color: OnepieceColors.fancyBlue,
+                size: 20,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _getSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0, 20, 0, 10),
+      child: Text(
+        title,
+        style: OnepieceFonts.contentStyleBoldFancyBlue,
+      ),
+    );
   }
 
   Widget _getHeader(BuildContext context) {
@@ -192,41 +212,25 @@ class _UserHomeState extends State<UserHome> {
     );
   }
 
-  Widget _getCharacterWall(BuildContext context) {
-    if (characters.isEmpty) {
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: Text(AppLocalizations.of(context)!.notCreated),
-          ),
-          TextButton(
-              onPressed: () {
-                context.goNamed("createCharacter");
-              },
-              child: Text(AppLocalizations.of(context)!.goToCreationPage))
-        ],
-      );
-    }
-    return LayoutBuilder(
-      builder: (context, constraint) {
-        int crossAxisCount = (constraint.maxWidth / 110).ceil().clamp(2, 8);
-        return SizedBox(
-          width: 880,
-          height: ((characters.length / crossAxisCount).ceil() * 110.0)
-              .clamp(110, 440),
-          child: GridView.builder(
-            itemCount: characters.length,
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: crossAxisCount,
-              mainAxisSpacing: 5,
-              crossAxisSpacing: 5,
-            ),
-            itemBuilder: (context, int index) => Tooltip(
+  // --- REFACTORED SLIVER METHODS ---
+
+  Widget _getCharacterSliverGrid(BuildContext context) {
+    if (characters.isEmpty) return _getEmptySliver(context, "createCharacter");
+
+    return SliverPadding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      sliver: SliverGrid(
+        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+          maxCrossAxisExtent: 110,
+          mainAxisSpacing: 5,
+          crossAxisSpacing: 5,
+          childAspectRatio: 1.0, // Adjust this ratio based on your lazy loader aspect
+        ),
+        delegate: SliverChildBuilderDelegate(
+              (BuildContext context, int index) {
+            return Tooltip(
               preferBelow: true,
-              message:
-                  I18nHelper.getDisplayNameFromI18n(characters[index].name),
+              message: I18nHelper.getDisplayNameFromI18n(characters[index].name),
               child: InkWell(
                 splashColor: Colors.transparent,
                 hoverColor: Colors.transparent,
@@ -244,291 +248,246 @@ class _UserHomeState extends State<UserHome> {
                     borderWidth: 2,
                     borderRadios: 100),
               ),
-            ),
-          ),
-        );
-      },
+            );
+          },
+          childCount: characters.length,
+        ),
+      ),
     );
   }
 
-  Widget _getGroupWall(BuildContext context) {
-    if (groups.isEmpty) {
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: Text(AppLocalizations.of(context)!.notCreated),
-          ),
-          TextButton(
-              onPressed: () {
-                context.goNamed("createGroup");
-              },
-              child: Text(AppLocalizations.of(context)!.goToCreationPage))
-        ],
-      );
-    }
-    return LayoutBuilder(builder: (context, constraint) {
-      int crossAxisCount = (constraint.maxWidth / 110).ceil().clamp(2, 8);
-      return SizedBox(
-        width: 880,
-        height:
-            ((groups.length / crossAxisCount).ceil() * 110.0).clamp(110, 400),
-        child: GridView.builder(
-          itemCount: groups.length,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: crossAxisCount,
-            mainAxisSpacing: 5,
-            crossAxisSpacing: 5,
-          ),
-          itemBuilder: (BuildContext context, int index) => Tooltip(
-            message: I18nHelper.getDisplayNameFromI18n(groups[index].name),
-            preferBelow: true,
-            child: InkWell(
-                splashColor: Colors.transparent,
-                hoverColor: Colors.transparent,
-                onTap: () {
-                  context.goNamed('groupDetails',
-                      extra: groups[index].id,
-                      pathParameters: {
-                        'name': I18nHelper.getDisplayNameFromI18n(
-                            groups[index].name)
-                      });
-                },
-                child: ImageLazyLoader(
-                    // key: UniqueKey(),
-                    uriProvider: () => groups[index].imageUri!,
-                    width: 100,
-                    borderWidth: 2,
-                    borderRadios: 10)),
-          ),
+  Widget _getGroupSliverGrid(BuildContext context) {
+    if (groups.isEmpty) return _getEmptySliver(context, "createGroup");
+
+    return SliverPadding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      sliver: SliverGrid(
+        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+          maxCrossAxisExtent: 110,
+          mainAxisSpacing: 5,
+          crossAxisSpacing: 5,
+          childAspectRatio: 1.0,
         ),
-      );
-    });
+        delegate: SliverChildBuilderDelegate(
+              (BuildContext context, int index) {
+            return Tooltip(
+              message: I18nHelper.getDisplayNameFromI18n(groups[index].name),
+              preferBelow: true,
+              child: InkWell(
+                  splashColor: Colors.transparent,
+                  hoverColor: Colors.transparent,
+                  onTap: () {
+                    context.goNamed('groupDetails',
+                        extra: groups[index].id,
+                        pathParameters: {
+                          'name': I18nHelper.getDisplayNameFromI18n(
+                              groups[index].name)
+                        });
+                  },
+                  child: ImageLazyLoader(
+                      uriProvider: () => groups[index].imageUri!,
+                      width: 100,
+                      borderWidth: 2,
+                      borderRadios: 10)),
+            );
+          },
+          childCount: groups.length,
+        ),
+      ),
+    );
   }
 
-  Widget _getBattleWall(BuildContext context) {
+  Widget _getBattleSliverGrid(BuildContext context) {
     Map<BattleStatus, String> battleStatusToDisplayName = {
       BattleStatus.CREATED: AppLocalizations.of(context)!.battleStatusCreated,
-      BattleStatus.IN_PROGRESS:
-          AppLocalizations.of(context)!.battleStatusStarted,
+      BattleStatus.IN_PROGRESS: AppLocalizations.of(context)!.battleStatusStarted,
       BattleStatus.FAILED: AppLocalizations.of(context)!.battleStatusFailed,
       BattleStatus.FINISHED: AppLocalizations.of(context)!.battleStatusFinished
     };
-    if (battles.isEmpty) {
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: Text(AppLocalizations.of(context)!.notCreated),
-          ),
-          TextButton(
-              onPressed: () {
-                context.goNamed("createBattle");
-              },
-              child: Text(AppLocalizations.of(context)!.goToCreationPage))
-        ],
-      );
-    }
-    return LayoutBuilder(
-      builder: (context, constraint) {
-        int crossAxisCount = (constraint.maxWidth / 250).ceil().clamp(2, 4);
-        return SizedBox(
-          width: 1000,
-          height: ((battles.length / crossAxisCount).ceil() * 250.0)
-              .clamp(250, 800),
-          child: GridView.builder(
-            itemCount: battles.length,
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: crossAxisCount,
-              mainAxisSpacing: 10,
-              crossAxisSpacing: 10,
+
+    if (battles.isEmpty) return _getEmptySliver(context, "createBattle");
+
+    return SliverPadding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      sliver: SliverGrid(
+        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+          maxCrossAxisExtent: 350, // Slightly increased to fit content
+          mainAxisExtent: 250, // Fixed height for battle card
+          mainAxisSpacing: 10,
+          crossAxisSpacing: 10,
+        ),
+        delegate: SliverChildBuilderDelegate(
+              (context, int index) => _buildBattleCard(
+              context, battles[index], battleStatusToDisplayName),
+          childCount: battles.length,
+        ),
+      ),
+    );
+  }
+
+  Widget _getEmptySliver(BuildContext context, String routeName) {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.only(left: 8.0, bottom: 20),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: Text(AppLocalizations.of(context)!.notCreated),
             ),
-            itemBuilder: (context, int index) => InkWell(
-              splashColor: Colors.transparent,
-              hoverColor: Colors.transparent,
-              onTap: () {
-                context.goNamed('battleDetails',
-                    extra: battles[index].id,
-                    pathParameters: {'id': battles[index].id});
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10.0),
-                  color: OnepieceColors.menuBackgroundColor,
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const SizedBox(
-                          width: 10,
-                        ),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            ImageLazyLoader(
-                                // key: UniqueKey(),
-                                uriProvider: () =>
-                                    battles[index].starter!.imageUri!,
-                                width: 40,
-                                borderWidth: 1.5,
-                                borderRadios: 40),
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                              child: Text(I18nHelper.getDisplayNameFromI18n(
-                                  battles[index].starter!.name)),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(left: 5.0),
-                              child: Text(
-                                  battles[index]
-                                      .battleExecution!
-                                      .starterScoreBefore!
-                                      .toString(),
-                                  style: OnepieceFonts.boldFancySmallFont),
-                            )
-                          ],
-                        ),
-                        Center(
-                          child: Text(
-                            "vs",
-                            style: OnepieceFonts.boldFancyBlueHintFont,
-                          ),
-                        ),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            ImageLazyLoader(
-                                // key: UniqueKey(),
-                                uriProvider: () =>
-                                    battles[index].receiver!.imageUri!,
-                                width: 40,
-                                borderWidth: 1.5,
-                                borderRadios: 40),
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                              child: Text(I18nHelper.getDisplayNameFromI18n(
-                                  battles[index].receiver!.name)),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(left: 5.0),
-                              child: Text(
-                                  battles[index]
-                                      .battleExecution!
-                                      .receiverScoreBefore!
-                                      .toString(),
-                                  style: OnepieceFonts.boldFancySmallFont),
-                            )
-                          ],
-                        ),
-                        const SizedBox(
-                          width: 10,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5.0),
-                          color: OnepieceColors.fancyBlue,
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                  battleStatusToDisplayName[battles[index]
-                                      .battleExecution!
-                                      .battleStatus!]!,
-                                  style: OnepieceFonts.boldFancyWhiteSmallFont),
-                              const SizedBox(
-                                width: 30,
-                              ),
-                              Tooltip(
-                                message: battles[index]
-                                            .battleExecution!
-                                            .battleReportStage ==
-                                        BattleReportStage.FINISHED
-                                    ? AppLocalizations.of(context)!
-                                        .downloadReport
-                                    : "",
-                                child: InkWell(
-                                  splashColor: Colors.transparent,
-                                  hoverColor: Colors.transparent,
-                                  onTap: battles[index]
-                                              .battleExecution!
-                                              .battleReportStage ==
-                                          BattleReportStage.FINISHED
-                                      ? () {
-                                          getIt<FileDao>()
-                                              .downloadFile(DownloadFileRequest(
-                                                  id: battles[index]
-                                                      .battleExecution!
-                                                      .reportFileId!))
-                                              .then((response) async {
-                                            debugPrint(
-                                                'pdf downloading finish');
-                                            var pdf = base64Decode(
-                                                response!.fileData!);
-                                            // pdfData.value = Uint8List.fromList(value!);
-                                            final blob = html.Blob(
-                                                [pdf], response.httpMimeType);
-                                            final url = html.Url
-                                                .createObjectUrlFromBlob(blob);
-                                            final anchor = html.AnchorElement()
-                                              ..href = url
-                                              ..setAttribute('target', '_blank')
-                                              ..download =
-                                                  "${response.fileName}.pdf"
-                                              ..style.display = 'none';
-                                            // Add the anchor element to the document body.
-                                            html.document.body?.append(anchor);
-                                            // Programmatically click the anchor element to start the download.
-                                            anchor.click();
-                                            // Remove the anchor element after the download has started.
-                                            anchor.remove();
-                                          });
-                                        }
-                                      : null,
-                                  child: battles[index]
-                                              .battleExecution!
-                                              .battleReportStage ==
-                                          BattleReportStage.FINISHED
-                                      ? SvgPicture.asset(
-                                          'asset/images/svgs/pdf.svg',
-                                          width: 20,
-                                          height: 20,
-                                        )
-                                      : SvgPicture.asset(
-                                          'asset/images/svgs/pdf_black.svg',
-                                          width: 20,
-                                          height: 20,
-                                          color: Colors.grey,
-                                        ),
-                                ),
-                              ),
-                            ],
-                          ),
+            TextButton(
+                onPressed: () {
+                  context.goNamed(routeName);
+                },
+                child: Text(AppLocalizations.of(context)!.goToCreationPage))
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBattleCard(BuildContext context, BattleListView battle, Map<BattleStatus, String> statusMap) {
+    return InkWell(
+      splashColor: Colors.transparent,
+      hoverColor: Colors.transparent,
+      onTap: () {
+        context.goNamed('battleDetails',
+            extra: battle.id,
+            pathParameters: {'id': battle.id});
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10.0),
+          color: OnepieceColors.menuBackgroundColor,
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ImageLazyLoader(
+                          uriProvider: () => battle.starter!.imageUri!,
+                          width: 40,
+                          borderWidth: 1.5,
+                          borderRadios: 40),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(5, 5, 0, 0),
+                        child: Text(
+                          I18nHelper.getDisplayNameFromI18n(battle.starter!.name),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                    )
-                  ],
+                      Text(battle.battleExecution!.starterScoreBefore!.toString(),
+                          style: OnepieceFonts.boldFancySmallFont)
+                    ],
+                  ),
+                ),
+                Center(
+                  child: Text(
+                    "vs",
+                    style: OnepieceFonts.boldFancyBlueHintFont,
+                  ),
+                ),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ImageLazyLoader(
+                          uriProvider: () => battle.receiver!.imageUri!,
+                          width: 40,
+                          borderWidth: 1.5,
+                          borderRadios: 40),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(5, 5, 0, 0),
+                        child: Text(
+                          I18nHelper.getDisplayNameFromI18n(battle.receiver!.name),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Text(battle.battleExecution!.receiverScoreBefore!.toString(),
+                          style: OnepieceFonts.boldFancySmallFont)
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 10),
+              ],
+            ),
+            const SizedBox(height: 15),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(5.0),
+                  color: OnepieceColors.fancyBlue,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Flexible(
+                        child: Text(statusMap[battle.battleExecution!.battleStatus!]!,
+                            overflow: TextOverflow.ellipsis,
+                            style: OnepieceFonts.boldFancyWhiteSmallFont),
+                      ),
+                      if (battle.battleExecution!.battleReportStage == BattleReportStage.FINISHED)
+                        _buildPdfButton(battle),
+                      if (battle.battleExecution!.battleReportStage != BattleReportStage.FINISHED)
+                        SvgPicture.asset(
+                          'asset/images/svgs/pdf_black.svg',
+                          width: 20,
+                          height: 20,
+                          color: Colors.grey,
+                        )
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ),
-        );
-      },
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPdfButton(BattleListView battle) {
+    return Tooltip(
+      message: AppLocalizations.of(context)!.downloadReport,
+      child: InkWell(
+        splashColor: Colors.transparent,
+        hoverColor: Colors.transparent,
+        onTap: () {
+          getIt<FileDao>()
+              .downloadFile(DownloadFileRequest(
+              id: battle.battleExecution!.reportFileId!))
+              .then((response) async {
+            var pdf = base64Decode(response!.fileData!);
+            final blob = html.Blob([pdf], response.httpMimeType);
+            final url = html.Url.createObjectUrlFromBlob(blob);
+            final anchor = html.AnchorElement()
+              ..href = url
+              ..setAttribute('target', '_blank')
+              ..download = "${response.fileName}.pdf"
+              ..style.display = 'none';
+            html.document.body?.append(anchor);
+            anchor.click();
+            anchor.remove();
+          });
+        },
+        child: SvgPicture.asset(
+          'asset/images/svgs/pdf.svg',
+          width: 20,
+          height: 20,
+        ),
+      ),
     );
   }
 }
