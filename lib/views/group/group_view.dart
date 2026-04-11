@@ -532,8 +532,8 @@ class _GroupViewState extends State<GroupView> {
         .entries
         .map(
           (entry) => DataRow(
-            color: MaterialStateProperty.resolveWith<Color?>(
-                (Set<MaterialState> states) {
+            color: WidgetStateProperty.resolveWith<Color?>(
+                (Set<WidgetState> states) {
               if (entry.key.isEven) {
                 return OnepieceColors
                     .liteFancyGreen; // Use whatever color you need for even rows
@@ -592,76 +592,82 @@ class _GroupViewState extends State<GroupView> {
     if (characters.isEmpty) {
       return const Text("");
     }
-    return SingleChildScrollView(
+    // 使用 ListView.builder 替代 SingleChildScrollView + Row
+    return ListView.builder(
       scrollDirection: Axis.horizontal,
-      child: Row(
-        children: characters
-            .map((character) => InkWell(
-                  hoverColor: Colors.transparent,
-                  splashColor: Colors.transparent,
-                  onTap: () {
-                    context.goNamed('characterDetails',
-                        extra: character.id,
-                        pathParameters: {
-                          'name':
-                              I18nHelper.getDisplayNameFromI18n(character.name!)
-                        });
-                  },
-                  child: Tooltip(
-                    message: I18nHelper.getDisplayNameFromI18n(character.name),
-                    preferBelow: false,
-                    showDuration: const Duration(seconds: 1),
-                    child: Padding(
-                        padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                        child: ImageLazyLoader(
-                            key: UniqueKey(),
-                            uriProvider: () => character.imageUri!,
-                            width: 40,
-                            borderWidth: 1.5,
-                            borderRadios: 40)),
-                  ),
-                ))
-            .toList(),
-      ),
+      itemCount: characters.length,
+      // 提升滑动性能
+      physics: const ClampingScrollPhysics(),
+      itemBuilder: (context, index) {
+        final character = characters[index];
+        return InkWell(
+          hoverColor: Colors.transparent,
+          splashColor: Colors.transparent,
+          onTap: () {
+            context.goNamed('characterDetails',
+                extra: character.id,
+                pathParameters: {
+                  'name': I18nHelper.getDisplayNameFromI18n(character.name!)
+                });
+          },
+          child: Tooltip(
+            message: I18nHelper.getDisplayNameFromI18n(character.name),
+            preferBelow: false,
+            showDuration: const Duration(seconds: 1),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+              child:ImageLazyLoader(
+                  key: UniqueKey(),
+                  uriProvider: () => character.imageUri!,
+                  width: 40,
+                  borderWidth: 1.5,
+                  borderRadios: 40),
+            ),
+          ),
+        );
+      },
     );
   }
+
 
   Widget _createGroupList(List<Group> groups) {
     if (groups.isEmpty) {
       return const Text("");
     }
-    return SingleChildScrollView(
+    return ListView.builder(
       scrollDirection: Axis.horizontal,
-      child: Row(
-        children: groups
-            .map((group) => InkWell(
-                  hoverColor: Colors.transparent,
-                  splashColor: Colors.transparent,
-                  onTap: () {
-                    context.goNamed('groupDetails',
-                        extra: group.id,
-                        pathParameters: {
-                          'name': I18nHelper.getDisplayNameFromI18n(group.name!)
-                        });
-                  },
-                  child: Tooltip(
-                    message: I18nHelper.getDisplayNameFromI18n(group.name),
-                    preferBelow: false,
-                    showDuration: const Duration(seconds: 1),
-                    child: Padding(
-                        padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                        child: ImageLazyLoader(
-                            key: UniqueKey(),
-                            uriProvider: () => group.imageUri!,
-                            width: 40,
-                            borderWidth: 1.5,
-                            borderRadios: 3)),
-                  ),
-                ))
-            .toList(),
-      ),
+      itemCount: groups.length,
+      physics: const ClampingScrollPhysics(),
+      itemBuilder: (context, index) {
+        final group = groups[index];
+        return InkWell(
+          hoverColor: Colors.transparent,
+          splashColor: Colors.transparent,
+          onTap: () {
+            context.goNamed('groupDetails',
+                extra: group.id,
+                pathParameters: {
+                  'name': I18nHelper.getDisplayNameFromI18n(group.name!)
+                });
+          },
+          child: Tooltip(
+            message: I18nHelper.getDisplayNameFromI18n(group.name),
+            preferBelow: false,
+            showDuration: const Duration(seconds: 1),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+              child: ImageLazyLoader(
+                  key: UniqueKey(),
+                  uriProvider: () => group.imageUri!,
+                  width: 40,
+                  borderWidth: 1.5,
+                  borderRadios: 3)),
+          ),
+        );
+      },
     );
   }
+
 
   Widget _getPageFoot(BuildContext context) {
     return StatefulBuilder(

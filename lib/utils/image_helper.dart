@@ -5,6 +5,7 @@ import 'package:one_piece_battles_flutter/repository/image_dao.dart';
 import 'package:openapi/api.dart';
 
 import '../app_router.dart';
+import '../components/image_lazy_loader.dart';
 import '../constants/onepiece_colors.dart';
 
 class ImageHelper {
