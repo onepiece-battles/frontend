@@ -35,7 +35,7 @@ class ImageHelper {
     );
   }
 
-  static Widget getOriginalImageFrame( Color borderColor,
+  static Widget getOriginalImageFrame(Color borderColor,
       Uint8List imageData, double maxWidth) {
     return Container(
       constraints: BoxConstraints(maxWidth: maxWidth),
@@ -49,33 +49,6 @@ class ImageHelper {
     );
   }
 
-  static Widget getCircleImageFrame(double width, double height,
-      double? borderWidth, Color? borderColor, Uint8List imageData) {
-    return Container(
-      width: width,
-      height: height,
-      decoration: borderWidth == null || borderColor == null
-          ? null
-          : BoxDecoration(
-              borderRadius: BorderRadius.all(
-                  Radius.circular(width < height ? width : height)),
-              border: Border.all(
-                  color: borderColor,
-                  width: borderWidth,
-                  style: BorderStyle.solid),
-            ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(width < height ? width : height),
-        child: AspectRatio(
-          aspectRatio: 1,
-          child: FittedBox(
-            fit: BoxFit.cover,
-            child: Image.memory(imageData),
-          ),
-        ),
-      ),
-    );
-  }
 
   static Widget getRoundImageFrame(
       double width,
@@ -126,13 +99,6 @@ class ImageHelper {
         width: width,
         height: height,
       ),
-    );
-  }
-
-  static Image getImageFromPath(String path) {
-    return Image(
-      image: AssetImage(path),
-      fit: BoxFit.fill,
     );
   }
 
