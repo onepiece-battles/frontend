@@ -19,17 +19,26 @@ class OriginalImageLoader extends StatefulWidget {
 }
 
 class _OriginalImageLoaderState extends State<OriginalImageLoader> {
-  late Future<String> imageFuture;
+  late Future<Uint8List> _imageFuture;
 
   @override
   void initState() {
     super.initState();
+    _imageFuture = ImageCacheManager.getImage(widget.uriProvider!());
+  }
+
+  @override
+  void didUpdateWidget(covariant OriginalImageLoader oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.uriProvider!() != oldWidget.uriProvider!()) {
+      _imageFuture = ImageCacheManager.getImage(widget.uriProvider!());
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<Uint8List>(
-        future: ImageCacheManager.getImage(widget.uriProvider!()),
+        future: _imageFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done &&
               snapshot.hasData) {
