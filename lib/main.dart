@@ -133,8 +133,18 @@ class _MyAppState extends State<MyApp> {
       locale: _locale,
       scrollBehavior: MyCustomScrollBehavior(),
       theme: ThemeData(
+        // Use system fonts that are guaranteed to be available instantly —
+        // no network-dependent Google Fonts CDN loading.
         fontFamily:
-            getIt<Locale>().languageCode == "en" ? 'Roboto' : 'Noto Sans SC',
+            getIt<Locale>().languageCode == "en" ? '.AppleSystemUIFont' : 'PingFang SC',
+        fontFamilyFallback: const [
+          'PingFang SC',          // macOS / iOS Chinese
+          'Microsoft YaHei',      // Windows Chinese
+          'Hiragino Sans GB',     // older macOS
+          'STHeiti',              // macOS fallback
+          'Heiti SC',             // macOS fallback
+          'sans-serif',
+        ],
         inputDecorationTheme: MyInputTheme().theme(),
         tooltipTheme: TooltipThemeData(
           showDuration: const Duration(seconds: 1),
