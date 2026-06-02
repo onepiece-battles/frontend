@@ -58,6 +58,10 @@ class _ChattingViewState extends State<ChattingView> {
   String _lastProcessedChatId = "";
   int _previousMsgCount = 0;
 
+  /// Dedicated notifier for search text — changes here rebuild only the
+  /// chat-list filter, not the entire ChattingView.
+  final ValueNotifier<String> _searchTextNotifier = ValueNotifier<String>('');
+
   @override
   void initState() {
     super.initState();
@@ -65,6 +69,7 @@ class _ChattingViewState extends State<ChattingView> {
 
   @override
   void dispose() {
+    _searchTextNotifier.dispose();
     scrollController.dispose();
     searchChattingController.dispose();
     typingController.dispose();
@@ -84,14 +89,11 @@ class _ChattingViewState extends State<ChattingView> {
     }
 
     // 3. Reset Local Variables
-    // Do NOT call setState here. Let the Provider update trigger the rebuild.
-    // Calling setState immediately before a provider update can cause race conditions.
     activeConversationId = "";
     _lastProcessedChatId = "";
     _currentNameChatId = null;
 
     // 4. Update Provider
-    // This will notify listeners and rebuild the widget tree automatically.
     Provider.of<ChatNotifier>(context, listen: false).setActiveChat(null);
 
     // 5. Clear controllers manually
@@ -100,121 +102,147 @@ class _ChattingViewState extends State<ChattingView> {
     inputPreMessageNotifier.value = null;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    // 1. WATCH the Notifier. Any update (including WS new chat) triggers this build.
-    final chatNotifier = context.watch<ChatNotifier>();
-
-    // 2. CREATE A SORTED COPY of the list.
-    // We create a new list reference so Flutter knows to repaint.
-    final List<Chat> sortedChats = List<Chat>.from(chatNotifier.chats);
-
-    // 3. SORT LOGIC:
-    // If message is null, it's a brand new chat -> give it current time (top priority).
-    // Otherwise use the message timestamp.
-    sortedChats.sort((a, b) {
-      final int timeA = a.message?.creationRecord?.actionTimestamp ??
-          DateTime.now().millisecondsSinceEpoch;
-      final int timeB = b.message?.creationRecord?.actionTimestamp ??
-          DateTime.now().millisecondsSinceEpoch;
-      // Descending order (Newest first)
-      return timeB.compareTo(timeA);
-    });
-
-    final String? activeChatId = chatNotifier.activeChatId;
-    final Chat? activeChat = chatNotifier.activeChat;
-
-    final messages = activeChatId != null
-        ? chatNotifier.getMessagesForChat(activeChatId)
-        : <Message>[];
-
-    // --- SMART AUTO-SCROLL LOGIC ---
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (activeChatId == null) return;
-
-      if (activeChatId != _lastProcessedChatId) {
-        _lastProcessedChatId = activeConversationId;
-        _previousMsgCount = messages.length;
-        return;
-      }
-
-      if (messages.length > _previousMsgCount) {
-        _previousMsgCount = messages.length;
+  /// Scrolls to bottom when a new message arrives and the user is near the
+  /// bottom.  Called from Selector builders (only fires when messages change).
+  void _autoScrollOnNewMessages(List<Message> messages, String activeChatId) {
+    if (activeChatId != _lastProcessedChatId) {
+      _lastProcessedChatId = activeChatId;
+      _previousMsgCount = messages.length;
+      return;
+    }
+    if (messages.length > _previousMsgCount) {
+      _previousMsgCount = messages.length;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
         if (scrollController.hasClients) {
-          final double maxScroll = scrollController.position.maxScrollExtent;
+          final double maxScroll =
+              scrollController.position.maxScrollExtent;
           final double currentScroll = scrollController.offset;
-          final double distanceFromBottom = maxScroll - currentScroll;
-
-          if (distanceFromBottom < 500) {
+          if (maxScroll - currentScroll < 500) {
             _scrollToBottom(0);
           }
         }
-      }
-    });
+      });
+    }
+  }
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // The top-level build does NOT watch ChatNotifier.  Instead, Selector
+  // widgets below subscribe to only the slices of state they need, so:
+  //   • a new message rebuilds only the message list and the one affected
+  //     sidebar row (not the whole page)
+  //   • changing the search text rebuilds only the chat list filter
+  // ─────────────────────────────────────────────────────────────────────────
+
+  @override
+  Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        bool isMobile = constraints.maxWidth < 500;
+        final bool isMobile = constraints.maxWidth < 500;
 
-        // --- MOBILE LAYOUT ---
         if (isMobile) {
-          if (activeChatId != null && activeChat != null) {
+          return _buildMobileLayout(isMobile);
+        }
+        return _buildDesktopLayout(isMobile);
+      },
+    );
+  }
+
+  // ── Mobile: full-screen list OR full-screen message view ──────────────
+
+  Widget _buildMobileLayout(bool isMobile) {
+    return Selector<ChatNotifier, String?>(
+      selector: (_, notifier) => notifier.activeChatId,
+      builder: (context, activeChatId, _) {
+        if (activeChatId == null) {
+          return _buildChatListPanel(isMobile: isMobile);
+        }
+        final activeChat = context.read<ChatNotifier>().activeChat;
+        if (activeChat == null) {
+          return _buildChatListPanel(isMobile: isMobile);
+        }
+        // Nested Selector for messages — avoids context.select in builder
+        return Selector<ChatNotifier, List<Message>>(
+          selector: (_, n) => n.getMessagesForChat(activeChatId),
+          builder: (_, messages, __) {
+            _autoScrollOnNewMessages(messages, activeChatId);
             return PopScope(
               canPop: false,
               onPopInvokedWithResult: (bool didPop, dynamic result) {
                 if (didPop) return;
                 _clearActiveChat();
               },
-              child: _buildChatView(
-                context,
-                activeChat,
-                activeChatId,
-                messages,
-                isMobile: true,
-              ),
+              child: _buildChatView(context, activeChat, activeChatId,
+                  messages, isMobile: true),
             );
-          }
-          // Pass sortedChats here
-          return _buildChatList(context, sortedChats, activeChatId,
-              isMobile: true);
-        }
+          },
+        );
+      },
+    );
+  }
 
-        // --- DESKTOP LAYOUT ---
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            SizedBox(
-              width: 300,
-              // Pass sortedChats here
-              child: _buildChatList(context, sortedChats, activeChatId,
-                  isMobile: false),
-            ),
-            const VerticalDivider(
-              thickness: 1.2,
-              color: OnepieceColors.liteFancyGreen,
-              indent: 10,
-              endIndent: 8,
-              width: 2,
-            ),
-            Expanded(
-              child: (activeChatId != null && activeChat != null)
-                  ? _buildChatView(
-                      context,
-                      activeChat,
-                      activeChatId,
-                      messages,
-                      isMobile: false,
-                    )
-                  : Center(
-                      child: ImageHelper.getSvgIconWithColor(
-                          'images/svgs/ship.svg',
-                          200,
-                          200,
-                          OnepieceColors.liteFancyBlue),
-                    ),
-            ),
-          ],
+  // ── Desktop: sidebar + message area side by side ─────────────────────
+
+  Widget _buildDesktopLayout(bool isMobile) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      mainAxisSize: MainAxisSize.max,
+      children: [
+        SizedBox(
+          width: 300,
+          child: _buildChatListPanel(isMobile: false),
+        ),
+        const VerticalDivider(
+          thickness: 1.2,
+          color: OnepieceColors.liteFancyGreen,
+          indent: 10,
+          endIndent: 8,
+          width: 2,
+        ),
+        Expanded(child: _buildMessagePanel(isMobile)),
+      ],
+    );
+  }
+
+  // ── Sidebar panel (chat list) ────────────────────────────────────────
+
+  Widget _buildChatListPanel({required bool isMobile}) {
+    return Selector<ChatNotifier, List<Chat>>(
+      selector: (_, n) => n.chats,
+      builder: (context, chats, _) {
+        // Non-reactive read for the selected-highlight — updates on next
+        // chat-list change, which is frequent enough in practice.
+        final activeChatId = context.read<ChatNotifier>().activeChatId;
+        return _buildChatList(context, chats, activeChatId,
+            isMobile: isMobile);
+      },
+    );
+  }
+
+  // ── Message panel (right side / full screen) ─────────────────────────
+
+  Widget _buildMessagePanel(bool isMobile) {
+    return Selector<ChatNotifier, String?>(
+      selector: (_, notifier) => notifier.activeChatId,
+      builder: (context, activeChatId, _) {
+        if (activeChatId == null) {
+          return Center(
+            child: ImageHelper.getSvgIconWithColor(
+                'images/svgs/ship.svg', 200, 200, OnepieceColors.liteFancyBlue),
+          );
+        }
+        final notifier = context.read<ChatNotifier>();
+        final activeChat = notifier.activeChat;
+        if (activeChat == null) {
+          return const SizedBox.shrink();
+        }
+        // Nested Selector for messages — avoids context.select in builder
+        return Selector<ChatNotifier, List<Message>>(
+          selector: (_, n) => n.getMessagesForChat(activeChatId),
+          builder: (_, messages, __) {
+            _autoScrollOnNewMessages(messages, activeChatId);
+            return _buildChatView(context, activeChat, activeChatId, messages,
+                isMobile: isMobile);
+          },
         );
       },
     );
@@ -226,16 +254,6 @@ class _ChattingViewState extends State<ChattingView> {
   Widget _buildChatList(
       BuildContext context, List<Chat> chats, String? activeChatId,
       {required bool isMobile}) {
-    // Apply Search Filter locally on the sorted list
-    final searchText = searchChattingController.text.toLowerCase();
-    final displayChats = searchText.isEmpty
-        ? chats
-        : chats.where((chat) {
-            final name =
-                chat.group! ? chat.name! : getTargetMember(chat).nickname;
-            return name.toLowerCase().contains(searchText);
-          }).toList();
-
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
@@ -251,8 +269,8 @@ class _ChattingViewState extends State<ChattingView> {
                   child: TextFormField(
                     controller: searchChattingController,
                     onChanged: (value) {
-                      // Trigger rebuild when searching
-                      setState(() {});
+                      // Update the notifier — rebuilds only the filtered list
+                      _searchTextNotifier.value = value;
                     },
                     decoration: InputDecoration(
                       labelStyle: OnepieceFonts.dropDownItemStyle,
@@ -277,12 +295,25 @@ class _ChattingViewState extends State<ChattingView> {
           ],
         ),
         Expanded(
-          child: ListView.builder(
-            itemCount: displayChats.length,
-            addAutomaticKeepAlives: true,
-            itemBuilder: (context, index) {
-              final chat = displayChats[index];
-              return ListTile(
+          child: ValueListenableBuilder<String>(
+            valueListenable: _searchTextNotifier,
+            builder: (context, searchValue, _) {
+              final searchText = searchValue.toLowerCase();
+              final displayChats = searchText.isEmpty
+                  ? chats
+                  : chats.where((chat) {
+                      final name = chat.group!
+                          ? chat.name!
+                          : getTargetMember(chat).nickname;
+                      return name.toLowerCase().contains(searchText);
+                    }).toList();
+
+              return ListView.builder(
+                itemCount: displayChats.length,
+                addAutomaticKeepAlives: true,
+                itemBuilder: (context, index) {
+                  final chat = displayChats[index];
+                  return ListTile(
                 // Key is crucial for reordering animations/updates
                 key: ValueKey(chat.id),
                 title: Column(
@@ -429,8 +460,10 @@ class _ChattingViewState extends State<ChattingView> {
                 },
               );
             },
-          ),
-        ),
+          ); // ListView.builder
+        }, // ValueListenableBuilder builder
+      ), // ValueListenableBuilder
+    ), // Expanded
       ],
     );
   }
@@ -1063,7 +1096,7 @@ class _ChattingViewState extends State<ChattingView> {
         itemCount: displayedImages.length,
         itemBuilder: (context, index) {
           return SquareImageLoader(
-              key: UniqueKey(),
+              key: ValueKey(displayedImages[index]),
               uriProvider: () => displayedImages[index],
               width: 40,
               borderWidth: 0.5);
@@ -1073,12 +1106,13 @@ class _ChattingViewState extends State<ChattingView> {
   }
 
   Widget getSingleLeading(Chat chat) {
+    final uri = getTargetMember(chat).imageUri ?? '';
     return SizedBox(
       width: 45,
       height: 45,
       child: ImageLazyLoader(
-        key: UniqueKey(),
-        uriProvider: () => getTargetMember(chat).imageUri!,
+        key: ValueKey(uri),
+        uriProvider: () => uri,
         width: 40,
         borderWidth: 1.5,
         borderRadios: 3,
