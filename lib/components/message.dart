@@ -51,7 +51,7 @@ class MessageItem extends StatelessWidget {
                 width: 10,
               ),
               SquareImageLoader(
-                  key: UniqueKey(),
+                  key: ValueKey(user.imageUri),
                   uriProvider: () => user.imageUri!,
                   width: 40,
                   borderWidth: 2),
@@ -68,7 +68,7 @@ class MessageItem extends StatelessWidget {
                     height: 7,
                   ),
                   SquareImageLoader(
-                      key: UniqueKey(),
+                      key: ValueKey(user.imageUri),
                       uriProvider: () => user.imageUri!,
                       width: 40,
                       borderWidth: 2),
@@ -183,7 +183,7 @@ class MessageItem extends StatelessWidget {
                     ),
                   if (message.imageContentUri != null)
                     OriginalImageLoader(
-                        key: UniqueKey(),
+                        key: ValueKey(message.imageContentUri),
                         uriProvider: () => message.imageContentUri!,
                         maxWidth: 150)
                 ],
@@ -218,7 +218,7 @@ class MessageItem extends StatelessWidget {
               ),
             if (preMessage!.imageContentUri != null)
               OriginalImageLoader(
-                key: UniqueKey(),
+                key: ValueKey(preMessage!.imageContentUri),
                 uriProvider: () => preMessage!.imageContentUri!,
                 maxWidth: 100,
               )
