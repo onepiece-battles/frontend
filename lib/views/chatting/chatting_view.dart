@@ -206,14 +206,19 @@ class _ChattingViewState extends State<ChattingView> {
   // ── Sidebar panel (chat list) ────────────────────────────────────────
 
   Widget _buildChatListPanel({required bool isMobile}) {
-    return Selector<ChatNotifier, List<Chat>>(
-      selector: (_, n) => n.chats,
-      builder: (context, chats, _) {
-        // Non-reactive read for the selected-highlight — updates on next
-        // chat-list change, which is frequent enough in practice.
-        final activeChatId = context.read<ChatNotifier>().activeChatId;
-        return _buildChatList(context, chats, activeChatId,
-            isMobile: isMobile);
+    // Outer: rebuilds when chats are added / reordered / get new messages
+    return Selector<ChatNotifier, int>(
+      selector: (_, n) => n.chatListVersion,
+      builder: (context, _, __) {
+        // Inner: rebuilds when the selected chat changes (highlight)
+        return Selector<ChatNotifier, String?>(
+          selector: (_, n) => n.activeChatId,
+          builder: (context, activeChatId, __) {
+            final chats = context.read<ChatNotifier>().chats;
+            return _buildChatList(context, chats, activeChatId,
+                isMobile: isMobile);
+          },
+        );
       },
     );
   }
@@ -736,11 +741,14 @@ class _ChattingViewState extends State<ChattingView> {
                                   ? null
                                   : (_) {
                                       buttonState(() {
+                                        final hasText = typingController
+                                            .text
+                                            .trim()
+                                            .isNotEmpty;
+
                                         final SendMessageRequest request =
                                             SendMessageRequest(
-                                          content: typingController.text
-                                                  .trim()
-                                                  .isNotEmpty
+                                          content: hasText
                                               ? typingController.text.trim()
                                               : null,
                                           userId: getIt<User>().id,
@@ -758,13 +766,43 @@ class _ChattingViewState extends State<ChattingView> {
                                                   .value?.id,
                                         );
 
+                                        // ── Optimistic add (text only) ──
+                                        // Insert the message into the UI
+                                        // immediately so it appears in the
+                                        // same frame as the input clearing.
+                                        // The server echo is deduplicated.
+                                        if (hasText) {
+                                          Provider.of<ChatNotifier>(context,
+                                                  listen: false)
+                                              .addOptimisticMessage(Message(
+                                            id: 'opt_${DateTime.now().millisecondsSinceEpoch}',
+                                            userId: getIt<User>().id,
+                                            conversationId: activeChat.id!,
+                                            content:
+                                                typingController.text.trim(),
+                                            creationRecord: ActionRecord(
+                                              actionTimestamp: DateTime.now()
+                                                  .millisecondsSinceEpoch,
+                                              nickname:
+                                                  getIt<User>().nickname,
+                                            ),
+                                            preMessageId:
+                                                inputPreMessageNotifier
+                                                    .value?.id,
+                                            preMessage:
+                                                inputPreMessageNotifier
+                                                    .value,
+                                          ));
+                                        }
+
+                                        // ── Send via WebSocket ─────────
                                         final String jsonMessage =
                                             jsonEncode(request.toJson());
-
                                         Provider.of<ChatNotifier>(context,
                                                 listen: false)
                                             .sendChatMessage(jsonMessage);
 
+                                        // ── Clear input ────────────────
                                         chatIdToCachedImage[activeChatId] =
                                             null;
                                         chatIdToRepliedMessage[activeChatId] =

@@ -28,9 +28,18 @@ class ChatNotifier with ChangeNotifier {
     }
   }
 
+  /// Monotonically increasing counter bumped on every chat-list mutation.
+  /// Use this in [Selector] selectors — unlike [chats] (whose [List.==]
+  /// returns true for equal elements), the version is guaranteed different.
+  int _chatListVersion = 0;
+
   /// Returns the current chat list.  Reference changes whenever the list
   /// content or order changes — safe to use with [context.select].
   List<Chat> get chats => _chats;
+
+  /// Version that increments on every chat-list change.  Safe for
+  /// [Selector] comparison (uses [identical] on an [int]).
+  int get chatListVersion => _chatListVersion;
 
   List<Message> getMessagesForChat(String? chatId) =>
       _messagesByChatId[chatId] ?? [];
@@ -63,6 +72,19 @@ class ChatNotifier with ChangeNotifier {
   // ── Message handler ─────────────────────────────────────────────────────
 
   void _handleIncomingMessage(Message message) {
+    // Dedup: if we optimistically added this message already, skip the echo.
+    if (_isDuplicate(message)) return;
+
+    _insertMessage(message);
+  }
+
+  /// Optimistically inserts a just-sent message so it appears instantly
+  /// instead of waiting for the server echo.  The echo is deduplicated.
+  void addOptimisticMessage(Message message) {
+    _insertMessage(message);
+  }
+
+  void _insertMessage(Message message) {
     final String conversationId = message.conversationId!;
 
     // 1. Append message — new list reference for change detection
@@ -82,8 +104,23 @@ class ChatNotifier with ChangeNotifier {
     chat.message = message;
     newChats.insert(0, chat);
     _chats = newChats;
+    _chatListVersion++;
 
     notifyListeners();
+  }
+
+  /// Returns true if [message] is already the last message in its
+  /// conversation (i.e. it was optimistically added), to avoid showing a
+  /// duplicate when the server echoes back.
+  bool _isDuplicate(Message message) {
+    final existing = _messagesByChatId[message.conversationId] ?? [];
+    if (existing.isEmpty) return false;
+    final last = existing.last;
+    return last.userId == message.userId &&
+        last.conversationId == message.conversationId &&
+        (last.content != null && last.content == message.content ||
+         last.imageContentUri != null &&
+             last.imageContentUri == message.imageContentUri);
   }
 
   void _handleChatUpdate(Chat update) {
@@ -92,6 +129,7 @@ class ChatNotifier with ChangeNotifier {
     newChats.removeWhere((e) => e.id == update.id);
     newChats.insert(0, update);
     _chats = newChats;
+    _chatListVersion++;
     notifyListeners();
   }
 
