@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 
 class OnepieceFonts {
@@ -38,7 +37,7 @@ class OnepieceFonts {
   static const TextStyle _baseContent = TextStyle(
     color: Colors.black54, // default content color
     fontSize: sizeContent,
-    height: 1,
+    height: 1.3, // looser line-height for CJK readability
   );
 
   static const TextStyle _baseSmall = TextStyle(
@@ -55,8 +54,21 @@ class OnepieceFonts {
   // 3. Public Styles
   // ===========================================================================
 
-  // --- Special Fonts ---
-  static final TextStyle contentStyle = GoogleFonts.roboto();
+  // --- Body text (system fonts — zero network dependency) ---
+  // Uses the system UI font for Latin + PingFang SC / Microsoft YaHei for
+  // CJK.  No Google Fonts CDN fetch means Chinese renders crisp and
+  // instantly, with no tofu (□) flash.
+  static const TextStyle contentStyle = TextStyle(
+    color: Colors.black54,
+    fontSize: sizeContent,
+    fontFamily: '.AppleSystemUIFont',
+    fontFamilyFallback: [
+      'PingFang SC',
+      'Microsoft YaHei',
+      'Hiragino Sans GB',
+      'sans-serif',
+    ],
+  );
   static const TextStyle loadingFont = TextStyle(
       color: OnepieceColors.fancyBlue,
       fontSize: sizeLoading
