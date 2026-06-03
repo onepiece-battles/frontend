@@ -7,11 +7,13 @@ import 'dart:typed_data';
 class OriginalImageLoader extends StatefulWidget {
   final String Function()? uriProvider;
   final double maxWidth;
+  final double maxHeight;
 
   const OriginalImageLoader({
     Key? key,
     required this.uriProvider,
     required this.maxWidth,
+    this.maxHeight = 200,
   }) : super(key: key);
 
   @override
@@ -45,17 +47,19 @@ class _OriginalImageLoaderState extends State<OriginalImageLoader> {
             return ImageHelper.getOriginalImageFrame(
                 OnepieceColors.liteFancyBlue,
                 snapshot.data!,
-            widget.maxWidth);
+                widget.maxWidth,
+                maxHeight: widget.maxHeight);
           } else if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: SizedBox(
-                width: 50,
-                height: 50,
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                      OnepieceColors.liteFancyBlue), // Change color to green
-                  strokeWidth: 0, //
-                ),
+            // Stable-height placeholder — prevents layout jumps
+            return Container(
+              width: widget.maxWidth,
+              height: widget.maxHeight.clamp(80.0, 200.0),
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Center(
+                child: Icon(Icons.image, color: Colors.grey, size: 32),
               ),
             );
           } else {
