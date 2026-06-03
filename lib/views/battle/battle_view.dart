@@ -4,6 +4,7 @@ import '../../l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/components/image_lazy_loader.dart';
+import 'package:one_piece_battles_flutter/components/page_foot.dart';
 import 'package:one_piece_battles_flutter/constants/button_style.dart';
 import 'package:one_piece_battles_flutter/repository/battle_dao.dart';
 import 'package:one_piece_battles_flutter/utils/date_helper.dart';
@@ -13,7 +14,6 @@ import 'package:logging/logging.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
-import '../../utils/data_validator.dart';
 import '../../utils/image_helper.dart';
 import '../../utils/permission_check.dart';
 
@@ -28,7 +28,6 @@ class BattleView extends StatefulWidget {
 
 class _BattleViewState extends State<BattleView> {
   Logger logger = Logger('BattleView');
-  TextEditingController pageNumberController = TextEditingController(text: "0");
   TextEditingController starterNameController = TextEditingController();
   TextEditingController receiverNameController = TextEditingController();
 
@@ -64,9 +63,6 @@ class _BattleViewState extends State<BattleView> {
   int totalPageNum = 0;
   int itemCountPerPage = 10;
   int totalItemCount = 0;
-  bool preButtonEnabled = false;
-  bool nextButtonEnabled = false;
-  bool confirmButtonEnabled = false;
 
   bool onlyShowSystemResource = false;
   bool donNotShowSystemResource = false;
@@ -94,23 +90,8 @@ class _BattleViewState extends State<BattleView> {
     response.then((value) => {
           setState(() {
             currentBattleList = value!.battles;
-            if (currentBattleList.isEmpty) {
-              pageNumberController.text = "0";
-            } else {
-              pageNumberController.text = selectedPageNum.toString();
-            }
             totalItemCount = value.totalSize!;
             totalPageNum = (totalItemCount / itemCountPerPage).ceil();
-            if (selectedPageNum <= 1) {
-              preButtonEnabled = false;
-            } else {
-              preButtonEnabled = true;
-            }
-            if (selectedPageNum >= totalPageNum) {
-              nextButtonEnabled = false;
-            } else {
-              nextButtonEnabled = true;
-            }
           })
         });
   }
@@ -170,7 +151,16 @@ class _BattleViewState extends State<BattleView> {
             Column(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Center(child: _getPageFoot(context)),
+                Center(
+                    child: PageFoot(
+                  currentPage: selectedPageNum,
+                  totalPages: totalPageNum,
+                  jumpLabel: AppLocalizations.of(context)!.jumpToPage,
+                  onPageChanged: (page) {
+                    selectedPageNum = page;
+                    _search(false);
+                  },
+                )),
               ],
             )
         ],
@@ -715,106 +705,4 @@ class _BattleViewState extends State<BattleView> {
     ));
   }
 
-  Widget _getPageFoot(BuildContext context) {
-    return StatefulBuilder(
-        builder: (BuildContext context, StateSetter footState) {
-      List<Widget> widgetList = [];
-      ElevatedButton prePage = ElevatedButton(
-          style: OnepieceButtonStyle.getDefaultStyle(),
-          onPressed: !preButtonEnabled
-              ? null
-              : () {
-                  selectedPageNum = selectedPageNum - 1;
-                  _search(false);
-                },
-          child: const Icon(Icons.arrow_back));
-      ElevatedButton nextPage = ElevatedButton(
-          style: OnepieceButtonStyle.getDefaultStyle(),
-          onPressed: !nextButtonEnabled
-              ? null
-              : () {
-                  selectedPageNum = selectedPageNum + 1;
-                  _search(false);
-                },
-          child: const Icon(Icons.arrow_forward));
-      Widget pageNumber = SizedBox(
-        width: 35,
-        height: 28,
-        child: TextFormField(
-            style: OnepieceFonts.pageInputStyle,
-            textAlign: TextAlign.center,
-            textAlignVertical: TextAlignVertical.center,
-            decoration: const InputDecoration(
-              contentPadding: EdgeInsets.fromLTRB(0, 0, 0, 20),
-              enabledBorder: UnderlineInputBorder(),
-              focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: OnepieceColors.themeColor)),
-            ),
-            controller: pageNumberController,
-            onChanged: (value) {
-              footState(() {
-                if (!DataValidator.isInt(pageNumberController.text.trim())) {
-                  confirmButtonEnabled = false;
-                } else {
-                  int currentTypedPage =
-                      int.parse(pageNumberController.text.trim());
-                  if (currentTypedPage < 1 ||
-                      currentTypedPage > totalPageNum ||
-                      currentTypedPage == selectedPageNum) {
-                    confirmButtonEnabled = false;
-                  } else {
-                    confirmButtonEnabled = true;
-                  }
-                }
-              });
-            }),
-      );
-      ElevatedButton confirmPage = ElevatedButton(
-        style: OnepieceButtonStyle.getDefaultStyle(),
-        onPressed: !confirmButtonEnabled
-            ? null
-            : () {
-                selectedPageNum = int.parse(pageNumberController.text);
-                _search(false);
-                confirmButtonEnabled = false;
-              },
-        child: Text(
-          AppLocalizations.of(context)!.jumpToPage,
-          textAlign: TextAlign.left,
-        ),
-      );
-      widgetList.add(Padding(
-        padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
-        child: prePage,
-      ));
-      widgetList.add(pageNumber);
-      var totalPageCount = ClipRRect(
-        borderRadius: BorderRadius.circular(3),
-        child: Container(
-            height: 28,
-            color: OnepieceColors.menuBackgroundColor,
-            alignment: AlignmentDirectional.center,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(3, 0, 3, 3),
-              child: Text(
-                "/$totalPageNum",
-                style: OnepieceFonts.contentStyle,
-              ),
-            )),
-      );
-      widgetList.add(totalPageCount);
-      widgetList.add(Padding(
-        padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-        child: confirmPage,
-      ));
-      widgetList.add(Padding(
-        padding: const EdgeInsets.fromLTRB(8.0, 0, 0, 0),
-        child: nextPage,
-      ));
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: widgetList,
-      );
-    });
-  }
 }

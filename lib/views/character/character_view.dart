@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:logging/logging.dart';
 import 'package:one_piece_battles_flutter/components/image_lazy_loader.dart';
+import 'package:one_piece_battles_flutter/components/page_foot.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:one_piece_battles_flutter/repository/character_dao.dart';
@@ -33,8 +34,6 @@ class _CharacterViewState extends State<CharacterView>
 
   // Controllers
   final TextEditingController searchNameController = TextEditingController();
-  final TextEditingController pageNumberController =
-      TextEditingController(text: "0");
   final ScrollController scrollController = ScrollController();
   final ScrollController controlPanelController = ScrollController();
   final ScrollController tableController = ScrollController();
@@ -57,9 +56,6 @@ class _CharacterViewState extends State<CharacterView>
   int totalPageNum = 0;
   int itemCountPerPage = 10;
   int totalItemCount = 0;
-  bool preButtonEnabled = false;
-  bool nextButtonEnabled = false;
-  bool confirmButtonEnabled = false;
   int initialLabelIndex = 0;
 
   // Constants / Maps
@@ -145,12 +141,8 @@ class _CharacterViewState extends State<CharacterView>
       if (!mounted) return;
       setState(() {
         currentCharacterList = value!.characters;
-        pageNumberController.text =
-            currentCharacterList.isEmpty ? "0" : selectedPageNum.toString();
         totalItemCount = value.totalSize!;
         totalPageNum = (totalItemCount / itemCountPerPage).ceil();
-        preButtonEnabled = selectedPageNum > 1;
-        nextButtonEnabled = selectedPageNum < totalPageNum;
       });
     });
   }
@@ -198,7 +190,15 @@ class _CharacterViewState extends State<CharacterView>
           if (totalPageNum > 1)
             Padding(
               padding: const EdgeInsets.only(top: 15.0),
-              child: _getPageFoot(),
+              child: PageFoot(
+                currentPage: selectedPageNum,
+                totalPages: totalPageNum,
+                jumpLabel: AppLocalizations.of(context)!.jumpToPage,
+                onPageChanged: (page) {
+                    selectedPageNum = page;
+                  _search(false);
+                },
+              ),
             ),
         ],
       ),
@@ -616,73 +616,6 @@ class _CharacterViewState extends State<CharacterView>
         ],
       );
     }).toList();
-  }
-
-  Widget _getPageFoot() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        ElevatedButton(
-            style: OnepieceButtonStyle.getDefaultStyle(),
-            onPressed: preButtonEnabled
-                ? () {
-                    selectedPageNum--;
-                    _search(false);
-                  }
-                : null,
-            child: const Icon(Icons.arrow_back)),
-        const SizedBox(width: 8),
-        SizedBox(
-          width: 35,
-          child: TextFormField(
-              style: OnepieceFonts.pageInputStyle,
-              textAlign: TextAlign.center,
-              controller: pageNumberController,
-              decoration: const InputDecoration(
-                contentPadding:
-                    EdgeInsets.only(bottom: 10), // Adjust for alignment
-                enabledBorder: UnderlineInputBorder(),
-                focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: OnepieceColors.themeColor)),
-              ),
-              onChanged: (value) {
-                setState(() {
-                  final page = int.tryParse(value);
-                  confirmButtonEnabled = page != null &&
-                      page > 0 &&
-                      page <= totalPageNum &&
-                      page != selectedPageNum;
-                });
-              }),
-        ),
-        Container(
-            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-            decoration: BoxDecoration(
-                color: OnepieceColors.menuBackgroundColor,
-                borderRadius: BorderRadius.circular(3)),
-            child: Text("/$totalPageNum", style: OnepieceFonts.contentStyle)),
-        const SizedBox(width: 8),
-        ElevatedButton(
-            style: OnepieceButtonStyle.getDefaultStyle(),
-            onPressed: confirmButtonEnabled
-                ? () {
-                    selectedPageNum = int.parse(pageNumberController.text);
-                    _search(false);
-                  }
-                : null,
-            child: Text(AppLocalizations.of(context)!.jumpToPage)),
-        const SizedBox(width: 8),
-        ElevatedButton(
-            style: OnepieceButtonStyle.getDefaultStyle(),
-            onPressed: nextButtonEnabled
-                ? () {
-                    selectedPageNum++;
-                    _search(false);
-                  }
-                : null,
-            child: const Icon(Icons.arrow_forward)),
-      ],
-    );
   }
 
   @override
