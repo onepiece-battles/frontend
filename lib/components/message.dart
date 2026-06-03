@@ -153,39 +153,49 @@ class MessageItem extends StatelessWidget {
       );
     }
 
+    final bool hasText = message.content != null;
+    final bool hasImage = message.imageContentUri != null;
+
     return MouseRegion(
       onEnter: (_) => BrowserContextMenu.disableContextMenu(),
       onExit: (_) => BrowserContextMenu.enableContextMenu(),
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(12),
           color: isMe ? OnepieceColors.fancyBlue : Colors.grey[900],
         ),
-        padding: EdgeInsets.all(message.content == null ? 0 : 6),
+        // Consistent padding — text, image, or both all get the same inset
+        padding: const EdgeInsets.all(8),
         child: Builder(builder: (innerContext) {
           return GestureDetector(
-            // 2. Triggers on Right Click (Desktop/Web)
             onSecondaryTap: () => showMessageMenu(innerContext),
-            // 3. Triggers on Long Press (Mobile/Touch)
             onLongPress: () => showMessageMenu(innerContext),
             child: SelectionContainer.disabled(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (message.content != null)
+                  if (hasText)
                     Text(
                       message.content!,
-                      style: OnepieceFonts.tagStyle,
+                      style: OnepieceFonts.tagStyle.copyWith(
+                        // Slightly larger for readability in chat bubbles
+                        fontSize: 13,
+                        height: 1.35,
+                      ),
                       softWrap: true,
                       textAlign: TextAlign.start,
                     ),
-                  if (message.imageContentUri != null)
-                    OriginalImageLoader(
-                        key: ValueKey(message.imageContentUri),
-                        uriProvider: () => message.imageContentUri!,
-                        maxWidth: 150)
+                  // Gap between text and image
+                  if (hasText && hasImage) const SizedBox(height: 6),
+                  if (hasImage)
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: OriginalImageLoader(
+                          key: ValueKey(message.imageContentUri),
+                          uriProvider: () => message.imageContentUri!,
+                          maxWidth: 200),
+                    ),
                 ],
               ),
             ),

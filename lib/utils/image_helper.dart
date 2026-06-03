@@ -36,14 +36,18 @@ class ImageHelper {
   }
 
   static Widget getOriginalImageFrame(Color borderColor,
-      Uint8List imageData, double maxWidth) {
-    return Container(
-      constraints: BoxConstraints(maxWidth: maxWidth),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(10),
-        child: FittedBox(
-          fit: BoxFit.fill,
-          child: Image.memory(imageData),
+      Uint8List imageData, double maxWidth, {double maxHeight = 200}) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(10),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: maxWidth,
+          maxHeight: maxHeight,
+        ),
+        child: Image.memory(
+          imageData,
+          fit: BoxFit.contain,
+          errorBuilder: (_, __, ___) => const Icon(Icons.broken_image),
         ),
       ),
     );

@@ -596,7 +596,6 @@ class _ChattingViewState extends State<ChattingView> {
                     key: PageStorageKey('chat_list_$activeChatId'),
                     controller: scrollController,
                     addAutomaticKeepAlives: true,
-                    shrinkWrap: true,
                     padding: const EdgeInsets.fromLTRB(15, 0, 20, 0),
                     itemCount: messages.length,
                     itemBuilder: (context, index) {
@@ -667,7 +666,10 @@ class _ChattingViewState extends State<ChattingView> {
                                     chatIdToCachedImage[activeChatId] =
                                         await pickedImage.readAsBytes();
                                     buttonState(() {});
-                                    Future.delayed(Duration.zero, () {
+                                    // Auto-focus the typing area so the user
+                                    // can start typing a caption immediately.
+                                    WidgetsBinding.instance
+                                        .addPostFrameCallback((_) {
                                       if (focusNode.canRequestFocus) {
                                         focusNode.requestFocus();
                                       }
@@ -689,150 +691,244 @@ class _ChattingViewState extends State<ChattingView> {
                                 )
                               ],
                             ),
-                            if (chatIdToCachedImage[activeChatId] != null)
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 10.0),
-                                child: Stack(
-                                  alignment: AlignmentDirectional.topStart,
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(8),
-                                      child: ImageHelper.getSquareImageFrame(
-                                          50,
-                                          50,
-                                          2,
-                                          Colors.white,
-                                          chatIdToCachedImage[activeChatId]!),
-                                    ),
-                                    Positioned(
-                                      right: -2,
-                                      top: -2,
-                                      child: InkWell(
-                                        onTap: () {
-                                          chatIdToCachedImage[activeChatId] =
-                                              null;
-                                          buttonState(() {});
-                                        },
-                                        child: const CircleAvatar(
-                                          backgroundColor: Colors.black54,
-                                          radius: 8,
-                                          child: Icon(Icons.close,
-                                              size: 8, color: Colors.white),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            TextField(
-                              controller: typingController,
-                              enabled: true,
-                              textAlign: TextAlign.start,
-                              minLines: 1,
-                              maxLines: 3,
-                              keyboardType: TextInputType.multiline,
-                              textInputAction: TextInputAction.send,
-                              autofocus: true,
-                              cursorHeight: 15,
-                              focusNode: focusNode,
-                              style: OnepieceFonts.smallContentStyle,
-                              onChanged: (value) {},
-                              onSubmitted: !canSend
-                                  ? null
-                                  : (_) {
-                                      buttonState(() {
-                                        final hasText = typingController
-                                            .text
-                                            .trim()
-                                            .isNotEmpty;
+                            // ── Image preview + typing area ──────────────────────
+                            Builder(builder: (ctx) {
+                              final hasImage =
+                                  chatIdToCachedImage[activeChatId] != null;
 
-                                        final SendMessageRequest request =
-                                            SendMessageRequest(
-                                          content: hasText
-                                              ? typingController.text.trim()
-                                              : null,
-                                          userId: getIt<User>().id,
-                                          profileImage: chatIdToCachedImage[
-                                                      activeChatId] ==
-                                                  null
-                                              ? null
-                                              : Base64Helper.encode(
-                                                  chatIdToCachedImage[
-                                                      activeChatId]!),
-                                          conversationId: activeChat.id!,
-                                          type: MessageType.SEND_MESSAGE,
-                                          preMessageId:
-                                              inputPreMessageNotifier
-                                                  .value?.id,
-                                        );
+                              // Shared TextField used in both layouts
+                              final typingField = TextField(
+                                controller: typingController,
+                                enabled: true,
+                                textAlign: TextAlign.start,
+                                minLines: isMobile ? 1 : 5,
+                                maxLines: isMobile ? 1 : null,
+                                keyboardType: TextInputType.multiline,
+                                textInputAction: TextInputAction.send,
+                                autofocus: true,
+                                cursorHeight: 15,
+                                focusNode: focusNode,
+                                style: OnepieceFonts.smallContentStyle,
+                                onChanged: (value) {},
+                                onSubmitted: !canSend
+                                    ? null
+                                    : (_) {
+                                        buttonState(() {
+                                          final hasText = typingController
+                                              .text
+                                              .trim()
+                                              .isNotEmpty;
 
-                                        // ── Optimistic add (text only) ──
-                                        // Insert the message into the UI
-                                        // immediately so it appears in the
-                                        // same frame as the input clearing.
-                                        // The server echo is deduplicated.
-                                        if (hasText) {
-                                          Provider.of<ChatNotifier>(context,
-                                                  listen: false)
-                                              .addOptimisticMessage(Message(
-                                            id: 'opt_${DateTime.now().millisecondsSinceEpoch}',
+                                          final SendMessageRequest request =
+                                              SendMessageRequest(
+                                            content: hasText
+                                                ? typingController.text.trim()
+                                                : null,
                                             userId: getIt<User>().id,
+                                            profileImage: chatIdToCachedImage[
+                                                        activeChatId] ==
+                                                    null
+                                                ? null
+                                                : Base64Helper.encode(
+                                                    chatIdToCachedImage[
+                                                        activeChatId]!),
                                             conversationId: activeChat.id!,
-                                            content:
-                                                typingController.text.trim(),
-                                            creationRecord: ActionRecord(
-                                              actionTimestamp: DateTime.now()
-                                                  .millisecondsSinceEpoch,
-                                              nickname:
-                                                  getIt<User>().nickname,
-                                            ),
+                                            type: MessageType.SEND_MESSAGE,
                                             preMessageId:
                                                 inputPreMessageNotifier
                                                     .value?.id,
-                                            preMessage:
-                                                inputPreMessageNotifier
-                                                    .value,
-                                          ));
-                                        }
+                                          );
 
-                                        // ── Send via WebSocket ─────────
-                                        final String jsonMessage =
-                                            jsonEncode(request.toJson());
-                                        Provider.of<ChatNotifier>(context,
-                                                listen: false)
-                                            .sendChatMessage(jsonMessage);
-
-                                        // ── Clear input ────────────────
-                                        chatIdToCachedImage[activeChatId] =
-                                            null;
-                                        chatIdToRepliedMessage[activeChatId] =
-                                            null;
-                                        chatIdToCachedMessage[activeChatId] =
-                                            null;
-                                        inputPreMessageNotifier.value = null;
-                                        typingController.clear();
-
-                                        Future.delayed(Duration.zero, () {
-                                          if (focusNode.canRequestFocus) {
-                                            focusNode.requestFocus();
+                                          // Only optimistic for text-only
+                                          // messages.  Text+image waits for
+                                          // the server echo so the image URI
+                                          // is included.
+                                          if (hasText && !hasImage) {
+                                            Provider.of<ChatNotifier>(context,
+                                                    listen: false)
+                                                .addOptimisticMessage(Message(
+                                              id: 'opt_${DateTime.now().millisecondsSinceEpoch}',
+                                              userId: getIt<User>().id,
+                                              conversationId: activeChat.id!,
+                                              content:
+                                                  typingController.text.trim(),
+                                              creationRecord: ActionRecord(
+                                                actionTimestamp: DateTime.now()
+                                                    .millisecondsSinceEpoch,
+                                                nickname:
+                                                    getIt<User>().nickname,
+                                              ),
+                                              preMessageId:
+                                                  inputPreMessageNotifier
+                                                      .value?.id,
+                                              preMessage:
+                                                  inputPreMessageNotifier
+                                                      .value,
+                                            ));
                                           }
-                                          _scrollToBottom(0);
+
+                                          final String jsonMessage =
+                                              jsonEncode(request.toJson());
+                                          Provider.of<ChatNotifier>(context,
+                                                  listen: false)
+                                              .sendChatMessage(jsonMessage);
+
+                                          chatIdToCachedImage[activeChatId] =
+                                              null;
+                                          chatIdToRepliedMessage[
+                                              activeChatId] = null;
+                                          chatIdToCachedMessage[
+                                              activeChatId] = null;
+                                          inputPreMessageNotifier.value = null;
+                                          typingController.clear();
+
+                                          Future.delayed(Duration.zero, () {
+                                            if (focusNode.canRequestFocus) {
+                                              focusNode.requestFocus();
+                                            }
+                                            _scrollToBottom(0);
+                                          });
                                         });
-                                      });
-                                    },
-                              decoration: const InputDecoration(
-                                contentPadding: EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 0),
-                                isDense: true,
-                                labelStyle: OnepieceFonts.dropDownItemStyle,
-                                floatingLabelBehavior:
-                                    FloatingLabelBehavior.never,
-                                border: InputBorder.none,
-                                focusedBorder: InputBorder.none,
-                                disabledBorder: InputBorder.none,
-                                enabledBorder: InputBorder.none,
-                              ),
-                            ),
+                                      },
+                                decoration: const InputDecoration(
+                                  contentPadding: EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 0),
+                                  isDense: true,
+                                  labelStyle:
+                                      OnepieceFonts.dropDownItemStyle,
+                                  floatingLabelBehavior:
+                                      FloatingLabelBehavior.never,
+                                  border: InputBorder.none,
+                                  focusedBorder: InputBorder.none,
+                                  disabledBorder: InputBorder.none,
+                                  enabledBorder: InputBorder.none,
+                                ),
+                              );
+
+                              if (hasImage && !isMobile) {
+                                // Desktop: image on left, typing on right
+                                return Padding(
+                                  padding: const EdgeInsets.only(
+                                      bottom: 8.0, left: 10.0),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      // ── Image panel ──────────
+                                      Container(
+                                        height: 120,
+                                        width: 120,
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey[200],
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          border: Border.all(
+                                            color: OnepieceColors
+                                                .liteFancyGreen,
+                                            width: 1.5,
+                                          ),
+                                        ),
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(7),
+                                          child: Stack(
+                                            fit: StackFit.expand,
+                                            children: [
+                                              Image.memory(
+                                                chatIdToCachedImage[
+                                                    activeChatId]!,
+                                                fit: BoxFit.cover,
+                                              ),
+                                              Positioned(
+                                                right: 2,
+                                                top: 2,
+                                                child: InkWell(
+                                                  onTap: () {
+                                                    chatIdToCachedImage[
+                                                            activeChatId] =
+                                                        null;
+                                                    buttonState(() {});
+                                                  },
+                                                  child: Container(
+                                                    width: 22,
+                                                    height: 22,
+                                                    decoration:
+                                                        const BoxDecoration(
+                                                      color: Colors.black54,
+                                                      shape: BoxShape.circle,
+                                                    ),
+                                                    child: const Icon(
+                                                      Icons.close,
+                                                      size: 14,
+                                                      color: Colors.white,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      // ── Typing area ────────
+                                      Expanded(child: typingField),
+                                    ],
+                                  ),
+                                );
+                              }
+
+                              // Mobile / no-image: full-width typing field
+                              return Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  if (hasImage && isMobile)
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                          bottom: 10.0),
+                                      child: Stack(
+                                        alignment: AlignmentDirectional
+                                            .topStart,
+                                        children: [
+                                          ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                            child: ImageHelper
+                                                .getSquareImageFrame(
+                                                    50,
+                                                    50,
+                                                    2,
+                                                    Colors.white,
+                                                    chatIdToCachedImage[
+                                                        activeChatId]!),
+                                          ),
+                                          Positioned(
+                                            right: -2,
+                                            top: -2,
+                                            child: InkWell(
+                                              onTap: () {
+                                                chatIdToCachedImage[
+                                                    activeChatId] = null;
+                                                buttonState(() {});
+                                              },
+                                              child: const CircleAvatar(
+                                                backgroundColor:
+                                                    Colors.black54,
+                                                radius: 8,
+                                                child: Icon(Icons.close,
+                                                    size: 8,
+                                                    color: Colors.white),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  typingField,
+                                ],
+                              );
+                            }),
+
+                            // ── Reply preview ──────────────────────────────
                             ValueListenableBuilder<Message?>(
                                 valueListenable: inputPreMessageNotifier,
                                 builder: (context, value, _) {
