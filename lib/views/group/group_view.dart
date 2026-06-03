@@ -551,12 +551,15 @@ class _GroupViewState extends State<GroupView> {
               DataCell(
                 Padding(
                     padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                    child: ImageLazyLoader(
-                        key: UniqueKey(),
-                        uriProvider: () => entry.value.imageUri!,
-                        width: 40,
-                        borderWidth: 1.5,
-                        borderRadios: 5)),
+                    child: RepaintBoundary(
+                      child: ImageLazyLoader(
+                          key: ValueKey(entry.value.imageUri),
+                          uriProvider: () => entry.value.imageUri!,
+                          width: 40,
+                          borderWidth: 1.5,
+                          borderRadios: 5,
+                          lazy: true),
+                    )),
               ),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
@@ -616,12 +619,15 @@ class _GroupViewState extends State<GroupView> {
             showDuration: const Duration(seconds: 1),
             child: Padding(
               padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-              child:ImageLazyLoader(
-                  key: UniqueKey(),
-                  uriProvider: () => character.imageUri!,
-                  width: 40,
-                  borderWidth: 1.5,
-                  borderRadios: 40),
+              child: RepaintBoundary(
+                child: ImageLazyLoader(
+                    key: ValueKey(character.imageUri),
+                    uriProvider: () => character.imageUri!,
+                    width: 40,
+                    borderWidth: 1.5,
+                    borderRadios: 40,
+                    lazy: true),
+              ),
             ),
           ),
         );
@@ -656,12 +662,15 @@ class _GroupViewState extends State<GroupView> {
             showDuration: const Duration(seconds: 1),
             child: Padding(
               padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-              child: ImageLazyLoader(
-                  key: UniqueKey(),
-                  uriProvider: () => group.imageUri!,
-                  width: 40,
-                  borderWidth: 1.5,
-                  borderRadios: 3)),
+              child: RepaintBoundary(
+                child: ImageLazyLoader(
+                    key: ValueKey(group.imageUri),
+                    uriProvider: () => group.imageUri!,
+                    width: 40,
+                    borderWidth: 1.5,
+                    borderRadios: 3,
+                    lazy: true),
+              )),
           ),
         );
       },
