@@ -547,18 +547,12 @@ class _CharacterViewState extends State<CharacterView>
               });
         },
         cells: [
-          // Expand / collapse icon
+          // Expand / collapse icon — opaque hit-test so only the
+          // icon area toggles; the rest of the row still navigates.
           DataCell(
-            IconButton(
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
-              splashRadius: 12,
-              icon: Icon(
-                isExpanded ? Icons.expand_less : Icons.expand_more,
-                color: OnepieceColors.fancyBlue,
-                size: 22,
-              ),
-              onPressed: () {
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {
                 setState(() {
                   if (isExpanded) {
                     _expandedRowIds.remove(character.id);
@@ -567,6 +561,13 @@ class _CharacterViewState extends State<CharacterView>
                   }
                 });
               },
+              child: Center(
+                child: Icon(
+                  isExpanded ? Icons.expand_less : Icons.expand_more,
+                  color: OnepieceColors.fancyBlue,
+                  size: 22,
+                ),
+              ),
             ),
           ),
           // Image

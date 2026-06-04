@@ -36,9 +36,11 @@ class _FruitViewState extends State<FruitView> {
   // first all columns will be sorted by creation id desc.
   Map<FruitSortableFieldsEnum, SortOrder?> sortableEnumToSortOrderMap = {
     FruitSortableFieldsEnum.fruitType: null,
-    FruitSortableFieldsEnum.magicConsume: null,
     FruitSortableFieldsEnum.name: null,
   };
+
+  /// Tracks which rows have their strengthen detail panel expanded.
+  final Set<String> _expandedRowIds = {};
 
   // sorting icon map
   Map<SortOrder?, String> sortOrderToPath = const {
@@ -219,66 +221,61 @@ class _FruitViewState extends State<FruitView> {
                   ),
                 ),
               ),
+              _getFruitTypeFilter(context)
             ],
           ),
           const SizedBox(
             height: 10,
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              SizedBox(
-                height: 36,
-                child: ToggleSwitch(
-                  customWidths: const [150, 150, 150, 180],
-                  cornerRadius: 4,
-                  minWidth: 150.0,
-                  minHeight: 35.0,
-                  fontSize: 14.0,
-                  dividerColor: Colors.white,
-                  initialLabelIndex: initialLabelIndex,
-                  activeBgColor: const [OnepieceColors.fancyBlue],
-                  activeFgColor: Colors.white,
-                  inactiveBgColor: OnepieceColors.liteFancyGreen,
-                  inactiveFgColor: Colors.grey[600],
-                  totalSwitches: 4,
-                  labels: [
-                    AppLocalizations.of(context)!.allResources,
-                    AppLocalizations.of(context)!.myResource,
-                    AppLocalizations.of(context)!.systemResource,
-                    AppLocalizations.of(context)!.excludeSystem
-                  ],
-                  onToggle: (index) {
-                    initialLabelIndex = index!;
-                    // show all resources
-                    if (index == 0) {
-                      fruitFilter.systemResource = null;
-                      fruitFilter.userId = null;
-                    }
-                    // show my resource
-                    if (index == 1) {
-                      fruitFilter.systemResource = null;
-                      fruitFilter.userId = getIt<User>().id;
-                    }
-                    // only show system resource
-                    if (index == 2) {
-                      fruitFilter.systemResource = true;
-                      fruitFilter.userId = null;
-                    }
-                    // do not show system resource
-                    if (index == 3) {
-                      fruitFilter.systemResource = false;
-                      fruitFilter.userId = null;
-                    }
-                    _search(true);
-                  },
-                ),
-              ),
-              const SizedBox(
-                width: 10,
-              ),
-              _getFruitTypeFilter(context)
-            ],
+          SizedBox(
+            height: 36,
+            child: ToggleSwitch(
+              customWidths: const [150, 150, 150, 180],
+              cornerRadius: 4,
+              minWidth: 150.0,
+              minHeight: 35.0,
+              fontSize: 14.0,
+              dividerColor: Colors.white,
+              initialLabelIndex: initialLabelIndex,
+              activeBgColor: const [OnepieceColors.fancyBlue],
+              activeFgColor: Colors.white,
+              inactiveBgColor: OnepieceColors.liteFancyGreen,
+              inactiveFgColor: Colors.grey[600],
+              totalSwitches: 4,
+              labels: [
+                AppLocalizations.of(context)!.allResources,
+                AppLocalizations.of(context)!.myResource,
+                AppLocalizations.of(context)!.systemResource,
+                AppLocalizations.of(context)!.excludeSystem
+              ],
+              onToggle: (index) {
+                initialLabelIndex = index!;
+                // show all resources
+                if (index == 0) {
+                  fruitFilter.systemResource = null;
+                  fruitFilter.userId = null;
+                }
+                // show my resource
+                if (index == 1) {
+                  fruitFilter.systemResource = null;
+                  fruitFilter.userId = getIt<User>().id;
+                }
+                // only show system resource
+                if (index == 2) {
+                  fruitFilter.systemResource = true;
+                  fruitFilter.userId = null;
+                }
+                // do not show system resource
+                if (index == 3) {
+                  fruitFilter.systemResource = false;
+                  fruitFilter.userId = null;
+                }
+                _search(true);
+              },
+            ),
+          ),
+          const SizedBox(
+            width: 10,
           )
         ],
       ),
@@ -329,7 +326,7 @@ class _FruitViewState extends State<FruitView> {
         buttonStyleData: ButtonStyleData(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             height: 35,
-            width: 280,
+            width: 250,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(3),
               color: OnepieceColors.liteFancyGreen,
@@ -404,6 +401,8 @@ class _FruitViewState extends State<FruitView> {
 
   List<DataColumn> _createColumns(BuildContext context) {
     return [
+      // Expand / collapse toggle
+      const DataColumn(label: SizedBox(width: 36)),
       DataColumn(
         label: Tooltip(
           preferBelow: true,
@@ -414,11 +413,9 @@ class _FruitViewState extends State<FruitView> {
             25,
             25,
             () {
-              // filter will not be cleared
               sortKeys = [];
-              sortableEnumToSortOrderMap = sortableEnumToSortOrderMap = {
+              sortableEnumToSortOrderMap = {
                 FruitSortableFieldsEnum.fruitType: null,
-                FruitSortableFieldsEnum.magicConsume: null,
                 FruitSortableFieldsEnum.name: null,
               };
               _search(false);
@@ -426,22 +423,10 @@ class _FruitViewState extends State<FruitView> {
           ),
         ),
       ),
-      _createSingleColumn(AppLocalizations.of(context)!.name, null, 80),
+      _createSingleColumn(AppLocalizations.of(context)!.name, null, 180),
       _createSingleColumn(AppLocalizations.of(context)!.fruitType,
           FruitSortableFieldsEnum.fruitType, 150),
-      _createSingleColumn(AppLocalizations.of(context)!.owner, null, 100),
-      _createSingleColumn(
-          AppLocalizations.of(context)!.attackStrengthen, null, 150),
-      _createSingleColumn(
-          AppLocalizations.of(context)!.defenseStrengthen, null, 150),
-      _createSingleColumn(
-          AppLocalizations.of(context)!.bloodStrengthen, null, 150),
-      _createSingleColumn(
-          AppLocalizations.of(context)!.intelligenceStrengthen, null, 150),
-      _createSingleColumn(
-          AppLocalizations.of(context)!.groupStrengthen, null, 150),
-      _createSingleColumn(
-          AppLocalizations.of(context)!.speedStrengthen, null, 150),
+      _createSingleColumn(AppLocalizations.of(context)!.owner, null, 180),
     ];
   }
 
@@ -523,74 +508,127 @@ class _FruitViewState extends State<FruitView> {
           AppLocalizations.of(context)!.artificialZoanFruit,
       FruitType.paramecia: AppLocalizations.of(context)!.parameciaFruit,
     };
-    List<DataRow> result = [];
-    var dataList = currentFruitList
-        .asMap()
-        .entries
-        .map(
-          (entry) => DataRow(
-            color: MaterialStateProperty.resolveWith<Color?>(
-                (Set<MaterialState> states) {
-              if (entry.key.isEven) {
-                return OnepieceColors
-                    .liteFancyGreen; // Use whatever color you need for even rows
-              }
-              return null; // Use default (transparent) color for odd rows
-            }),
-            onSelectChanged: (value) {
-              context.goNamed('fruitDetails',
-                  extra: entry.value.id,
-                  pathParameters: {
-                    'name': I18nHelper.getDisplayNameFromI18n(entry.value.name!)
-                  });
-            },
-            cells: [
-              _getDataCell("${entry.key + 1}"),
-              _getDataCell(I18nHelper.getDisplayNameFromI18n(entry.value.name)),
-              DataCell(Padding(
-                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: OnepieceTag.getFruitTag(entry.value.fruitType!,
-                    fruitTypeToDisplayValue[entry.value.fruitType]!),
-              )),
-              DataCell(_createCharacterList(entry.value.characters)),
-              _getWidgetDataCell(
-                  entry.value.attackSlope!,
-                  entry.value.attackIntercept!,
-                  ImageHelper.getTextFormFieldIcon(
-                      'images/character_digits_icon/attack.svg', true, 25)),
-              _getWidgetDataCell(
-                  entry.value.defenseSlope!,
-                  entry.value.defenseIntercept!,
-                  ImageHelper.getTextFormFieldIcon(
-                      'images/character_digits_icon/defense.svg', true, 25)),
-              _getWidgetDataCell(
-                  entry.value.bloodSlope!,
-                  entry.value.bloodIntercept!,
-                  ImageHelper.getTextFormFieldIcon(
-                      'images/character_digits_icon/blood.svg', true, 25)),
-              _getWidgetDataCell(
-                  entry.value.intelligenceSlope!,
-                  entry.value.intelligenceIntercept!,
-                  ImageHelper.getTextFormFieldIcon(
-                      'images/character_digits_icon/intelligence.svg',
-                      true,
-                      25)),
-              _getWidgetDataCell(
-                  entry.value.groupGainSlope!,
-                  entry.value.groupGainIntercept!,
-                  ImageHelper.getTextFormFieldIcon(
-                      'images/character_digits_icon/group_gain.svg', true, 25)),
-              _getWidgetDataCell(
-                  entry.value.speedSlope!,
-                  entry.value.speedIntercept!,
-                  ImageHelper.getTextFormFieldIcon(
-                      'images/character_digits_icon/speed.svg', true, 25)),
-            ],
+    final List<DataRow> rows = [];
+
+    for (final entry in currentFruitList.asMap().entries) {
+      final fruit = entry.value;
+      final isExpanded = _expandedRowIds.contains(fruit.id);
+
+      // ── Main row ──────────────────────────────────────────────
+      rows.add(DataRow(
+        color: MaterialStateProperty.resolveWith<Color?>(
+            (Set<MaterialState> states) {
+          if (entry.key.isEven) return OnepieceColors.liteFancyGreen;
+          return null;
+        }),
+        onSelectChanged: (value) {
+          context.goNamed('fruitDetails',
+              extra: fruit.id,
+              pathParameters: {
+                'name': I18nHelper.getDisplayNameFromI18n(fruit.name!)
+              });
+        },
+        cells: [
+          // Expand icon
+          DataCell(
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {
+                setState(() {
+                  isExpanded
+                      ? _expandedRowIds.remove(fruit.id)
+                      : _expandedRowIds.add(fruit.id!);
+                });
+              },
+              child: Center(
+                child: Icon(
+                  isExpanded ? Icons.expand_less : Icons.expand_more,
+                  color: OnepieceColors.fancyBlue,
+                  size: 22,
+                ),
+              ),
+            ),
           ),
-        )
-        .toList();
-    result.addAll(dataList);
-    return result;
+          _getDataCell("${entry.key + 1}"),
+          _getDataCell(I18nHelper.getDisplayNameFromI18n(fruit.name)),
+          DataCell(Padding(
+            padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+            child: OnepieceTag.getFruitTag(fruit.fruitType!,
+                fruitTypeToDisplayValue[fruit.fruitType]!),
+          )),
+          DataCell(_createCharacterList(fruit.characters)),
+        ],
+      ));
+
+      // ── Expanded strengthen sub-rows ──────────────────────────
+      if (isExpanded) {
+        final stats = <_FruitStat>[
+          _FruitStat(
+              AppLocalizations.of(context)!.attackStrengthen,
+              fruit.attackSlope!,
+              fruit.attackIntercept!,
+              'images/character_digits_icon/attack.svg'),
+          _FruitStat(
+              AppLocalizations.of(context)!.defenseStrengthen,
+              fruit.defenseSlope!,
+              fruit.defenseIntercept!,
+              'images/character_digits_icon/defense.svg'),
+          _FruitStat(
+              AppLocalizations.of(context)!.bloodStrengthen,
+              fruit.bloodSlope!,
+              fruit.bloodIntercept!,
+              'images/character_digits_icon/blood.svg'),
+          _FruitStat(
+              AppLocalizations.of(context)!.intelligenceStrengthen,
+              fruit.intelligenceSlope!,
+              fruit.intelligenceIntercept!,
+              'images/character_digits_icon/intelligence.svg'),
+          _FruitStat(
+              AppLocalizations.of(context)!.groupStrengthen,
+              fruit.groupGainSlope!,
+              fruit.groupGainIntercept!,
+              'images/character_digits_icon/group_gain.svg'),
+          _FruitStat(
+              AppLocalizations.of(context)!.speedStrengthen,
+              fruit.speedSlope!,
+              fruit.speedIntercept!,
+              'images/character_digits_icon/speed.svg'),
+        ];
+
+        for (final stat in stats) {
+          rows.add(DataRow(
+            color: MaterialStateProperty.all(
+                OnepieceColors.liteFancyGreen.withValues(alpha: 0.4)),
+            cells: [
+              const DataCell(SizedBox.shrink()),
+              DataCell(const SizedBox.shrink()),
+              DataCell(Padding(
+                padding: const EdgeInsets.only(left: 8.0),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(right: 6),
+                      child: ImageHelper.getTextFormFieldIcon(
+                          stat.icon, true, 18),
+                    ),
+                    Text(stat.label,
+                        style: OnepieceFonts.smallContentStyle),
+                    const SizedBox(width: 8),
+                    Text('${stat.slope}x + ${stat.intercept}',
+                        style: OnepieceFonts.boldFancySmallFont),
+                  ],
+                ),
+              )),
+              const DataCell(SizedBox.shrink()),
+              const DataCell(SizedBox.shrink()),
+            ],
+          ));
+        }
+      }
+    }
+
+    return rows;
   }
 
   Widget _createCharacterList(List<CharacterInFruitView> characters) {
@@ -638,42 +676,12 @@ class _FruitViewState extends State<FruitView> {
     ));
   }
 
-  DataCell _getWidgetDataCell(
-    double slope,
-    int intercept,
-    Widget icon,
-  ) {
-    return DataCell(SizedBox(
-      width: 120,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(slope.toString()),
-            const Icon(
-              Icons.close,
-              color: OnepieceColors.fancyGreen,
-              size: 17,
-            ),
-            icon,
-            if (intercept >= 0)
-              const Icon(
-                Icons.add,
-                color: OnepieceColors.fancyGreen,
-                size: 17,
-              ),
-            if (intercept < 0)
-              const Icon(
-                Icons.remove,
-                color: OnepieceColors.fancyGreen,
-                size: 17,
-              ),
-            Text(intercept.abs().toString()),
-          ],
-        ),
-      ),
-    ));
-  }
+}
 
+class _FruitStat {
+  final String label;
+  final double slope;
+  final int intercept;
+  final String icon;
+  const _FruitStat(this.label, this.slope, this.intercept, this.icon);
 }
