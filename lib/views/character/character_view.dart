@@ -68,14 +68,10 @@ class _CharacterViewState extends State<CharacterView>
   Map<CharacterSortableFieldsEnum, SortOrder?> sortableEnumToSortOrderMap = {
     CharacterSortableFieldsEnum.name: null,
     CharacterSortableFieldsEnum.score: SortOrder.DESC,
-    CharacterSortableFieldsEnum.fruitLimit: null,
-    CharacterSortableFieldsEnum.groupGain: null,
-    CharacterSortableFieldsEnum.attack: null,
-    CharacterSortableFieldsEnum.defense: null,
-    CharacterSortableFieldsEnum.intelligence: null,
-    CharacterSortableFieldsEnum.blood: null,
-    CharacterSortableFieldsEnum.speed: null,
   };
+
+  /// Tracks which rows have their stat detail panel expanded.
+  final Set<String> _expandedRowIds = {};
 
   // Cached display maps to avoid rebuilding in build()
   late Map<BattleStyle, String> battleStyleToDisplayValue;
@@ -432,6 +428,8 @@ class _CharacterViewState extends State<CharacterView>
 
   List<DataColumn> _createColumns() {
     return [
+      // Expand / collapse toggle
+      const DataColumn(label: SizedBox(width: 36)),
       DataColumn(
         label: Tooltip(
           message: AppLocalizations.of(context)!.resetSort,
@@ -456,38 +454,6 @@ class _CharacterViewState extends State<CharacterView>
         null,
         iconPath: 'images/character_digits_icon/bounty.svg',
       ),
-      _createSingleColumn(
-        AppLocalizations.of(context)!.characterAttack,
-        CharacterSortableFieldsEnum.attack,
-        iconPath: 'images/character_digits_icon/attack.svg',
-      ),
-      _createSingleColumn(
-        AppLocalizations.of(context)!.characterDefense,
-        CharacterSortableFieldsEnum.defense,
-        iconPath: 'images/character_digits_icon/defense.svg',
-      ),
-      _createSingleColumn(
-        AppLocalizations.of(context)!.characterIntelligence,
-        CharacterSortableFieldsEnum.intelligence,
-        iconPath: 'images/character_digits_icon/intelligence.svg',
-      ),
-      _createSingleColumn(
-        AppLocalizations.of(context)!.characterBlood,
-        CharacterSortableFieldsEnum.blood,
-        iconPath: 'images/character_digits_icon/blood.svg',
-      ),
-      _createSingleColumn(
-        AppLocalizations.of(context)!.characterSpeed,
-        CharacterSortableFieldsEnum.speed,
-        iconPath: 'images/character_digits_icon/speed.svg',
-      ),
-      _createSingleColumn(
-        AppLocalizations.of(context)!.groupGain,
-        CharacterSortableFieldsEnum.groupGain,
-        iconPath: 'images/character_digits_icon/group_gain.svg',
-      ),
-      _createSingleColumn(AppLocalizations.of(context)!.fruitLimit,
-          CharacterSortableFieldsEnum.fruitLimit),
     ];
   }
 
@@ -561,11 +527,15 @@ class _CharacterViewState extends State<CharacterView>
   }
 
   List<DataRow> _createRows() {
-    return currentCharacterList.asMap().entries.map((entry) {
+    final List<DataRow> rows = [];
+
+    for (final entry in currentCharacterList.asMap().entries) {
       final character = entry.value;
       final isEven = entry.key.isEven;
+      final isExpanded = _expandedRowIds.contains(character.id);
 
-      return DataRow(
+      // ── Main row ─────────────────────────────────────────────────
+      rows.add(DataRow(
         color: WidgetStateProperty.all(
             isEven ? OnepieceColors.liteFancyGreen : null),
         onSelectChanged: (_) {
@@ -576,11 +546,34 @@ class _CharacterViewState extends State<CharacterView>
               });
         },
         cells: [
+          // Expand / collapse icon
+          DataCell(
+            IconButton(
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+              splashRadius: 12,
+              icon: Icon(
+                isExpanded ? Icons.expand_less : Icons.expand_more,
+                color: OnepieceColors.fancyBlue,
+                size: 22,
+              ),
+              onPressed: () {
+                setState(() {
+                  if (isExpanded) {
+                    _expandedRowIds.remove(character.id);
+                  } else {
+                    _expandedRowIds.add(character.id);
+                  }
+                });
+              },
+            ),
+          ),
+          // Image
           DataCell(
             Padding(
               padding: const EdgeInsets.all(3.0),
               child: ImageLazyLoader(
-                  key: UniqueKey(),
+                  key: ValueKey(character.imageUri),
                   uriProvider: () => character.imageUri!,
                   width: 40,
                   borderWidth: 1.5,
@@ -609,18 +602,80 @@ class _CharacterViewState extends State<CharacterView>
             style: GoogleFonts.lobster(),
             textAlign: TextAlign.right,
           )),
-          DataCell(Text(character.attack.toString())),
-          DataCell(Text(character.defense.toString())),
-          DataCell(Text(character.intelligence.toString())),
-          DataCell(Text(character.blood.toString())),
-          DataCell(Text(character.speed.toString())),
-          DataCell(Text(character.groupGain.toString())),
-          DataCell(Text(character.maximumFruitCount.toString())),
         ],
-      );
-    }).toList();
+      ));
+
+      // ── Expanded stat sub-rows ───────────────────────────────────
+      if (isExpanded) {
+        final stats = <_StatPair>[
+          _StatPair(AppLocalizations.of(context)!.characterAttack,
+              character.attack.toString(),
+              icon: 'images/character_digits_icon/attack.svg'),
+          _StatPair(AppLocalizations.of(context)!.characterDefense,
+              character.defense.toString(),
+              icon: 'images/character_digits_icon/defense.svg'),
+          _StatPair(AppLocalizations.of(context)!.characterIntelligence,
+              character.intelligence.toString(),
+              icon: 'images/character_digits_icon/intelligence.svg'),
+          _StatPair(AppLocalizations.of(context)!.characterBlood,
+              character.blood.toString(),
+              icon: 'images/character_digits_icon/blood.svg'),
+          _StatPair(AppLocalizations.of(context)!.characterSpeed,
+              character.speed.toString(),
+              icon: 'images/character_digits_icon/speed.svg'),
+          _StatPair(AppLocalizations.of(context)!.groupGain,
+              character.groupGain.toString(),
+              icon: 'images/character_digits_icon/group_gain.svg'),
+          _StatPair(AppLocalizations.of(context)!.fruitLimit,
+              character.maximumFruitCount.toString()),
+        ];
+
+        for (final stat in stats) {
+          rows.add(DataRow(
+            color: WidgetStateProperty.all(
+                OnepieceColors.liteFancyGreen.withValues(alpha: 0.4)),
+            cells: [
+              const DataCell(SizedBox.shrink()),
+              DataCell(const SizedBox.shrink()),
+              DataCell(Padding(
+                padding: const EdgeInsets.only(left: 8.0),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (stat.icon != null)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 6),
+                        child: ImageHelper.getTextFormFieldIcon(
+                            stat.icon!, false, 16),
+                      ),
+                    Text(stat.label,
+                        style: OnepieceFonts.smallContentStyle),
+                    const SizedBox(width: 8),
+                    Text(stat.value,
+                        style: OnepieceFonts.boldFancySmallFont),
+                  ],
+                ),
+              )),
+              // Fill remaining columns with empty cells
+              for (int i = 0; i < 5; i++)
+                const DataCell(SizedBox.shrink()),
+            ],
+          ));
+        }
+      }
+    }
+
+    return rows;
   }
 
   @override
   bool get wantKeepAlive => true;
+}
+
+/// Lightweight value object for the expandable stat rows.
+class _StatPair {
+  final String label;
+  final String value;
+  final String? icon;
+  const _StatPair(this.label, this.value, {this.icon});
 }
