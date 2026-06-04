@@ -237,28 +237,31 @@ class _CharacterViewState extends State<CharacterView>
                   ),
                 ),
               ),
-            SizedBox(
-              width: 200,
-              height: 35,
-              child: TextFormField(
-                controller: searchNameController,
-                onChanged: (value) {
-                  characterFilter.name = value;
-                  _search(true);
-                },
-                decoration: InputDecoration(
-                  labelStyle: OnepieceFonts.dropDownItemStyle,
-                  floatingLabelBehavior: FloatingLabelBehavior.never,
-                  border: const OutlineInputBorder(
-                      borderSide:
-                          BorderSide(color: OnepieceColors.menuHoverColor)),
-                  focusedBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(
-                          color: OnepieceColors.fancyGreen, width: 1.5)),
-                  prefixIcon: const Icon(Icons.search),
-                  labelText: AppLocalizations.of(context)!.name,
-                  contentPadding:
-                      const EdgeInsets.symmetric(vertical: 0, horizontal: 10),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0, 0, 6, 0),
+              child: SizedBox(
+                width: 200,
+                height: 35,
+                child: TextFormField(
+                  controller: searchNameController,
+                  onChanged: (value) {
+                    characterFilter.name = value.trim();
+                    _search(true);
+                  },
+                  decoration: InputDecoration(
+                      floatingLabelBehavior: FloatingLabelBehavior.never,
+                      disabledBorder: const OutlineInputBorder(
+                          borderSide: BorderSide(
+                              color: OnepieceColors.menuHoverColor)),
+                      enabledBorder: const OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: OnepieceColors.menuHoverColor,)),
+                      focusedBorder: const OutlineInputBorder(
+                        borderSide:
+                        BorderSide(color: OnepieceColors.fancyGreen, width: 1.5),),
+                      prefixIcon: const Icon(Icons.search),
+                      labelText: AppLocalizations.of(context)!.starterName,
+                      labelStyle: OnepieceFonts.dropDownItemStyle),
                 ),
               ),
             ),

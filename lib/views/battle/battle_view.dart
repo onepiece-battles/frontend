@@ -7,7 +7,6 @@ import 'package:one_piece_battles_flutter/components/image_lazy_loader.dart';
 import 'package:one_piece_battles_flutter/components/page_foot.dart';
 import 'package:one_piece_battles_flutter/constants/button_style.dart';
 import 'package:one_piece_battles_flutter/repository/battle_dao.dart';
-import 'package:one_piece_battles_flutter/utils/date_helper.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
 import 'package:logging/logging.dart';
@@ -46,8 +45,6 @@ class _BattleViewState extends State<BattleView> {
   // first all columns will be sorted by creation id desc.
   Map<BattleSortableFieldsEnum, SortOrder?> sortableEnumToSortOrderMap = {
     BattleSortableFieldsEnum.winnerName: null,
-    BattleSortableFieldsEnum.creationRecordId: null,
-    BattleSortableFieldsEnum.modificationRecordId: null,
   };
 
   // sorting icon map
@@ -274,7 +271,7 @@ class _BattleViewState extends State<BattleView> {
               SizedBox(
                 height: 36,
                 child: ToggleSwitch(
-                  customWidths: const [150, 150, 150, 180],
+                  customWidths: const [140, 130, 150, 180],
                   cornerRadius: 4,
                   minWidth: 150.0,
                   minHeight: 35.0,
@@ -377,7 +374,7 @@ class _BattleViewState extends State<BattleView> {
           buttonStyleData: ButtonStyleData(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               height: 35,
-              width: 250,
+              width: 150,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(3),
                 color: OnepieceColors.liteFancyGreen,
@@ -469,8 +466,6 @@ class _BattleViewState extends State<BattleView> {
               sortKeys = [];
               sortableEnumToSortOrderMap = {
                 BattleSortableFieldsEnum.winnerName: null,
-                BattleSortableFieldsEnum.creationRecordId: null,
-                BattleSortableFieldsEnum.modificationRecordId: null,
               };
               _search(false);
             },
@@ -483,10 +478,6 @@ class _BattleViewState extends State<BattleView> {
           null, 60),
       _createSingleColumn(AppLocalizations.of(context)!.status, null, 70),
       _createSingleColumn(AppLocalizations.of(context)!.creator, null, 150),
-      _createSingleColumn(AppLocalizations.of(context)!.creationTime,
-          BattleSortableFieldsEnum.creationRecordId, 160),
-      _createSingleColumn(AppLocalizations.of(context)!.modificationTime,
-          BattleSortableFieldsEnum.modificationRecordId, 160),
     ];
   }
 
@@ -688,10 +679,6 @@ class _BattleViewState extends State<BattleView> {
               _getDataCell(battleStatusToDisplayName[
                   entry.value.battleExecution!.battleStatus]!),
               _getDataCell(entry.value.creationRecord!.nickname.toString()),
-              _getDataCell(DateHelper.getFormattedDatetimeFromTimestamp(
-                  entry.value.creationRecord!.actionTimestamp!, context)),
-              _getDataCell(DateHelper.getFormattedDatetimeFromTimestamp(
-                  entry.value.modificationRecord!.actionTimestamp!, context)),
             ],
           ),
         )
