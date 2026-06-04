@@ -44,7 +44,6 @@ class _GroupViewState extends State<GroupView> {
     GroupSortableFieldsEnum.category: null,
   };
   ScrollController mainController = ScrollController();
-  ScrollController controlBarController = ScrollController();
   ScrollController tableController = ScrollController();
   int initialLabelIndex = 0;
   // group filter options
@@ -92,46 +91,40 @@ class _GroupViewState extends State<GroupView> {
     return Padding(
       padding: const EdgeInsets.all(15.0),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          _createHeader(context),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: SizedBox(
+              height: 90,
+              child: _createControlPanel(context),
+            ),
+          ),
+          const SizedBox(height: 10),
           Expanded(
+            child: Scrollbar(
+              controller: mainController,
+              thumbVisibility: true,
+              trackVisibility: true,
               child: SingleChildScrollView(
-            controller: mainController,
-            scrollDirection: Axis.vertical,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _createHeader(context),
-                SizedBox(
-                    width: 1400,
-                    height: 90,
-                    child: Scrollbar(
-                      controller: controlBarController,
-                      trackVisibility: true,
-                      thickness: 5,
-                      child: SingleChildScrollView(
-                        controller: controlBarController,
-                        scrollDirection: Axis.horizontal,
-                        child: _createControlPanel(context),
-                      ),
-                    )),
-                Scrollbar(
+                controller: mainController,
+                child: Scrollbar(
                   controller: tableController,
+                  thumbVisibility: true,
                   trackVisibility: true,
-                  thickness: 5,
+                  notificationPredicate:
+                      (notification) => notification.depth == 0,
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
+                    controller: tableController,
                     child: _createGroupTable(context),
                   ),
                 ),
-                const SizedBox(
-                  height: 15,
-                ),
-              ],
+              ),
             ),
-          )),
-          const SizedBox(
-            height: 15,
           ),
+          const SizedBox(height: 15),
           if (totalPageNum > 1)
             Column(
               mainAxisAlignment: MainAxisAlignment.end,

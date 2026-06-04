@@ -35,7 +35,6 @@ class _CharacterViewState extends State<CharacterView>
   // Controllers
   final TextEditingController searchNameController = TextEditingController();
   final ScrollController scrollController = ScrollController();
-  final ScrollController controlPanelController = ScrollController();
   final ScrollController tableController = ScrollController();
 
   // Data & Filter State
@@ -149,40 +148,42 @@ class _CharacterViewState extends State<CharacterView>
     return Padding(
       padding: const EdgeInsets.all(15.0),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          _createHeader(),
+          // Control panel — horizontally scrollable if needed
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 6.0),
+              child: _createControlPanel(),
+            ),
+          ),
+          const SizedBox(height: 10),
+          // Data Table — fills remaining space, scrolls both ways
           Expanded(
-            child: SingleChildScrollView(
+            child: Scrollbar(
               controller: scrollController,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _createHeader(),
-                  // Wrap control panel in simpler scroll container
-                  SingleChildScrollView(
+              thumbVisibility: true,
+              trackVisibility: true,
+              child: SingleChildScrollView(
+                controller: scrollController,
+                child: Scrollbar(
+                  controller: tableController,
+                  thumbVisibility: true,
+                  trackVisibility: true,
+                  notificationPredicate:
+                      (notification) => notification.depth == 0,
+                  child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
-                    controller: controlPanelController,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 6.0),
-                      child: _createControlPanel(),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  // Data Table Area
-                  Scrollbar(
-                    trackVisibility: true,
-                    thickness: 5,
                     controller: tableController,
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      controller: tableController,
-                      child: _createCharacterTable(),
-                    ),
+                    child: _createCharacterTable(),
                   ),
-                  const SizedBox(height: 15),
-                ],
+                ),
               ),
             ),
           ),
+          const SizedBox(height: 15),
           if (totalPageNum > 1)
             Padding(
               padding: const EdgeInsets.only(top: 15.0),
@@ -191,7 +192,7 @@ class _CharacterViewState extends State<CharacterView>
                 totalPages: totalPageNum,
                 jumpLabel: AppLocalizations.of(context)!.jumpToPage,
                 onPageChanged: (page) {
-                    selectedPageNum = page;
+                  selectedPageNum = page;
                   _search(false);
                 },
               ),

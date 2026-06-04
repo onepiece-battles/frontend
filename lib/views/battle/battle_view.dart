@@ -39,7 +39,6 @@ class _BattleViewState extends State<BattleView> {
   List<BattleStatus> selectedBattleStatus = [];
 
   ScrollController mainController = ScrollController();
-  ScrollController controlBarController = ScrollController();
   ScrollController tableController = ScrollController();
 
   // first all columns will be sorted by creation id desc.
@@ -98,52 +97,40 @@ class _BattleViewState extends State<BattleView> {
     return Padding(
       padding: const EdgeInsets.all(15.0),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          _getHeaderText(context),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: SizedBox(
+              height: 90,
+              child: _getControlRow(context),
+            ),
+          ),
+          const SizedBox(height: 10),
           Expanded(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.vertical,
+            child: Scrollbar(
               controller: mainController,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _getHeaderText(context),
-                  SizedBox(
-                    width: 1220,
-                    height: 90,
-                    child: Scrollbar(
-                      controller: controlBarController,
-                      trackVisibility: true,
-                      thickness: 5,
-                      child: SingleChildScrollView(
-                        controller: controlBarController,
-                        scrollDirection: Axis.horizontal,
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: _getControlRow(context),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Scrollbar(
+              thumbVisibility: true,
+              trackVisibility: true,
+              child: SingleChildScrollView(
+                controller: mainController,
+                child: Scrollbar(
+                  controller: tableController,
+                  thumbVisibility: true,
+                  trackVisibility: true,
+                  notificationPredicate:
+                      (notification) => notification.depth == 0,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
                     controller: tableController,
-                    trackVisibility: true,
-                    thickness: 5,
-                    child:
-                    SingleChildScrollView(
-                      controller: tableController,
-                      scrollDirection: Axis.horizontal,
-                      child:_getBattlesTable(context),),
+                    child: _getBattlesTable(context),
                   ),
-                  const SizedBox(
-                    height: 15,
-                  ),
-                ],
+                ),
               ),
             ),
           ),
-          const SizedBox(
-            height: 15,
-          ),
+          const SizedBox(height: 15),
           if (totalPageNum > 1)
             Column(
               mainAxisAlignment: MainAxisAlignment.end,
