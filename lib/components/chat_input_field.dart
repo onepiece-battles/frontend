@@ -12,7 +12,7 @@ import '../constants/onepiece_fonts.dart';
 class ChatInputField extends StatefulWidget {
   final WebSocketService webSocketManager;
   final TextEditingController textEditingController;
-  ValueNotifier<Chat?> selectedChatNotifier;
+  final ValueNotifier<Chat?> selectedChatNotifier;
   final int minLines;
   final int maxLines;
   final EdgeInsetsGeometry padding;
@@ -20,8 +20,8 @@ class ChatInputField extends StatefulWidget {
   final Color sendButtonColor;
   final bool enabled;
 
-  ChatInputField({
-    Key? key,
+  const ChatInputField({
+    super.key,
     required this.webSocketManager,
     required this.selectedChatNotifier,
     this.minLines = 1,
@@ -31,7 +31,7 @@ class ChatInputField extends StatefulWidget {
     this.textStyle,
     this.sendButtonColor = Colors.blue,
     this.enabled = true,
-  }) : super(key: key);
+  });
 
   @override
   State<ChatInputField> createState() => _ChatInputFieldState();

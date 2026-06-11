@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/cupertino.dart';
 import 'package:openapi/api.dart'; // Keep your existing import
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -37,7 +38,7 @@ class WebSocketService {
     if (currentId == null) return;
 
     try {
-      print("Connecting to WebSocket...");
+      debugPrint("Connecting to WebSocket...");
 
       _channel = WebSocketChannel.connect(Uri.parse('$hostName$currentId'));
 
@@ -49,7 +50,7 @@ class WebSocketService {
       );
       _startPing();
     } catch (e) {
-      print("Connection failed: $e");
+      debugPrint("Connection failed: $e");
       _scheduleReconnect();
     }
   }
@@ -69,11 +70,11 @@ class WebSocketService {
   }
 
   void sendMessage(String message) {
-    if (_channel != null && _channel!.sink != null) {
+    if (_channel != null) {
       try {
         _channel!.sink.add(message);
       } catch (e) {
-        print("Error sending message: $e");
+        debugPrint("Error sending message: $e");
       }
     }
   }
@@ -83,26 +84,24 @@ class WebSocketService {
       final data = jsonDecode(event);
       // Determine message type and parse
       if (data.containsKey('retracted')) {
-        // print('message');
         _messageController.add(Message.fromJson(data));
       } else if (data.containsKey('private_group')) {
-        // print('chat');
         _messageController.add(Chat.fromJson(data));
       }
       // Add other message types here...
     } catch (e) {
-      print('Error parsing WebSocket message: $e');
+      debugPrint('Error parsing WebSocket message: $e');
     }
   }
 
   void _onError(Object error, StackTrace stackTrace) {
-    print("WebSocket Error: $error");
+    debugPrint("WebSocket Error: $error");
     // Don't manually call _onDone here; the stream listener will usually call
     // onDone automatically after onError if cancelOnError is true.
   }
 
   void _onDone() {
-    print("WebSocket connection closed.");
+    debugPrint("WebSocket connection closed.");
     _stopPing();
     _channel = null;
 
@@ -119,7 +118,7 @@ class WebSocketService {
     // Attempt to reconnect in 3 seconds
     _reconnectTimer = Timer(const Duration(seconds: 3), () {
       if (!_isIntentionalDisconnect && currentId != null) {
-        print("Attempting to reconnect...");
+        debugPrint("Attempting to reconnect...");
         _initConnection();
       }
     });
@@ -127,7 +126,7 @@ class WebSocketService {
 
   /// Call this specifically when the User Logs Out
   void disconnect() {
-    print("Disconnecting WebSocket (Intentional Logout)");
+    debugPrint("Disconnecting WebSocket (Intentional Logout)");
     _stopPing();
 
     // 1. Mark as intentional so we don't reconnect

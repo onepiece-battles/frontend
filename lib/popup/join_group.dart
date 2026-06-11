@@ -1,7 +1,6 @@
 import 'dart:async';
 import '../../l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/components/image_lazy_loader.dart';
 import 'package:openapi/api.dart';
 import 'package:get_it/get_it.dart';

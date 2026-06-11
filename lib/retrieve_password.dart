@@ -343,6 +343,8 @@ class _RetrievePasswordState extends State<RetrievePassword> {
                 : () async {
                     final alertHint = AppLocalizations.of(context)!.hint;
                     final showAlert = OnepieceAlert.createAlertShower(context);
+                    final router = GoRouter.of(context);
+                    final preCapturedLocale = Localizations.localeOf(context);
                     try {
                       final value = await getIt<UserDao>().updatePassword(
                           UpdatePasswordRequest(
@@ -367,19 +369,18 @@ class _RetrievePasswordState extends State<RetrievePassword> {
                               loginValue.accessToken!);
                           ResourcePermissionManager.updateUserCache(
                               loginValue.user!);
-                          GoRouter.of(context).goNamed('userHome',
+                          router.goNamed('userHome',
                               extra: loginValue.user!.id,
                               pathParameters: {
                                 'name': loginValue.user!.nickname
                               });
                         } else {
+                          if (!mounted) return;
                           setState(() {
                             verificationI18n = loginValue.verification;
-                            final myLocale =
-                                Localizations.localeOf(context);
                             verificationMessage =
                                 I18nHelper.getDisplayNameFromI18nByLocale(
-                                    verificationI18n, myLocale);
+                                    verificationI18n, preCapturedLocale);
                           });
                         }
                       }

@@ -76,6 +76,8 @@ class _UserNavigationState extends State<UserNavigation> {
               height: 35,
               child: ElevatedButton(
                 onPressed: () async {
+                  final router = GoRouter.of(context);
+                  final navigator = Navigator.of(context);
                   try {
                     await getIt<UserDao>()
                         .logout(LogoutRequest(userId: getIt<User>().id));
@@ -88,8 +90,8 @@ class _UserNavigationState extends State<UserNavigation> {
                       () => User(id: "", username: "", nickname: ""));
                   // Close popover before navigating to avoid overlay
                   // GlobalKey collisions during ShellRoute teardown.
-                  Navigator.of(context).pop();
-                  AppRouter.router.replace(AppRouter.loginPath);
+                  navigator.pop();
+                  router.replace(AppRouter.loginPath);
                 },
                 style: OnepieceButtonStyle.getDefaultStyle(),
                 child: Row(

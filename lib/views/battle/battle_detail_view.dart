@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:html' as html;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -19,6 +18,8 @@ import 'package:openapi/api.dart';
 import '../../l10n/app_localizations.dart';
 import 'package:one_piece_battles_flutter/graph/character_data.dart';
 import '../../constants/onepiece_fonts.dart';
+import '../../utils/pdf_downloader_stub.dart'
+    if (dart.library.html) '../../utils/pdf_downloader_web.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -717,24 +718,10 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                         .downloadFile(DownloadFileRequest(
                             id: battleExecutionData.reportFileId!))
                         .then((response) async {
-                      debugPrint('pdf downloading finish');
+                      if (response?.fileData == null) return;
                       var pdf = base64Decode(response!.fileData!);
-                      // pdfData.value = Uint8List.fromList(value!);
-                      final blob = html.Blob([pdf], response.httpMimeType);
-                      final url = html.Url.createObjectUrlFromBlob(blob);
-                      final anchor = html.AnchorElement()
-                        ..href = url
-                        ..setAttribute('target', '_blank')
-                        ..download = "${response.fileName}.pdf"
-                        ..style.display = 'none';
-                      // Add the anchor element to the document body.
-                      html.document.body?.append(anchor);
-                      // Programmatically click the anchor element to start the download.
-                      anchor.click();
-                      // Remove the anchor element after the download has started.
-                      anchor.remove();
-                      // Release the object URL to free up resources.
-                      html.Url.revokeObjectUrl(url);
+                      downloadPdf(pdf, "${response.fileName}.pdf",
+                          response.httpMimeType);
                     });
                   }
                 : null,
@@ -748,7 +735,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                     'asset/images/svgs/pdf_black.svg',
                     width: 100,
                     height: 100,
-                    color: Colors.grey,
+                    colorFilter: const ColorFilter.mode(Colors.grey, BlendMode.srcIn),
                   ),
           ),
         ),

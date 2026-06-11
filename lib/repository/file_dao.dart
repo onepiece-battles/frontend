@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:openapi/api.dart';
-import 'package:http/http.dart';
 
 class FileDao {
   FileApi fileApi = FileApi();

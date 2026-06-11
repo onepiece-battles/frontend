@@ -13,7 +13,6 @@ import 'package:one_piece_battles_flutter/graph/character_data.dart';
 import '../../graph/character_bar_graph.dart';
 import '../../repository/battle_dao.dart';
 import '../../repository/character_dao.dart';
-import '../../utils/base64_helper.dart';
 import '../../utils/i18n_helper.dart';
 import '../../utils/image_helper.dart';
 

@@ -5,7 +5,6 @@ import 'package:one_piece_battles_flutter/repository/image_dao.dart';
 import 'package:openapi/api.dart';
 
 import '../app_router.dart';
-import '../components/image_lazy_loader.dart';
 import '../constants/onepiece_colors.dart';
 
 class ImageHelper {
@@ -99,7 +98,7 @@ class ImageHelper {
       hoverColor: Colors.transparent,
       icon: SvgPicture.asset(
         "asset/$svgPath",
-        color: svgColor,
+        colorFilter: ColorFilter.mode(svgColor, BlendMode.srcIn),
         width: width,
         height: height,
       ),
@@ -119,7 +118,9 @@ class ImageHelper {
       String svgPath, double width, double height, Color? color) {
     return SvgPicture.asset(
       "asset/$svgPath",
-      color: color,
+      colorFilter: color != null
+          ? ColorFilter.mode(color, BlendMode.srcIn)
+          : null,
       width: width,
       height: height,
     );

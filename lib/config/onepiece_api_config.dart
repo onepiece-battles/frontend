@@ -6,6 +6,5 @@ import 'package:openapi_generator_annotations/openapi_generator_annotations.dart
     inputSpec: InputSpec(path: "onepiece-battles-api/api/openapi.yaml"),
     generatorName: Generator.dart,
     skipIfSpecIsUnchanged: false,
-    outputDirectory: 'generated',
-    forceAlwaysRun: true)
+    outputDirectory: 'generated')
 class OnepieceApiConfig {}

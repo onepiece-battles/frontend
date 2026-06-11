@@ -466,7 +466,7 @@ class _UserHomeState extends State<UserHome> {
                           'asset/images/svgs/pdf_black.svg',
                           width: 20,
                           height: 20,
-                          color: Colors.grey,
+                          colorFilter: const ColorFilter.mode(Colors.grey, BlendMode.srcIn),
                         )
                     ],
                   ),

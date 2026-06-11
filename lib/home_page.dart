@@ -471,6 +471,7 @@ class _SideMenuState extends State<SideMenu> {
               isSelected: false,
               isExpanded: isExpanded,
               onTap: () async {
+                final router = GoRouter.of(context);
                 try {
                   await getIt<UserDao>()
                       .logout(LogoutRequest(userId: getIt<User>().id));
@@ -482,7 +483,7 @@ class _SideMenuState extends State<SideMenu> {
                 getIt.registerLazySingleton<User>(
                     () => User(id: "", username: "", nickname: ""));
                 if (!mounted) return;
-                context.replace(AppRouter.loginPath);
+                router.replace(AppRouter.loginPath);
               },
             ),
           ],

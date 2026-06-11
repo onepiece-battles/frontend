@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 
 /// Stub implementation for non-web platforms.
 /// PDF download via Blob/AnchorElement is only supported on web.
