@@ -91,65 +91,68 @@ class _GroupViewState extends State<GroupView> {
   Widget build(BuildContext context) {
     return Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 1400),
+        constraints: const BoxConstraints(maxWidth: 1200),
         child: Padding(
           padding: const EdgeInsets.all(15.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-            _createHeader(context),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: SizedBox(
-              height: 90,
-              child: _createControlPanel(context),
-            ),
-          ),
-          const SizedBox(height: 10),
-          Expanded(
-            child: Scrollbar(
-              controller: mainController,
-              thumbVisibility: true,
-              trackVisibility: true,
-              child: SingleChildScrollView(
-                controller: mainController,
-                child: Scrollbar(
-                  controller: tableController,
-                  thumbVisibility: true,
-                  trackVisibility: true,
-                  notificationPredicate:
-                      (notification) => notification.depth == 0,
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    controller: tableController,
-                    child: _createGroupTable(context),
+          child: SizedBox(
+            width: double.infinity,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _createHeader(context),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: SizedBox(
+                    height: 90,
+                    child: _createControlPanel(context),
                   ),
                 ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 15),
-          if (totalPageNum > 1)
-            Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Center(
-                    child: PageFoot(
-                  currentPage: selectedPageNum,
-                  totalPages: totalPageNum,
-                  jumpLabel: AppLocalizations.of(context)!.jumpToPage,
-                  onPageChanged: (page) {
-                    selectedPageNum = page;
-                    _search(false);
-                  },
-                )),
+                const SizedBox(height: 10),
+                Expanded(
+                  child: Scrollbar(
+                    controller: mainController,
+                    thumbVisibility: true,
+                    trackVisibility: true,
+                    child: SingleChildScrollView(
+                      controller: mainController,
+                      child: Scrollbar(
+                        controller: tableController,
+                        thumbVisibility: true,
+                        trackVisibility: true,
+                        notificationPredicate: (notification) =>
+                            notification.depth == 0,
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          controller: tableController,
+                          child: _createGroupTable(context),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 15),
+                if (totalPageNum > 1)
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Center(
+                          child: PageFoot(
+                        currentPage: selectedPageNum,
+                        totalPages: totalPageNum,
+                        jumpLabel: AppLocalizations.of(context)!.jumpToPage,
+                        onPageChanged: (page) {
+                          selectedPageNum = page;
+                          _search(false);
+                        },
+                      )),
+                    ],
+                  )
               ],
-            )
-        ],
             ),
           ),
         ),
-      );
+      ),
+    );
   }
 
   Widget _createHeader(BuildContext context) {
@@ -624,7 +627,6 @@ class _GroupViewState extends State<GroupView> {
     );
   }
 
-
   Widget _createGroupList(List<Group> groups) {
     if (groups.isEmpty) {
       return const Text("");
@@ -639,32 +641,28 @@ class _GroupViewState extends State<GroupView> {
           hoverColor: Colors.transparent,
           splashColor: Colors.transparent,
           onTap: () {
-            context.goNamed('groupDetails',
-                extra: group.id,
-                pathParameters: {
-                  'name': I18nHelper.getDisplayNameFromI18n(group.name!)
-                });
+            context.goNamed('groupDetails', extra: group.id, pathParameters: {
+              'name': I18nHelper.getDisplayNameFromI18n(group.name!)
+            });
           },
           child: Tooltip(
             message: I18nHelper.getDisplayNameFromI18n(group.name),
             preferBelow: false,
             showDuration: const Duration(seconds: 1),
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-              child: RepaintBoundary(
-                child: ImageLazyLoader(
-                    key: ValueKey(group.imageUri),
-                    uriProvider: () => group.imageUri!,
-                    width: 40,
-                    borderWidth: 1.5,
-                    borderRadios: 3,
-                    lazy: true),
-              )),
+                padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
+                child: RepaintBoundary(
+                  child: ImageLazyLoader(
+                      key: ValueKey(group.imageUri),
+                      uriProvider: () => group.imageUri!,
+                      width: 40,
+                      borderWidth: 1.5,
+                      borderRadios: 3,
+                      lazy: true),
+                )),
           ),
         );
       },
     );
   }
-
-
 }

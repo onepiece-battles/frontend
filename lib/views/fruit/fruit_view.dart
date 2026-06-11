@@ -94,65 +94,68 @@ class _FruitViewState extends State<FruitView> {
   Widget build(BuildContext context) {
     return Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 1400),
+        constraints: const BoxConstraints(maxWidth: 700),
         child: Padding(
           padding: const EdgeInsets.all(15.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _getHeaderText(context),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: SizedBox(
-              height: 90,
-              child: _getControlRow(context),
-            ),
-          ),
-          const SizedBox(height: 10),
-          Expanded(
-            child: Scrollbar(
-              controller: mainController,
-              thumbVisibility: true,
-              trackVisibility: true,
-              child: SingleChildScrollView(
-                controller: mainController,
-                child: Scrollbar(
-                  controller: tableController,
-                  thumbVisibility: true,
-                  trackVisibility: true,
-                  notificationPredicate:
-                      (notification) => notification.depth == 0,
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    controller: tableController,
-                    child: _getFruitsTable(context),
+          child: SizedBox(
+            width: double.infinity,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _getHeaderText(context),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: SizedBox(
+                    height: 90,
+                    child: _getControlRow(context),
                   ),
                 ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 15),
-          if (totalPageNum > 1)
-            Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Center(
-                    child: PageFoot(
-                  currentPage: selectedPageNum,
-                  totalPages: totalPageNum,
-                  jumpLabel: AppLocalizations.of(context)!.jumpToPage,
-                  onPageChanged: (page) {
-                    selectedPageNum = page;
-                    _search(false);
-                  },
-                )),
+                const SizedBox(height: 10),
+                Expanded(
+                  child: Scrollbar(
+                    controller: mainController,
+                    thumbVisibility: true,
+                    trackVisibility: true,
+                    child: SingleChildScrollView(
+                      controller: mainController,
+                      child: Scrollbar(
+                        controller: tableController,
+                        thumbVisibility: true,
+                        trackVisibility: true,
+                        notificationPredicate: (notification) =>
+                            notification.depth == 0,
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          controller: tableController,
+                          child: _getFruitsTable(context),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 15),
+                if (totalPageNum > 1)
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Center(
+                          child: PageFoot(
+                        currentPage: selectedPageNum,
+                        totalPages: totalPageNum,
+                        jumpLabel: AppLocalizations.of(context)!.jumpToPage,
+                        onPageChanged: (page) {
+                          selectedPageNum = page;
+                          _search(false);
+                        },
+                      )),
+                    ],
+                  )
               ],
-            )
-        ],
             ),
           ),
         ),
-      );
+      ),
+    );
   }
 
   Widget _getHeaderText(BuildContext context) {
@@ -522,17 +525,15 @@ class _FruitViewState extends State<FruitView> {
 
       // ── Main row ──────────────────────────────────────────────
       rows.add(DataRow(
-        color: WidgetStateProperty.resolveWith<Color?>(
-            (Set<WidgetState> states) {
+        color:
+            WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
           if (entry.key.isEven) return OnepieceColors.liteFancyGreen;
           return null;
         }),
         onSelectChanged: (value) {
-          context.goNamed('fruitDetails',
-              extra: fruit.id,
-              pathParameters: {
-                'name': I18nHelper.getDisplayNameFromI18n(fruit.name!)
-              });
+          context.goNamed('fruitDetails', extra: fruit.id, pathParameters: {
+            'name': I18nHelper.getDisplayNameFromI18n(fruit.name!)
+          });
         },
         cells: [
           // Expand icon
@@ -559,8 +560,8 @@ class _FruitViewState extends State<FruitView> {
           _getDataCell(I18nHelper.getDisplayNameFromI18n(fruit.name)),
           DataCell(Padding(
             padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-            child: OnepieceTag.getFruitTag(fruit.fruitType!,
-                fruitTypeToDisplayValue[fruit.fruitType]!),
+            child: OnepieceTag.getFruitTag(
+                fruit.fruitType!, fruitTypeToDisplayValue[fruit.fruitType]!),
           )),
           DataCell(_createCharacterList(fruit.characters)),
         ],
@@ -615,11 +616,10 @@ class _FruitViewState extends State<FruitView> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.only(right: 6),
-                      child: ImageHelper.getTextFormFieldIcon(
-                          stat.icon, true, 18),
+                      child:
+                          ImageHelper.getTextFormFieldIcon(stat.icon, true, 18),
                     ),
-                    Text(stat.label,
-                        style: OnepieceFonts.smallContentStyle),
+                    Text(stat.label, style: OnepieceFonts.smallContentStyle),
                     const SizedBox(width: 8),
                     Text('${stat.slope}x + ${stat.intercept}',
                         style: OnepieceFonts.boldFancySmallFont),
@@ -681,7 +681,6 @@ class _FruitViewState extends State<FruitView> {
       child: Text(value),
     ));
   }
-
 }
 
 class _FruitStat {

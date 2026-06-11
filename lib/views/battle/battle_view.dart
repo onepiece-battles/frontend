@@ -97,65 +97,68 @@ class _BattleViewState extends State<BattleView> {
   Widget build(BuildContext context) {
     return Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 1400),
+        constraints: const BoxConstraints(maxWidth: 800),
         child: Padding(
           padding: const EdgeInsets.all(15.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-          _getHeaderText(context),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: SizedBox(
-              height: 90,
-              child: _getControlRow(context),
-            ),
-          ),
-          const SizedBox(height: 10),
-          Expanded(
-            child: Scrollbar(
-              controller: mainController,
-              thumbVisibility: true,
-              trackVisibility: true,
-              child: SingleChildScrollView(
-                controller: mainController,
-                child: Scrollbar(
-                  controller: tableController,
-                  thumbVisibility: true,
-                  trackVisibility: true,
-                  notificationPredicate:
-                      (notification) => notification.depth == 0,
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    controller: tableController,
-                    child: _getBattlesTable(context),
+          child: SizedBox(
+            width: double.infinity,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _getHeaderText(context),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: SizedBox(
+                    height: 90,
+                    child: _getControlRow(context),
                   ),
                 ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 15),
-          if (totalPageNum > 1)
-            Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Center(
-                    child: PageFoot(
-                  currentPage: selectedPageNum,
-                  totalPages: totalPageNum,
-                  jumpLabel: AppLocalizations.of(context)!.jumpToPage,
-                  onPageChanged: (page) {
-                    selectedPageNum = page;
-                    _search(false);
-                  },
-                )),
+                const SizedBox(height: 10),
+                Expanded(
+                  child: Scrollbar(
+                    controller: mainController,
+                    thumbVisibility: true,
+                    trackVisibility: true,
+                    child: SingleChildScrollView(
+                      controller: mainController,
+                      child: Scrollbar(
+                        controller: tableController,
+                        thumbVisibility: true,
+                        trackVisibility: true,
+                        notificationPredicate: (notification) =>
+                            notification.depth == 0,
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          controller: tableController,
+                          child: _getBattlesTable(context),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 15),
+                if (totalPageNum > 1)
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Center(
+                          child: PageFoot(
+                        currentPage: selectedPageNum,
+                        totalPages: totalPageNum,
+                        jumpLabel: AppLocalizations.of(context)!.jumpToPage,
+                        onPageChanged: (page) {
+                          selectedPageNum = page;
+                          _search(false);
+                        },
+                      )),
+                    ],
+                  )
               ],
-            )
-        ],
             ),
           ),
         ),
-      );
+      ),
+    );
   }
 
   Widget _getHeaderText(BuildContext context) {
@@ -214,10 +217,12 @@ class _BattleViewState extends State<BattleView> {
                                 color: OnepieceColors.menuHoverColor)),
                         enabledBorder: const OutlineInputBorder(
                             borderSide: BorderSide(
-                                color: OnepieceColors.menuHoverColor,)),
+                          color: OnepieceColors.menuHoverColor,
+                        )),
                         focusedBorder: const OutlineInputBorder(
-                            borderSide:
-                                BorderSide(color: OnepieceColors.fancyGreen, width: 1.5),),
+                          borderSide: BorderSide(
+                              color: OnepieceColors.fancyGreen, width: 1.5),
+                        ),
                         prefixIcon: const Icon(Icons.search),
                         labelText: AppLocalizations.of(context)!.starterName,
                         labelStyle: OnepieceFonts.dropDownItemStyle),
@@ -245,8 +250,8 @@ class _BattleViewState extends State<BattleView> {
                           borderSide:
                               BorderSide(color: OnepieceColors.menuHoverColor)),
                       focusedBorder: const OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: OnepieceColors.fancyGreen, width: 1.5)),
+                          borderSide: BorderSide(
+                              color: OnepieceColors.fancyGreen, width: 1.5)),
                       prefixIcon: const Icon(Icons.search),
                       labelText: AppLocalizations.of(context)!.receiverName,
                     ),
@@ -320,7 +325,6 @@ class _BattleViewState extends State<BattleView> {
       ),
     );
   }
-
 
   Widget _getBattleStatusFilter(BuildContext context) {
     Map<BattleStatus, String> battleStatusToDisplayName = {
@@ -467,8 +471,7 @@ class _BattleViewState extends State<BattleView> {
       ),
       _createSingleColumn(AppLocalizations.of(context)!.initiator, null, 150),
       _createSingleColumn(AppLocalizations.of(context)!.receiver, null, 150),
-      _createSingleColumn(AppLocalizations.of(context)!.winner,
-          null, 60),
+      _createSingleColumn(AppLocalizations.of(context)!.winner, null, 60),
       _createSingleColumn(AppLocalizations.of(context)!.status, null, 70),
       _createSingleColumn(AppLocalizations.of(context)!.creator, null, 150),
     ];
@@ -634,8 +637,7 @@ class _BattleViewState extends State<BattleView> {
               DataCell(
                 Padding(
                   padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                  child:
-                  Row(
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       entry.value.battleExecution!.winnerId == null
@@ -684,5 +686,4 @@ class _BattleViewState extends State<BattleView> {
       child: Text(value),
     ));
   }
-
 }

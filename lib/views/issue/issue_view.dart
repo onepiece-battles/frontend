@@ -79,58 +79,66 @@ class _IssueViewState extends State<IssueView> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(15.0),
-      child: Column(
-        children: [
-          Expanded(
-              child: SingleChildScrollView(
-            controller: scrollController,
-            scrollDirection: Axis.vertical,
-            child: Scrollbar(
-              thumbVisibility: true,
-              controller: horizontalController,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                controller: horizontalController,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _createHeader(context),
-                    SizedBox(
-                      width: 1600,
-                      height: 50,
-                      child: _createControlPanel(context),
-                    ),
-                    _createIssueTable(context),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          )),
-          const SizedBox(
-            height: 15,
-          ),
-          if (totalPageNum > 1)
-            Column(
-              mainAxisAlignment: MainAxisAlignment.end,
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 1400),
+        child: Padding(
+          padding: const EdgeInsets.all(15.0),
+          child: SizedBox(
+            width: double.infinity,
+            child: Column(
               children: [
-                Center(
-                    child: PageFoot(
-                  currentPage: selectedPageNum,
-                  totalPages: totalPageNum,
-                  jumpLabel: AppLocalizations.of(context)!.jumpToPage,
-                  onPageChanged: (page) {
-                    selectedPageNum = page;
-                    _search(false);
-                  },
+                Expanded(
+                    child: SingleChildScrollView(
+                  controller: scrollController,
+                  scrollDirection: Axis.vertical,
+                  child: Scrollbar(
+                    thumbVisibility: true,
+                    controller: horizontalController,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      controller: horizontalController,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _createHeader(context),
+                          SizedBox(
+                            width: 1600,
+                            height: 50,
+                            child: _createControlPanel(context),
+                          ),
+                          _createIssueTable(context),
+                          const SizedBox(
+                            height: 15,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 )),
+                const SizedBox(
+                  height: 15,
+                ),
+                if (totalPageNum > 1)
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Center(
+                          child: PageFoot(
+                        currentPage: selectedPageNum,
+                        totalPages: totalPageNum,
+                        jumpLabel: AppLocalizations.of(context)!.jumpToPage,
+                        onPageChanged: (page) {
+                          selectedPageNum = page;
+                          _search(false);
+                        },
+                      )),
+                    ],
+                  )
               ],
-            )
-        ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -178,10 +186,10 @@ class _IssueViewState extends State<IssueView> {
                   floatingLabelBehavior: FloatingLabelBehavior.never,
                   disabledBorder: const OutlineInputBorder(
                       borderSide:
-                      BorderSide(color: OnepieceColors.menuHoverColor)),
+                          BorderSide(color: OnepieceColors.menuHoverColor)),
                   enabledBorder: const OutlineInputBorder(
                       borderSide:
-                      BorderSide(color: OnepieceColors.menuHoverColor)),
+                          BorderSide(color: OnepieceColors.menuHoverColor)),
                   focusedBorder: const OutlineInputBorder(
                       borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
                   prefixIcon: const Icon(Icons.search),
@@ -634,5 +642,4 @@ class _IssueViewState extends State<IssueView> {
       child: Text(value),
     ));
   }
-
 }

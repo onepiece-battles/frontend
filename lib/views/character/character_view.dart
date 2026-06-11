@@ -147,64 +147,67 @@ class _CharacterViewState extends State<CharacterView>
     super.build(context);
     return Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 1400),
+        constraints: const BoxConstraints(maxWidth: 800),
         child: Padding(
           padding: const EdgeInsets.all(15.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-          _createHeader(),
-          // Control panel — horizontally scrollable if needed
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 6.0),
-              child: _createControlPanel(),
-            ),
-          ),
-          const SizedBox(height: 10),
-          // Data Table — fills remaining space, scrolls both ways
-          Expanded(
-            child: Scrollbar(
-              controller: scrollController,
-              thumbVisibility: true,
-              trackVisibility: true,
-              child: SingleChildScrollView(
-                controller: scrollController,
-                child: Scrollbar(
-                  controller: tableController,
-                  thumbVisibility: true,
-                  trackVisibility: true,
-                  notificationPredicate:
-                      (notification) => notification.depth == 0,
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    controller: tableController,
-                    child: _createCharacterTable(),
+          child: SizedBox(
+            width: double.infinity,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _createHeader(),
+                // Control panel — horizontally scrollable if needed
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 6.0),
+                    child: _createControlPanel(),
                   ),
                 ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 15),
-          if (totalPageNum > 1)
-            Padding(
-              padding: const EdgeInsets.only(top: 15.0),
-              child: PageFoot(
-                currentPage: selectedPageNum,
-                totalPages: totalPageNum,
-                jumpLabel: AppLocalizations.of(context)!.jumpToPage,
-                onPageChanged: (page) {
-                  selectedPageNum = page;
-                  _search(false);
-                },
-              ),
-            ),
-        ],
+                const SizedBox(height: 10),
+                // Data Table — fills remaining space, scrolls both ways
+                Expanded(
+                  child: Scrollbar(
+                    controller: scrollController,
+                    thumbVisibility: true,
+                    trackVisibility: true,
+                    child: SingleChildScrollView(
+                      controller: scrollController,
+                      child: Scrollbar(
+                        controller: tableController,
+                        thumbVisibility: true,
+                        trackVisibility: true,
+                        notificationPredicate: (notification) =>
+                            notification.depth == 0,
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          controller: tableController,
+                          child: _createCharacterTable(),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 15),
+                if (totalPageNum > 1)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 15.0),
+                    child: PageFoot(
+                      currentPage: selectedPageNum,
+                      totalPages: totalPageNum,
+                      jumpLabel: AppLocalizations.of(context)!.jumpToPage,
+                      onPageChanged: (page) {
+                        selectedPageNum = page;
+                        _search(false);
+                      },
+                    ),
+                  ),
+              ],
             ),
           ),
         ),
-      );
+      ),
+    );
   }
 
   Widget _createHeader() {
@@ -253,14 +256,16 @@ class _CharacterViewState extends State<CharacterView>
                   decoration: InputDecoration(
                       floatingLabelBehavior: FloatingLabelBehavior.never,
                       disabledBorder: const OutlineInputBorder(
-                          borderSide: BorderSide(
-                              color: OnepieceColors.menuHoverColor)),
+                          borderSide:
+                              BorderSide(color: OnepieceColors.menuHoverColor)),
                       enabledBorder: const OutlineInputBorder(
                           borderSide: BorderSide(
-                            color: OnepieceColors.menuHoverColor,)),
+                        color: OnepieceColors.menuHoverColor,
+                      )),
                       focusedBorder: const OutlineInputBorder(
-                        borderSide:
-                        BorderSide(color: OnepieceColors.fancyGreen, width: 1.5),),
+                        borderSide: BorderSide(
+                            color: OnepieceColors.fancyGreen, width: 1.5),
+                      ),
                       prefixIcon: const Icon(Icons.search),
                       labelText: AppLocalizations.of(context)!.starterName,
                       labelStyle: OnepieceFonts.dropDownItemStyle),
@@ -655,17 +660,14 @@ class _CharacterViewState extends State<CharacterView>
                         child: ImageHelper.getTextFormFieldIcon(
                             stat.icon!, false, 16),
                       ),
-                    Text(stat.label,
-                        style: OnepieceFonts.smallContentStyle),
+                    Text(stat.label, style: OnepieceFonts.smallContentStyle),
                     const SizedBox(width: 8),
-                    Text(stat.value,
-                        style: OnepieceFonts.boldFancySmallFont),
+                    Text(stat.value, style: OnepieceFonts.boldFancySmallFont),
                   ],
                 ),
               )),
               // Fill remaining columns with empty cells
-              for (int i = 0; i < 5; i++)
-                const DataCell(SizedBox.shrink()),
+              for (int i = 0; i < 5; i++) const DataCell(SizedBox.shrink()),
             ],
           ));
         }
