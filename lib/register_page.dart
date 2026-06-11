@@ -408,6 +408,7 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Future<void> handleRegisterSuccess() async {
+    final router = GoRouter.of(context);
     final loginRequest = LoginRequest(
       email: usernameController.text,
       password: passwordController.text,
@@ -420,9 +421,7 @@ class _RegisterPageState extends State<RegisterPage> {
       await saveUserCredentials(
           usernameController.text, passwordController.text);
       if (!mounted) return; // ensure widget still in tree before using context
-      context.goNamed(
-        'characters',
-      );
+      router.goNamed('characters');
       context.read<WebSocketService>().connect(value.user!.id);
     } catch (e, st) {
       debugPrint('Login after register failed: $e\n$st');

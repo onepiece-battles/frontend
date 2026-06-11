@@ -56,6 +56,7 @@ class _SearchPopupState extends State<SearchPopup> {
     Future<ListCharacterResponse?> listCharacterResponse =
         getIt<CharacterDao>().listCharacter(listCharacterRequest);
     listCharacterResponse.then((value) {
+      if (!mounted) return;
       setState(() {
         characters = value!.characters;
       });
@@ -66,6 +67,7 @@ class _SearchPopupState extends State<SearchPopup> {
     Future<ListFruitResponse?> listFruitResponse =
         getIt<FruitDao>().list(request);
     listFruitResponse.then((value) {
+      if (!mounted) return;
       setState(() {
         fruits = value!.fruits;
       });
@@ -77,6 +79,7 @@ class _SearchPopupState extends State<SearchPopup> {
     Future<ListGroupResponse?> listGroupResponse =
         getIt<GroupDao>().listGroups(listGroupRequest);
     listGroupResponse.then((value) {
+      if (!mounted) return;
       setState(() {
         groups = value!.groups;
       });

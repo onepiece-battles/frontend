@@ -462,9 +462,10 @@ class _CreateFruitViewState extends State<CreateFruitView> {
                           fruitEnergyConsumeController.text),
                     );
 
+                    final router = GoRouter.of(context);
                     getIt<FruitDao>().add(addFruitRequest).then((value) {
                       if (!mounted) return;
-                      context.goNamed('fruitDetails',
+                      router.goNamed('fruitDetails',
                           extra: value!.id,
                           pathParameters: {
                             'name':

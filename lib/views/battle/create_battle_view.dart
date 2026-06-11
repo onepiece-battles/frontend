@@ -740,18 +740,19 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                                         userId: getIt<User>().id,
                                         starterId: starterSelectedId,
                                         receiverId: receiverSelectedId);
+                                final router = GoRouter.of(context);
                                 Future<CreateBattleResponse?> response =
                                     getIt<BattleDao>().createBattle(request);
                                 response.then((value) {
                                   if (!mounted) return;
                                   if (value?.battleId != null) {
-                                    context.goNamed('battleDetails',
+                                    router.goNamed('battleDetails',
                                         extra: value?.battleId,
                                         pathParameters: {
                                           'id': value!.battleId!
                                         });
                                   } else {
-                                    context.goNamed("battle");
+                                    router.goNamed("battle");
                                   }
                                 });
                               },

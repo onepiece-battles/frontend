@@ -425,6 +425,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                       : DataConverter.stringToInt(
                                       characterHeight.text.trim()),
                                   score: character.score);
+                              final router = GoRouter.of(context);
                               getIt<CharacterDao>()
                                   .update(updatedCharacter)
                                   .then((value) {
@@ -435,7 +436,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                     I18nHelper.getDisplayNameFromI18n(
                                         value!.result));
                                 if (value.success) {
-                                  context.goNamed('characterDetails',
+                                  router.goNamed('characterDetails',
                                       extra: character.id,
                                       pathParameters: {
                                         'name':
@@ -446,6 +447,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                               });
                             }
                             if (selectedImage != null) {
+                              final router2 = GoRouter.of(context);
                               getIt<ImageDao>()
                                   .addImage(UploadImageRequest(
                                       type: ResourceType.CHARACTER,
@@ -458,7 +460,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                     AppLocalizations.of(context)!.hint,
                                     I18nHelper.getDisplayNameFromI18n(
                                         value!.result));
-                                context.goNamed('characterDetails',
+                                router2.goNamed('characterDetails',
                                     extra: character.id,
                                     pathParameters: {
                                       'name': I18nHelper.getDisplayNameFromI18n(

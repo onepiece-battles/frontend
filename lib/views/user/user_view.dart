@@ -73,6 +73,7 @@ class _UserViewState extends State<UserView> {
         getIt<UserDao>().listUser(listUserRequest);
 
     listUserResponse.then((value) {
+      if (!mounted) return;
       setState(() {
         currentUserList = value!.users;
         totalItemCount = value.totalSize!;

@@ -77,14 +77,15 @@ class _FruitViewState extends State<FruitView> {
         fruitFilter: fruitFilter);
     Future<ListFruitResponse?> response = getIt<FruitDao>().list(request);
     response.then(
-      (value) => {
+      (value) {
+        if (!mounted) return;
         setState(
           () {
             currentFruitList = value!.fruits;
             totalItemCount = value.totalSize!;
             totalPageNum = (totalItemCount / itemCountPerPage).ceil();
           },
-        )
+        );
       },
     );
   }

@@ -83,13 +83,14 @@ class _BattleViewState extends State<BattleView> {
         battleFilter: battleFilter);
     Future<ListBattleResponse?> response =
         getIt<BattleDao>().listBattles(request);
-    response.then((value) => {
-          setState(() {
-            currentBattleList = value!.battles;
-            totalItemCount = value.totalSize!;
-            totalPageNum = (totalItemCount / itemCountPerPage).ceil();
-          })
-        });
+    response.then((value) {
+      if (!mounted) return;
+      setState(() {
+        currentBattleList = value!.battles;
+        totalItemCount = value.totalSize!;
+        totalPageNum = (totalItemCount / itemCountPerPage).ceil();
+      });
+    });
   }
 
   @override

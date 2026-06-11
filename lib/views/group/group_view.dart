@@ -78,6 +78,7 @@ class _GroupViewState extends State<GroupView> {
         getIt<GroupDao>().listGroups(listGroupRequest);
 
     listGroupResponse.then((value) {
+      if (!mounted) return;
       setState(() {
         currentGroupList = value!.groups;
         totalItemCount = value.totalSize!;

@@ -340,42 +340,52 @@ class _RetrievePasswordState extends State<RetrievePassword> {
             autofocus: true,
             onPressed: !_buttonEnabled
                 ? null
-                : () {
-                    UpdatePasswordRequest request = UpdatePasswordRequest(
-                        username: emailController.text.trim(),
-                        password: passwordController.text.trim(),
-                        confirmedPassword:
-                            confirmedPasswordController.text.trim(),
-                        verificationCode:
-                            verificationCodeController.text.trim());
-                    getIt<UserDao>().updatePassword(request).then((value) {
-                      if (!mounted) return;
+                : () async {
+                    try {
+                      final value = await getIt<UserDao>().updatePassword(
+                          UpdatePasswordRequest(
+                              username: emailController.text.trim(),
+                              password: passwordController.text.trim(),
+                              confirmedPassword:
+                                  confirmedPasswordController.text.trim(),
+                              verificationCode:
+                                  verificationCodeController.text.trim()));
+                      if (value == null || !mounted) return;
                       OnepieceAlert.getBasicAlertDialogFunc(
                           context,
                           AppLocalizations.of(context)!.hint,
                           I18nHelper.getDisplayNameFromI18n(
-                              value!.notification!));
-                      if (value.result!) {
-                        LoginRequest loginRequest = LoginRequest(
-                            email: emailController.text,
-                            password: passwordController.text);
-                        getIt<UserDao>().login(loginRequest).then((value) {
-                          if (value!.verification == null) {
-                            if (!mounted) return;
-                            _route(value.user!, value.accessToken!, context);
-                          } else {
-                            if (!mounted) return;
-                            setState(() {
-                              verificationI18n = value.verification;
-                              Locale myLocale = Localizations.localeOf(context);
-                              verificationMessage =
-                                  I18nHelper.getDisplayNameFromI18nByLocale(
-                                      verificationI18n, myLocale);
-                            });
-                          }
-                        });
+                              value.notification!));
+                      if (value.result! && mounted) {
+                        final loginValue = await getIt<UserDao>().login(
+                            LoginRequest(
+                                email: emailController.text,
+                                password: passwordController.text));
+                        if (loginValue == null || !mounted) return;
+                        if (loginValue.verification == null) {
+                          ApiInitializer.initAuthInfo(
+                              loginValue.accessToken!);
+                          ResourcePermissionManager.updateUserCache(
+                              loginValue.user!);
+                          GoRouter.of(context).goNamed('userHome',
+                              extra: loginValue.user!.id,
+                              pathParameters: {
+                                'name': loginValue.user!.nickname
+                              });
+                        } else {
+                          setState(() {
+                            verificationI18n = loginValue.verification;
+                            final myLocale =
+                                Localizations.localeOf(context);
+                            verificationMessage =
+                                I18nHelper.getDisplayNameFromI18nByLocale(
+                                    verificationI18n, myLocale);
+                          });
+                        }
                       }
-                    });
+                    } catch (e) {
+                      // error handled silently
+                    }
                   },
             style: OnepieceButtonStyle.getDefaultStyle(),
             child: Text(
@@ -391,12 +401,4 @@ class _RetrievePasswordState extends State<RetrievePassword> {
     );
   }
 
-  void _route(User user, String token, BuildContext context) {
-    // init apis with tokens
-    ApiInitializer.initAuthInfo(token);
-    ResourcePermissionManager.updateUserCache(user);
-    context.goNamed('userHome',
-        extra: user.id,
-        pathParameters: {'name': user.nickname});
-  }
 }

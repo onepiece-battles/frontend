@@ -1082,6 +1082,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                                 : DataConverter.stringToInt(
                                     characterBounty.text.trim()),
                           );
+                          final router = GoRouter.of(context);
                           getIt<CharacterDao>()
                               .addCharacter(addCharacterRequest)
                               .then((characterResponse) {
@@ -1096,7 +1097,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                             getIt<ImageDao>().addImage(uploadImageRequest).then(
                                 (value) {
                               if (!mounted) return;
-                              context.goNamed('characterDetails',
+                              router.goNamed('characterDetails',
                                   extra: characterResponse.id,
                                   pathParameters: {
                                     'name':

@@ -243,6 +243,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                                 name: I18nHelper.getI18nFromDisplayName(
                                     groupFullView.name!,
                                     groupNameController.text));
+                            final router = GoRouter.of(context);
                             getIt<GroupDao>().updateGroups(group).then((value) {
                               if (!mounted) return;
                               OnepieceAlert.getBasicAlertDialogFunc(
@@ -251,7 +252,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                                   I18nHelper.getDisplayNameFromI18n(
                                       value!.result));
                               if (value.success) {
-                                context.goNamed('groupDetails',
+                                router.goNamed('groupDetails',
                                     extra: groupFullView.id,
                                     pathParameters: {
                                       'name': I18nHelper.getDisplayNameFromI18n(
@@ -261,6 +262,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                             });
                           }
                           if (selectedImage != null) {
+                            final router2 = GoRouter.of(context);
                             getIt<ImageDao>()
                                 .addImage(UploadImageRequest(
                                     type: ResourceType.GROUP,
@@ -273,7 +275,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                                   AppLocalizations.of(context)!.hint,
                                   I18nHelper.getDisplayNameFromI18n(
                                       value!.result));
-                              context.goNamed('groupDetails',
+                              router2.goNamed('groupDetails',
                                   extra: groupFullView.id,
                                   pathParameters: {
                                     'name': I18nHelper.getDisplayNameFromI18n(

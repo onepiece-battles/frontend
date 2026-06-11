@@ -264,11 +264,11 @@ class _CreateFeedbackPopupState extends State<CreateFeedbackPopup> {
                                       AppLocalizations.of(context)!.hint,
                                       I18nHelper.getDisplayNameFromI18n(
                                           value!.issueCreationResult));
+                                  headerController.text = '';
+                                  descriptionController.text = '';
+                                  _calculateButtonCondition();
+                                  Navigator.pop(context);
                                 });
-                                headerController.text = '';
-                                descriptionController.text = '';
-                                _calculateButtonCondition();
-                                Navigator.pop(context);
                               },
                         child: Text(AppLocalizations.of(context)!.submitForm),
                       )

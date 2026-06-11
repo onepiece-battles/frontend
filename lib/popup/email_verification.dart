@@ -113,14 +113,15 @@ class _EmailVerificationState extends State<EmailVerification> {
                               userId: widget.userId,
                               email: widget.email,
                               verificationCode: verificationCode.text.trim()))
-                          .then((value) => {
+                          .then((value) {
+                                if (!mounted) return;
                                 setState(() {
                                   verificationCodeSent = true;
                                   verificationSuccess = value!.verifyResult!;
                                   verificationMessage =
                                       I18nHelper.getDisplayNameFromI18n(
                                           value.verifyMessage);
-                                })
+                                });
                               });
                     },
                     style: OnepieceButtonStyle.getDefaultStyle(),

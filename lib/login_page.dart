@@ -366,8 +366,9 @@ class _LoginPageState extends State<LoginPage> {
     final email = emailController.text.trim();
     final password = passwordController.text;
 
-    // read context-only values synchronously BEFORE async gap if they won't change
+    // read context-only values synchronously BEFORE async gap
     final locale = Localizations.localeOf(context);
+    final router = GoRouter.of(context);
 
     final request = LoginRequest(email: email, password: password);
 
@@ -380,7 +381,9 @@ class _LoginPageState extends State<LoginPage> {
 
         // Ensure still mounted, then perform navigation using current context synchronously.
         if (!mounted) return;
-        _route(response.user!, response.accessToken!, context);
+        ApiInitializer.initAuthInfo(response.accessToken!);
+        ResourcePermissionManager.updateUserCache(response.user!);
+        router.goNamed('characters');
         context.read<WebSocketService>().connect(response.user!.id);
         return;
       }
@@ -399,6 +402,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _visitorLogin() async {
+    final router = GoRouter.of(context);
     String nickname = RandomStringGenerator.generateRandomUserName(10);
     String username = RandomStringGenerator.generateRandomUserName(10);
     String fullUsername = "$username@163.com";
@@ -419,7 +423,10 @@ class _LoginPageState extends State<LoginPage> {
       LoginResponse? loginResponse = await getIt<UserDao>().login(loginRequest);
       if (loginResponse!.verification == null) {
         if (!mounted) return;
-        _route(loginResponse.user!, loginResponse.accessToken!, context);
+        ApiInitializer.initAuthInfo(loginResponse.accessToken!);
+        ResourcePermissionManager.updateUserCache(loginResponse.user!);
+        router.goNamed('characters');
+        context.read<WebSocketService>().connect(loginResponse.user!.id);
       } else {
         setState(() {
           verificationI18n = loginResponse.verification;
@@ -435,15 +442,6 @@ class _LoginPageState extends State<LoginPage> {
             response.verification, myLocale);
       });
     }
-  }
-
-  void _route(User user, String token, BuildContext context) {
-    // init apis with tokens
-    ApiInitializer.initAuthInfo(token);
-    ResourcePermissionManager.updateUserCache(user);
-    context.goNamed(
-      'characters',
-    );
   }
 
   static const _storage = FlutterSecureStorage();

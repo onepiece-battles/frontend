@@ -762,6 +762,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(
                   onPressed: () {
+                    final router = GoRouter.of(context);
                     getIt<BattleDao>()
                         .createBattle(CreateBattleRequest(
                             userId: getIt<User>().id,
@@ -769,7 +770,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                             receiverId: battle.receiverId))
                         .then((value) {
                       if (!mounted) return;
-                      context.goNamed('battleDetails',
+                      router.goNamed('battleDetails',
                           extra: value!.battleId,
                           pathParameters: {'id': value.battleId!});
                     });

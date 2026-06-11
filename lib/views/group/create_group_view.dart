@@ -367,6 +367,7 @@ class _CreateGroupViewState extends State<CreateGroupView> {
                           groupNameChController.text),
                       groupCategory: selectedGroupCategory,
                     );
+                    final router = GoRouter.of(context);
                     getIt<GroupDao>()
                         .createGroup(createGroupRequest)
                         .then((createGroupResponse) {
@@ -380,7 +381,7 @@ class _CreateGroupViewState extends State<CreateGroupView> {
                       getIt<ImageDao>().addImage(uploadImageRequest).then(
                           (value) {
                         if (!mounted) return;
-                        context.goNamed('groupDetails',
+                        router.goNamed('groupDetails',
                                 extra: createGroupResponse.id,
                                 pathParameters: {
                                   'name': I18nHelper.getDisplayNameFromI18n(

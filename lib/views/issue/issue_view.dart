@@ -68,6 +68,7 @@ class _IssueViewState extends State<IssueView> {
     Future<ListIssueResponse?> listIssueResponse =
         getIt<IssueDao>().listIssue(listIssueRequest);
     listIssueResponse.then((value) {
+      if (!mounted) return;
       setState(() {
         currentIssueList = value!.issues;
         totalItemCount = value.totalSize!;

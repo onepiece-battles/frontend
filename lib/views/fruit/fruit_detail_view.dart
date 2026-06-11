@@ -277,6 +277,7 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                                 name: I18nHelper.getI18nFromDisplayName(
                                     fruitFullView.name!, nameController.text),
                                 fruitType: selectedFruitType);
+                            final router = GoRouter.of(context);
                             getIt<FruitDao>()
                                 .update(updatedFruit)
                                 .then((value) {
@@ -287,7 +288,7 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                                   I18nHelper.getDisplayNameFromI18n(
                                       value!.result));
                               if (value.success) {
-                                context.goNamed('fruitDetails',
+                                router.goNamed('fruitDetails',
                                     extra: widget.fruitId,
                                     pathParameters: {
                                       'name': I18nHelper.getDisplayNameFromI18n(
@@ -496,6 +497,7 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                               // basic info
                               name: fruitFullView.name,
                             );
+                            final router = GoRouter.of(context);
                             getIt<FruitDao>()
                                 .update(updatedFruit)
                                 .then((value) {
@@ -506,7 +508,7 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                                   I18nHelper.getDisplayNameFromI18n(
                                       value!.result));
                               if (value.success) {
-                                context.goNamed('fruitDetails',
+                                router.goNamed('fruitDetails',
                                     extra: widget.fruitId,
                                     pathParameters: {
                                       'name': I18nHelper.getDisplayNameFromI18n(

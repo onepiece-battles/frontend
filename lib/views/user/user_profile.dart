@@ -191,9 +191,10 @@ class UserProfileController extends ChangeNotifier {
 
       // 3. Update Cache & Router
       ResourcePermissionManager.updateUserCache(response!.user!);
+      final router = GoRouter.of(context);
 
       if (context.mounted) {
-        context.goNamed('userProfile',
+        router.goNamed('userProfile',
             extra: GetIt.I<User>().id,
             pathParameters: {'name': GetIt.I<User>().nickname});
       }
