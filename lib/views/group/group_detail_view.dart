@@ -244,6 +244,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                                     groupFullView.name!,
                                     groupNameController.text));
                             getIt<GroupDao>().updateGroups(group).then((value) {
+                              if (!mounted) return;
                               OnepieceAlert.getBasicAlertDialogFunc(
                                   context,
                                   AppLocalizations.of(context)!.hint,
@@ -266,6 +267,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                                     resourceId: groupFullView.id,
                                     image: selectedImage!))
                                 .then((value) {
+                              if (!mounted) return;
                               OnepieceAlert.getBasicAlertDialogFunc(
                                   context,
                                   AppLocalizations.of(context)!.hint,

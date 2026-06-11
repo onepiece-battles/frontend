@@ -86,8 +86,10 @@ class _UserNavigationState extends State<UserNavigation> {
                   }
                   getIt.registerLazySingleton<User>(
                       () => User(id: "", username: "", nickname: ""));
-                  if (!mounted) return;
-                  context.replace(AppRouter.loginPath);
+                  // Close popover before navigating to avoid overlay
+                  // GlobalKey collisions during ShellRoute teardown.
+                  Navigator.of(context).pop();
+                  AppRouter.router.replace(AppRouter.loginPath);
                 },
                 style: OnepieceButtonStyle.getDefaultStyle(),
                 child: Row(

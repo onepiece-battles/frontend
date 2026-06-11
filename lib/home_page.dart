@@ -797,6 +797,7 @@ class _TopNavigationBarState extends State<TopNavigationBar> {
             getIt<UserDao>()
                 .updateLoginRole(UpdateLoginRoleRequest(role: selectedRole))
                 .then((res) {
+              if (!mounted) return;
               var currentUser = getIt<User>();
               currentUser.loginRoleId = res!.currentRoleId;
               currentUser.loginRole = res.currentRole;

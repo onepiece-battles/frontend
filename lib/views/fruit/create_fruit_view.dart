@@ -463,6 +463,7 @@ class _CreateFruitViewState extends State<CreateFruitView> {
                     );
 
                     getIt<FruitDao>().add(addFruitRequest).then((value) {
+                      if (!mounted) return;
                       context.goNamed('fruitDetails',
                           extra: value!.id,
                           pathParameters: {

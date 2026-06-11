@@ -743,6 +743,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                                 Future<CreateBattleResponse?> response =
                                     getIt<BattleDao>().createBattle(request);
                                 response.then((value) {
+                                  if (!mounted) return;
                                   if (value?.battleId != null) {
                                     context.goNamed('battleDetails',
                                         extra: value?.battleId,

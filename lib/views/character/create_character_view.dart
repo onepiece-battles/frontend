@@ -1085,6 +1085,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                           getIt<CharacterDao>()
                               .addCharacter(addCharacterRequest)
                               .then((characterResponse) {
+                            if (!mounted) return;
                             var encodedImage =
                                 Base64Helper.encode(_pickedImage);
                             UploadImageRequest uploadImageRequest =
@@ -1093,13 +1094,16 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                                     image: encodedImage,
                                     type: ResourceType.CHARACTER);
                             getIt<ImageDao>().addImage(uploadImageRequest).then(
-                                (value) => context.goNamed('characterDetails',
-                                        extra: characterResponse.id,
-                                        pathParameters: {
-                                          'name':
-                                              I18nHelper.getDisplayNameFromI18n(
-                                                  characterResponse.name)
-                                        }));
+                                (value) {
+                              if (!mounted) return;
+                              context.goNamed('characterDetails',
+                                  extra: characterResponse.id,
+                                  pathParameters: {
+                                    'name':
+                                        I18nHelper.getDisplayNameFromI18n(
+                                            characterResponse.name)
+                                  });
+                            });
                           });
                         },
                   child: Text(AppLocalizations.of(context)!.submitForm),

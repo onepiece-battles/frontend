@@ -393,17 +393,17 @@ class _RegisterPageState extends State<RegisterPage> {
         confirmedPassword: confirmedPasswordController.text,
         locale: I18nHelper.convertToOnepieceLocale(getIt<Locale>()));
     Future<RegisterResponse?> response = userDao.register(request);
-    response.then((value) => {
-          if (value!.registerResult)
-            {handleRegisterSuccess()}
-          else
-            {
-              setState(() {
-                Locale myLocale = Localizations.localeOf(context);
-                verificationMessage = I18nHelper.getDisplayNameFromI18nByLocale(
-                    value.verification, myLocale);
-              })
-            }
+    response.then((value) {
+          if (value!.registerResult) {
+            handleRegisterSuccess();
+          } else {
+            if (!mounted) return;
+            setState(() {
+              Locale myLocale = Localizations.localeOf(context);
+              verificationMessage = I18nHelper.getDisplayNameFromI18nByLocale(
+                  value.verification, myLocale);
+            });
+          }
         });
   }
 

@@ -7,6 +7,7 @@ import 'package:one_piece_battles_flutter/repository/user_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
 import 'package:go_router/go_router.dart';
+import '../app_router.dart';
 import '../constants/onepiece_fonts.dart';
 
 GetIt getIt = GetIt.instance;
@@ -159,7 +160,7 @@ class _EmailVerificationState extends State<EmailVerification> {
                   child: ElevatedButton(
                       onPressed: () {
                         Navigator.pop(context);
-                        context.pushReplacementNamed('userProfile',
+                        AppRouter.router.pushReplacementNamed('userProfile',
                             extra: getIt<User>().id,
                             pathParameters: {'name': getIt<User>().nickname});
                       },

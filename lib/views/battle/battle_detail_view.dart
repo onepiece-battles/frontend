@@ -768,6 +768,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                             starterId: battle.starterId,
                             receiverId: battle.receiverId))
                         .then((value) {
+                      if (!mounted) return;
                       context.goNamed('battleDetails',
                           extra: value!.battleId,
                           pathParameters: {'id': value.battleId!});

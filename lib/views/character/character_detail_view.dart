@@ -428,6 +428,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                               getIt<CharacterDao>()
                                   .update(updatedCharacter)
                                   .then((value) {
+                                if (!mounted) return;
                                 OnepieceAlert.getBasicAlertDialogFunc(
                                     context,
                                     AppLocalizations.of(context)!.hint,
@@ -451,6 +452,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                       resourceId: character.id,
                                       image: selectedImage!))
                                   .then((value) {
+                                if (!mounted) return;
                                 OnepieceAlert.getBasicAlertDialogFunc(
                                     context,
                                     AppLocalizations.of(context)!.hint,
@@ -1102,6 +1104,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                       getIt<CharacterDao>()
                                           .update(updatedCharacter)
                                           .then((value) {
+                                        if (!mounted) return;
                                         OnepieceAlert.getBasicAlertDialogFunc(
                                           context,
                                           AppLocalizations.of(context)!.hint,

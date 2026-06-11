@@ -203,6 +203,7 @@ class _RetrievePasswordState extends State<RetrievePassword> {
                             locale: I18nHelper.convertToOnepieceLocale(
                                 getIt<Locale>())))
                         .then((value) {
+                      if (!mounted) return;
                       OnepieceAlert.getBasicAlertDialogFunc(
                           context,
                           AppLocalizations.of(context)!.hint,
@@ -348,6 +349,7 @@ class _RetrievePasswordState extends State<RetrievePassword> {
                         verificationCode:
                             verificationCodeController.text.trim());
                     getIt<UserDao>().updatePassword(request).then((value) {
+                      if (!mounted) return;
                       OnepieceAlert.getBasicAlertDialogFunc(
                           context,
                           AppLocalizations.of(context)!.hint,
@@ -359,8 +361,10 @@ class _RetrievePasswordState extends State<RetrievePassword> {
                             password: passwordController.text);
                         getIt<UserDao>().login(loginRequest).then((value) {
                           if (value!.verification == null) {
+                            if (!mounted) return;
                             _route(value.user!, value.accessToken!, context);
                           } else {
+                            if (!mounted) return;
                             setState(() {
                               verificationI18n = value.verification;
                               Locale myLocale = Localizations.localeOf(context);

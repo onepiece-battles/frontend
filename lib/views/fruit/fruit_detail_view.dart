@@ -280,6 +280,7 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                             getIt<FruitDao>()
                                 .update(updatedFruit)
                                 .then((value) {
+                              if (!mounted) return;
                               OnepieceAlert.getBasicAlertDialogFunc(
                                   context,
                                   AppLocalizations.of(context)!.hint,
@@ -498,6 +499,7 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                             getIt<FruitDao>()
                                 .update(updatedFruit)
                                 .then((value) {
+                              if (!mounted) return;
                               OnepieceAlert.getBasicAlertDialogFunc(
                                   context,
                                   AppLocalizations.of(context)!.hint,

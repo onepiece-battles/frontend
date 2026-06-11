@@ -9,6 +9,7 @@ import '../constants/onepiece_colors.dart';
 import '../constants/onepiece_fonts.dart';
 import '../repository/character_dao.dart';
 import '../repository/group_dao.dart';
+import '../app_router.dart';
 import '../utils/i18n_helper.dart';
 import '../utils/image_helper.dart';
 
@@ -214,7 +215,7 @@ class _JoinGroupState extends State<JoinGroup> {
                                                                       .toList()));
                                                     }
                                                     Navigator.pop(context);
-                                                    context.replaceNamed(
+                                                    AppRouter.router.replaceNamed(
                                                         'groupDetails',
                                                         extra: widget
                                                             .fatherGroup.id,

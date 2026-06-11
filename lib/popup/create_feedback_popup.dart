@@ -258,6 +258,7 @@ class _CreateFeedbackPopupState extends State<CreateFeedbackPopup> {
                                 getIt<IssueDao>()
                                     .createIssue(createIssueRequest)
                                     .then((value) {
+                                  if (!context.mounted) return;
                                   OnepieceAlert.getBasicAlertDialogFunc(
                                       context,
                                       AppLocalizations.of(context)!.hint,

@@ -370,6 +370,7 @@ class _CreateGroupViewState extends State<CreateGroupView> {
                     getIt<GroupDao>()
                         .createGroup(createGroupRequest)
                         .then((createGroupResponse) {
+                      if (!mounted) return;
                       var encodedImage = Base64Helper.encode(_pickedImage);
                       UploadImageRequest uploadImageRequest =
                           UploadImageRequest(
@@ -377,12 +378,15 @@ class _CreateGroupViewState extends State<CreateGroupView> {
                               image: encodedImage,
                               type: ResourceType.GROUP);
                       getIt<ImageDao>().addImage(uploadImageRequest).then(
-                          (value) => context.goNamed('groupDetails',
-                                  extra: createGroupResponse.id,
-                                  pathParameters: {
-                                    'name': I18nHelper.getDisplayNameFromI18n(
-                                        createGroupResponse.name)
-                                  }));
+                          (value) {
+                        if (!mounted) return;
+                        context.goNamed('groupDetails',
+                                extra: createGroupResponse.id,
+                                pathParameters: {
+                                  'name': I18nHelper.getDisplayNameFromI18n(
+                                      createGroupResponse.name)
+                                });
+                      });
                     });
                   },
                   child: Text(AppLocalizations.of(context)!.submitForm),
