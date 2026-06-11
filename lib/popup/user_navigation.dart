@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/components/image_lazy_loader.dart';
+import 'package:one_piece_battles_flutter/components/web_socket_service.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import '../../l10n/app_localizations.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
@@ -74,13 +75,18 @@ class _UserNavigationState extends State<UserNavigation> {
               width: 160,
               height: 35,
               child: ElevatedButton(
-                onPressed: () {
-                  getIt<UserDao>()
-                      .logout(LogoutRequest(userId: getIt<User>().id))
-                      .then((value) {
-                    getIt.registerLazySingleton<User>(
-                        () => User(id: "", username: "", nickname: ""));
-                  });
+                onPressed: () async {
+                  try {
+                    await getIt<UserDao>()
+                        .logout(LogoutRequest(userId: getIt<User>().id));
+                  } catch (_) {}
+                  getIt<WebSocketService>().disconnect();
+                  if (getIt.isRegistered<User>()) {
+                    getIt.unregister<User>();
+                  }
+                  getIt.registerLazySingleton<User>(
+                      () => User(id: "", username: "", nickname: ""));
+                  if (!mounted) return;
                   context.replace(AppRouter.loginPath);
                 },
                 style: OnepieceButtonStyle.getDefaultStyle(),
@@ -108,13 +114,13 @@ class _UserNavigationState extends State<UserNavigation> {
       ),
       child: widget.constraints.maxWidth > 1500
           ? ImageLazyLoader(
-              uriProvider: () => getIt<User>().imageUri!,
+              uriProvider: () => getIt<User>().imageUri ?? '',
               width: 70,
               borderWidth: 3,
               borderRadios: 70,
             )
           : ImageLazyLoader(
-        uriProvider: () => getIt<User>().imageUri!,
+        uriProvider: () => getIt<User>().imageUri ?? '',
         width: 60,
         borderWidth: 3,
         borderRadios: 60,
