@@ -158,12 +158,10 @@ class _EmailVerificationState extends State<EmailVerification> {
                   padding: const EdgeInsets.fromLTRB(0, 10, 10, 10),
                   child: ElevatedButton(
                       onPressed: () {
-                        setState(() {
-                          Navigator.pop(context);
-                          context.pushReplacementNamed('userProfile',
-                              extra: getIt<User>().id,
-                              pathParameters: {'name': getIt<User>().nickname});
-                        });
+                        Navigator.pop(context);
+                        context.pushReplacementNamed('userProfile',
+                            extra: getIt<User>().id,
+                            pathParameters: {'name': getIt<User>().nickname});
                       },
                       style: OnepieceButtonStyle.getDefaultStyle(),
                       child: Text(AppLocalizations.of(context)!.confirm)),

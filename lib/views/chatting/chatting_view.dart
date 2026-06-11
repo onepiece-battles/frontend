@@ -638,8 +638,6 @@ class _ChattingViewState extends State<ChattingView> {
                     return ValueListenableBuilder<TextEditingValue>(
                       valueListenable: typingController,
                       builder: (context, textValue, child) {
-                        final bool canSend = textValue.text.trim().isNotEmpty ||
-                            chatIdToCachedImage[activeChatId] != null;
                         return Column(
                           mainAxisAlignment: MainAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
@@ -710,14 +708,15 @@ class _ChattingViewState extends State<ChattingView> {
                                 focusNode: focusNode,
                                 style: OnepieceFonts.smallContentStyle,
                                 onChanged: (value) {},
-                                onSubmitted: !canSend
-                                    ? null
-                                    : (_) {
+                                onSubmitted: (_) {
                                         buttonState(() {
                                           final hasText = typingController
                                               .text
                                               .trim()
                                               .isNotEmpty;
+                                          final hasImage = chatIdToCachedImage[activeChatId] != null;
+                                          // Guard: nothing to send
+                                          if (!hasText && !hasImage) return;
 
                                           final SendMessageRequest request =
                                               SendMessageRequest(

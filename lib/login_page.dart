@@ -16,7 +16,7 @@ import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:one_piece_battles_flutter/utils/random_string_generator.dart';
 import 'package:openapi/api.dart';
 import 'components/icp.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'constants/button_style.dart';
 import 'constants/onepiece_colors.dart';
 import 'package:flutter/services.dart';
@@ -446,16 +446,16 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  static const _storage = FlutterSecureStorage();
+
   Future<void> saveUserCredentials(String username, String password) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('username', username);
-    await prefs.setString('password', password);
+    await _storage.write(key: 'username', value: username);
+    await _storage.write(key: 'password', value: password);
   }
 
   Future<Map<String, String>> getUserCredentials() async {
-    final prefs = await SharedPreferences.getInstance();
-    final username = prefs.getString('username') ?? '';
-    final password = prefs.getString('password') ?? '';
+    final username = await _storage.read(key: 'username') ?? '';
+    final password = await _storage.read(key: 'password') ?? '';
     return {'username': username, 'password': password};
   }
 }

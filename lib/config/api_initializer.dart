@@ -22,19 +22,27 @@ class ApiInitializer {
     HttpBearerAuth bearAuth = HttpBearerAuth();
     bearAuth.accessToken = token;
     var apiClient = ApiClient(authentication: bearAuth);
-    // init dao apis with new api client
-    getIt.registerLazySingleton<UserDao>(() => UserDao(apiClient));
-    getIt.registerLazySingleton<CharacterDao>(() => CharacterDao(apiClient));
-    getIt.registerLazySingleton<ChattingDao>(() => ChattingDao(apiClient));
-    getIt.registerLazySingleton<ImageDao>(() => ImageDao(apiClient));
-    getIt.registerLazySingleton<IssueDao>(() => IssueDao(apiClient));
-    getIt.registerLazySingleton<BattleDao>(() => BattleDao(apiClient));
-    getIt.registerLazySingleton<FruitDao>(() => FruitDao(apiClient));
-    getIt.registerLazySingleton<FileDao>(() => FileDao(apiClient));
-    getIt.registerLazySingleton<GroupDao>(() => GroupDao(apiClient));
-    getIt.registerLazySingleton<SupportDao>(() => SupportDao(apiClient));
-    getIt.registerLazySingleton<EmailDao>(() => EmailDao(apiClient));
-    getIt.registerLazySingleton<NotificationDao>(() => NotificationDao(apiClient));
-    getIt.registerLazySingleton<MessageDao>(() => MessageDao(apiClient));
+    // init dao apis with new api client — unregister first to avoid
+    // "already registered" errors on re-login
+    _registerOrReplace<UserDao>(() => UserDao(apiClient));
+    _registerOrReplace<CharacterDao>(() => CharacterDao(apiClient));
+    _registerOrReplace<ChattingDao>(() => ChattingDao(apiClient));
+    _registerOrReplace<ImageDao>(() => ImageDao(apiClient));
+    _registerOrReplace<IssueDao>(() => IssueDao(apiClient));
+    _registerOrReplace<BattleDao>(() => BattleDao(apiClient));
+    _registerOrReplace<FruitDao>(() => FruitDao(apiClient));
+    _registerOrReplace<FileDao>(() => FileDao(apiClient));
+    _registerOrReplace<GroupDao>(() => GroupDao(apiClient));
+    _registerOrReplace<SupportDao>(() => SupportDao(apiClient));
+    _registerOrReplace<EmailDao>(() => EmailDao(apiClient));
+    _registerOrReplace<NotificationDao>(() => NotificationDao(apiClient));
+    _registerOrReplace<MessageDao>(() => MessageDao(apiClient));
+  }
+
+  static void _registerOrReplace<T extends Object>(T Function() factory) {
+    if (getIt.isRegistered<T>()) {
+      getIt.unregister<T>();
+    }
+    getIt.registerLazySingleton<T>(factory);
   }
 }

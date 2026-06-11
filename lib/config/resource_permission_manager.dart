@@ -21,6 +21,11 @@ class ResourcePermissionManager {
         resourceOrderMap[a.resourceType]!
             .compareTo(resourceOrderMap[b.resourceType]!));
 
+    // Unregister before re-registering to avoid "already registered" errors
+    // on subsequent logins / role switches.
+    if (getIt.isRegistered<User>()) {
+      getIt.unregister<User>();
+    }
     getIt.registerLazySingleton(() => user);
   }
 }

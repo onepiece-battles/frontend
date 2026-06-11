@@ -172,13 +172,15 @@ class UserProfileController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // 1. Upload Image
-      final encodedImage = Base64Helper.encode(_currentData.profileImage!);
-      await _imageDao.addImage(UploadImageRequest(
-        resourceId: GetIt.I<User>().id,
-        image: encodedImage,
-        type: ResourceType.USER,
-      ));
+      // 1. Upload Image (only if a new image has been selected)
+      if (_currentData.profileImage != null) {
+        final encodedImage = Base64Helper.encode(_currentData.profileImage!);
+        await _imageDao.addImage(UploadImageRequest(
+          resourceId: GetIt.I<User>().id,
+          image: encodedImage,
+          type: ResourceType.USER,
+        ));
+      }
 
       // 2. Update User Data
       final response = await _userDao.updateUser(UpdateUserRequest(

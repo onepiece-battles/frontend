@@ -470,14 +470,18 @@ class _SideMenuState extends State<SideMenu> {
               text: AppLocalizations.of(context)!.logout,
               isSelected: false,
               isExpanded: isExpanded,
-              onTap: () {
-                getIt<UserDao>()
-                    .logout(LogoutRequest(userId: getIt<User>().id))
-                    .then((value) {
-                  getIt<WebSocketService>().dispose();
-                  getIt.registerLazySingleton<User>(
-                          () => User(id: "", username: "", nickname: ""));
-                });
+              onTap: () async {
+                try {
+                  await getIt<UserDao>()
+                      .logout(LogoutRequest(userId: getIt<User>().id));
+                } catch (_) {}
+                getIt<WebSocketService>().disconnect();
+                if (getIt.isRegistered<User>()) {
+                  getIt.unregister<User>();
+                }
+                getIt.registerLazySingleton<User>(
+                    () => User(id: "", username: "", nickname: ""));
+                if (!mounted) return;
                 context.replace(AppRouter.loginPath);
               },
             ),

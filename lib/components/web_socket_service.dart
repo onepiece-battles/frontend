@@ -58,9 +58,8 @@ class WebSocketService {
     _pingTimer?.cancel();
     // Send a ping every 30 seconds (less than the 60s timeout)
     _pingTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
-      // Determine what your server expects as a ping.
-      // Often it's just the string "ping" or a specific JSON object.
-      sendMessage('ping');
+      // Send a JSON ping object as most servers expect structured messages
+      sendMessage(jsonEncode({'type': 'ping'}));
     });
   }
 

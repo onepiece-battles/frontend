@@ -78,7 +78,7 @@ class _FruitDigitTextFormFieldState extends State<FruitDigitTextFormField> {
                 controller: widget.slopeController,
                 autovalidateMode: AutovalidateMode.onUserInteraction,
                 validator: (value) {
-                  if (value!.isWhiteSpace()) {
+                  if (value == null || value.isWhiteSpace()) {
                     leftHasError.value = true;
                     return AppLocalizations.of(widget.buildContext)!
                         .requiredField;
@@ -156,7 +156,7 @@ class _FruitDigitTextFormFieldState extends State<FruitDigitTextFormField> {
                 controller: widget.interceptController,
                 autovalidateMode: AutovalidateMode.onUserInteraction,
                 validator: (value) {
-                  if (value!.isWhiteSpace()) {
+                  if (value == null || value.isWhiteSpace()) {
                     rightHasError.value = true;
                     return AppLocalizations.of(widget.buildContext)!
                         .requiredField;

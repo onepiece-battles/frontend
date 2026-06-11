@@ -18,7 +18,7 @@ RUN flutter pub get
 RUN flutter build web
 
 # Use the Nginx image to serve the app
-FROM nginx:alpine
+FROM nginx:1.27.0-alpine
 
 # Remove the default nginx.conf provided by the base image.
 RUN rm /etc/nginx/conf.d/default.conf
@@ -28,9 +28,17 @@ COPY --from=build-env /app/build/web /usr/share/nginx/html
 
 # replace with new nginx config file
 COPY nginx.conf /etc/nginx/nginx.conf
-COPY www.onepiece-battles.com.pem /etc/nginx/ssl/www.onepiece-battles.com.pem
-COPY www.onepiece-battles.com.key /etc/nginx/ssl/www.onepiece-battles.com.key
 
-# Expose port 80
+# TLS key and certificate MUST be mounted at runtime via a volume or secret.
+# Do NOT bake them into the image. Example docker run invocation:
+#   docker run -p 443:443 \
+#     -v /path/to/www.onepiece-battles.com.pem:/etc/nginx/ssl/www.onepiece-battles.com.pem \
+#     -v /path/to/www.onepiece-battles.com.key:/etc/nginx/ssl/www.onepiece-battles.com.key \
+#     your-image:tag
+# -- The COPY lines below are commented out intentionally for security --
+# COPY www.onepiece-battles.com.pem /etc/nginx/ssl/www.onepiece-battles.com.pem
+# COPY www.onepiece-battles.com.key /etc/nginx/ssl/www.onepiece-battles.com.key
+
+# Expose ports
 EXPOSE 80
 EXPOSE 443

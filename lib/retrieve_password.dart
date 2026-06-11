@@ -392,7 +392,7 @@ class _RetrievePasswordState extends State<RetrievePassword> {
     ApiInitializer.initAuthInfo(token);
     ResourcePermissionManager.updateUserCache(user);
     context.goNamed('userHome',
-        extra: getIt<User>().id,
-        pathParameters: {'name': getIt<User>().nickname});
+        extra: user.id,
+        pathParameters: {'name': user.nickname});
   }
 }

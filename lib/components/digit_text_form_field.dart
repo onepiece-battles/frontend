@@ -68,14 +68,14 @@ class DigitTextFormField extends StatelessWidget {
                 return null;
               }
               if (required && (value == null || value.isEmpty)) {
-                return AppLocalizations.of(buildContext)!.requiredField;
+                return AppLocalizations.of(context)!.requiredField;
               }
               if (value != null && value.isNotEmpty && !value.isValidInt()) {
-                return AppLocalizations.of(buildContext)!.fieldMustBeInt;
+                return AppLocalizations.of(context)!.fieldMustBeInt;
               }
               int valueInt = int.parse(value!);
               if (valueInt < min || valueInt > max) {
-                return AppLocalizations.of(buildContext)!.valueExceedsLimit;
+                return AppLocalizations.of(context)!.valueExceedsLimit;
               }
               return null;
             },

@@ -8,7 +8,7 @@ import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'components/icp.dart';
 import 'components/web_socket_service.dart';
 import 'config/api_initializer.dart';
@@ -431,10 +431,11 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
+  static const _storage = FlutterSecureStorage();
+
   Future<void> saveUserCredentials(String username, String password) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('username', username);
-    await prefs.setString('password', password);
+    await _storage.write(key: 'username', value: username);
+    await _storage.write(key: 'password', value: password);
   }
 
   bool isValidNickname(String input) {

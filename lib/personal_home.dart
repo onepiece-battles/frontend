@@ -74,15 +74,19 @@ class _UserHomeState extends State<UserHome> {
   }
 
   _updateData(List<dynamic> widgets) {
-    characters = (widgets[0] as ListCharacterResponse).characters;
-    groups = (widgets[1] as ListGroupResponse).groups;
-    battles = (widgets[2] as ListBattleResponse).battles;
+    final r0 = widgets[0];
+    final r1 = widgets[1];
+    final r2 = widgets[2];
+    characters = (r0 is ListCharacterResponse) ? (r0.characters) : [];
+    groups = (r1 is ListGroupResponse) ? (r1.groups) : [];
+    battles = (r2 is ListBattleResponse) ? (r2.battles) : [];
   }
 
   @override
   void initState() {
     super.initState();
-    myFuture = Future.wait([listCharacters(), listGroups(), listBattles()]);
+    myFuture = Future.wait([listCharacters(), listGroups(), listBattles()],
+        eagerError: false);
   }
 
   @override
@@ -184,7 +188,8 @@ class _UserHomeState extends State<UserHome> {
                 setState(() {
                   currentRoleOnly = !currentRoleOnly;
                   myFuture = Future.wait(
-                      [listCharacters(), listGroups(), listBattles()]);
+                      [listCharacters(), listGroups(), listBattles()],
+                      eagerError: false);
                 });
               },
               hoverColor: Colors.transparent,
@@ -252,7 +257,7 @@ class _UserHomeState extends State<UserHome> {
                       });
                 },
                 child: ImageLazyLoader(
-                    uriProvider: () => characters[index].imageUri!,
+                    uriProvider: () => characters[index].imageUri ?? '',
                     width: 100,
                     borderWidth: 2,
                     borderRadios: 100),
@@ -294,7 +299,7 @@ class _UserHomeState extends State<UserHome> {
                         });
                   },
                   child: ImageLazyLoader(
-                      uriProvider: () => groups[index].imageUri!,
+                      uriProvider: () => groups[index].imageUri ?? '',
                       width: 100,
                       borderWidth: 2,
                       borderRadios: 10)),
@@ -357,6 +362,13 @@ class _UserHomeState extends State<UserHome> {
   }
 
   Widget _buildBattleCard(BuildContext context, BattleListView battle, Map<BattleStatus, String> statusMap) {
+    final execution = battle.battleExecution;
+    final starter = battle.starter;
+    final receiver = battle.receiver;
+    if (execution == null || starter == null || receiver == null) {
+      return const SizedBox.shrink();
+    }
+
     return InkWell(
       splashColor: Colors.transparent,
       hoverColor: Colors.transparent,
@@ -383,18 +395,18 @@ class _UserHomeState extends State<UserHome> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       ImageLazyLoader(
-                          uriProvider: () => battle.starter!.imageUri!,
+                          uriProvider: () => starter.imageUri ?? '',
                           width: 40,
                           borderWidth: 1.5,
                           borderRadios: 40),
                       Padding(
                         padding: const EdgeInsets.fromLTRB(5, 5, 0, 0),
                         child: Text(
-                          I18nHelper.getDisplayNameFromI18n(battle.starter!.name),
+                          I18nHelper.getDisplayNameFromI18n(starter.name),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      Text(battle.battleExecution!.starterScoreBefore!.toString(),
+                      Text(execution.starterScoreBefore?.toString() ?? '',
                           style: OnepieceFonts.boldFancySmallFont)
                     ],
                   ),
@@ -410,18 +422,18 @@ class _UserHomeState extends State<UserHome> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       ImageLazyLoader(
-                          uriProvider: () => battle.receiver!.imageUri!,
+                          uriProvider: () => receiver.imageUri ?? '',
                           width: 40,
                           borderWidth: 1.5,
                           borderRadios: 40),
                       Padding(
                         padding: const EdgeInsets.fromLTRB(5, 5, 0, 0),
                         child: Text(
-                          I18nHelper.getDisplayNameFromI18n(battle.receiver!.name),
+                          I18nHelper.getDisplayNameFromI18n(receiver.name),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      Text(battle.battleExecution!.receiverScoreBefore!.toString(),
+                      Text(execution.receiverScoreBefore?.toString() ?? '',
                           style: OnepieceFonts.boldFancySmallFont)
                     ],
                   ),
@@ -443,13 +455,13 @@ class _UserHomeState extends State<UserHome> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Flexible(
-                        child: Text(statusMap[battle.battleExecution!.battleStatus!]!,
+                        child: Text(statusMap[execution.battleStatus] ?? '',
                             overflow: TextOverflow.ellipsis,
                             style: OnepieceFonts.boldFancyWhiteSmallFont),
                       ),
-                      if (battle.battleExecution!.battleReportStage == BattleReportStage.FINISHED)
+                      if (execution.battleReportStage == BattleReportStage.FINISHED)
                         _buildPdfButton(battle),
-                      if (battle.battleExecution!.battleReportStage != BattleReportStage.FINISHED)
+                      if (execution.battleReportStage != BattleReportStage.FINISHED)
                         SvgPicture.asset(
                           'asset/images/svgs/pdf_black.svg',
                           width: 20,
@@ -468,6 +480,9 @@ class _UserHomeState extends State<UserHome> {
   }
 
   Widget _buildPdfButton(BattleListView battle) {
+    final reportFileId = battle.battleExecution?.reportFileId;
+    if (reportFileId == null) return const SizedBox.shrink();
+
     return Tooltip(
       message: AppLocalizations.of(context)!.downloadReport,
       child: InkWell(
@@ -475,8 +490,7 @@ class _UserHomeState extends State<UserHome> {
         hoverColor: Colors.transparent,
         onTap: () {
           getIt<FileDao>()
-              .downloadFile(DownloadFileRequest(
-              id: battle.battleExecution!.reportFileId!))
+              .downloadFile(DownloadFileRequest(id: reportFileId))
               .then((response) async {
             if (response?.fileData == null) return;
             var pdf = base64Decode(response!.fileData!);

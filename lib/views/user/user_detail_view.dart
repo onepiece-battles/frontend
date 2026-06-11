@@ -103,7 +103,7 @@ class _UserDetailViewState extends State<UserDetailView> {
                   3,
                   OnepieceColors.liteFancyBlue,
                   150,
-                  Base64Helper.decode(user.profileImage!)),
+                  Base64Helper.decode(user.profileImage ?? '')),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(8, 0, 0, 15),
