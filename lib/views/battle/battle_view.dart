@@ -94,11 +94,14 @@ class _BattleViewState extends State<BattleView> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(15.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 1400),
+        child: Padding(
+          padding: const EdgeInsets.all(15.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
           _getHeaderText(context),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -148,8 +151,10 @@ class _BattleViewState extends State<BattleView> {
               ],
             )
         ],
-      ),
-    );
+            ),
+          ),
+        ),
+      );
   }
 
   Widget _getHeaderText(BuildContext context) {

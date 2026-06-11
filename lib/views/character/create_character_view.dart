@@ -1111,12 +1111,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
   }
 
   bool _allElementsAreFilled() {
-    characterControllerListRequired().map((e) {
-      if (e.text == '') {
-        return false;
-      }
-    });
-    return true;
+    return characterControllerListRequired().every((e) => e.text != '');
   }
 
   // 1. 抽象出选择并处理图片的逻辑到单独的方法

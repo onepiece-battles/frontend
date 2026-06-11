@@ -82,7 +82,7 @@ class _CreateFruitViewState extends State<CreateFruitView> {
       fruitNameEnController,
       fruitNameChController,
       attackSlopeController,
-      attackSlopeController,
+      attackInterceptController,
       bloodInterceptController,
       bloodSlopeController,
       groupGainInterceptController,

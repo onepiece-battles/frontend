@@ -88,12 +88,15 @@ class _GroupViewState extends State<GroupView> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(15.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _createHeader(context),
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 1400),
+        child: Padding(
+          padding: const EdgeInsets.all(15.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+            _createHeader(context),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: SizedBox(
@@ -142,8 +145,10 @@ class _GroupViewState extends State<GroupView> {
               ],
             )
         ],
-      ),
-    );
+            ),
+          ),
+        ),
+      );
   }
 
   Widget _createHeader(BuildContext context) {

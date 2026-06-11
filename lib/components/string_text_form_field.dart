@@ -64,11 +64,10 @@ class StringTextFormField extends StatelessWidget {
               }
             },
             validator: (value) {
-              if ((required && value!.isWhiteSpace()) ||
-                  (required && value == null)) {
+              if (required && (value == null || value.isWhiteSpace())) {
                 return AppLocalizations.of(buildContext)!.requiredField;
               }
-              if (!DataValidator.validName(value!)) {
+              if (value != null && !DataValidator.validName(value)) {
                 return AppLocalizations.of(context)!.invalidName;
               }
               return null;

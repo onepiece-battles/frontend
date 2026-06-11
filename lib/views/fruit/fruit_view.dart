@@ -91,12 +91,15 @@ class _FruitViewState extends State<FruitView> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(15.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _getHeaderText(context),
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 1400),
+        child: Padding(
+          padding: const EdgeInsets.all(15.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _getHeaderText(context),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: SizedBox(
@@ -145,8 +148,10 @@ class _FruitViewState extends State<FruitView> {
               ],
             )
         ],
-      ),
-    );
+            ),
+          ),
+        ),
+      );
   }
 
   Widget _getHeaderText(BuildContext context) {
@@ -516,8 +521,8 @@ class _FruitViewState extends State<FruitView> {
 
       // ── Main row ──────────────────────────────────────────────
       rows.add(DataRow(
-        color: MaterialStateProperty.resolveWith<Color?>(
-            (Set<MaterialState> states) {
+        color: WidgetStateProperty.resolveWith<Color?>(
+            (Set<WidgetState> states) {
           if (entry.key.isEven) return OnepieceColors.liteFancyGreen;
           return null;
         }),
@@ -597,11 +602,11 @@ class _FruitViewState extends State<FruitView> {
 
         for (final stat in stats) {
           rows.add(DataRow(
-            color: MaterialStateProperty.all(
+            color: WidgetStateProperty.all(
                 OnepieceColors.liteFancyGreen.withValues(alpha: 0.4)),
             cells: [
               const DataCell(SizedBox.shrink()),
-              DataCell(const SizedBox.shrink()),
+              const DataCell(SizedBox.shrink()),
               DataCell(Padding(
                 padding: const EdgeInsets.only(left: 8.0),
                 child: Row(
@@ -647,7 +652,7 @@ class _FruitViewState extends State<FruitView> {
                         extra: character.id,
                         pathParameters: {
                           'name':
-                              I18nHelper.getDisplayNameFromI18n(character.name!)
+                              I18nHelper.getDisplayNameFromI18n(character.name)
                         });
                   },
                   child: Tooltip(

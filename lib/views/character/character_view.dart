@@ -145,11 +145,14 @@ class _CharacterViewState extends State<CharacterView>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return Padding(
-      padding: const EdgeInsets.all(15.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 1400),
+        child: Padding(
+          padding: const EdgeInsets.all(15.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
           _createHeader(),
           // Control panel — horizontally scrollable if needed
           SingleChildScrollView(
@@ -198,8 +201,10 @@ class _CharacterViewState extends State<CharacterView>
               ),
             ),
         ],
-      ),
-    );
+            ),
+          ),
+        ),
+      );
   }
 
   Widget _createHeader() {

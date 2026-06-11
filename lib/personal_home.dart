@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:html' as html;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -14,6 +13,8 @@ import 'package:one_piece_battles_flutter/repository/character_dao.dart';
 import 'package:one_piece_battles_flutter/repository/file_dao.dart';
 import 'package:one_piece_battles_flutter/repository/group_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
+import 'package:one_piece_battles_flutter/utils/pdf_downloader_stub.dart'
+    if (dart.library.html) 'package:one_piece_battles_flutter/utils/pdf_downloader_web.dart';
 import 'constants/onepiece_colors.dart';
 import 'constants/onepiece_fonts.dart';
 
@@ -90,6 +91,14 @@ class _UserHomeState extends State<UserHome> {
       future: myFuture as Future<List<dynamic>>,
       builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
+          if (snapshot.hasError || !snapshot.hasData) {
+            return Center(
+              child: Text(
+                AppLocalizations.of(context)!.loading,
+                style: OnepieceFonts.loadingFont,
+              ),
+            );
+          }
           _updateData(snapshot.data!);
 
           // REFACTORED: Use CustomScrollView with Slivers
@@ -469,17 +478,10 @@ class _UserHomeState extends State<UserHome> {
               .downloadFile(DownloadFileRequest(
               id: battle.battleExecution!.reportFileId!))
               .then((response) async {
+            if (response?.fileData == null) return;
             var pdf = base64Decode(response!.fileData!);
-            final blob = html.Blob([pdf], response.httpMimeType);
-            final url = html.Url.createObjectUrlFromBlob(blob);
-            final anchor = html.AnchorElement()
-              ..href = url
-              ..setAttribute('target', '_blank')
-              ..download = "${response.fileName}.pdf"
-              ..style.display = 'none';
-            html.document.body?.append(anchor);
-            anchor.click();
-            anchor.remove();
+            downloadPdf(pdf, "${response.fileName}.pdf",
+                response.httpMimeType);
           });
         },
         child: SvgPicture.asset(

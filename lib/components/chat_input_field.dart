@@ -38,14 +38,15 @@ class ChatInputField extends StatefulWidget {
 }
 
 class _ChatInputFieldState extends State<ChatInputField> {
-  late TextEditingController textEditingController;
   late FocusNode _focusNode;
   bool _canSend = false;
+
+  TextEditingController get textEditingController =>
+      widget.textEditingController;
 
   @override
   void initState() {
     super.initState();
-    textEditingController = TextEditingController();
     _focusNode = FocusNode();
     textEditingController.addListener(_onTextChanged);
   }
@@ -73,7 +74,6 @@ class _ChatInputFieldState extends State<ChatInputField> {
   @override
   void dispose() {
     textEditingController.removeListener(_onTextChanged);
-    textEditingController.dispose();
     _focusNode.dispose();
     super.dispose();
   }
