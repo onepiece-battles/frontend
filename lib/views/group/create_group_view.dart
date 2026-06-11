@@ -202,10 +202,10 @@ class _CreateGroupViewState extends State<CreateGroupView> {
                         final alert = AppLocalizations.of(context)!.alert;
                         final message = AppLocalizations.of(context)!
                             .imageSizeExceedsLimit;
+                        final showAlert = OnepieceAlert.createAlertShower(context);
                         XFile? pickedImage =
                             await OnepieceImagePicker.pickWebImage();
                         if (pickedImage == null) {
-                          // Optionally, show a message to the user
                           return;
                         }
                         Uint8List imageInByte =
@@ -213,11 +213,7 @@ class _CreateGroupViewState extends State<CreateGroupView> {
                         _pickedImage = imageInByte;
                         if (!ImageHelper.isValidImageSize(
                             500 * 1024, imageInByte)) {
-                          OnepieceAlert.getBasicAlertDialogFunc(
-                              context,
-                              alert,
-                              message
-                          );
+                          showAlert(alert, message);
                           return;
                         }
                         setState(() {

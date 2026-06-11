@@ -116,10 +116,9 @@ class _CharacterDetailState extends State<CharacterDetail> {
     Future<EatFruitResponse?> response =
         getIt<CharacterDao>().eatFruit(request);
     response.then(
-      (value) => {
-        setState(
-          () {},
-        )
+      (value) {
+        if (!mounted) return;
+        setState(() {});
       },
     );
   }
@@ -132,10 +131,9 @@ class _CharacterDetailState extends State<CharacterDetail> {
     Future<JoinGroupResponse?> response =
         getIt<CharacterDao>().joinGroup(request);
     response.then(
-      (value) => {
-        setState(
-          () {},
-        )
+      (value) {
+        if (!mounted) return;
+        setState(() {});
       },
     );
   }
@@ -426,13 +424,13 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                       characterHeight.text.trim()),
                                   score: character.score);
                               final router = GoRouter.of(context);
+                              final alertHint = AppLocalizations.of(context)!.hint;
+                              final showAlert = OnepieceAlert.createAlertShower(context);
                               getIt<CharacterDao>()
                                   .update(updatedCharacter)
                                   .then((value) {
                                 if (!mounted) return;
-                                OnepieceAlert.getBasicAlertDialogFunc(
-                                    context,
-                                    AppLocalizations.of(context)!.hint,
+                                showAlert(alertHint,
                                     I18nHelper.getDisplayNameFromI18n(
                                         value!.result));
                                 if (value.success) {
@@ -448,6 +446,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
                             }
                             if (selectedImage != null) {
                               final router2 = GoRouter.of(context);
+                              final alertHint2 = AppLocalizations.of(context)!.hint;
+                              final showAlert2 = OnepieceAlert.createAlertShower(context);
                               getIt<ImageDao>()
                                   .addImage(UploadImageRequest(
                                       type: ResourceType.CHARACTER,
@@ -455,9 +455,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                       image: selectedImage!))
                                   .then((value) {
                                 if (!mounted) return;
-                                OnepieceAlert.getBasicAlertDialogFunc(
-                                    context,
-                                    AppLocalizations.of(context)!.hint,
+                                showAlert2(alertHint2,
                                     I18nHelper.getDisplayNameFromI18n(
                                         value!.result));
                                 router2.goNamed('characterDetails',
@@ -497,17 +495,17 @@ class _CharacterDetailState extends State<CharacterDetail> {
                 splashColor: Colors.transparent,
                 onTap: basicInfoEditable
                     ? () async {
+                        final alertTitle = AppLocalizations.of(context)!.alert;
+                        final alertMsg = AppLocalizations.of(context)!
+                            .imageSizeExceedsLimit;
+                        final showAlert = OnepieceAlert.createAlertShower(context);
                         XFile? pickedImage =
                             await OnepieceImagePicker.pickWebImage();
                         Uint8List imageInByte =
                             await pickedImage!.readAsBytes();
                         if (!ImageHelper.isValidImageSize(
                             500 * 1024, imageInByte)) {
-                          OnepieceAlert.getBasicAlertDialogFunc(
-                              context,
-                              AppLocalizations.of(context)!.alert,
-                              AppLocalizations.of(context)!
-                                  .imageSizeExceedsLimit);
+                          showAlert(alertTitle, alertMsg);
                           return;
                         }
                         basicState(() {
@@ -1103,19 +1101,19 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                         battleStyle: selectedBattleStyle,
                                         name: character.name,
                                       );
+                                      final router3 = GoRouter.of(context);
+                                      final alertHint3 = AppLocalizations.of(context)!.hint;
+                                      final showAlert3 = OnepieceAlert.createAlertShower(context);
                                       getIt<CharacterDao>()
                                           .update(updatedCharacter)
                                           .then((value) {
                                         if (!mounted) return;
-                                        OnepieceAlert.getBasicAlertDialogFunc(
-                                          context,
-                                          AppLocalizations.of(context)!.hint,
+                                        showAlert3(alertHint3,
                                           I18nHelper.getDisplayNameFromI18n(
-                                              value!.result),
-                                        );
+                                              value!.result));
                                         if (value.success) {
                                           showBaseValue = false;
-                                          context.replaceNamed(
+                                          router3.replaceNamed(
                                               'characterDetails',
                                               extra: character.id,
                                               pathParameters: {
@@ -1563,9 +1561,9 @@ class _CharacterDetailState extends State<CharacterDetail> {
                     Future<ListFruitResponse?> response =
                         getIt<FruitDao>().list(request);
                     response.then(
-                      (value) => {
-                        searchingFruitList = value!.fruits,
-                        fruitSetState(() {})
+                      (value) {
+                        searchingFruitList = value!.fruits;
+                        fruitSetState(() {});
                       },
                     );
                   },
@@ -1813,9 +1811,9 @@ class _CharacterDetailState extends State<CharacterDetail> {
                     Future<ListGroupResponse?> response =
                         getIt<GroupDao>().listGroups(request);
                     response.then(
-                      (value) => {
-                        searchingGroupList = value!.groups,
-                        groupSetState(() {})
+                      (value) {
+                        searchingGroupList = value!.groups;
+                        groupSetState(() {});
                       },
                     );
                   },

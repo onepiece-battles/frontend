@@ -255,13 +255,13 @@ class _CreateFeedbackPopupState extends State<CreateFeedbackPopup> {
                                             descriptionController.text.trim(),
                                         issueStatus: IssueStatus.CREATED,
                                         issueType: selectedIssueType);
+                                final alertHint = AppLocalizations.of(context)!.hint;
+                                final showAlert = OnepieceAlert.createAlertShower(context);
                                 getIt<IssueDao>()
                                     .createIssue(createIssueRequest)
                                     .then((value) {
                                   if (!context.mounted) return;
-                                  OnepieceAlert.getBasicAlertDialogFunc(
-                                      context,
-                                      AppLocalizations.of(context)!.hint,
+                                  showAlert(alertHint,
                                       I18nHelper.getDisplayNameFromI18n(
                                           value!.issueCreationResult));
                                   headerController.text = '';

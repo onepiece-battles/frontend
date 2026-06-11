@@ -643,7 +643,7 @@ class _CharacterViewState extends State<CharacterView>
                 OnepieceColors.liteFancyGreen.withValues(alpha: 0.4)),
             cells: [
               const DataCell(SizedBox.shrink()),
-              DataCell(const SizedBox.shrink()),
+              const DataCell(SizedBox.shrink()),
               DataCell(Padding(
                 padding: const EdgeInsets.only(left: 8.0),
                 child: Row(

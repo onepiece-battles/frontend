@@ -794,6 +794,7 @@ class _TopNavigationBarState extends State<TopNavigationBar> {
           onChanged: (UserRole? value) {
             if (value == null) return;
             selectedRole = value;
+            final router = GoRouter.of(context);
             getIt<UserDao>()
                 .updateLoginRole(UpdateLoginRoleRequest(role: selectedRole))
                 .then((res) {
@@ -806,7 +807,7 @@ class _TopNavigationBarState extends State<TopNavigationBar> {
               ResourcePermissionManager.updateUserCache(currentUser);
 
               widget.onRoleChanged();
-              context.goNamed('characters');
+              router.goNamed('characters');
             });
           },
           buttonStyleData: ButtonStyleData(

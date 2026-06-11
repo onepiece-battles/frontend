@@ -197,6 +197,8 @@ class _RetrievePasswordState extends State<RetrievePassword> {
             onPressed: !_verificationCodeButtonEnabled
                 ? null
                 : () {
+                    final alertHint = AppLocalizations.of(context)!.hint;
+                    final showAlert = OnepieceAlert.createAlertShower(context);
                     getIt<EmailDao>()
                         .sendRetrievalEmail(PasswordRetrievalRequest(
                             email: emailController.text,
@@ -204,9 +206,7 @@ class _RetrievePasswordState extends State<RetrievePassword> {
                                 getIt<Locale>())))
                         .then((value) {
                       if (!mounted) return;
-                      OnepieceAlert.getBasicAlertDialogFunc(
-                          context,
-                          AppLocalizations.of(context)!.hint,
+                      showAlert(alertHint,
                           I18nHelper.getDisplayNameFromI18n(
                               value!.notification!));
                       setState(() {
@@ -341,6 +341,8 @@ class _RetrievePasswordState extends State<RetrievePassword> {
             onPressed: !_buttonEnabled
                 ? null
                 : () async {
+                    final alertHint = AppLocalizations.of(context)!.hint;
+                    final showAlert = OnepieceAlert.createAlertShower(context);
                     try {
                       final value = await getIt<UserDao>().updatePassword(
                           UpdatePasswordRequest(
@@ -351,9 +353,7 @@ class _RetrievePasswordState extends State<RetrievePassword> {
                               verificationCode:
                                   verificationCodeController.text.trim()));
                       if (value == null || !mounted) return;
-                      OnepieceAlert.getBasicAlertDialogFunc(
-                          context,
-                          AppLocalizations.of(context)!.hint,
+                      showAlert(alertHint,
                           I18nHelper.getDisplayNameFromI18n(
                               value.notification!));
                       if (value.result! && mounted) {

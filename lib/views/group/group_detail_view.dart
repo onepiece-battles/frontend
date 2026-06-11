@@ -244,11 +244,11 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                                     groupFullView.name!,
                                     groupNameController.text));
                             final router = GoRouter.of(context);
+                            final alertHint = AppLocalizations.of(context)!.hint;
+                            final showAlert = OnepieceAlert.createAlertShower(context);
                             getIt<GroupDao>().updateGroups(group).then((value) {
                               if (!mounted) return;
-                              OnepieceAlert.getBasicAlertDialogFunc(
-                                  context,
-                                  AppLocalizations.of(context)!.hint,
+                              showAlert(alertHint,
                                   I18nHelper.getDisplayNameFromI18n(
                                       value!.result));
                               if (value.success) {
@@ -263,6 +263,8 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                           }
                           if (selectedImage != null) {
                             final router2 = GoRouter.of(context);
+                            final alertHint2 = AppLocalizations.of(context)!.hint;
+                            final showAlert2 = OnepieceAlert.createAlertShower(context);
                             getIt<ImageDao>()
                                 .addImage(UploadImageRequest(
                                     type: ResourceType.GROUP,
@@ -270,9 +272,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                                     image: selectedImage!))
                                 .then((value) {
                               if (!mounted) return;
-                              OnepieceAlert.getBasicAlertDialogFunc(
-                                  context,
-                                  AppLocalizations.of(context)!.hint,
+                              showAlert2(alertHint2,
                                   I18nHelper.getDisplayNameFromI18n(
                                       value!.result));
                               router2.goNamed('groupDetails',
@@ -309,17 +309,17 @@ class _GroupDetailViewState extends State<GroupDetailView> {
             splashColor: Colors.transparent,
             onTap: _basicInfoEditable
                 ? () async {
+                    final alertTitle = AppLocalizations.of(context)!.alert;
+                    final alertMsg = AppLocalizations.of(context)!
+                        .imageSizeExceedsLimit;
+                    final showAlert = OnepieceAlert.createAlertShower(context);
                     basicInfoState(() async {
                       XFile? pickedImage =
                           await OnepieceImagePicker.pickWebImage();
                       Uint8List imageInByte = await pickedImage!.readAsBytes();
                       if (!ImageHelper.isValidImageSize(
                           500 * 1024, imageInByte)) {
-                        OnepieceAlert.getBasicAlertDialogFunc(
-                            context,
-                            AppLocalizations.of(context)!.alert,
-                            AppLocalizations.of(context)!
-                                .imageSizeExceedsLimit);
+                        showAlert(alertTitle, alertMsg);
                         return;
                       }
                       basicInfoState(() {

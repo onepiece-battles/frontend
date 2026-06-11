@@ -542,13 +542,14 @@ class _BattleDetailViewState extends State<BattleDetailView> {
               hoverColor: Colors.transparent,
               onTap: model.battleStatus == BattleStatus.CREATED
                   ? () {
+                      final battleTitle = AppLocalizations.of(context)!.battle;
+                      final startSuccess = AppLocalizations.of(context)!.startSuccess;
+                      final showAlert = OnepieceAlert.createAlertShower(context);
                       getIt<BattleDao>()
                           .startBattle(StartBattleRequest(battleId: battle.id))
-                          .then((value) => {
-                                OnepieceAlert.getBasicAlertDialogFunc(
-                                    context,
-                                    AppLocalizations.of(context)!.battle,
-                                    AppLocalizations.of(context)!.startSuccess)
+                          .then((value) {
+                                if (!mounted) return;
+                                showAlert(battleTitle, startSuccess);
                               });
                     }
                   : null,

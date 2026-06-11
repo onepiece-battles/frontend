@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -128,6 +127,10 @@ class UserProfileController extends ChangeNotifier {
   }
 
   Future<void> pickImage(BuildContext context) async {
+    final alertTitle = AppLocalizations.of(context)!.alert;
+    final alertMsg = AppLocalizations.of(context)!.imageSizeExceedsLimit;
+    final showAlert = OnepieceAlert.createAlertShower(context);
+
     final XFile? pickedImage = await OnepieceImagePicker.pickWebImage();
     if (pickedImage == null) return;
 
@@ -135,10 +138,7 @@ class UserProfileController extends ChangeNotifier {
 
     // Validation
     if (!ImageHelper.isValidImageSize(500 * 1024, imageInByte)) {
-      OnepieceAlert.getBasicAlertDialogFunc(
-          context,
-          AppLocalizations.of(context)!.alert,
-          AppLocalizations.of(context)!.imageSizeExceedsLimit);
+      showAlert(alertTitle, alertMsg);
       return;
     }
 
@@ -171,6 +171,9 @@ class UserProfileController extends ChangeNotifier {
     isSaving = true;
     notifyListeners();
 
+    // Capture router before async gap to avoid lint warnings
+    final router = GoRouter.of(context);
+
     try {
       // 1. Upload Image (only if a new image has been selected)
       if (_currentData.profileImage != null) {
@@ -191,7 +194,6 @@ class UserProfileController extends ChangeNotifier {
 
       // 3. Update Cache & Router
       ResourcePermissionManager.updateUserCache(response!.user!);
-      final router = GoRouter.of(context);
 
       if (context.mounted) {
         router.goNamed('userProfile',
@@ -203,7 +205,9 @@ class UserProfileController extends ChangeNotifier {
       _originalData = _currentData.copyWith();
     } catch (e) {
       debugPrint("Error saving: $e");
-      OnepieceAlert.getBasicAlertDialogFunc(context, "Error", "Failed to save profile");
+      if (context.mounted) {
+        OnepieceAlert.getBasicAlertDialogFunc(context, "Error", "Failed to save profile");
+      }
     } finally {
       isSaving = false;
       notifyListeners();

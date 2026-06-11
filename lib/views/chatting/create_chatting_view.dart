@@ -30,9 +30,12 @@ class _CreateChattingViewState extends State<CreateChattingView> {
           ),
         )
         .then(
-          (value) => setState(() {
-            users = value!.users;
-          }),
+          (value) {
+            if (!mounted) return;
+            setState(() {
+              users = value!.users;
+            });
+          },
         );
   }
 

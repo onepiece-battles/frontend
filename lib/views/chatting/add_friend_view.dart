@@ -175,7 +175,7 @@ class _AddFriendViewState extends State<AddFriendView> {
                   children: [
                     ElevatedButton(
                         style: OnepieceButtonStyle.getDefaultStyle(),
-                        onPressed: selectedUserId == "" || selectedUserId == null
+                        onPressed: selectedUserId == ""
                             ? null
                             : () {
                                 userSearchState(() {
@@ -185,9 +185,10 @@ class _AddFriendViewState extends State<AddFriendView> {
                         child: Text(AppLocalizations.of(context)!.cancelPopUp)),
                     ElevatedButton(
                         style: OnepieceButtonStyle.getDefaultStyle(),
-                        onPressed: selectedUserId == "" || selectedUserId == null
+                        onPressed: selectedUserId == ""
                             ? null
                             : () {
+                                final navigator = Navigator.of(context);
                                 userSearchState(() {
                                   getIt<UserDao>()
                                       .addFriend(AddFriendRequest(
@@ -196,8 +197,8 @@ class _AddFriendViewState extends State<AddFriendView> {
                                     if (value!.result!) {
                                       selectedUserId = "";
                                     }
+                                    navigator.pop();
                                   });
-                                  Navigator.pop(context);
                                 });
                               },
                         child: Text(AppLocalizations.of(context)!.submitForm))

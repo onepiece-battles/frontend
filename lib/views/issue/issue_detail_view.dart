@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -10,7 +8,6 @@ import '../../l10n/app_localizations.dart';
 import '../../app_router.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
-import '../../utils/base64_helper.dart';
 import '../../utils/image_helper.dart';
 
 class IssueDetailView extends StatefulWidget {

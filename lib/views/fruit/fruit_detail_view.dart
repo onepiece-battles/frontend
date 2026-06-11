@@ -278,13 +278,13 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                                     fruitFullView.name!, nameController.text),
                                 fruitType: selectedFruitType);
                             final router = GoRouter.of(context);
+                            final alertHint = AppLocalizations.of(context)!.hint;
+                            final showAlert = OnepieceAlert.createAlertShower(context);
                             getIt<FruitDao>()
                                 .update(updatedFruit)
                                 .then((value) {
                               if (!mounted) return;
-                              OnepieceAlert.getBasicAlertDialogFunc(
-                                  context,
-                                  AppLocalizations.of(context)!.hint,
+                              showAlert(alertHint,
                                   I18nHelper.getDisplayNameFromI18n(
                                       value!.result));
                               if (value.success) {
@@ -498,13 +498,13 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                               name: fruitFullView.name,
                             );
                             final router = GoRouter.of(context);
+                            final alertHint = AppLocalizations.of(context)!.hint;
+                            final showAlert = OnepieceAlert.createAlertShower(context);
                             getIt<FruitDao>()
                                 .update(updatedFruit)
                                 .then((value) {
                               if (!mounted) return;
-                              OnepieceAlert.getBasicAlertDialogFunc(
-                                  context,
-                                  AppLocalizations.of(context)!.hint,
+                              showAlert(alertHint,
                                   I18nHelper.getDisplayNameFromI18n(
                                       value!.result));
                               if (value.success) {
