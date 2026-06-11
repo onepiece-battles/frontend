@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
@@ -57,6 +58,8 @@ class _ChattingViewState extends State<ChattingView> {
   String activeConversationId = "";
   String _lastProcessedChatId = "";
   int _previousMsgCount = 0;
+  Timer? _pendingScroll;
+  bool _isAutoScrolling = false;
 
   /// Dedicated notifier for search text — changes here rebuild only the
   /// chat-list filter, not the entire ChattingView.
@@ -70,6 +73,7 @@ class _ChattingViewState extends State<ChattingView> {
   @override
   void dispose() {
     _searchTextNotifier.dispose();
+    _pendingScroll?.cancel();
     scrollController.dispose();
     searchChattingController.dispose();
     typingController.dispose();
@@ -103,25 +107,28 @@ class _ChattingViewState extends State<ChattingView> {
   }
 
   /// Scrolls to bottom when a new message arrives and the user is near the
-  /// bottom.  Called from Selector builders (only fires when messages change).
+  /// bottom.  Suppressed while an auto-scroll animation is already in flight.
   void _autoScrollOnNewMessages(List<Message> messages, String activeChatId) {
     if (activeChatId != _lastProcessedChatId) {
       _lastProcessedChatId = activeChatId;
       _previousMsgCount = messages.length;
-      return;
-    }
-    if (messages.length > _previousMsgCount) {
-      _previousMsgCount = messages.length;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
+      // When first entering a chat, scroll to bottom (offset 0 = reverse list).
+      _pendingScroll?.cancel();
+      _pendingScroll = Timer(const Duration(milliseconds: 300), () {
         if (scrollController.hasClients) {
-          final double maxScroll =
-              scrollController.position.maxScrollExtent;
-          final double currentScroll = scrollController.offset;
-          if (maxScroll - currentScroll < 500) {
-            _scrollToBottom(0);
-          }
+          scrollController.jumpTo(0);
         }
       });
+      return;
+    }
+    if (_isAutoScrolling) return;
+    if (messages.length > _previousMsgCount) {
+      _previousMsgCount = messages.length;
+      if (!scrollController.hasClients) return;
+      // reverse list: 0 is the bottom, so user is "near bottom" when offset < 500
+      if (scrollController.offset < 500) {
+        _scrollToBottom(0);
+      }
     }
   }
 
@@ -451,16 +458,16 @@ class _ChattingViewState extends State<ChattingView> {
                   Provider.of<ChatNotifier>(context, listen: false)
                       .setActiveChat(newChatId);
 
-                  // 6. Handle Scroll (Post Frame)
+                  // 6. Restore saved scroll offset for previously visited chats
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     if (chatIdToScrollOffset.containsKey(newChatId)) {
                       if (scrollController.hasClients) {
                         scrollController
                             .jumpTo(chatIdToScrollOffset[newChatId]!);
                       }
-                    } else {
-                      _scrollToBottom(0);
                     }
+                    // Initial scroll-to-bottom for new chats is handled by
+                    // _autoScrollOnNewMessages with a layout-settling delay.
                   });
                 },
               );
@@ -595,6 +602,7 @@ class _ChattingViewState extends State<ChattingView> {
                   child: ListView.builder(
                     key: PageStorageKey('chat_list_$activeChatId'),
                     controller: scrollController,
+                    reverse: true,
                     addAutomaticKeepAlives: true,
                     padding: const EdgeInsets.fromLTRB(15, 0, 20, 0),
                     itemCount: messages.length,
@@ -1026,23 +1034,29 @@ class _ChattingViewState extends State<ChattingView> {
     );
   }
 
+  /// With `reverse: true` on the ListView, scroll offset 0 = visual bottom.
   void _scrollToBottom(int extendValue) {
-    Future.delayed(const Duration(milliseconds: 100), () {
-      if (!scrollController.hasClients) return;
-
-      final double target =
-          scrollController.position.maxScrollExtent + extendValue;
+    _pendingScroll?.cancel();
+    _isAutoScrolling = true;
+    _pendingScroll = Timer(const Duration(milliseconds: 100), () {
+      if (!scrollController.hasClients) {
+        _isAutoScrolling = false;
+        return;
+      }
+      // reverse list: 0 is the bottom
+      final double target = 0.0 + extendValue;
       final double current = scrollController.offset;
-      final double distance = target - current;
+      final double distance = (target - current).abs();
 
       if (distance > 500) {
         scrollController.jumpTo(target);
+        _isAutoScrolling = false;
       } else {
         scrollController.animateTo(
           target,
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeOut,
-        );
+        ).then((_) => _isAutoScrolling = false);
       }
     });
   }
