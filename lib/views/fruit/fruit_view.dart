@@ -148,6 +148,7 @@ class _FruitViewState extends State<FruitView> {
                         jumpLabel: AppLocalizations.of(context)!.jumpToPage,
                         onPageChanged: (page) {
                           selectedPageNum = page;
+                          mainController.jumpTo(0);
                           _search(false);
                         },
                       )),

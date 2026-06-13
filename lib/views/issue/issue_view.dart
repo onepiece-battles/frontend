@@ -128,6 +128,7 @@ class _IssueViewState extends State<IssueView> {
                                 AppLocalizations.of(context)!.jumpToPage,
                             onPageChanged: (page) {
                               selectedPageNum = page;
+                              scrollController.jumpTo(0);
                               _search(false);
                             },
                           )),

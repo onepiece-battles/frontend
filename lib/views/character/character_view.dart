@@ -200,6 +200,7 @@ class _CharacterViewState extends State<CharacterView>
                       jumpLabel: AppLocalizations.of(context)!.jumpToPage,
                       onPageChanged: (page) {
                         selectedPageNum = page;
+                        scrollController.jumpTo(0);
                         _search(false);
                       },
                     ),

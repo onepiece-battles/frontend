@@ -15,6 +15,7 @@ import 'package:one_piece_battles_flutter/repository/group_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:one_piece_battles_flutter/utils/pdf_downloader_stub.dart'
     if (dart.library.html) 'package:one_piece_battles_flutter/utils/pdf_downloader_web.dart';
+import 'package:one_piece_battles_flutter/utils/responsive_breakpoints.dart';
 import 'constants/onepiece_colors.dart';
 import 'constants/onepiece_fonts.dart';
 
@@ -230,40 +231,21 @@ class _UserHomeState extends State<UserHome> {
 
   Widget _getCharacterSliverGrid(BuildContext context) {
     if (characters.isEmpty) return _getEmptySliver(context, "createCharacter");
-
+    final isDesktop = ResponsiveBreakpoints.isDesktop(context);
+    final maxExtent = isDesktop ? 150.0 : 120.0;
+    final mainExtent = isDesktop ? 170.0 : 140.0;
+    final imgSize = isDesktop ? 100.0 : 72.0;
     return SliverPadding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       sliver: SliverGrid(
-        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: 110,
-          mainAxisSpacing: 5,
-          crossAxisSpacing: 5,
-          childAspectRatio: 1.0, // Adjust this ratio based on your lazy loader aspect
+        gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+          maxCrossAxisExtent: maxExtent,
+          mainAxisSpacing: 8,
+          crossAxisSpacing: 8,
+          mainAxisExtent: mainExtent,
         ),
         delegate: SliverChildBuilderDelegate(
-              (BuildContext context, int index) {
-            return Tooltip(
-              preferBelow: true,
-              message: I18nHelper.getDisplayNameFromI18n(characters[index].name),
-              child: InkWell(
-                splashColor: Colors.transparent,
-                hoverColor: Colors.transparent,
-                onTap: () {
-                  context.goNamed('characterDetails',
-                      extra: characters[index].id,
-                      pathParameters: {
-                        'name': I18nHelper.getDisplayNameFromI18n(
-                            characters[index].name)
-                      });
-                },
-                child: ImageLazyLoader(
-                    uriProvider: () => characters[index].imageUri ?? '',
-                    width: 100,
-                    borderWidth: 2,
-                    borderRadios: 100),
-              ),
-            );
-          },
+          (_, i) => _buildImageCard(context, imageUri: characters[i].imageUri ?? '', name: I18nHelper.getDisplayNameFromI18n(characters[i].name), borderRadius: 100, imgSize: imgSize, onTap: () => context.goNamed('characterDetails', extra: characters[i].id, pathParameters: {'name': I18nHelper.getDisplayNameFromI18n(characters[i].name)})),
           childCount: characters.length,
         ),
       ),
@@ -272,40 +254,43 @@ class _UserHomeState extends State<UserHome> {
 
   Widget _getGroupSliverGrid(BuildContext context) {
     if (groups.isEmpty) return _getEmptySliver(context, "createGroup");
-
+    final isDesktop = ResponsiveBreakpoints.isDesktop(context);
+    final maxExtent = isDesktop ? 150.0 : 120.0;
+    final mainExtent = isDesktop ? 170.0 : 140.0;
+    final imgSize = isDesktop ? 100.0 : 72.0;
     return SliverPadding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       sliver: SliverGrid(
-        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: 110,
-          mainAxisSpacing: 5,
-          crossAxisSpacing: 5,
-          childAspectRatio: 1.0,
+        gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+          maxCrossAxisExtent: maxExtent,
+          mainAxisSpacing: 8,
+          crossAxisSpacing: 8,
+          mainAxisExtent: mainExtent,
         ),
         delegate: SliverChildBuilderDelegate(
-              (BuildContext context, int index) {
-            return Tooltip(
-              message: I18nHelper.getDisplayNameFromI18n(groups[index].name),
-              preferBelow: true,
-              child: InkWell(
-                  splashColor: Colors.transparent,
-                  hoverColor: Colors.transparent,
-                  onTap: () {
-                    context.goNamed('groupDetails',
-                        extra: groups[index].id,
-                        pathParameters: {
-                          'name': I18nHelper.getDisplayNameFromI18n(
-                              groups[index].name)
-                        });
-                  },
-                  child: ImageLazyLoader(
-                      uriProvider: () => groups[index].imageUri ?? '',
-                      width: 100,
-                      borderWidth: 2,
-                      borderRadios: 10)),
-            );
-          },
+          (_, i) => _buildImageCard(context, imageUri: groups[i].imageUri ?? '', name: I18nHelper.getDisplayNameFromI18n(groups[i].name), borderRadius: 10, imgSize: imgSize, onTap: () => context.goNamed('groupDetails', extra: groups[i].id, pathParameters: {'name': I18nHelper.getDisplayNameFromI18n(groups[i].name)})),
           childCount: groups.length,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildImageCard(BuildContext context, {required String imageUri, required String name, required double borderRadius, required double imgSize, required VoidCallback onTap}) {
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(10),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ImageLazyLoader(uriProvider: () => imageUri, width: imgSize, borderWidth: 2, borderRadios: borderRadius),
+              const SizedBox(height: 6),
+              Text(name, style: OnepieceFonts.smallContentStyle, maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
+            ],
+          ),
         ),
       ),
     );
@@ -365,115 +350,60 @@ class _UserHomeState extends State<UserHome> {
     final execution = battle.battleExecution;
     final starter = battle.starter;
     final receiver = battle.receiver;
-    if (execution == null || starter == null || receiver == null) {
-      return const SizedBox.shrink();
-    }
+    if (execution == null || starter == null || receiver == null) return const SizedBox.shrink();
 
-    return InkWell(
-      splashColor: Colors.transparent,
-      hoverColor: Colors.transparent,
-      onTap: () {
-        context.goNamed('battleDetails',
-            extra: battle.id,
-            pathParameters: {'id': battle.id});
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10.0),
-          color: OnepieceColors.menuBackgroundColor,
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const SizedBox(width: 10),
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(10),
+        onTap: () => context.goNamed('battleDetails', extra: battle.id, pathParameters: {'id': battle.id}),
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Row(crossAxisAlignment: CrossAxisAlignment.center, mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                 Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      ImageLazyLoader(
-                          uriProvider: () => starter.imageUri ?? '',
-                          width: 40,
-                          borderWidth: 1.5,
-                          borderRadios: 40),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(5, 5, 0, 0),
-                        child: Text(
-                          I18nHelper.getDisplayNameFromI18n(starter.name),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      Text(execution.starterScoreBefore?.toString() ?? '',
-                          style: OnepieceFonts.boldFancySmallFont)
-                    ],
-                  ),
+                  child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                    ImageLazyLoader(uriProvider: () => starter.imageUri ?? '', width: 44, borderWidth: 2, borderRadios: 44),
+                    const SizedBox(height: 4),
+                    Text(I18nHelper.getDisplayNameFromI18n(starter.name), overflow: TextOverflow.ellipsis, maxLines: 1, style: const TextStyle(fontSize: 11)),
+                    Text(execution.starterScoreBefore?.toString() ?? '', style: OnepieceFonts.boldFancySmallFont),
+                  ]),
                 ),
-                Center(
-                  child: Text(
-                    "vs",
-                    style: OnepieceFonts.boldFancyBlueHintFont,
-                  ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  child: Column(children: [
+                    Text("VS", style: OnepieceFonts.boldFancyBlueHintFont.copyWith(fontSize: 13)),
+                    const SizedBox(height: 4),
+                    if (execution.winnerId != null)
+                      ImageLazyLoader(uriProvider: () => execution.winnerId == battle.starterId ? starter.imageUri! : receiver.imageUri!, width: 28, borderWidth: 1.5, borderRadios: 28)
+                    else
+                      Icon(Icons.help_outline, size: 28, color: Colors.grey[400]),
+                  ]),
                 ),
                 Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      ImageLazyLoader(
-                          uriProvider: () => receiver.imageUri ?? '',
-                          width: 40,
-                          borderWidth: 1.5,
-                          borderRadios: 40),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(5, 5, 0, 0),
-                        child: Text(
-                          I18nHelper.getDisplayNameFromI18n(receiver.name),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      Text(execution.receiverScoreBefore?.toString() ?? '',
-                          style: OnepieceFonts.boldFancySmallFont)
-                    ],
-                  ),
+                  child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                    ImageLazyLoader(uriProvider: () => receiver.imageUri ?? '', width: 44, borderWidth: 2, borderRadios: 44),
+                    const SizedBox(height: 4),
+                    Text(I18nHelper.getDisplayNameFromI18n(receiver.name), overflow: TextOverflow.ellipsis, maxLines: 1, style: const TextStyle(fontSize: 11)),
+                    Text(execution.receiverScoreBefore?.toString() ?? '', style: OnepieceFonts.boldFancySmallFont),
+                  ]),
                 ),
-                const SizedBox(width: 10),
-              ],
-            ),
-            const SizedBox(height: 15),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(5.0),
-                  color: OnepieceColors.fancyBlue,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Flexible(
-                        child: Text(statusMap[execution.battleStatus] ?? '',
-                            overflow: TextOverflow.ellipsis,
-                            style: OnepieceFonts.boldFancyWhiteSmallFont),
-                      ),
-                      if (execution.battleReportStage == BattleReportStage.FINISHED)
-                        _buildPdfButton(battle),
-                      if (execution.battleReportStage != BattleReportStage.FINISHED)
-                        SvgPicture.asset(
-                          'asset/images/svgs/pdf_black.svg',
-                          width: 20,
-                          height: 20,
-                          colorFilter: const ColorFilter.mode(Colors.grey, BlendMode.srcIn),
-                        )
-                    ],
-                  ),
-                ),
+              ]),
+              const SizedBox(height: 10),
+              Container(
+                decoration: BoxDecoration(borderRadius: BorderRadius.circular(6), color: OnepieceColors.fancyBlue.withValues(alpha: 0.85)),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                  Flexible(child: Text(statusMap[execution.battleStatus] ?? '', overflow: TextOverflow.ellipsis, style: OnepieceFonts.boldFancyWhiteSmallFont)),
+                  if (execution.battleReportStage == BattleReportStage.FINISHED) _buildPdfButton(battle),
+                  if (execution.battleReportStage != BattleReportStage.FINISHED)
+                    SvgPicture.asset('asset/images/svgs/pdf_black.svg', width: 18, height: 18, colorFilter: const ColorFilter.mode(Colors.white70, BlendMode.srcIn)),
+                ]),
               ),
-            )
-          ],
+            ],
+          ),
         ),
       ),
     );

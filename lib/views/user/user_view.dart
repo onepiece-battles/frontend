@@ -133,6 +133,7 @@ class _UserViewState extends State<UserView> {
                                 AppLocalizations.of(context)!.jumpToPage,
                             onPageChanged: (page) {
                               selectedPageNum = page;
+                              scrollController.jumpTo(0);
                               _search(false);
                             },
                           )),
