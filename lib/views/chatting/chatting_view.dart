@@ -13,6 +13,7 @@ import 'package:one_piece_battles_flutter/components/square_image_loader.dart';
 import 'package:one_piece_battles_flutter/popup/chatting_options.dart';
 import 'package:one_piece_battles_flutter/utils/onepiece_image_picker.dart';
 import 'package:one_piece_battles_flutter/utils/time_helper.dart';
+import 'package:one_piece_battles_flutter/utils/responsive_breakpoints.dart';
 import 'package:openapi/api.dart';
 import '../../components/chat_notifier.dart';
 import '../../components/message.dart';
@@ -158,7 +159,8 @@ class _ChattingViewState extends State<ChattingView> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final bool isMobile = constraints.maxWidth < 500;
+        final bool isMobile =
+            ResponsiveBreakpoints.isMobileFromConstraints(constraints);
 
         if (isMobile) {
           return _buildMobileLayout(isMobile);

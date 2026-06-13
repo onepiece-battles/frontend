@@ -17,6 +17,7 @@ import 'package:one_piece_battles_flutter/popup/user_navigation.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:one_piece_battles_flutter/utils/image_helper.dart';
+import 'package:one_piece_battles_flutter/utils/responsive_breakpoints.dart';
 import 'package:openapi/api.dart';
 import 'package:string_validator/string_validator.dart';
 
@@ -96,6 +97,7 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   // Using a GlobalKey to access SideMenu state for refreshing resources if needed
   final GlobalKey<_SideMenuState> _sideMenuKey = GlobalKey();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
@@ -109,16 +111,30 @@ class HomePageState extends State<HomePage> {
       },
       child: LayoutBuilder(
         builder: (context, constraints) {
+          final isMobile =
+              ResponsiveBreakpoints.isMobileFromConstraints(constraints);
           return Scaffold(
+            key: _scaffoldKey,
             backgroundColor: Colors.grey[50],
+            drawer: isMobile
+                ? Drawer(
+                    width: MenuConfig.maxDrawerWidth,
+                    child: SideMenu(
+                      key: _sideMenuKey,
+                      constraints: constraints,
+                      isDrawer: true,
+                    ),
+                  )
+                : null,
             body: SelectionArea(
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  SideMenu(
-                    key: _sideMenuKey,
-                    constraints: constraints,
-                  ),
+                  if (!isMobile)
+                    SideMenu(
+                      key: _sideMenuKey,
+                      constraints: constraints,
+                    ),
                   Expanded(
                     child: Column(
                       children: [
@@ -128,6 +144,8 @@ class HomePageState extends State<HomePage> {
                             padding: const EdgeInsets.all(5.0),
                             child: TopNavigationBar(
                               constraints: constraints,
+                              isMobile: isMobile,
+                              scaffoldKey: _scaffoldKey,
                               onRoleChanged: () {
                                 // Trigger side menu resource refresh
                                 _sideMenuKey.currentState?._initResources();
@@ -169,7 +187,12 @@ void _showSearchDialog(BuildContext context) {
 
 class SideMenu extends StatefulWidget {
   final BoxConstraints constraints;
-  const SideMenu({super.key, required this.constraints});
+  final bool isDrawer;
+  const SideMenu({
+    super.key,
+    required this.constraints,
+    this.isDrawer = false,
+  });
 
   @override
   State<SideMenu> createState() => _SideMenuState();
@@ -209,6 +232,13 @@ class _SideMenuState extends State<SideMenu> {
     if (mounted) setState(() {});
   }
 
+  void _onDrawerItemTap(VoidCallback action) {
+    if (widget.isDrawer) {
+      Navigator.of(context).pop();
+    }
+    action();
+  }
+
   Widget _getUserNavigation(BuildContext context) {
     if (_cachedUserNavigation != null &&
         _cachedConstraints == widget.constraints) {
@@ -222,8 +252,46 @@ class _SideMenuState extends State<SideMenu> {
 
   @override
   Widget build(BuildContext context) {
-    bool isExpanded = _drawerWidth > MenuConfig.shrinkLimitWidth;
+    final bool isExpanded =
+        widget.isDrawer || _drawerWidth > MenuConfig.shrinkLimitWidth;
 
+    // Drawer mode: full-width, no resize handle, wrapped in SafeArea
+    if (widget.isDrawer) {
+      return SafeArea(
+        child: Container(
+          color: OnepieceColors.menuBackgroundColor,
+          child: Column(
+            children: [
+              _buildHeader(context, isExpanded),
+              Expanded(
+                child: ListView(
+                  padding: EdgeInsets.zero,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(8, 10, 0, 10),
+                      child: Text(AppLocalizations.of(context)!.route,
+                          style: const TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.w800)),
+                    ),
+                    _buildResourceList(context, isExpanded),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(8, 20, 0, 10),
+                      child: Text(AppLocalizations.of(context)!.user,
+                          style: const TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.w800)),
+                    ),
+                    _buildUserActions(context, isExpanded),
+                    const SizedBox(height: 40),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Desktop mode: fixed width + resize handle
     return Stack(
       children: [
         Container(
@@ -231,11 +299,7 @@ class _SideMenuState extends State<SideMenu> {
           color: OnepieceColors.menuBackgroundColor,
           child: Column(
             children: [
-              // 1. Fixed Header
               _buildHeader(context, isExpanded),
-
-              // 2. Scrollable Content (Resources + Profile/Logout)
-              // Using Expanded + ListView ensures it scrolls on phones/small laptops
               Expanded(
                 child: ListView(
                   padding: EdgeInsets.zero,
@@ -313,14 +377,14 @@ class _SideMenuState extends State<SideMenu> {
 
   Widget _buildHeader(BuildContext context, bool isExpanded) {
     return Container(
-      width: _drawerWidth,
+      width: double.infinity,
       height: 180,
       color: OnepieceColors.deepFancyBlue,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(8, 15, 0, 0),
+            padding: EdgeInsets.fromLTRB(isExpanded ? 8 : 4, 15, 0, 0),
             child: Row(
               children: [
                 _getUserNavigation(context),
@@ -424,7 +488,8 @@ class _SideMenuState extends State<SideMenu> {
               text: MenuConfig.getResourceDisplayName(context, resourceType),
               isSelected: isSelected,
               isExpanded: isExpanded,
-              onTap: () => context.go(routes[resourceType]!),
+              onTap: () =>
+                  _onDrawerItemTap(() => context.go(routes[resourceType]!)),
             );
           }).toList(),
         );
@@ -454,7 +519,7 @@ class _SideMenuState extends State<SideMenu> {
               text: AppLocalizations.of(context)!.myAccount,
               isSelected: resource == "profile",
               isExpanded: isExpanded,
-              onTap: () {
+              onTap: () => _onDrawerItemTap(() {
                 if (getIt<User>().loginRole == UserRole.VISITOR) {
                   context.go(AppRouter.registerPath);
                 } else {
@@ -462,7 +527,7 @@ class _SideMenuState extends State<SideMenu> {
                       extra: getIt<User>().id,
                       pathParameters: {'name': getIt<User>().nickname});
                 }
-              },
+              }),
             ),
             _buildMenuItem(
               context: context,
@@ -470,7 +535,7 @@ class _SideMenuState extends State<SideMenu> {
               text: AppLocalizations.of(context)!.logout,
               isSelected: false,
               isExpanded: isExpanded,
-              onTap: () async {
+              onTap: () => _onDrawerItemTap(() async {
                 final router = GoRouter.of(context);
                 try {
                   await getIt<UserDao>()
@@ -484,7 +549,7 @@ class _SideMenuState extends State<SideMenu> {
                     () => User(id: "", username: "", nickname: ""));
                 if (!mounted) return;
                 router.replace(AppRouter.loginPath);
-              },
+              }),
             ),
           ],
         );
@@ -542,11 +607,15 @@ class _SideMenuState extends State<SideMenu> {
 
 class TopNavigationBar extends StatefulWidget {
   final BoxConstraints constraints;
+  final bool isMobile;
+  final GlobalKey<ScaffoldState> scaffoldKey;
   final VoidCallback onRoleChanged;
 
   const TopNavigationBar({
     super.key,
     required this.constraints,
+    required this.isMobile,
+    required this.scaffoldKey,
     required this.onRoleChanged,
   });
 
@@ -569,42 +638,61 @@ class _TopNavigationBarState extends State<TopNavigationBar> {
 
   @override
   Widget build(BuildContext context) {
-    // 1. Calculate available width for the top bar
     return LayoutBuilder(
       builder: (context, constraints) {
-        // 2. Define the minimum width needed for the UI to not break
-        const double minContentWidth = 500;
-        // 3. Create the Row with spaceBetween
+        final double minContentWidth = widget.isMobile ? 300 : 500;
+        final bool isMobile = widget.isMobile;
+
         Widget content = Container(
-          // Ensure the container fills the width if space allows,
-          // or takes the min width if screen is small
           width: constraints.maxWidth > minContentWidth
               ? constraints.maxWidth
               : minContentWidth,
           padding: const EdgeInsets.symmetric(horizontal: 10),
           child: Row(
-            mainAxisSize: MainAxisSize.max, // Force row to take full width
-            mainAxisAlignment:
-            MainAxisAlignment.spaceBetween, // Push items to edges
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              // Hamburger menu on mobile
+              if (isMobile)
+                IconButton(
+                  icon: const Icon(Icons.menu,
+                      color: OnepieceColors.fancyBlue, size: 26),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  onPressed: () =>
+                      widget.scaffoldKey.currentState?.openDrawer(),
+                ),
+              if (isMobile) const SizedBox(width: 8),
+
               // Breadcrumbs on the left
-              Flexible(
-                child: SingleChildScrollView(
+              if (isMobile)
+                SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: _buildBreadcrumbs(context),
+                )
+              else
+                Flexible(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: _buildBreadcrumbs(context),
+                  ),
                 ),
-              ),
 
-              const SizedBox(width: 20), // Spacing between sections
+              if (!isMobile) const SizedBox(width: 10),
+
+              // Push everything to the right on mobile
+              if (isMobile) const Spacer(),
 
               // Controls on the right
-              _buildRightControls(context),
+              if (isMobile)
+                _buildMobileRightControls(context)
+              else
+                _buildRightControls(context),
             ],
           ),
         );
 
-        // 4. Wrap in ScrollView only if screen is smaller than minContentWidth
         if (constraints.maxWidth < minContentWidth) {
           return SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -614,6 +702,73 @@ class _TopNavigationBarState extends State<TopNavigationBar> {
 
         return content;
       },
+    );
+  }
+
+  Widget _buildMobileRightControls(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        NotificationList(context: context),
+        const SizedBox(width: 8),
+        // Language toggle
+        PopupMenuButton<String>(
+          tooltip: AppLocalizations.of(context)!.language,
+          icon: const Icon(Icons.language,
+              color: OnepieceColors.fancyBlue, size: 24),
+          offset: const Offset(0, 40),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          onSelected: (value) {
+            switch (value) {
+              case 'locale_zh':
+                setState(() => _tabTextIndexSelected = 0);
+                MyApp.setLocale(context, const Locale('zh', 'CN'));
+                getIt<UserDao>().updateUser(UpdateUserRequest(
+                    id: getIt<User>().id,
+                    nickname: getIt<User>().nickname,
+                    locale: I18nHelper.convertToOnepieceLocale(
+                        const Locale('zh', 'CN'))));
+                break;
+              case 'locale_en':
+                setState(() => _tabTextIndexSelected = 1);
+                MyApp.setLocale(context, const Locale('en', 'US'));
+                getIt<UserDao>().updateUser(UpdateUserRequest(
+                    id: getIt<User>().id,
+                    nickname: getIt<User>().nickname,
+                    locale: I18nHelper.convertToOnepieceLocale(
+                        const Locale('en', 'US'))));
+                break;
+            }
+          },
+          itemBuilder: (context) => [
+            PopupMenuItem<String>(
+              value: 'locale_zh',
+              child: Row(
+                children: [
+                  const Icon(Icons.language,
+                      size: 18, color: OnepieceColors.fancyBlue),
+                  const SizedBox(width: 8),
+                  Text(_tabTextIndexSelected == 0 ? '✓ 中文' : '  中文',
+                      style: const TextStyle(fontSize: 14)),
+                ],
+              ),
+            ),
+            PopupMenuItem<String>(
+              value: 'locale_en',
+              child: Row(
+                children: [
+                  const Icon(Icons.language,
+                      size: 18, color: OnepieceColors.fancyBlue),
+                  const SizedBox(width: 8),
+                  Text(_tabTextIndexSelected == 1 ? '✓ English' : '  English',
+                      style: const TextStyle(fontSize: 14)),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 

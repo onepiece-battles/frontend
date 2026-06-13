@@ -13,6 +13,7 @@ import 'package:logging/logging.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
+import '../../utils/responsive_breakpoints.dart';
 import '../../utils/image_helper.dart';
 import '../../utils/permission_check.dart';
 
@@ -95,24 +96,32 @@ class _BattleViewState extends State<BattleView> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 800),
-        child: Padding(
-          padding: const EdgeInsets.all(15.0),
-          child: SizedBox(
-            width: double.infinity,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _getHeaderText(context),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: SizedBox(
-                    height: 90,
-                    child: _getControlRow(context),
-                  ),
-                ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isNarrow =
+            ResponsiveBreakpoints.isMobileFromConstraints(constraints);
+        return Center(
+          child: ConstrainedBox(
+            constraints:
+                BoxConstraints(maxWidth: isNarrow ? double.infinity : 800),
+            child: Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: SizedBox(
+                width: double.infinity,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _getHeaderText(context),
+                    if (isNarrow)
+                      _getControlRow(context)
+                    else
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: SizedBox(
+                          height: 90,
+                          child: _getControlRow(context),
+                        ),
+                      ),
                 const SizedBox(height: 10),
                 Expanded(
                   child: Scrollbar(
@@ -158,6 +167,8 @@ class _BattleViewState extends State<BattleView> {
           ),
         ),
       ),
+        );
+      },
     );
   }
 

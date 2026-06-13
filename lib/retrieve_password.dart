@@ -47,13 +47,19 @@ class _RetrievePasswordState extends State<RetrievePassword> {
   TextEditingController confirmedPasswordController = TextEditingController();
   TextEditingController verificationCodeController = TextEditingController();
 
+  double _formWidth(BuildContext context) =>
+      MediaQuery.of(context).size.width > 400
+          ? 300.0
+          : MediaQuery.of(context).size.width - 60;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       bottomNavigationBar: const ICP(),
       backgroundColor: Colors.grey[300],
-      body: SingleChildScrollView(
-        child: Column(
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
           children: [
             Align(
               alignment: Alignment.topRight,
@@ -161,7 +167,8 @@ class _RetrievePasswordState extends State<RetrievePassword> {
           ],
         ),
       ),
-    );
+    ),
+  );
   }
 
   Widget _getSendVerificationCode(BuildContext context) {
@@ -169,7 +176,7 @@ class _RetrievePasswordState extends State<RetrievePassword> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(
-          width: 300,
+          width: _formWidth(context),
           child: TextField(
             onChanged: (value) {
               setState(() {
@@ -191,7 +198,7 @@ class _RetrievePasswordState extends State<RetrievePassword> {
           height: 20,
         ),
         SizedBox(
-          width: 300,
+          width: _formWidth(context),
           child: ElevatedButton(
             autofocus: true,
             onPressed: !_verificationCodeButtonEnabled
@@ -234,7 +241,7 @@ class _RetrievePasswordState extends State<RetrievePassword> {
     return Column(
       children: <Widget>[
         SizedBox(
-          width: 300,
+          width: _formWidth(context),
           child: TextFormField(
             onChanged: (value) {
               setState(() {
@@ -270,7 +277,7 @@ class _RetrievePasswordState extends State<RetrievePassword> {
           height: 20,
         ),
         SizedBox(
-          width: 300,
+          width: _formWidth(context),
           child: TextFormField(
             onChanged: (value) {
               setState(() {
@@ -308,7 +315,7 @@ class _RetrievePasswordState extends State<RetrievePassword> {
           height: 20,
         ),
         SizedBox(
-          width: 300,
+          width: _formWidth(context),
           child: TextFormField(
             onChanged: (value) {
               setState(() {
@@ -335,7 +342,7 @@ class _RetrievePasswordState extends State<RetrievePassword> {
           height: 20,
         ),
         SizedBox(
-          width: 300,
+          width: _formWidth(context),
           child: ElevatedButton(
             autofocus: true,
             onPressed: !_buttonEnabled

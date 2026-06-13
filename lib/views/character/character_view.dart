@@ -17,6 +17,7 @@ import '../../constants/button_style.dart';
 import '../../constants/onepiece_tag.dart';
 import '../../utils/i18n_helper.dart';
 import '../../utils/image_helper.dart';
+import '../../utils/responsive_breakpoints.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -145,25 +146,30 @@ class _CharacterViewState extends State<CharacterView>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 800),
-        child: Padding(
-          padding: const EdgeInsets.all(15.0),
-          child: SizedBox(
-            width: double.infinity,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _createHeader(),
-                // Control panel — horizontally scrollable if needed
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 6.0),
-                    child: _createControlPanel(),
-                  ),
-                ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isNarrow =
+            ResponsiveBreakpoints.isMobileFromConstraints(constraints);
+        return Center(
+          child: ConstrainedBox(
+            constraints:
+                BoxConstraints(maxWidth: isNarrow ? double.infinity : 800),
+            child: Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: SizedBox(
+                width: double.infinity,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _createHeader(),
+                    // Control panel — horizontally scrollable if needed
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 6.0),
+                        child: _createControlPanel(),
+                      ),
+                    ),
                 const SizedBox(height: 10),
                 // Data Table — fills remaining space, scrolls both ways
                 Expanded(
@@ -207,6 +213,8 @@ class _CharacterViewState extends State<CharacterView>
           ),
         ),
       ),
+        );
+      },
     );
   }
 

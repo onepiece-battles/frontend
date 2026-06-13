@@ -51,12 +51,15 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
+    final formWidth = MediaQuery.of(context).size.width > 400
+        ? 300.0
+        : MediaQuery.of(context).size.width - 60;
     return Scaffold(
       bottomNavigationBar: const ICP(),
       backgroundColor: Colors.grey[300],
-      body: SingleChildScrollView(
-        scrollDirection: Axis.vertical,
-        child: SafeArea(
+      body: SafeArea(
+        child: SingleChildScrollView(
+          scrollDirection: Axis.vertical,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -158,7 +161,7 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               const SizedBox(height: 90),
               SizedBox(
-                width: 300,
+                width: formWidth,
                 child: TextFormField(
                   onChanged: (value) {
                     setState(() {
@@ -197,7 +200,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 height: 20,
               ),
               SizedBox(
-                width: 300,
+                width: formWidth,
                 child: TextFormField(
                   onChanged: (value) {
                     setState(() {
@@ -222,7 +225,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 height: 20,
               ),
               SizedBox(
-                width: 300,
+                width: formWidth,
                 child: TextFormField(
                   onChanged: (value) {
                     setState(() {
@@ -275,7 +278,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 height: 20,
               ),
               SizedBox(
-                width: 300,
+                width: formWidth,
                 child: TextFormField(
                   onChanged: (value) {
                     setState(() {
@@ -328,7 +331,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 height: 10,
               ),
               SizedBox(
-                width: 300,
+                width: formWidth,
                 child: ElevatedButton(
                   autofocus: true,
                   style: OnepieceButtonStyle.getDefaultStyle(),

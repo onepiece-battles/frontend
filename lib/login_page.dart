@@ -70,6 +70,9 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final formWidth = MediaQuery.of(context).size.width > 400
+        ? 300.0
+        : MediaQuery.of(context).size.width - 60;
     return KeyboardListener(
         focusNode: _focusNode,
         onKeyEvent: (KeyEvent keyEvent) {
@@ -86,7 +89,8 @@ class _LoginPageState extends State<LoginPage> {
         child: Scaffold(
           bottomNavigationBar: const ICP(),
           backgroundColor: Colors.grey[300],
-          body: SingleChildScrollView(
+          body: SafeArea(
+            child: SingleChildScrollView(
             scrollDirection: Axis.vertical,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -189,7 +193,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 const SizedBox(height: 90),
                 SizedBox(
-                  width: 300,
+                  width: formWidth,
                   child: TextFormField(
                     onChanged: (value) {
                       setState(() {
@@ -212,7 +216,7 @@ class _LoginPageState extends State<LoginPage> {
                   height: 20,
                 ),
                 SizedBox(
-                  width: 300,
+                  width: formWidth,
                   child: TextFormField(
                     onChanged: (value) {
                       setState(() {
@@ -250,7 +254,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 const SizedBox(height: 10),
                 SizedBox(
-                  width: 300,
+                  width: formWidth,
                   child: ElevatedButton(
                     onPressed: !_buttonEnabled ? null : () => _login(),
                     style: OnepieceButtonStyle.getDefaultStyle(),
@@ -267,7 +271,7 @@ class _LoginPageState extends State<LoginPage> {
                   height: 15,
                 ),
                 SizedBox(
-                  width: 300,
+                  width: formWidth,
                   child: ElevatedButton(
                     onPressed: () => _visitorLogin(),
                     style: ElevatedButton.styleFrom(
@@ -286,7 +290,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 const SizedBox(height: 5),
                 SizedBox(
-                  width: 300,
+                  width: formWidth,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
@@ -357,6 +361,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ],
             ),
+          ),
           ),
         ));
   }

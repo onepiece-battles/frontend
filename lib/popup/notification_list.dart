@@ -94,9 +94,12 @@ class _NotificationListState extends State<NotificationList> {
           context: context,
           barrierColor: Colors.transparent,
           backgroundColor: OnepieceColors.fancyBlue,
-          bodyBuilder: (ctx) => _internalNotifications.isNotEmpty
-              ? _buildNotificationItems(ctx)
-              : _buildEmptyState(context),
+          bodyBuilder: (ctx) => ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: 320),
+            child: _internalNotifications.isNotEmpty
+                ? _buildNotificationItems(ctx)
+                : _buildEmptyState(context),
+          ),
         );
 
         // Resume auto-refresh after popup closes
@@ -131,9 +134,11 @@ class _NotificationListState extends State<NotificationList> {
   Widget _buildNotificationItems(BuildContext ctx) {
     return StatefulBuilder(
       builder: (BuildContext notificationContext, StateSetter notificationState) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: _internalNotifications.map((e) {
+        return ListView.builder(
+          shrinkWrap: true,
+          itemCount: _internalNotifications.length,
+          itemBuilder: (context, index) {
+            final e = _internalNotifications[index];
             return Padding(
               padding: const EdgeInsets.only(left: 8.0),
               child: Row(
@@ -149,7 +154,7 @@ class _NotificationListState extends State<NotificationList> {
                 ],
               ),
             );
-          }).toList(),
+          },
         );
       },
     );

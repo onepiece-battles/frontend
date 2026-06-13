@@ -13,6 +13,7 @@ import '../../constants/button_style.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
 import '../../utils/i18n_helper.dart';
+import '../../utils/responsive_breakpoints.dart';
 import '../../utils/image_helper.dart';
 import '../../utils/permission_check.dart';
 
@@ -89,24 +90,32 @@ class _GroupViewState extends State<GroupView> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 1200),
-        child: Padding(
-          padding: const EdgeInsets.all(15.0),
-          child: SizedBox(
-            width: double.infinity,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _createHeader(context),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: SizedBox(
-                    height: 90,
-                    child: _createControlPanel(context),
-                  ),
-                ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isNarrow =
+            ResponsiveBreakpoints.isMobileFromConstraints(constraints);
+        return Center(
+          child: ConstrainedBox(
+            constraints:
+                BoxConstraints(maxWidth: isNarrow ? double.infinity : 1200),
+            child: Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: SizedBox(
+                width: double.infinity,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _createHeader(context),
+                    if (isNarrow)
+                      _createControlPanel(context)
+                    else
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: SizedBox(
+                          height: 90,
+                          child: _createControlPanel(context),
+                        ),
+                      ),
                 const SizedBox(height: 10),
                 Expanded(
                   child: Scrollbar(
@@ -146,12 +155,14 @@ class _GroupViewState extends State<GroupView> {
                         },
                       )),
                     ],
-                  )
+                  ),
               ],
             ),
           ),
         ),
       ),
+        );
+      },
     );
   }
 
