@@ -57,6 +57,7 @@ class _CharacterViewState extends State<CharacterView>
   int itemCountPerPage = 10;
   int totalItemCount = 0;
   int initialLabelIndex = 0;
+  bool _showFilters = false;
 
   // Constants / Maps
   final Map<SortOrder?, String> sortOrderToPath = {
@@ -162,14 +163,7 @@ class _CharacterViewState extends State<CharacterView>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _createHeader(),
-                    // Control panel — horizontally scrollable if needed
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Padding(
-                        padding: const EdgeInsets.only(bottom: 6.0),
-                        child: _createControlPanel(),
-                      ),
-                    ),
+                    _createControlPanel(isNarrow: isNarrow),
                 const SizedBox(height: 10),
                 // Data Table on desktop, Cards on mobile
                 Expanded(
@@ -230,16 +224,170 @@ class _CharacterViewState extends State<CharacterView>
     );
   }
 
-  Widget _createControlPanel() {
+  Widget _createControlPanel({required bool isNarrow}) {
+    final hasCreate = PermissionCheck.checkPermission(
+        getIt<User>().loginRoleResourcesPermissionMap,
+        ResourceType.CHARACTER,
+        Permission.CREATE);
+
+    // ── Mobile: collapsible filter panel ──────────────────────────────
+    if (isNarrow) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Row 1: Create button + search field + filter toggle
+          Row(
+            children: [
+              if (hasCreate)
+                Padding(
+                  padding: const EdgeInsets.only(right: 6.0),
+                  child: SizedBox(
+                    height: 35,
+                    width: 80,
+                    child: ElevatedButton(
+                      onPressed: () => context.goNamed("createCharacter"),
+                      style: OnepieceButtonStyle.getDefaultStyle(),
+                      child: Text(AppLocalizations.of(context)!.create,
+                          style: const TextStyle(fontSize: 13)),
+                    ),
+                  ),
+                ),
+              Expanded(
+                child: SizedBox(
+                  height: 35,
+                  child: TextFormField(
+                    controller: searchNameController,
+                    onChanged: (value) {
+                      characterFilter.name = value.trim();
+                      _search(true);
+                    },
+                    decoration: InputDecoration(
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 0),
+                        floatingLabelBehavior: FloatingLabelBehavior.never,
+                        disabledBorder: const OutlineInputBorder(
+                            borderSide: BorderSide(
+                                color: OnepieceColors.menuHoverColor)),
+                        enabledBorder: const OutlineInputBorder(
+                            borderSide: BorderSide(
+                                color: OnepieceColors.menuHoverColor)),
+                        focusedBorder: const OutlineInputBorder(
+                          borderSide: BorderSide(
+                              color: OnepieceColors.fancyGreen, width: 1.5),
+                        ),
+                        prefixIcon: const Icon(Icons.search, size: 20),
+                        labelText: AppLocalizations.of(context)!.starterName,
+                        labelStyle: OnepieceFonts.dropDownItemStyle),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 6),
+              InkWell(
+                onTap: () => setState(() => _showFilters = !_showFilters),
+                borderRadius: BorderRadius.circular(4),
+                child: Container(
+                  height: 35,
+                  width: 35,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: OnepieceColors.menuHoverColor),
+                    borderRadius: BorderRadius.circular(4),
+                    color: _showFilters
+                        ? OnepieceColors.fancyBlue.withValues(alpha: 0.1)
+                        : null,
+                  ),
+                  child: Icon(
+                    Icons.filter_list,
+                    size: 20,
+                    color: _showFilters
+                        ? OnepieceColors.fancyBlue
+                        : Colors.grey[700],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          // Expandable filter panel
+          if (_showFilters) ...[
+            const SizedBox(height: 8),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: SizedBox(
+                height: 36,
+                child: ToggleSwitch(
+                  customWidths: const [90, 90, 100, 120],
+                  cornerRadius: 4,
+                  minHeight: 35.0,
+                  fontSize: 12.0,
+                  initialLabelIndex: initialLabelIndex,
+                  activeBgColor: const [OnepieceColors.fancyBlue],
+                  inactiveBgColor: OnepieceColors.liteFancyGreen,
+                  inactiveFgColor: Colors.grey[600],
+                  totalSwitches: 4,
+                  labels: [
+                    AppLocalizations.of(context)!.allResources,
+                    AppLocalizations.of(context)!.myResource,
+                    AppLocalizations.of(context)!.systemResource,
+                    AppLocalizations.of(context)!.excludeSystem
+                  ],
+                  onToggle: (index) {
+                    initialLabelIndex = index!;
+                    characterFilter.systemResource =
+                        (index == 2) ? true : (index == 3 ? false : null);
+                    characterFilter.userId =
+                        (index == 1) ? getIt<User>().id : null;
+                    _search(true);
+                  },
+                ),
+              ),
+            ),
+            const SizedBox(height: 6),
+            _buildDropdown<BattleStyle>(
+              items: BattleStyle.values,
+              selectedItems: selectedBattleStyles,
+              displayMap: battleStyleToDisplayValue,
+              hint: AppLocalizations.of(context)!.battleStyle,
+              width: double.infinity,
+              onChanged: (list) {
+                characterFilter.battleStyles = list;
+                _search(true);
+              },
+            ),
+            const SizedBox(height: 6),
+            _buildDropdown<Haki>(
+              items: Haki.values,
+              selectedItems: selectedHakis,
+              displayMap: hakiEnumValueToDisplayValue,
+              hint: AppLocalizations.of(context)!.hakis,
+              width: double.infinity,
+              onChanged: (list) {
+                characterFilter.hakis = list;
+                _search(true);
+              },
+            ),
+            const SizedBox(height: 6),
+            _buildDropdown<Race>(
+              items: Race.values,
+              selectedItems: selectedRaces,
+              displayMap: raceEnumToDisplayName,
+              hint: AppLocalizations.of(context)!.race,
+              width: double.infinity,
+              onChanged: (list) {
+                characterFilter.races = list;
+                _search(true);
+              },
+            ),
+          ],
+        ],
+      );
+    }
+
+    // ── Desktop: existing layout ─────────────────────────────────────
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            if (PermissionCheck.checkPermission(
-                getIt<User>().loginRoleResourcesPermissionMap,
-                ResourceType.CHARACTER,
-                Permission.CREATE))
+            if (hasCreate)
               Padding(
                 padding: const EdgeInsets.only(right: 10.0),
                 child: SizedBox(

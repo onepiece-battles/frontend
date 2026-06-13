@@ -48,6 +48,7 @@ class _UserViewState extends State<UserView> {
   ScrollController horizontalController = ScrollController();
 
   int selectedPageNum = 1;
+  bool _showFilters = false;
   int totalPageNum = 0;
   int itemCountPerPage = 10;
   int totalItemCount = 0;
@@ -99,28 +100,26 @@ class _UserViewState extends State<UserView> {
                 width: double.infinity,
                 child: Column(
                   children: [
+                    _createHeader(context),
+                    _createControlPanel(context, isNarrow: isNarrow),
+                    const SizedBox(height: 10),
                     Expanded(
-                        child: SingleChildScrollView(
-                      controller: scrollController,
-                      scrollDirection: Axis.vertical,
-                      child: Scrollbar(
-                        thumbVisibility: true,
-                        controller: horizontalController,
-                        child: SingleChildScrollView(
-                          controller: horizontalController,
-                          scrollDirection: Axis.horizontal,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _createHeader(context),
-                              _createControlPanel(context),
-                              _createUserTable(context),
-                              const SizedBox(height: 15),
-                            ],
-                          ),
-                        ),
-                      ),
-                    )),
+                      child: isNarrow
+                          ? _buildMobileUserCards(context)
+                          : SingleChildScrollView(
+                              controller: scrollController,
+                              scrollDirection: Axis.vertical,
+                              child: Scrollbar(
+                                thumbVisibility: true,
+                                controller: horizontalController,
+                                child: SingleChildScrollView(
+                                  controller: horizontalController,
+                                  scrollDirection: Axis.horizontal,
+                                  child: _createUserTable(context),
+                                ),
+                              ),
+                            ),
+                    ),
                     const SizedBox(height: 15),
                     if (totalPageNum > 1)
                       Column(
@@ -163,13 +162,85 @@ class _UserViewState extends State<UserView> {
     );
   }
 
-  Widget _createControlPanel(BuildContext context) {
+  Widget _createControlPanel(BuildContext context, {required bool isNarrow}) {
     Map<UserRole, String> enumValueToDisplayValue = <UserRole, String>{
       UserRole.NIKA: AppLocalizations.of(context)!.roleNika,
       UserRole.ADMIN: AppLocalizations.of(context)!.roleAdmin,
       UserRole.NORMAL: AppLocalizations.of(context)!.roleNormal,
       UserRole.VISITOR: AppLocalizations.of(context)!.roleVisitor,
     };
+
+    if (isNarrow) {
+      return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          Expanded(child: SizedBox(height: 35, child: TextFormField(
+            controller: searchNameController,
+            onChanged: (v) { userFilter.nickname = v; _search(true); },
+            decoration: InputDecoration(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+              floatingLabelBehavior: FloatingLabelBehavior.never,
+              disabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: OnepieceColors.menuHoverColor)),
+              enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: OnepieceColors.menuHoverColor)),
+              focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
+              prefixIcon: const Icon(Icons.search, size: 20),
+              labelText: AppLocalizations.of(context)!.name),),),),
+          const SizedBox(width: 6),
+          InkWell(
+            onTap: () => setState(() => _showFilters = !_showFilters),
+            borderRadius: BorderRadius.circular(4),
+            child: Container(height: 35, width: 35,
+              decoration: BoxDecoration(border: Border.all(color: OnepieceColors.menuHoverColor), borderRadius: BorderRadius.circular(4),
+                color: _showFilters ? OnepieceColors.fancyBlue.withValues(alpha: 0.1) : null),
+              child: Icon(Icons.filter_list, size: 20, color: _showFilters ? OnepieceColors.fancyBlue : Colors.grey[700]),),),
+        ]),
+        if (_showFilters) ...[
+          const SizedBox(height: 6),
+          SizedBox(height: 35, child: TextFormField(
+            controller: searchEmailController,
+            onChanged: (v) { userFilter.username = v; _search(true); },
+            decoration: InputDecoration(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+              floatingLabelBehavior: FloatingLabelBehavior.never,
+              disabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: OnepieceColors.menuHoverColor)),
+              enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: OnepieceColors.menuHoverColor)),
+              focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
+              prefixIcon: const Icon(Icons.search, size: 20),
+              labelText: AppLocalizations.of(context)!.email),),),
+          const SizedBox(height: 6),
+          DropdownButtonHideUnderline(child: DropdownButton2(
+            isExpanded: true,
+            value: selectedUserRoles.isEmpty ? null : selectedUserRoles.last,
+            hint: Text(AppLocalizations.of(context)!.loginRole, style: OnepieceFonts.dropDownItemStyle),
+            onChanged: (value) {},
+            selectedItemBuilder: (context) => UserRole.values.map((item) =>
+              Container(alignment: AlignmentDirectional.center, child: Text(
+                selectedUserRoles.map((t) => enumValueToDisplayValue[t]).toSet().join(', '),
+                style: const TextStyle(fontSize: 16, overflow: TextOverflow.ellipsis), maxLines: 1))).toList(),
+            buttonStyleData: ButtonStyleData(padding: const EdgeInsets.symmetric(horizontal: 16), height: 35,
+                decoration: BoxDecoration(borderRadius: BorderRadius.circular(3), color: OnepieceColors.liteFancyGreen)),
+            menuItemStyleData: const MenuItemStyleData(height: 35),
+            items: UserRole.values.map((role) => DropdownMenuItem<UserRole>(value: role, enabled: false,
+              child: StatefulBuilder(builder: (ctx, ms) {
+                final sel = selectedUserRoles.contains(role);
+                return InkWell(hoverColor: Colors.transparent, splashColor: Colors.transparent,
+                  onTap: () {
+                    sel ? selectedUserRoles.remove(role) : selectedUserRoles.add(role);
+                    userFilter.userRoles = selectedUserRoles;
+                    setState(() {}); ms(() {}); _search(true);
+                  },
+                  child: Container(height: double.infinity, padding: const EdgeInsets.symmetric(horizontal: 3),
+                    child: Row(children: [
+                      Icon(sel ? Icons.check_box_outlined : Icons.check_box_outline_blank),
+                      const SizedBox(width: 8),
+                      Expanded(child: Text(enumValueToDisplayValue[role]!, style: const TextStyle(fontSize: 16))),
+                    ])));
+              }))).toList(),
+          )),
+        ],
+      ]);
+    }
+
+    // Desktop
     return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
       Row(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -323,6 +394,77 @@ class _UserViewState extends State<UserView> {
         ],
       ),
     ]);
+  }
+
+  // ── Mobile: card-based user list ─────────────────────────────────────
+
+  Widget _buildMobileUserCards(BuildContext context) {
+    final roleMap = <UserRole, String>{
+      UserRole.NIKA: AppLocalizations.of(context)!.roleNika,
+      UserRole.NORMAL: AppLocalizations.of(context)!.roleNormal,
+      UserRole.VISITOR: AppLocalizations.of(context)!.roleVisitor,
+      UserRole.ADMIN: AppLocalizations.of(context)!.roleAdmin,
+    };
+    final accountMap = <AccountStatus, String>{
+      AccountStatus.loggedIn: AppLocalizations.of(context)!.accountLoggedIn,
+      AccountStatus.loggedOut: AppLocalizations.of(context)!.accountLoggedOut,
+      AccountStatus.stopped: AppLocalizations.of(context)!.accountStopped,
+      AccountStatus.closed: AppLocalizations.of(context)!.accountClosed,
+    };
+
+    if (currentUserList.isEmpty) {
+      return Center(child: Text(AppLocalizations.of(context)!.empty, style: OnepieceFonts.contentStyle));
+    }
+
+    return ListView.builder(
+      controller: scrollController,
+      itemCount: currentUserList.length,
+      itemBuilder: (context, index) {
+        final user = currentUserList[index];
+        return Card(
+          margin: const EdgeInsets.only(bottom: 8),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(10),
+            onTap: () => context.goNamed('userDetails', extra: user.id, pathParameters: {'name': user.nickname}),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Row(children: [
+                  ImageLazyLoader(key: UniqueKey(), uriProvider: () => user.imageUri!, width: 44, borderWidth: 1.5, borderRadios: 44),
+                  const SizedBox(width: 10),
+                  Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text(user.nickname.toString(), style: OnepieceFonts.headerStyle.copyWith(fontSize: 15), maxLines: 1, overflow: TextOverflow.ellipsis),
+                    const SizedBox(height: 2),
+                    Text(user.username.toString(), style: OnepieceFonts.smallContentStyle, maxLines: 1, overflow: TextOverflow.ellipsis),
+                  ])),
+                  OnepieceTag.getUserRoleTag(user.loginRole!, roleMap[user.loginRole]!),
+                ]),
+                const SizedBox(height: 8),
+                Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                  Row(mainAxisSize: MainAxisSize.min, children: [
+                    Icon(user.emailVerified! ? Icons.check : Icons.cancel, size: 16,
+                        color: user.emailVerified! ? Colors.greenAccent : Colors.redAccent),
+                    const SizedBox(width: 4),
+                    Text(user.emailVerified! ? AppLocalizations.of(context)!.verified : AppLocalizations.of(context)!.notVerified,
+                        style: TextStyle(fontSize: 12, color: user.emailVerified! ? Colors.greenAccent : Colors.redAccent)),
+                  ]),
+                  Text(accountMap[user.accountStatus] ?? '', style: OnepieceFonts.smallContentStyle),
+                ]),
+                if (user.userRoles.isNotEmpty) ...[
+                  const SizedBox(height: 6),
+                  Wrap(spacing: 4, runSpacing: 2,
+                    children: user.userRoles.map((e) => OnepieceTag.getUserRoleTag(e, roleMap[e]!)).toList()),
+                ],
+                const SizedBox(height: 4),
+                Text(DateHelper.getFormattedDatetimeFromTimestamp(user.creationRecord!.actionTimestamp!, context),
+                    style: const TextStyle(fontSize: 11, color: Colors.grey)),
+              ]),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   DataTable _createUserTable(BuildContext context) {
