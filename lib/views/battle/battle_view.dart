@@ -194,7 +194,7 @@ class _BattleViewState extends State<BattleView> {
                 Padding(
                   padding: const EdgeInsets.only(right: 6),
                   child: SizedBox(
-                    height: 35, width: 80,
+                    height: 35,
                     child: ElevatedButton(
                       onPressed: () => context.goNamed("createBattle"),
                       style: OnepieceButtonStyle.getDefaultStyle(),

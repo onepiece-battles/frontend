@@ -244,7 +244,6 @@ class _CharacterViewState extends State<CharacterView>
                   padding: const EdgeInsets.only(right: 6.0),
                   child: SizedBox(
                     height: 35,
-                    width: 80,
                     child: ElevatedButton(
                       onPressed: () => context.goNamed("createCharacter"),
                       style: OnepieceButtonStyle.getDefaultStyle(),

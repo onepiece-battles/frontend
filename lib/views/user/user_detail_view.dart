@@ -8,6 +8,7 @@ import '../../constants/onepiece_fonts.dart';
 import '../../constants/onepiece_tag.dart';
 import '../../utils/base64_helper.dart';
 import '../../utils/image_helper.dart';
+import '../../utils/responsive_breakpoints.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -43,29 +44,23 @@ class _UserDetailViewState extends State<UserDetailView> {
       builder: (context, AsyncSnapshot snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           _prepareData(snapshot.data);
-          return SingleChildScrollView(
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              final isNarrow = ResponsiveBreakpoints.isMobileFromConstraints(constraints);
+              return SingleChildScrollView(
             scrollDirection: Axis.vertical,
+            padding: isNarrow ? const EdgeInsets.fromLTRB(12, 12, 12, 20) : null,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _getBasicInfo(context),
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 8.0),
-                  child: Divider(
-                    color: Colors.grey,
-                    thickness: 1,
-                  ),
-                ),
+                const SizedBox(height: 12),
                 _getLoginStatus(context),
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 8.0),
-                  child: Divider(
-                    color: Colors.grey,
-                    thickness: 1,
-                  ),
-                ),
+                const SizedBox(height: 12),
               ],
             ),
+          );
+            },
           );
         } else {
           return Center(
@@ -80,86 +75,31 @@ class _UserDetailViewState extends State<UserDetailView> {
   }
 
   Widget _getBasicInfo(BuildContext context) {
-    return StatefulBuilder(
-      builder: (context, basicState) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                AppLocalizations.of(context)!.basicInfo,
-                style: OnepieceFonts.headerStyle,
-              ),
-            ),
-            const SizedBox(
-              width: 15,
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ImageHelper.getRoundImageFrame(
-                  150,
-                  150,
-                  3,
-                  OnepieceColors.liteFancyBlue,
-                  150,
-                  Base64Helper.decode(user.profileImage ?? '')),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(8, 0, 0, 15),
-              child: Text(
-                AppLocalizations.of(context)!.nickname,
-                style: OnepieceFonts.contentStyle,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(8, 0, 0, 15),
-              child: Text(
-                user.nickname,
-                style: OnepieceFonts.fancyBlueHintFont,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(8, 0, 0, 15),
-              child: Text(
-                AppLocalizations.of(context)!.email,
-                style: OnepieceFonts.contentStyle,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(8, 0, 0, 15),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    user.username,
-                    style: OnepieceFonts.fancyBlueHintFont,
-                  ),
-                  Tooltip(
-                    message: user.emailVerified!
-                        ? AppLocalizations.of(context)!.verified
-                        : AppLocalizations.of(context)!.notVerified,
-                    child: SizedBox(
-                      width: 30,
-                      height: 30,
-                      child: user.emailVerified!
-                          ? ImageHelper.getSvgIconWithColor(
-                              'images/svgs/check-circle.svg',
-                              150,
-                              150,
-                              Colors.green)
-                          : ImageHelper.getSvgIconWithColor(
-                              'images/svgs/alert.svg', 150, 150, Colors.red),
-                    ),
-                  )
-                ],
-              ),
-            ),
-          ],
-        );
-      },
+    return Card(
+      elevation: 0, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: Padding(padding: const EdgeInsets.all(12), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(AppLocalizations.of(context)!.basicInfo, style: OnepieceFonts.headerStyle.copyWith(fontSize: 16)),
+        const SizedBox(height: 10),
+        Center(child: ImageHelper.getRoundImageFrame(120, 120, 3, OnepieceColors.liteFancyBlue, 120, Base64Helper.decode(user.profileImage ?? ''))),
+        const SizedBox(height: 8),
+        _readOnlyRow(context, AppLocalizations.of(context)!.nickname, user.nickname),
+        const SizedBox(height: 6),
+        _readOnlyRow(context, AppLocalizations.of(context)!.email, user.username, trailing: Tooltip(
+          message: user.emailVerified! ? AppLocalizations.of(context)!.verified : AppLocalizations.of(context)!.notVerified,
+          child: SizedBox(width: 24, height: 24,
+            child: user.emailVerified! ? ImageHelper.getSvgIconWithColor('images/svgs/check-circle.svg', 150, 150, Colors.green) : ImageHelper.getSvgIconWithColor('images/svgs/alert.svg', 150, 150, Colors.red)),
+        )),
+      ])),
     );
+  }
+
+  Widget _readOnlyRow(BuildContext context, String label, String value, {Widget? trailing}) {
+    return Row(children: [
+      Text(label, style: OnepieceFonts.deepBlackHintFont),
+      const SizedBox(width: 8),
+      Expanded(child: Text(value, style: OnepieceFonts.contentStyle.copyWith(fontWeight: FontWeight.w600), overflow: TextOverflow.ellipsis)),
+      if (trailing != null) trailing,
+    ]);
   }
 
   Widget _getLoginStatus(BuildContext context) {
@@ -175,62 +115,23 @@ class _UserDetailViewState extends State<UserDetailView> {
       AccountStatus.stopped: AppLocalizations.of(context)!.accountStopped,
       AccountStatus.closed: AppLocalizations.of(context)!.accountClosed,
     };
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(bottom: 18.0),
-            child: Text(
-              AppLocalizations.of(context)!.loginInfo,
-              style: OnepieceFonts.headerStyle,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8.0),
-            child: Text(
-              AppLocalizations.of(context)!.loginRoleOrLastLoginRole,
-              style: OnepieceFonts.contentStyle,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 18.0),
-            child: OnepieceTag.getUserRoleTag(
-                user.loginRole!, userRoleToDisplayNameMap[user.loginRole]!),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8.0),
-            child: Text(
-              AppLocalizations.of(context)!.allUserRoles,
-              style: OnepieceFonts.contentStyle,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 18.0),
-            child: Row(
-              children: user.userRoles
-                  .map((e) => Padding(
-                        padding: const EdgeInsets.only(right: 5),
-                        child: OnepieceTag.getUserRoleTag(
-                            e, userRoleToDisplayNameMap[e]!),
-                      ))
-                  .toList(),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8.0),
-            child: Text(
-              AppLocalizations.of(context)!.accountStatus,
-              style: OnepieceFonts.contentStyle,
-            ),
-          ),
-          Text(
-            accountStatusEnumToDisplayValue[user.accountStatus]!,
-            style: OnepieceFonts.fancyBlueHintFont,
-          ),
-        ],
-      ),
+    return Card(
+      elevation: 0, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: Padding(padding: const EdgeInsets.all(12), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(AppLocalizations.of(context)!.loginInfo, style: OnepieceFonts.headerStyle.copyWith(fontSize: 16)),
+        const SizedBox(height: 10),
+        Text(AppLocalizations.of(context)!.loginRoleOrLastLoginRole, style: OnepieceFonts.contentStyle),
+        const SizedBox(height: 6),
+        OnepieceTag.getUserRoleTag(user.loginRole!, userRoleToDisplayNameMap[user.loginRole]!),
+        const SizedBox(height: 12),
+        Text(AppLocalizations.of(context)!.allUserRoles, style: OnepieceFonts.contentStyle),
+        const SizedBox(height: 6),
+        Wrap(spacing: 4, runSpacing: 4, children: user.userRoles.map((e) => OnepieceTag.getUserRoleTag(e, userRoleToDisplayNameMap[e]!)).toList()),
+        const SizedBox(height: 12),
+        Text(AppLocalizations.of(context)!.accountStatus, style: OnepieceFonts.contentStyle),
+        const SizedBox(height: 6),
+        Text(accountStatusEnumToDisplayValue[user.accountStatus]!, style: OnepieceFonts.fancyBlueHintFont),
+      ])),
     );
   }
 }

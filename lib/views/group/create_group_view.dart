@@ -17,6 +17,7 @@ import '../../utils/i18n_helper.dart';
 import '../../utils/image_helper.dart';
 import '../../utils/onepiece_image_picker.dart';
 import '../../utils/random_string_generator.dart';
+import '../../utils/responsive_breakpoints.dart';
 import '../../l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
@@ -32,12 +33,8 @@ class CreateGroupView extends StatefulWidget {
 
 class _CreateGroupViewState extends State<CreateGroupView> {
   // name controller
-  TextEditingController groupNameEnController = TextEditingController(
-      text: RandomStringGenerator.generateRandomName(
-          8, getIt<User>().loginRole == UserRole.NIKA));
-  TextEditingController groupNameChController = TextEditingController(
-      text: RandomStringGenerator.generateRandomChineseName(
-          3, getIt<User>().loginRole == UserRole.NIKA));
+  TextEditingController groupNameEnController = TextEditingController(text: '');
+  TextEditingController groupNameChController = TextEditingController(text: '');
 
   GroupCategory selectedGroupCategory = GroupCategory.pirate;
   final _formKey = GlobalKey<FormState>();
@@ -53,114 +50,211 @@ class _CreateGroupViewState extends State<CreateGroupView> {
   bool _newImagePicked = false;
   String _chosenImageName = "";
 
+  Widget _buildMobileLayout(BuildContext context) {
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      // Avatar
+      Center(
+          child: Padding(
+        padding: const EdgeInsets.only(bottom: 16),
+        child: _getAvatar(context),
+      )),
+      // Basic Info card
+      Card(
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        child: Padding(
+            padding: const EdgeInsets.all(12),
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(AppLocalizations.of(context)!.basicInfo,
+                  style: OnepieceFonts.headerStyle.copyWith(fontSize: 16)),
+              const SizedBox(height: 10),
+              _buildMobileField(
+                  context,
+                  groupNameChController,
+                  '${AppLocalizations.of(context)!.groupName}(CN)',
+                  Icons.people),
+              if (getIt<User>().loginRole == UserRole.NIKA) ...[
+                const SizedBox(height: 10),
+                _buildMobileField(
+                    context,
+                    groupNameEnController,
+                    '${AppLocalizations.of(context)!.groupName}(EN)',
+                    Icons.people),
+              ],
+              const SizedBox(height: 10),
+              _getDropDownList(context),
+            ])),
+      ),
+    ]);
+  }
+
+  Widget _buildMobileField(BuildContext context, TextEditingController ctrl,
+      String hint, IconData? icon) {
+    return SizedBox(
+        height: 35,
+        child: TextFormField(
+          controller: ctrl,
+          validator: (value) {
+            if (value == null || value.isWhiteSpace()) {
+              return AppLocalizations.of(context)!.requiredField;
+            }
+            if (!DataValidator.validName(value)) {
+              return AppLocalizations.of(context)!.invalidName;
+            }
+            return null;
+          },
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+          decoration: InputDecoration(
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+            floatingLabelBehavior: FloatingLabelBehavior.never,
+            counterText: '',
+            disabledBorder: const OutlineInputBorder(
+                borderSide: BorderSide(color: OnepieceColors.menuHoverColor)),
+            enabledBorder: const OutlineInputBorder(
+                borderSide: BorderSide(color: OnepieceColors.menuHoverColor)),
+            focusedBorder: const OutlineInputBorder(
+                borderSide:
+                    BorderSide(color: OnepieceColors.fancyGreen, width: 1.5)),
+            labelText: hint,
+            labelStyle: OnepieceFonts.dropDownItemStyle,
+            prefixIcon: icon != null ? Icon(icon, size: 20) : null,
+          ),
+        ));
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        SingleChildScrollView(
-          scrollDirection: Axis.vertical,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 0, 0, 15),
-                  child: Text(
-                    AppLocalizations.of(context)!.basicInfo,
-                    style: OnepieceFonts.headerStyle,
-                  ),
-                ),
-                _getAvatar(context),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: Row(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isNarrow =
+            ResponsiveBreakpoints.isMobileFromConstraints(constraints);
+        return Stack(
+          children: [
+            if (isNarrow)
+              SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                padding: const EdgeInsets.fromLTRB(12, 12, 12, 80),
+                child: _buildMobileLayout(context),
+              )
+            else
+              SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Form(
-                        key:_formKey,
-                        child:  SizedBox(
-                        width: MediaQuery.of(context).size.width > 600 ? 300 : MediaQuery.of(context).size.width - 60,
-                        child: TextFormField(
-                          controller: groupNameChController,
-                          validator: (value) {
-                            if (value!.isWhiteSpace()) {
-                              return AppLocalizations.of(context)!
-                                  .requiredField;
-                            }
-                            if (!DataValidator.validName(value)) {
-                              return AppLocalizations.of(context)!.invalidName;
-                            }
-                            return null;
-                          },
-                          autovalidateMode: AutovalidateMode.onUserInteraction,
-                          maxLength: 30,
-                          maxLengthEnforcement: MaxLengthEnforcement.enforced,
-                          decoration: InputDecoration(
-                            labelText: AppLocalizations.of(context)!.groupName,
-                            prefixIcon: const Icon(Icons.people),
-                          ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(0, 0, 0, 15),
+                        child: Text(
+                          AppLocalizations.of(context)!.basicInfo,
+                          style: OnepieceFonts.headerStyle,
                         ),
-                      ),),
-                      const SizedBox(
-                        width: 25,
                       ),
-                      if (getIt<User>().loginRole == UserRole.NIKA)
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width > 600 ? 300 : MediaQuery.of(context).size.width - 60,
-                          child: TextFormField(
-                            controller: groupNameEnController,
-                            validator: (value) {
-                              if (value==null||value.isWhiteSpace()) {
-                                return AppLocalizations.of(context)!
-                                    .requiredField;
-                              }
-                              if (!DataValidator.validName(value)) {
-                                return AppLocalizations.of(context)!
-                                    .invalidName;
-                              }
-                              return null;
-                            },
-                            autovalidateMode:
-                                AutovalidateMode.onUserInteraction,
-                            maxLength: 30,
-                            maxLengthEnforcement: MaxLengthEnforcement.enforced,
-                            decoration: InputDecoration(
-                              labelText:
-                                  AppLocalizations.of(context)!.groupName,
-                              prefixIcon: const Icon(Icons.people),
+                      _getAvatar(context),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8.0),
+                        child: Row(
+                          children: [
+                            Form(
+                              key: _formKey,
+                              child: SizedBox(
+                                width: MediaQuery.of(context).size.width > 600
+                                    ? 300
+                                    : MediaQuery.of(context).size.width - 60,
+                                child: TextFormField(
+                                  controller: groupNameChController,
+                                  validator: (value) {
+                                    if (value!.isWhiteSpace()) {
+                                      return AppLocalizations.of(context)!
+                                          .requiredField;
+                                    }
+                                    if (!DataValidator.validName(value)) {
+                                      return AppLocalizations.of(context)!
+                                          .invalidName;
+                                    }
+                                    return null;
+                                  },
+                                  autovalidateMode:
+                                      AutovalidateMode.onUserInteraction,
+                                  maxLength: 30,
+                                  maxLengthEnforcement:
+                                      MaxLengthEnforcement.enforced,
+                                  decoration: InputDecoration(
+                                    labelText:
+                                        AppLocalizations.of(context)!.groupName,
+                                    prefixIcon: const Icon(Icons.people),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(
+                              width: 25,
+                            ),
+                            if (getIt<User>().loginRole == UserRole.NIKA)
+                              SizedBox(
+                                width: MediaQuery.of(context).size.width > 600
+                                    ? 300
+                                    : MediaQuery.of(context).size.width - 60,
+                                child: TextFormField(
+                                  controller: groupNameEnController,
+                                  validator: (value) {
+                                    if (value == null || value.isWhiteSpace()) {
+                                      return AppLocalizations.of(context)!
+                                          .requiredField;
+                                    }
+                                    if (!DataValidator.validName(value)) {
+                                      return AppLocalizations.of(context)!
+                                          .invalidName;
+                                    }
+                                    return null;
+                                  },
+                                  autovalidateMode:
+                                      AutovalidateMode.onUserInteraction,
+                                  maxLength: 30,
+                                  maxLengthEnforcement:
+                                      MaxLengthEnforcement.enforced,
+                                  decoration: InputDecoration(
+                                    labelText:
+                                        AppLocalizations.of(context)!.groupName,
+                                    prefixIcon: const Icon(Icons.people),
+                                  ),
+                                ),
+                              )
+                          ],
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 0, 8, 10),
+                            child: Text(
+                              AppLocalizations.of(context)!.groupCategory,
+                              style: OnepieceFonts.tableHeaderStyle,
                             ),
                           ),
-                        )
+                          _getDropDownList(context),
+                        ],
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.fromLTRB(0, 0, 0, 8),
+                        child: Divider(
+                          height: 2,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 40,
+                      )
                     ],
                   ),
                 ),
-                Row(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 0, 8, 10),
-                      child: Text(
-                        AppLocalizations.of(context)!.groupCategory,
-                        style: OnepieceFonts.tableHeaderStyle,
-                      ),
-                    ),
-                    _getDropDownList(context),
-                  ],
-                ),
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(0, 0, 0, 8),
-                  child: Divider(
-                    height: 2,
-                  ),
-                ),
-                const SizedBox(
-                  height: 40,
-                )
-              ],
-            ),
-          ),
-        ),
-        _getFootBar(context)
-      ],
+              ),
+            _getFootBar(context)
+          ],
+        );
+      },
     );
   }
 
@@ -200,16 +294,16 @@ class _CreateGroupViewState extends State<CreateGroupView> {
                       onPressed: () async {
                         if (!mounted) return;
                         final alert = AppLocalizations.of(context)!.alert;
-                        final message = AppLocalizations.of(context)!
-                            .imageSizeExceedsLimit;
-                        final showAlert = OnepieceAlert.createAlertShower(context);
+                        final message =
+                            AppLocalizations.of(context)!.imageSizeExceedsLimit;
+                        final showAlert =
+                            OnepieceAlert.createAlertShower(context);
                         XFile? pickedImage =
                             await OnepieceImagePicker.pickWebImage();
                         if (pickedImage == null) {
                           return;
                         }
-                        Uint8List imageInByte =
-                            await pickedImage.readAsBytes();
+                        Uint8List imageInByte = await pickedImage.readAsBytes();
                         _pickedImage = imageInByte;
                         if (!ImageHelper.isValidImageSize(
                             500 * 1024, imageInByte)) {
@@ -299,7 +393,9 @@ class _CreateGroupViewState extends State<CreateGroupView> {
           buttonStyleData: ButtonStyleData(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               height: 34,
-              width: 210,
+              width: MediaQuery.of(context).size.width < 600
+                  ? double.infinity
+                  : 210,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(3),
                 color: OnepieceColors.menuBackgroundColor,
@@ -374,15 +470,16 @@ class _CreateGroupViewState extends State<CreateGroupView> {
                               resourceId: createGroupResponse!.id.toString(),
                               image: encodedImage,
                               type: ResourceType.GROUP);
-                      getIt<ImageDao>().addImage(uploadImageRequest).then(
-                          (value) {
+                      getIt<ImageDao>()
+                          .addImage(uploadImageRequest)
+                          .then((value) {
                         if (!mounted) return;
                         router.goNamed('groupDetails',
-                                extra: createGroupResponse.id,
-                                pathParameters: {
-                                  'name': I18nHelper.getDisplayNameFromI18n(
-                                      createGroupResponse.name)
-                                });
+                            extra: createGroupResponse.id,
+                            pathParameters: {
+                              'name': I18nHelper.getDisplayNameFromI18n(
+                                  createGroupResponse.name)
+                            });
                       });
                     });
                   },

@@ -188,7 +188,7 @@ class _GroupViewState extends State<GroupView> {
       return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
           if (hasCreate)
-            Padding(padding: const EdgeInsets.only(right: 6), child: SizedBox(height: 35, width: 80,
+            Padding(padding: const EdgeInsets.only(right: 6), child: SizedBox(height: 35,
               child: ElevatedButton(onPressed: () => context.goNamed("createGroup"),
                 style: OnepieceButtonStyle.getDefaultStyle(),
                 child: Text(AppLocalizations.of(context)!.create, style: const TextStyle(fontSize: 13))),),),

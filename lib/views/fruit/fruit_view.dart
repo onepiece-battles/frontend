@@ -187,7 +187,7 @@ class _FruitViewState extends State<FruitView> {
             if (hasCreate)
               Padding(
                 padding: const EdgeInsets.only(right: 6),
-                child: SizedBox(height: 35, width: 80,
+                child: SizedBox(height: 35,
                   child: ElevatedButton(
                       onPressed: () => context.goNamed("createFruit"),
                       style: OnepieceButtonStyle.getDefaultStyle(),

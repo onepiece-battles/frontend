@@ -27,56 +27,35 @@ class CreateFruitView extends StatefulWidget {
 
 class _CreateFruitViewState extends State<CreateFruitView> {
   TextEditingController fruitNameEnController = TextEditingController(
-      text: RandomStringGenerator.generateRandomName(
-          8, getIt<User>().loginRole == UserRole.NIKA));
+      text: "");
   TextEditingController fruitNameChController = TextEditingController(
-      text: RandomStringGenerator.generateRandomChineseName(
-          3, getIt<User>().loginRole == UserRole.NIKA));
+      text: "");
   TextEditingController attackSlopeController = TextEditingController(
-      text: RandomStringGenerator.generateRandomDouble(
-              1.5, 0.8, 1, getIt<User>().loginRole == UserRole.NIKA)
-          .toString());
+      text: "");
   TextEditingController attackInterceptController = TextEditingController(
-      text: RandomStringGenerator.generateRandomNumber(
-          -100, 300, getIt<User>().loginRole == UserRole.NIKA));
+      text: "");
   TextEditingController defenseSlopeController = TextEditingController(
-      text: RandomStringGenerator.generateRandomDouble(
-              1.5, 0.8, 1, getIt<User>().loginRole == UserRole.NIKA)
-          .toString());
+      text: "");
   TextEditingController defenseInterceptController = TextEditingController(
-      text: RandomStringGenerator.generateRandomNumber(
-          -100, 800, getIt<User>().loginRole == UserRole.NIKA));
+      text: "");
   TextEditingController intelligenceSlopeController = TextEditingController(
-      text: RandomStringGenerator.generateRandomDouble(
-              2, 0.8, 1, getIt<User>().loginRole == UserRole.NIKA)
-          .toString());
+      text: "");
   TextEditingController intelligenceInterceptController = TextEditingController(
-      text: RandomStringGenerator.generateRandomNumber(
-          -30, 30, getIt<User>().loginRole == UserRole.NIKA));
+      text: "");
   TextEditingController bloodSlopeController = TextEditingController(
-      text: RandomStringGenerator.generateRandomDouble(
-              1.5, 0.8, 1, getIt<User>().loginRole == UserRole.NIKA)
-          .toString());
+      text: '');
   TextEditingController bloodInterceptController = TextEditingController(
-      text: RandomStringGenerator.generateRandomNumber(
-          -1000, 3000, getIt<User>().loginRole == UserRole.NIKA));
+      text: '');
   TextEditingController speedSlopeController = TextEditingController(
-      text: RandomStringGenerator.generateRandomDouble(
-              3, 0.8, 1, getIt<User>().loginRole == UserRole.NIKA)
-          .toString());
+      text: '');
   TextEditingController speedInterceptController = TextEditingController(
-      text: RandomStringGenerator.generateRandomNumber(
-          -30, 30, getIt<User>().loginRole == UserRole.NIKA));
+      text: '');
   TextEditingController groupGainSlopeController = TextEditingController(
-      text: RandomStringGenerator.generateRandomDouble(
-              2, 0.8, 1, getIt<User>().loginRole == UserRole.NIKA)
-          .toString());
+      text: '');
   TextEditingController groupGainInterceptController = TextEditingController(
-      text: RandomStringGenerator.generateRandomNumber(
-          -10, 30, getIt<User>().loginRole == UserRole.NIKA));
+      text: '');
   TextEditingController fruitEnergyConsumeController = TextEditingController(
-      text: RandomStringGenerator.generateRandomNumber(
-          1, 10, getIt<User>().loginRole == UserRole.NIKA));
+      text: "");
 
   List<TextEditingController> fruitControllerList() {
     return <TextEditingController>[
@@ -104,239 +83,397 @@ class _CreateFruitViewState extends State<CreateFruitView> {
   double sideWidth = 50;
   final _formKey = GlobalKey<FormState>();
 
+  Widget _buildMobileLayout(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 80),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        // Basic Info card
+        Card(
+          elevation: 0,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(AppLocalizations.of(context)!.basicInfo,
+                        style:
+                            OnepieceFonts.headerStyle.copyWith(fontSize: 16)),
+                    const SizedBox(height: 10),
+                    SizedBox(
+                        height: 35,
+                        child: TextFormField(
+                          controller: fruitNameEnController,
+                          decoration: InputDecoration(
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                            floatingLabelBehavior: FloatingLabelBehavior.never,
+                            disabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: OnepieceColors.menuHoverColor)),
+                            enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: OnepieceColors.menuHoverColor)),
+                            focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: OnepieceColors.fancyGreen, width: 1.5)),
+                            labelText: AppLocalizations.of(context)!.name,
+                            labelStyle: OnepieceFonts.dropDownItemStyle,
+                          ),
+                        )),
+                    const SizedBox(height: 10),
+                    _getDropDownList(context),
+                  ])),
+        ),
+        const SizedBox(height: 12),
+        // Battle Info card
+        Card(
+          elevation: 0,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(AppLocalizations.of(context)!.battleInfo,
+                        style:
+                            OnepieceFonts.headerStyle.copyWith(fontSize: 16)),
+                    const SizedBox(height: 10),
+                    _buildDigitField(context, fruitEnergyConsumeController,
+                        AppLocalizations.of(context)!.energyConsume, 0, 300),
+                    _buildStatPair(
+                        context,
+                        attackSlopeController,
+                        attackInterceptController,
+                        AppLocalizations.of(context)!.characterAttack),
+                    _buildStatPair(
+                        context,
+                        defenseSlopeController,
+                        defenseInterceptController,
+                        AppLocalizations.of(context)!.characterDefense),
+                    _buildStatPair(
+                        context,
+                        bloodSlopeController,
+                        bloodInterceptController,
+                        AppLocalizations.of(context)!.characterBlood),
+                    _buildStatPair(
+                        context,
+                        intelligenceSlopeController,
+                        intelligenceInterceptController,
+                        AppLocalizations.of(context)!.characterIntelligence),
+                    _buildStatPair(
+                        context,
+                        speedSlopeController,
+                        speedInterceptController,
+                        AppLocalizations.of(context)!.characterSpeed),
+                    _buildStatPair(
+                        context,
+                        groupGainSlopeController,
+                        groupGainInterceptController,
+                        AppLocalizations.of(context)!.groupGain),
+                  ])),
+        ),
+      ]),
+    );
+  }
+
+  Widget _buildDigitField(BuildContext context, TextEditingController ctrl,
+      String hint, int min, int max) {
+    return Padding(
+        padding: const EdgeInsets.only(bottom: 10),
+        child: SizedBox(
+            height: 35,
+            child: TextFormField(
+              controller: ctrl,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                  floatingLabelBehavior: FloatingLabelBehavior.never,
+                  disabledBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: OnepieceColors.menuHoverColor)),
+                  enabledBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: OnepieceColors.menuHoverColor)),
+                  focusedBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: OnepieceColors.fancyGreen, width: 1.5)),
+                  labelText: hint, labelStyle: OnepieceFonts.dropDownItemStyle),
+            )));
+  }
+
+  Widget _buildStatPair(BuildContext context, TextEditingController slope,
+      TextEditingController intercept, String label) {
+    return Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Row(children: [
+          Text(label, style: OnepieceFonts.deepBlackHintFont, maxLines: 2, overflow: TextOverflow.visible),
+          const SizedBox(width: 6),
+          const Text('=', style: TextStyle(fontSize: 14)),
+          const SizedBox(width: 4),
+          Text(AppLocalizations.of(context)!.basicValue, style: const TextStyle(fontSize: 11, color: Colors.grey)),
+          const SizedBox(width: 2),
+          const Text('×', style: TextStyle(fontSize: 14)),
+          const SizedBox(width: 4),
+          Expanded(child: SizedBox(height: 35, child: TextFormField(
+              controller: slope, keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 6, vertical: 0),
+                  floatingLabelBehavior: FloatingLabelBehavior.never,
+                  disabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: OnepieceColors.menuHoverColor)),
+                  enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: OnepieceColors.menuHoverColor)),
+                  focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: OnepieceColors.fancyGreen, width: 1.5)),
+                  labelStyle: OnepieceFonts.dropDownItemStyle)))),
+          const SizedBox(width: 4),
+          const Text('+', style: TextStyle(fontSize: 14)),
+          const SizedBox(width: 4),
+          Expanded(child: SizedBox(height: 35, child: TextFormField(
+              controller: intercept, keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                      contentPadding: EdgeInsets.symmetric(horizontal: 6, vertical: 0),
+                      floatingLabelBehavior: FloatingLabelBehavior.never,
+                      disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: OnepieceColors.menuHoverColor)),
+                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: OnepieceColors.menuHoverColor)),
+                      focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: OnepieceColors.fancyGreen, width: 1.5)))))),
+        ]));
+  }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isNarrow = ResponsiveBreakpoints.isMobileFromConstraints(constraints);
+        final isNarrow =
+            ResponsiveBreakpoints.isMobileFromConstraints(constraints);
         dividerWidth = isNarrow ? constraints.maxWidth - 30 : 800;
         sideWidth = isNarrow ? 8.0 : 50;
         return Stack(
-      children: [
-        SingleChildScrollView(
-          scrollDirection: Axis.vertical,
-          child: Center(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: SizedBox(
-                width: dividerWidth,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.only(left: sideWidth),
-                      child: Text(
-                        AppLocalizations.of(context)!.basicInfo,
-                        style: OnepieceFonts.headerStyle,
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 30,
-                    ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: sideWidth),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            if (isNarrow)
+              _buildMobileLayout(context)
+            else
+              SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                child: Center(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: SizedBox(
+                      width: dividerWidth,
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Column(
-                            children: [
-                              StringTextFormField(
-                                  context,
-                                  true,
-                                  fruitNameChController,
-                                  AppLocalizations.of(context)!.name,
-                                  30,
-                                  ImageHelper.getTextFormFieldIcon(
-                                      'images/character_digits_icon/name.svg',
-                                      true,
-                                      25),
-                                  true),
-                              if (getIt<User>().loginRole == UserRole.NIKA)
-                                StringTextFormField(
-                                    context,
-                                    true,
-                                    fruitNameEnController,
-                                    AppLocalizations.of(context)!.name,
-                                    30,
-                                    ImageHelper.getTextFormFieldIcon(
-                                        'images/character_digits_icon/name.svg',
-                                        true,
-                                        25),
-                                    true),
-                            ],
+                          Padding(
+                            padding: EdgeInsets.only(left: sideWidth),
+                            child: Text(
+                              AppLocalizations.of(context)!.basicInfo,
+                              style: OnepieceFonts.headerStyle,
+                            ),
                           ),
-                          SizedBox(
-                            width: 300,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
+                          const SizedBox(
+                            height: 30,
+                          ),
+                          Padding(
+                            padding:
+                                EdgeInsets.symmetric(horizontal: sideWidth),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  AppLocalizations.of(context)!.fruitType,
-                                  style: OnepieceFonts.deepBlackHintFont,
+                                Column(
+                                  children: [
+                                    StringTextFormField(
+                                        context,
+                                        true,
+                                        fruitNameChController,
+                                        AppLocalizations.of(context)!.name,
+                                        30,
+                                        ImageHelper.getTextFormFieldIcon(
+                                            'images/character_digits_icon/name.svg',
+                                            true,
+                                            25),
+                                        true),
+                                    if (getIt<User>().loginRole ==
+                                        UserRole.NIKA)
+                                      StringTextFormField(
+                                          context,
+                                          true,
+                                          fruitNameEnController,
+                                          AppLocalizations.of(context)!.name,
+                                          30,
+                                          ImageHelper.getTextFormFieldIcon(
+                                              'images/character_digits_icon/name.svg',
+                                              true,
+                                              25),
+                                          true),
+                                  ],
                                 ),
-                                const SizedBox(
-                                  height: 18,
-                                ),
-                                _getDropDownList(context),
+                                SizedBox(
+                                  width: 300,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        AppLocalizations.of(context)!.fruitType,
+                                        style: OnepieceFonts.deepBlackHintFont,
+                                      ),
+                                      const SizedBox(
+                                        height: 18,
+                                      ),
+                                      _getDropDownList(context),
+                                    ],
+                                  ),
+                                )
                               ],
                             ),
+                          ),
+                          const SizedBox(
+                            height: 30,
+                            child: Divider(
+                              color: Colors.grey,
+                              height: 2,
+                            ),
+                          ),
+                          Padding(
+                            padding:
+                                EdgeInsets.symmetric(horizontal: sideWidth),
+                            child: Text(
+                              AppLocalizations.of(context)!.battleInfo,
+                              style: OnepieceFonts.headerStyle,
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 30,
+                          ),
+                          Padding(
+                            padding:
+                                EdgeInsets.symmetric(horizontal: sideWidth),
+                            child: Form(
+                              key: _formKey,
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  Column(
+                                    children: [
+                                      FruitDigitTextFormField(
+                                          context,
+                                          true,
+                                          attackSlopeController,
+                                          attackInterceptController,
+                                          AppLocalizations.of(context)!
+                                              .attackStrengthen,
+                                          0.8,
+                                          1.5,
+                                          -100,
+                                          300,
+                                          ImageHelper.getTextFormFieldIcon(
+                                              'images/character_digits_icon/attack.svg',
+                                              true,
+                                              25)),
+                                      FruitDigitTextFormField(
+                                          context,
+                                          true,
+                                          defenseSlopeController,
+                                          defenseInterceptController,
+                                          AppLocalizations.of(context)!
+                                              .defenseStrengthen,
+                                          0.8,
+                                          1.5,
+                                          -100,
+                                          800,
+                                          ImageHelper.getTextFormFieldIcon(
+                                              'images/character_digits_icon/defense.svg',
+                                              true,
+                                              25)),
+                                      FruitDigitTextFormField(
+                                          context,
+                                          true,
+                                          bloodSlopeController,
+                                          bloodInterceptController,
+                                          AppLocalizations.of(context)!
+                                              .bloodStrengthen,
+                                          0.8,
+                                          1.5,
+                                          -1000,
+                                          3000,
+                                          ImageHelper.getTextFormFieldIcon(
+                                              'images/character_digits_icon/blood.svg',
+                                              true,
+                                              25)),
+                                      DigitTextFormField(
+                                          context,
+                                          true,
+                                          fruitEnergyConsumeController,
+                                          AppLocalizations.of(context)!
+                                              .energyConsume,
+                                          1,
+                                          10,
+                                          ImageHelper.getTextFormFieldIcon(
+                                              'images/character_digits_icon/energy.svg',
+                                              true,
+                                              25),
+                                          true),
+                                    ],
+                                  ),
+                                  Column(
+                                    children: [
+                                      FruitDigitTextFormField(
+                                          context,
+                                          true,
+                                          intelligenceSlopeController,
+                                          intelligenceInterceptController,
+                                          AppLocalizations.of(context)!
+                                              .intelligenceStrengthen,
+                                          0.8,
+                                          2,
+                                          -30,
+                                          30,
+                                          ImageHelper.getTextFormFieldIcon(
+                                              'images/character_digits_icon/intelligence.svg',
+                                              true,
+                                              25)),
+                                      FruitDigitTextFormField(
+                                          context,
+                                          true,
+                                          speedSlopeController,
+                                          speedInterceptController,
+                                          AppLocalizations.of(context)!
+                                              .speedStrengthen,
+                                          0.8,
+                                          3,
+                                          -10,
+                                          30,
+                                          ImageHelper.getTextFormFieldIcon(
+                                              'images/character_digits_icon/speed.svg',
+                                              true,
+                                              25)),
+                                      FruitDigitTextFormField(
+                                          context,
+                                          true,
+                                          groupGainSlopeController,
+                                          groupGainInterceptController,
+                                          AppLocalizations.of(context)!
+                                              .groupStrengthen,
+                                          0.8,
+                                          2,
+                                          -10,
+                                          30,
+                                          ImageHelper.getTextFormFieldIcon(
+                                              'images/character_digits_icon/group_gain.svg',
+                                              true,
+                                              25)),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 40,
                           )
                         ],
                       ),
                     ),
-                    const SizedBox(
-                      height: 30,
-                      child: Divider(
-                        color: Colors.grey,
-                        height: 2,
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: sideWidth),
-                      child: Text(
-                        AppLocalizations.of(context)!.battleInfo,
-                        style: OnepieceFonts.headerStyle,
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 30,
-                    ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: sideWidth),
-                      child: Form(
-                        key: _formKey,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Column(
-                              children: [
-                                FruitDigitTextFormField(
-                                    context,
-                                    true,
-                                    attackSlopeController,
-                                    attackInterceptController,
-                                    AppLocalizations.of(context)!
-                                        .attackStrengthen,
-                                    0.8,
-                                    1.5,
-                                    -100,
-                                    300,
-                                    ImageHelper.getTextFormFieldIcon(
-                                        'images/character_digits_icon/attack.svg',
-                                        true,
-                                        25)),
-                                FruitDigitTextFormField(
-                                    context,
-                                    true,
-                                    defenseSlopeController,
-                                    defenseInterceptController,
-                                    AppLocalizations.of(context)!
-                                        .defenseStrengthen,
-                                    0.8,
-                                    1.5,
-                                    -100,
-                                    800,
-                                    ImageHelper.getTextFormFieldIcon(
-                                        'images/character_digits_icon/defense.svg',
-                                        true,
-                                        25)),
-                                FruitDigitTextFormField(
-                                    context,
-                                    true,
-                                    bloodSlopeController,
-                                    bloodInterceptController,
-                                    AppLocalizations.of(context)!
-                                        .bloodStrengthen,
-                                    0.8,
-                                    1.5,
-                                    -1000,
-                                    3000,
-                                    ImageHelper.getTextFormFieldIcon(
-                                        'images/character_digits_icon/blood.svg',
-                                        true,
-                                        25)),
-                                DigitTextFormField(
-                                    context,
-                                    true,
-                                    fruitEnergyConsumeController,
-                                    AppLocalizations.of(context)!.energyConsume,
-                                    1,
-                                    10,
-                                    ImageHelper.getTextFormFieldIcon(
-                                        'images/character_digits_icon/energy.svg',
-                                        true,
-                                        25),
-                                    true),
-                              ],
-                            ),
-                            Column(
-                              children: [
-                                FruitDigitTextFormField(
-                                    context,
-                                    true,
-                                    intelligenceSlopeController,
-                                    intelligenceInterceptController,
-                                    AppLocalizations.of(context)!
-                                        .intelligenceStrengthen,
-                                    0.8,
-                                    2,
-                                    -30,
-                                    30,
-                                    ImageHelper.getTextFormFieldIcon(
-                                        'images/character_digits_icon/intelligence.svg',
-                                        true,
-                                        25)),
-                                FruitDigitTextFormField(
-                                    context,
-                                    true,
-                                    speedSlopeController,
-                                    speedInterceptController,
-                                    AppLocalizations.of(context)!
-                                        .speedStrengthen,
-                                    0.8,
-                                    3,
-                                    -10,
-                                    30,
-                                    ImageHelper.getTextFormFieldIcon(
-                                        'images/character_digits_icon/speed.svg',
-                                        true,
-                                        25)),
-                                FruitDigitTextFormField(
-                                    context,
-                                    true,
-                                    groupGainSlopeController,
-                                    groupGainInterceptController,
-                                    AppLocalizations.of(context)!
-                                        .groupStrengthen,
-                                    0.8,
-                                    2,
-                                    -10,
-                                    30,
-                                    ImageHelper.getTextFormFieldIcon(
-                                        'images/character_digits_icon/group_gain.svg',
-                                        true,
-                                        25)),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 40,
-                    )
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ),
-        ),
-        _getFootBar(context)
-      ],
-    );
+            _getFootBar(context)
+          ],
+        );
       },
     );
   }
@@ -385,10 +522,10 @@ class _CreateFruitViewState extends State<CreateFruitView> {
           buttonStyleData: ButtonStyleData(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               height: 34,
-              width: 210,
+              width: MediaQuery.of(context).size.width < 600 ? double.infinity : 210,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(3),
-                color: OnepieceColors.menuBackgroundColor,
+                color: OnepieceColors.liteFancyGreen,
               )),
           menuItemStyleData: const MenuItemStyleData(
             height: 35,

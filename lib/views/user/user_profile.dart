@@ -21,6 +21,7 @@ import '../../repository/email_dao.dart';
 import '../../utils/base64_helper.dart';
 import '../../utils/image_helper.dart';
 import '../../utils/onepiece_image_picker.dart';
+import '../../utils/responsive_breakpoints.dart';
 
 // --- 1. STATE MODEL ---
 // Holds the data for the screen. Immutable style preferred for safety.
@@ -55,11 +56,12 @@ class UserProfileFormData {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-          other is UserProfileFormData &&
-              runtimeType == other.runtimeType &&
-              listEquals(profileImage, other.profileImage) && // Use flutter/foundation
-              nickname == other.nickname &&
-              username == other.username;
+      other is UserProfileFormData &&
+          runtimeType == other.runtimeType &&
+          listEquals(
+              profileImage, other.profileImage) && // Use flutter/foundation
+          nickname == other.nickname &&
+          username == other.username;
 
   @override
   int get hashCode => Object.hash(nickname, username, profileImage);
@@ -98,7 +100,8 @@ class UserProfileController extends ChangeNotifier {
       final response = await _userDao.get(GetUserRequest(userId: userId));
       _currentUser = response!;
 
-      final imageBytes = Base64Helper.decode(GetIt.I<User>().profileImage ?? "");
+      final imageBytes =
+          Base64Helper.decode(GetIt.I<User>().profileImage ?? "");
 
       _originalData = UserProfileFormData(
         profileImage: imageBytes,
@@ -150,16 +153,16 @@ class UserProfileController extends ChangeNotifier {
   }
 
   Future<void> sendVerificationEmail(BuildContext context) async {
-    await _emailDao.verifyEmailAddress(
-        VerifyEmailAddressRequest(id: _currentUser.id, email: _currentUser.username)
-    );
+    await _emailDao.verifyEmailAddress(VerifyEmailAddressRequest(
+        id: _currentUser.id, email: _currentUser.username));
 
     if (context.mounted) {
       showCupertinoModalPopup(
         filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
         context: context,
         builder: (_) => Dialog(
-          child: EmailVerification(userId: _currentUser.id, email: _currentUser.username),
+          child: EmailVerification(
+              userId: _currentUser.id, email: _currentUser.username),
         ),
       );
     }
@@ -206,7 +209,8 @@ class UserProfileController extends ChangeNotifier {
     } catch (e) {
       debugPrint("Error saving: $e");
       if (context.mounted) {
-        OnepieceAlert.getBasicAlertDialogFunc(context, "Error", "Failed to save profile");
+        OnepieceAlert.getBasicAlertDialogFunc(
+            context, "Error", "Failed to save profile");
       }
     } finally {
       isSaving = false;
@@ -253,18 +257,26 @@ class _UserProfileState extends State<UserProfile> {
           );
         }
 
-        return SingleChildScrollView(
-          child: Column(
-            children: [
-              _AvatarSection(controller: _controller),
-              const Divider(height: 10, thickness: 1),
-              _NicknameSection(controller: _controller),
-              const Divider(height: 10, thickness: 1),
-              _EmailSection(controller: _controller),
-              const Divider(height: 10, thickness: 1),
-              _ActionButtons(controller: _controller),
-            ],
-          ),
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final isNarrow =
+                ResponsiveBreakpoints.isMobileFromConstraints(constraints);
+            return SingleChildScrollView(
+              padding:
+                  isNarrow ? const EdgeInsets.fromLTRB(12, 12, 12, 20) : null,
+              child: Column(
+                children: [
+                  _AvatarSection(controller: _controller),
+                  const SizedBox(height: 12),
+                  _NicknameSection(controller: _controller),
+                  const SizedBox(height: 12),
+                  _EmailSection(controller: _controller),
+                  const SizedBox(height: 12),
+                  _ActionButtons(controller: _controller),
+                ],
+              ),
+            );
+          },
         );
       },
     );
@@ -280,54 +292,53 @@ class _AvatarSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
-    return Padding(
-      padding: const EdgeInsets.all(15.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(loc.avatarHeader, style: OnepieceFonts.headerStyle),
-          const SizedBox(height: 10),
-          Text(loc.avatarHeaderDescription, style: OnepieceFonts.contentStyle),
-          const SizedBox(height: 10),
-          Row(
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ImageHelper.getRoundImageFrame(
-                  100, 100, 3,
-                  OnepieceColors.liteFancyBlue,
-                  100,
-                  controller.data.profileImage!
-              ),
-              const SizedBox(width: 10),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              Text(loc.avatarHeader,
+                  style: OnepieceFonts.headerStyle.copyWith(fontSize: 16)),
+              const SizedBox(height: 10),
+              Row(
                 children: [
-                  Text(
-                    loc.uploadNewAvatar,
-                    style: OnepieceFonts.contentStyle,
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
+                  ImageHelper.getRoundImageFrame(
+                      80,
+                      80,
+                      3,
+                      OnepieceColors.liteFancyBlue,
+                      80,
+                      controller.data.profileImage!),
+                  const SizedBox(width: 12),
+                  Expanded(
+                      child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      ElevatedButton(
-                        style: OnepieceButtonStyle.getDefaultStyle(),
-                        onPressed: () => controller.pickImage(context),
-                        child: Text(loc.chooseFile),
-                      ),
-                      const SizedBox(width: 10),
-                      Text(
-                        controller.data.imageName ?? loc.noFileChosen,
-                        style: OnepieceFonts.contentStyle,
-                      )
+                      Text(loc.uploadNewAvatar,
+                          style: OnepieceFonts.contentStyle),
+                      const SizedBox(height: 8),
+                      SizedBox(
+                          height: 32,
+                          child: ElevatedButton(
+                              style: OnepieceButtonStyle.getDefaultStyle(),
+                              onPressed: () => controller.pickImage(context),
+                              child: Text(loc.chooseFile,
+                                  style: const TextStyle(fontSize: 13)))),
+                      const SizedBox(height: 4),
+                      Text(controller.data.imageName ?? loc.noFileChosen,
+                          style: OnepieceFonts.smallContentStyle),
+                      const SizedBox(height: 4),
+                      Text(loc.maxFileSize500,
+                          style: OnepieceFonts.smallContentStyle),
                     ],
-                  ),
-                  const SizedBox(height: 10),
-                  Text(loc.maxFileSize500, style: OnepieceFonts.contentStyle)
+                  ))
                 ],
-              )
+              ),
             ],
-          )
-        ],
-      ),
+          )),
     );
   }
 }
@@ -354,61 +365,70 @@ class _NicknameSectionState extends State<_NicknameSection> {
   void didUpdateWidget(covariant _NicknameSection oldWidget) {
     super.didUpdateWidget(oldWidget);
     // Sync text field if external change happened (e.g. reset)
-    if (_textController.text != widget.controller.data.nickname && !_isEditable) {
+    if (_textController.text != widget.controller.data.nickname &&
+        !_isEditable) {
       _textController.text = widget.controller.data.nickname;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(15.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(bottom: 15),
-            child: Text(
-              AppLocalizations.of(context)!.nickname,
-              style: OnepieceFonts.headerStyle,
-            ),
-          ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              SizedBox(
-                width: 300,
-                child: TextFormField(
-                  controller: _textController,
-                  enabled: _isEditable,
-                  onChanged: (val) => widget.controller.updateNickname(val),
-                  decoration: const InputDecoration(
-                    contentPadding: EdgeInsets.only(left: 10),
-                  ),
-                ),
-              ),
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: Padding(
+          padding: const EdgeInsets.all(12),
+          child:
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Row(children: [
+              Text(AppLocalizations.of(context)!.nickname,
+                  style: OnepieceFonts.headerStyle.copyWith(fontSize: 16)),
+              const Spacer(),
               InkWell(
-                onTap: () {
-                  setState(() {
-                    _isEditable = !_isEditable;
-                    if(!_isEditable) {
-                      // Ensure data is synced when closing edit
-                      _textController.text = widget.controller.data.nickname;
-                    }
-                  });
-                },
+                onTap: () => setState(() {
+                  _isEditable = !_isEditable;
+                  if (!_isEditable)
+                    _textController.text = widget.controller.data.nickname;
+                }),
                 child: SizedBox(
-                  width: 25, height: 25,
-                  child: ImageHelper.getSvgIconWithColor(
-                      _isEditable ? 'images/svgs/check.svg' : 'images/svgs/edit.svg',
-                      150, 150, OnepieceColors.fancyBlue
-                  ),
-                ),
+                    width: 22,
+                    height: 22,
+                    child: ImageHelper.getSvgIconWithColor(
+                        _isEditable
+                            ? 'images/svgs/check.svg'
+                            : 'images/svgs/edit.svg',
+                        150,
+                        150,
+                        OnepieceColors.fancyBlue)),
               ),
-            ],
-          ),
-        ],
-      ),
+            ]),
+            const SizedBox(height: 10),
+            _isEditable
+                ? SizedBox(
+                    height: 35,
+                    child: TextFormField(
+                      controller: _textController,
+                      onChanged: (val) => widget.controller.updateNickname(val),
+                      decoration: InputDecoration(
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 0),
+                          floatingLabelBehavior: FloatingLabelBehavior.never,
+                          disabledBorder: const OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: OnepieceColors.menuHoverColor)),
+                          enabledBorder: const OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: OnepieceColors.menuHoverColor)),
+                          focusedBorder: const OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: OnepieceColors.fancyGreen,
+                                  width: 1.5)),
+                          labelStyle: OnepieceFonts.dropDownItemStyle),
+                    ))
+                : Text(widget.controller.data.nickname,
+                    style: OnepieceFonts.contentStyle
+                        .copyWith(fontSize: 16, fontWeight: FontWeight.w600)),
+          ])),
     );
   }
 }
@@ -422,49 +442,48 @@ class _EmailSection extends StatelessWidget {
     final loc = AppLocalizations.of(context)!;
     final isVerified = controller.isEmailVerified;
 
-    return Padding(
-      padding: const EdgeInsets.all(15.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(bottom: 15),
-            child: Row(
-              children: [
-                Text(loc.email, style: OnepieceFonts.headerStyle),
-                const SizedBox(width: 10),
-                Tooltip(
-                  message: isVerified ? loc.verified : loc.notVerified,
-                  child: SizedBox(
-                    width: 30, height: 30,
-                    child: ImageHelper.getSvgIconWithColor(
-                      isVerified ? 'images/svgs/check-circle.svg' : 'images/svgs/alert.svg',
-                      150, 150,
-                      isVerified ? Colors.green : Colors.red,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Row(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 6.0),
-                child: Text(
-                  controller.data.username,
-                  style: OnepieceFonts.contentStyle,
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: Padding(
+          padding: const EdgeInsets.all(12),
+          child:
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Row(children: [
+              Text(loc.email,
+                  style: OnepieceFonts.headerStyle.copyWith(fontSize: 16)),
+              const SizedBox(width: 8),
+              Tooltip(
+                message: isVerified ? loc.verified : loc.notVerified,
+                child: SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: ImageHelper.getSvgIconWithColor(
+                      isVerified
+                          ? 'images/svgs/check-circle.svg'
+                          : 'images/svgs/alert.svg',
+                      150,
+                      150,
+                      isVerified ? Colors.green : Colors.red),
                 ),
               ),
+            ]),
+            const SizedBox(height: 10),
+            Row(children: [
+              Text(controller.data.username,
+                  style: OnepieceFonts.contentStyle
+                      .copyWith(fontWeight: FontWeight.w600)),
+              const Spacer(),
               if (!isVerified)
-                ElevatedButton(
-                  onPressed: () => controller.sendVerificationEmail(context),
-                  child: Text(loc.sendEmail),
-                ),
-            ],
-          ),
-        ],
-      ),
+                SizedBox(
+                    height: 32,
+                    child: ElevatedButton(
+                        onPressed: () =>
+                            controller.sendVerificationEmail(context),
+                        child: Text(loc.sendEmail,
+                            style: const TextStyle(fontSize: 13)))),
+            ]),
+          ])),
     );
   }
 }
@@ -483,9 +502,8 @@ class _ActionButtons extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           ElevatedButton(
-            onPressed: controller.hasChanges
-                ? () => controller.resetChanges()
-                : null,
+            onPressed:
+                controller.hasChanges ? () => controller.resetChanges() : null,
             child: Text(loc.cancelPopUp),
           ),
           const SizedBox(width: 10),
@@ -495,9 +513,9 @@ class _ActionButtons extends StatelessWidget {
                 : null,
             child: controller.isSaving
                 ? const SizedBox(
-                width: 20, height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2)
-            )
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2))
                 : Text(loc.submitForm),
           ),
         ],

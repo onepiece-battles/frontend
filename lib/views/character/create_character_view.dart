@@ -167,535 +167,808 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
 
   final _formKey = GlobalKey<FormState>();
 
+  Widget _buildMobileLayout(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 80),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        // Avatar
+        Center(
+            child: Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: _getAvatar(context),
+        )),
+        // Basic Info card
+        Card(
+          elevation: 0,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(AppLocalizations.of(context)!.basicInfo,
+                        style:
+                            OnepieceFonts.headerStyle.copyWith(fontSize: 16)),
+                    const SizedBox(height: 10),
+                    _buildStringField(context, characterNameEnController,
+                        AppLocalizations.of(context)!.name, true),
+                    const SizedBox(height: 6),
+                    const SizedBox(height: 6),
+                    _getBattleStyle(context),
+                    const SizedBox(height: 6),
+                    _getRace(context),
+                    const SizedBox(height: 6),
+                    _getHakiList(context),
+                    const SizedBox(height: 6),
+                    _buildDigitField(
+                        context,
+                        characterBounty,
+                        AppLocalizations.of(context)!.bounty,
+                        10,
+                        100000000000,
+                        false),
+                    _buildDigitField(context, characterAge,
+                        AppLocalizations.of(context)!.age, 0, 100000, false),
+                    _buildDigitField(context, characterHeight,
+                        AppLocalizations.of(context)!.height, 1, 100000, false),
+                    _buildStringField(context, characterBirthPlace,
+                        AppLocalizations.of(context)!.birthPlace, false),
+                    _getBirthDropdown(context),
+                  ])),
+        ),
+        const SizedBox(height: 12),
+        // Battle Info card
+        Card(
+          elevation: 0,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(AppLocalizations.of(context)!.battleInfo,
+                        style:
+                            OnepieceFonts.headerStyle.copyWith(fontSize: 16)),
+                    const SizedBox(height: 10),
+                    _buildDigitField(
+                        context,
+                        characterAttackController,
+                        AppLocalizations.of(context)!.characterAttack,
+                        10,
+                        1500,
+                        true),
+                    _buildDigitField(
+                        context,
+                        characterDefenseController,
+                        AppLocalizations.of(context)!.characterDefense,
+                        10,
+                        1400,
+                        true),
+                    _buildDigitField(
+                        context,
+                        characterBloodController,
+                        AppLocalizations.of(context)!.characterBlood,
+                        100,
+                        10000,
+                        true),
+                    _buildDigitField(
+                        context,
+                        characterEnergyController,
+                        AppLocalizations.of(context)!.characterEnergy,
+                        100,
+                        300,
+                        true),
+                    _buildDigitField(
+                        context,
+                        characterSpeedController,
+                        AppLocalizations.of(context)!.characterSpeed,
+                        10,
+                        200,
+                        true),
+                    _buildDigitField(
+                        context,
+                        characterIntelligenceController,
+                        AppLocalizations.of(context)!.characterIntelligence,
+                        70,
+                        260,
+                        true),
+                    _buildDigitField(
+                        context,
+                        characterGroupGainController,
+                        AppLocalizations.of(context)!.groupGain,
+                        100,
+                        200,
+                        true),
+                    _buildDigitField(context, characterFruitLimitController,
+                        AppLocalizations.of(context)!.fruitLimit, 1, 2, true),
+                  ])),
+        ),
+      ]),
+    );
+  }
+
+  Widget _buildDigitField(BuildContext context, TextEditingController ctrl,
+      String hint, int min, int max, bool required) {
+    return Padding(
+        padding: const EdgeInsets.only(bottom: 10),
+        child: SizedBox(
+            height: 35,
+            child: TextFormField(
+              controller: ctrl,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                floatingLabelBehavior: FloatingLabelBehavior.never,
+                disabledBorder: const OutlineInputBorder(
+                    borderSide:
+                        BorderSide(color: OnepieceColors.menuHoverColor)),
+                enabledBorder: const OutlineInputBorder(
+                    borderSide:
+                        BorderSide(color: OnepieceColors.menuHoverColor)),
+                focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(
+                        color: OnepieceColors.fancyGreen, width: 1.5)),
+                labelText: hint,
+                labelStyle: OnepieceFonts.dropDownItemStyle,
+              ),
+            )));
+  }
+
+  Widget _buildStringField(BuildContext context, TextEditingController ctrl,
+      String hint, bool required) {
+    return Padding(
+        padding: const EdgeInsets.only(bottom: 10),
+        child: SizedBox(
+            height: 35,
+            child: TextFormField(
+              controller: ctrl,
+              decoration: InputDecoration(
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                floatingLabelBehavior: FloatingLabelBehavior.never,
+                disabledBorder: const OutlineInputBorder(
+                    borderSide:
+                        BorderSide(color: OnepieceColors.menuHoverColor)),
+                enabledBorder: const OutlineInputBorder(
+                    borderSide:
+                        BorderSide(color: OnepieceColors.menuHoverColor)),
+                focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(
+                        color: OnepieceColors.fancyGreen, width: 1.5)),
+                labelText: hint,
+                labelStyle: OnepieceFonts.dropDownItemStyle,
+              ),
+            )));
+  }
+
+  Widget _getBirthDropdown(BuildContext context) {
+    return Padding(
+        padding: const EdgeInsets.only(bottom: 10),
+        child: Row(children: [
+          Text(AppLocalizations.of(context)!.birthDay,
+              style: OnepieceFonts.deepBlackHintFont),
+          const Spacer(),
+          SizedBox(
+              width: 60,
+              child: DropdownButtonHideUnderline(
+                  child: DropdownButton2<String>(
+                isExpanded: true,
+                value: selectedMonth,
+                onChanged: (v) => setState(() => selectedMonth = v ?? ''),
+                buttonStyleData: ButtonStyleData(
+                    padding: const EdgeInsets.symmetric(horizontal: 5),
+                    height: 30,
+                    width: 60,
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(3),
+                        color: OnepieceColors.liteFancyGreen)),
+                menuItemStyleData: const MenuItemStyleData(height: 30),
+                items: List.generate(12, (i) => (i + 1).toString())
+                    .map((m) => DropdownMenuItem<String>(
+                        value: m,
+                        child: Text(m, style: const TextStyle(fontSize: 14))))
+                    .toList(),
+              ))),
+          Text(' ${AppLocalizations.of(context)!.month} ',
+              style: OnepieceFonts.smallContentStyle),
+          SizedBox(
+              width: 60,
+              child: DropdownButtonHideUnderline(
+                  child: DropdownButton2<String>(
+                isExpanded: true,
+                value: selectedDay,
+                onChanged: (v) => setState(() => selectedDay = v ?? ''),
+                buttonStyleData: ButtonStyleData(
+                    padding: const EdgeInsets.symmetric(horizontal: 5),
+                    height: 30,
+                    width: 60,
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(3),
+                        color: OnepieceColors.liteFancyGreen)),
+                menuItemStyleData: const MenuItemStyleData(height: 30),
+                items: List.generate(31, (i) => (i + 1).toString())
+                    .map((d) => DropdownMenuItem<String>(
+                        value: d,
+                        child: Text(d, style: const TextStyle(fontSize: 14))))
+                    .toList(),
+              ))),
+          Text(' ${AppLocalizations.of(context)!.day}',
+              style: OnepieceFonts.smallContentStyle),
+        ]));
+  }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isNarrow = ResponsiveBreakpoints.isMobileFromConstraints(constraints);
+        final isNarrow =
+            ResponsiveBreakpoints.isMobileFromConstraints(constraints);
         dividerWidth = isNarrow ? constraints.maxWidth - 30 : 900;
         sideWidth = isNarrow ? 8.0 : 50;
         return Stack(
-      children: [
-        SingleChildScrollView(
-          scrollDirection: Axis.vertical,
-          child: Center(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: SizedBox(
-                width: dividerWidth,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.fromLTRB(sideWidth, 10, 0, 20),
-                      child: Text(
-                        AppLocalizations.of(context)!.basicInfo,
-                        style: OnepieceFonts.headerStyle,
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: sideWidth),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            if (isNarrow)
+              _buildMobileLayout(context)
+            else
+              SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                child: Center(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: SizedBox(
+                      width: dividerWidth,
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Column(
+                          Padding(
+                            padding: EdgeInsets.fromLTRB(sideWidth, 10, 0, 20),
+                            child: Text(
+                              AppLocalizations.of(context)!.basicInfo,
+                              style: OnepieceFonts.headerStyle,
+                            ),
+                          ),
+                          Padding(
+                            padding:
+                                EdgeInsets.symmetric(horizontal: sideWidth),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.start,
                               children: [
-                                _getAvatar(context),
-                                StringTextFormField(
-                                    context,
-                                    true,
-                                    characterNameCnController,
-                                    AppLocalizations.of(context)!.name,
-                                    30,
-                                    ImageHelper.getTextFormFieldIcon(
-                                        'images/character_digits_icon/name.svg',
-                                        true,
-                                        null),
-                                    true),
-                                if (getIt<User>().loginRole == UserRole.NIKA)
-                                  StringTextFormField(
-                                      context,
-                                      true,
-                                      characterNameEnController,
-                                      AppLocalizations.of(context)!.name,
-                                      30,
-                                      ImageHelper.getTextFormFieldIcon(
-                                          'images/character_digits_icon/name.svg',
+                                Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      _getAvatar(context),
+                                      StringTextFormField(
+                                          context,
                                           true,
-                                          null),
-                                      true),
-                              ]),
-                          SizedBox(
-                            width: 300,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Text(
-                                  AppLocalizations.of(context)!.battleStyle,
-                                  style: OnepieceFonts.fancyBlueHintFont,
-                                ),
-                                const SizedBox(
-                                  height: 10,
-                                ),
-                                _getBattleStyle(context),
-                                const SizedBox(
-                                  height: 30,
-                                ),
-                                Text(
-                                  AppLocalizations.of(context)!.race,
-                                  style: OnepieceFonts.fancyBlueHintFont,
-                                ),
-                                const SizedBox(
-                                  height: 10,
-                                ),
-                                _getRace(context),
-                                const SizedBox(
-                                  height: 30,
-                                ),
-                                Text(
-                                  AppLocalizations.of(context)!.hakis,
-                                  style: OnepieceFonts.fancyBlueHintFont,
-                                ),
-                                const SizedBox(
-                                  height: 10,
-                                ),
-                                _getHakiList(context),
-                              ],
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                    SizedBox(
-                      width: dividerWidth,
-                      height: 30,
-                      child: const Divider(
-                        height: 2,
-                        color: Colors.grey,
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: sideWidth),
-                      child: Form(
-                        key: _formKey,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.fromLTRB(0, 0, 0, 15),
-                                  child: Row(
-                                    children: [
-                                      Text(
-                                        AppLocalizations.of(context)!
-                                            .battleInfo,
-                                        style: OnepieceFonts.headerStyle,
-                                      ),
-                                      Text(
-                                        "  ( ${AppLocalizations.of(context)!.required} )",
-                                        style: OnepieceFonts.hintFont,
-                                      )
-                                    ],
-                                  ),
-                                ),
-                                DigitTextFormField(
-                                    context,
-                                    true,
-                                    characterFruitLimitController,
-                                    AppLocalizations.of(context)!.fruitLimit,
-                                    1,
-                                    2,
-                                    ImageHelper.getTextFormFieldIcon(
-                                        'images/character_digits_icon/fruit_limit.svg',
-                                        true,
-                                        null),
-                                    true),
-                                DigitTextFormField(
-                                    context,
-                                    true,
-                                    characterGroupGainController,
-                                    AppLocalizations.of(context)!.groupGain,
-                                    100,
-                                    200,
-                                    ImageHelper.getTextFormFieldIcon(
-                                        'images/character_digits_icon/group_gain.svg',
-                                        true,
-                                        null),
-                                    true),
-                                DigitTextFormField(
-                                    context,
-                                    true,
-                                    characterAttackController,
-                                    AppLocalizations.of(context)!
-                                        .characterAttack,
-                                    10,
-                                    1500,
-                                    ImageHelper.getTextFormFieldIcon(
-                                        'images/character_digits_icon/attack.svg',
-                                        true,
-                                        null),
-                                    true),
-                                DigitTextFormField(
-                                    context,
-                                    true,
-                                    characterDefenseController,
-                                    AppLocalizations.of(context)!
-                                        .characterDefense,
-                                    10,
-                                    1400,
-                                    ImageHelper.getTextFormFieldIcon(
-                                        'images/character_digits_icon/defense.svg',
-                                        true,
-                                        null),
-                                    true),
-                                DigitTextFormField(
-                                    context,
-                                    true,
-                                    characterIntelligenceController,
-                                    AppLocalizations.of(context)!
-                                        .characterIntelligence,
-                                    70,
-                                    260,
-                                    ImageHelper.getTextFormFieldIcon(
-                                        'images/character_digits_icon/intelligence.svg',
-                                        true,
-                                        null),
-                                    true),
-                                DigitTextFormField(
-                                    context,
-                                    true,
-                                    characterBloodController,
-                                    AppLocalizations.of(context)!
-                                        .characterBlood,
-                                    100,
-                                    10000,
-                                    ImageHelper.getTextFormFieldIcon(
-                                        'images/character_digits_icon/blood.svg',
-                                        true,
-                                        null),
-                                    true),
-                                DigitTextFormField(
-                                    context,
-                                    true,
-                                    characterSpeedController,
-                                    AppLocalizations.of(context)!
-                                        .characterSpeed,
-                                    10,
-                                    200,
-                                    ImageHelper.getTextFormFieldIcon(
-                                        'images/character_digits_icon/speed.svg',
-                                        true,
-                                        null),
-                                    true),
-                                DigitTextFormField(
-                                    context,
-                                    true,
-                                    characterEnergyController,
-                                    AppLocalizations.of(context)!
-                                        .characterEnergy,
-                                    100,
-                                    300,
-                                    ImageHelper.getTextFormFieldIcon(
-                                        'images/character_digits_icon/energy.svg',
-                                        true,
-                                        null),
-                                    true),
-                              ],
-                            ),
-                            const SizedBox(
-                              width: 100,
-                            ),
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.fromLTRB(0, 0, 0, 15),
-                                  child: Row(
-                                    children: [
-                                      Text(
-                                        AppLocalizations.of(context)!
-                                            .characterDetail,
-                                        style: OnepieceFonts.headerStyle,
-                                      ),
-                                      Text(
-                                        "  ( ${AppLocalizations.of(context)!.optional} )",
-                                        style: OnepieceFonts.hintFont,
-                                      )
-                                    ],
-                                  ),
-                                ),
-                                DigitTextFormField(
-                                    context,
-                                    true,
-                                    characterAge,
-                                    AppLocalizations.of(context)!.age,
-                                    0,
-                                    100000,
-                                    ImageHelper.getTextFormFieldIcon(
-                                        'images/character_digits_icon/age.svg',
-                                        true,
-                                        null),
-                                    false),
-                                DigitTextFormField(
-                                    context,
-                                    true,
-                                    characterHeight,
-                                    AppLocalizations.of(context)!.height,
-                                    1,
-                                    100000,
-                                    ImageHelper.getTextFormFieldIcon(
-                                        'images/character_digits_icon/height.svg',
-                                        true,
-                                        null),
-                                    false),
-                                StringTextFormField(
-                                    context,
-                                    true,
-                                    characterBirthPlace,
-                                    AppLocalizations.of(context)!.birthPlace,
-                                    20,
-                                    ImageHelper.getTextFormFieldIcon(
-                                        'images/character_digits_icon/birth_place.svg',
-                                        true,
-                                        null),
-                                    false),
-                                DigitTextFormField(
-                                    context,
-                                    true,
-                                    characterBounty,
-                                    AppLocalizations.of(context)!.bounty,
-                                    10,
-                                    100000000000,
-                                    ImageHelper.getTextFormFieldIcon(
-                                        'images/character_digits_icon/bounty.svg',
-                                        true,
-                                        null),
-                                    false),
+                                          characterNameCnController,
+                                          AppLocalizations.of(context)!.name,
+                                          30,
+                                          ImageHelper.getTextFormFieldIcon(
+                                              'images/character_digits_icon/name.svg',
+                                              true,
+                                              null),
+                                          true),
+                                      if (getIt<User>().loginRole ==
+                                          UserRole.NIKA)
+                                        StringTextFormField(
+                                            context,
+                                            true,
+                                            characterNameEnController,
+                                            AppLocalizations.of(context)!.name,
+                                            30,
+                                            ImageHelper.getTextFormFieldIcon(
+                                                'images/character_digits_icon/name.svg',
+                                                true,
+                                                null),
+                                            true),
+                                    ]),
                                 SizedBox(
-                                  width: 240,
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(left: 8.0),
-                                    child: Column(
-                                      children: [
-                                        SizedBox(
-                                          width: 300,
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.start,
+                                  width: 300,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        AppLocalizations.of(context)!
+                                            .battleStyle,
+                                        style: OnepieceFonts.fancyBlueHintFont,
+                                      ),
+                                      const SizedBox(
+                                        height: 10,
+                                      ),
+                                      _getBattleStyle(context),
+                                      const SizedBox(
+                                        height: 30,
+                                      ),
+                                      Text(
+                                        AppLocalizations.of(context)!.race,
+                                        style: OnepieceFonts.fancyBlueHintFont,
+                                      ),
+                                      const SizedBox(
+                                        height: 10,
+                                      ),
+                                      _getRace(context),
+                                      const SizedBox(
+                                        height: 30,
+                                      ),
+                                      Text(
+                                        AppLocalizations.of(context)!.hakis,
+                                        style: OnepieceFonts.fancyBlueHintFont,
+                                      ),
+                                      const SizedBox(
+                                        height: 10,
+                                      ),
+                                      _getHakiList(context),
+                                    ],
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                          SizedBox(
+                            width: dividerWidth,
+                            height: 30,
+                            child: const Divider(
+                              height: 2,
+                              color: Colors.grey,
+                            ),
+                          ),
+                          Padding(
+                            padding:
+                                EdgeInsets.symmetric(horizontal: sideWidth),
+                            child: Form(
+                              key: _formKey,
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      Padding(
+                                        padding: const EdgeInsets.fromLTRB(
+                                            0, 0, 0, 15),
+                                        child: Row(
+                                          children: [
+                                            Text(
+                                              AppLocalizations.of(context)!
+                                                  .battleInfo,
+                                              style: OnepieceFonts.headerStyle,
+                                            ),
+                                            Text(
+                                              "  ( ${AppLocalizations.of(context)!.required} )",
+                                              style: OnepieceFonts.hintFont,
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                      DigitTextFormField(
+                                          context,
+                                          true,
+                                          characterFruitLimitController,
+                                          AppLocalizations.of(context)!
+                                              .fruitLimit,
+                                          1,
+                                          2,
+                                          ImageHelper.getTextFormFieldIcon(
+                                              'images/character_digits_icon/fruit_limit.svg',
+                                              true,
+                                              null),
+                                          true),
+                                      DigitTextFormField(
+                                          context,
+                                          true,
+                                          characterGroupGainController,
+                                          AppLocalizations.of(context)!
+                                              .groupGain,
+                                          100,
+                                          200,
+                                          ImageHelper.getTextFormFieldIcon(
+                                              'images/character_digits_icon/group_gain.svg',
+                                              true,
+                                              null),
+                                          true),
+                                      DigitTextFormField(
+                                          context,
+                                          true,
+                                          characterAttackController,
+                                          AppLocalizations.of(context)!
+                                              .characterAttack,
+                                          10,
+                                          1500,
+                                          ImageHelper.getTextFormFieldIcon(
+                                              'images/character_digits_icon/attack.svg',
+                                              true,
+                                              null),
+                                          true),
+                                      DigitTextFormField(
+                                          context,
+                                          true,
+                                          characterDefenseController,
+                                          AppLocalizations.of(context)!
+                                              .characterDefense,
+                                          10,
+                                          1400,
+                                          ImageHelper.getTextFormFieldIcon(
+                                              'images/character_digits_icon/defense.svg',
+                                              true,
+                                              null),
+                                          true),
+                                      DigitTextFormField(
+                                          context,
+                                          true,
+                                          characterIntelligenceController,
+                                          AppLocalizations.of(context)!
+                                              .characterIntelligence,
+                                          70,
+                                          260,
+                                          ImageHelper.getTextFormFieldIcon(
+                                              'images/character_digits_icon/intelligence.svg',
+                                              true,
+                                              null),
+                                          true),
+                                      DigitTextFormField(
+                                          context,
+                                          true,
+                                          characterBloodController,
+                                          AppLocalizations.of(context)!
+                                              .characterBlood,
+                                          100,
+                                          10000,
+                                          ImageHelper.getTextFormFieldIcon(
+                                              'images/character_digits_icon/blood.svg',
+                                              true,
+                                              null),
+                                          true),
+                                      DigitTextFormField(
+                                          context,
+                                          true,
+                                          characterSpeedController,
+                                          AppLocalizations.of(context)!
+                                              .characterSpeed,
+                                          10,
+                                          200,
+                                          ImageHelper.getTextFormFieldIcon(
+                                              'images/character_digits_icon/speed.svg',
+                                              true,
+                                              null),
+                                          true),
+                                      DigitTextFormField(
+                                          context,
+                                          true,
+                                          characterEnergyController,
+                                          AppLocalizations.of(context)!
+                                              .characterEnergy,
+                                          100,
+                                          300,
+                                          ImageHelper.getTextFormFieldIcon(
+                                              'images/character_digits_icon/energy.svg',
+                                              true,
+                                              null),
+                                          true),
+                                    ],
+                                  ),
+                                  const SizedBox(
+                                    width: 100,
+                                  ),
+                                  Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      Padding(
+                                        padding: const EdgeInsets.fromLTRB(
+                                            0, 0, 0, 15),
+                                        child: Row(
+                                          children: [
+                                            Text(
+                                              AppLocalizations.of(context)!
+                                                  .characterDetail,
+                                              style: OnepieceFonts.headerStyle,
+                                            ),
+                                            Text(
+                                              "  ( ${AppLocalizations.of(context)!.optional} )",
+                                              style: OnepieceFonts.hintFont,
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                      DigitTextFormField(
+                                          context,
+                                          true,
+                                          characterAge,
+                                          AppLocalizations.of(context)!.age,
+                                          0,
+                                          100000,
+                                          ImageHelper.getTextFormFieldIcon(
+                                              'images/character_digits_icon/age.svg',
+                                              true,
+                                              null),
+                                          false),
+                                      DigitTextFormField(
+                                          context,
+                                          true,
+                                          characterHeight,
+                                          AppLocalizations.of(context)!.height,
+                                          1,
+                                          100000,
+                                          ImageHelper.getTextFormFieldIcon(
+                                              'images/character_digits_icon/height.svg',
+                                              true,
+                                              null),
+                                          false),
+                                      StringTextFormField(
+                                          context,
+                                          true,
+                                          characterBirthPlace,
+                                          AppLocalizations.of(context)!
+                                              .birthPlace,
+                                          20,
+                                          ImageHelper.getTextFormFieldIcon(
+                                              'images/character_digits_icon/birth_place.svg',
+                                              true,
+                                              null),
+                                          false),
+                                      DigitTextFormField(
+                                          context,
+                                          true,
+                                          characterBounty,
+                                          AppLocalizations.of(context)!.bounty,
+                                          10,
+                                          100000000000,
+                                          ImageHelper.getTextFormFieldIcon(
+                                              'images/character_digits_icon/bounty.svg',
+                                              true,
+                                              null),
+                                          false),
+                                      SizedBox(
+                                        width: 240,
+                                        child: Padding(
+                                          padding:
+                                              const EdgeInsets.only(left: 8.0),
+                                          child: Column(
                                             children: [
-                                              ImageHelper.getTextFormFieldIcon(
-                                                  "images/character_digits_icon/birthday.svg",
-                                                  true,
-                                                  null),
-                                              Text(
-                                                AppLocalizations.of(context)!
-                                                    .birthDay,
-                                                style: OnepieceFonts
-                                                    .deepBlackHintFont,
+                                              SizedBox(
+                                                width: 300,
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.start,
+                                                  children: [
+                                                    ImageHelper
+                                                        .getTextFormFieldIcon(
+                                                            "images/character_digits_icon/birthday.svg",
+                                                            true,
+                                                            null),
+                                                    Text(
+                                                      AppLocalizations.of(
+                                                              context)!
+                                                          .birthDay,
+                                                      style: OnepieceFonts
+                                                          .deepBlackHintFont,
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.end,
+                                                children: [
+                                                  SizedBox(
+                                                    width: 60,
+                                                    child:
+                                                        DropdownButtonHideUnderline(
+                                                      child: DropdownButton2(
+                                                        isExpanded: true,
+                                                        value: selectedMonth,
+                                                        onChanged:
+                                                            (String? month) {
+                                                          setState(() {
+                                                            selectedMonth =
+                                                                month!;
+                                                          });
+                                                        },
+                                                        buttonStyleData:
+                                                            ButtonStyleData(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .symmetric(
+                                                                  horizontal:
+                                                                      5),
+                                                          decoration: BoxDecoration(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          3),
+                                                              color: OnepieceColors
+                                                                  .liteFancyGreen),
+                                                          height: 30,
+                                                          width: 60,
+                                                        ),
+                                                        menuItemStyleData:
+                                                            const MenuItemStyleData(
+                                                          height: 30,
+                                                        ),
+                                                        selectedItemBuilder:
+                                                            (context) {
+                                                          return List<
+                                                                  String>.generate(
+                                                              12,
+                                                              (int index) =>
+                                                                  (index + 1)
+                                                                      .toString()).map(
+                                                              (String month) {
+                                                            return Container(
+                                                              alignment:
+                                                                  AlignmentDirectional
+                                                                      .center,
+                                                              child: Text(
+                                                                month,
+                                                                style:
+                                                                    const TextStyle(
+                                                                  fontSize: 16,
+                                                                  overflow:
+                                                                      TextOverflow
+                                                                          .ellipsis,
+                                                                ),
+                                                              ),
+                                                            );
+                                                          }).toList();
+                                                        },
+                                                        items: List<
+                                                                String>.generate(
+                                                            12,
+                                                            (int index) => (index +
+                                                                    1)
+                                                                .toString()).map(
+                                                            (String month) {
+                                                          return DropdownMenuItem<
+                                                              String>(
+                                                            value: month,
+                                                            child: Text(
+                                                              month,
+                                                              style:
+                                                                  const TextStyle(
+                                                                fontSize: 14,
+                                                              ),
+                                                            ),
+                                                          );
+                                                        }).toList(),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                    AppLocalizations.of(
+                                                            context)!
+                                                        .month,
+                                                    style: OnepieceFonts
+                                                        .contentStyle,
+                                                  ),
+                                                  SizedBox(
+                                                    width: 60,
+                                                    child:
+                                                        DropdownButtonHideUnderline(
+                                                      child: DropdownButton2(
+                                                        isExpanded: true,
+                                                        value: selectedDay,
+                                                        onChanged:
+                                                            (String? day) {
+                                                          setState(() {
+                                                            selectedDay = day!;
+                                                          });
+                                                        },
+                                                        buttonStyleData:
+                                                            ButtonStyleData(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .symmetric(
+                                                                  horizontal:
+                                                                      6),
+                                                          decoration: BoxDecoration(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          3),
+                                                              color: OnepieceColors
+                                                                  .liteFancyGreen),
+                                                          height: 30,
+                                                          width: 60,
+                                                        ),
+                                                        menuItemStyleData:
+                                                            const MenuItemStyleData(
+                                                          height: 30,
+                                                        ),
+                                                        selectedItemBuilder:
+                                                            (context) {
+                                                          return List<
+                                                                  String>.generate(
+                                                              31,
+                                                              (int index) =>
+                                                                  (index + 1)
+                                                                      .toString()).map(
+                                                              (String day) {
+                                                            return Container(
+                                                              alignment:
+                                                                  AlignmentDirectional
+                                                                      .center,
+                                                              child: Text(
+                                                                day,
+                                                                style:
+                                                                    const TextStyle(
+                                                                  fontSize: 16,
+                                                                  overflow:
+                                                                      TextOverflow
+                                                                          .ellipsis,
+                                                                ),
+                                                              ),
+                                                            );
+                                                          }).toList();
+                                                        },
+                                                        items: List<
+                                                                String>.generate(
+                                                            31,
+                                                            (int index) => (index +
+                                                                    1)
+                                                                .toString()).map(
+                                                            (String day) {
+                                                          return DropdownMenuItem<
+                                                              String>(
+                                                            value: day,
+                                                            child: Text(
+                                                              day,
+                                                              style:
+                                                                  const TextStyle(
+                                                                fontSize: 14,
+                                                              ),
+                                                            ),
+                                                          );
+                                                        }).toList(),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                    AppLocalizations.of(
+                                                            context)!
+                                                        .day,
+                                                    style: OnepieceFonts
+                                                        .contentStyle,
+                                                  ),
+                                                ],
                                               ),
                                             ],
                                           ),
                                         ),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.end,
-                                          children: [
-                                            SizedBox(
-                                              width: 60,
-                                              child:
-                                                  DropdownButtonHideUnderline(
-                                                child: DropdownButton2(
-                                                  isExpanded: true,
-                                                  value: selectedMonth,
-                                                  onChanged: (String? month) {
-                                                    setState(() {
-                                                      selectedMonth = month!;
-                                                    });
-                                                  },
-                                                  buttonStyleData:
-                                                      ButtonStyleData(
-                                                    padding: const EdgeInsets
-                                                        .symmetric(
-                                                        horizontal: 5),
-                                                    decoration: BoxDecoration(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(3),
-                                                        color: OnepieceColors
-                                                            .liteFancyGreen),
-                                                    height: 30,
-                                                    width: 60,
-                                                  ),
-                                                  menuItemStyleData:
-                                                      const MenuItemStyleData(
-                                                    height: 30,
-                                                  ),
-                                                  selectedItemBuilder:
-                                                      (context) {
-                                                    return List<
-                                                            String>.generate(
-                                                        12,
-                                                        (int index) => (index +
-                                                                1)
-                                                            .toString()).map(
-                                                        (String month) {
-                                                      return Container(
-                                                        alignment:
-                                                            AlignmentDirectional
-                                                                .center,
-                                                        child: Text(
-                                                          month,
-                                                          style:
-                                                              const TextStyle(
-                                                            fontSize: 16,
-                                                            overflow:
-                                                                TextOverflow
-                                                                    .ellipsis,
-                                                          ),
-                                                        ),
-                                                      );
-                                                    }).toList();
-                                                  },
-                                                  items: List<String>.generate(
-                                                      12,
-                                                      (int index) => (index + 1)
-                                                          .toString()).map(
-                                                      (String month) {
-                                                    return DropdownMenuItem<
-                                                        String>(
-                                                      value: month,
-                                                      child: Text(
-                                                        month,
-                                                        style: const TextStyle(
-                                                          fontSize: 14,
-                                                        ),
-                                                      ),
-                                                    );
-                                                  }).toList(),
-                                                ),
-                                              ),
-                                            ),
-                                            Text(
-                                              AppLocalizations.of(context)!
-                                                  .month,
-                                              style: OnepieceFonts.contentStyle,
-                                            ),
-                                            SizedBox(
-                                              width: 60,
-                                              child:
-                                                  DropdownButtonHideUnderline(
-                                                child: DropdownButton2(
-                                                  isExpanded: true,
-                                                  value: selectedDay,
-                                                  onChanged: (String? day) {
-                                                    setState(() {
-                                                      selectedDay = day!;
-                                                    });
-                                                  },
-                                                  buttonStyleData:
-                                                      ButtonStyleData(
-                                                    padding: const EdgeInsets
-                                                        .symmetric(
-                                                        horizontal: 6),
-                                                    decoration: BoxDecoration(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(3),
-                                                        color: OnepieceColors
-                                                            .liteFancyGreen),
-                                                    height: 30,
-                                                    width: 60,
-                                                  ),
-                                                  menuItemStyleData:
-                                                      const MenuItemStyleData(
-                                                    height: 30,
-                                                  ),
-                                                  selectedItemBuilder:
-                                                      (context) {
-                                                    return List<
-                                                            String>.generate(
-                                                        31,
-                                                        (int index) => (index +
-                                                                1)
-                                                            .toString()).map(
-                                                        (String day) {
-                                                      return Container(
-                                                        alignment:
-                                                            AlignmentDirectional
-                                                                .center,
-                                                        child: Text(
-                                                          day,
-                                                          style:
-                                                              const TextStyle(
-                                                            fontSize: 16,
-                                                            overflow:
-                                                                TextOverflow
-                                                                    .ellipsis,
-                                                          ),
-                                                        ),
-                                                      );
-                                                    }).toList();
-                                                  },
-                                                  items: List<String>.generate(
-                                                      31,
-                                                      (int index) => (index + 1)
-                                                          .toString()).map(
-                                                      (String day) {
-                                                    return DropdownMenuItem<
-                                                        String>(
-                                                      value: day,
-                                                      child: Text(
-                                                        day,
-                                                        style: const TextStyle(
-                                                          fontSize: 14,
-                                                        ),
-                                                      ),
-                                                    );
-                                                  }).toList(),
-                                                ),
-                                              ),
-                                            ),
-                                            Text(
-                                              AppLocalizations.of(context)!.day,
-                                              style: OnepieceFonts.contentStyle,
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
+                                      ),
+                                    ],
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ],
-                        ),
+                          ),
+                          const SizedBox(
+                            height: 40,
+                          )
+                        ],
                       ),
                     ),
-                    const SizedBox(
-                      height: 40,
-                    )
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ),
-        ),
-        _getFootBar(context)
-      ],
-    );
+            _getFootBar(context)
+          ],
+        );
       },
     );
   }
@@ -812,15 +1085,14 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
           buttonStyleData: ButtonStyleData(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             height: 35,
-            width: 280,
+            width:
+                MediaQuery.of(context).size.width < 600 ? double.infinity : 280,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(3),
               color: OnepieceColors.liteFancyGreen,
             ),
           ),
-          menuItemStyleData: const MenuItemStyleData(
-            height: 35,
-          ),
+          menuItemStyleData: const MenuItemStyleData(height: 35),
           items: BattleStyle.values.map((BattleStyle battleStyle) {
             return DropdownMenuItem<BattleStyle>(
               value: battleStyle,
@@ -887,15 +1159,14 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
           buttonStyleData: ButtonStyleData(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             height: 35,
-            width: 280,
+            width:
+                MediaQuery.of(context).size.width < 600 ? double.infinity : 280,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(3),
               color: OnepieceColors.liteFancyGreen,
             ),
           ),
-          menuItemStyleData: const MenuItemStyleData(
-            height: 35,
-          ),
+          menuItemStyleData: const MenuItemStyleData(height: 35),
           items: Race.values.map((Race race) {
             return DropdownMenuItem<Race>(
               value: race,
@@ -951,15 +1222,14 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
           buttonStyleData: ButtonStyleData(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             height: 35,
-            width: 280,
+            width:
+                MediaQuery.of(context).size.width < 600 ? double.infinity : 280,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(3),
               color: OnepieceColors.liteFancyGreen,
             ),
           ),
-          menuItemStyleData: const MenuItemStyleData(
-            height: 35,
-          ),
+          menuItemStyleData: const MenuItemStyleData(height: 35),
           items: Haki.values.map((Haki haki) {
             return DropdownMenuItem<Haki>(
               value: haki,
@@ -1102,15 +1372,15 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                                     resourceId: characterResponse!.id,
                                     image: encodedImage,
                                     type: ResourceType.CHARACTER);
-                            getIt<ImageDao>().addImage(uploadImageRequest).then(
-                                (value) {
+                            getIt<ImageDao>()
+                                .addImage(uploadImageRequest)
+                                .then((value) {
                               if (!mounted) return;
                               router.goNamed('characterDetails',
                                   extra: characterResponse.id,
                                   pathParameters: {
-                                    'name':
-                                        I18nHelper.getDisplayNameFromI18n(
-                                            characterResponse.name)
+                                    'name': I18nHelper.getDisplayNameFromI18n(
+                                        characterResponse.name)
                                   });
                             });
                           });

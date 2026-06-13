@@ -18,6 +18,7 @@ import 'package:openapi/api.dart';
 import '../../l10n/app_localizations.dart';
 import 'package:one_piece_battles_flutter/graph/character_data.dart';
 import '../../constants/onepiece_fonts.dart';
+import '../../utils/responsive_breakpoints.dart';
 import '../../utils/pdf_downloader_stub.dart'
     if (dart.library.html) '../../utils/pdf_downloader_web.dart';
 
@@ -100,6 +101,112 @@ class _BattleDetailViewState extends State<BattleDetailView> {
     battleExecutionData.receiverScoreAfter = battleExecution.receiverScoreAfter;
   }
 
+  Widget _buildMobileLayout(BuildContext context) {
+    final exec = battle.battleExecution;
+    final statusMap = <BattleStatus, String>{
+      BattleStatus.CREATED: AppLocalizations.of(context)!.battleStatusCreated,
+      BattleStatus.IN_PROGRESS:
+          AppLocalizations.of(context)!.battleStatusStarted,
+      BattleStatus.FINISHED: AppLocalizations.of(context)!.battleStatusFinished,
+      BattleStatus.FAILED: AppLocalizations.of(context)!.battleStatusFailed,
+    };
+    return ChangeNotifierProvider(
+      create: (context) => battleExecutionData,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(12, 12, 12, 80),
+        child: Column(children: [
+          Center(
+              child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            decoration: BoxDecoration(
+                color: OnepieceColors.fancyBlue.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(20)),
+            child: Text(statusMap[exec?.battleStatus] ?? '',
+                style: OnepieceFonts.headerStyle
+                    .copyWith(color: OnepieceColors.fancyBlue, fontSize: 15)),
+          )),
+          const SizedBox(height: 12),
+          Card(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: Column(children: [
+                  Row(children: [
+                    Expanded(
+                        child: _charMini(context, battle.starter!,
+                            exec?.starterScoreBefore)),
+                    Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                        child: Column(children: [
+                          Text('VS',
+                              style: OnepieceFonts.boldFancyBlueHintFont
+                                  .copyWith(fontSize: 13)),
+                          const SizedBox(height: 2),
+                          exec?.winnerId != null
+                              ? ImageLazyLoader(
+                                  key: const ValueKey('w'),
+                                  uriProvider: () =>
+                                      exec!.winnerId == battle.starterId
+                                          ? battle.starter!.imageUri!
+                                          : battle.receiver!.imageUri!,
+                                  width: 28,
+                                  borderWidth: 1.5,
+                                  borderRadios: 28)
+                              : Icon(Icons.help_outline,
+                                  size: 28, color: Colors.grey[400]),
+                          const SizedBox(height: 2),
+                          _getProgressBar(context, 22),
+                        ])),
+                    Expanded(
+                        child: _charMini(context, battle.receiver!,
+                            exec?.receiverScoreBefore)),
+                  ]),
+                  const SizedBox(height: 10),
+                  _getWinnerTag(context),
+                  const SizedBox(height: 6),
+                  _getResult(context),
+                ])),
+          ),
+          const SizedBox(height: 10),
+          Card(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: Column(children: [
+                  Center(child: _getBattleReportProgress(context, 28)),
+                  Center(child: _getBattleReportIcon(context)),
+                ])),
+          ),
+          if (getIt<User>().loginRole != UserRole.VISITOR) ...[
+            const SizedBox(height: 10),
+            _getFightAgain(context),
+          ],
+        ]),
+      ),
+    );
+  }
+
+  Widget _charMini(BuildContext context, Character char, int? score) {
+    return Column(children: [
+      ImageLazyLoader(
+          key: ValueKey(char.imageUri),
+          uriProvider: () => char.imageUri!,
+          width: 52,
+          borderWidth: 1.5,
+          borderRadios: 52),
+      const SizedBox(height: 2),
+      Text(I18nHelper.getDisplayNameFromI18n(char.name),
+          style: const TextStyle(fontSize: 11),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center),
+      Text(score?.toString() ?? '?',
+          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+    ]);
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -108,124 +215,132 @@ class _BattleDetailViewState extends State<BattleDetailView> {
           if (snapshot.connectionState == ConnectionState.done) {
             _updateData(snapshot.data);
             _getBattleExecution();
-            return Stack(
-              children: [
-                SingleChildScrollView(
-                  scrollDirection: Axis.vertical,
-                  child: Center(
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: ChangeNotifierProvider(
-                        create: (context) => battleExecutionData,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            const SizedBox(
-                              height: 100,
-                            ),
-                            _getStart(context),
-                            const SizedBox(
-                              width: 400,
-                              child: Divider(
-                                color: OnepieceColors.fancyBlue,
-                                thickness: 2,
-                                height: 20,
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                final isNarrow =
+                    ResponsiveBreakpoints.isMobileFromConstraints(constraints);
+                return Stack(
+                  children: [
+                    if (isNarrow)
+                      _buildMobileLayout(context)
+                    else
+                      SingleChildScrollView(
+                        scrollDirection: Axis.vertical,
+                        child: Center(
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: ChangeNotifierProvider(
+                              create: (context) => battleExecutionData,
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  const SizedBox(height: 100),
+                                  _getStart(context),
+                                  const SizedBox(
+                                    width: 400,
+                                    child: Divider(
+                                      color: OnepieceColors.fancyBlue,
+                                      thickness: 2,
+                                      height: 20,
+                                    ),
+                                  ),
+                                  _getProgressBar(context, 40),
+                                  const SizedBox(
+                                    width: 400,
+                                    child: Divider(
+                                      color: OnepieceColors.fancyBlue,
+                                      thickness: 2,
+                                      height: 20,
+                                    ),
+                                  ),
+                                  _getWinnerTag(context),
+                                  _getResult(context),
+                                  const SizedBox(
+                                    width: 400,
+                                    child: Divider(
+                                      color: OnepieceColors.fancyBlue,
+                                      thickness: 2,
+                                      height: 20,
+                                    ),
+                                  ),
+                                  _getBattleReportProgress(context, 40),
+                                  const SizedBox(
+                                    width: 400,
+                                    child: Divider(
+                                      color: OnepieceColors.fancyBlue,
+                                      thickness: 2,
+                                      height: 20,
+                                    ),
+                                  ),
+                                  _getBattleReportIcon(context),
+                                  if (getIt<User>().loginRole !=
+                                      UserRole.VISITOR)
+                                    _getFightAgain(context),
+                                  // bottom space
+                                  const SizedBox(
+                                    height: 60,
+                                  )
+                                ],
                               ),
                             ),
-                            _getProgressBar(context, 40),
-                            const SizedBox(
-                              width: 400,
-                              child: Divider(
-                                color: OnepieceColors.fancyBlue,
-                                thickness: 2,
-                                height: 20,
+                          ),
+                        ),
+                      ),
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      child: Container(
+                        color: Colors.white,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Tooltip(
+                                message: battle.previousBattle == null
+                                    ? ""
+                                    : "${I18nHelper.getDisplayNameFromI18n(battle.previousBattle!.starter!.name)} vs ${I18nHelper.getDisplayNameFromI18n(battle.previousBattle!.receiver!.name)}",
+                                child: ElevatedButton(
+                                  onPressed: battle.previousBattle == null
+                                      ? null
+                                      : () {
+                                          context.goNamed('battleDetails',
+                                              extra: battle.previousBattle!.id,
+                                              pathParameters: {
+                                                'id': battle.previousBattle!.id
+                                              });
+                                        },
+                                  child: const Icon(Icons.arrow_back),
+                                ),
                               ),
-                            ),
-                            _getWinnerTag(context),
-                            _getResult(context),
-                            const SizedBox(
-                              width: 400,
-                              child: Divider(
-                                color: OnepieceColors.fancyBlue,
-                                thickness: 2,
-                                height: 20,
+                              Tooltip(
+                                message: battle.nextBattle == null
+                                    ? ""
+                                    : "${I18nHelper.getDisplayNameFromI18n(battle.nextBattle!.starter!.name)} vs ${I18nHelper.getDisplayNameFromI18n(battle.nextBattle!.receiver!.name)}",
+                                child: ElevatedButton(
+                                  onPressed: battle.nextBattle == null
+                                      ? null
+                                      : () {
+                                          context.goNamed('battleDetails',
+                                              extra: battle.nextBattle!.id,
+                                              pathParameters: {
+                                                'id': battle.nextBattle!.id
+                                              });
+                                        },
+                                  child: const Icon(Icons.arrow_forward),
+                                ),
                               ),
-                            ),
-                            _getBattleReportProgress(context, 40),
-                            const SizedBox(
-                              width: 400,
-                              child: Divider(
-                                color: OnepieceColors.fancyBlue,
-                                thickness: 2,
-                                height: 20,
-                              ),
-                            ),
-                            _getBattleReportIcon(context),
-                            if (getIt<User>().loginRole != UserRole.VISITOR)
-                              _getFightAgain(context),
-                            // bottom space
-                            const SizedBox(
-                              height: 60,
-                            )
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ),
-                Positioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  child: Container(
-                    color: Colors.white,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Tooltip(
-                            message: battle.previousBattle == null
-                                ? ""
-                                : "${I18nHelper.getDisplayNameFromI18n(battle.previousBattle!.starter!.name)} vs ${I18nHelper.getDisplayNameFromI18n(battle.previousBattle!.receiver!.name)}",
-                            child: ElevatedButton(
-                              onPressed: battle.previousBattle == null
-                                  ? null
-                                  : () {
-                                      context.goNamed('battleDetails',
-                                          extra: battle.previousBattle!.id,
-                                          pathParameters: {
-                                            'id': battle.previousBattle!.id
-                                          });
-                                    },
-                              child: const Icon(Icons.arrow_back),
-                            ),
-                          ),
-                          Tooltip(
-                            message: battle.nextBattle == null
-                                ? ""
-                                : "${I18nHelper.getDisplayNameFromI18n(battle.nextBattle!.starter!.name)} vs ${I18nHelper.getDisplayNameFromI18n(battle.nextBattle!.receiver!.name)}",
-                            child: ElevatedButton(
-                              onPressed: battle.nextBattle == null
-                                  ? null
-                                  : () {
-                                      context.goNamed('battleDetails',
-                                          extra: battle.nextBattle!.id,
-                                          pathParameters: {
-                                            'id': battle.nextBattle!.id
-                                          });
-                                    },
-                              child: const Icon(Icons.arrow_forward),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+                  ],
+                );
+              },
             );
           } else {
             return Center(
@@ -544,14 +659,16 @@ class _BattleDetailViewState extends State<BattleDetailView> {
               onTap: model.battleStatus == BattleStatus.CREATED
                   ? () {
                       final battleTitle = AppLocalizations.of(context)!.battle;
-                      final startSuccess = AppLocalizations.of(context)!.startSuccess;
-                      final showAlert = OnepieceAlert.createAlertShower(context);
+                      final startSuccess =
+                          AppLocalizations.of(context)!.startSuccess;
+                      final showAlert =
+                          OnepieceAlert.createAlertShower(context);
                       getIt<BattleDao>()
                           .startBattle(StartBattleRequest(battleId: battle.id))
                           .then((value) {
-                                if (!mounted) return;
-                                showAlert(battleTitle, startSuccess);
-                              });
+                        if (!mounted) return;
+                        showAlert(battleTitle, startSuccess);
+                      });
                     }
                   : null,
               child: model.battleStatus == BattleStatus.CREATED
@@ -596,9 +713,10 @@ class _BattleDetailViewState extends State<BattleDetailView> {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 20.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
                   model.winnerId != null
@@ -629,6 +747,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
             ),
             model.battleReportStage == BattleReportStage.WAITING
                 ? Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(Icons.check_circle_outline,
                           size: iconSize, color: OnepieceColors.liteFancyBlue),
@@ -642,6 +761,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                     ],
                   )
                 : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(Icons.check_circle,
                           size: iconSize, color: OnepieceColors.fancyBlue),
@@ -664,6 +784,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
             if (model.battleReportStage == BattleReportStage.WAITING ||
                 model.battleReportStage == BattleReportStage.IN_PROGRESS)
               Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
                     Icons.check_circle_outline,
@@ -681,6 +802,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
               ),
             if (model.battleReportStage == BattleReportStage.FINISHED)
               Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.check_circle,
                       size: iconSize, color: OnepieceColors.fancyBlue),
@@ -735,7 +857,8 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                     'asset/images/svgs/pdf_black.svg',
                     width: 100,
                     height: 100,
-                    colorFilter: const ColorFilter.mode(Colors.grey, BlendMode.srcIn),
+                    colorFilter:
+                        const ColorFilter.mode(Colors.grey, BlendMode.srcIn),
                   ),
           ),
         ),

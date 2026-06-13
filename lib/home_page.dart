@@ -35,7 +35,7 @@ final ValueNotifier<String> routeNotifier = ValueNotifier<String>('/home/abc');
 class MenuConfig {
   static const double shrinkLimitWidth = 120;
   static const double minDrawerWidth = 75;
-  static const double maxDrawerWidth = 350;
+  static const double maxDrawerWidth = 280;
 
   static Map<String, Widget> getResourceIcons() {
     return {
