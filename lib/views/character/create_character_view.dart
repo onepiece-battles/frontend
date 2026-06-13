@@ -21,6 +21,7 @@ import '../../utils/data_converter.dart';
 import '../../utils/i18n_helper.dart';
 import '../../utils/image_helper.dart';
 import '../../utils/onepiece_image_picker.dart';
+import '../../utils/responsive_breakpoints.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -168,7 +169,12 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isNarrow = ResponsiveBreakpoints.isMobileFromConstraints(constraints);
+        dividerWidth = isNarrow ? constraints.maxWidth - 30 : 900;
+        sideWidth = isNarrow ? 8.0 : 50;
+        return Stack(
       children: [
         SingleChildScrollView(
           scrollDirection: Axis.vertical,
@@ -689,6 +695,8 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
         ),
         _getFootBar(context)
       ],
+    );
+      },
     );
   }
 

@@ -12,6 +12,7 @@ import '../../constants/onepiece_tag.dart';
 import 'package:one_piece_battles_flutter/graph/character_data.dart';
 import '../../graph/character_bar_graph.dart';
 import '../../repository/battle_dao.dart';
+import '../../utils/responsive_breakpoints.dart';
 import '../../repository/character_dao.dart';
 import '../../utils/i18n_helper.dart';
 import '../../utils/image_helper.dart';
@@ -76,27 +77,37 @@ class _CreateBattleViewState extends State<CreateBattleView> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.vertical,
-      controller: _verticalScrollController,
-      child: Center(
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          controller: _horizontalScrollController,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [getLeftPanel(context), getRightPanel(context)],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isNarrow = ResponsiveBreakpoints.isMobileFromConstraints(constraints);
+        return SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+          controller: _verticalScrollController,
+          child: isNarrow
+            ? SingleChildScrollView(
+                child: Column(children: [
+                  Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Expanded(child: getLeftPanel(context)),
+                    const VerticalDivider(width: 2),
+                    Expanded(child: getRightPanel(context)),
+                  ]),
+                  const Divider(height: 3),
+                  _getFoot(context),
+                ]),
+              )
+            : Center(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  controller: _horizontalScrollController,
+                  child: Column(mainAxisAlignment: MainAxisAlignment.start, children: [
+                    Row(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [getLeftPanel(context), getRightPanel(context)]),
+                    const Divider(height: 3),
+                    _getFoot(context),
+                  ]),
+                ),
               ),
-              const Divider(height: 3),
-              _getFoot(context)
-            ],
-          ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -106,65 +117,47 @@ class _CreateBattleViewState extends State<CreateBattleView> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(60, 10, 30, 10),
+          padding: EdgeInsets.fromLTRB(
+              MediaQuery.of(context).size.width < 600 ? 4 : 60, 10,
+              MediaQuery.of(context).size.width < 600 ? 4 : 30, 10),
           child: ValueListenableBuilder<CharacterListView?>(
             valueListenable: starterSelectedItem,
             builder: (context, value, _) {
+              final isSmall = MediaQuery.of(context).size.width < 600;
+              final imgSize = isSmall ? 80.0 : 180.0;
+              final graphW = isSmall ? 120.0 : 200.0;
+              final graphH = isSmall ? 120.0 : 180.0;
               return SizedBox(
-                width: 500,
+                width: isSmall ? (MediaQuery.of(context).size.width - 40) / 2 : 500,
                 child: Column(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.only(top: 60),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            width: 180,
-                            height: 180,
-                            child: FittedBox(
-                              fit: BoxFit.fill,
-                              child: starterSelectedItem.value == null
-                                  ? ImageHelper.getSvgIconWithColor(
-                                      'images/svgs/question.svg',
-                                      60,
-                                      60,
-                                      OnepieceColors.liteFancyBlue)
-                                  : Padding(
-                                      padding: const EdgeInsets.all(20.0),
-                                      child: ImageLazyLoader(
-                                          key: UniqueKey(),
-                                          uriProvider: () => starterSelectedItem
-                                              .value!.imageUri!,
-                                          width: 200,
-                                          borderWidth: 3,
-                                          borderRadios: 100),
-                                    ),
-                            ),
-                          ),
-                          if (starterSelectedItem.value != null)
-                            SizedBox(
-                              width: 200,
-                              height: 180,
-                              child: Padding(
-                                padding: const EdgeInsets.only(left: 30.0),
-                                child: RotatedBox(
-                                  quarterTurns: 1,
-                                  child: CharacterBarGraph(
-                                      symmetric: false,
-                                      characterData: CharacterData(
-                                        starterSelectedItem.value!.attack,
-                                        starterSelectedItem.value!.defense,
-                                        starterSelectedItem.value!.intelligence,
-                                        starterSelectedItem.value!.speed,
-                                        starterSelectedItem.value!.blood,
-                                        starterSelectedItem.value!.energy,
-                                      )),
-                                ),
+                      padding: EdgeInsets.only(top: isSmall ? 10 : 60),
+                      child: isSmall
+                          ? Column(children: [
+                              SizedBox(
+                                width: imgSize, height: imgSize,
+                                child: starterSelectedItem.value == null
+                                    ? ImageHelper.getSvgIconWithColor('images/svgs/question.svg', 40, 40, OnepieceColors.liteFancyBlue)
+                                    : ImageLazyLoader(key: UniqueKey(), uriProvider: () => starterSelectedItem.value!.imageUri!, width: 100, borderWidth: 2, borderRadios: 100),
                               ),
-                            ),
-                        ],
-                      ),
+                              if (starterSelectedItem.value != null) ...[
+                                const SizedBox(height: 4),
+                                SizedBox(width: graphW, height: graphH,
+                                  child: RotatedBox(quarterTurns: 1, child: CharacterBarGraph(
+                                      symmetric: false,
+                                      characterData: CharacterData(starterSelectedItem.value!.attack, starterSelectedItem.value!.defense, starterSelectedItem.value!.intelligence, starterSelectedItem.value!.speed, starterSelectedItem.value!.blood, starterSelectedItem.value!.energy)))),
+                              ],
+                            ])
+                          : Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                              SizedBox(width: imgSize, height: imgSize, child: FittedBox(fit: BoxFit.fill, child: starterSelectedItem.value == null
+                                  ? ImageHelper.getSvgIconWithColor('images/svgs/question.svg', 60, 60, OnepieceColors.liteFancyBlue)
+                                  : Padding(padding: const EdgeInsets.all(20.0), child: ImageLazyLoader(key: UniqueKey(), uriProvider: () => starterSelectedItem.value!.imageUri!, width: 200, borderWidth: 3, borderRadios: 100)))),
+                              if (starterSelectedItem.value != null)
+                                SizedBox(width: graphW, height: graphH, child: Padding(padding: const EdgeInsets.only(left: 30.0), child: RotatedBox(quarterTurns: 1, child: CharacterBarGraph(
+                                    symmetric: false,
+                                    characterData: CharacterData(starterSelectedItem.value!.attack, starterSelectedItem.value!.defense, starterSelectedItem.value!.intelligence, starterSelectedItem.value!.speed, starterSelectedItem.value!.blood, starterSelectedItem.value!.energy))))),
+                            ]),
                     ),
                     starterSelectedItem.value == null
                         ? const SizedBox(
@@ -183,21 +176,14 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Text(
-                                    I18nHelper.getDisplayNameFromI18n(
-                                        starterSelectedItem.value!.name),
-                                    style: const TextStyle(
-                                        color: OnepieceColors.fancyBlue,
-                                        fontStyle: FontStyle.normal,
-                                        fontSize: 22,
-                                        fontWeight: FontWeight.bold),
+                                    I18nHelper.getDisplayNameFromI18n(starterSelectedItem.value!.name),
+                                    style: TextStyle(color: OnepieceColors.fancyBlue, fontStyle: FontStyle.normal,
+                                        fontSize: isSmall ? 13 : 22, fontWeight: FontWeight.bold),
                                   ),
                                   Text(
                                     "${AppLocalizations.of(context)!.combatPower} ${starterSelectedItem.value!.score}",
-                                    style: const TextStyle(
-                                        color: OnepieceColors.fancyGreen,
-                                        fontStyle: FontStyle.normal,
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w200),
+                                    style: TextStyle(color: OnepieceColors.fancyGreen, fontStyle: FontStyle.normal,
+                                        fontSize: isSmall ? 11 : 18, fontWeight: FontWeight.w200),
                                   )
                                 ],
                               ),
@@ -232,7 +218,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
             Padding(
               padding: const EdgeInsets.all(15.0),
               child: SizedBox(
-                width: 400,
+                width: MediaQuery.of(context).size.width < 600 ? (MediaQuery.of(context).size.width - 40) / 2 : 400,
                 height: 60,
                 child: TextFormField(
                   controller: starterTextController,
@@ -279,7 +265,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
             Padding(
               padding: const EdgeInsets.only(bottom: 10.0),
               child: SizedBox(
-                width: 400,
+                width: MediaQuery.of(context).size.width < 600 ? (MediaQuery.of(context).size.width - 40) / 2 : 400,
                 height: 400,
                 child: ListView.builder(
                   shrinkWrap: true,
@@ -399,69 +385,42 @@ class _CreateBattleViewState extends State<CreateBattleView> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Padding(
-            padding: const EdgeInsets.fromLTRB(30, 10, 60, 10),
+            padding: EdgeInsets.fromLTRB(
+                MediaQuery.of(context).size.width < 600 ? 4 : 30, 10,
+                MediaQuery.of(context).size.width < 600 ? 4 : 60, 10),
             child: ValueListenableBuilder<CharacterListView?>(
                 valueListenable: receiverSelectedItem,
                 builder: (context, value, _) {
+                  final isSmall = MediaQuery.of(context).size.width < 600;
+                  final imgSize = isSmall ? 80.0 : 180.0;
+                  final graphW = isSmall ? 120.0 : 200.0;
+                  final graphH = isSmall ? 120.0 : 180.0;
                   return SizedBox(
-                    width: 500,
+                    width: isSmall ? (MediaQuery.of(context).size.width - 40) / 2 : 500,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Padding(
-                          padding: const EdgeInsets.only(top: 60),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              if (receiverSelectedItem.value != null)
-                                SizedBox(
-                                  width: 200,
-                                  height: 180,
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(right: 30.0),
-                                    child: RotatedBox(
-                                      quarterTurns: 1,
-                                      child: CharacterBarGraph(
-                                        characterData: CharacterData(
-                                          receiverSelectedItem.value!.attack,
-                                          receiverSelectedItem.value!.defense,
-                                          receiverSelectedItem
-                                              .value!.intelligence,
-                                          receiverSelectedItem.value!.speed,
-                                          receiverSelectedItem.value!.blood,
-                                          receiverSelectedItem.value!.energy,
-                                        ),
-                                        symmetric: false,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              SizedBox(
-                                width: 180,
-                                height: 180,
-                                child: FittedBox(
-                                  fit: BoxFit.fill,
-                                  child: receiverSelectedItem.value == null
-                                      ? ImageHelper.getSvgIconWithColor(
-                                          'images/svgs/question.svg',
-                                          60,
-                                          60,
-                                          OnepieceColors.liteFancyBlue)
-                                      : Padding(
-                                          padding: const EdgeInsets.all(20.0),
-                                          child: ImageLazyLoader(
-                                              key: UniqueKey(),
-                                              uriProvider: () =>
-                                                  receiverSelectedItem
-                                                      .value!.imageUri!,
-                                              width: 200,
-                                              borderWidth: 3,
-                                              borderRadios: 100),
-                                        ),
-                                ),
-                              ),
-                            ],
-                          ),
+                          padding: EdgeInsets.only(top: isSmall ? 10 : 60),
+                          child: isSmall
+                              ? Column(children: [
+                                  SizedBox(width: imgSize, height: imgSize, child: receiverSelectedItem.value == null
+                                      ? ImageHelper.getSvgIconWithColor('images/svgs/question.svg', 40, 40, OnepieceColors.liteFancyBlue)
+                                      : ImageLazyLoader(key: UniqueKey(), uriProvider: () => receiverSelectedItem.value!.imageUri!, width: 100, borderWidth: 2, borderRadios: 100)),
+                                  if (receiverSelectedItem.value != null) ...[
+                                    const SizedBox(height: 4),
+                                    SizedBox(width: graphW, height: graphH, child: RotatedBox(quarterTurns: 1, child: CharacterBarGraph(
+                                        characterData: CharacterData(receiverSelectedItem.value!.attack, receiverSelectedItem.value!.defense, receiverSelectedItem.value!.intelligence, receiverSelectedItem.value!.speed, receiverSelectedItem.value!.blood, receiverSelectedItem.value!.energy), symmetric: false))),
+                                  ],
+                                ])
+                              : Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                                  if (receiverSelectedItem.value != null)
+                                    SizedBox(width: graphW, height: graphH, child: Padding(padding: const EdgeInsets.only(right: 30.0), child: RotatedBox(quarterTurns: 1, child: CharacterBarGraph(
+                                        characterData: CharacterData(receiverSelectedItem.value!.attack, receiverSelectedItem.value!.defense, receiverSelectedItem.value!.intelligence, receiverSelectedItem.value!.speed, receiverSelectedItem.value!.blood, receiverSelectedItem.value!.energy), symmetric: false)))),
+                                  SizedBox(width: imgSize, height: imgSize, child: FittedBox(fit: BoxFit.fill, child: receiverSelectedItem.value == null
+                                      ? ImageHelper.getSvgIconWithColor('images/svgs/question.svg', 60, 60, OnepieceColors.liteFancyBlue)
+                                      : Padding(padding: const EdgeInsets.all(20.0), child: ImageLazyLoader(key: UniqueKey(), uriProvider: () => receiverSelectedItem.value!.imageUri!, width: 200, borderWidth: 3, borderRadios: 100)))),
+                                ]),
                         ),
                         receiverSelectedItem.value == null
                             ? const SizedBox(
@@ -480,21 +439,14 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                                         CrossAxisAlignment.center,
                                     children: [
                                       Text(
-                                        I18nHelper.getDisplayNameFromI18n(
-                                            receiverSelectedItem.value!.name),
-                                        style: const TextStyle(
-                                            color: OnepieceColors.fancyBlue,
-                                            fontStyle: FontStyle.normal,
-                                            fontSize: 22,
-                                            fontWeight: FontWeight.bold),
+                                        I18nHelper.getDisplayNameFromI18n(receiverSelectedItem.value!.name),
+                                        style: TextStyle(color: OnepieceColors.fancyBlue, fontStyle: FontStyle.normal,
+                                            fontSize: isSmall ? 13 : 22, fontWeight: FontWeight.bold),
                                       ),
                                       Text(
                                         "${AppLocalizations.of(context)!.combatPower} ${receiverSelectedItem.value!.score}",
-                                        style: const TextStyle(
-                                            color: OnepieceColors.fancyGreen,
-                                            fontStyle: FontStyle.normal,
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w200),
+                                        style: TextStyle(color: OnepieceColors.fancyGreen, fontStyle: FontStyle.normal,
+                                            fontSize: isSmall ? 11 : 18, fontWeight: FontWeight.w200),
                                       )
                                     ],
                                   ),
@@ -527,7 +479,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
               Padding(
                 padding: const EdgeInsets.all(15.0),
                 child: SizedBox(
-                  width: 400,
+                  width: MediaQuery.of(context).size.width < 600 ? (MediaQuery.of(context).size.width - 40) / 2 : 400,
                   height: 60,
                   child: TextFormField(
                     controller: receiverTextController,
@@ -574,7 +526,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
               Padding(
                 padding: const EdgeInsets.only(bottom: 10.0),
                 child: SizedBox(
-                  width: 400,
+                  width: MediaQuery.of(context).size.width < 600 ? (MediaQuery.of(context).size.width - 40) / 2 : 400,
                   height: 400,
                   child: ListView.builder(
                     shrinkWrap: true,

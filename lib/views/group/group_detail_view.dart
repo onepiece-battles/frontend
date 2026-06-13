@@ -13,10 +13,12 @@ import 'package:one_piece_battles_flutter/repository/group_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:one_piece_battles_flutter/utils/image_helper.dart';
 import 'package:openapi/api.dart';
+import 'package:one_piece_battles_flutter/constants/onepiece_tag.dart';
 import '../../l10n/app_localizations.dart';
 import '../../constants/button_style.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
+import '../../utils/responsive_breakpoints.dart';
 import '../../popup/onepiece_alert.dart';
 import '../../repository/image_dao.dart';
 import '../../utils/base64_helper.dart';
@@ -45,7 +47,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
   String? selectedImage;
   bool _basicInfoEditable = false;
   bool _editButtonVisible = false;
-  final double _dividerWidth = 900;
+  final double divW = 900;
 
   @override
   void initState() {
@@ -89,6 +91,70 @@ class _GroupDetailViewState extends State<GroupDetailView> {
     }
   }
 
+  Widget _buildMobileLayout(BuildContext context) {
+    final catMap = _getCategoryMap(context);
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 80),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        // Header: image + name + category
+        Center(child: Column(children: [
+          ImageLazyLoader(uriProvider: () => groupFullView.imageUri ?? '', width: 120, borderWidth: 2, borderRadios: 15),
+          const SizedBox(height: 8),
+          Text(I18nHelper.getDisplayNameFromI18n(groupFullView.name), style: OnepieceFonts.headerStyle.copyWith(fontSize: 20)),
+          const SizedBox(height: 4),
+          OnepieceTag.getGroupTag(groupFullView.groupCategory!, catMap[groupFullView.groupCategory]!),
+          if (_editButtonVisible) ...[
+            const SizedBox(height: 8),
+            TextButton.icon(
+              onPressed: () => setState(() => _basicInfoEditable = !_basicInfoEditable),
+              icon: Icon(_basicInfoEditable ? Icons.check : Icons.edit, size: 14, color: OnepieceColors.fancyBlue),
+              label: Text(_basicInfoEditable ? AppLocalizations.of(context)!.submitForm : AppLocalizations.of(context)!.editHint,
+                  style: const TextStyle(fontSize: 11, color: OnepieceColors.fancyBlue)),
+            ),
+          ],
+        ])),
+        const SizedBox(height: 12),
+        // Basic info form (if editable)
+        if (_basicInfoEditable)
+          Card(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            child: Padding(padding: const EdgeInsets.all(12), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(AppLocalizations.of(context)!.basicInfo, style: OnepieceFonts.headerStyle.copyWith(fontSize: 16)),
+              const SizedBox(height: 10),
+              ..._buildMobileGroupForm(context),
+            ])),
+          ),
+        const SizedBox(height: 12),
+        // Members
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: _getMembersPanel(context),
+        ),
+      ]),
+    );
+  }
+
+  List<Widget> _buildMobileGroupForm(BuildContext context) {
+    // Simplified form — reuse existing controller methods
+    return [
+      SizedBox(height: 35, child: TextFormField(
+        controller: groupNameController,
+        decoration: InputDecoration(contentPadding: const EdgeInsets.symmetric(horizontal: 10), floatingLabelBehavior: FloatingLabelBehavior.never,
+          disabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: OnepieceColors.menuHoverColor)),
+          enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: OnepieceColors.menuHoverColor)),
+          focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
+          prefixIcon: const Icon(Icons.edit, size: 18), labelText: AppLocalizations.of(context)!.name),
+      )),
+    ];
+  }
+
+  Map<GroupCategory, String> _getCategoryMap(BuildContext context) => <GroupCategory, String>{
+    GroupCategory.pirate: AppLocalizations.of(context)!.pirate, GroupCategory.marine: AppLocalizations.of(context)!.marine,
+    GroupCategory.government: AppLocalizations.of(context)!.worldGovernment, GroupCategory.underWorld: AppLocalizations.of(context)!.underworld,
+    GroupCategory.group: AppLocalizations.of(context)!.group, GroupCategory.other: AppLocalizations.of(context)!.otherType,
+    GroupCategory.revolutionArmy: AppLocalizations.of(context)!.revolutionaryArmy,
+  };
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -96,18 +162,25 @@ class _GroupDetailViewState extends State<GroupDetailView> {
       builder: (context, AsyncSnapshot snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           _prepareData(snapshot.data);
-          return Stack(
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              final isNarrow = ResponsiveBreakpoints.isMobileFromConstraints(constraints);
+              final divW = isNarrow ? constraints.maxWidth - 30 : 900.0;
+              return Stack(
             children: [
-              SingleChildScrollView(
-                scrollDirection: Axis.vertical,
-                child: Center(
-                  child: SingleChildScrollView(
-                    controller: scrollController,
-                    scrollDirection: Axis.horizontal,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+              if (isNarrow)
+                _buildMobileLayout(context)
+              else
+                SingleChildScrollView(
+                  scrollDirection: Axis.vertical,
+                  child: Center(
+                    child: SingleChildScrollView(
+                      controller: scrollController,
+                      scrollDirection: Axis.horizontal,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                         Padding(
                           padding: const EdgeInsets.only(left: 15.0),
                           child: _getBasicInfo(context),
@@ -115,7 +188,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8.0),
                           child: SizedBox(
-                            width: _dividerWidth,
+                            width: divW,
                             child: const Divider(
                               color: Colors.grey,
                               thickness: 1,
@@ -194,6 +267,8 @@ class _GroupDetailViewState extends State<GroupDetailView> {
               )
             ],
           );
+          },
+        );
         } else {
           return Center(
             child: Text(

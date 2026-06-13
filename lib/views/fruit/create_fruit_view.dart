@@ -14,6 +14,7 @@ import '../../utils/data_converter.dart';
 import '../../utils/i18n_helper.dart';
 import '../../utils/image_helper.dart';
 import '../../utils/random_string_generator.dart';
+import '../../utils/responsive_breakpoints.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -105,7 +106,12 @@ class _CreateFruitViewState extends State<CreateFruitView> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isNarrow = ResponsiveBreakpoints.isMobileFromConstraints(constraints);
+        dividerWidth = isNarrow ? constraints.maxWidth - 30 : 800;
+        sideWidth = isNarrow ? 8.0 : 50;
+        return Stack(
       children: [
         SingleChildScrollView(
           scrollDirection: Axis.vertical,
@@ -330,6 +336,8 @@ class _CreateFruitViewState extends State<CreateFruitView> {
         ),
         _getFootBar(context)
       ],
+    );
+      },
     );
   }
 

@@ -79,7 +79,7 @@ class _CreateGroupViewState extends State<CreateGroupView> {
                       Form(
                         key:_formKey,
                         child:  SizedBox(
-                        width: 300,
+                        width: MediaQuery.of(context).size.width > 600 ? 300 : MediaQuery.of(context).size.width - 60,
                         child: TextFormField(
                           controller: groupNameChController,
                           validator: (value) {
@@ -106,7 +106,7 @@ class _CreateGroupViewState extends State<CreateGroupView> {
                       ),
                       if (getIt<User>().loginRole == UserRole.NIKA)
                         SizedBox(
-                          width: 300,
+                          width: MediaQuery.of(context).size.width > 600 ? 300 : MediaQuery.of(context).size.width - 60,
                           child: TextFormField(
                             controller: groupNameEnController,
                             validator: (value) {

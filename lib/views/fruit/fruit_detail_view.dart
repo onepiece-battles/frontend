@@ -17,6 +17,7 @@ import '../../constants/onepiece_tag.dart';
 import '../../popup/onepiece_alert.dart';
 import '../../utils/image_helper.dart';
 import '../../utils/permission_check.dart';
+import '../../utils/responsive_breakpoints.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -62,8 +63,8 @@ class _FruitDetailViewState extends State<FruitDetailView> {
   bool _combatInfoEditable = false;
   bool _editButtonVisible = false;
 
-  final double _dividerWidth = 800;
-  final double _sideWidth = 50;
+  final double divW = 800;
+  final double sideW = 50;
 
   _loadData() {
     return getIt<FruitDao>().get(GetFruitRequest(fruitId: widget.fruitId));
@@ -120,6 +121,182 @@ class _FruitDetailViewState extends State<FruitDetailView> {
         fruitFullView.groupGainIntercept.toString();
   }
 
+  // ── Mobile card layout ────────────────────────────────────────────
+
+  Widget _buildMobileLayout(BuildContext context) {
+    final fruitMap = <FruitType, String>{
+      FruitType.logia: AppLocalizations.of(context)!.logiaFruit,
+      FruitType.zoan: AppLocalizations.of(context)!.zoanFruit,
+      FruitType.ancientZoan: AppLocalizations.of(context)!.ancientZoanFruit,
+      FruitType.mythicalZoan: AppLocalizations.of(context)!.mythicalZoanFruit,
+      FruitType.artificialZoan: AppLocalizations.of(context)!.artificialZoanFruit,
+      FruitType.paramecia: AppLocalizations.of(context)!.parameciaFruit,
+    };
+    return SingleChildScrollView(
+      controller: verticalController,
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 80),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        // Header
+        Center(child: Column(children: [
+          const SizedBox(height: 8),
+          Text(I18nHelper.getDisplayNameFromI18n(fruitFullView.name), style: OnepieceFonts.headerStyle.copyWith(fontSize: 20)),
+          const SizedBox(height: 4),
+          OnepieceTag.getFruitTag(fruitFullView.fruitType!, fruitMap[fruitFullView.fruitType]!),
+          if (_editButtonVisible) ...[
+            const SizedBox(height: 4),
+            Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              TextButton.icon(
+                onPressed: () => setState(() {
+                  _basicInfoEditable = !_basicInfoEditable;
+                  if (!_basicInfoEditable) _submitBasicInfo();
+                }),
+                icon: Icon(_basicInfoEditable ? Icons.check : Icons.edit, size: 14, color: OnepieceColors.fancyBlue),
+                label: Text(_basicInfoEditable ? AppLocalizations.of(context)!.submitForm : AppLocalizations.of(context)!.editHint,
+                    style: const TextStyle(fontSize: 11, color: OnepieceColors.fancyBlue)),
+              ),
+            ]),
+          ],
+        ])),
+        const SizedBox(height: 16),
+        // Basic Info
+        Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(AppLocalizations.of(context)!.basicInfo, style: OnepieceFonts.headerStyle.copyWith(fontSize: 16)),
+          const SizedBox(height: 10),
+          _mobileField(context, _basicInfoEditable, nameController, AppLocalizations.of(context)!.name, null),
+          _mobileDropdown<FruitType>(_basicInfoEditable, selectedFruitType, FruitType.values, fruitMap, AppLocalizations.of(context)!.fruitType, null, (v) => setState(() => selectedFruitType = v)),
+          const Divider(),
+        ])),
+        const SizedBox(height: 12),
+        // Combat Info
+        Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [
+            Text(AppLocalizations.of(context)!.battleInfo, style: OnepieceFonts.headerStyle.copyWith(fontSize: 16)), const Spacer(),
+            if (_editButtonVisible)
+              TextButton.icon(
+                onPressed: () => setState(() {
+                  _combatInfoEditable = !_combatInfoEditable;
+                  if (!_combatInfoEditable && _combatInfoUpdated()) _submitCombatInfo();
+                }),
+                icon: Icon(_combatInfoEditable ? Icons.check : Icons.edit, size: 14, color: OnepieceColors.fancyBlue),
+                label: Text(_combatInfoEditable ? AppLocalizations.of(context)!.submitForm : AppLocalizations.of(context)!.editHint,
+                    style: const TextStyle(fontSize: 11, color: OnepieceColors.fancyBlue)),
+              ),
+          ]),
+          const SizedBox(height: 10),
+          _mobileField(context, _combatInfoEditable, energyConsumeController, AppLocalizations.of(context)!.energyConsume, null, isNum: true),
+          _mobileStatPair(context, _combatInfoEditable, attackSlopeController, attackInterceptController, AppLocalizations.of(context)!.characterAttack, 'images/character_digits_icon/attack.svg'),
+          _mobileStatPair(context, _combatInfoEditable, defenseSlopeController, defenseInterceptController, AppLocalizations.of(context)!.characterDefense, 'images/character_digits_icon/defense.svg'),
+          _mobileStatPair(context, _combatInfoEditable, bloodSlopeController, bloodInterceptController, AppLocalizations.of(context)!.characterBlood, 'images/character_digits_icon/blood.svg'),
+          _mobileStatPair(context, _combatInfoEditable, intelligenceSlopeController, intelligenceInterceptController, AppLocalizations.of(context)!.characterIntelligence, 'images/character_digits_icon/intelligence.svg'),
+          _mobileStatPair(context, _combatInfoEditable, speedSlopeController, speedInterceptController, AppLocalizations.of(context)!.characterSpeed, 'images/character_digits_icon/speed.svg'),
+          _mobileStatPair(context, _combatInfoEditable, groupGainSlopeController, groupGainInterceptController, AppLocalizations.of(context)!.groupGain, 'images/character_digits_icon/group_gain.svg'),
+          const Divider(),
+        ])),
+        // Characters
+        if (characters.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(AppLocalizations.of(context)!.character, style: OnepieceFonts.headerStyle.copyWith(fontSize: 16)),
+            const SizedBox(height: 10),
+            ...characters.map((c) => Card(
+              margin: const EdgeInsets.only(bottom: 6),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(8),
+                onTap: () => context.goNamed('characterDetails', extra: c.id, pathParameters: {'name': I18nHelper.getDisplayNameFromI18n(c.name)}),
+                child: Padding(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8), child: Row(children: [
+                  ImageLazyLoader(key: ValueKey(c.imageUri), uriProvider: () => c.imageUri!, width: 36, borderWidth: 1.5, borderRadios: 36),
+                  const SizedBox(width: 10),
+                  Expanded(child: Text(I18nHelper.getDisplayNameFromI18n(c.name), style: OnepieceFonts.contentStyle)),
+                ])),
+              ),
+            )),
+          ])),
+        ],
+      ]),
+    );
+  }
+
+  Widget _mobileField(BuildContext context, bool editable, TextEditingController ctrl, String label, String? icon, {bool isNum = false}) {
+    final val = ctrl.text.isNotEmpty ? ctrl.text : '-';
+    return Padding(padding: const EdgeInsets.only(bottom: 10), child: editable
+      ? SizedBox(height: 35, child: TextFormField(
+          controller: ctrl, keyboardType: isNum ? TextInputType.number : TextInputType.text,
+          decoration: InputDecoration(contentPadding: const EdgeInsets.symmetric(horizontal: 10), floatingLabelBehavior: FloatingLabelBehavior.never,
+            disabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: OnepieceColors.menuHoverColor)),
+            enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: OnepieceColors.menuHoverColor)),
+            focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
+            prefixIcon: icon != null ? ImageHelper.getTextFormFieldIcon(icon, true, 18) : null, labelText: label,
+          )))
+      : Padding(padding: const EdgeInsets.symmetric(vertical: 4), child: Row(children: [
+          if (icon != null) ...[ImageHelper.getTextFormFieldIcon(icon, true, 20), const SizedBox(width: 10)],
+          Text(label, style: OnepieceFonts.deepBlackHintFont), const Spacer(),
+          Text(val, style: OnepieceFonts.contentStyle.copyWith(fontSize: 16, fontWeight: FontWeight.w600)),
+        ])));
+  }
+
+  Widget _mobileStatPair(BuildContext context, bool editable, TextEditingController slope, TextEditingController intercept, String label, String icon) {
+    final sv = slope.text.isNotEmpty ? slope.text : '0';
+    final iv = intercept.text.isNotEmpty ? intercept.text : '0';
+    return Padding(padding: const EdgeInsets.only(bottom: 10), child: editable
+      ? Row(children: [
+          Expanded(child: SizedBox(height: 35, child: TextFormField(controller: slope, keyboardType: TextInputType.number,
+            decoration: InputDecoration(contentPadding: const EdgeInsets.symmetric(horizontal: 8), floatingLabelBehavior: FloatingLabelBehavior.never,
+              disabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: OnepieceColors.menuHoverColor)),
+              enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: OnepieceColors.menuHoverColor)),
+              focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
+              prefixIcon: ImageHelper.getTextFormFieldIcon(icon, true, 18), labelText: label,
+            )))),
+          const Padding(padding: EdgeInsets.symmetric(horizontal: 4), child: Text('×', style: TextStyle(fontSize: 16))),
+          Expanded(child: SizedBox(height: 35, child: TextFormField(controller: intercept, keyboardType: TextInputType.number,
+            decoration: const InputDecoration(contentPadding: EdgeInsets.symmetric(horizontal: 8), floatingLabelBehavior: FloatingLabelBehavior.never,
+              disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: OnepieceColors.menuHoverColor)),
+              enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: OnepieceColors.menuHoverColor)),
+              focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
+              labelText: '+',
+            )))),
+        ])
+      : Padding(padding: const EdgeInsets.symmetric(vertical: 4), child: Row(children: [
+          ImageHelper.getTextFormFieldIcon(icon, true, 20), const SizedBox(width: 10),
+          Text(label, style: OnepieceFonts.deepBlackHintFont), const Spacer(),
+          Text('$sv × x + $iv', style: OnepieceFonts.contentStyle.copyWith(fontSize: 16, fontWeight: FontWeight.w600)),
+        ])));
+  }
+
+  Widget _mobileDropdown<T>(bool enabled, T value, List<T> items, Map<T, String> displayMap, String hint, String? icon, Function(T) onChanged) {
+    return Padding(padding: const EdgeInsets.only(bottom: 10), child: DropdownButtonHideUnderline(child: DropdownButton2<T>(
+      isExpanded: true, value: value,
+      hint: Row(children: [if (icon != null) ...[ImageHelper.getTextFormFieldIcon(icon, true, 18), const SizedBox(width: 8)], Text(hint, style: OnepieceFonts.dropDownItemStyle)]),
+      onChanged: enabled ? (T? v) { if (v != null) onChanged(v); } : null,
+      buttonStyleData: ButtonStyleData(padding: const EdgeInsets.symmetric(horizontal: 12), height: 35, decoration: BoxDecoration(borderRadius: BorderRadius.circular(3), color: OnepieceColors.liteFancyGreen)),
+      menuItemStyleData: const MenuItemStyleData(height: 30),
+      items: items.map((i) => DropdownMenuItem<T>(value: i, child: Text(displayMap[i]!, style: const TextStyle(fontSize: 16)))).toList(),
+    )));
+  }
+
+  void _submitBasicInfo() {
+    final router = GoRouter.of(context);
+    final showAlert = OnepieceAlert.createAlertShower(context);
+    final updated = UpdateFruitRequest(
+      id: fruitFullView.id, name: I18nHelper.getI18nFromDisplayName(fruitFullView.name!, nameController.text),
+      fruitType: selectedFruitType, energyConsume: DataConverter.stringToInt(energyConsumeController.text),
+      attackSlope: DataConverter.stringToDouble(attackSlopeController.text), attackIntercept: DataConverter.stringToInt(attackInterceptController.text),
+      defenseSlope: DataConverter.stringToDouble(defenseSlopeController.text), defenseIntercept: DataConverter.stringToInt(defenseInterceptController.text),
+      intelligenceSlope: DataConverter.stringToDouble(intelligenceSlopeController.text), intelligenceIntercept: DataConverter.stringToInt(intelligenceInterceptController.text),
+      bloodSlope: DataConverter.stringToDouble(bloodSlopeController.text), bloodIntercept: DataConverter.stringToInt(bloodInterceptController.text),
+      speedSlope: DataConverter.stringToDouble(speedSlopeController.text), speedIntercept: DataConverter.stringToInt(speedInterceptController.text),
+      groupGainSlope: DataConverter.stringToDouble(groupGainSlopeController.text), groupGainIntercept: DataConverter.stringToInt(groupGainInterceptController.text),
+    );
+    getIt<FruitDao>().update(updated).then((v) {
+      if (!mounted) return;
+      showAlert(AppLocalizations.of(context)!.hint, I18nHelper.getDisplayNameFromI18n(v!.result));
+      if (v.success) router.goNamed('fruitDetails', extra: fruitFullView.id, pathParameters: {'name': I18nHelper.getDisplayNameFromI18n(fruitFullView.name)});
+    });
+  }
+
+  void _submitCombatInfo() => _submitBasicInfo();
+  bool _combatInfoUpdated() => true;
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -127,50 +304,40 @@ class _FruitDetailViewState extends State<FruitDetailView> {
         builder: (context, AsyncSnapshot snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
             _updateData(snapshot.data);
-            return Stack(
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                final isNarrow = ResponsiveBreakpoints.isMobileFromConstraints(constraints);
+                final divW = isNarrow ? constraints.maxWidth - 30 : 800.0;
+                final sideW = isNarrow ? 8.0 : 50.0;
+                return Stack(
               children: [
-                SingleChildScrollView(
-                  controller: verticalController,
-                  scrollDirection: Axis.vertical,
-                  child: Center(
-                    child: SingleChildScrollView(
-                      controller: horizontalController,
-                      scrollDirection: Axis.horizontal,
-                      child: SizedBox(
-                        width: _dividerWidth,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _getBasicInfo(context),
-                            const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 8.0),
-                              child: Divider(
-                                color: Colors.grey,
-                                thickness: 1,
-                              ),
-                            ),
-                            _getCombatInfo(context),
-                            const SizedBox(
-                              height: 30,
-                              child: Divider(
-                                color: Colors.grey,
-                                thickness: 1,
-                              ),
-                            ),
-                            Padding(
-                              padding:
-                                  EdgeInsets.symmetric(horizontal: _sideWidth),
-                              child: _getCharacterList(context),
-                            ),
-                            const SizedBox(
-                              height: 60,
-                            )
-                          ],
+                if (isNarrow)
+                  _buildMobileLayout(context)
+                else
+                  SingleChildScrollView(
+                    controller: verticalController,
+                    scrollDirection: Axis.vertical,
+                    child: Center(
+                      child: SingleChildScrollView(
+                        controller: horizontalController,
+                        scrollDirection: Axis.horizontal,
+                        child: SizedBox(
+                          width: divW,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _getBasicInfo(context),
+                              const Padding(padding: EdgeInsets.symmetric(vertical: 8), child: Divider(color: Colors.grey, thickness: 1)),
+                              _getCombatInfo(context),
+                              const SizedBox(height: 30, child: Divider(color: Colors.grey, thickness: 1)),
+                              Padding(padding: EdgeInsets.symmetric(horizontal: sideW), child: _getCharacterList(context)),
+                              const SizedBox(height: 60),
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
                 Positioned(
                     bottom: 0,
                     left: 0,
@@ -231,6 +398,8 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                     )),
               ],
             );
+            },
+          );
           } else {
             return Center(
               child: Text(
@@ -245,7 +414,7 @@ class _FruitDetailViewState extends State<FruitDetailView> {
   Widget _getBasicInfo(BuildContext context) {
     return StatefulBuilder(builder: (context, basicState) {
       return Padding(
-        padding: EdgeInsets.symmetric(horizontal: _sideWidth),
+        padding: EdgeInsets.symmetric(horizontal: sideW),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -442,7 +611,7 @@ class _FruitDetailViewState extends State<FruitDetailView> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: _sideWidth),
+            padding: EdgeInsets.symmetric(horizontal: sideW),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
@@ -542,7 +711,7 @@ class _FruitDetailViewState extends State<FruitDetailView> {
             height: 15,
           ),
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: _sideWidth),
+            padding: EdgeInsets.symmetric(horizontal: sideW),
             child: Form(
               key: _battleFormKey,
               child: Row(

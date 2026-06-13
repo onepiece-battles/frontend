@@ -9,6 +9,7 @@ import '../../app_router.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
 import '../../utils/image_helper.dart';
+import '../../utils/responsive_breakpoints.dart';
 
 class IssueDetailView extends StatefulWidget {
   final String issueId;
@@ -54,8 +55,13 @@ class _IssueDetailViewState extends State<IssueDetailView> {
       builder: (context, AsyncSnapshot snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           _prepareData(snapshot.data);
-          return SingleChildScrollView(
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              final isNarrow = ResponsiveBreakpoints.isMobileFromConstraints(constraints);
+              final dynamicWidth = isNarrow ? constraints.maxWidth - 30 : 800.0;
+              return SingleChildScrollView(
             scrollDirection: Axis.vertical,
+            padding: isNarrow ? const EdgeInsets.fromLTRB(12, 12, 12, 80) : null,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -181,7 +187,7 @@ class _IssueDetailViewState extends State<IssueDetailView> {
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 16),
                                   height: 34,
-                                  width: 210,
+                                  width: isNarrow ? dynamicWidth : 210,
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(3),
                                     color: OnepieceColors.menuBackgroundColor,
@@ -250,7 +256,7 @@ class _IssueDetailViewState extends State<IssueDetailView> {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Container(
-                    width: 800,
+                    width: dynamicWidth,
                     decoration: BoxDecoration(
                       color: Colors.white,
                       border: Border.all(
@@ -279,6 +285,8 @@ class _IssueDetailViewState extends State<IssueDetailView> {
                 ),
               ],
             ),
+          );
+            },
           );
         } else {
           return Center(
