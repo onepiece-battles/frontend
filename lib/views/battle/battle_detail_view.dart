@@ -101,94 +101,17 @@ class _BattleDetailViewState extends State<BattleDetailView> {
     battleExecutionData.receiverScoreAfter = battleExecution.receiverScoreAfter;
   }
 
-  Widget _buildMobileLayout(BuildContext context) {
-    final exec = battle.battleExecution;
+  String _statusText() {
     final statusMap = <BattleStatus, String>{
       BattleStatus.CREATED: AppLocalizations.of(context)!.battleStatusCreated,
-      BattleStatus.IN_PROGRESS:
-          AppLocalizations.of(context)!.battleStatusStarted,
+      BattleStatus.IN_PROGRESS: AppLocalizations.of(context)!.battleStatusStarted,
       BattleStatus.FINISHED: AppLocalizations.of(context)!.battleStatusFinished,
       BattleStatus.FAILED: AppLocalizations.of(context)!.battleStatusFailed,
     };
-    return ChangeNotifierProvider(
-      create: (context) => battleExecutionData,
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(12, 12, 12, 80),
-        child: Column(children: [
-          Center(
-              child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-            decoration: BoxDecoration(
-                color: OnepieceColors.fancyBlue.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(20)),
-            child: Text(statusMap[exec?.battleStatus] ?? '',
-                style: OnepieceFonts.headerStyle
-                    .copyWith(color: OnepieceColors.fancyBlue, fontSize: 15)),
-          )),
-          const SizedBox(height: 12),
-          Card(
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            child: Padding(
-                padding: const EdgeInsets.all(10),
-                child: Column(children: [
-                  Row(children: [
-                    Expanded(
-                        child: _charMini(context, battle.starter!,
-                            exec?.starterScoreBefore)),
-                    Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 6),
-                        child: Column(children: [
-                          Text('VS',
-                              style: OnepieceFonts.boldFancyBlueHintFont
-                                  .copyWith(fontSize: 13)),
-                          const SizedBox(height: 2),
-                          exec?.winnerId != null
-                              ? ImageLazyLoader(
-                                  key: const ValueKey('w'),
-                                  uriProvider: () =>
-                                      exec!.winnerId == battle.starterId
-                                          ? battle.starter!.imageUri!
-                                          : battle.receiver!.imageUri!,
-                                  width: 28,
-                                  borderWidth: 1.5,
-                                  borderRadios: 28)
-                              : Icon(Icons.help_outline,
-                                  size: 28, color: Colors.grey[400]),
-                          const SizedBox(height: 2),
-                          _getProgressBar(context, 22),
-                        ])),
-                    Expanded(
-                        child: _charMini(context, battle.receiver!,
-                            exec?.receiverScoreBefore)),
-                  ]),
-                  const SizedBox(height: 10),
-                  _getWinnerTag(context),
-                  const SizedBox(height: 6),
-                  _getResult(context),
-                ])),
-          ),
-          const SizedBox(height: 10),
-          Card(
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            child: Padding(
-                padding: const EdgeInsets.all(10),
-                child: Column(children: [
-                  Center(child: _getBattleReportProgress(context, 28)),
-                  Center(child: _getBattleReportIcon(context)),
-                ])),
-          ),
-          if (getIt<User>().loginRole != UserRole.VISITOR) ...[
-            const SizedBox(height: 10),
-            _getFightAgain(context),
-          ],
-        ]),
-      ),
-    );
+    return statusMap[battle.battleExecution?.battleStatus] ?? '';
   }
 
-  Widget _charMini(BuildContext context, Character char, int? score) {
+  Widget _charMini(Character char, int? score) {
     return Column(children: [
       ImageLazyLoader(
           key: ValueKey(char.imageUri),
@@ -215,19 +138,50 @@ class _BattleDetailViewState extends State<BattleDetailView> {
           if (snapshot.connectionState == ConnectionState.done) {
             _updateData(snapshot.data);
             _getBattleExecution();
-            return LayoutBuilder(
+            return ChangeNotifierProvider.value(
+              value: battleExecutionData,
+              child: LayoutBuilder(
               builder: (context, constraints) {
                 final isNarrow =
                     ResponsiveBreakpoints.isMobileFromConstraints(constraints);
                 return Stack(
-                  children: [
-                    if (isNarrow)
-                      _buildMobileLayout(context)
-                    else
-                      SingleChildScrollView(
-                        scrollDirection: Axis.vertical,
-                        child: Center(
-                          child: SingleChildScrollView(
+                    children: [
+                      if (isNarrow)
+                        SingleChildScrollView(
+                          padding: const EdgeInsets.fromLTRB(12, 12, 12, 80),
+                          child: Column(children: [
+                            Center(child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                              decoration: BoxDecoration(color: OnepieceColors.fancyBlue.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(20)),
+                              child: Text(_statusText(), style: OnepieceFonts.headerStyle.copyWith(color: OnepieceColors.fancyBlue, fontSize: 15)),
+                            )),
+                            const SizedBox(height: 12),
+                            Card(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)), child: Padding(padding: const EdgeInsets.all(10), child: Column(children: [
+                              Row(children: [
+                                Expanded(child: _charMini(battle.starter!, battle.battleExecution?.starterScoreBefore)),
+                                Padding(padding: const EdgeInsets.symmetric(horizontal: 6), child: Column(children: [
+                                  const Text('VS', style: TextStyle(color: OnepieceColors.fancyBlue, fontSize: 13, fontWeight: FontWeight.bold)),
+                                  const SizedBox(height: 2),
+                                  battle.battleExecution?.winnerId != null ? ImageLazyLoader(key: const ValueKey('w'), uriProvider: () => battle.battleExecution!.winnerId == battle.starterId ? battle.starter!.imageUri! : battle.receiver!.imageUri!, width: 28, borderWidth: 1.5, borderRadios: 28) : Icon(Icons.help_outline, size: 28, color: Colors.grey[400]),
+                                  const SizedBox(height: 2), _getProgressBar(context, 22),
+                                ])),
+                                Expanded(child: _charMini(battle.receiver!, battle.battleExecution?.receiverScoreBefore)),
+                              ]),
+                              const SizedBox(height: 10), _getWinnerTag(context), const SizedBox(height: 6), _getResult(context),
+                            ]))),
+                            const SizedBox(height: 10),
+                            Card(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)), child: Padding(padding: const EdgeInsets.all(10), child: RepaintBoundary(child: Column(children: [
+                              Center(child: _getBattleReportProgress(context, 28)),
+                              Center(child: _getBattleReportIcon(context)),
+                            ])))),
+                            if (getIt<User>().loginRole != UserRole.VISITOR) ...[const SizedBox(height: 10), _getFightAgain(context)],
+                          ]),
+                        )
+                      else
+                        SingleChildScrollView(
+                          scrollDirection: Axis.vertical,
+                          child: Center(
+                            child: SingleChildScrollView(
                             scrollDirection: Axis.horizontal,
                             child: ChangeNotifierProvider(
                               create: (context) => battleExecutionData,
@@ -339,9 +293,10 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                       ),
                     ),
                   ],
-                );
+              );
               },
-            );
+            ),
+          );
           } else {
             return Center(
               child: Text(
