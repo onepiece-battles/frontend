@@ -118,26 +118,28 @@ class _GroupViewState extends State<GroupView> {
                       ),
                 const SizedBox(height: 10),
                 Expanded(
-                  child: Scrollbar(
-                    controller: mainController,
-                    thumbVisibility: true,
-                    trackVisibility: true,
-                    child: SingleChildScrollView(
-                      controller: mainController,
-                      child: Scrollbar(
-                        controller: tableController,
-                        thumbVisibility: true,
-                        trackVisibility: true,
-                        notificationPredicate: (notification) =>
-                            notification.depth == 0,
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          controller: tableController,
-                          child: _createGroupTable(context),
+                  child: isNarrow
+                      ? _buildMobileGroupCards(context)
+                      : Scrollbar(
+                          controller: mainController,
+                          thumbVisibility: true,
+                          trackVisibility: true,
+                          child: SingleChildScrollView(
+                            controller: mainController,
+                            child: Scrollbar(
+                              controller: tableController,
+                              thumbVisibility: true,
+                              trackVisibility: true,
+                              notificationPredicate: (notification) =>
+                                  notification.depth == 0,
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                controller: tableController,
+                                child: _createGroupTable(context),
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                  ),
                 ),
                 const SizedBox(height: 15),
                 if (totalPageNum > 1)
@@ -401,6 +403,120 @@ class _GroupViewState extends State<GroupView> {
             ],
           )
         ]);
+  }
+
+  // ── Mobile: card-based group list ─────────────────────────────────────
+
+  Widget _buildMobileGroupCards(BuildContext context) {
+    final categoryMap = <GroupCategory, String>{
+      GroupCategory.marine: AppLocalizations.of(context)!.marine,
+      GroupCategory.pirate: AppLocalizations.of(context)!.pirate,
+      GroupCategory.underWorld: AppLocalizations.of(context)!.underworld,
+      GroupCategory.government: AppLocalizations.of(context)!.worldGovernment,
+      GroupCategory.group: AppLocalizations.of(context)!.group,
+      GroupCategory.other: AppLocalizations.of(context)!.otherType,
+      GroupCategory.revolutionArmy:
+          AppLocalizations.of(context)!.revolutionaryArmy,
+    };
+
+    if (currentGroupList.isEmpty) {
+      return Center(
+        child: Text(AppLocalizations.of(context)!.empty,
+            style: OnepieceFonts.contentStyle),
+      );
+    }
+
+    return ListView.builder(
+      controller: mainController,
+      itemCount: currentGroupList.length,
+      itemBuilder: (context, index) {
+        final group = currentGroupList[index];
+        final isEven = index.isEven;
+
+        return Card(
+          color: isEven ? OnepieceColors.liteFancyGreen : Colors.white,
+          margin: const EdgeInsets.only(bottom: 8),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(10),
+            onTap: () => context.goNamed('groupDetails',
+                extra: group.id,
+                pathParameters: {
+                  'name': I18nHelper.getDisplayNameFromI18n(group.name)
+                }),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Top row: image + name + category
+                  Row(
+                    children: [
+                      RepaintBoundary(
+                        child: ImageLazyLoader(
+                          key: ValueKey(group.imageUri),
+                          uriProvider: () => group.imageUri!,
+                          width: 44,
+                          borderWidth: 1.5,
+                          borderRadios: 5,
+                          lazy: true,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              I18nHelper.getDisplayNameFromI18n(group.name),
+                              style: OnepieceFonts.headerStyle
+                                  .copyWith(fontSize: 15),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              group.creationRecord?.nickname ?? '',
+                              style: OnepieceFonts.smallContentStyle,
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: OnepieceColors.fancyBlue
+                              .withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          categoryMap[group.groupCategory] ?? '',
+                          style: OnepieceFonts.smallContentStyle.copyWith(
+                              color: OnepieceColors.fancyBlue, fontSize: 11),
+                        ),
+                      ),
+                    ],
+                  ),
+                  // Members row
+                  if (group.characterInGroup.isNotEmpty ||
+                      group.subGroups.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      height: 46,
+                      child: group.groupCategory == GroupCategory.group
+                          ? _createGroupList(group.subGroups)
+                          : _createCharacterList(group.characterInGroup),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   DataTable _createGroupTable(BuildContext context) {
