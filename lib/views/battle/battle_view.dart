@@ -124,26 +124,28 @@ class _BattleViewState extends State<BattleView> {
                       ),
                 const SizedBox(height: 10),
                 Expanded(
-                  child: Scrollbar(
-                    controller: mainController,
-                    thumbVisibility: true,
-                    trackVisibility: true,
-                    child: SingleChildScrollView(
-                      controller: mainController,
-                      child: Scrollbar(
-                        controller: tableController,
-                        thumbVisibility: true,
-                        trackVisibility: true,
-                        notificationPredicate: (notification) =>
-                            notification.depth == 0,
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          controller: tableController,
-                          child: _getBattlesTable(context),
+                  child: isNarrow
+                      ? _buildMobileBattleCards(context)
+                      : Scrollbar(
+                          controller: mainController,
+                          thumbVisibility: true,
+                          trackVisibility: true,
+                          child: SingleChildScrollView(
+                            controller: mainController,
+                            child: Scrollbar(
+                              controller: tableController,
+                              thumbVisibility: true,
+                              trackVisibility: true,
+                              notificationPredicate: (notification) =>
+                                  notification.depth == 0,
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                controller: tableController,
+                                child: _getBattlesTable(context),
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                  ),
                 ),
                 const SizedBox(height: 15),
                 if (totalPageNum > 1)
@@ -441,6 +443,183 @@ class _BattleViewState extends State<BattleView> {
           }).toList(),
         ),
       ),
+    );
+  }
+
+  // ── Mobile: card-based battle list ────────────────────────────────────
+
+  Widget _buildMobileBattleCards(BuildContext context) {
+    if (currentBattleList.isEmpty) {
+      return Center(
+        child: Text(AppLocalizations.of(context)!.empty,
+            style: OnepieceFonts.contentStyle),
+      );
+    }
+
+    final statusMap = <BattleStatus, String>{
+      BattleStatus.CREATED: AppLocalizations.of(context)!.battleStatusCreated,
+      BattleStatus.IN_PROGRESS:
+          AppLocalizations.of(context)!.battleStatusStarted,
+      BattleStatus.FINISHED:
+          AppLocalizations.of(context)!.battleStatusFinished,
+      BattleStatus.FAILED: AppLocalizations.of(context)!.battleStatusFailed,
+    };
+
+    return ListView.builder(
+      controller: mainController,
+      itemCount: currentBattleList.length,
+      itemBuilder: (context, index) {
+        final battle = currentBattleList[index];
+        final exec = battle.battleExecution;
+        final isEven = index.isEven;
+
+        return Card(
+          color: isEven ? OnepieceColors.liteFancyGreen : Colors.white,
+          margin: const EdgeInsets.only(bottom: 8),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(10),
+            onTap: () => context.goNamed('battleDetails',
+                extra: battle.id,
+                pathParameters: {'id': battle.id}),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                children: [
+                  // Starter vs Receiver row
+                  Row(
+                    children: [
+                      // Starter
+                      Expanded(
+                        child: _buildBattleCharCard(
+                          imageUri: battle.starter!.imageUri!,
+                          name: I18nHelper.getDisplayNameFromI18n(
+                              battle.starter!.name),
+                          score: exec?.starterScoreBefore?.toString() ?? '?',
+                        ),
+                      ),
+                      // VS
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Column(
+                          children: [
+                            Text('VS',
+                                style: OnepieceFonts.boldFancySmallFont
+                                    .copyWith(
+                                        color: OnepieceColors.fancyBlue,
+                                        fontSize: 16)),
+                            const SizedBox(height: 4),
+                            // Winner indicator
+                            if (exec?.winnerId != null)
+                              ImageLazyLoader(
+                                key: UniqueKey(),
+                                uriProvider: () =>
+                                    exec!.winnerId == battle.starterId
+                                        ? battle.starter!.imageUri!
+                                        : battle.receiver!.imageUri!,
+                                width: 30,
+                                borderWidth: 2,
+                                borderRadios: 30,
+                              )
+                            else
+                              Container(
+                                width: 30,
+                                height: 30,
+                                decoration: const BoxDecoration(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(4)),
+                                ),
+                                child: FittedBox(
+                                  fit: BoxFit.fill,
+                                  child: ImageHelper.getSvgIconWithColor(
+                                      'images/svgs/question.svg',
+                                      100,
+                                      100,
+                                      OnepieceColors.liteFancyBlue),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      // Receiver
+                      Expanded(
+                        child: _buildBattleCharCard(
+                          imageUri: battle.receiver!.imageUri!,
+                          name: I18nHelper.getDisplayNameFromI18n(
+                              battle.receiver!.name),
+                          score:
+                              exec?.receiverScoreBefore?.toString() ?? '?',
+                          alignRight: true,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  // Status + Creator row
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: OnepieceColors.fancyBlue.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          statusMap[exec?.battleStatus] ?? '',
+                          style: OnepieceFonts.smallContentStyle.copyWith(
+                              color: OnepieceColors.fancyBlue, fontSize: 12),
+                        ),
+                      ),
+                      Text(
+                        battle.creationRecord?.nickname ?? '',
+                        style: OnepieceFonts.smallContentStyle,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildBattleCharCard({
+    required String imageUri,
+    required String name,
+    required String score,
+    bool alignRight = false,
+  }) {
+    final children = [
+      ImageLazyLoader(
+        key: UniqueKey(),
+        uriProvider: () => imageUri,
+        width: 44,
+        borderWidth: 2,
+        borderRadios: 44,
+      ),
+      const SizedBox(width: 8),
+      Column(
+        crossAxisAlignment:
+            alignRight ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        children: [
+          Text(name,
+              style: OnepieceFonts.contentStyle.copyWith(fontSize: 13),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis),
+          const SizedBox(height: 2),
+          Text(score, style: OnepieceFonts.boldFancySmallFont),
+        ],
+      ),
+    ];
+    return Row(
+      mainAxisAlignment:
+          alignRight ? MainAxisAlignment.end : MainAxisAlignment.start,
+      children: alignRight ? children.reversed.toList() : children,
     );
   }
 

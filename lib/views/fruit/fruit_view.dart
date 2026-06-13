@@ -121,26 +121,28 @@ class _FruitViewState extends State<FruitView> {
                       ),
                 const SizedBox(height: 10),
                 Expanded(
-                  child: Scrollbar(
-                    controller: mainController,
-                    thumbVisibility: true,
-                    trackVisibility: true,
-                    child: SingleChildScrollView(
-                      controller: mainController,
-                      child: Scrollbar(
-                        controller: tableController,
-                        thumbVisibility: true,
-                        trackVisibility: true,
-                        notificationPredicate: (notification) =>
-                            notification.depth == 0,
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          controller: tableController,
-                          child: _getFruitsTable(context),
+                  child: isNarrow
+                      ? _buildMobileFruitCards(context)
+                      : Scrollbar(
+                          controller: mainController,
+                          thumbVisibility: true,
+                          trackVisibility: true,
+                          child: SingleChildScrollView(
+                            controller: mainController,
+                            child: Scrollbar(
+                              controller: tableController,
+                              thumbVisibility: true,
+                              trackVisibility: true,
+                              notificationPredicate: (notification) =>
+                                  notification.depth == 0,
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                controller: tableController,
+                                child: _getFruitsTable(context),
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                  ),
                 ),
                 const SizedBox(height: 15),
                 if (totalPageNum > 1)
@@ -402,6 +404,191 @@ class _FruitViewState extends State<FruitView> {
           );
         }).toList(),
       ),
+    );
+  }
+
+  // ── Mobile: card-based fruit list ─────────────────────────────────────
+
+  Widget _buildMobileFruitCards(BuildContext context) {
+    final fruitTypeMap = <FruitType, String>{
+      FruitType.logia: AppLocalizations.of(context)!.logiaFruit,
+      FruitType.zoan: AppLocalizations.of(context)!.zoanFruit,
+      FruitType.ancientZoan: AppLocalizations.of(context)!.ancientZoanFruit,
+      FruitType.mythicalZoan: AppLocalizations.of(context)!.mythicalZoanFruit,
+      FruitType.artificialZoan:
+          AppLocalizations.of(context)!.artificialZoanFruit,
+      FruitType.paramecia: AppLocalizations.of(context)!.parameciaFruit,
+    };
+
+    if (currentFruitList.isEmpty) {
+      return Center(
+        child: Text(AppLocalizations.of(context)!.empty,
+            style: OnepieceFonts.contentStyle),
+      );
+    }
+
+    return ListView.builder(
+      controller: mainController,
+      itemCount: currentFruitList.length,
+      itemBuilder: (context, index) {
+        final fruit = currentFruitList[index];
+        final isExpanded = _expandedRowIds.contains(fruit.id);
+        final isEven = index.isEven;
+
+        return Card(
+          color: isEven ? OnepieceColors.liteFancyGreen : Colors.white,
+          margin: const EdgeInsets.only(bottom: 8),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(10),
+            onTap: () => context.goNamed('fruitDetails',
+                extra: fruit.id,
+                pathParameters: {
+                  'name': I18nHelper.getDisplayNameFromI18n(fruit.name!)
+                }),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Top row: name + type tag
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          I18nHelper.getDisplayNameFromI18n(fruit.name),
+                          style: OnepieceFonts.headerStyle.copyWith(
+                              fontSize: 16),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      OnepieceTag.getFruitTag(
+                        fruit.fruitType!,
+                        fruitTypeMap[fruit.fruitType]!,
+                      ),
+                    ],
+                  ),
+                  // Character list
+                  if (fruit.characters.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    _createCharacterList(fruit.characters),
+                  ],
+                  // Expand toggle
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: InkWell(
+                      onTap: () {
+                        setState(() {
+                          if (isExpanded) {
+                            _expandedRowIds.remove(fruit.id);
+                          } else {
+                            _expandedRowIds.add(fruit.id!);
+                          }
+                        });
+                      },
+                      borderRadius: BorderRadius.circular(4),
+                      child: Padding(
+                        padding: const EdgeInsets.all(4),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              AppLocalizations.of(context)!.detailInformation,
+                              style: const TextStyle(
+                                  fontSize: 12,
+                                  color: OnepieceColors.fancyBlue),
+                            ),
+                            Icon(
+                              isExpanded
+                                  ? Icons.expand_less
+                                  : Icons.expand_more,
+                              size: 18,
+                              color: OnepieceColors.fancyBlue,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Expanded stats
+                  if (isExpanded)
+                    Container(
+                      margin: const EdgeInsets.only(top: 4),
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: OnepieceColors.liteFancyGreen
+                            .withValues(alpha: 0.4),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Wrap(
+                        spacing: 16,
+                        runSpacing: 6,
+                        children: <_FruitStat>[
+                          _FruitStat(
+                              AppLocalizations.of(context)!.attackStrengthen,
+                              fruit.attackSlope!,
+                              fruit.attackIntercept!,
+                              'images/character_digits_icon/attack.svg'),
+                          _FruitStat(
+                              AppLocalizations.of(context)!.defenseStrengthen,
+                              fruit.defenseSlope!,
+                              fruit.defenseIntercept!,
+                              'images/character_digits_icon/defense.svg'),
+                          _FruitStat(
+                              AppLocalizations.of(context)!.bloodStrengthen,
+                              fruit.bloodSlope!,
+                              fruit.bloodIntercept!,
+                              'images/character_digits_icon/blood.svg'),
+                          _FruitStat(
+                              AppLocalizations.of(context)!
+                                  .intelligenceStrengthen,
+                              fruit.intelligenceSlope!,
+                              fruit.intelligenceIntercept!,
+                              'images/character_digits_icon/intelligence.svg'),
+                          _FruitStat(
+                              AppLocalizations.of(context)!.groupStrengthen,
+                              fruit.groupGainSlope!,
+                              fruit.groupGainIntercept!,
+                              'images/character_digits_icon/group_gain.svg'),
+                          _FruitStat(
+                              AppLocalizations.of(context)!.speedStrengthen,
+                              fruit.speedSlope!,
+                              fruit.speedIntercept!,
+                              'images/character_digits_icon/speed.svg'),
+                        ].map((stat) {
+                          return SizedBox(
+                            width:
+                                (MediaQuery.of(context).size.width - 80) / 2,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 4),
+                                  child: ImageHelper.getTextFormFieldIcon(
+                                      stat.icon, true, 14),
+                                ),
+                                Text(stat.label,
+                                    style: OnepieceFonts.smallContentStyle
+                                        .copyWith(fontSize: 12)),
+                                const SizedBox(width: 4),
+                                Text('${stat.slope}x + ${stat.intercept}',
+                                    style: OnepieceFonts.boldFancySmallFont
+                                        .copyWith(fontSize: 13)),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
