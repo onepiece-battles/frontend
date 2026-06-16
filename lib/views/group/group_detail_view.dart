@@ -9,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:one_piece_battles_flutter/components/image_lazy_loader.dart';
 import 'package:one_piece_battles_flutter/components/string_text_form_field.dart';
 import 'package:one_piece_battles_flutter/popup/join_group.dart';
+import 'package:one_piece_battles_flutter/repository/character_dao.dart';
 import 'package:one_piece_battles_flutter/repository/group_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:one_piece_battles_flutter/utils/image_helper.dart';
@@ -43,6 +44,8 @@ class _GroupDetailViewState extends State<GroupDetailView> {
   late GroupFullView groupFullView;
   List<CharacterInGroupView> characters = [];
   List<Group> subGroups = [];
+  final Map<String, CharacterFullView> _characterCombatCache = {};
+  final Set<String> _loadingCharacterCombatIds = {};
   late GroupCategory selectedGroupCategory;
   String? selectedImage;
   bool _basicInfoEditable = false;
@@ -685,7 +688,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                         width: contentWidth,
                         child: root.group.groupCategory == GroupCategory.group
                             ? buildTreeNode(root, listState, false, 1)
-                            : buildCharacterList(context),
+                            : buildCharacterList(context, listState),
                       ),
                     ),
                   ],
@@ -768,93 +771,17 @@ class _GroupDetailViewState extends State<GroupDetailView> {
     );
   }
 
-  Widget buildCharacterList(BuildContext context) {
-    Map<GroupPosition, String> groupPositionToDisplayValue = {
-      GroupPosition.member: AppLocalizations.of(context)!.member,
-      GroupPosition.captain: AppLocalizations.of(context)!.caption,
-      GroupPosition.combatant: AppLocalizations.of(context)!.combatant,
-      GroupPosition.cook: AppLocalizations.of(context)!.cook,
-      GroupPosition.doctor: AppLocalizations.of(context)!.doctor,
-      GroupPosition.firstMate: AppLocalizations.of(context)!.firstMate,
-      GroupPosition.helmsman: AppLocalizations.of(context)!.helmsman,
-      GroupPosition.intern: AppLocalizations.of(context)!.intern,
-      GroupPosition.musician: AppLocalizations.of(context)!.musician,
-      GroupPosition.navigator: AppLocalizations.of(context)!.navigator,
-      GroupPosition.scholar: AppLocalizations.of(context)!.scholar,
-      GroupPosition.shipwright: AppLocalizations.of(context)!.shipwright,
-    };
+  Widget buildCharacterList(BuildContext context, Function listState) {
     return SizedBox(
       width: 600,
       child: ListView.builder(
+        physics: const NeverScrollableScrollPhysics(),
         shrinkWrap: true,
         itemCount: characters.length,
         itemBuilder: (context, index) {
           var character = characters[index];
-          return Material(
-            type: MaterialType.transparency,
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-              decoration: const BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(5))),
-              child: ExpansionTile(
-                expandedAlignment: Alignment.centerLeft,
-                expandedCrossAxisAlignment: CrossAxisAlignment.start,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5),
-                ),
-                onExpansionChanged: (value) {},
-                title: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    InkWell(
-                      hoverColor: Colors.transparent,
-                      splashColor: Colors.transparent,
-                      child: ImageLazyLoader(
-                          key: UniqueKey(),
-                          uriProvider: () => character.imageUri!,
-                          width: 40,
-                          borderWidth: 1.4,
-                          borderRadios: 3),
-                      onTap: () {
-                        context.goNamed('characterDetails',
-                            extra: character.id,
-                            pathParameters: {
-                              'name': I18nHelper.getDisplayNameFromI18n(
-                                  character.name)
-                            });
-                      },
-                    ),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 8.0),
-                      child: Text(
-                        I18nHelper.getDisplayNameFromI18n(character.name!),
-                      ),
-                    )
-                  ],
-                ),
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 3, 0, 3),
-                    child: Row(
-                      children: [
-                        Text(
-                          "${AppLocalizations.of(context)!.position}: ",
-                          style: OnepieceFonts.contentStyle,
-                        ),
-                        Text(
-                          groupPositionToDisplayValue[character.position!]!,
-                          style: OnepieceFonts.contentStyle,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
+          return _buildCharacterExpansionCard(
+              character: character, listState: listState, isTreeLeaf: false);
         },
       ),
     );
@@ -898,20 +825,6 @@ class _GroupDetailViewState extends State<GroupDetailView> {
 
   Widget buildTreeNode(
       TreeNode node, Function listState, bool isChildCharacter, int level) {
-    Map<GroupPosition, String> groupPositionToDisplayValue = {
-      GroupPosition.member: AppLocalizations.of(context)!.member,
-      GroupPosition.captain: AppLocalizations.of(context)!.caption,
-      GroupPosition.combatant: AppLocalizations.of(context)!.combatant,
-      GroupPosition.cook: AppLocalizations.of(context)!.cook,
-      GroupPosition.doctor: AppLocalizations.of(context)!.doctor,
-      GroupPosition.firstMate: AppLocalizations.of(context)!.firstMate,
-      GroupPosition.helmsman: AppLocalizations.of(context)!.helmsman,
-      GroupPosition.intern: AppLocalizations.of(context)!.intern,
-      GroupPosition.musician: AppLocalizations.of(context)!.musician,
-      GroupPosition.navigator: AppLocalizations.of(context)!.navigator,
-      GroupPosition.scholar: AppLocalizations.of(context)!.scholar,
-      GroupPosition.shipwright: AppLocalizations.of(context)!.shipwright,
-    };
     if (!isChildCharacter) {
       GroupNode actualNode = node as GroupNode;
       return Container(
@@ -970,60 +883,181 @@ class _GroupDetailViewState extends State<GroupDetailView> {
       );
     } else {
       CharacterNode actualNode = node as CharacterNode;
+      return _buildCharacterExpansionCard(
+          character: actualNode.characterInGroupView,
+          listState: listState,
+          isTreeLeaf: true);
+    }
+  }
+
+  Widget _buildCharacterExpansionCard({
+    required CharacterInGroupView character,
+    required Function listState,
+    required bool isTreeLeaf,
+  }) {
+    return Container(
+      margin: EdgeInsets.only(top: isTreeLeaf ? 6 : 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: OnepieceColors.menuHoverColor.withValues(alpha: 0.55),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isTreeLeaf ? 0.02 : 0.04),
+            blurRadius: isTreeLeaf ? 4 : 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          tilePadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+          expandedAlignment: Alignment.centerLeft,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          collapsedShape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          leading: const Icon(Icons.person_outline,
+              size: 18, color: OnepieceColors.fancyGreen),
+          title: _buildTreeTitle(
+            imageUri: character.imageUri!,
+            title: I18nHelper.getDisplayNameFromI18n(character.name!),
+            onTap: () {
+              context.goNamed('characterDetails',
+                  extra: character.id,
+                  pathParameters: {
+                    'name': I18nHelper.getDisplayNameFromI18n(character.name)
+                  });
+            },
+          ),
+          onExpansionChanged: (isExpanded) {
+            if (isExpanded) {
+              _loadCharacterCombatStats(character, listState);
+            }
+          },
+          children: [_buildCharacterCombatStats(character)],
+        ),
+      ),
+    );
+  }
+
+  void _loadCharacterCombatStats(
+      CharacterInGroupView character, Function listState) {
+    final characterId = _getCharacterLookupId(character);
+    if (characterId == null ||
+        _characterCombatCache.containsKey(characterId) ||
+        _loadingCharacterCombatIds.contains(characterId)) {
+      return;
+    }
+    listState(() {
+      _loadingCharacterCombatIds.add(characterId);
+    });
+    getIt<CharacterDao>()
+        .getCharacter(GetCharacterFullViewRequest(characterId: characterId))
+        .then((value) {
+      if (!mounted) return;
+      listState(() {
+        _loadingCharacterCombatIds.remove(characterId);
+        if (value != null) {
+          _characterCombatCache[characterId] = value;
+        }
+      });
+    }).catchError((_) {
+      if (!mounted) return;
+      listState(() {
+        _loadingCharacterCombatIds.remove(characterId);
+      });
+    });
+  }
+
+  String? _getCharacterLookupId(CharacterInGroupView character) {
+    return character.characterId ?? character.id;
+  }
+
+  Widget _buildCharacterCombatStats(CharacterInGroupView character) {
+    final characterId = _getCharacterLookupId(character);
+    final fullView =
+        characterId == null ? null : _characterCombatCache[characterId];
+    if (characterId != null &&
+        _loadingCharacterCombatIds.contains(characterId)) {
       return Container(
-        margin: const EdgeInsets.only(top: 6),
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: OnepieceColors.liteFancyGreen.withValues(alpha: 0.35),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: OnepieceColors.menuHoverColor.withValues(alpha: 0.55),
-          ),
         ),
-        child: Theme(
-          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-          child: ExpansionTile(
-            tilePadding:
-                const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-            childrenPadding: const EdgeInsets.fromLTRB(52, 0, 12, 10),
-            expandedAlignment: Alignment.centerLeft,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            collapsedShape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            leading: const Icon(Icons.person_outline,
-                size: 18, color: OnepieceColors.fancyGreen),
-            title: _buildTreeTitle(
-              imageUri: actualNode.characterInGroupView.imageUri!,
-              title: I18nHelper.getDisplayNameFromI18n(
-                  actualNode.characterInGroupView.name!),
-              onTap: () {
-                context.goNamed('characterDetails',
-                    extra: node.characterInGroupView.id,
-                    pathParameters: {
-                      'name': I18nHelper.getDisplayNameFromI18n(
-                          node.characterInGroupView.name)
-                    });
-              },
-            ),
-            children: [
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  color: OnepieceColors.liteFancyGreen.withValues(alpha: 0.35),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  "${AppLocalizations.of(context)!.position}: "
-                  "${groupPositionToDisplayValue[node.characterInGroupView.position]!}",
-                  style: OnepieceFonts.contentStyle.copyWith(fontSize: 13),
-                ),
-              ),
-            ],
-          ),
-        ),
+        child: const LinearProgressIndicator(minHeight: 3),
       );
     }
+    if (fullView == null) {
+      return const SizedBox.shrink();
+    }
+
+    final stats = <_GroupCharacterStat>[
+      _GroupCharacterStat(AppLocalizations.of(context)!.characterAttack,
+          fullView.attack.toString(),
+          icon: 'images/character_digits_icon/attack.svg'),
+      _GroupCharacterStat(AppLocalizations.of(context)!.characterDefense,
+          fullView.defense.toString(),
+          icon: 'images/character_digits_icon/defense.svg'),
+      _GroupCharacterStat(AppLocalizations.of(context)!.characterIntelligence,
+          fullView.intelligence.toString(),
+          icon: 'images/character_digits_icon/intelligence.svg'),
+      _GroupCharacterStat(AppLocalizations.of(context)!.characterBlood,
+          fullView.blood.toString(),
+          icon: 'images/character_digits_icon/blood.svg'),
+      _GroupCharacterStat(AppLocalizations.of(context)!.characterSpeed,
+          fullView.speed.toString(),
+          icon: 'images/character_digits_icon/speed.svg'),
+      _GroupCharacterStat(AppLocalizations.of(context)!.groupGain,
+          fullView.groupGain.toString(),
+          icon: 'images/character_digits_icon/group_gain.svg'),
+    ];
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: OnepieceColors.liteFancyGreen.withValues(alpha: 0.35),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Wrap(
+        spacing: 10,
+        runSpacing: 8,
+        children: stats
+            .map((stat) => _buildCharacterStatChip(stat))
+            .toList(growable: false),
+      ),
+    );
+  }
+
+  Widget _buildCharacterStatChip(_GroupCharacterStat stat) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(7),
+        border: Border.all(
+          color: OnepieceColors.menuHoverColor.withValues(alpha: 0.45),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (stat.icon != null) ...[
+            ImageHelper.getTextFormFieldIcon(stat.icon!, false, 15),
+            const SizedBox(width: 5),
+          ],
+          Text(stat.label, style: OnepieceFonts.smallContentStyle),
+          const SizedBox(width: 6),
+          Text(stat.value, style: OnepieceFonts.boldFancySmallFont),
+        ],
+      ),
+    );
   }
 
   Widget _buildTreeTitle({
@@ -1084,4 +1118,12 @@ class CharacterNode extends TreeNode {
 
   CharacterNode(
       super.children, super.childrenFetched, this.characterInGroupView);
+}
+
+class _GroupCharacterStat {
+  final String label;
+  final String value;
+  final String? icon;
+
+  const _GroupCharacterStat(this.label, this.value, {this.icon});
 }
