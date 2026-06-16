@@ -308,61 +308,58 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                           child: Center(
                             child: SingleChildScrollView(
                               scrollDirection: Axis.horizontal,
-                              child: ChangeNotifierProvider(
-                                create: (context) => battleExecutionData,
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    const SizedBox(height: 100),
-                                    _getStart(context),
-                                    const SizedBox(
-                                      width: 400,
-                                      child: Divider(
-                                        color: OnepieceColors.fancyBlue,
-                                        thickness: 2,
-                                        height: 20,
-                                      ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  const SizedBox(height: 100),
+                                  _getStart(context),
+                                  const SizedBox(
+                                    width: 400,
+                                    child: Divider(
+                                      color: OnepieceColors.fancyBlue,
+                                      thickness: 2,
+                                      height: 20,
                                     ),
-                                    _getProgressBar(context, 40),
-                                    const SizedBox(
-                                      width: 400,
-                                      child: Divider(
-                                        color: OnepieceColors.fancyBlue,
-                                        thickness: 2,
-                                        height: 20,
-                                      ),
+                                  ),
+                                  _getProgressBar(context, 40),
+                                  const SizedBox(
+                                    width: 400,
+                                    child: Divider(
+                                      color: OnepieceColors.fancyBlue,
+                                      thickness: 2,
+                                      height: 20,
                                     ),
-                                    _getWinnerTag(context),
-                                    _getResult(context),
-                                    const SizedBox(
-                                      width: 400,
-                                      child: Divider(
-                                        color: OnepieceColors.fancyBlue,
-                                        thickness: 2,
-                                        height: 20,
-                                      ),
+                                  ),
+                                  _getWinnerTag(context),
+                                  _getResult(context),
+                                  const SizedBox(
+                                    width: 400,
+                                    child: Divider(
+                                      color: OnepieceColors.fancyBlue,
+                                      thickness: 2,
+                                      height: 20,
                                     ),
-                                    _getBattleReportProgress(context, 40),
-                                    const SizedBox(
-                                      width: 400,
-                                      child: Divider(
-                                        color: OnepieceColors.fancyBlue,
-                                        thickness: 2,
-                                        height: 20,
-                                      ),
+                                  ),
+                                  _getBattleReportProgress(context, 40),
+                                  const SizedBox(
+                                    width: 400,
+                                    child: Divider(
+                                      color: OnepieceColors.fancyBlue,
+                                      thickness: 2,
+                                      height: 20,
                                     ),
-                                    _getBattleReportIcon(context),
-                                    if (getIt<User>().loginRole !=
-                                        UserRole.VISITOR)
-                                      _getFightAgain(context),
-                                    // bottom space
-                                    const SizedBox(
-                                      height: 60,
-                                    )
-                                  ],
-                                ),
+                                  ),
+                                  _getBattleReportIcon(context),
+                                  if (getIt<User>().loginRole !=
+                                      UserRole.VISITOR)
+                                    _getFightAgain(context),
+                                  // bottom space
+                                  const SizedBox(
+                                    height: 60,
+                                  )
+                                ],
                               ),
                             ),
                           ),
@@ -378,41 +375,29 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Tooltip(
-                                  message: battle.previousBattle == null
-                                      ? ""
-                                      : "${I18nHelper.getDisplayNameFromI18n(battle.previousBattle!.starter!.name)} vs ${I18nHelper.getDisplayNameFromI18n(battle.previousBattle!.receiver!.name)}",
-                                  child: ElevatedButton(
-                                    onPressed: battle.previousBattle == null
-                                        ? null
-                                        : () {
-                                            context.goNamed('battleDetails',
-                                                extra:
-                                                    battle.previousBattle!.id,
-                                                pathParameters: {
-                                                  'id':
-                                                      battle.previousBattle!.id
-                                                });
-                                          },
-                                    child: const Icon(Icons.arrow_back),
-                                  ),
+                                ElevatedButton(
+                                  onPressed: battle.previousBattle == null
+                                      ? null
+                                      : () {
+                                          context.goNamed('battleDetails',
+                                              extra: battle.previousBattle!.id,
+                                              pathParameters: {
+                                                'id': battle.previousBattle!.id
+                                              });
+                                        },
+                                  child: const Icon(Icons.arrow_back),
                                 ),
-                                Tooltip(
-                                  message: battle.nextBattle == null
-                                      ? ""
-                                      : "${I18nHelper.getDisplayNameFromI18n(battle.nextBattle!.starter!.name)} vs ${I18nHelper.getDisplayNameFromI18n(battle.nextBattle!.receiver!.name)}",
-                                  child: ElevatedButton(
-                                    onPressed: battle.nextBattle == null
-                                        ? null
-                                        : () {
-                                            context.goNamed('battleDetails',
-                                                extra: battle.nextBattle!.id,
-                                                pathParameters: {
-                                                  'id': battle.nextBattle!.id
-                                                });
-                                          },
-                                    child: const Icon(Icons.arrow_forward),
-                                  ),
+                                ElevatedButton(
+                                  onPressed: battle.nextBattle == null
+                                      ? null
+                                      : () {
+                                          context.goNamed('battleDetails',
+                                              extra: battle.nextBattle!.id,
+                                              pathParameters: {
+                                                'id': battle.nextBattle!.id
+                                              });
+                                        },
+                                  child: const Icon(Icons.arrow_forward),
                                 ),
                               ],
                             ),
@@ -534,18 +519,15 @@ class _BattleDetailViewState extends State<BattleDetailView> {
 
       return Padding(
         padding: const EdgeInsets.all(30.0),
-        child: Tooltip(
-          message: AppLocalizations.of(context)!.startBattle,
-          child: InkWell(
-              splashColor: Colors.transparent,
-              hoverColor: Colors.transparent,
-              onTap: () => _startBattle(context),
-              child: const Icon(
-                Icons.not_started,
-                size: 55,
-                color: OnepieceColors.fancyBlue,
-              )),
-        ),
+        child: InkWell(
+            splashColor: Colors.transparent,
+            hoverColor: Colors.transparent,
+            onTap: () => _startBattle(context),
+            child: const Icon(
+              Icons.not_started,
+              size: 55,
+              color: OnepieceColors.fancyBlue,
+            )),
       );
     });
   }
@@ -793,48 +775,44 @@ class _BattleDetailViewState extends State<BattleDetailView> {
               getIt<User>().loginRole != UserRole.VISITOR;
       return Padding(
         padding: const EdgeInsets.fromLTRB(0, 4, 0, 18),
-        child: Tooltip(
-          message:
-              canDownload ? AppLocalizations.of(context)!.downloadReport : "",
-          child: InkWell(
-            hoverColor: Colors.transparent,
-            splashColor: Colors.transparent,
-            onTap: canDownload
-                ? () {
-                    getIt<FileDao>()
-                        .downloadFile(DownloadFileRequest(
-                            id: battleExecutionData.reportFileId!))
-                        .then((response) async {
-                      if (response?.fileData == null) return;
-                      var pdf = base64Decode(response!.fileData!);
-                      downloadPdf(pdf, "${response.fileName}.pdf",
-                          response.httpMimeType);
-                    });
-                  }
-                : null,
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
+        child: InkWell(
+          hoverColor: Colors.transparent,
+          splashColor: Colors.transparent,
+          onTap: canDownload
+              ? () {
+                  getIt<FileDao>()
+                      .downloadFile(DownloadFileRequest(
+                          id: battleExecutionData.reportFileId!))
+                      .then((response) async {
+                    if (response?.fileData == null) return;
+                    var pdf = base64Decode(response!.fileData!);
+                    downloadPdf(
+                        pdf, "${response.fileName}.pdf", response.httpMimeType);
+                  });
+                }
+              : null,
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: canDownload
+                  ? OnepieceColors.fancyBlue.withValues(alpha: 0.08)
+                  : Colors.grey.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
                 color: canDownload
-                    ? OnepieceColors.fancyBlue.withValues(alpha: 0.08)
-                    : Colors.grey.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: canDownload
-                      ? OnepieceColors.fancyBlue.withValues(alpha: 0.3)
-                      : Colors.grey.withValues(alpha: 0.25),
-                ),
+                    ? OnepieceColors.fancyBlue.withValues(alpha: 0.3)
+                    : Colors.grey.withValues(alpha: 0.25),
               ),
-              child: SvgPicture.asset(
-                canDownload
-                    ? 'asset/images/svgs/pdf.svg'
-                    : 'asset/images/svgs/pdf_black.svg',
-                width: 72,
-                height: 72,
-                colorFilter: canDownload
-                    ? null
-                    : const ColorFilter.mode(Colors.grey, BlendMode.srcIn),
-              ),
+            ),
+            child: SvgPicture.asset(
+              canDownload
+                  ? 'asset/images/svgs/pdf.svg'
+                  : 'asset/images/svgs/pdf_black.svg',
+              width: 72,
+              height: 72,
+              colorFilter: canDownload
+                  ? null
+                  : const ColorFilter.mode(Colors.grey, BlendMode.srcIn),
             ),
           ),
         ),

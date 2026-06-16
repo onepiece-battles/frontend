@@ -42,17 +42,17 @@ class MenuConfig {
       ResourceType.FRUIT.toString(): ImageHelper.getSvgIconWithColor(
           'images/svgs/devil_fruit.svg', 20, 20, Colors.orange),
       ResourceType.GROUP.toString():
-      ImageHelper.getSvgIcon('images/svgs/flag.svg', 20, 20),
+          ImageHelper.getSvgIcon('images/svgs/flag.svg', 20, 20),
       ResourceType.USER.toString():
-      ImageHelper.getSvgIcon('images/svgs/users.svg', 20, 20),
+          ImageHelper.getSvgIcon('images/svgs/users.svg', 20, 20),
       ResourceType.BATTLE.toString():
-      ImageHelper.getSvgIcon('images/svgs/cannon.svg', 20, 20),
+          ImageHelper.getSvgIcon('images/svgs/cannon.svg', 20, 20),
       ResourceType.CHARACTER.toString():
-      ImageHelper.getSvgIcon('images/svgs/hat.svg', 20, 20),
+          ImageHelper.getSvgIcon('images/svgs/hat.svg', 20, 20),
       ResourceType.CHATTING.toString():
-      ImageHelper.getSvgIcon('images/svgs/message1.svg', 20, 20),
+          ImageHelper.getSvgIcon('images/svgs/message1.svg', 20, 20),
       ResourceType.ISSUE.toString():
-      ImageHelper.getSvgIcon('images/svgs/feedback.svg', 20, 20),
+          ImageHelper.getSvgIcon('images/svgs/feedback.svg', 20, 20),
     };
   }
 
@@ -73,10 +73,10 @@ class MenuConfig {
       ResourceType.FRUIT.toString(): AppLocalizations.of(context)!.devilFruit,
       ResourceType.GROUP.toString(): AppLocalizations.of(context)!.group,
       ResourceType.USER.toString():
-      AppLocalizations.of(context)!.userManagement,
+          AppLocalizations.of(context)!.userManagement,
       ResourceType.BATTLE.toString(): AppLocalizations.of(context)!.battle,
       ResourceType.CHARACTER.toString():
-      AppLocalizations.of(context)!.character,
+          AppLocalizations.of(context)!.character,
       ResourceType.ISSUE.toString(): AppLocalizations.of(context)!.feedback,
       ResourceType.CHATTING.toString(): AppLocalizations.of(context)!.message,
     };
@@ -97,6 +97,7 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   // Using a GlobalKey to access SideMenu state for refreshing resources if needed
   final GlobalKey<_SideMenuState> _sideMenuKey = GlobalKey();
+  final GlobalKey<_SideMenuState> _drawerSideMenuKey = GlobalKey();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
@@ -120,45 +121,44 @@ class HomePageState extends State<HomePage> {
                 ? Drawer(
                     width: MenuConfig.maxDrawerWidth,
                     child: SideMenu(
-                      key: _sideMenuKey,
+                      key: _drawerSideMenuKey,
                       constraints: constraints,
                       isDrawer: true,
                     ),
                   )
                 : null,
-            body: SelectionArea(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  if (!isMobile)
-                    SideMenu(
-                      key: _sideMenuKey,
-                      constraints: constraints,
-                    ),
-                  Expanded(
-                    child: Column(
-                      children: [
-                        SizedBox(
-                          height: 55,
-                          child: Padding(
-                            padding: const EdgeInsets.all(5.0),
-                            child: TopNavigationBar(
-                              constraints: constraints,
-                              isMobile: isMobile,
-                              scaffoldKey: _scaffoldKey,
-                              onRoleChanged: () {
-                                // Trigger side menu resource refresh
-                                _sideMenuKey.currentState?._initResources();
-                              },
-                            ),
+            body: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (!isMobile)
+                  SideMenu(
+                    key: _sideMenuKey,
+                    constraints: constraints,
+                  ),
+                Expanded(
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        height: 55,
+                        child: Padding(
+                          padding: const EdgeInsets.all(5.0),
+                          child: TopNavigationBar(
+                            constraints: constraints,
+                            isMobile: isMobile,
+                            scaffoldKey: _scaffoldKey,
+                            onRoleChanged: () {
+                              // Trigger side menu resource refresh
+                              _sideMenuKey.currentState?._initResources();
+                              _drawerSideMenuKey.currentState?._initResources();
+                            },
                           ),
                         ),
-                        Expanded(child: widget.mainScreen),
-                      ],
-                    ),
+                      ),
+                      Expanded(child: widget.mainScreen),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           );
         },
@@ -176,7 +176,7 @@ void _showSearchDialog(BuildContext context) {
         backgroundColor: OnepieceColors.liteFancyGreen,
         alignment: Alignment.topCenter,
         shape:
-        RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
         child: const SearchPopup(),
       );
     }),
@@ -245,8 +245,8 @@ class _SideMenuState extends State<SideMenu> {
       return _cachedUserNavigation!;
     }
     _cachedConstraints = widget.constraints;
-    _cachedUserNavigation = UserNavigation(
-        context: context, constraints: widget.constraints);
+    _cachedUserNavigation =
+        UserNavigation(context: context, constraints: widget.constraints);
     return _cachedUserNavigation!;
   }
 
@@ -502,9 +502,9 @@ class _SideMenuState extends State<SideMenu> {
       valueListenable: routeNotifier,
       builder: (context, currentRoute, _) {
         var resource = currentRoute
-            .split("/")
-            .where((e) => e.isNotEmpty && e != "home")
-            .lastOrNull ??
+                .split("/")
+                .where((e) => e.isNotEmpty && e != "home")
+                .lastOrNull ??
             "";
 
         return Column(
@@ -514,7 +514,7 @@ class _SideMenuState extends State<SideMenu> {
               icon: SizedBox(
                 width: 20,
                 child:
-                ImageHelper.getSvgIcon('images/svgs/profile.svg', 18, 18),
+                    ImageHelper.getSvgIcon('images/svgs/profile.svg', 18, 18),
               ),
               text: AppLocalizations.of(context)!.myAccount,
               isSelected: resource == "profile",
@@ -579,7 +579,7 @@ class _SideMenuState extends State<SideMenu> {
             minLeadingWidth: 10,
             contentPadding: const EdgeInsets.fromLTRB(20, 0, 15, 0),
             shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             leading: icon,
             selected: isSelected,
             selectedTileColor: OnepieceColors.fancyBlue,
@@ -587,14 +587,14 @@ class _SideMenuState extends State<SideMenu> {
             hoverColor: OnepieceColors.liteFancyBlue,
             title: isExpanded
                 ? Text(
-              text,
-              maxLines: 1,
-              overflow: TextOverflow.clip,
-              style: OnepieceFonts.contentStyle.copyWith(
-                fontSize: 16,
-                color: isSelected ? Colors.white : Colors.black,
-              ),
-            )
+                    text,
+                    maxLines: 1,
+                    overflow: TextOverflow.clip,
+                    style: OnepieceFonts.contentStyle.copyWith(
+                      fontSize: 16,
+                      color: isSelected ? Colors.white : Colors.black,
+                    ),
+                  )
                 : const SizedBox(),
           ),
         ),
@@ -625,14 +625,14 @@ class TopNavigationBar extends StatefulWidget {
 
 class _TopNavigationBarState extends State<TopNavigationBar> {
   var _tabTextIndexSelected =
-  I18nHelper.convertToOnepieceLocale(getIt<Locale>()).toString() ==
-      (OnepieceLocale.zhCN.toString())
-      ? 0
-      : 1;
+      I18nHelper.convertToOnepieceLocale(getIt<Locale>()).toString() ==
+              (OnepieceLocale.zhCN.toString())
+          ? 0
+          : 1;
   UserRole selectedRole = getIt<User>().loginRole!;
 
   static const TextStyle _toggleTextStyle =
-  TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600);
+      TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600);
   static const TextStyle _toggleTextDarkStyle = TextStyle(
       color: Colors.black87, fontSize: 12, fontWeight: FontWeight.w600);
 
@@ -717,8 +717,7 @@ class _TopNavigationBarState extends State<TopNavigationBar> {
           icon: const Icon(Icons.language,
               color: OnepieceColors.fancyBlue, size: 24),
           offset: const Offset(0, 40),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           onSelected: (value) {
             switch (value) {
               case 'locale_zh':
@@ -776,19 +775,19 @@ class _TopNavigationBarState extends State<TopNavigationBar> {
     // Map definitions
     final Map<String, String> routeDisplayName = {
       ResourceType.CHARACTER.toString().toLowerCase():
-      AppLocalizations.of(context)!.character,
+          AppLocalizations.of(context)!.character,
       ResourceType.FRUIT.toString().toLowerCase():
-      AppLocalizations.of(context)!.devilFruit,
+          AppLocalizations.of(context)!.devilFruit,
       ResourceType.GROUP.toString().toLowerCase():
-      AppLocalizations.of(context)!.group,
+          AppLocalizations.of(context)!.group,
       ResourceType.USER.toString().toLowerCase():
-      AppLocalizations.of(context)!.userManagement,
+          AppLocalizations.of(context)!.userManagement,
       ResourceType.BATTLE.toString().toLowerCase():
-      AppLocalizations.of(context)!.battle,
+          AppLocalizations.of(context)!.battle,
       ResourceType.ISSUE.toString().toLowerCase():
-      AppLocalizations.of(context)!.issue,
+          AppLocalizations.of(context)!.issue,
       ResourceType.CHATTING.toString().toLowerCase():
-      AppLocalizations.of(context)!.chatting,
+          AppLocalizations.of(context)!.chatting,
       'create': AppLocalizations.of(context)!.create,
       'profile': AppLocalizations.of(context)!.userProfile,
     };
@@ -874,7 +873,7 @@ class _TopNavigationBarState extends State<TopNavigationBar> {
       height: 30,
       child: Row(
         mainAxisSize:
-        MainAxisSize.min, // Important: Don't let this row expand infinitely
+            MainAxisSize.min, // Important: Don't let this row expand infinitely
         children: [
           NotificationList(context: context),
           const SizedBox(width: 20),
@@ -912,7 +911,7 @@ class _TopNavigationBarState extends State<TopNavigationBar> {
           setState(() {
             _tabTextIndexSelected = _tabTextIndexSelected == 0 ? 1 : 0;
             Locale locale =
-            _tabTextIndexSelected == 0 ? locales.first : locales.last;
+                _tabTextIndexSelected == 0 ? locales.first : locales.last;
 
             getIt<UserDao>().updateUser(UpdateUserRequest(
                 id: getIt<User>().id,
@@ -922,7 +921,7 @@ class _TopNavigationBarState extends State<TopNavigationBar> {
           });
         },
         styleBuilder: (b) =>
-        const ToggleStyle(indicatorColor: OnepieceColors.fancyBlue),
+            const ToggleStyle(indicatorColor: OnepieceColors.fancyBlue),
         iconBuilder: (value) => value
             ? const Text("En", style: _toggleTextStyle)
             : const Text("文", style: _toggleTextStyle),
