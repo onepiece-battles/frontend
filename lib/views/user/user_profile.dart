@@ -76,7 +76,8 @@ class UserProfileController extends ChangeNotifier {
   final EmailDao _emailDao = GetIt.I<EmailDao>();
 
   bool isLoading = true;
-  bool isSaving = false;
+  bool isSavingAvatar = false;
+  bool isSavingNickname = false;
 
   late User _currentUser;
   late UserProfileFormData _originalData;
@@ -124,11 +125,6 @@ class UserProfileController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void resetChanges() {
-    _currentData = _originalData.copyWith();
-    notifyListeners();
-  }
-
   Future<void> pickImage(BuildContext context) async {
     final alertTitle = AppLocalizations.of(context)!.alert;
     final alertMsg = AppLocalizations.of(context)!.imageSizeExceedsLimit;
@@ -145,11 +141,47 @@ class UserProfileController extends ChangeNotifier {
       return;
     }
 
+    final previousData = _currentData;
     _currentData = _currentData.copyWith(
       profileImage: imageInByte,
       imageName: pickedImage.name,
     );
+    isSavingAvatar = true;
     notifyListeners();
+
+    try {
+      final encodedImage = Base64Helper.encode(imageInByte);
+      await _imageDao.addImage(UploadImageRequest(
+        resourceId: GetIt.I<User>().id,
+        image: encodedImage,
+        type: ResourceType.USER,
+      ));
+
+      final refreshedUser =
+          await _userDao.get(GetUserRequest(userId: GetIt.I<User>().id));
+      if (refreshedUser != null) {
+        refreshedUser.profileImage ??= encodedImage;
+        _currentUser = refreshedUser;
+        ResourcePermissionManager.updateUserCache(refreshedUser);
+      }
+
+      _currentData = UserProfileFormData(
+        profileImage: imageInByte,
+        nickname: _currentUser.nickname,
+        username: _currentUser.username,
+      );
+      _originalData = _currentData.copyWith();
+    } catch (e) {
+      debugPrint("Error saving avatar: $e");
+      _currentData = previousData;
+      if (context.mounted) {
+        OnepieceAlert.getBasicAlertDialogFunc(
+            context, "Error", "Failed to save avatar");
+      }
+    } finally {
+      isSavingAvatar = false;
+      notifyListeners();
+    }
   }
 
   Future<void> sendVerificationEmail(BuildContext context) async {
@@ -168,54 +200,68 @@ class UserProfileController extends ChangeNotifier {
     }
   }
 
-  Future<void> saveProfile(BuildContext context) async {
-    if (!hasChanges) return;
+  Future<bool> saveNickname(BuildContext context, String nickname) async {
+    final trimmedNickname = nickname.trim();
+    if (trimmedNickname == _originalData.nickname) {
+      _currentData = _originalData.copyWith();
+      notifyListeners();
+      return true;
+    }
 
-    isSaving = true;
+    final previousData = _currentData;
+    final previousProfileImage = _currentUser.profileImage;
+    final previousImageUri = _currentUser.imageUri;
+    _currentData = _currentData.copyWith(nickname: trimmedNickname);
+    isSavingNickname = true;
     notifyListeners();
 
     // Capture router before async gap to avoid lint warnings
     final router = GoRouter.of(context);
 
     try {
-      // 1. Upload Image (only if a new image has been selected)
-      if (_currentData.profileImage != null) {
-        final encodedImage = Base64Helper.encode(_currentData.profileImage!);
-        await _imageDao.addImage(UploadImageRequest(
-          resourceId: GetIt.I<User>().id,
-          image: encodedImage,
-          type: ResourceType.USER,
-        ));
-      }
-
-      // 2. Update User Data
       final response = await _userDao.updateUser(UpdateUserRequest(
         locale: OnepieceLocale.zhCN,
-        nickname: _currentData.nickname.trim(),
+        nickname: trimmedNickname,
         id: GetIt.I<User>().id,
       ));
 
-      // 3. Update Cache & Router
-      ResourcePermissionManager.updateUserCache(response!.user!);
+      final updatedUser = response!.user!;
+      if (updatedUser.profileImage == null || updatedUser.profileImage == "") {
+        updatedUser.profileImage = previousProfileImage;
+      }
+      if (updatedUser.imageUri == null || updatedUser.imageUri == "") {
+        updatedUser.imageUri = previousImageUri;
+      }
+
+      ResourcePermissionManager.updateUserCache(updatedUser);
+      _currentUser = updatedUser;
+      _currentData = UserProfileFormData(
+        profileImage: _currentUser.profileImage == null
+            ? previousData.profileImage
+            : Base64Helper.decode(_currentUser.profileImage!),
+        nickname: _currentUser.nickname,
+        username: _currentUser.username,
+      );
+      _originalData = _currentData.copyWith();
 
       if (context.mounted) {
         router.goNamed('userProfile',
             extra: GetIt.I<User>().id,
             pathParameters: {'name': GetIt.I<User>().nickname});
       }
-
-      // Update internal state to match new saved state
-      _originalData = _currentData.copyWith();
     } catch (e) {
-      debugPrint("Error saving: $e");
+      debugPrint("Error saving nickname: $e");
+      _currentData = previousData;
       if (context.mounted) {
         OnepieceAlert.getBasicAlertDialogFunc(
-            context, "Error", "Failed to save profile");
+            context, "Error", "Failed to save nickname");
       }
+      return false;
     } finally {
-      isSaving = false;
+      isSavingNickname = false;
       notifyListeners();
     }
+    return true;
   }
 }
 
@@ -271,8 +317,6 @@ class _UserProfileState extends State<UserProfile> {
                   _NicknameSection(controller: _controller),
                   const SizedBox(height: 12),
                   _EmailSection(controller: _controller),
-                  const SizedBox(height: 12),
-                  _ActionButtons(controller: _controller),
                 ],
               ),
             );
@@ -324,9 +368,17 @@ class _AvatarSection extends StatelessWidget {
                           height: 32,
                           child: ElevatedButton(
                               style: OnepieceButtonStyle.getDefaultStyle(),
-                              onPressed: () => controller.pickImage(context),
-                              child: Text(loc.chooseFile,
-                                  style: const TextStyle(fontSize: 13)))),
+                              onPressed: controller.isSavingAvatar
+                                  ? null
+                                  : () => controller.pickImage(context),
+                              child: controller.isSavingAvatar
+                                  ? const SizedBox(
+                                      width: 18,
+                                      height: 18,
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 2))
+                                  : Text(loc.chooseFile,
+                                      style: const TextStyle(fontSize: 13)))),
                       const SizedBox(height: 4),
                       Text(controller.data.imageName ?? loc.noFileChosen,
                           style: OnepieceFonts.smallContentStyle),
@@ -354,6 +406,17 @@ class _NicknameSection extends StatefulWidget {
 class _NicknameSectionState extends State<_NicknameSection> {
   final TextEditingController _textController = TextEditingController();
   bool _isEditable = false;
+
+  Future<void> _confirmNickname() async {
+    final saved =
+        await widget.controller.saveNickname(context, _textController.text);
+    if (mounted && saved) {
+      setState(() {
+        _isEditable = false;
+        _textController.text = widget.controller.data.nickname;
+      });
+    }
+  }
 
   @override
   void initState() {
@@ -385,21 +448,30 @@ class _NicknameSectionState extends State<_NicknameSection> {
                   style: OnepieceFonts.headerStyle.copyWith(fontSize: 16)),
               const Spacer(),
               InkWell(
-                onTap: () => setState(() {
-                  _isEditable = !_isEditable;
-                  if (!_isEditable)
-                    _textController.text = widget.controller.data.nickname;
-                }),
+                onTap: widget.controller.isSavingNickname
+                    ? null
+                    : () {
+                        if (_isEditable) {
+                          _confirmNickname();
+                          return;
+                        }
+
+                        setState(() {
+                          _isEditable = true;
+                        });
+                      },
                 child: SizedBox(
                     width: 22,
                     height: 22,
-                    child: ImageHelper.getSvgIconWithColor(
-                        _isEditable
-                            ? 'images/svgs/check.svg'
-                            : 'images/svgs/edit.svg',
-                        150,
-                        150,
-                        OnepieceColors.fancyBlue)),
+                    child: widget.controller.isSavingNickname
+                        ? const CircularProgressIndicator(strokeWidth: 2)
+                        : ImageHelper.getSvgIconWithColor(
+                            _isEditable
+                                ? 'images/svgs/check.svg'
+                                : 'images/svgs/edit.svg',
+                            150,
+                            150,
+                            OnepieceColors.fancyBlue)),
               ),
             ]),
             const SizedBox(height: 10),
@@ -409,17 +481,17 @@ class _NicknameSectionState extends State<_NicknameSection> {
                     child: TextFormField(
                       controller: _textController,
                       onChanged: (val) => widget.controller.updateNickname(val),
-                      decoration: InputDecoration(
-                          contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 0),
+                      decoration: const InputDecoration(
+                          contentPadding:
+                              EdgeInsets.symmetric(horizontal: 10, vertical: 0),
                           floatingLabelBehavior: FloatingLabelBehavior.never,
-                          disabledBorder: const OutlineInputBorder(
+                          disabledBorder: OutlineInputBorder(
                               borderSide: BorderSide(
                                   color: OnepieceColors.menuHoverColor)),
-                          enabledBorder: const OutlineInputBorder(
+                          enabledBorder: OutlineInputBorder(
                               borderSide: BorderSide(
                                   color: OnepieceColors.menuHoverColor)),
-                          focusedBorder: const OutlineInputBorder(
+                          focusedBorder: OutlineInputBorder(
                               borderSide: BorderSide(
                                   color: OnepieceColors.fancyGreen,
                                   width: 1.5)),
@@ -484,42 +556,6 @@ class _EmailSection extends StatelessWidget {
                             style: const TextStyle(fontSize: 13)))),
             ]),
           ])),
-    );
-  }
-}
-
-class _ActionButtons extends StatelessWidget {
-  final UserProfileController controller;
-  const _ActionButtons({required this.controller});
-
-  @override
-  Widget build(BuildContext context) {
-    final loc = AppLocalizations.of(context)!;
-
-    return Padding(
-      padding: const EdgeInsets.only(right: 8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          ElevatedButton(
-            onPressed:
-                controller.hasChanges ? () => controller.resetChanges() : null,
-            child: Text(loc.cancelPopUp),
-          ),
-          const SizedBox(width: 10),
-          ElevatedButton(
-            onPressed: (controller.hasChanges && !controller.isSaving)
-                ? () => controller.saveProfile(context)
-                : null,
-            child: controller.isSaving
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2))
-                : Text(loc.submitForm),
-          ),
-        ],
-      ),
     );
   }
 }
