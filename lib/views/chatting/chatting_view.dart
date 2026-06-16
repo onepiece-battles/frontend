@@ -59,6 +59,7 @@ class _ChattingViewState extends State<ChattingView> {
   String activeConversationId = "";
   String _lastProcessedChatId = "";
   int _previousMsgCount = 0;
+  String? _previousNewestMessageId;
   Timer? _pendingScroll;
 
   /// Dedicated notifier for search text — changes here rebuild only the
@@ -68,35 +69,29 @@ class _ChattingViewState extends State<ChattingView> {
   @override
   void initState() {
     super.initState();
-    scrollController.addListener(_onScroll);
   }
 
-  /// Loads more history when the user scrolls toward the top.
-  void _onScroll() {
-    if (!scrollController.hasClients) return;
-    if (activeConversationId.isEmpty) return;
-    final pos = scrollController.position;
-    if (pos.maxScrollExtent <= 0) return;
-
-    // Fire within 300px of top.
-    if (pos.pixels > 300) return;
-
+  Future<void> _loadEarlierMessages(String chatId) async {
     final notifier = Provider.of<ChatNotifier>(context, listen: false);
-    if (!notifier.hasMoreHistory(activeConversationId)) return;
-    if (notifier.isLoadingHistory(activeConversationId)) return;
+    if (!notifier.hasMoreHistory(chatId)) return;
+    if (notifier.isLoadingHistory(chatId)) return;
 
-    final previousExtent = pos.maxScrollExtent;
-    notifier.loadMoreHistory(activeConversationId).then((_) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (scrollController.hasClients) {
-          final newExtent = scrollController.position.maxScrollExtent;
-          final addedExtent = newExtent - previousExtent;
-          if (addedExtent > 0) {
-            scrollController.jumpTo(pos.pixels + addedExtent);
-          }
-        }
-      });
-    });
+    if (!scrollController.hasClients) return;
+    final previousExtent = scrollController.position.maxScrollExtent;
+    final previousPixels = scrollController.position.pixels;
+
+    await notifier.loadMoreHistory(chatId);
+    await WidgetsBinding.instance.endOfFrame;
+
+    if (!scrollController.hasClients) return;
+    final addedExtent =
+        scrollController.position.maxScrollExtent - previousExtent;
+    if (addedExtent <= 0) return;
+
+    final target = (previousPixels + addedExtent)
+        .clamp(0.0, scrollController.position.maxScrollExtent)
+        .toDouble();
+    scrollController.jumpTo(target);
   }
 
   @override
@@ -119,6 +114,7 @@ class _ChattingViewState extends State<ChattingView> {
     }
     activeConversationId = "";
     _lastProcessedChatId = "";
+    _previousNewestMessageId = null;
     _currentNameChatId = null;
     Provider.of<ChatNotifier>(context, listen: false).setActiveChat(null);
     typingController.clear();
@@ -128,9 +124,11 @@ class _ChattingViewState extends State<ChattingView> {
 
   /// Scrolls to bottom when a new message arrives and user is near the bottom.
   void _autoScrollOnNewMessages(List<Message> messages, String activeChatId) {
+    final newestMessageId = messages.isEmpty ? null : messages.last.id;
     if (activeChatId != _lastProcessedChatId) {
       _lastProcessedChatId = activeChatId;
       _previousMsgCount = messages.length;
+      _previousNewestMessageId = newestMessageId;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (scrollController.hasClients) {
           scrollController.jumpTo(scrollController.position.maxScrollExtent);
@@ -140,8 +138,14 @@ class _ChattingViewState extends State<ChattingView> {
     }
     if (messages.length > _previousMsgCount) {
       _previousMsgCount = messages.length;
+      if (newestMessageId == _previousNewestMessageId) {
+        return;
+      }
+      _previousNewestMessageId = newestMessageId;
       if (!scrollController.hasClients) return;
-      if (scrollController.position.maxScrollExtent - scrollController.position.pixels < 500) {
+      if (scrollController.position.maxScrollExtent -
+              scrollController.position.pixels <
+          500) {
         _scrollToBottom(0);
       }
     }
@@ -619,27 +623,19 @@ class _ChattingViewState extends State<ChattingView> {
               mainAxisAlignment: MainAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Loading indicator for history fetch
-                Selector<ChatNotifier, bool>(
-                  selector: (_, n) => n.isLoadingHistory(activeChatId),
-                  builder: (_, isLoading, __) {
-                    if (!isLoading) return const SizedBox.shrink();
-                    return const SizedBox(
-                      height: 30,
-                      child: Center(
-                          child: CircularProgressIndicator(strokeWidth: 2)),
-                    );
-                  },
-                ),
                 Expanded(
                   child: ListView.builder(
                     controller: scrollController,
                     addAutomaticKeepAlives: true,
                     cacheExtent: 5000,
                     padding: const EdgeInsets.fromLTRB(15, 0, 20, 0),
-                    itemCount: messages.length,
+                    itemCount: messages.length + 1,
                     itemBuilder: (context, index) {
-                      final msg = messages[index];
+                      if (index == 0) {
+                        return _buildHistoryControl(activeChatId);
+                      }
+
+                      final msg = messages[index - 1];
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 15.0),
                         child: MessageItem(
@@ -820,8 +816,8 @@ class _ChattingViewState extends State<ChattingView> {
                                       }
                                       _pendingScroll?.cancel();
                                       if (scrollController.hasClients) {
-                                        scrollController.jumpTo(
-                                            scrollController.position.maxScrollExtent);
+                                        scrollController.jumpTo(scrollController
+                                            .position.maxScrollExtent);
                                       }
                                     });
                                   });
@@ -1058,13 +1054,82 @@ class _ChattingViewState extends State<ChattingView> {
     );
   }
 
+  Widget _buildHistoryControl(String activeChatId) {
+    return Consumer<ChatNotifier>(builder: (context, notifier, _) {
+      final isLoading = notifier.isLoadingHistory(activeChatId);
+      final hasMore = notifier.hasMoreHistory(activeChatId);
+
+      if (isLoading) {
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(0, 10, 0, 14),
+          child: Center(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: OnepieceColors.liteFancyGreen.withValues(alpha: 0.7),
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    AppLocalizations.of(context)!.loading,
+                    style: OnepieceFonts.superSmallContentStyle,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      }
+
+      if (!hasMore) {
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(0, 10, 0, 14),
+          child: Center(
+            child: Text(
+              'No earlier messages',
+              style: OnepieceFonts.superSmallContentStyle
+                  .copyWith(color: Colors.grey[600]),
+            ),
+          ),
+        );
+      }
+
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(0, 10, 0, 14),
+        child: Center(
+          child: TextButton.icon(
+            onPressed: () => _loadEarlierMessages(activeChatId),
+            icon: const Icon(Icons.keyboard_arrow_up, size: 18),
+            label: const Text('Load earlier messages'),
+            style: TextButton.styleFrom(
+              foregroundColor: OnepieceColors.fancyBlue,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(18),
+                side: const BorderSide(color: OnepieceColors.liteFancyGreen),
+              ),
+            ),
+          ),
+        ),
+      );
+    });
+  }
+
   /// Scrolls to the bottom of the message list.
   void _scrollToBottom(int extendValue) {
     _pendingScroll?.cancel();
     _pendingScroll = Timer(const Duration(milliseconds: 50), () {
       if (!scrollController.hasClients) return;
-      scrollController.jumpTo(
-          scrollController.position.maxScrollExtent + extendValue);
+      scrollController
+          .jumpTo(scrollController.position.maxScrollExtent + extendValue);
     });
   }
 
