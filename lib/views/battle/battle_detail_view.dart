@@ -104,7 +104,8 @@ class _BattleDetailViewState extends State<BattleDetailView> {
   String _statusText() {
     final statusMap = <BattleStatus, String>{
       BattleStatus.CREATED: AppLocalizations.of(context)!.battleStatusCreated,
-      BattleStatus.IN_PROGRESS: AppLocalizations.of(context)!.battleStatusStarted,
+      BattleStatus.IN_PROGRESS:
+          AppLocalizations.of(context)!.battleStatusStarted,
       BattleStatus.FINISHED: AppLocalizations.of(context)!.battleStatusFinished,
       BattleStatus.FAILED: AppLocalizations.of(context)!.battleStatusFailed,
     };
@@ -130,6 +131,84 @@ class _BattleDetailViewState extends State<BattleDetailView> {
     ]);
   }
 
+  void _startBattle(BuildContext context) {
+    final battleTitle = AppLocalizations.of(context)!.battle;
+    final startSuccess = AppLocalizations.of(context)!.startSuccess;
+    final showAlert = OnepieceAlert.createAlertShower(context);
+    getIt<BattleDao>()
+        .startBattle(StartBattleRequest(battleId: battle.id))
+        .then((value) {
+      if (!mounted) return;
+      battleExecutionData.battleStatus = BattleStatus.IN_PROGRESS;
+      showAlert(battleTitle, startSuccess);
+    });
+  }
+
+  Widget _workflowConnector(bool active, double iconSize) {
+    return Padding(
+      padding: EdgeInsets.only(left: iconSize / 2 - 1, top: 3, bottom: 3),
+      child: Container(
+        width: 2,
+        height: iconSize * 0.7,
+        decoration: BoxDecoration(
+          color: active
+              ? OnepieceColors.fancyBlue
+              : OnepieceColors.liteFancyBlue.withValues(alpha: 0.55),
+          borderRadius: BorderRadius.circular(2),
+        ),
+      ),
+    );
+  }
+
+  Widget _workflowStep({
+    required String label,
+    required bool done,
+    required double iconSize,
+    bool failed = false,
+  }) {
+    final color = failed
+        ? Colors.red
+        : done
+            ? OnepieceColors.fancyBlue
+            : OnepieceColors.liteFancyBlue;
+    final style = done && !failed
+        ? OnepieceFonts.fancyBlueHintFont
+        : OnepieceFonts.liteFancyBlueHintFont;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: iconSize + 8,
+          height: iconSize + 8,
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: done || failed ? 0.12 : 0.08),
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: failed
+                ? ImageHelper.getSvgIconWithColor(
+                    'images/svgs/failed.svg', iconSize, iconSize, Colors.red)
+                : Icon(
+                    done ? Icons.check_circle : Icons.radio_button_unchecked,
+                    size: iconSize,
+                    color: color,
+                  ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Flexible(
+          child: Text(
+            label,
+            style: style,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        )
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -141,40 +220,86 @@ class _BattleDetailViewState extends State<BattleDetailView> {
             return ChangeNotifierProvider.value(
               value: battleExecutionData,
               child: LayoutBuilder(
-              builder: (context, constraints) {
-                final isNarrow =
-                    ResponsiveBreakpoints.isMobileFromConstraints(constraints);
-                return Stack(
+                builder: (context, constraints) {
+                  final isNarrow =
+                      ResponsiveBreakpoints.isMobileFromConstraints(
+                          constraints);
+                  return Stack(
                     children: [
                       if (isNarrow)
                         SingleChildScrollView(
                           padding: const EdgeInsets.fromLTRB(12, 12, 12, 80),
                           child: Column(children: [
-                            Center(child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                              decoration: BoxDecoration(color: OnepieceColors.fancyBlue.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(20)),
-                              child: Text(_statusText(), style: OnepieceFonts.headerStyle.copyWith(color: OnepieceColors.fancyBlue, fontSize: 15)),
+                            Center(
+                                child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 6),
+                              decoration: BoxDecoration(
+                                  color: OnepieceColors.fancyBlue
+                                      .withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(20)),
+                              child: Text(_statusText(),
+                                  style: OnepieceFonts.headerStyle.copyWith(
+                                      color: OnepieceColors.fancyBlue,
+                                      fontSize: 15)),
                             )),
+                            _getStartButton(context, compact: true),
                             const SizedBox(height: 12),
-                            Card(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)), child: Padding(padding: const EdgeInsets.all(10), child: Column(children: [
-                              Row(children: [
-                                Expanded(child: _charMini(battle.starter!, battle.battleExecution?.starterScoreBefore)),
-                                Padding(padding: const EdgeInsets.symmetric(horizontal: 6), child: Column(children: [
-                                  const Text('VS', style: TextStyle(color: OnepieceColors.fancyBlue, fontSize: 13, fontWeight: FontWeight.bold)),
-                                  const SizedBox(height: 2),
-                                  battle.battleExecution?.winnerId != null ? ImageLazyLoader(key: const ValueKey('w'), uriProvider: () => battle.battleExecution!.winnerId == battle.starterId ? battle.starter!.imageUri! : battle.receiver!.imageUri!, width: 28, borderWidth: 1.5, borderRadios: 28) : Icon(Icons.help_outline, size: 28, color: Colors.grey[400]),
-                                  const SizedBox(height: 2), _getProgressBar(context, 22),
-                                ])),
-                                Expanded(child: _charMini(battle.receiver!, battle.battleExecution?.receiverScoreBefore)),
-                              ]),
-                              const SizedBox(height: 10), _getWinnerTag(context), const SizedBox(height: 6), _getResult(context),
-                            ]))),
+                            Card(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10)),
+                                child: Padding(
+                                    padding: const EdgeInsets.all(10),
+                                    child: Column(children: [
+                                      Row(children: [
+                                        Expanded(
+                                            child: _charMini(
+                                                battle.starter!,
+                                                battle.battleExecution
+                                                    ?.starterScoreBefore)),
+                                        const Padding(
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: 6),
+                                            child: Column(children: [
+                                              Text('VS',
+                                                  style: TextStyle(
+                                                      color: OnepieceColors
+                                                          .fancyBlue,
+                                                      fontSize: 13,
+                                                      fontWeight:
+                                                          FontWeight.bold)),
+                                            ])),
+                                        Expanded(
+                                            child: _charMini(
+                                                battle.receiver!,
+                                                battle.battleExecution
+                                                    ?.receiverScoreBefore)),
+                                      ]),
+                                      _getProgressBar(context, 22),
+                                      const SizedBox(height: 10),
+                                      _getWinnerTag(context),
+                                      const SizedBox(height: 6),
+                                      _getResult(context),
+                                    ]))),
                             const SizedBox(height: 10),
-                            Card(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)), child: Padding(padding: const EdgeInsets.all(10), child: RepaintBoundary(child: Column(children: [
-                              Center(child: _getBattleReportProgress(context, 28)),
-                              Center(child: _getBattleReportIcon(context)),
-                            ])))),
-                            if (getIt<User>().loginRole != UserRole.VISITOR) ...[const SizedBox(height: 10), _getFightAgain(context)],
+                            Card(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10)),
+                                child: Padding(
+                                    padding: const EdgeInsets.all(10),
+                                    child: RepaintBoundary(
+                                        child: Column(children: [
+                                      Center(
+                                          child: _getBattleReportProgress(
+                                              context, 28)),
+                                      Center(
+                                          child: _getBattleReportIcon(context)),
+                                    ])))),
+                            if (getIt<User>().loginRole !=
+                                UserRole.VISITOR) ...[
+                              const SizedBox(height: 10),
+                              _getFightAgain(context)
+                            ],
                           ]),
                         )
                       else
@@ -182,121 +307,123 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                           scrollDirection: Axis.vertical,
                           child: Center(
                             child: SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: ChangeNotifierProvider(
-                              create: (context) => battleExecutionData,
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  const SizedBox(height: 100),
-                                  _getStart(context),
-                                  const SizedBox(
-                                    width: 400,
-                                    child: Divider(
-                                      color: OnepieceColors.fancyBlue,
-                                      thickness: 2,
-                                      height: 20,
+                              scrollDirection: Axis.horizontal,
+                              child: ChangeNotifierProvider(
+                                create: (context) => battleExecutionData,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    const SizedBox(height: 100),
+                                    _getStart(context),
+                                    const SizedBox(
+                                      width: 400,
+                                      child: Divider(
+                                        color: OnepieceColors.fancyBlue,
+                                        thickness: 2,
+                                        height: 20,
+                                      ),
                                     ),
-                                  ),
-                                  _getProgressBar(context, 40),
-                                  const SizedBox(
-                                    width: 400,
-                                    child: Divider(
-                                      color: OnepieceColors.fancyBlue,
-                                      thickness: 2,
-                                      height: 20,
+                                    _getProgressBar(context, 40),
+                                    const SizedBox(
+                                      width: 400,
+                                      child: Divider(
+                                        color: OnepieceColors.fancyBlue,
+                                        thickness: 2,
+                                        height: 20,
+                                      ),
                                     ),
-                                  ),
-                                  _getWinnerTag(context),
-                                  _getResult(context),
-                                  const SizedBox(
-                                    width: 400,
-                                    child: Divider(
-                                      color: OnepieceColors.fancyBlue,
-                                      thickness: 2,
-                                      height: 20,
+                                    _getWinnerTag(context),
+                                    _getResult(context),
+                                    const SizedBox(
+                                      width: 400,
+                                      child: Divider(
+                                        color: OnepieceColors.fancyBlue,
+                                        thickness: 2,
+                                        height: 20,
+                                      ),
                                     ),
-                                  ),
-                                  _getBattleReportProgress(context, 40),
-                                  const SizedBox(
-                                    width: 400,
-                                    child: Divider(
-                                      color: OnepieceColors.fancyBlue,
-                                      thickness: 2,
-                                      height: 20,
+                                    _getBattleReportProgress(context, 40),
+                                    const SizedBox(
+                                      width: 400,
+                                      child: Divider(
+                                        color: OnepieceColors.fancyBlue,
+                                        thickness: 2,
+                                        height: 20,
+                                      ),
                                     ),
-                                  ),
-                                  _getBattleReportIcon(context),
-                                  if (getIt<User>().loginRole !=
-                                      UserRole.VISITOR)
-                                    _getFightAgain(context),
-                                  // bottom space
-                                  const SizedBox(
-                                    height: 60,
-                                  )
-                                ],
+                                    _getBattleReportIcon(context),
+                                    if (getIt<User>().loginRole !=
+                                        UserRole.VISITOR)
+                                      _getFightAgain(context),
+                                    // bottom space
+                                    const SizedBox(
+                                      height: 60,
+                                    )
+                                  ],
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                    Positioned(
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      child: Container(
-                        color: Colors.white,
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Tooltip(
-                                message: battle.previousBattle == null
-                                    ? ""
-                                    : "${I18nHelper.getDisplayNameFromI18n(battle.previousBattle!.starter!.name)} vs ${I18nHelper.getDisplayNameFromI18n(battle.previousBattle!.receiver!.name)}",
-                                child: ElevatedButton(
-                                  onPressed: battle.previousBattle == null
-                                      ? null
-                                      : () {
-                                          context.goNamed('battleDetails',
-                                              extra: battle.previousBattle!.id,
-                                              pathParameters: {
-                                                'id': battle.previousBattle!.id
-                                              });
-                                        },
-                                  child: const Icon(Icons.arrow_back),
+                      Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        child: Container(
+                          color: Colors.white,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Tooltip(
+                                  message: battle.previousBattle == null
+                                      ? ""
+                                      : "${I18nHelper.getDisplayNameFromI18n(battle.previousBattle!.starter!.name)} vs ${I18nHelper.getDisplayNameFromI18n(battle.previousBattle!.receiver!.name)}",
+                                  child: ElevatedButton(
+                                    onPressed: battle.previousBattle == null
+                                        ? null
+                                        : () {
+                                            context.goNamed('battleDetails',
+                                                extra:
+                                                    battle.previousBattle!.id,
+                                                pathParameters: {
+                                                  'id':
+                                                      battle.previousBattle!.id
+                                                });
+                                          },
+                                    child: const Icon(Icons.arrow_back),
+                                  ),
                                 ),
-                              ),
-                              Tooltip(
-                                message: battle.nextBattle == null
-                                    ? ""
-                                    : "${I18nHelper.getDisplayNameFromI18n(battle.nextBattle!.starter!.name)} vs ${I18nHelper.getDisplayNameFromI18n(battle.nextBattle!.receiver!.name)}",
-                                child: ElevatedButton(
-                                  onPressed: battle.nextBattle == null
-                                      ? null
-                                      : () {
-                                          context.goNamed('battleDetails',
-                                              extra: battle.nextBattle!.id,
-                                              pathParameters: {
-                                                'id': battle.nextBattle!.id
-                                              });
-                                        },
-                                  child: const Icon(Icons.arrow_forward),
+                                Tooltip(
+                                  message: battle.nextBattle == null
+                                      ? ""
+                                      : "${I18nHelper.getDisplayNameFromI18n(battle.nextBattle!.starter!.name)} vs ${I18nHelper.getDisplayNameFromI18n(battle.nextBattle!.receiver!.name)}",
+                                  child: ElevatedButton(
+                                    onPressed: battle.nextBattle == null
+                                        ? null
+                                        : () {
+                                            context.goNamed('battleDetails',
+                                                extra: battle.nextBattle!.id,
+                                                pathParameters: {
+                                                  'id': battle.nextBattle!.id
+                                                });
+                                          },
+                                    child: const Icon(Icons.arrow_forward),
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
-              );
-              },
-            ),
-          );
+                    ],
+                  );
+                },
+              ),
+            );
           } else {
             return Center(
               child: Text(
@@ -324,115 +451,100 @@ class _BattleDetailViewState extends State<BattleDetailView> {
 
   Widget _getProgressBar(BuildContext context, double iconSize) {
     return Consumer<BattleExecutionData>(builder: (context, model, child) {
+      final isCreated = model.battleStatus == BattleStatus.CREATED;
+      final isInProgress = model.battleStatus == BattleStatus.IN_PROGRESS;
+      final isFinished = model.battleStatus == BattleStatus.FINISHED;
+      final isFailed = model.battleStatus == BattleStatus.FAILED;
       return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.check_circle,
-                  size: iconSize,
-                  color: OnepieceColors.fancyBlue,
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 8.0),
-                  child: Text(
-                    AppLocalizations.of(context)!.battleStatusCreated,
-                    style: OnepieceFonts.fancyBlueHintFont,
-                  ),
-                )
-              ],
+        padding: const EdgeInsets.symmetric(vertical: 14.0),
+        child: Container(
+          constraints: const BoxConstraints(minWidth: 220, maxWidth: 360),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+                color: OnepieceColors.liteFancyBlue.withValues(alpha: 0.45)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              )
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _workflowStep(
+                label: AppLocalizations.of(context)!.battleStatusCreated,
+                done: true,
+                iconSize: iconSize,
+              ),
+              _workflowConnector(!isCreated, iconSize),
+              _workflowStep(
+                label: AppLocalizations.of(context)!.battleInProgress,
+                done: isInProgress || isFinished || isFailed,
+                iconSize: iconSize,
+                failed: isFailed,
+              ),
+              _workflowConnector(isFinished || isFailed, iconSize),
+              _workflowStep(
+                label: isFailed
+                    ? AppLocalizations.of(context)!.battleStatusFailed
+                    : AppLocalizations.of(context)!.battleFinished,
+                done: isFinished || isFailed,
+                iconSize: iconSize,
+                failed: isFailed,
+              ),
+            ],
+          ),
+        ),
+      );
+    });
+  }
+
+  Widget _getStartButton(BuildContext context, {bool compact = false}) {
+    return Consumer<BattleExecutionData>(builder: (context, model, child) {
+      if (model.battleStatus != BattleStatus.CREATED) {
+        return compact
+            ? const SizedBox.shrink()
+            : const SizedBox(
+                width: 35,
+              );
+      }
+
+      if (compact) {
+        return Padding(
+          padding: const EdgeInsets.only(top: 10),
+          child: ElevatedButton.icon(
+            onPressed: () => _startBattle(context),
+            icon: const Icon(Icons.not_started, size: 18),
+            label: Text(AppLocalizations.of(context)!.startBattle),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: OnepieceColors.fancyBlue,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20)),
             ),
-            Padding(
-              padding: const EdgeInsets.only(left: 17.0),
-              child: Text(
-                "|",
-                style: OnepieceFonts.fancyBlueHintFont,
-              ),
-            ),
-            model.battleStatus == BattleStatus.CREATED
-                ? Row(
-                    children: [
-                      Icon(Icons.check_circle_outline,
-                          size: iconSize, color: OnepieceColors.liteFancyBlue),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 8.0),
-                        child: Text(
-                          AppLocalizations.of(context)!.battleInProgress,
-                          style: OnepieceFonts.liteFancyBlueHintFont,
-                        ),
-                      )
-                    ],
-                  )
-                : Row(
-                    children: [
-                      Icon(Icons.check_circle,
-                          size: iconSize, color: OnepieceColors.fancyBlue),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 8.0),
-                        child: Text(
-                          AppLocalizations.of(context)!.battleInProgress,
-                          style: OnepieceFonts.fancyBlueHintFont,
-                        ),
-                      )
-                    ],
-                  ),
-            Padding(
-              padding: const EdgeInsets.only(left: 17.0),
-              child: Text(
-                "|",
-                style: OnepieceFonts.fancyBlueHintFont,
-              ),
-            ),
-            if (model.battleStatus == BattleStatus.CREATED ||
-                model.battleStatus == BattleStatus.IN_PROGRESS)
-              Row(
-                children: [
-                  Icon(
-                    Icons.check_circle_outline,
-                    size: iconSize,
-                    color: OnepieceColors.liteFancyBlue,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8.0),
-                    child: Text(
-                      AppLocalizations.of(context)!.battleFinished,
-                      style: OnepieceFonts.liteFancyBlueHintFont,
-                    ),
-                  )
-                ],
-              ),
-            if (model.battleStatus == BattleStatus.FINISHED)
-              Row(
-                children: [
-                  Icon(Icons.check_circle,
-                      size: iconSize, color: OnepieceColors.fancyBlue),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8.0),
-                    child: Text(
-                      AppLocalizations.of(context)!.battleStatusFinished,
-                      style: OnepieceFonts.fancyBlueHintFont,
-                    ),
-                  )
-                ],
-              ),
-            if (model.battleStatus == BattleStatus.FAILED)
-              Row(
-                children: [
-                  ImageHelper.getSvgIconWithColor(
-                      'images/svgs/failed.svg', iconSize, iconSize, Colors.red),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8.0),
-                    child: Text(
-                      AppLocalizations.of(context)!.battleStatusFailed,
-                      style: OnepieceFonts.liteFancyBlueHintFont,
-                    ),
-                  )
-                ],
-              ),
-          ],
+          ),
+        );
+      }
+
+      return Padding(
+        padding: const EdgeInsets.all(30.0),
+        child: Tooltip(
+          message: AppLocalizations.of(context)!.startBattle,
+          child: InkWell(
+              splashColor: Colors.transparent,
+              hoverColor: Colors.transparent,
+              onTap: () => _startBattle(context),
+              child: const Icon(
+                Icons.not_started,
+                size: 55,
+                color: OnepieceColors.fancyBlue,
+              )),
         ),
       );
     });
@@ -600,46 +712,6 @@ class _BattleDetailViewState extends State<BattleDetailView> {
     );
   }
 
-  Widget _getStartButton(BuildContext context) {
-    return Consumer<BattleExecutionData>(builder: (context, model, child) {
-      return Padding(
-        padding: const EdgeInsets.all(30.0),
-        child: Tooltip(
-          message: model.battleStatus == BattleStatus.CREATED
-              ? AppLocalizations.of(context)!.startBattle
-              : "",
-          child: InkWell(
-              splashColor: Colors.transparent,
-              hoverColor: Colors.transparent,
-              onTap: model.battleStatus == BattleStatus.CREATED
-                  ? () {
-                      final battleTitle = AppLocalizations.of(context)!.battle;
-                      final startSuccess =
-                          AppLocalizations.of(context)!.startSuccess;
-                      final showAlert =
-                          OnepieceAlert.createAlertShower(context);
-                      getIt<BattleDao>()
-                          .startBattle(StartBattleRequest(battleId: battle.id))
-                          .then((value) {
-                        if (!mounted) return;
-                        showAlert(battleTitle, startSuccess);
-                      });
-                    }
-                  : null,
-              child: model.battleStatus == BattleStatus.CREATED
-                  ? const Icon(
-                      Icons.not_started,
-                      size: 55,
-                      color: OnepieceColors.fancyBlue,
-                    )
-                  : const SizedBox(
-                      width: 35,
-                    )),
-        ),
-      );
-    });
-  }
-
   Widget _getResult(BuildContext context) {
     return Consumer<BattleExecutionData>(builder: (context, model, child) {
       return model.winnerId == null
@@ -665,112 +737,50 @@ class _BattleDetailViewState extends State<BattleDetailView> {
 
   Widget _getBattleReportProgress(BuildContext context, double iconSize) {
     return Consumer<BattleExecutionData>(builder: (context, model, child) {
+      final hasWinner = model.winnerId != null;
+      final isGenerating =
+          model.battleReportStage == BattleReportStage.IN_PROGRESS;
+      final isFinished = model.battleReportStage == BattleReportStage.FINISHED;
       return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  model.winnerId != null
-                      ? Icons.check_circle
-                      : Icons.check_circle_outline,
-                  size: iconSize,
-                  color: model.winnerId != null
-                      ? OnepieceColors.fancyBlue
-                      : OnepieceColors.liteFancyBlue,
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 8.0),
-                  child: Text(
-                    AppLocalizations.of(context)!.battleReportWaiting,
-                    style: model.winnerId != null
-                        ? OnepieceFonts.fancyBlueHintFont
-                        : OnepieceFonts.liteFancyBlueHintFont,
-                  ),
-                )
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsets.only(left: 17.0),
-              child: Text(
-                "|",
-                style: OnepieceFonts.fancyBlueHintFont,
+        padding: const EdgeInsets.symmetric(vertical: 14.0),
+        child: Container(
+          constraints: const BoxConstraints(minWidth: 220, maxWidth: 360),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+                color: OnepieceColors.liteFancyBlue.withValues(alpha: 0.45)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              )
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _workflowStep(
+                label: AppLocalizations.of(context)!.battleReportWaiting,
+                done: hasWinner,
+                iconSize: iconSize,
               ),
-            ),
-            model.battleReportStage == BattleReportStage.WAITING
-                ? Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.check_circle_outline,
-                          size: iconSize, color: OnepieceColors.liteFancyBlue),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 8.0),
-                        child: Text(
-                          AppLocalizations.of(context)!.battleReportInProgress,
-                          style: OnepieceFonts.liteFancyBlueHintFont,
-                        ),
-                      )
-                    ],
-                  )
-                : Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.check_circle,
-                          size: iconSize, color: OnepieceColors.fancyBlue),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 8.0),
-                        child: Text(
-                          AppLocalizations.of(context)!.battleReportInProgress,
-                          style: OnepieceFonts.fancyBlueHintFont,
-                        ),
-                      )
-                    ],
-                  ),
-            Padding(
-              padding: const EdgeInsets.only(left: 17.0),
-              child: Text(
-                "|",
-                style: OnepieceFonts.fancyBlueHintFont,
+              _workflowConnector(isGenerating || isFinished, iconSize),
+              _workflowStep(
+                label: AppLocalizations.of(context)!.battleReportInProgress,
+                done: isGenerating || isFinished,
+                iconSize: iconSize,
               ),
-            ),
-            if (model.battleReportStage == BattleReportStage.WAITING ||
-                model.battleReportStage == BattleReportStage.IN_PROGRESS)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.check_circle_outline,
-                    size: iconSize,
-                    color: OnepieceColors.liteFancyBlue,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8.0),
-                    child: Text(
-                      AppLocalizations.of(context)!.battleReportGenerated,
-                      style: OnepieceFonts.liteFancyBlueHintFont,
-                    ),
-                  )
-                ],
+              _workflowConnector(isFinished, iconSize),
+              _workflowStep(
+                label: AppLocalizations.of(context)!.battleReportGenerated,
+                done: isFinished,
+                iconSize: iconSize,
               ),
-            if (model.battleReportStage == BattleReportStage.FINISHED)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.check_circle,
-                      size: iconSize, color: OnepieceColors.fancyBlue),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8.0),
-                    child: Text(
-                      AppLocalizations.of(context)!.battleReportGenerated,
-                      style: OnepieceFonts.fancyBlueHintFont,
-                    ),
-                  )
-                ],
-              ),
-          ],
+            ],
+          ),
         ),
       );
     });
@@ -778,18 +788,18 @@ class _BattleDetailViewState extends State<BattleDetailView> {
 
   Widget _getBattleReportIcon(BuildContext context) {
     return Consumer<BattleExecutionData>(builder: (context, model, child) {
+      final canDownload =
+          model.battleReportStage == BattleReportStage.FINISHED &&
+              getIt<User>().loginRole != UserRole.VISITOR;
       return Padding(
-        padding: const EdgeInsets.fromLTRB(0, 8, 0, 20),
+        padding: const EdgeInsets.fromLTRB(0, 4, 0, 18),
         child: Tooltip(
-          message: model.battleReportStage == BattleReportStage.FINISHED &&
-                  getIt<User>().loginRole != UserRole.VISITOR
-              ? AppLocalizations.of(context)!.downloadReport
-              : "",
+          message:
+              canDownload ? AppLocalizations.of(context)!.downloadReport : "",
           child: InkWell(
             hoverColor: Colors.transparent,
             splashColor: Colors.transparent,
-            onTap: model.battleReportStage == BattleReportStage.FINISHED &&
-                    getIt<User>().loginRole != UserRole.VISITOR
+            onTap: canDownload
                 ? () {
                     getIt<FileDao>()
                         .downloadFile(DownloadFileRequest(
@@ -802,19 +812,30 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                     });
                   }
                 : null,
-            child: model.battleReportStage == BattleReportStage.FINISHED
-                ? SvgPicture.asset(
-                    'asset/images/svgs/pdf.svg',
-                    width: 100,
-                    height: 100,
-                  )
-                : SvgPicture.asset(
-                    'asset/images/svgs/pdf_black.svg',
-                    width: 100,
-                    height: 100,
-                    colorFilter:
-                        const ColorFilter.mode(Colors.grey, BlendMode.srcIn),
-                  ),
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: canDownload
+                    ? OnepieceColors.fancyBlue.withValues(alpha: 0.08)
+                    : Colors.grey.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: canDownload
+                      ? OnepieceColors.fancyBlue.withValues(alpha: 0.3)
+                      : Colors.grey.withValues(alpha: 0.25),
+                ),
+              ),
+              child: SvgPicture.asset(
+                canDownload
+                    ? 'asset/images/svgs/pdf.svg'
+                    : 'asset/images/svgs/pdf_black.svg',
+                width: 72,
+                height: 72,
+                colorFilter: canDownload
+                    ? null
+                    : const ColorFilter.mode(Colors.grey, BlendMode.srcIn),
+              ),
+            ),
           ),
         ),
       );
