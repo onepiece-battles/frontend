@@ -218,7 +218,7 @@ class ChatNotifier with ChangeNotifier {
 
     try {
       final loadCount = (_historyLoadCount[chatId] ?? 0) + 1;
-      const batchSize = 10;
+      const batchSize = 20;
       final alreadyLoadedCount = _messagesByChatId[chatId]?.length ?? 0;
       final countedLimit = loadCount * batchSize;
       final visibleLimit = alreadyLoadedCount + batchSize;

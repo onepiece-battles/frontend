@@ -106,33 +106,33 @@ class _ChattingViewState extends State<ChattingView> {
     final notifier = Provider.of<ChatNotifier>(context, listen: false);
     if (!notifier.hasMoreHistory(chatId)) return;
 
-    final hadScrollPosition = scrollController.hasClients;
-    final previousExtent =
-        hadScrollPosition ? scrollController.position.maxScrollExtent : 0.0;
-    final previousPixels =
-        hadScrollPosition ? scrollController.position.pixels : 0.0;
+    final hadClients = scrollController.hasClients;
+    final oldOffset = hadClients ? scrollController.offset : 0.0;
+    final oldExtent = hadClients ? scrollController.position.maxScrollExtent : 0.0;
 
+    _preservingHistoryScrollChats.add(chatId);
     try {
-      _preservingHistoryScrollChats.add(chatId);
       await notifier.loadMoreHistoryAfterCurrent(chatId);
-      await WidgetsBinding.instance.endOfFrame;
-      await WidgetsBinding.instance.endOfFrame;
-
-      if (!hadScrollPosition || !scrollController.hasClients) return;
-      final addedExtent =
-          scrollController.position.maxScrollExtent - previousExtent;
-      if (addedExtent <= 0) return;
-
-      final wasAtHistoryControl = previousPixels <= 24;
-      final target =
-          (wasAtHistoryControl ? previousPixels : previousPixels + addedExtent)
-              .clamp(0.0, scrollController.position.maxScrollExtent)
-              .toDouble();
-      scrollController.jumpTo(target);
-      chatIdToScrollOffset[chatId] = target;
     } finally {
       _preservingHistoryScrollChats.remove(chatId);
     }
+
+    // Jump by the amount of new content added (old content shifted down).
+    // Retry over multiple frames in case ListView hasn't finished laying out
+    // the new items yet.
+    void apply([int retries = 8]) {
+      if (!scrollController.hasClients || !mounted) return;
+      final newExtent = scrollController.position.maxScrollExtent;
+      final added = (newExtent - oldExtent).clamp(0.0, newExtent);
+      if (added > 0 || retries <= 0) {
+        scrollController.jumpTo((oldOffset + added).clamp(0.0, newExtent));
+      }
+      if (retries > 0) {
+        WidgetsBinding.instance.addPostFrameCallback((_) => apply(retries - 1));
+      }
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) => apply());
   }
 
   @override
@@ -817,6 +817,7 @@ class _ChattingViewState extends State<ChattingView> {
               children: [
                 Expanded(
                   child: ListView.builder(
+                    key: ValueKey('chat_$activeChatId'),
                     controller: scrollController,
                     addAutomaticKeepAlives: true,
                     cacheExtent: 5000,
