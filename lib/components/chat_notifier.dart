@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:one_piece_battles_flutter/components/web_socket_service.dart';
+import 'package:one_piece_battles_flutter/repository/chatting_dao.dart';
 import 'package:one_piece_battles_flutter/repository/message_dao.dart';
 import 'package:openapi/api.dart';
 
@@ -102,8 +103,7 @@ class ChatNotifier with ChangeNotifier {
     final String conversationId = message.conversationId!;
 
     // Append — newest message at visual bottom.
-    final List<Message> existing =
-        _messagesByChatId[conversationId] ?? [];
+    final List<Message> existing = _messagesByChatId[conversationId] ?? [];
     _messagesByChatId[conversationId] = [...existing, message];
 
     // Move chat to top of sidebar with new message preview
@@ -134,8 +134,8 @@ class ChatNotifier with ChangeNotifier {
     return newest.userId == message.userId &&
         newest.conversationId == message.conversationId &&
         (newest.content != null && newest.content == message.content ||
-         newest.imageContentUri != null &&
-             newest.imageContentUri == message.imageContentUri);
+            newest.imageContentUri != null &&
+                newest.imageContentUri == message.imageContentUri);
   }
 
   void _handleChatUpdate(Chat update) {
@@ -146,6 +146,37 @@ class ChatNotifier with ChangeNotifier {
     _chats = newChats;
     _chatListVersion++;
     notifyListeners();
+  }
+
+  void upsertChat(Chat chat) {
+    _handleChatUpdate(chat);
+  }
+
+  Future<void> refreshChats() async {
+    try {
+      final response = await getIt<ChattingDao>().listChat(
+        ListChatRequest(
+          type: MessageType.CREATE_CHAT,
+          userId: getIt<User>().id,
+        ),
+      );
+      if (response == null) return;
+
+      _chats = response.chats.toList();
+      if (_activeChatId != null) {
+        _activeChat = _chats.cast<Chat?>().firstWhere(
+              (chat) => chat?.id == _activeChatId,
+              orElse: () => null,
+            );
+        if (_activeChat == null) {
+          _activeChatId = null;
+        }
+      }
+      _chatListVersion++;
+      notifyListeners();
+    } catch (error) {
+      debugPrint('Error refreshing chats: $error');
+    }
   }
 
   void sendChatMessage(String content) {
@@ -191,9 +222,8 @@ class ChatNotifier with ChangeNotifier {
       final existingIds = existing.map((e) => e.id).toSet();
 
       // Only keep messages that aren't already loaded.
-      final onlyNew = allLoaded
-          .where((m) => !existingIds.contains(m.id))
-          .toList();
+      final onlyNew =
+          allLoaded.where((m) => !existingIds.contains(m.id)).toList();
 
       if (onlyNew.isNotEmpty) {
         // Prepend older messages at the start (= visual top).

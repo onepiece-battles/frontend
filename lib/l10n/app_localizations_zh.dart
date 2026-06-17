@@ -973,4 +973,34 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get copy => '复制';
+
+  @override
+  String get chatInformation => '聊天信息';
+
+  @override
+  String get chatPrivate => '私密';
+
+  @override
+  String get chatUnread => '未读';
+
+  @override
+  String get chatActions => '操作';
+
+  @override
+  String get clearHistory => '清空聊天记录';
+
+  @override
+  String get leaveGroup => '退出群聊';
+
+  @override
+  String get groupRenameApiNotConnected => '群聊改名接口暂未接入';
+
+  @override
+  String get addMemberApiNotConnected => '添加成员接口暂未接入';
+
+  @override
+  String get addCharactersToGroup => '添加角色';
+
+  @override
+  String get noCharactersFound => '没有找到角色';
 }

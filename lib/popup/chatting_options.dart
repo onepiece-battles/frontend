@@ -5,14 +5,10 @@ import '../../l10n/app_localizations.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:one_piece_battles_flutter/views/chatting/add_friend_view.dart';
 import 'package:one_piece_battles_flutter/views/chatting/create_chatting_view.dart';
-import 'package:popover/popover.dart';
-import '../constants/button_style.dart';
 
 GetIt getIt = GetIt.instance;
 
 class ChattingOptions extends StatefulWidget {
-  // final BoxConstraints constraints;
-
   const ChattingOptions({super.key, required BuildContext context});
 
   @override
@@ -20,113 +16,123 @@ class ChattingOptions extends StatefulWidget {
 }
 
 class _ChattingOptionsState extends State<ChattingOptions> {
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      iconSize: 45,
-      splashRadius: 0.1,
-      padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-      color: OnepieceColors.liteFancyBlue,
-      hoverColor: Colors.transparent,
-      splashColor: Colors.transparent,
-      highlightColor: Colors.transparent,
-      focusColor: Colors.transparent,
-      onPressed: () => showPopover(
-        width: 170,
-        height: 70,
-        direction: PopoverDirection.top,
-        context: context,
-        barrierColor: Colors.transparent,
-        backgroundColor: OnepieceColors.fancyBlue,
-        bodyBuilder: (context) => Column(
+  Future<void> _showOptions(BuildContext buttonContext) async {
+    final buttonBox = buttonContext.findRenderObject() as RenderBox;
+    final overlay =
+        Overlay.of(buttonContext).context.findRenderObject() as RenderBox;
+    final buttonTopLeft =
+        buttonBox.localToGlobal(Offset.zero, ancestor: overlay);
+    final buttonRect = buttonTopLeft & buttonBox.size;
+    final localizations = AppLocalizations.of(context)!;
+
+    final selected = await showMenu<_ChattingAction>(
+      context: context,
+      color: Colors.white,
+      elevation: 8,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      position: RelativeRect.fromRect(
+        buttonRect,
+        Offset.zero & overlay.size,
+      ),
+      items: [
+        _buildMenuItem(
+          value: _ChattingAction.createChat,
+          icon: Icons.chat_bubble_outline,
+          label: localizations.createChatting,
+        ),
+        _buildMenuItem(
+          value: _ChattingAction.addFriend,
+          icon: Icons.group_add_outlined,
+          label: localizations.addFriend,
+        ),
+      ],
+    );
+
+    if (!mounted || selected == null) return;
+    if (selected == _ChattingAction.createChat) {
+      _showCardDialog(const CreateChattingView());
+    } else {
+      _showCardDialog(const AddFriendView());
+    }
+  }
+
+  PopupMenuItem<_ChattingAction> _buildMenuItem({
+    required _ChattingAction value,
+    required IconData icon,
+    required String label,
+  }) {
+    return PopupMenuItem<_ChattingAction>(
+      value: value,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      child: Container(
+        width: 190,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+        decoration: BoxDecoration(
+          color: OnepieceColors.liteFancyBlue.withValues(alpha: 0.18),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: OnepieceColors.menuHoverColor.withValues(alpha: 0.5),
+          ),
+        ),
+        child: Row(
           children: [
-            SizedBox(
-              width: 170,
-              height: 35,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  showDialog(
-                    context: context,
-                    builder: ((context) {
-                      return Dialog(
-                        surfaceTintColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.0),
-                        ),
-                        alignment: AlignmentDirectional.center,
-                        child: const CreateChattingView(),
-                      );
-                    }),
-                  );
-                },
-                style: OnepieceButtonStyle.getDefaultStyle(),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    const Icon(
-                      Icons.chat_bubble_outlined,
-                      color: Colors.white,
-                      size: 18,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 8.0),
-                      child: Text(
-                        AppLocalizations.of(context)!.createChatting,
-                        style: OnepieceFonts.smallContentStyleWhite,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(
-              width: 170,
-              height: 35,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  showDialog(
-                    context: context,
-                    builder: ((context) {
-                      return Dialog(
-                        surfaceTintColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.0),
-                        ),
-                        alignment: AlignmentDirectional.center,
-                        child: const AddFriendView(),
-                      );
-                    }),
-                  );
-                },
-                style: OnepieceButtonStyle.getDefaultStyle(),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    const Icon(
-                      Icons.group_add_outlined,
-                      color: Colors.white,
-                      size: 18,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 8.0),
-                      child: Text(
-                        AppLocalizations.of(context)!.addFriend,
-                        style: OnepieceFonts.smallContentStyleWhite,
-                      ),
-                    ),
-                  ],
+            Icon(icon, size: 19, color: OnepieceColors.fancyBlue),
+            const SizedBox(width: 9),
+            Expanded(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: OnepieceFonts.smallContentStyle.copyWith(
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
           ],
         ),
       ),
-      icon: const Icon(
-        Icons.add_box,
-        color: OnepieceColors.liteFancyBlue,
+    );
+  }
+
+  void _showCardDialog(Widget child) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+          child: child,
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Builder(
+      builder: (buttonContext) => InkWell(
+        borderRadius: BorderRadius.circular(8),
+        onTap: () => _showOptions(buttonContext),
+        child: Container(
+          width: 38,
+          height: 38,
+          decoration: BoxDecoration(
+            color: OnepieceColors.fancyBlue,
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: [
+              BoxShadow(
+                color: OnepieceColors.fancyBlue.withValues(alpha: 0.18),
+                blurRadius: 8,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: const Icon(Icons.add, color: Colors.white, size: 22),
+        ),
       ),
     );
   }
 }
+
+enum _ChattingAction { createChat, addFriend }

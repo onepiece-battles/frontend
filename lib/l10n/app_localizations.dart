@@ -2029,6 +2029,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Copy'**
   String get copy;
+
+  /// No description provided for @chatInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat information'**
+  String get chatInformation;
+
+  /// No description provided for @chatPrivate.
+  ///
+  /// In en, this message translates to:
+  /// **'Private'**
+  String get chatPrivate;
+
+  /// No description provided for @chatUnread.
+  ///
+  /// In en, this message translates to:
+  /// **'Unread'**
+  String get chatUnread;
+
+  /// No description provided for @chatActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Actions'**
+  String get chatActions;
+
+  /// No description provided for @clearHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear history'**
+  String get clearHistory;
+
+  /// No description provided for @leaveGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave group'**
+  String get leaveGroup;
+
+  /// No description provided for @groupRenameApiNotConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Group rename API is not connected yet'**
+  String get groupRenameApiNotConnected;
+
+  /// No description provided for @addMemberApiNotConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Add member API is not connected yet'**
+  String get addMemberApiNotConnected;
+
+  /// No description provided for @addCharactersToGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Add characters'**
+  String get addCharactersToGroup;
+
+  /// No description provided for @noCharactersFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No characters found'**
+  String get noCharactersFound;
 }
 
 class _AppLocalizationsDelegate

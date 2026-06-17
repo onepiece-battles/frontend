@@ -320,5 +320,15 @@
   "cancelSelection": "取消选择",
   "draft": "草稿",
   "reference": "引用",
-  "copy": "复制"
+  "copy": "复制",
+  "chatInformation": "聊天信息",
+  "chatPrivate": "私密",
+  "chatUnread": "未读",
+  "chatActions": "操作",
+  "clearHistory": "清空聊天记录",
+  "leaveGroup": "退出群聊",
+  "groupRenameApiNotConnected": "群聊改名接口暂未接入",
+  "addMemberApiNotConnected": "添加成员接口暂未接入",
+  "addCharactersToGroup": "添加角色",
+  "noCharactersFound": "没有找到角色"
 }

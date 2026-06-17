@@ -320,5 +320,15 @@
   "cancelSelection": "Cancel",
   "draft": "Draft",
   "reference": "Reference",
-  "copy": "Copy"
+  "copy": "Copy",
+  "chatInformation": "Chat information",
+  "chatPrivate": "Private",
+  "chatUnread": "Unread",
+  "chatActions": "Actions",
+  "clearHistory": "Clear history",
+  "leaveGroup": "Leave group",
+  "groupRenameApiNotConnected": "Group rename API is not connected yet",
+  "addMemberApiNotConnected": "Add member API is not connected yet",
+  "addCharactersToGroup": "Add characters",
+  "noCharactersFound": "No characters found"
 }

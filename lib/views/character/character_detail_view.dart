@@ -152,12 +152,9 @@ class _CharacterDetailState extends State<CharacterDetail> {
         character.height == null ? "" : character.height.toString();
     characterBirthPlace.text =
         character.birthPlace == null ? "" : character.birthPlace.toString();
-    selectedMonth = character.dateOfBirth == null
-        ? null
-        : character.dateOfBirth!.split("-")[0].toString();
-    selectedDay = character.dateOfBirth == null
-        ? null
-        : character.dateOfBirth!.split("-")[1].toString();
+    final birthdayParts = _parseBirthday(character.dateOfBirth);
+    selectedMonth = birthdayParts.$1;
+    selectedDay = birthdayParts.$2;
     characterBounty.text =
         character.bounty == null ? "" : character.bounty.toString();
     selectedBattleStyle = character.battleStyle;
@@ -171,6 +168,40 @@ class _CharacterDetailState extends State<CharacterDetail> {
     characterBloodController.text = character.blood.toString();
     characterSpeedController.text = character.speed.toString();
     characterEnergyController.text = character.energy.toString();
+  }
+
+  (String?, String?) _parseBirthday(String? birthday) {
+    if (birthday == null || birthday.trim().isEmpty) {
+      return (null, null);
+    }
+    final parts = birthday.split('-');
+    if (parts.length != 2) {
+      return (null, null);
+    }
+    return (
+      _normalizeBirthdayPart(parts[0], 12),
+      _normalizeBirthdayPart(parts[1], 31),
+    );
+  }
+
+  String? _normalizeBirthdayPart(String? value, int max) {
+    if (value == null) return null;
+    final parsed = int.tryParse(value);
+    if (parsed == null || parsed < 1 || parsed > max) return null;
+    return parsed.toString();
+  }
+
+  String? _formattedBirthday() {
+    final month = _normalizeBirthdayPart(selectedMonth, 12);
+    final day = _normalizeBirthdayPart(selectedDay, 31);
+    if (month == null || day == null) return null;
+    return '$month-$day';
+  }
+
+  String? _normalizeStoredBirthday(String? birthday) {
+    final parts = _parseBirthday(birthday);
+    if (parts.$1 == null || parts.$2 == null) return null;
+    return '${parts.$1}-${parts.$2}';
   }
 
   Widget _buildMobileLayout(BuildContext context) {
@@ -890,12 +921,13 @@ class _CharacterDetailState extends State<CharacterDetail> {
 
   Widget _monthDayDropdown<T>(
       bool enabled, String? value, int count, Function(String?) onChanged) {
+    final dropdownValue = _normalizeBirthdayPart(value, count);
     return SizedBox(
         width: 60,
         child: DropdownButtonHideUnderline(
             child: DropdownButton2<String>(
           isExpanded: true,
-          value: value,
+          value: dropdownValue,
           onChanged: enabled ? onChanged : null,
           buttonStyleData: ButtonStyleData(
               padding: const EdgeInsets.symmetric(horizontal: 5),
@@ -1115,9 +1147,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
       race: selectedRace,
       name: I18nHelper.getI18nFromDisplayName(
           character.name, characterNameController.text),
-      dateOfBirth: selectedDay == null || selectedMonth == null
-          ? null
-          : "$selectedMonth-$selectedDay",
+      dateOfBirth: _formattedBirthday(),
       birthPlace: characterBirthPlace.text,
       age: characterAge.text.isEmpty
           ? null
@@ -1403,10 +1433,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                   name: I18nHelper.getI18nFromDisplayName(
                                       character.name,
                                       characterNameController.text),
-                                  dateOfBirth: selectedDay == null ||
-                                          selectedMonth == null
-                                      ? null
-                                      : "$selectedMonth-$selectedDay",
+                                  dateOfBirth: _formattedBirthday(),
                                   birthPlace: characterBirthPlace.text,
                                   age: characterAge.text.isEmpty
                                       ? null
@@ -1661,11 +1688,12 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                         child: DropdownButtonHideUnderline(
                                           child: DropdownButton2(
                                             isExpanded: true,
-                                            value: selectedMonth,
+                                            value: _normalizeBirthdayPart(
+                                                selectedMonth, 12),
                                             onChanged: basicInfoEditable
                                                 ? (String? month) {
                                                     basicState(() {
-                                                      selectedMonth = month!;
+                                                      selectedMonth = month;
                                                     });
                                                   }
                                                 : null,
@@ -1737,11 +1765,12 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                         child: DropdownButtonHideUnderline(
                                           child: DropdownButton2(
                                             isExpanded: true,
-                                            value: selectedDay,
+                                            value: _normalizeBirthdayPart(
+                                                selectedDay, 31),
                                             onChanged: basicInfoEditable
                                                 ? (String? day) {
                                                     basicState(() {
-                                                      selectedDay = day!;
+                                                      selectedDay = day;
                                                     });
                                                   }
                                                 : null,
@@ -3162,7 +3191,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
             characterNameController.text.toString() ||
         character.birthPlace.toString() !=
             characterBirthPlace.text.toString() ||
-        character.dateOfBirth.toString() != "$selectedMonth-$selectedDay" ||
+        _normalizeStoredBirthday(character.dateOfBirth) !=
+            _formattedBirthday() ||
         !intValueEquals(character.bounty, characterBounty.text.toString()) ||
         !intValueEquals(character.height, characterHeight.text.toString()) ||
         !intValueEquals(character.age, characterAge.text.toString());

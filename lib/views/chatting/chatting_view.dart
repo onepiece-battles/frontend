@@ -22,6 +22,8 @@ import '../../constants/onepiece_fonts.dart';
 import '../../l10n/app_localizations.dart';
 import '../../utils/base64_helper.dart';
 import '../../utils/image_helper.dart';
+import 'widgets/add_group_character_dialog.dart';
+import 'widgets/chat_detail_drawer.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -40,11 +42,6 @@ class _ChattingViewState extends State<ChattingView> {
   TextEditingController searchChattingController = TextEditingController();
   TextEditingController typingController = TextEditingController();
   FocusNode focusNode = FocusNode();
-  // 1. ADD THIS CONTROLLER
-  TextEditingController chatNameController = TextEditingController();
-
-  // 2. ADD THIS TRACKER (to prevent overwriting text while typing)
-  String? _currentNameChatId;
 
   // Local State Caches
   Map<String, Message?> chatIdToRepliedMessage = {};
@@ -61,6 +58,8 @@ class _ChattingViewState extends State<ChattingView> {
   int _previousMsgCount = 0;
   String? _previousNewestMessageId;
   Timer? _pendingScroll;
+  final Set<String> _preservingHistoryScrollChats = {};
+  bool _didSelectInitialChat = false;
 
   /// Dedicated notifier for search text — changes here rebuild only the
   /// chat-list filter, not the entire ChattingView.
@@ -69,6 +68,34 @@ class _ChattingViewState extends State<ChattingView> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _refreshChatsAndSelectInitial();
+    });
+  }
+
+  Future<void> _refreshChatsAndSelectInitial() async {
+    if (!mounted) return;
+    final notifier = Provider.of<ChatNotifier>(context, listen: false);
+    await notifier.refreshChats();
+    if (!mounted) return;
+    _selectInitialChat(notifier);
+  }
+
+  void _selectInitialChat(ChatNotifier notifier) {
+    if (_didSelectInitialChat || notifier.chats.isEmpty) return;
+
+    final initialChatId = notifier.chats.first.id;
+    if (initialChatId == null) return;
+
+    _didSelectInitialChat = true;
+    activeConversationId = initialChatId;
+    _lastProcessedChatId = "";
+    typingController.text = chatIdToCachedMessage[initialChatId] ?? "";
+    inputPreMessageNotifier.value = chatIdToRepliedMessage[initialChatId];
+
+    notifier.setActiveChat(initialChatId);
+    notifier.ensureHistoryLoaded(initialChatId);
+    _restoreScrollForChat(initialChatId, fallbackToBottom: false);
   }
 
   Future<void> _loadEarlierMessages(String chatId) async {
@@ -80,18 +107,24 @@ class _ChattingViewState extends State<ChattingView> {
     final previousExtent = scrollController.position.maxScrollExtent;
     final previousPixels = scrollController.position.pixels;
 
-    await notifier.loadMoreHistory(chatId);
-    await WidgetsBinding.instance.endOfFrame;
+    try {
+      _preservingHistoryScrollChats.add(chatId);
+      await notifier.loadMoreHistory(chatId);
+      await WidgetsBinding.instance.endOfFrame;
 
-    if (!scrollController.hasClients) return;
-    final addedExtent =
-        scrollController.position.maxScrollExtent - previousExtent;
-    if (addedExtent <= 0) return;
+      if (!scrollController.hasClients) return;
+      final addedExtent =
+          scrollController.position.maxScrollExtent - previousExtent;
+      if (addedExtent <= 0) return;
 
-    final target = (previousPixels + addedExtent)
-        .clamp(0.0, scrollController.position.maxScrollExtent)
-        .toDouble();
-    scrollController.jumpTo(target);
+      final target = (previousPixels + addedExtent)
+          .clamp(0.0, scrollController.position.maxScrollExtent)
+          .toDouble();
+      scrollController.jumpTo(target);
+      chatIdToScrollOffset[chatId] = target;
+    } finally {
+      _preservingHistoryScrollChats.remove(chatId);
+    }
   }
 
   @override
@@ -102,7 +135,6 @@ class _ChattingViewState extends State<ChattingView> {
     searchChattingController.dispose();
     typingController.dispose();
     focusNode.dispose();
-    chatNameController.dispose();
     super.dispose();
   }
 
@@ -111,14 +143,15 @@ class _ChattingViewState extends State<ChattingView> {
     FocusScope.of(context).unfocus();
     if (activeConversationId.isNotEmpty) {
       chatIdToCachedMessage[activeConversationId] = typingController.text;
+      if (scrollController.hasClients) {
+        chatIdToScrollOffset[activeConversationId] = scrollController.offset;
+      }
     }
     activeConversationId = "";
     _lastProcessedChatId = "";
     _previousNewestMessageId = null;
-    _currentNameChatId = null;
     Provider.of<ChatNotifier>(context, listen: false).setActiveChat(null);
     typingController.clear();
-    chatNameController.clear();
     inputPreMessageNotifier.value = null;
   }
 
@@ -129,15 +162,15 @@ class _ChattingViewState extends State<ChattingView> {
       _lastProcessedChatId = activeChatId;
       _previousMsgCount = messages.length;
       _previousNewestMessageId = newestMessageId;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (scrollController.hasClients) {
-          scrollController.jumpTo(scrollController.position.maxScrollExtent);
-        }
-      });
+      _restoreScrollForChat(activeChatId, fallbackToBottom: true);
       return;
     }
     if (messages.length > _previousMsgCount) {
       _previousMsgCount = messages.length;
+      if (_preservingHistoryScrollChats.contains(activeChatId)) {
+        _previousNewestMessageId = newestMessageId;
+        return;
+      }
       if (newestMessageId == _previousNewestMessageId) {
         return;
       }
@@ -149,6 +182,44 @@ class _ChattingViewState extends State<ChattingView> {
         _scrollToBottom(0);
       }
     }
+  }
+
+  void _restoreScrollForChat(String chatId, {required bool fallbackToBottom}) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!scrollController.hasClients) return;
+      final savedOffset = chatIdToScrollOffset[chatId];
+      final maxOffset = scrollController.position.maxScrollExtent;
+      final target = savedOffset != null
+          ? savedOffset.clamp(0.0, maxOffset).toDouble()
+          : fallbackToBottom
+              ? maxOffset
+              : null;
+      if (target == null) return;
+      scrollController.jumpTo(target);
+    });
+  }
+
+  User? _findChatMember(Chat chat, String? userId) {
+    if (userId == null) return null;
+    for (final member in chat.members) {
+      if (member.id == userId) return member;
+    }
+    return null;
+  }
+
+  User _messageMemberOrFallback(Chat chat, Message message) {
+    return _findChatMember(chat, message.userId) ??
+        User(
+          id: message.userId ?? '',
+          username: message.userId ?? '',
+          nickname: AppLocalizations.of(context)!.user,
+          imageUri: '',
+        );
+  }
+
+  String _memberNicknameOrFallback(Chat chat, String? userId) {
+    return _findChatMember(chat, userId)?.nickname ??
+        AppLocalizations.of(context)!.user;
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -289,42 +360,65 @@ class _ChattingViewState extends State<ChattingView> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(left: 8.0),
-                child: SizedBox(
-                  height: 35,
-                  child: TextFormField(
-                    controller: searchChattingController,
-                    onChanged: (value) {
-                      // Update the notifier — rebuilds only the filtered list
-                      _searchTextNotifier.value = value;
-                    },
-                    decoration: InputDecoration(
-                      labelStyle: OnepieceFonts.dropDownItemStyle,
-                      floatingLabelBehavior: FloatingLabelBehavior.never,
-                      disabledBorder: const OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: OnepieceColors.menuHoverColor)),
-                      enabledBorder: const OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: OnepieceColors.menuHoverColor)),
-                      focusedBorder: const OutlineInputBorder(
-                          borderSide: BorderSide(
-                              color: OnepieceColors.fancyGreen, width: 1.5)),
-                      prefixIcon: const Icon(Icons.search),
-                      labelText: AppLocalizations.of(context)!.name,
+        Padding(
+          padding: const EdgeInsets.fromLTRB(8, 8, 8, 6),
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    height: 36,
+                    child: TextFormField(
+                      controller: searchChattingController,
+                      onChanged: (value) {
+                        // Update the notifier — rebuilds only the filtered list
+                        _searchTextNotifier.value = value;
+                      },
+                      decoration: InputDecoration(
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 10),
+                        labelStyle: OnepieceFonts.dropDownItemStyle,
+                        floatingLabelBehavior: FloatingLabelBehavior.never,
+                        disabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: const BorderSide(
+                              color: OnepieceColors.menuHoverColor),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: const BorderSide(
+                              color: OnepieceColors.menuHoverColor),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: const BorderSide(
+                              color: OnepieceColors.fancyGreen, width: 2),
+                        ),
+                        prefixIcon: const Icon(Icons.search, size: 19),
+                        labelText: AppLocalizations.of(context)!.name,
+                      ),
                     ),
                   ),
                 ),
-              ),
+                const SizedBox(width: 8),
+                ChattingOptions(context: context)
+              ],
             ),
-            ChattingOptions(context: context)
-          ],
+          ),
         ),
         Expanded(
           child: ValueListenableBuilder<String>(
@@ -341,160 +435,174 @@ class _ChattingViewState extends State<ChattingView> {
                     }).toList();
 
               return ListView.builder(
+                padding: const EdgeInsets.fromLTRB(8, 2, 8, 12),
                 itemCount: displayChats.length,
                 addAutomaticKeepAlives: true,
                 itemBuilder: (context, index) {
                   final chat = displayChats[index];
-                  return ListTile(
+                  final isSelected = activeChatId == chat.id;
+                  return Card(
                     // Key is crucial for reordering animations/updates
                     key: ValueKey(chat.id),
-                    title: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Chat Name
-                            Expanded(
-                              child: Text(
-                                chat.group!
-                                    ? chat.name!
-                                    : getTargetMember(chat).nickname,
-                                overflow: TextOverflow.ellipsis,
-                                style: OnepieceFonts.smallContentFancyBlueStyle,
-                              ),
-                            ),
-                            const SizedBox(width: 5),
-
-                            // RIGHT COLUMN: Date & Unread Badge
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                if (chat.message != null)
-                                  Text(
-                                    TimeHelper.humanDateFromTimestamp(
-                                        chat.message!.creationRecord!
-                                            .actionTimestamp!,
-                                        context),
-                                    style: OnepieceFonts.boldLiteFancySmallFont,
-                                  )
-                                else
-                                  // Fallback for new chats without messages
-                                  const Text(
-                                    "New",
-                                    style: TextStyle(
-                                        fontSize: 10, color: Colors.green),
-                                  ),
-
-                                // --- UNREAD COUNT BADGE ---
-                                if (chat.unreadCount != null &&
-                                    chat.unreadCount! > 0)
-                                  Container(
-                                    margin: const EdgeInsets.only(top: 5),
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 6, vertical: 2),
-                                    decoration: BoxDecoration(
-                                      color: Colors.red,
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    constraints: const BoxConstraints(
-                                      minWidth: 20,
-                                      minHeight: 20,
-                                    ),
-                                    child: Text(
-                                      chat.unreadCount! > 99
-                                          ? '99+'
-                                          : chat.unreadCount.toString(),
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        // Draft Indicator OR Last Message Preview
-                        if ((chatIdToRepliedMessage[chat.id] != null ||
-                                (chatIdToCachedMessage[chat.id] != null &&
-                                    chatIdToCachedMessage[chat.id]!
-                                        .isNotEmpty)) &&
-                            activeChatId != chat.id)
-                          Text(
-                            "[${AppLocalizations.of(context)!.draft}]",
-                            style: OnepieceFonts.smallContentStyle
-                                .copyWith(color: Colors.red),
-                          )
-                        else if (chat.message != null)
-                          Text(
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                              style: OnepieceFonts.superSmallContentStyle,
-                              "${chat.members.firstWhere((e) => e.id == chat.message!.userId!).nickname}: ${chat.message!.content != null ? chat.message!.content!.split('\n').first : AppLocalizations.of(context)!.image}")
-                      ],
+                    elevation: isSelected ? 2 : 0,
+                    margin: const EdgeInsets.symmetric(vertical: 5),
+                    color: isSelected
+                        ? OnepieceColors.liteFancyBlue.withValues(alpha: 0.10)
+                        : Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      side: BorderSide(
+                        color: isSelected
+                            ? OnepieceColors.fancyBlue.withValues(alpha: 0.04)
+                            : OnepieceColors.menuHoverColor
+                                .withValues(alpha: 0.45),
+                      ),
                     ),
-                    selected: activeChatId == chat.id,
-                    focusColor: OnepieceColors.liteFancyBlue,
-                    selectedTileColor: OnepieceColors.liteFancyBlue,
-                    leading: chat.group!
-                        ? getLeading(
-                            chat.members.map((e) => e.imageUri!).toList())
-                        : getSingleLeading(chat),
-                    // inside ListView.builder -> ListTile
-                    // Inside _buildChatList -> ListView.builder -> ListTile
-                    onTap: () {
-                      final newChatId = chat.id!;
+                    child: ListTile(
+                      title: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Chat Name
+                              Expanded(
+                                child: Text(
+                                  chat.group!
+                                      ? chat.name!
+                                      : getTargetMember(chat).nickname,
+                                  overflow: TextOverflow.ellipsis,
+                                  style:
+                                      OnepieceFonts.smallContentFancyBlueStyle,
+                                ),
+                              ),
+                              const SizedBox(width: 5),
 
-                      // 1. If clicking the SAME chat that is already active (rare but possible), do nothing
-                      if (activeConversationId == newChatId) return;
+                              // RIGHT COLUMN: Date & Unread Badge
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  if (chat.message != null)
+                                    Text(
+                                      TimeHelper.humanDateFromTimestamp(
+                                          chat.message!.creationRecord!
+                                              .actionTimestamp!,
+                                          context),
+                                      style:
+                                          OnepieceFonts.boldLiteFancySmallFont,
+                                    )
+                                  else
+                                    // Fallback for new chats without messages
+                                    const Text(
+                                      "New",
+                                      style: TextStyle(
+                                          fontSize: 10, color: Colors.green),
+                                    ),
 
-                      // 2. Handle Focus & Cache for the OLD chat (if any)
-                      FocusScope.of(context).unfocus();
-                      if (activeConversationId.isNotEmpty) {
-                        chatIdToCachedMessage[activeConversationId] =
-                            typingController.text;
-                        if (scrollController.hasClients) {
-                          chatIdToScrollOffset[activeConversationId] =
-                              scrollController.offset;
-                        }
-                      }
+                                  // --- UNREAD COUNT BADGE ---
+                                  if (chat.unreadCount != null &&
+                                      chat.unreadCount! > 0)
+                                    Container(
+                                      margin: const EdgeInsets.only(top: 5),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 6, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: Colors.red,
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      constraints: const BoxConstraints(
+                                        minWidth: 20,
+                                        minHeight: 20,
+                                      ),
+                                      child: Text(
+                                        chat.unreadCount! > 99
+                                            ? '99+'
+                                            : chat.unreadCount.toString(),
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          // Draft Indicator OR Last Message Preview
+                          if ((chatIdToRepliedMessage[chat.id] != null ||
+                                  (chatIdToCachedMessage[chat.id] != null &&
+                                      chatIdToCachedMessage[chat.id]!
+                                          .isNotEmpty)) &&
+                              activeChatId != chat.id)
+                            Text(
+                              "[${AppLocalizations.of(context)!.draft}]",
+                              style: OnepieceFonts.smallContentStyle
+                                  .copyWith(color: Colors.red),
+                            )
+                          else if (chat.message != null)
+                            Text(
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                                style: OnepieceFonts.superSmallContentStyle,
+                                "${_memberNicknameOrFallback(chat, chat.message!.userId)}: ${chat.message!.content != null ? chat.message!.content!.split('\n').first : AppLocalizations.of(context)!.image}")
+                        ],
+                      ),
+                      selected: isSelected,
+                      focusColor: OnepieceColors.liteFancyBlue,
+                      selectedTileColor: OnepieceColors.liteFancyBlue,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      leading: chat.group!
+                          ? getLeading(
+                              chat.members.map((e) => e.imageUri!).toList())
+                          : getSingleLeading(chat),
+                      // inside ListView.builder -> ListTile
+                      // Inside _buildChatList -> ListView.builder -> ListTile
+                      onTap: () {
+                        final newChatId = chat.id!;
 
-                      // 3. Update Local State for the NEW chat
-                      activeConversationId = newChatId;
-                      _lastProcessedChatId = ""; // Reset scroll logic
+                        // 1. If clicking the SAME chat that is already active (rare but possible), do nothing
+                        if (activeConversationId == newChatId) return;
 
-                      // 4. Restore Drafts for NEW chat
-                      typingController.text =
-                          chatIdToCachedMessage[newChatId] ?? "";
-                      inputPreMessageNotifier.value =
-                          chatIdToRepliedMessage[newChatId];
-
-                      // 5. Update Provider (This triggers the view switch)
-                      Provider.of<ChatNotifier>(context, listen: false)
-                          .setActiveChat(newChatId);
-
-                      // 6. Load initial history if needed
-                      Provider.of<ChatNotifier>(context, listen: false)
-                          .ensureHistoryLoaded(newChatId);
-
-                      // 6. Restore saved scroll offset for previously visited chats
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        if (chatIdToScrollOffset.containsKey(newChatId)) {
+                        // 2. Handle Focus & Cache for the OLD chat (if any)
+                        FocusScope.of(context).unfocus();
+                        if (activeConversationId.isNotEmpty) {
+                          chatIdToCachedMessage[activeConversationId] =
+                              typingController.text;
                           if (scrollController.hasClients) {
-                            scrollController
-                                .jumpTo(chatIdToScrollOffset[newChatId]!);
+                            chatIdToScrollOffset[activeConversationId] =
+                                scrollController.offset;
                           }
                         }
-                        // Initial scroll-to-bottom for new chats is handled by
-                        // _autoScrollOnNewMessages with a layout-settling delay.
-                      });
-                    },
+
+                        // 3. Update Local State for the NEW chat
+                        activeConversationId = newChatId;
+                        _lastProcessedChatId = ""; // Reset scroll logic
+
+                        // 4. Restore Drafts for NEW chat
+                        typingController.text =
+                            chatIdToCachedMessage[newChatId] ?? "";
+                        inputPreMessageNotifier.value =
+                            chatIdToRepliedMessage[newChatId];
+
+                        // 5. Update Provider (This triggers the view switch)
+                        Provider.of<ChatNotifier>(context, listen: false)
+                            .setActiveChat(newChatId);
+
+                        // 6. Load initial history if needed
+                        Provider.of<ChatNotifier>(context, listen: false)
+                            .ensureHistoryLoaded(newChatId);
+
+                        _restoreScrollForChat(newChatId,
+                            fallbackToBottom: false);
+                      },
+                    ),
                   );
                 },
               ); // ListView.builder
@@ -511,13 +619,6 @@ class _ChattingViewState extends State<ChattingView> {
   Widget _buildChatView(BuildContext context, Chat activeChat,
       String activeChatId, List<Message> messages,
       {required bool isMobile}) {
-    if (_currentNameChatId != activeChatId) {
-      _currentNameChatId = activeChatId;
-      // If it's a group, use group name, else use the other person's nickname
-      chatNameController.text = activeChat.group!
-          ? (activeChat.name ?? "")
-          : getTargetMember(activeChat).nickname;
-    }
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -594,30 +695,31 @@ class _ChattingViewState extends State<ChattingView> {
             key: _scaffoldKey,
             drawerEnableOpenDragGesture: true,
             drawerScrimColor: Colors.transparent,
-            endDrawer: Drawer(
-              width: 200,
-              elevation: 0.1,
-              shadowColor: Colors.green,
-              backgroundColor: OnepieceColors.menuBackgroundColor,
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.horizontal(left: Radius.circular(8)),
-              ),
-              child: SafeArea(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    getUserWall(activeChat),
-                    const Divider(
-                        thickness: 1,
-                        indent: 10,
-                        endIndent: 10,
-                        color: Colors.black12),
-                    // 2. ADD THIS NEW WIDGET
-                    if (activeChat.group!)
-                      _buildEditableChatName(activeChat, context),
-                  ],
-                ),
-              ),
+            endDrawer: ChatDetailDrawer(
+              chat: activeChat,
+              currentUserId: getIt<User>().id,
+              onRenameChat: (newName) {
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(AppLocalizations.of(context)!
+                        .groupRenameApiNotConnected),
+                  ),
+                );
+              },
+              onAddMember: () {
+                final groupId = activeChat.id;
+                if (groupId == null) return;
+                showDialog(
+                  context: context,
+                  builder: (dialogContext) => Dialog(
+                    backgroundColor: Colors.transparent,
+                    insetPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 24),
+                    child: AddGroupCharacterDialog(groupId: groupId),
+                  ),
+                );
+              },
             ),
             body: Column(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -643,13 +745,10 @@ class _ChattingViewState extends State<ChattingView> {
                             message: msg,
                             isMe: msg.userId == getIt<User>().id,
                             preMessage: msg.preMessage,
-                            user: activeChat.members
-                                .firstWhere((user) => user.id == msg.userId),
+                            user: _messageMemberOrFallback(activeChat, msg),
                             preMessageNickname: msg.preMessage != null
-                                ? activeChat.members
-                                    .firstWhere(
-                                        (e) => e.id == msg.preMessage!.userId!)
-                                    .nickname
+                                ? _memberNicknameOrFallback(
+                                    activeChat, msg.preMessage!.userId)
                                 : null,
                             replyMessage: (msg) {
                               chatIdToRepliedMessage[msg.conversationId!] = msg;
@@ -991,7 +1090,7 @@ class _ChattingViewState extends State<ChattingView> {
                                                           .content !=
                                                       null)
                                                     Text(
-                                                      "${activeChat.members.firstWhere((e) => e.id == chatIdToRepliedMessage[activeChatId]!.userId!).nickname}: ${chatIdToRepliedMessage[activeChatId]!.content!}",
+                                                      "${_memberNicknameOrFallback(activeChat, chatIdToRepliedMessage[activeChatId]!.userId)}: ${chatIdToRepliedMessage[activeChatId]!.content!}",
                                                       style: OnepieceFonts
                                                           .tagStyle,
                                                     ),
@@ -1131,159 +1230,6 @@ class _ChattingViewState extends State<ChattingView> {
       scrollController
           .jumpTo(scrollController.position.maxScrollExtent + extendValue);
     });
-  }
-
-  Widget getUserWall(Chat activeChat) {
-    // 1. Filter logic
-    var members = activeChat.members;
-    if (members.length == 2) {
-      members =
-          members.toList().where((e) => e.id != getIt<User>().id).toList();
-    }
-
-    return ConstrainedBox(
-      constraints: const BoxConstraints(
-        maxHeight: 500,
-      ),
-      child: SizedBox(
-        width: 180,
-        child: GridView.builder(
-          padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
-          itemCount: members.length + 1,
-          shrinkWrap: true,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 4,
-            mainAxisSpacing: 8, // Increased spacing between rows
-            crossAxisSpacing: 4,
-            // 2. IMPORTANT: Ratio < 1 makes the cell taller to fit the text
-            childAspectRatio: 0.70,
-          ),
-          itemBuilder: (context, index) {
-            // --- OPTION A: Add Button ---
-            if (index == members.length) {
-              return Column(
-                children: [
-                  Container(
-                    height: 40,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(3),
-                      border: Border.all(
-                          color: OnepieceColors.fancyBlue, width: 1.5),
-                      color: Colors.white,
-                    ),
-                    child: IconButton(
-                      splashRadius: 1,
-                      iconSize: 20,
-                      disabledColor: Colors.transparent,
-                      hoverColor: Colors.transparent,
-                      highlightColor: Colors.transparent,
-                      splashColor: Colors.transparent,
-                      focusColor: Colors.transparent,
-                      color: OnepieceColors.fancyBlue,
-                      onPressed: () {},
-                      icon: const Icon(
-                        Icons.add,
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            }
-
-            // --- OPTION B: User Profile ---
-            final member = members[index];
-            final uri = member.imageUri ?? '';
-
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Image takes up available vertical space
-                SquareImageLoader(
-                  uriProvider: () => uri,
-                  width: 40, // Acts as max width/quality
-                  borderWidth: 2,
-                ),
-                const SizedBox(height: 2),
-                // Username Text
-                Text(
-                  member.nickname,
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow:
-                      TextOverflow.ellipsis, // cuts off long names: "Luff..."
-                  style: const TextStyle(
-                    fontSize: 9, // Small font to fit
-                    color: OnepieceColors.fancyBlue,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEditableChatName(Chat activeChat, BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            AppLocalizations.of(context)!
-                .name, // Ensure you have this key or use string
-            style:
-                const TextStyle(fontSize: 10, color: OnepieceColors.fancyBlue),
-          ),
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: chatNameController,
-                  style: OnepieceFonts.smallContentFancyBlueStyle,
-                  decoration: const InputDecoration(
-                    isDense: true,
-                    contentPadding: EdgeInsets.symmetric(vertical: 5),
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.black12),
-                    ),
-                    focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: OnepieceColors.fancyGreen),
-                    ),
-                  ),
-                ),
-              ),
-              IconButton(
-                onPressed: () {
-                  final newName = chatNameController.text.trim();
-                  if (newName.isNotEmpty && newName != activeChat.name) {
-                    // CALL YOUR API HERE
-                    // Example:
-                    // Provider.of<ChatNotifier>(context, listen: false)
-                    //    .updateGroupName(activeChat.id!, newName);
-
-                    // Close the drawer (Optional)
-                    Navigator.of(context).pop();
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Group name updated")),
-                    );
-                  }
-                },
-                icon: const Icon(Icons.check_circle,
-                    color: OnepieceColors.fancyGreen, size: 20),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                splashRadius: 20,
-              )
-            ],
-          ),
-        ],
-      ),
-    );
   }
 
   User getTargetMember(Chat chat) {

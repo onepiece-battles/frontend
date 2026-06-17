@@ -979,4 +979,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get copy => 'Copy';
+
+  @override
+  String get chatInformation => 'Chat information';
+
+  @override
+  String get chatPrivate => 'Private';
+
+  @override
+  String get chatUnread => 'Unread';
+
+  @override
+  String get chatActions => 'Actions';
+
+  @override
+  String get clearHistory => 'Clear history';
+
+  @override
+  String get leaveGroup => 'Leave group';
+
+  @override
+  String get groupRenameApiNotConnected =>
+      'Group rename API is not connected yet';
+
+  @override
+  String get addMemberApiNotConnected => 'Add member API is not connected yet';
+
+  @override
+  String get addCharactersToGroup => 'Add characters';
+
+  @override
+  String get noCharactersFound => 'No characters found';
 }
