@@ -107,7 +107,7 @@ class HomePageState extends State<HomePage> {
       onKeyEvent: (event) {
         if (HardwareKeyboard.instance
             .isLogicalKeyPressed(LogicalKeyboardKey.slash)) {
-          _showSearchDialog(context);
+          _openSearchFromHome();
         }
       },
       child: LayoutBuilder(
@@ -124,6 +124,7 @@ class HomePageState extends State<HomePage> {
                       key: _drawerSideMenuKey,
                       constraints: constraints,
                       isDrawer: true,
+                      onSearchRequested: _openSearchFromHome,
                     ),
                   )
                 : null,
@@ -134,6 +135,7 @@ class HomePageState extends State<HomePage> {
                   SideMenu(
                     key: _sideMenuKey,
                     constraints: constraints,
+                    onSearchRequested: _openSearchFromHome,
                   ),
                 Expanded(
                   child: Column(
@@ -165,6 +167,21 @@ class HomePageState extends State<HomePage> {
       ),
     );
   }
+
+  void _closeLeftMenu() {
+    if (_scaffoldKey.currentState?.isDrawerOpen ?? false) {
+      _scaffoldKey.currentState?.closeDrawer();
+      return;
+    }
+    _sideMenuKey.currentState?.collapse();
+  }
+
+  Future<void> _openSearchFromHome() async {
+    _closeLeftMenu();
+    await WidgetsBinding.instance.endOfFrame;
+    if (!mounted) return;
+    _showSearchDialog(context);
+  }
 }
 
 void _showSearchDialog(BuildContext context) {
@@ -188,10 +205,12 @@ void _showSearchDialog(BuildContext context) {
 class SideMenu extends StatefulWidget {
   final BoxConstraints constraints;
   final bool isDrawer;
+  final VoidCallback? onSearchRequested;
   const SideMenu({
     super.key,
     required this.constraints,
     this.isDrawer = false,
+    this.onSearchRequested,
   });
 
   @override
@@ -237,6 +256,17 @@ class _SideMenuState extends State<SideMenu> {
       Navigator.of(context).pop();
     }
     action();
+  }
+
+  void collapse() {
+    if (widget.isDrawer) {
+      Navigator.of(context).maybePop();
+      return;
+    }
+    if (_drawerWidth <= MenuConfig.minDrawerWidth) return;
+    setState(() {
+      _drawerWidth = MenuConfig.minDrawerWidth;
+    });
   }
 
   Widget _getUserNavigation(BuildContext context) {
@@ -438,7 +468,7 @@ class _SideMenuState extends State<SideMenu> {
         color: OnepieceColors.fancyGreen,
         borderRadius: BorderRadius.circular(3.0),
         child: InkWell(
-          onTap: () => _showSearchDialog(context),
+          onTap: widget.onSearchRequested,
           child: Container(
             height: 33,
             padding: EdgeInsets.symmetric(horizontal: isExpanded ? 6.0 : 2.0),

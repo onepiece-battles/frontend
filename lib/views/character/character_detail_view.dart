@@ -77,6 +77,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
   double sideWidth = 50;
 
   // initial date
+  late Future<CharacterFullView?> _characterFuture;
+  String? _preparedCharacterId;
   late CharacterFullView character;
   List<BattleListView> battles = [];
   List<FruitListView> fruits = [];
@@ -104,11 +106,26 @@ class _CharacterDetailState extends State<CharacterDetail> {
   @override
   void initState() {
     super.initState();
+    _characterFuture = _loadData();
   }
 
-  _loadData() {
+  @override
+  void didUpdateWidget(covariant CharacterDetail oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.characterId != widget.characterId) {
+      _preparedCharacterId = null;
+      _characterFuture = _loadData();
+    }
+  }
+
+  Future<CharacterFullView?> _loadData() {
     return getIt<CharacterDao>().getCharacter(
         GetCharacterFullViewRequest(characterId: widget.characterId));
+  }
+
+  void _refreshCharacterData() {
+    _preparedCharacterId = null;
+    _characterFuture = _loadData();
   }
 
   _eatFruit() {
@@ -119,12 +136,16 @@ class _CharacterDetailState extends State<CharacterDetail> {
     response.then(
       (value) {
         if (!mounted) return;
-        setState(() {});
+        setState(() {
+          _refreshCharacterData();
+        });
       },
     );
   }
 
-  void _updateData(CharacterFullView characterFullView) {
+  bool _updateData(CharacterFullView characterFullView) {
+    if (_preparedCharacterId == characterFullView.id) return false;
+    _preparedCharacterId = characterFullView.id;
     character = characterFullView;
     battles = characterFullView.battles;
     fruits = characterFullView.fruits;
@@ -148,6 +169,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
     if (fruits.length < character.maximumFruitCount) {
       fruitSearchEnabled = true;
     }
+    return true;
   }
 
   void _updateControllerData() {
@@ -1281,10 +1303,6 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                 child: const Divider(
                                     color: Colors.grey, thickness: 1))),
                         _getGroupSearchBar(context),
-                        if (groups.isNotEmpty)
-                          Padding(
-                              padding: EdgeInsets.fromLTRB(sideWidth, 0, 8, 8),
-                              child: _getGroupList(context)),
                         Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8),
                             child: SizedBox(
@@ -1356,11 +1374,15 @@ class _CharacterDetailState extends State<CharacterDetail> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: _loadData(),
+        future: _characterFuture,
         builder: (context, AsyncSnapshot snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
-            _updateData(snapshot.data);
-            _updateControllerData();
+            if (snapshot.data == null) {
+              return const SizedBox.shrink();
+            }
+            if (_updateData(snapshot.data)) {
+              _updateControllerData();
+            }
             return LayoutBuilder(
               builder: (context, constraints) {
                 final isNarrow =

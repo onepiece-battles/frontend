@@ -24,7 +24,7 @@ class SearchPopup extends StatefulWidget {
 }
 
 class _SearchPopupState extends State<SearchPopup> {
-  TextEditingController searchBarController = TextEditingController();
+  final TextEditingController searchBarController = TextEditingController();
   List<CharacterListView> characters =
       <CharacterListView>[].toList(growable: true);
   CharacterFilter characterFilter = CharacterFilter();
@@ -33,8 +33,11 @@ class _SearchPopupState extends State<SearchPopup> {
   List<Battle> battle = [];
   GroupFilter groupFilter = GroupFilter();
   List<GroupListView> groups = [];
+  bool _isSearching = false;
+  int _searchVersion = 0;
 
-  _search(String name) {
+  Future<void> _search(String name) async {
+    final int version = ++_searchVersion;
     characterFilter.languageCode = I18nHelper.getLanguageCode();
     fruitFilter.languageCode = I18nHelper.getLanguageCode();
     groupFilter.languageCode = I18nHelper.getLanguageCode();
@@ -43,211 +46,196 @@ class _SearchPopupState extends State<SearchPopup> {
         characters = [];
         fruits = [];
         groups = [];
+        _isSearching = false;
       });
       return;
     }
+    setState(() {
+      _isSearching = true;
+    });
     characterFilter.name = name;
     fruitFilter.name = name;
-    ListCharacterRequest listCharacterRequest = ListCharacterRequest(
+    final listCharacterRequest = ListCharacterRequest(
         pageSize: 10,
         pageIndex: 1,
         sortKeys: [],
         characterFilter: characterFilter);
-    Future<ListCharacterResponse?> listCharacterResponse =
-        getIt<CharacterDao>().listCharacter(listCharacterRequest);
-    listCharacterResponse.then((value) {
-      if (!mounted) return;
-      setState(() {
-        characters = value!.characters;
-      });
-    });
 
-    ListFruitRequest request = ListFruitRequest(
+    final request = ListFruitRequest(
         pageSize: 6, pageIndex: 1, sortKeys: [], fruitFilter: fruitFilter);
-    Future<ListFruitResponse?> listFruitResponse =
-        getIt<FruitDao>().list(request);
-    listFruitResponse.then((value) {
-      if (!mounted) return;
-      setState(() {
-        fruits = value!.fruits;
-      });
-    });
 
     groupFilter.name = name;
-    ListGroupRequest listGroupRequest = ListGroupRequest(
+    final listGroupRequest = ListGroupRequest(
         pageSize: 6, pageIndex: 1, sortKeys: [], groupFilter: groupFilter);
-    Future<ListGroupResponse?> listGroupResponse =
-        getIt<GroupDao>().listGroups(listGroupRequest);
-    listGroupResponse.then((value) {
-      if (!mounted) return;
-      setState(() {
-        groups = value!.groups;
-      });
+
+    final responses = await Future.wait<dynamic>([
+      getIt<CharacterDao>().listCharacter(listCharacterRequest),
+      getIt<FruitDao>().list(request),
+      getIt<GroupDao>().listGroups(listGroupRequest),
+    ]);
+
+    if (!mounted || version != _searchVersion) return;
+    final characterResponse = responses[0] as ListCharacterResponse?;
+    final fruitResponse = responses[1] as ListFruitResponse?;
+    final groupResponse = responses[2] as ListGroupResponse?;
+    setState(() {
+      characters = characterResponse?.characters ?? [];
+      fruits = fruitResponse?.fruits ?? [];
+      groups = groupResponse?.groups ?? [];
+      _isSearching = false;
     });
   }
 
   @override
+  void dispose() {
+    _timer?.cancel();
+    searchBarController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: _getSearchBar(context),
-          ),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (characters.isNotEmpty)
-                SizedBox(
-                  width: 800,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          AppLocalizations.of(context)!.character,
-                          style: OnepieceFonts.selectedTableHeaderStyle,
-                        ),
-                        const Divider(
-                          height: 3,
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-              SizedBox(
-                width: 800,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: _getCharacterList(context),
-                ),
-              ),
-              if (fruits.isNotEmpty)
-                SizedBox(
-                  width: 800,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          AppLocalizations.of(context)!.devilFruit,
-                          style: OnepieceFonts.selectedTableHeaderStyle,
-                        ),
-                        const Divider(
-                          height: 3,
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-              SizedBox(
-                width: 800,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: _getFruitList(context),
-                ),
-              ),
-              if (groups.isNotEmpty)
-                SizedBox(
-                  width: 800,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          AppLocalizations.of(context)!.group,
-                          style: OnepieceFonts.selectedTableHeaderStyle,
-                        ),
-                        const Divider(
-                          height: 3,
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-              SizedBox(
-                width: 800,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: _getGroupList(context),
-                ),
+    final media = MediaQuery.of(context);
+    final maxWidth = media.size.width < 860 ? media.size.width - 24 : 820.0;
+    final maxHeight = media.size.height * 0.82;
+
+    return Material(
+      color: Colors.transparent,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: maxWidth.clamp(320.0, 820.0),
+          maxHeight: maxHeight.clamp(360.0, 760.0),
+        ),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: OnepieceColors.liteFancyBlue.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.18),
+                blurRadius: 22,
+                offset: const Offset(0, 12),
               ),
             ],
           ),
-          if (characters.isNotEmpty || fruits.isNotEmpty || groups.isNotEmpty)
-            const SizedBox(
-              width: 800,
-              height: 30,
-            )
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _getSearchBar(context),
+                const SizedBox(height: 16),
+                if (_isSearching)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 24),
+                    child: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.4,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                if (characters.isNotEmpty)
+                  _buildResultSection(
+                    title: AppLocalizations.of(context)!.character,
+                    child: _getCharacterList(context),
+                  ),
+                if (fruits.isNotEmpty)
+                  _buildResultSection(
+                    title: AppLocalizations.of(context)!.devilFruit,
+                    child: _getFruitList(context),
+                  ),
+                if (groups.isNotEmpty)
+                  _buildResultSection(
+                    title: AppLocalizations.of(context)!.group,
+                    child: _getGroupList(context),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildResultSection({
+    required String title,
+    required Widget child,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(title, style: OnepieceFonts.selectedTableHeaderStyle),
+          const SizedBox(height: 6),
+          Divider(height: 1, color: Colors.white.withValues(alpha: 0.35)),
+          const SizedBox(height: 6),
+          child,
         ],
       ),
     );
   }
 
   Widget _getSearchBar(BuildContext context) {
-    return SizedBox(
-      width: 800,
-      child: TextFormField(
-        autofocus: true,
-        cursorColor: Colors.white,
-        controller: searchBarController,
-        decoration: InputDecoration(
-          floatingLabelBehavior: FloatingLabelBehavior.never,
-          labelStyle: OnepieceFonts.whiteHintFont,
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(5.0),
-            borderSide: const BorderSide(
-              color: Colors.white,
-              width: 1.0,
-            ),
+    return TextFormField(
+      autofocus: true,
+      cursorColor: Colors.white,
+      controller: searchBarController,
+      decoration: InputDecoration(
+        floatingLabelBehavior: FloatingLabelBehavior.never,
+        labelStyle: OnepieceFonts.whiteHintFont,
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(7.0),
+          borderSide: BorderSide(
+            color: Colors.white.withValues(alpha: 0.82),
+            width: 1.2,
           ),
-          errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(5.0),
-            borderSide: const BorderSide(
-              color: Colors.white,
-              width: 1.5,
-            ),
-          ),
-          focusedErrorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(5.0),
-            borderSide: const BorderSide(
-              color: Colors.white,
-              width: 1.5,
-            ),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(5.0),
-            borderSide: const BorderSide(
-              color: Colors.white,
-              width: 1.5,
-            ),
-          ),
-          disabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(5.0),
-            borderSide: const BorderSide(
-              color: Colors.white,
-              width: 1.0,
-            ),
-          ),
-          prefixIcon: const Icon(
-            Icons.search,
-            color: Colors.white,
-          ),
-          labelText: AppLocalizations.of(context)!.searchResourceDetail,
         ),
-        onChanged: (value) {
-          if (_timer?.isActive ?? false) _timer?.cancel();
-          _timer = Timer(const Duration(milliseconds: 500), () {
-            _search(value);
-          });
-        },
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(7.0),
+          borderSide: const BorderSide(
+            color: Colors.white,
+            width: 1.8,
+          ),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(7.0),
+          borderSide: const BorderSide(
+            color: Colors.white,
+            width: 2.2,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(7.0),
+          borderSide: const BorderSide(
+            color: Colors.white,
+            width: 2.2,
+          ),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(7.0),
+          borderSide: BorderSide(
+            color: Colors.white.withValues(alpha: 0.6),
+            width: 1.2,
+          ),
+        ),
+        prefixIcon: const Icon(
+          Icons.search,
+          color: Colors.white,
+        ),
+        labelText: AppLocalizations.of(context)!.searchResourceDetail,
       ),
+      onChanged: (value) {
+        if (_timer?.isActive ?? false) _timer?.cancel();
+        _timer = Timer(const Duration(milliseconds: 450), () {
+          _search(value.trim());
+        });
+      },
     );
   }
 
@@ -287,36 +275,46 @@ class _SearchPopupState extends State<SearchPopup> {
                               I18nHelper.getDisplayNameFromI18n(character.name)
                         });
                   },
-                  hoverColor: OnepieceColors.fancyBlue,
+                  hoverColor:
+                      OnepieceColors.liteFancyGreen.withValues(alpha: 0.34),
                   title: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(3, 3, 6, 3),
-                            child: ImageLazyLoader(
-                                key: UniqueKey(),
-                                uriProvider: () => character.imageUri!,
-                                width: 50,
-                                borderWidth: 2,
-                                borderRadios: 10),
-                          ),
-                          Text(
-                            I18nHelper.getDisplayNameFromI18n(character.name),
-                            style: OnepieceFonts.smallContentStyleWhite,
-                          )
-                        ],
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(3, 3, 6, 3),
+                              child: ImageLazyLoader(
+                                  key: ValueKey(character.imageUri),
+                                  uriProvider: () => character.imageUri!,
+                                  width: 50,
+                                  borderWidth: 2,
+                                  borderRadios: 10),
+                            ),
+                            Expanded(
+                              child: Text(
+                                I18nHelper.getDisplayNameFromI18n(
+                                    character.name),
+                                style: OnepieceFonts.smallContentStyleWhite,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            )
+                          ],
+                        ),
                       ),
+                      const SizedBox(width: 8),
                       if (character.hakis.isNotEmpty)
-                        Row(
-                          children: character.hakis
-                              .map((e) => Padding(
-                                    padding: const EdgeInsets.only(right: 5),
-                                    child: OnepieceTag.getHakiTag(
-                                        e, hakiEnumValueToDisplayValue[e]!),
-                                  ))
-                              .toList(),
+                        Flexible(
+                          child: Wrap(
+                            alignment: WrapAlignment.end,
+                            spacing: 5,
+                            runSpacing: 4,
+                            children: character.hakis
+                                .map((e) => OnepieceTag.getHakiTag(
+                                    e, hakiEnumValueToDisplayValue[e]!))
+                                .toList(),
+                          ),
                         )
                     ],
                   ),
@@ -366,18 +364,29 @@ class _SearchPopupState extends State<SearchPopup> {
                           'name': I18nHelper.getDisplayNameFromI18n(fruit.name!)
                         });
                   },
-                  hoverColor: OnepieceColors.fancyBlue,
+                  hoverColor:
+                      OnepieceColors.liteFancyGreen.withValues(alpha: 0.34),
                   title: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        I18nHelper.getDisplayNameFromI18n(fruit.name!),
-                        style: OnepieceFonts.smallContentStyleWhite,
+                      Expanded(
+                        child: Text(
+                          I18nHelper.getDisplayNameFromI18n(fruit.name!),
+                          style: OnepieceFonts.smallContentStyleWhite,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.only(right: 5),
-                        child: OnepieceTag.getFruitTag(fruit.fruitType!,
-                            fruitTypeToDisplayValue[fruit.fruitType]!),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerRight,
+                            child: OnepieceTag.getFruitTag(fruit.fruitType!,
+                                fruitTypeToDisplayValue[fruit.fruitType]!),
+                          ),
+                        ),
                       )
                     ],
                   ),
@@ -430,36 +439,47 @@ class _SearchPopupState extends State<SearchPopup> {
                                 I18nHelper.getDisplayNameFromI18n(group.name)
                           });
                     },
-                    hoverColor: OnepieceColors.fancyBlue,
+                    hoverColor:
+                        OnepieceColors.liteFancyGreen.withValues(alpha: 0.34),
                     title: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Row(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(3, 6, 3, 3),
-                              child: ImageLazyLoader(
-                                  key: UniqueKey(),
-                                  uriProvider: () => group.imageUri!,
-                                  width: 50,
-                                  borderWidth: 2,
-                                  borderRadios: 10),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(left: 5.0),
-                              child: Text(
-                                I18nHelper.getDisplayNameFromI18n(group.name),
-                                style: OnepieceFonts.smallContentStyleWhite,
+                        Expanded(
+                          child: Row(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(3, 6, 3, 3),
+                                child: ImageLazyLoader(
+                                    key: ValueKey(group.imageUri),
+                                    uriProvider: () => group.imageUri!,
+                                    width: 50,
+                                    borderWidth: 2,
+                                    borderRadios: 10),
                               ),
-                            )
-                          ],
+                              const SizedBox(width: 5),
+                              Expanded(
+                                child: Text(
+                                  I18nHelper.getDisplayNameFromI18n(group.name),
+                                  style: OnepieceFonts.smallContentStyleWhite,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              )
+                            ],
+                          ),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.only(right: 5),
-                          child: OnepieceTag.getGroupTag(
-                              group.groupCategory!,
-                              groupCategoryToDisplayValue[
-                                  group.groupCategory]!),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Align(
+                            alignment: Alignment.centerRight,
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerRight,
+                              child: OnepieceTag.getGroupTag(
+                                  group.groupCategory!,
+                                  groupCategoryToDisplayValue[
+                                      group.groupCategory]!),
+                            ),
+                          ),
                         )
                       ],
                     ),

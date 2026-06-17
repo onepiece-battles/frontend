@@ -43,6 +43,8 @@ class _GroupDetailViewState extends State<GroupDetailView> {
   TextEditingController groupNameController = TextEditingController();
   ScrollController scrollController = ScrollController();
   final ScrollController _pageScrollController = ScrollController();
+  late Future<GroupFullView?> _groupFuture;
+  String? _preparedGroupId;
   late GroupFullView groupFullView;
   List<CharacterInGroupView> characters = [];
   List<Group> subGroups = [];
@@ -57,6 +59,16 @@ class _GroupDetailViewState extends State<GroupDetailView> {
   @override
   void initState() {
     super.initState();
+    _groupFuture = _loadData();
+  }
+
+  @override
+  void didUpdateWidget(covariant GroupDetailView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.groupId != widget.groupId) {
+      _preparedGroupId = null;
+      _groupFuture = _loadData();
+    }
   }
 
   @override
@@ -67,12 +79,14 @@ class _GroupDetailViewState extends State<GroupDetailView> {
     super.dispose();
   }
 
-  _loadData() {
+  Future<GroupFullView?> _loadData() {
     return getIt<GroupDao>()
         .getGroupFullView(GetGroupRequest(id: widget.groupId));
   }
 
   void _prepareData(GroupFullView group) {
+    if (_preparedGroupId == group.id) return;
+    _preparedGroupId = group.id;
     groupFullView = group;
     characters = group.characters;
     subGroups = group.subGroups;
@@ -207,9 +221,12 @@ class _GroupDetailViewState extends State<GroupDetailView> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: _loadData(),
+      future: _groupFuture,
       builder: (context, AsyncSnapshot snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
+          if (snapshot.data == null) {
+            return const SizedBox.shrink();
+          }
           _prepareData(snapshot.data);
           return LayoutBuilder(
             builder: (context, constraints) {
@@ -586,131 +603,124 @@ class _GroupDetailViewState extends State<GroupDetailView> {
   }
 
   Widget _getMembersPanel(BuildContext context) {
-    return StatefulBuilder(
-        builder: (BuildContext context, StateSetter listState) {
-      return LayoutBuilder(
-        builder: (context, constraints) {
-          final isNarrow =
-              ResponsiveBreakpoints.isMobileFromConstraints(constraints);
-          final availableWidth = constraints.hasBoundedWidth
-              ? constraints.maxWidth
-              : MediaQuery.of(context).size.width;
-          final panelWidth = isNarrow ? availableWidth : 760.0;
-          final contentWidth = isNarrow
-              ? (panelWidth - 32 > 280 ? panelWidth - 32 : 280.0)
-              : 700.0;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isNarrow =
+            ResponsiveBreakpoints.isMobileFromConstraints(constraints);
+        final availableWidth = constraints.hasBoundedWidth
+            ? constraints.maxWidth
+            : MediaQuery.of(context).size.width;
+        final panelWidth = isNarrow ? availableWidth : 760.0;
+        final contentWidth = isNarrow
+            ? (panelWidth - 32 > 280 ? panelWidth - 32 : 280.0)
+            : 700.0;
 
-          return SizedBox(
-            width: panelWidth,
-            child: Card(
-              elevation: 2,
-              shadowColor: Colors.black.withValues(alpha: 0.08),
-              color: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-                side: BorderSide(
-                  color: OnepieceColors.menuHoverColor.withValues(alpha: 0.45),
-                ),
+        return SizedBox(
+          width: panelWidth,
+          child: Card(
+            elevation: 2,
+            shadowColor: Colors.black.withValues(alpha: 0.08),
+            color: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+              side: BorderSide(
+                color: OnepieceColors.menuHoverColor.withValues(alpha: 0.45),
               ),
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(
-                    isNarrow ? 12 : 18, 14, isNarrow ? 12 : 18, 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: 34,
-                          height: 34,
-                          decoration: BoxDecoration(
-                            color: OnepieceColors.liteFancyGreen
-                                .withValues(alpha: 0.65),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Icon(Icons.account_tree_outlined,
-                              size: 20, color: OnepieceColors.fancyGreen),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            groupFullView.groupCategory == GroupCategory.group
-                                ? AppLocalizations.of(context)!.groupStructure
-                                : AppLocalizations.of(context)!.groupMember,
-                            style: OnepieceFonts.headerStyle.copyWith(
-                              fontSize: isNarrow ? 18 : 22,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        if (_editButtonVisible)
-                          InkWell(
-                            borderRadius: BorderRadius.circular(18),
-                            hoverColor: Colors.transparent,
-                            splashColor: Colors.transparent,
-                            onTap: () {
-                              listState(() {
-                                _showDialog(context);
-                              });
-                            },
-                            child: Container(
-                              width: 34,
-                              height: 34,
-                              decoration: BoxDecoration(
-                                color: OnepieceColors.fancyBlue
-                                    .withValues(alpha: 0.08),
-                                borderRadius: BorderRadius.circular(17),
-                                border: Border.all(
-                                  color: OnepieceColors.fancyBlue
-                                      .withValues(alpha: 0.18),
-                                ),
-                              ),
-                              child: const Icon(Icons.add,
-                                  size: 20, color: OnepieceColors.fancyBlue),
-                            ),
-                          ),
-                      ],
-                    ),
-                    if (groupFullView.fatherGroups.isNotEmpty) ...[
-                      const SizedBox(height: 16),
-                      getFatherList(context),
-                    ],
-                    if (groupFullView.characters.isNotEmpty) ...[
-                      const SizedBox(height: 16),
+            ),
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                  isNarrow ? 12 : 18, 14, isNarrow ? 12 : 18, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 5),
+                        width: 34,
+                        height: 34,
                         decoration: BoxDecoration(
-                          color: OnepieceColors.menuHoverColor
-                              .withValues(alpha: 0.35),
-                          borderRadius: BorderRadius.circular(14),
+                          color: OnepieceColors.liteFancyGreen
+                              .withValues(alpha: 0.65),
+                          borderRadius: BorderRadius.circular(8),
                         ),
+                        child: const Icon(Icons.account_tree_outlined,
+                            size: 20, color: OnepieceColors.fancyGreen),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
                         child: Text(
-                          AppLocalizations.of(context)!.thisGroup,
-                          style: OnepieceFonts.navigationTopBarStyleClickable
-                              .copyWith(fontSize: 13),
+                          groupFullView.groupCategory == GroupCategory.group
+                              ? AppLocalizations.of(context)!.groupStructure
+                              : AppLocalizations.of(context)!.groupMember,
+                          style: OnepieceFonts.headerStyle.copyWith(
+                            fontSize: isNarrow ? 18 : 22,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
+                      if (_editButtonVisible)
+                        InkWell(
+                          borderRadius: BorderRadius.circular(18),
+                          hoverColor: Colors.transparent,
+                          splashColor: Colors.transparent,
+                          onTap: () => _showDialog(context),
+                          child: Container(
+                            width: 34,
+                            height: 34,
+                            decoration: BoxDecoration(
+                              color: OnepieceColors.fancyBlue
+                                  .withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(17),
+                              border: Border.all(
+                                color: OnepieceColors.fancyBlue
+                                    .withValues(alpha: 0.18),
+                              ),
+                            ),
+                            child: const Icon(Icons.add,
+                                size: 20, color: OnepieceColors.fancyBlue),
+                          ),
+                        ),
                     ],
-                    const SizedBox(height: 12),
-                    NestedHorizontalScrollView(
-                      verticalParentController: _pageScrollController,
-                      child: SizedBox(
-                        width: contentWidth,
-                        child: root.group.groupCategory == GroupCategory.group
-                            ? buildTreeNode(root, listState, false, 1)
-                            : buildCharacterList(context, listState),
+                  ),
+                  if (groupFullView.fatherGroups.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    getFatherList(context),
+                  ],
+                  if (groupFullView.characters.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: OnepieceColors.menuHoverColor
+                            .withValues(alpha: 0.35),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Text(
+                        AppLocalizations.of(context)!.thisGroup,
+                        style: OnepieceFonts.navigationTopBarStyleClickable
+                            .copyWith(fontSize: 13),
                       ),
                     ),
                   ],
-                ),
+                  const SizedBox(height: 12),
+                  NestedHorizontalScrollView(
+                    verticalParentController: _pageScrollController,
+                    child: SizedBox(
+                      width: contentWidth,
+                      child: root.group.groupCategory == GroupCategory.group
+                          ? buildTreeNode(root, false, 1)
+                          : buildCharacterList(context),
+                    ),
+                  ),
+                ],
               ),
             ),
-          );
-        },
-      );
-    });
+          ),
+        );
+      },
+    );
   }
 
   Widget getFatherList(BuildContext context) {
@@ -783,7 +793,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
     );
   }
 
-  Widget buildCharacterList(BuildContext context, Function listState) {
+  Widget buildCharacterList(BuildContext context) {
     return SizedBox(
       width: 600,
       child: ListView.builder(
@@ -793,14 +803,14 @@ class _GroupDetailViewState extends State<GroupDetailView> {
         itemBuilder: (context, index) {
           var character = characters[index];
           return _buildCharacterExpansionCard(
-              character: character, listState: listState, isTreeLeaf: false);
+              character: character, isTreeLeaf: false);
         },
       ),
     );
   }
 
   void handleExpansionChanged(
-      bool isExpanded, GroupNode node, Function listState) {
+      bool isExpanded, GroupNode node, StateSetter nodeState) {
     if (isExpanded && !node.childrenFetched) {
       // Simulate fetching children from the backend
       List<TreeNode> fetchedChildren = [];
@@ -812,7 +822,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
             return GroupNode([], false, e);
           }).toList();
           if (!mounted) return;
-          listState(() {
+          nodeState(() {
             node.children = fetchedChildren;
             node.childrenFetched = true;
           });
@@ -826,7 +836,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
             return CharacterNode([], true, e);
           }).toList();
           if (!mounted) return;
-          listState(() {
+          nodeState(() {
             node.children = fetchedChildren;
             node.childrenFetched = true;
           });
@@ -835,143 +845,152 @@ class _GroupDetailViewState extends State<GroupDetailView> {
     }
   }
 
-  Widget buildTreeNode(
-      TreeNode node, Function listState, bool isChildCharacter, int level) {
+  Widget buildTreeNode(TreeNode node, bool isChildCharacter, int level) {
     if (!isChildCharacter) {
       GroupNode actualNode = node as GroupNode;
-      return Container(
-        margin: EdgeInsets.only(top: level == 1 ? 0 : 6),
-        decoration: BoxDecoration(
-          color: level == 1
-              ? OnepieceColors.liteFancyBlue.withValues(alpha: 0.20)
-              : Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: level == 1
-                ? OnepieceColors.fancyBlue.withValues(alpha: 0.18)
-                : OnepieceColors.menuHoverColor.withValues(alpha: 0.55),
-          ),
-        ),
-        child: Theme(
-          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-          child: ExpansionTile(
-            tilePadding:
-                const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-            childrenPadding: const EdgeInsets.fromLTRB(16, 0, 8, 10),
-            expandedAlignment: Alignment.centerLeft,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            collapsedShape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            leading: Icon(
-              actualNode.group.groupCategory == GroupCategory.group
-                  ? Icons.account_tree_outlined
-                  : Icons.groups_2_outlined,
-              size: 18,
-              color: OnepieceColors.fancyBlue,
+      return StatefulBuilder(
+        builder: (context, nodeState) {
+          return Container(
+            margin: EdgeInsets.only(top: level == 1 ? 0 : 6),
+            decoration: BoxDecoration(
+              color: level == 1
+                  ? OnepieceColors.liteFancyBlue.withValues(alpha: 0.20)
+                  : Colors.white,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: level == 1
+                    ? OnepieceColors.fancyBlue.withValues(alpha: 0.18)
+                    : OnepieceColors.menuHoverColor.withValues(alpha: 0.55),
+              ),
             ),
-            title: _buildTreeTitle(
-              imageUri: node.group.imageUri!,
-              title: I18nHelper.getDisplayNameFromI18n(actualNode.group.name!),
-              onTap: () {
-                context.goNamed('groupDetails',
-                    extra: node.group.id,
-                    pathParameters: {
-                      'name': I18nHelper.getDisplayNameFromI18n(node.group.name)
-                    });
-              },
+            child: Theme(
+              data:
+                  Theme.of(context).copyWith(dividerColor: Colors.transparent),
+              child: ExpansionTile(
+                tilePadding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                childrenPadding: const EdgeInsets.fromLTRB(16, 0, 8, 10),
+                expandedAlignment: Alignment.centerLeft,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
+                collapsedShape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
+                leading: Icon(
+                  actualNode.group.groupCategory == GroupCategory.group
+                      ? Icons.account_tree_outlined
+                      : Icons.groups_2_outlined,
+                  size: 18,
+                  color: OnepieceColors.fancyBlue,
+                ),
+                title: _buildTreeTitle(
+                  imageUri: node.group.imageUri!,
+                  title:
+                      I18nHelper.getDisplayNameFromI18n(actualNode.group.name!),
+                  onTap: () {
+                    context.goNamed('groupDetails',
+                        extra: node.group.id,
+                        pathParameters: {
+                          'name':
+                              I18nHelper.getDisplayNameFromI18n(node.group.name)
+                        });
+                  },
+                ),
+                onExpansionChanged: (isExpanded) =>
+                    handleExpansionChanged(isExpanded, actualNode, nodeState),
+                children: actualNode.children
+                    .map((child) => buildTreeNode(
+                        child,
+                        actualNode.group.groupCategory != GroupCategory.group,
+                        level + 1))
+                    .toList(),
+              ),
             ),
-            onExpansionChanged: (isExpanded) =>
-                handleExpansionChanged(isExpanded, actualNode, listState),
-            children: actualNode.children
-                .map((child) => buildTreeNode(
-                    child,
-                    listState,
-                    actualNode.group.groupCategory != GroupCategory.group,
-                    level + 1))
-                .toList(),
-          ),
-        ),
+          );
+        },
       );
     } else {
       CharacterNode actualNode = node as CharacterNode;
       return _buildCharacterExpansionCard(
-          character: actualNode.characterInGroupView,
-          listState: listState,
-          isTreeLeaf: true);
+          character: actualNode.characterInGroupView, isTreeLeaf: true);
     }
   }
 
   Widget _buildCharacterExpansionCard({
     required CharacterInGroupView character,
-    required Function listState,
     required bool isTreeLeaf,
   }) {
-    return Container(
-      margin: EdgeInsets.only(top: isTreeLeaf ? 6 : 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: OnepieceColors.menuHoverColor.withValues(alpha: 0.55),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isTreeLeaf ? 0.02 : 0.04),
-            blurRadius: isTreeLeaf ? 4 : 8,
-            offset: const Offset(0, 2),
+    return StatefulBuilder(
+      builder: (context, cardState) {
+        return Container(
+          margin: EdgeInsets.only(top: isTreeLeaf ? 6 : 8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: OnepieceColors.menuHoverColor.withValues(alpha: 0.55),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isTreeLeaf ? 0.02 : 0.04),
+                blurRadius: isTreeLeaf ? 4 : 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Theme(
-        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-        child: ExpansionTile(
-          tilePadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-          expandedAlignment: Alignment.centerLeft,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          collapsedShape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          leading: const Icon(Icons.person_outline,
-              size: 18, color: OnepieceColors.fancyGreen),
-          title: _buildTreeTitle(
-            imageUri: character.imageUri!,
-            title: I18nHelper.getDisplayNameFromI18n(character.name!),
-            onTap: () {
-              context.goNamed('characterDetails',
-                  extra: character.id,
-                  pathParameters: {
-                    'name': I18nHelper.getDisplayNameFromI18n(character.name)
-                  });
-            },
+          child: Theme(
+            data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+            child: ExpansionTile(
+              tilePadding:
+                  const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+              expandedAlignment: Alignment.centerLeft,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8)),
+              collapsedShape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8)),
+              leading: const Icon(Icons.person_outline,
+                  size: 18, color: OnepieceColors.fancyGreen),
+              title: _buildTreeTitle(
+                imageUri: character.imageUri!,
+                title: I18nHelper.getDisplayNameFromI18n(character.name!),
+                onTap: () {
+                  context.goNamed('characterDetails',
+                      extra: character.id,
+                      pathParameters: {
+                        'name':
+                            I18nHelper.getDisplayNameFromI18n(character.name)
+                      });
+                },
+              ),
+              onExpansionChanged: (isExpanded) {
+                if (isExpanded) {
+                  _loadCharacterCombatStats(character, cardState);
+                }
+              },
+              children: [_buildCharacterCombatStats(character)],
+            ),
           ),
-          onExpansionChanged: (isExpanded) {
-            if (isExpanded) {
-              _loadCharacterCombatStats(character, listState);
-            }
-          },
-          children: [_buildCharacterCombatStats(character)],
-        ),
-      ),
+        );
+      },
     );
   }
 
   void _loadCharacterCombatStats(
-      CharacterInGroupView character, Function listState) {
+      CharacterInGroupView character, StateSetter cardState) {
     final characterId = _getCharacterLookupId(character);
     if (characterId == null ||
         _characterCombatCache.containsKey(characterId) ||
         _loadingCharacterCombatIds.contains(characterId)) {
       return;
     }
-    listState(() {
+    cardState(() {
       _loadingCharacterCombatIds.add(characterId);
     });
     getIt<CharacterDao>()
         .getCharacter(GetCharacterFullViewRequest(characterId: characterId))
         .then((value) {
       if (!mounted) return;
-      listState(() {
+      cardState(() {
         _loadingCharacterCombatIds.remove(characterId);
         if (value != null) {
           _characterCombatCache[characterId] = value;
@@ -979,7 +998,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
       });
     }).catchError((_) {
       if (!mounted) return;
-      listState(() {
+      cardState(() {
         _loadingCharacterCombatIds.remove(characterId);
       });
     });

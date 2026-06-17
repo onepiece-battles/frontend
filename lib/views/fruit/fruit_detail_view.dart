@@ -34,37 +34,75 @@ class FruitDetailView extends StatefulWidget {
 class _FruitDetailViewState extends State<FruitDetailView> {
   late FruitFullView fruitFullView;
   late FruitType selectedFruitType;
+  late Future<FruitFullView?> _fruitFuture;
+  String? _hydratedFruitId;
   List<CharacterInFruitView> characters = [];
-  ScrollController horizontalController = ScrollController();
-  ScrollController verticalController = ScrollController();
+  final ScrollController horizontalController = ScrollController();
+  final ScrollController verticalController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _fruitFuture = _loadData();
+  }
+
+  @override
+  void didUpdateWidget(covariant FruitDetailView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.fruitId != widget.fruitId) {
+      _hydratedFruitId = null;
+      _fruitFuture = _loadData();
+    }
+  }
 
   @override
   void dispose() {
     horizontalController.dispose();
     verticalController.dispose();
+    nameController.dispose();
+    energyConsumeController.dispose();
+    attackSlopeController.dispose();
+    attackInterceptController.dispose();
+    defenseSlopeController.dispose();
+    defenseInterceptController.dispose();
+    intelligenceSlopeController.dispose();
+    intelligenceInterceptController.dispose();
+    bloodSlopeController.dispose();
+    bloodInterceptController.dispose();
+    speedSlopeController.dispose();
+    speedInterceptController.dispose();
+    groupGainSlopeController.dispose();
+    groupGainInterceptController.dispose();
     super.dispose();
   }
 
   // controllers
   // 1. basic info
-  TextEditingController nameController = TextEditingController();
+  final TextEditingController nameController = TextEditingController();
 
   // 2. combat info
-  TextEditingController energyConsumeController = TextEditingController();
+  final TextEditingController energyConsumeController = TextEditingController();
 
-  TextEditingController attackSlopeController = TextEditingController();
-  TextEditingController attackInterceptController = TextEditingController();
-  TextEditingController defenseSlopeController = TextEditingController();
-  TextEditingController defenseInterceptController = TextEditingController();
-  TextEditingController intelligenceSlopeController = TextEditingController();
-  TextEditingController intelligenceInterceptController =
+  final TextEditingController attackSlopeController = TextEditingController();
+  final TextEditingController attackInterceptController =
       TextEditingController();
-  TextEditingController bloodSlopeController = TextEditingController();
-  TextEditingController bloodInterceptController = TextEditingController();
-  TextEditingController speedSlopeController = TextEditingController();
-  TextEditingController speedInterceptController = TextEditingController();
-  TextEditingController groupGainSlopeController = TextEditingController();
-  TextEditingController groupGainInterceptController = TextEditingController();
+  final TextEditingController defenseSlopeController = TextEditingController();
+  final TextEditingController defenseInterceptController =
+      TextEditingController();
+  final TextEditingController intelligenceSlopeController =
+      TextEditingController();
+  final TextEditingController intelligenceInterceptController =
+      TextEditingController();
+  final TextEditingController bloodSlopeController = TextEditingController();
+  final TextEditingController bloodInterceptController =
+      TextEditingController();
+  final TextEditingController speedSlopeController = TextEditingController();
+  final TextEditingController speedInterceptController =
+      TextEditingController();
+  final TextEditingController groupGainSlopeController =
+      TextEditingController();
+  final TextEditingController groupGainInterceptController =
+      TextEditingController();
 
   final _battleFormKey = GlobalKey<FormState>();
   bool _basicInfoEditable = false;
@@ -74,12 +112,18 @@ class _FruitDetailViewState extends State<FruitDetailView> {
   final double divW = 800;
   final double sideW = 50;
 
-  _loadData() {
+  Future<FruitFullView?> _loadData() {
     return getIt<FruitDao>().get(GetFruitRequest(fruitId: widget.fruitId));
   }
 
   // will be executed every time page refreshes
   void _updateData(FruitFullView fruitFullView) {
+    if (_hydratedFruitId == fruitFullView.id) {
+      this.fruitFullView = fruitFullView;
+      characters = fruitFullView.characters;
+      return;
+    }
+    _hydratedFruitId = fruitFullView.id;
     // 1. update data
     this.fruitFullView = fruitFullView;
     characters = fruitFullView.characters;
@@ -535,11 +579,20 @@ class _FruitDetailViewState extends State<FruitDetailView> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-        future: _loadData(),
-        builder: (context, AsyncSnapshot snapshot) {
+    return FutureBuilder<FruitFullView?>(
+        future: _fruitFuture,
+        builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
-            _updateData(snapshot.data);
+            final fruit = snapshot.data;
+            if (fruit == null) {
+              return Center(
+                child: Text(
+                  AppLocalizations.of(context)!.loading,
+                  style: OnepieceFonts.loadingFont,
+                ),
+              );
+            }
+            _updateData(fruit);
             return LayoutBuilder(
               builder: (context, constraints) {
                 final isNarrow =

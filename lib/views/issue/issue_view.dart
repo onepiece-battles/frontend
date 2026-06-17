@@ -23,9 +23,10 @@ class IssueView extends StatefulWidget {
 }
 
 class _IssueViewState extends State<IssueView> {
-  TextEditingController searchHeaderController = TextEditingController();
-  TextEditingController searchEmailController = TextEditingController();
-  TextEditingController searchNicknameController = TextEditingController();
+  final TextEditingController searchHeaderController = TextEditingController();
+  final TextEditingController searchEmailController = TextEditingController();
+  final TextEditingController searchNicknameController =
+      TextEditingController();
   IssueFilter issueFilter = IssueFilter();
   List<IssueListView> currentIssueList = [];
   List<IssueSortableField> sortKeys = [];
@@ -62,6 +63,8 @@ class _IssueViewState extends State<IssueView> {
   @override
   void dispose() {
     searchHeaderController.dispose();
+    searchEmailController.dispose();
+    searchNicknameController.dispose();
     scrollController.dispose();
     horizontalController.dispose();
     super.dispose();

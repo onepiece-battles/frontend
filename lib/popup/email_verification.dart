@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import '../../l10n/app_localizations.dart';
-import 'package:one_piece_battles_flutter/constants/button_style.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
+import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
+import 'package:one_piece_battles_flutter/l10n/app_localizations.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
-import '../app_router.dart';
-import '../constants/onepiece_fonts.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -15,161 +13,262 @@ class EmailVerification extends StatefulWidget {
   final String userId;
   final String email;
 
-  const EmailVerification({Key? key, required this.userId, required this.email})
-      : super(key: key);
+  const EmailVerification({
+    super.key,
+    required this.userId,
+    required this.email,
+  });
 
   @override
   State<EmailVerification> createState() => _EmailVerificationState();
 }
 
 class _EmailVerificationState extends State<EmailVerification> {
-  TextEditingController verificationCode = TextEditingController();
-  bool verificationCodeSent = false;
+  final TextEditingController verificationCode = TextEditingController();
   bool verificationSuccess = false;
+  bool isVerifying = false;
   String verificationMessage = "";
 
   @override
+  void dispose() {
+    verificationCode.dispose();
+    super.dispose();
+  }
+
+  Future<void> _verify() async {
+    final code = verificationCode.text.trim();
+    if (code.isEmpty || isVerifying) return;
+
+    setState(() => isVerifying = true);
+    try {
+      final value = await getIt<UserDao>().verifyEmail(
+        VerifyByEmailCodeRequest(
+          userId: widget.userId,
+          email: widget.email,
+          verificationCode: code,
+        ),
+      );
+      if (!mounted) return;
+      setState(() {
+        verificationSuccess = value?.verifyResult ?? false;
+        verificationMessage =
+            I18nHelper.getDisplayNameFromI18n(value?.verifyMessage);
+      });
+    } catch (error) {
+      debugPrint("Error verifying email: $error");
+      if (!mounted) return;
+      setState(() {
+        verificationSuccess = false;
+        verificationMessage = AppLocalizations.of(context)!.alert;
+      });
+    } finally {
+      if (mounted) {
+        setState(() => isVerifying = false);
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 600,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(0, 50, 0, 20),
-            child: Text(
-              AppLocalizations.of(context)!.emailVerification,
-              style: OnepieceFonts.headerStyle,
-            ),
+    final loc = AppLocalizations.of(context)!;
+    final size = MediaQuery.sizeOf(context);
+    final isNarrow = size.width < 520;
+    final maxWidth = isNarrow ? size.width - 32 : 480.0;
+
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxWidth: maxWidth,
+        maxHeight: size.height - 48,
+      ),
+      child: Material(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        clipBehavior: Clip.antiAlias,
+        child: SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(
+            isNarrow ? 16 : 22,
+            isNarrow ? 16 : 20,
+            isNarrow ? 16 : 22,
+            isNarrow ? 14 : 18,
           ),
-          if (!verificationSuccess)
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.check_circle,
-                  color: Colors.green,
-                  size: 120,
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: Text(
-                    AppLocalizations.of(context)!.emailSent,
-                    style: OnepieceFonts.contentStylePass,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color:
+                          OnepieceColors.liteFancyBlue.withValues(alpha: 0.6),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      verificationSuccess
+                          ? Icons.verified_outlined
+                          : Icons.mark_email_read_outlined,
+                      color: verificationSuccess
+                          ? OnepieceColors.fancyGreen
+                          : OnepieceColors.fancyBlue,
+                      size: 22,
+                    ),
                   ),
-                )
-              ],
-            ),
-          if (!verificationSuccess)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(30, 30, 30, 0),
-              child: SizedBox(
-                width: 500,
-                child: TextFormField(
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          loc.emailVerification,
+                          style: OnepieceFonts.headerStyle.copyWith(
+                            fontSize: isNarrow ? 17 : 19,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          widget.email,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: OnepieceFonts.smallContentStyle.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    visualDensity: VisualDensity.compact,
+                    padding: EdgeInsets.zero,
+                    constraints:
+                        const BoxConstraints.tightFor(width: 32, height: 32),
+                    onPressed: () => Navigator.of(context).pop(false),
+                    icon: const Icon(Icons.close,
+                        size: 19, color: OnepieceColors.fancyBlue),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 18),
+              Container(
+                width: double.infinity,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                decoration: BoxDecoration(
+                  color: OnepieceColors.liteFancyGreen.withValues(alpha: 0.35),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color:
+                        OnepieceColors.menuHoverColor.withValues(alpha: 0.45),
+                  ),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      verificationSuccess
+                          ? Icons.check_circle_outline
+                          : Icons.outgoing_mail,
+                      color: verificationSuccess
+                          ? OnepieceColors.fancyGreen
+                          : OnepieceColors.fancyBlue,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        verificationSuccess
+                            ? verificationMessage
+                            : loc.emailSent,
+                        style: OnepieceFonts.smallContentStyle.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (!verificationSuccess) ...[
+                const SizedBox(height: 16),
+                TextFormField(
                   controller: verificationCode,
-                  onChanged: (value) {},
+                  textInputAction: TextInputAction.done,
+                  onFieldSubmitted: (_) => _verify(),
                   decoration: InputDecoration(
-                      hintText: AppLocalizations.of(context)!.verificationCode,
-                      contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-                      focusedBorder: const OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(10)),
-                        borderSide: BorderSide(
-                            color: OnepieceColors.fancyBlue, width: 2.0),
+                    isDense: true,
+                    prefixIcon: const Icon(Icons.pin_outlined, size: 19),
+                    labelText: loc.verificationCode,
+                    floatingLabelBehavior: FloatingLabelBehavior.never,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 12,
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(
+                        color: OnepieceColors.menuHoverColor,
                       ),
-                      enabledBorder: const OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(10)),
-                        borderSide: BorderSide(
-                            color: OnepieceColors.fancyBlue, width: 2.0),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(
+                        color: OnepieceColors.fancyGreen,
+                        width: 2,
                       ),
-                      disabledBorder: const OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(10)),
-                        borderSide: BorderSide(
-                            color: OnepieceColors.fancyBlue, width: 2.0),
-                      )),
-                ),
-              ),
-            ),
-          if (!verificationSuccess)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 2.0),
-              child: Text(
-                verificationMessage,
-                style: OnepieceFonts.contentStyleAlert,
-              ),
-            ),
-          if (!verificationSuccess)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 30.0),
-              child: SizedBox(
-                  width: 500,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      getIt<UserDao>()
-                          .verifyEmail(VerifyByEmailCodeRequest(
-                              userId: widget.userId,
-                              email: widget.email,
-                              verificationCode: verificationCode.text.trim()))
-                          .then((value) {
-                                if (!mounted) return;
-                                setState(() {
-                                  verificationCodeSent = true;
-                                  verificationSuccess = value!.verifyResult!;
-                                  verificationMessage =
-                                      I18nHelper.getDisplayNameFromI18n(
-                                          value.verifyMessage);
-                                });
-                              });
-                    },
-                    style: OnepieceButtonStyle.getDefaultStyle(),
-                    child: Text(AppLocalizations.of(context)!.submitForm),
-                  )),
-            ),
-          if (verificationSuccess)
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.check_circle,
-                  color: Colors.green,
-                  size: 120,
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: Text(
-                    verificationMessage,
-                    style: OnepieceFonts.contentStylePass,
+                    ),
                   ),
-                )
+                ),
+                if (verificationMessage.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    verificationMessage,
+                    style: OnepieceFonts.contentStyleAlert,
+                  ),
+                ],
               ],
-            ),
-          if (verificationSuccess)
-            const Divider(
-              height: 10,
-              thickness: 1,
-            ),
-          if (verificationSuccess)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 10, 10, 10),
-                  child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        AppRouter.router.pushReplacementNamed('userProfile',
-                            extra: getIt<User>().id,
-                            pathParameters: {'name': getIt<User>().nickname});
-                      },
-                      style: OnepieceButtonStyle.getDefaultStyle(),
-                      child: Text(AppLocalizations.of(context)!.confirm)),
-                )
-              ],
-            )
-        ],
+              const SizedBox(height: 18),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  if (!verificationSuccess)
+                    TextButton(
+                      onPressed: isVerifying
+                          ? null
+                          : () => Navigator.pop(context, false),
+                      child: Text(loc.back),
+                    ),
+                  const SizedBox(width: 8),
+                  SizedBox(
+                    height: 36,
+                    child: ElevatedButton.icon(
+                      onPressed: verificationSuccess
+                          ? () => Navigator.pop(context, true)
+                          : isVerifying
+                              ? null
+                              : _verify,
+                      icon: isVerifying
+                          ? const SizedBox(
+                              width: 14,
+                              height: 14,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Icon(
+                              verificationSuccess
+                                  ? Icons.check
+                                  : Icons.verified_outlined,
+                              size: 16,
+                            ),
+                      label: Text(
+                        verificationSuccess ? loc.confirm : loc.submitForm,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

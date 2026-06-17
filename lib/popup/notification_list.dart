@@ -142,6 +142,16 @@ class _NotificationListState extends State<NotificationList> {
     final menuWidth = MediaQuery.sizeOf(context).width < 370
         ? MediaQuery.sizeOf(context).width - 32
         : 320.0;
+    final menuLeft = (buttonRect.right - menuWidth)
+        .clamp(12.0, overlay.size.width - menuWidth - 12.0)
+        .toDouble();
+    final menuTop = buttonRect.bottom + 8;
+    final menuAnchor = Rect.fromLTWH(
+      menuLeft,
+      menuTop,
+      menuWidth,
+      1,
+    );
 
     await showMenu<void>(
       context: context,
@@ -149,7 +159,7 @@ class _NotificationListState extends State<NotificationList> {
       elevation: 8,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       position: RelativeRect.fromRect(
-        buttonRect,
+        menuAnchor,
         Offset.zero & overlay.size,
       ),
       items: [

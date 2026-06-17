@@ -1,7 +1,5 @@
-import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 import 'package:get_it/get_it.dart';
 import 'package:image_picker/image_picker.dart';
@@ -78,6 +76,7 @@ class UserProfileController extends ChangeNotifier {
   bool isLoading = true;
   bool isSavingAvatar = false;
   bool isSavingNickname = false;
+  bool isSendingVerificationEmail = false;
 
   late User _currentUser;
   late UserProfileFormData _originalData;
@@ -185,18 +184,47 @@ class UserProfileController extends ChangeNotifier {
   }
 
   Future<void> sendVerificationEmail(BuildContext context) async {
-    await _emailDao.verifyEmailAddress(VerifyEmailAddressRequest(
-        id: _currentUser.id, email: _currentUser.username));
+    isSendingVerificationEmail = true;
+    notifyListeners();
 
-    if (context.mounted) {
-      showCupertinoModalPopup(
-        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+    try {
+      await _emailDao.verifyEmailAddress(VerifyEmailAddressRequest(
+          id: _currentUser.id, email: _currentUser.username));
+
+      if (!context.mounted) return;
+
+      final verified = await showDialog<bool>(
         context: context,
+        barrierColor: Colors.black.withValues(alpha: 0.18),
         builder: (_) => Dialog(
+          insetPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
           child: EmailVerification(
-              userId: _currentUser.id, email: _currentUser.username),
+            userId: _currentUser.id,
+            email: _currentUser.username,
+          ),
         ),
       );
+
+      if (verified == true) {
+        final refreshedUser =
+            await _userDao.get(GetUserRequest(userId: _currentUser.id));
+        if (refreshedUser != null) {
+          _currentUser = refreshedUser;
+          ResourcePermissionManager.updateUserCache(refreshedUser);
+        }
+      }
+    } catch (e) {
+      debugPrint("Error sending verification email: $e");
+      if (context.mounted) {
+        OnepieceAlert.getBasicAlertDialogFunc(
+            context, "Error", "Failed to send verification email");
+      }
+    } finally {
+      isSendingVerificationEmail = false;
+      notifyListeners();
     }
   }
 
@@ -542,18 +570,36 @@ class _EmailSection extends StatelessWidget {
             ]),
             const SizedBox(height: 10),
             Row(children: [
-              Text(controller.data.username,
+              Expanded(
+                child: Text(
+                  controller.data.username,
                   style: OnepieceFonts.contentStyle
-                      .copyWith(fontWeight: FontWeight.w600)),
-              const Spacer(),
-              if (!isVerified)
+                      .copyWith(fontWeight: FontWeight.w600),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              if (!isVerified) ...[
+                const SizedBox(width: 10),
                 SizedBox(
-                    height: 32,
-                    child: ElevatedButton(
-                        onPressed: () =>
-                            controller.sendVerificationEmail(context),
-                        child: Text(loc.sendEmail,
-                            style: const TextStyle(fontSize: 13)))),
+                  height: 32,
+                  child: ElevatedButton.icon(
+                    style: OnepieceButtonStyle.getDefaultStyle(),
+                    onPressed: controller.isSendingVerificationEmail
+                        ? null
+                        : () => controller.sendVerificationEmail(context),
+                    icon: controller.isSendingVerificationEmail
+                        ? const SizedBox(
+                            width: 14,
+                            height: 14,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.mark_email_unread_outlined,
+                            size: 16),
+                    label: Text(loc.sendEmail,
+                        style: const TextStyle(fontSize: 13)),
+                  ),
+                ),
+              ],
             ]),
           ])),
     );
