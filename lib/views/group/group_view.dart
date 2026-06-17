@@ -15,6 +15,7 @@ import '../../constants/onepiece_fonts.dart';
 import '../../utils/i18n_helper.dart';
 import '../../utils/responsive_breakpoints.dart';
 import '../../utils/image_helper.dart';
+import '../../utils/nested_scroll_helper.dart';
 import '../../utils/permission_check.dart';
 
 GetIt getIt = GetIt.instance;
@@ -66,6 +67,16 @@ class _GroupViewState extends State<GroupView> {
     _search(false);
   }
 
+  @override
+  void dispose() {
+    scrollController.dispose();
+    horizontalController.dispose();
+    mainController.dispose();
+    tableController.dispose();
+    searchNameController.dispose();
+    super.dispose();
+  }
+
   void _search(bool filterChange) {
     groupFilter.languageCode = I18nHelper.getLanguageCode();
     if (filterChange) {
@@ -108,54 +119,54 @@ class _GroupViewState extends State<GroupView> {
                   children: [
                     _createHeader(context),
                     _createControlPanel(context, isNarrow: isNarrow),
-                const SizedBox(height: 10),
-                Expanded(
-                  child: isNarrow
-                      ? _buildMobileGroupCards(context)
-                      : Scrollbar(
-                          controller: mainController,
-                          thumbVisibility: true,
-                          trackVisibility: true,
-                          child: SingleChildScrollView(
-                            controller: mainController,
-                            child: Scrollbar(
-                              controller: tableController,
+                    const SizedBox(height: 10),
+                    Expanded(
+                      child: isNarrow
+                          ? _buildMobileGroupCards(context)
+                          : Scrollbar(
+                              controller: mainController,
                               thumbVisibility: true,
                               trackVisibility: true,
-                              notificationPredicate: (notification) =>
-                                  notification.depth == 0,
                               child: SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                controller: tableController,
-                                child: _createGroupTable(context),
+                                controller: mainController,
+                                child: Scrollbar(
+                                  controller: tableController,
+                                  thumbVisibility: true,
+                                  trackVisibility: true,
+                                  notificationPredicate: (notification) =>
+                                      notification.depth == 0,
+                                  child: NestedHorizontalScrollView(
+                                    controller: tableController,
+                                    verticalParentController: mainController,
+                                    child: _createGroupTable(context),
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                        ),
+                    ),
+                    const SizedBox(height: 15),
+                    if (totalPageNum > 1)
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Center(
+                              child: PageFoot(
+                            currentPage: selectedPageNum,
+                            totalPages: totalPageNum,
+                            jumpLabel: AppLocalizations.of(context)!.jumpToPage,
+                            onPageChanged: (page) {
+                              selectedPageNum = page;
+                              mainController.jumpTo(0);
+                              _search(false);
+                            },
+                          )),
+                        ],
+                      ),
+                  ],
                 ),
-                const SizedBox(height: 15),
-                if (totalPageNum > 1)
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Center(
-                          child: PageFoot(
-                        currentPage: selectedPageNum,
-                        totalPages: totalPageNum,
-                        jumpLabel: AppLocalizations.of(context)!.jumpToPage,
-                        onPageChanged: (page) {
-                          selectedPageNum = page;
-                          mainController.jumpTo(0);
-                          _search(false);
-                        },
-                      )),
-                    ],
-                  ),
-              ],
+              ),
             ),
           ),
-        ),
-      ),
         );
       },
     );
@@ -172,91 +183,196 @@ class _GroupViewState extends State<GroupView> {
   }
 
   Widget _createControlPanel(BuildContext context, {required bool isNarrow}) {
-    Map<GroupCategory, String> enumValueToDisplayValue = <GroupCategory, String>{
+    Map<GroupCategory, String> enumValueToDisplayValue =
+        <GroupCategory, String>{
       GroupCategory.marine: AppLocalizations.of(context)!.marine,
       GroupCategory.pirate: AppLocalizations.of(context)!.pirate,
       GroupCategory.underWorld: AppLocalizations.of(context)!.underworld,
       GroupCategory.government: AppLocalizations.of(context)!.worldGovernment,
       GroupCategory.group: AppLocalizations.of(context)!.group,
       GroupCategory.other: AppLocalizations.of(context)!.otherType,
-      GroupCategory.revolutionArmy: AppLocalizations.of(context)!.revolutionaryArmy,
+      GroupCategory.revolutionArmy:
+          AppLocalizations.of(context)!.revolutionaryArmy,
     };
     final hasCreate = PermissionCheck.checkPermission(
-        getIt<User>().loginRoleResourcesPermissionMap, ResourceType.GROUP, Permission.CREATE);
+        getIt<User>().loginRoleResourcesPermissionMap,
+        ResourceType.GROUP,
+        Permission.CREATE);
 
     if (isNarrow) {
       return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
           if (hasCreate)
-            Padding(padding: const EdgeInsets.only(right: 6), child: SizedBox(height: 35,
-              child: ElevatedButton(onPressed: () => context.goNamed("createGroup"),
-                style: OnepieceButtonStyle.getDefaultStyle(),
-                child: Text(AppLocalizations.of(context)!.create, style: const TextStyle(fontSize: 13))),),),
-          Expanded(child: SizedBox(height: 35, child: TextFormField(
-            controller: searchNameController,
-            onChanged: (v) { groupFilter.name = v; _search(true); },
-            decoration: InputDecoration(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-              floatingLabelBehavior: FloatingLabelBehavior.never,
-              disabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: OnepieceColors.menuHoverColor)),
-              enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: OnepieceColors.menuHoverColor)),
-              focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: OnepieceColors.fancyGreen, width: 1.5)),
-              prefixIcon: const Icon(Icons.search, size: 20),
-              labelText: AppLocalizations.of(context)!.name, labelStyle: OnepieceFonts.dropDownItemStyle),),),),
+            Padding(
+              padding: const EdgeInsets.only(right: 6),
+              child: SizedBox(
+                height: 35,
+                child: ElevatedButton(
+                    onPressed: () => context.goNamed("createGroup"),
+                    style: OnepieceButtonStyle.getDefaultStyle(),
+                    child: Text(AppLocalizations.of(context)!.create,
+                        style: const TextStyle(fontSize: 13))),
+              ),
+            ),
+          Expanded(
+            child: SizedBox(
+              height: 35,
+              child: TextFormField(
+                controller: searchNameController,
+                onChanged: (v) {
+                  groupFilter.name = v;
+                  _search(true);
+                },
+                decoration: InputDecoration(
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                    floatingLabelBehavior: FloatingLabelBehavior.never,
+                    disabledBorder: const OutlineInputBorder(
+                        borderSide:
+                            BorderSide(color: OnepieceColors.menuHoverColor)),
+                    enabledBorder: const OutlineInputBorder(
+                        borderSide:
+                            BorderSide(color: OnepieceColors.menuHoverColor)),
+                    focusedBorder: const OutlineInputBorder(
+                        borderSide: BorderSide(
+                            color: OnepieceColors.fancyGreen, width: 1.5)),
+                    prefixIcon: const Icon(Icons.search, size: 20),
+                    labelText: AppLocalizations.of(context)!.name,
+                    labelStyle: OnepieceFonts.dropDownItemStyle),
+              ),
+            ),
+          ),
           const SizedBox(width: 6),
           InkWell(
             onTap: () => setState(() => _showFilters = !_showFilters),
             borderRadius: BorderRadius.circular(4),
-            child: Container(height: 35, width: 35,
-              decoration: BoxDecoration(border: Border.all(color: OnepieceColors.menuHoverColor), borderRadius: BorderRadius.circular(4),
-                color: _showFilters ? OnepieceColors.fancyBlue.withValues(alpha: 0.1) : null),
-              child: Icon(Icons.filter_list, size: 20, color: _showFilters ? OnepieceColors.fancyBlue : Colors.grey[700]),),),
+            child: Container(
+              height: 35,
+              width: 35,
+              decoration: BoxDecoration(
+                  border: Border.all(color: OnepieceColors.menuHoverColor),
+                  borderRadius: BorderRadius.circular(4),
+                  color: _showFilters
+                      ? OnepieceColors.fancyBlue.withValues(alpha: 0.1)
+                      : null),
+              child: Icon(Icons.filter_list,
+                  size: 20,
+                  color: _showFilters
+                      ? OnepieceColors.fancyBlue
+                      : Colors.grey[700]),
+            ),
+          ),
         ]),
         if (_showFilters) ...[
           const SizedBox(height: 6),
-          SingleChildScrollView(scrollDirection: Axis.horizontal,
-            child: SizedBox(height: 36, child: ToggleSwitch(
-              customWidths: const [90, 90, 100, 120], cornerRadius: 4, minHeight: 35, fontSize: 12, dividerColor: Colors.white,
-              initialLabelIndex: initialLabelIndex, activeBgColor: const [OnepieceColors.fancyBlue], activeFgColor: Colors.white,
-              inactiveBgColor: OnepieceColors.liteFancyGreen, inactiveFgColor: Colors.grey[600], totalSwitches: 4,
-              labels: [AppLocalizations.of(context)!.allResources, AppLocalizations.of(context)!.myResource, AppLocalizations.of(context)!.systemResource, AppLocalizations.of(context)!.excludeSystem],
-              onToggle: (index) {
-                initialLabelIndex = index!;
-                if (index == 0) { groupFilter.systemResource = null; groupFilter.userId = null; }
-                if (index == 1) { groupFilter.systemResource = null; groupFilter.userId = getIt<User>().id; }
-                if (index == 2) { groupFilter.systemResource = true; groupFilter.userId = null; }
-                if (index == 3) { groupFilter.systemResource = false; groupFilter.userId = null; }
-                _search(true);
-              },),),),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: SizedBox(
+              height: 36,
+              child: ToggleSwitch(
+                customWidths: const [90, 90, 100, 120],
+                cornerRadius: 4,
+                minHeight: 35,
+                fontSize: 12,
+                dividerColor: Colors.white,
+                initialLabelIndex: initialLabelIndex,
+                activeBgColor: const [OnepieceColors.fancyBlue],
+                activeFgColor: Colors.white,
+                inactiveBgColor: OnepieceColors.liteFancyGreen,
+                inactiveFgColor: Colors.grey[600],
+                totalSwitches: 4,
+                labels: [
+                  AppLocalizations.of(context)!.allResources,
+                  AppLocalizations.of(context)!.myResource,
+                  AppLocalizations.of(context)!.systemResource,
+                  AppLocalizations.of(context)!.excludeSystem
+                ],
+                onToggle: (index) {
+                  initialLabelIndex = index!;
+                  if (index == 0) {
+                    groupFilter.systemResource = null;
+                    groupFilter.userId = null;
+                  }
+                  if (index == 1) {
+                    groupFilter.systemResource = null;
+                    groupFilter.userId = getIt<User>().id;
+                  }
+                  if (index == 2) {
+                    groupFilter.systemResource = true;
+                    groupFilter.userId = null;
+                  }
+                  if (index == 3) {
+                    groupFilter.systemResource = false;
+                    groupFilter.userId = null;
+                  }
+                  _search(true);
+                },
+              ),
+            ),
+          ),
           const SizedBox(height: 6),
-          DropdownButtonHideUnderline(child: DropdownButton2(
+          DropdownButtonHideUnderline(
+              child: DropdownButton2(
             isExpanded: true,
-            value: selectedGroupCategories.isEmpty ? null : selectedGroupCategories.last,
-            hint: Text(AppLocalizations.of(context)!.groupCategory, style: OnepieceFonts.dropDownItemStyle),
+            value: selectedGroupCategories.isEmpty
+                ? null
+                : selectedGroupCategories.last,
+            hint: Text(AppLocalizations.of(context)!.groupCategory,
+                style: OnepieceFonts.dropDownItemStyle),
             onChanged: (value) {},
-            selectedItemBuilder: (context) => GroupCategory.values.map((item) =>
-              Container(alignment: AlignmentDirectional.center, child: Text(
-                selectedGroupCategories.map((t) => enumValueToDisplayValue[t]).toSet().join(', '),
-                style: const TextStyle(fontSize: 16, overflow: TextOverflow.ellipsis), maxLines: 1))).toList(),
-            buttonStyleData: ButtonStyleData(padding: const EdgeInsets.symmetric(horizontal: 16), height: 35,
-                decoration: BoxDecoration(borderRadius: BorderRadius.circular(3), color: OnepieceColors.liteFancyGreen)),
+            selectedItemBuilder: (context) => GroupCategory.values
+                .map((item) => Container(
+                    alignment: AlignmentDirectional.center,
+                    child: Text(
+                        selectedGroupCategories
+                            .map((t) => enumValueToDisplayValue[t])
+                            .toSet()
+                            .join(', '),
+                        style: const TextStyle(
+                            fontSize: 16, overflow: TextOverflow.ellipsis),
+                        maxLines: 1)))
+                .toList(),
+            buttonStyleData: ButtonStyleData(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                height: 35,
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(3),
+                    color: OnepieceColors.liteFancyGreen)),
             menuItemStyleData: const MenuItemStyleData(height: 35),
-            items: GroupCategory.values.map((gc) => DropdownMenuItem<GroupCategory>(value: gc, enabled: false,
-              child: StatefulBuilder(builder: (ctx, ms) {
-                final sel = selectedGroupCategories.contains(gc);
-                return InkWell(hoverColor: Colors.transparent, splashColor: Colors.transparent,
-                  onTap: () {
-                    sel ? selectedGroupCategories.remove(gc) : selectedGroupCategories.add(gc);
-                    groupFilter.groupCategories = selectedGroupCategories;
-                    setState(() {}); ms(() {}); _search(true);
-                  },
-                  child: Container(height: double.infinity, padding: const EdgeInsets.symmetric(horizontal: 3),
-                    child: Row(children: [
-                      Icon(sel ? Icons.check_box_outlined : Icons.check_box_outline_blank),
-                      const SizedBox(width: 8),
-                      Expanded(child: Text(enumValueToDisplayValue[gc]!, style: const TextStyle(fontSize: 16))),
-                    ])));
-              }))).toList(),
+            items: GroupCategory.values
+                .map((gc) => DropdownMenuItem<GroupCategory>(
+                    value: gc,
+                    enabled: false,
+                    child: StatefulBuilder(builder: (ctx, ms) {
+                      final sel = selectedGroupCategories.contains(gc);
+                      return InkWell(
+                          hoverColor: Colors.transparent,
+                          splashColor: Colors.transparent,
+                          onTap: () {
+                            sel
+                                ? selectedGroupCategories.remove(gc)
+                                : selectedGroupCategories.add(gc);
+                            groupFilter.groupCategories =
+                                selectedGroupCategories;
+                            setState(() {});
+                            ms(() {});
+                            _search(true);
+                          },
+                          child: Container(
+                              height: double.infinity,
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 3),
+                              child: Row(children: [
+                                Icon(sel
+                                    ? Icons.check_box_outlined
+                                    : Icons.check_box_outline_blank),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                    child: Text(enumValueToDisplayValue[gc]!,
+                                        style: const TextStyle(fontSize: 16))),
+                              ])));
+                    })))
+                .toList(),
           )),
         ],
       ]);
@@ -560,8 +676,8 @@ class _GroupViewState extends State<GroupView> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 3),
                         decoration: BoxDecoration(
-                          color: OnepieceColors.fancyBlue
-                              .withValues(alpha: 0.15),
+                          color:
+                              OnepieceColors.fancyBlue.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(

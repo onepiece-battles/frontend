@@ -16,6 +16,7 @@ import '../../utils/responsive_breakpoints.dart';
 import '../../repository/character_dao.dart';
 import '../../utils/i18n_helper.dart';
 import '../../utils/image_helper.dart';
+import '../../utils/nested_scroll_helper.dart';
 
 GetIt getIt = GetIt.instance;
 Timer? _timer;
@@ -56,6 +57,19 @@ class _CreateBattleViewState extends State<CreateBattleView> {
   void initState() {
     super.initState();
     searchOnStart();
+  }
+
+  @override
+  void dispose() {
+    _starterScrollController.dispose();
+    _receiverScrollController.dispose();
+    _verticalScrollController.dispose();
+    _horizontalScrollController.dispose();
+    starterSelectedItem.dispose();
+    receiverSelectedItem.dispose();
+    starterTextController.dispose();
+    receiverTextController.dispose();
+    super.dispose();
   }
 
   void searchOnStart() {
@@ -133,9 +147,9 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                   ]),
                 )
               : Center(
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
+                  child: NestedHorizontalScrollView(
                     controller: _horizontalScrollController,
+                    verticalParentController: _verticalScrollController,
                     child: Column(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [

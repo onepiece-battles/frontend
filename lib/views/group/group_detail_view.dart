@@ -13,6 +13,7 @@ import 'package:one_piece_battles_flutter/repository/character_dao.dart';
 import 'package:one_piece_battles_flutter/repository/group_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:one_piece_battles_flutter/utils/image_helper.dart';
+import 'package:one_piece_battles_flutter/utils/nested_scroll_helper.dart';
 import 'package:openapi/api.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_tag.dart';
 import '../../l10n/app_localizations.dart';
@@ -41,6 +42,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
   late GroupNode root;
   TextEditingController groupNameController = TextEditingController();
   ScrollController scrollController = ScrollController();
+  final ScrollController _pageScrollController = ScrollController();
   late GroupFullView groupFullView;
   List<CharacterInGroupView> characters = [];
   List<Group> subGroups = [];
@@ -55,6 +57,14 @@ class _GroupDetailViewState extends State<GroupDetailView> {
   @override
   void initState() {
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    groupNameController.dispose();
+    scrollController.dispose();
+    _pageScrollController.dispose();
+    super.dispose();
   }
 
   _loadData() {
@@ -97,6 +107,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
   Widget _buildMobileLayout(BuildContext context) {
     final catMap = _getCategoryMap(context);
     return SingleChildScrollView(
+      controller: _pageScrollController,
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 80),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         // Header: image + name + category
@@ -211,11 +222,12 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                     _buildMobileLayout(context)
                   else
                     SingleChildScrollView(
+                      controller: _pageScrollController,
                       scrollDirection: Axis.vertical,
                       child: Center(
-                        child: SingleChildScrollView(
+                        child: NestedHorizontalScrollView(
                           controller: scrollController,
-                          scrollDirection: Axis.horizontal,
+                          verticalParentController: _pageScrollController,
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -682,8 +694,8 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                       ),
                     ],
                     const SizedBox(height: 12),
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
+                    NestedHorizontalScrollView(
+                      verticalParentController: _pageScrollController,
                       child: SizedBox(
                         width: contentWidth,
                         child: root.group.groupCategory == GroupCategory.group

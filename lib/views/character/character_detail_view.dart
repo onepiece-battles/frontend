@@ -24,6 +24,7 @@ import '../../utils/i18n_helper.dart';
 import '../../utils/image_helper.dart';
 import '../../utils/onepiece_image_picker.dart';
 import '../../utils/permission_check.dart';
+import '../../utils/nested_scroll_helper.dart';
 import '../../utils/responsive_breakpoints.dart';
 
 GetIt getIt = GetIt.instance;
@@ -39,6 +40,12 @@ class CharacterDetail extends StatefulWidget {
 
 class _CharacterDetailState extends State<CharacterDetail> {
   ScrollController verticalController = ScrollController();
+
+  @override
+  void dispose() {
+    verticalController.dispose();
+    super.dispose();
+  }
 
   // character details controller
   TextEditingController characterNameController = TextEditingController();
@@ -1243,8 +1250,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
               controller: verticalController,
               scrollDirection: Axis.vertical,
               child: Center(
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
+                child: NestedHorizontalScrollView(
+                  verticalParentController: verticalController,
                   child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [

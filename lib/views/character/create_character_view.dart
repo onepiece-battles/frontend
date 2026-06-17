@@ -20,6 +20,7 @@ import '../../utils/base64_helper.dart';
 import '../../utils/data_converter.dart';
 import '../../utils/i18n_helper.dart';
 import '../../utils/image_helper.dart';
+import '../../utils/nested_scroll_helper.dart';
 import '../../utils/onepiece_image_picker.dart';
 import '../../utils/responsive_breakpoints.dart';
 
@@ -33,6 +34,8 @@ class CreateCharacterView extends StatefulWidget {
 }
 
 class _CreateCharacterViewState extends State<CreateCharacterView> {
+  final ScrollController _pageScrollController = ScrollController();
+  final ScrollController _horizontalScrollController = ScrollController();
   TextEditingController characterNameEnController = TextEditingController(
       text: RandomStringGenerator.generateRandomName(
           8,
@@ -152,6 +155,16 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
       characterBirthPlace,
       characterBounty
     ];
+  }
+
+  @override
+  void dispose() {
+    _pageScrollController.dispose();
+    _horizontalScrollController.dispose();
+    for (final controller in characterControllerListAll()) {
+      controller.dispose();
+    }
+    super.dispose();
   }
 
   Uint8List _pickedImage = Uint8List(0);
@@ -414,10 +427,12 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
               _buildMobileLayout(context)
             else
               SingleChildScrollView(
+                controller: _pageScrollController,
                 scrollDirection: Axis.vertical,
                 child: Center(
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
+                  child: NestedHorizontalScrollView(
+                    controller: _horizontalScrollController,
+                    verticalParentController: _pageScrollController,
                     child: SizedBox(
                       width: dividerWidth,
                       child: Column(

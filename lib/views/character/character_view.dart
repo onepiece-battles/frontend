@@ -17,6 +17,7 @@ import '../../constants/button_style.dart';
 import '../../constants/onepiece_tag.dart';
 import '../../utils/i18n_helper.dart';
 import '../../utils/image_helper.dart';
+import '../../utils/nested_scroll_helper.dart';
 import '../../utils/responsive_breakpoints.dart';
 
 GetIt getIt = GetIt.instance;
@@ -123,6 +124,14 @@ class _CharacterViewState extends State<CharacterView>
     _search(false);
   }
 
+  @override
+  void dispose() {
+    searchNameController.dispose();
+    scrollController.dispose();
+    tableController.dispose();
+    super.dispose();
+  }
+
   void _search(bool filterChange) {
     characterFilter.languageCode = I18nHelper.getLanguageCode();
     if (filterChange) {
@@ -164,52 +173,52 @@ class _CharacterViewState extends State<CharacterView>
                   children: [
                     _createHeader(),
                     _createControlPanel(isNarrow: isNarrow),
-                const SizedBox(height: 10),
-                // Data Table on desktop, Cards on mobile
-                Expanded(
-                  child: isNarrow
-                      ? _buildMobileCharacterCards()
-                      : Scrollbar(
-                          controller: scrollController,
-                          thumbVisibility: true,
-                          trackVisibility: true,
-                          child: SingleChildScrollView(
-                            controller: scrollController,
-                            child: Scrollbar(
-                              controller: tableController,
+                    const SizedBox(height: 10),
+                    // Data Table on desktop, Cards on mobile
+                    Expanded(
+                      child: isNarrow
+                          ? _buildMobileCharacterCards()
+                          : Scrollbar(
+                              controller: scrollController,
                               thumbVisibility: true,
                               trackVisibility: true,
-                              notificationPredicate: (notification) =>
-                                  notification.depth == 0,
                               child: SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                controller: tableController,
-                                child: _createCharacterTable(),
+                                controller: scrollController,
+                                child: Scrollbar(
+                                  controller: tableController,
+                                  thumbVisibility: true,
+                                  trackVisibility: true,
+                                  notificationPredicate: (notification) =>
+                                      notification.depth == 0,
+                                  child: NestedHorizontalScrollView(
+                                    controller: tableController,
+                                    verticalParentController: scrollController,
+                                    child: _createCharacterTable(),
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                        ),
-                ),
-                const SizedBox(height: 15),
-                if (totalPageNum > 1)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 15.0),
-                    child: PageFoot(
-                      currentPage: selectedPageNum,
-                      totalPages: totalPageNum,
-                      jumpLabel: AppLocalizations.of(context)!.jumpToPage,
-                      onPageChanged: (page) {
-                        selectedPageNum = page;
-                        scrollController.jumpTo(0);
-                        _search(false);
-                      },
                     ),
-                  ),
-              ],
+                    const SizedBox(height: 15),
+                    if (totalPageNum > 1)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 15.0),
+                        child: PageFoot(
+                          currentPage: selectedPageNum,
+                          totalPages: totalPageNum,
+                          jumpLabel: AppLocalizations.of(context)!.jumpToPage,
+                          onPageChanged: (page) {
+                            selectedPageNum = page;
+                            scrollController.jumpTo(0);
+                            _search(false);
+                          },
+                        ),
+                      ),
+                  ],
+                ),
+              ),
             ),
           ),
-        ),
-      ),
         );
       },
     );
@@ -629,10 +638,9 @@ class _CharacterViewState extends State<CharacterView>
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              I18nHelper.getDisplayNameFromI18n(
-                                  character.name),
-                              style: OnepieceFonts.headerStyle.copyWith(
-                                  fontSize: 16),
+                              I18nHelper.getDisplayNameFromI18n(character.name),
+                              style: OnepieceFonts.headerStyle
+                                  .copyWith(fontSize: 16),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -652,8 +660,7 @@ class _CharacterViewState extends State<CharacterView>
                           Text(character.score.toString(),
                               style: OnepieceFonts.boldFancySmallFont
                                   .copyWith(fontSize: 18)),
-                          if (character.bounty != null &&
-                              character.bounty! > 0)
+                          if (character.bounty != null && character.bounty! > 0)
                             Text(
                               '₿${character.bounty}',
                               style: GoogleFonts.lobster(
@@ -670,8 +677,8 @@ class _CharacterViewState extends State<CharacterView>
                       spacing: 4,
                       runSpacing: 2,
                       children: (character.hakis.toList()
-                            ..sort((a, b) =>
-                                a.toString().compareTo(b.toString())))
+                            ..sort(
+                                (a, b) => a.toString().compareTo(b.toString())))
                           .map((e) => OnepieceTag.getHakiTag(
                               e, hakiEnumValueToDisplayValue[e]!))
                           .toList(),
@@ -698,7 +705,8 @@ class _CharacterViewState extends State<CharacterView>
                             Text(
                               AppLocalizations.of(context)!.detailInformation,
                               style: const TextStyle(
-                                  fontSize: 12, color: OnepieceColors.fancyBlue),
+                                  fontSize: 12,
+                                  color: OnepieceColors.fancyBlue),
                             ),
                             Icon(
                               isExpanded
@@ -766,12 +774,12 @@ class _CharacterViewState extends State<CharacterView>
                 if (stat.icon != null)
                   Padding(
                     padding: const EdgeInsets.only(right: 4),
-                    child: ImageHelper.getTextFormFieldIcon(
-                        stat.icon!, false, 14),
+                    child:
+                        ImageHelper.getTextFormFieldIcon(stat.icon!, false, 14),
                   ),
                 Text(stat.label,
-                    style: OnepieceFonts.smallContentStyle
-                        .copyWith(fontSize: 12)),
+                    style:
+                        OnepieceFonts.smallContentStyle.copyWith(fontSize: 12)),
                 const SizedBox(width: 4),
                 Text(stat.value,
                     style: OnepieceFonts.boldFancySmallFont

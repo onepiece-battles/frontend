@@ -13,6 +13,7 @@ import '../../repository/fruit_dao.dart';
 import '../../utils/data_converter.dart';
 import '../../utils/i18n_helper.dart';
 import '../../utils/image_helper.dart';
+import '../../utils/nested_scroll_helper.dart';
 import '../../utils/random_string_generator.dart';
 import '../../utils/responsive_breakpoints.dart';
 
@@ -26,36 +27,33 @@ class CreateFruitView extends StatefulWidget {
 }
 
 class _CreateFruitViewState extends State<CreateFruitView> {
-  TextEditingController fruitNameEnController = TextEditingController(
-      text: "");
-  TextEditingController fruitNameChController = TextEditingController(
-      text: "");
-  TextEditingController attackSlopeController = TextEditingController(
-      text: "");
-  TextEditingController attackInterceptController = TextEditingController(
-      text: "");
-  TextEditingController defenseSlopeController = TextEditingController(
-      text: "");
-  TextEditingController defenseInterceptController = TextEditingController(
-      text: "");
-  TextEditingController intelligenceSlopeController = TextEditingController(
-      text: "");
-  TextEditingController intelligenceInterceptController = TextEditingController(
-      text: "");
-  TextEditingController bloodSlopeController = TextEditingController(
-      text: '');
-  TextEditingController bloodInterceptController = TextEditingController(
-      text: '');
-  TextEditingController speedSlopeController = TextEditingController(
-      text: '');
-  TextEditingController speedInterceptController = TextEditingController(
-      text: '');
-  TextEditingController groupGainSlopeController = TextEditingController(
-      text: '');
-  TextEditingController groupGainInterceptController = TextEditingController(
-      text: '');
-  TextEditingController fruitEnergyConsumeController = TextEditingController(
-      text: "");
+  final ScrollController _pageScrollController = ScrollController();
+  final ScrollController _horizontalScrollController = ScrollController();
+  TextEditingController fruitNameEnController = TextEditingController(text: "");
+  TextEditingController fruitNameChController = TextEditingController(text: "");
+  TextEditingController attackSlopeController = TextEditingController(text: "");
+  TextEditingController attackInterceptController =
+      TextEditingController(text: "");
+  TextEditingController defenseSlopeController =
+      TextEditingController(text: "");
+  TextEditingController defenseInterceptController =
+      TextEditingController(text: "");
+  TextEditingController intelligenceSlopeController =
+      TextEditingController(text: "");
+  TextEditingController intelligenceInterceptController =
+      TextEditingController(text: "");
+  TextEditingController bloodSlopeController = TextEditingController(text: '');
+  TextEditingController bloodInterceptController =
+      TextEditingController(text: '');
+  TextEditingController speedSlopeController = TextEditingController(text: '');
+  TextEditingController speedInterceptController =
+      TextEditingController(text: '');
+  TextEditingController groupGainSlopeController =
+      TextEditingController(text: '');
+  TextEditingController groupGainInterceptController =
+      TextEditingController(text: '');
+  TextEditingController fruitEnergyConsumeController =
+      TextEditingController(text: "");
 
   List<TextEditingController> fruitControllerList() {
     return <TextEditingController>[
@@ -75,6 +73,16 @@ class _CreateFruitViewState extends State<CreateFruitView> {
       defenseSlopeController,
       fruitEnergyConsumeController,
     ];
+  }
+
+  @override
+  void dispose() {
+    _pageScrollController.dispose();
+    _horizontalScrollController.dispose();
+    for (final controller in fruitControllerList()) {
+      controller.dispose();
+    }
+    super.dispose();
   }
 
   FruitType selectedFruitType = FruitType.paramecia;
@@ -106,11 +114,19 @@ class _CreateFruitViewState extends State<CreateFruitView> {
                         child: TextFormField(
                           controller: fruitNameEnController,
                           decoration: InputDecoration(
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                            contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 0),
                             floatingLabelBehavior: FloatingLabelBehavior.never,
-                            disabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: OnepieceColors.menuHoverColor)),
-                            enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: OnepieceColors.menuHoverColor)),
-                            focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: OnepieceColors.fancyGreen, width: 1.5)),
+                            disabledBorder: const OutlineInputBorder(
+                                borderSide: BorderSide(
+                                    color: OnepieceColors.menuHoverColor)),
+                            enabledBorder: const OutlineInputBorder(
+                                borderSide: BorderSide(
+                                    color: OnepieceColors.menuHoverColor)),
+                            focusedBorder: const OutlineInputBorder(
+                                borderSide: BorderSide(
+                                    color: OnepieceColors.fancyGreen,
+                                    width: 1.5)),
                             labelText: AppLocalizations.of(context)!.name,
                             labelStyle: OnepieceFonts.dropDownItemStyle,
                           ),
@@ -182,15 +198,20 @@ class _CreateFruitViewState extends State<CreateFruitView> {
               controller: ctrl,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
                   floatingLabelBehavior: FloatingLabelBehavior.never,
                   disabledBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: OnepieceColors.menuHoverColor)),
+                      borderSide:
+                          BorderSide(color: OnepieceColors.menuHoverColor)),
                   enabledBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: OnepieceColors.menuHoverColor)),
+                      borderSide:
+                          BorderSide(color: OnepieceColors.menuHoverColor)),
                   focusedBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: OnepieceColors.fancyGreen, width: 1.5)),
-                  labelText: hint, labelStyle: OnepieceFonts.dropDownItemStyle),
+                      borderSide: BorderSide(
+                          color: OnepieceColors.fancyGreen, width: 1.5)),
+                  labelText: hint,
+                  labelStyle: OnepieceFonts.dropDownItemStyle),
             )));
   }
 
@@ -199,34 +220,62 @@ class _CreateFruitViewState extends State<CreateFruitView> {
     return Padding(
         padding: const EdgeInsets.only(bottom: 12),
         child: Row(children: [
-          Text(label, style: OnepieceFonts.deepBlackHintFont, maxLines: 2, overflow: TextOverflow.visible),
+          Text(label,
+              style: OnepieceFonts.deepBlackHintFont,
+              maxLines: 2,
+              overflow: TextOverflow.visible),
           const SizedBox(width: 6),
           const Text('=', style: TextStyle(fontSize: 14)),
           const SizedBox(width: 4),
-          Text(AppLocalizations.of(context)!.basicValue, style: const TextStyle(fontSize: 11, color: Colors.grey)),
+          Text(AppLocalizations.of(context)!.basicValue,
+              style: const TextStyle(fontSize: 11, color: Colors.grey)),
           const SizedBox(width: 2),
           const Text('×', style: TextStyle(fontSize: 14)),
           const SizedBox(width: 4),
-          Expanded(child: SizedBox(height: 35, child: TextFormField(
-              controller: slope, keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 6, vertical: 0),
-                  floatingLabelBehavior: FloatingLabelBehavior.never,
-                  disabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: OnepieceColors.menuHoverColor)),
-                  enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: OnepieceColors.menuHoverColor)),
-                  focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: OnepieceColors.fancyGreen, width: 1.5)),
-                  labelStyle: OnepieceFonts.dropDownItemStyle)))),
+          Expanded(
+              child: SizedBox(
+                  height: 35,
+                  child: TextFormField(
+                      controller: slope,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                          contentPadding:
+                              EdgeInsets.symmetric(horizontal: 6, vertical: 0),
+                          floatingLabelBehavior: FloatingLabelBehavior.never,
+                          disabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: OnepieceColors.menuHoverColor)),
+                          enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: OnepieceColors.menuHoverColor)),
+                          focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: OnepieceColors.fancyGreen,
+                                  width: 1.5)),
+                          labelStyle: OnepieceFonts.dropDownItemStyle)))),
           const SizedBox(width: 4),
           const Text('+', style: TextStyle(fontSize: 14)),
           const SizedBox(width: 4),
-          Expanded(child: SizedBox(height: 35, child: TextFormField(
-              controller: intercept, keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(horizontal: 6, vertical: 0),
-                      floatingLabelBehavior: FloatingLabelBehavior.never,
-                      disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: OnepieceColors.menuHoverColor)),
-                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: OnepieceColors.menuHoverColor)),
-                      focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: OnepieceColors.fancyGreen, width: 1.5)))))),
+          Expanded(
+              child: SizedBox(
+                  height: 35,
+                  child: TextFormField(
+                      controller: intercept,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                          contentPadding:
+                              EdgeInsets.symmetric(horizontal: 6, vertical: 0),
+                          floatingLabelBehavior: FloatingLabelBehavior.never,
+                          disabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: OnepieceColors.menuHoverColor)),
+                          enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: OnepieceColors.menuHoverColor)),
+                          focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: OnepieceColors.fancyGreen,
+                                  width: 1.5)))))),
         ]));
   }
 
@@ -244,10 +293,12 @@ class _CreateFruitViewState extends State<CreateFruitView> {
               _buildMobileLayout(context)
             else
               SingleChildScrollView(
+                controller: _pageScrollController,
                 scrollDirection: Axis.vertical,
                 child: Center(
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
+                  child: NestedHorizontalScrollView(
+                    controller: _horizontalScrollController,
+                    verticalParentController: _pageScrollController,
                     child: SizedBox(
                       width: dividerWidth,
                       child: Column(
@@ -522,7 +573,9 @@ class _CreateFruitViewState extends State<CreateFruitView> {
           buttonStyleData: ButtonStyleData(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               height: 34,
-              width: MediaQuery.of(context).size.width < 600 ? double.infinity : 210,
+              width: MediaQuery.of(context).size.width < 600
+                  ? double.infinity
+                  : 210,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(3),
                 color: OnepieceColors.liteFancyGreen,

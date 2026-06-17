@@ -18,6 +18,7 @@ import 'package:openapi/api.dart';
 import '../../l10n/app_localizations.dart';
 import 'package:one_piece_battles_flutter/graph/character_data.dart';
 import '../../constants/onepiece_fonts.dart';
+import '../../utils/nested_scroll_helper.dart';
 import '../../utils/responsive_breakpoints.dart';
 import '../../utils/pdf_downloader_stub.dart'
     if (dart.library.html) '../../utils/pdf_downloader_web.dart';
@@ -40,6 +41,8 @@ class _BattleDetailViewState extends State<BattleDetailView> {
   late Character starter;
   late Character receiver;
   ValueNotifier<Uint8List?> pdfData = ValueNotifier(null);
+  final ScrollController _pageScrollController = ScrollController();
+  final ScrollController _horizontalScrollController = ScrollController();
 
   @override
   void initState() {
@@ -50,6 +53,8 @@ class _BattleDetailViewState extends State<BattleDetailView> {
   void dispose() {
     // Cancel the timer when the widget is disposed
     _timer?.cancel();
+    _pageScrollController.dispose();
+    _horizontalScrollController.dispose();
     super.dispose();
   }
 
@@ -304,10 +309,12 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                         )
                       else
                         SingleChildScrollView(
+                          controller: _pageScrollController,
                           scrollDirection: Axis.vertical,
                           child: Center(
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
+                            child: NestedHorizontalScrollView(
+                              controller: _horizontalScrollController,
+                              verticalParentController: _pageScrollController,
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 mainAxisAlignment: MainAxisAlignment.start,
