@@ -4,10 +4,11 @@ import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/components/image_lazy_loader.dart';
 import 'package:one_piece_battles_flutter/repository/issue_dao.dart';
 import 'package:openapi/api.dart';
-import '../../l10n/app_localizations.dart';
+
 import '../../app_router.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
+import '../../l10n/app_localizations.dart';
 import '../../utils/image_helper.dart';
 import '../../utils/responsive_breakpoints.dart';
 
@@ -21,274 +22,61 @@ class IssueDetailView extends StatefulWidget {
 }
 
 class _IssueDetailViewState extends State<IssueDetailView> {
+  late Future<IssueFullView?> _issueFuture;
   late IssueFullView issue;
   bool _issueStatusEditable = false;
   IssueStatus? _selectedIssueStatus;
 
-  _loadData() {
+  @override
+  void initState() {
+    super.initState();
+    _issueFuture = _loadData();
+  }
+
+  @override
+  void didUpdateWidget(covariant IssueDetailView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.issueId != widget.issueId) {
+      _issueStatusEditable = false;
+      _issueFuture = _loadData();
+    }
+  }
+
+  Future<IssueFullView?> _loadData() {
     return getIt<IssueDao>()
         .getIssueFullView(GetIssueFullViewRequest(id: widget.issueId));
   }
 
-  _prepareData(IssueFullView issueFullView) {
+  void _prepareData(IssueFullView issueFullView) {
     issue = issueFullView;
-    _selectedIssueStatus = issue.issueStatus!;
+    _selectedIssueStatus ??= issue.issueStatus!;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    Map<IssueType, String> issueTypeToDisplayValue = <IssueType, String>{
+  Map<IssueType, String> _issueTypeMap(BuildContext context) {
+    return <IssueType, String>{
       IssueType.OTHER: AppLocalizations.of(context)!.otherType,
       IssueType.FEATURE_SUGGESTION:
           AppLocalizations.of(context)!.featureSuggestion,
       IssueType.BUG_REPORT: AppLocalizations.of(context)!.bugReport,
     };
-    Map<IssueStatus, String> issueStatusToDisplayValue = <IssueStatus, String>{
+  }
+
+  Map<IssueStatus, String> _issueStatusMap(BuildContext context) {
+    return <IssueStatus, String>{
       IssueStatus.CREATED: AppLocalizations.of(context)!.statusCreated,
       IssueStatus.IN_PROGRESS: AppLocalizations.of(context)!.statusInProgress,
       IssueStatus.RESOLVED: AppLocalizations.of(context)!.statusResolved,
       IssueStatus.REVOKED: AppLocalizations.of(context)!.statusRevoked,
       IssueStatus.BACKLOGGED: AppLocalizations.of(context)!.statusBackLogged,
     };
-    return FutureBuilder(
-      future: _loadData(),
-      builder: (context, AsyncSnapshot snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
-          _prepareData(snapshot.data);
-          return LayoutBuilder(
-            builder: (context, constraints) {
-              final isNarrow = ResponsiveBreakpoints.isMobileFromConstraints(constraints);
-              final dynamicWidth = isNarrow ? constraints.maxWidth - 30 : 800.0;
-              return SingleChildScrollView(
-            scrollDirection: Axis.vertical,
-            padding: isNarrow ? const EdgeInsets.fromLTRB(12, 12, 12, 80) : null,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    AppLocalizations.of(context)!.creator,
-                    style: OnepieceFonts.headerStyle,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: InkWell(
-                    hoverColor: Colors.transparent,
-                    splashColor: Colors.transparent,
-                    onTap: () {
-                      context.goNamed('userDetails',
-                          extra: issue.issueCreator!.id,
-                          pathParameters: {
-                            'name': issue.issueCreator!.nickname
-                          });
-                    },
-                    child: ImageLazyLoader(
-                        key: UniqueKey(),
-                        uriProvider: () => issue.issueCreator!.imageUri!,
-                        width: 100,
-                        borderWidth: 3,
-                        borderRadios: 100),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(8, 0, 0, 15),
-                  child: Text(
-                    AppLocalizations.of(context)!.nickname,
-                    style: OnepieceFonts.contentStyle,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(8, 0, 0, 15),
-                  child: Text(
-                    issue.issueCreator!.nickname,
-                    style: OnepieceFonts.fancyBlueHintFont,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(8, 0, 0, 15),
-                  child: Text(
-                    AppLocalizations.of(context)!.email,
-                    style: OnepieceFonts.contentStyle,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(8, 0, 0, 15),
-                  child: Text(
-                    issue.issueCreator!.username,
-                    style: OnepieceFonts.fancyBlueHintFont,
-                  ),
-                ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 3.0),
-                  child: Divider(
-                    color: Colors.grey,
-                    thickness: 1,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    AppLocalizations.of(context)!.issueDetail,
-                    style: OnepieceFonts.headerStyle,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    issueTypeToDisplayValue[issue.issueType]!,
-                    style: OnepieceFonts.fancyBlueSmallTitle,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: StatefulBuilder(builder: (context, basicState) {
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
-                          child: DropdownButtonHideUnderline(
-                            child: DropdownButton2(
-                              isExpanded: true,
-                              value: _selectedIssueStatus,
-                              hint: Text(
-                                AppLocalizations.of(context)!.groupCategory,
-                                style: OnepieceFonts.dropDownItemStyle,
-                              ),
-                              onChanged: !_issueStatusEditable
-                                  ? null
-                                  : (value) {
-                                      basicState(() {
-                                        _selectedIssueStatus =
-                                            value! as IssueStatus;
-                                      });
-                                    },
-                              selectedItemBuilder: (context) {
-                                return IssueStatus.values.map(
-                                  (item) {
-                                    return Container(
-                                      alignment: AlignmentDirectional.center,
-                                      child: Text(
-                                        issueStatusToDisplayValue[
-                                            _selectedIssueStatus]!,
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ).toList();
-                              },
-                              buttonStyleData: ButtonStyleData(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 16),
-                                  height: 34,
-                                  width: isNarrow ? dynamicWidth : 210,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(3),
-                                    color: OnepieceColors.menuBackgroundColor,
-                                  )),
-                              menuItemStyleData: const MenuItemStyleData(
-                                height: 35,
-                              ),
-                              items: IssueStatus.values
-                                  .map((IssueStatus issueStatus) {
-                                return DropdownMenuItem<IssueStatus>(
-                                  value: issueStatus,
-                                  child: Text(
-                                    issueStatusToDisplayValue[issueStatus]!,
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                );
-                              }).toList(),
-                            ),
-                          ),
-                        ),
-                        Tooltip(
-                          message: _issueStatusEditable
-                              ? AppLocalizations.of(context)!.submitForm
-                              : AppLocalizations.of(context)!.editHint,
-                          child: InkWell(
-                            hoverColor: Colors.transparent,
-                            splashColor: Colors.transparent,
-                            onTap: () {
-                              basicState(() {
-                                _issueStatusEditable = !_issueStatusEditable;
-                                if (!_issueStatusEditable) {
-                                  BatchUpdateIssueRequest request =
-                                      BatchUpdateIssueRequest(updatedIssues: [
-                                    Issue(
-                                        id: issue.id,
-                                        issueStatus: _selectedIssueStatus)
-                                  ]);
-                                  getIt<IssueDao>()
-                                      .batchUpdateIssue(request)
-                                      .then((value) => setState(() {}));
-                                }
-                              });
-                            },
-                            child: SizedBox(
-                                width: 30,
-                                height: 30,
-                                child: !_issueStatusEditable
-                                    ? ImageHelper.getSvgIconWithColor(
-                                        'images/svgs/edit.svg',
-                                        150,
-                                        150,
-                                        OnepieceColors.fancyBlue)
-                                    : ImageHelper.getSvgIconWithColor(
-                                        'images/svgs/check.svg',
-                                        150,
-                                        150,
-                                        OnepieceColors.fancyBlue)),
-                          ),
-                        ),
-                      ],
-                    );
-                  }),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Container(
-                    width: dynamicWidth,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border.all(
-                        color: OnepieceColors.fancyBlue,
-                        width: 3, // Width of the border
-                      ),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            issue.issueHeader!,
-                            style: OnepieceFonts.smallHeaderStyle,
-                          ),
-                          Text(
-                            issue.issueDescription!,
-                            style: OnepieceFonts.contentStyle,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          );
-            },
-          );
-        } else {
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<IssueFullView?>(
+      future: _issueFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
           return Center(
             child: Text(
               AppLocalizations.of(context)!.loading,
@@ -296,7 +84,414 @@ class _IssueDetailViewState extends State<IssueDetailView> {
             ),
           );
         }
+
+        final issueData = snapshot.data;
+        if (issueData == null) {
+          return Center(
+            child: Text(
+              AppLocalizations.of(context)!.loading,
+              style: OnepieceFonts.loadingFont,
+            ),
+          );
+        }
+
+        _prepareData(issueData);
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final isNarrow =
+                ResponsiveBreakpoints.isMobileFromConstraints(constraints);
+            return SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(
+                isNarrow ? 12 : 24,
+                isNarrow ? 12 : 24,
+                isNarrow ? 12 : 24,
+                80,
+              ),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 980),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _buildHeaderCard(context, isNarrow: isNarrow),
+                      const SizedBox(height: 14),
+                      if (isNarrow) ...[
+                        _buildCreatorCard(context),
+                        const SizedBox(height: 14),
+                        _buildMetaCard(context),
+                      ] else
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              flex: 4,
+                              child: _buildCreatorCard(context),
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              flex: 5,
+                              child: _buildMetaCard(context),
+                            ),
+                          ],
+                        ),
+                      const SizedBox(height: 14),
+                      _buildIssueBodyCard(context),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
       },
+    );
+  }
+
+  Widget _buildHeaderCard(BuildContext context, {required bool isNarrow}) {
+    return Card(
+      elevation: 5,
+      shadowColor: Colors.black.withValues(alpha: 0.08),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: EdgeInsets.all(isNarrow ? 16 : 20),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: OnepieceColors.fancyBlue.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(
+                Icons.feedback_outlined,
+                color: OnepieceColors.fancyBlue,
+                size: 22,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    AppLocalizations.of(context)!.issueDetail,
+                    style: OnepieceFonts.headerStyle,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    issue.issueHeader ?? '',
+                    maxLines: isNarrow ? 2 : 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: OnepieceFonts.smallHeaderStyle,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCreatorCard(BuildContext context) {
+    final creator = issue.issueCreator!;
+    return _sectionCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _sectionTitle(
+            context,
+            icon: Icons.person_outline,
+            title: AppLocalizations.of(context)!.creator,
+          ),
+          const SizedBox(height: 16),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              InkWell(
+                borderRadius: BorderRadius.circular(44),
+                hoverColor: OnepieceColors.liteFancyBlue,
+                onTap: () {
+                  context.goNamed(
+                    'userDetails',
+                    extra: creator.id,
+                    pathParameters: {'name': creator.nickname},
+                  );
+                },
+                child: ImageLazyLoader(
+                  key: ValueKey(creator.imageUri),
+                  uriProvider: () => creator.imageUri ?? '',
+                  width: 84,
+                  borderWidth: 3,
+                  borderRadios: 84,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _labelValue(
+                      AppLocalizations.of(context)!.nickname,
+                      creator.nickname,
+                    ),
+                    const SizedBox(height: 12),
+                    _labelValue(
+                      AppLocalizations.of(context)!.email,
+                      creator.username,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMetaCard(BuildContext context) {
+    final issueTypeToDisplayValue = _issueTypeMap(context);
+    final issueStatusToDisplayValue = _issueStatusMap(context);
+    return _sectionCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _sectionTitle(
+            context,
+            icon: Icons.tune_outlined,
+            title: AppLocalizations.of(context)!.issueDetail,
+          ),
+          const SizedBox(height: 16),
+          _labelValue(
+            AppLocalizations.of(context)!.issueType,
+            issueTypeToDisplayValue[issue.issueType]!,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            AppLocalizations.of(context)!.status,
+            style: OnepieceFonts.contentStyle,
+          ),
+          const SizedBox(height: 8),
+          StatefulBuilder(builder: (context, basicState) {
+            return Row(
+              children: [
+                Expanded(
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton2<IssueStatus>(
+                      isExpanded: true,
+                      value: _selectedIssueStatus,
+                      hint: Text(
+                        AppLocalizations.of(context)!.status,
+                        style: OnepieceFonts.dropDownItemStyle,
+                      ),
+                      onChanged: !_issueStatusEditable
+                          ? null
+                          : (value) {
+                              basicState(() {
+                                _selectedIssueStatus = value;
+                              });
+                            },
+                      selectedItemBuilder: (context) {
+                        return IssueStatus.values.map(
+                          (item) {
+                            return Container(
+                              alignment: AlignmentDirectional.centerStart,
+                              child: Text(
+                                issueStatusToDisplayValue[
+                                    _selectedIssueStatus]!,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(fontSize: 15),
+                              ),
+                            );
+                          },
+                        ).toList();
+                      },
+                      buttonStyleData: ButtonStyleData(
+                        padding: const EdgeInsets.symmetric(horizontal: 14),
+                        height: 40,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          color: OnepieceColors.menuBackgroundColor,
+                          border: Border.all(
+                            color: _issueStatusEditable
+                                ? OnepieceColors.fancyGreen
+                                : OnepieceColors.menuHoverColor,
+                            width: _issueStatusEditable ? 1.8 : 1,
+                          ),
+                        ),
+                      ),
+                      menuItemStyleData: const MenuItemStyleData(height: 38),
+                      items: IssueStatus.values.map((IssueStatus issueStatus) {
+                        return DropdownMenuItem<IssueStatus>(
+                          value: issueStatus,
+                          child: Text(
+                            issueStatusToDisplayValue[issueStatus]!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Tooltip(
+                  message: _issueStatusEditable
+                      ? AppLocalizations.of(context)!.submitForm
+                      : AppLocalizations.of(context)!.editHint,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(8),
+                    hoverColor:
+                        OnepieceColors.liteFancyBlue.withValues(alpha: 0.6),
+                    splashColor: Colors.transparent,
+                    onTap: () => _toggleStatusEditing(basicState),
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: OnepieceColors.fancyBlue.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: !_issueStatusEditable
+                          ? ImageHelper.getSvgIconWithColor(
+                              'images/svgs/edit.svg',
+                              150,
+                              150,
+                              OnepieceColors.fancyBlue,
+                            )
+                          : ImageHelper.getSvgIconWithColor(
+                              'images/svgs/check.svg',
+                              150,
+                              150,
+                              OnepieceColors.fancyBlue,
+                            ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  void _toggleStatusEditing(StateSetter basicState) {
+    basicState(() {
+      _issueStatusEditable = !_issueStatusEditable;
+    });
+    if (_issueStatusEditable) return;
+
+    final request = BatchUpdateIssueRequest(
+      updatedIssues: [
+        Issue(id: issue.id, issueStatus: _selectedIssueStatus),
+      ],
+    );
+    getIt<IssueDao>().batchUpdateIssue(request).then((value) {
+      if (!mounted) return;
+      setState(() {
+        _issueFuture = _loadData();
+        _selectedIssueStatus = null;
+      });
+    });
+  }
+
+  Widget _buildIssueBodyCard(BuildContext context) {
+    return _sectionCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _sectionTitle(
+            context,
+            icon: Icons.article_outlined,
+            title: issue.issueHeader ?? '',
+          ),
+          const SizedBox(height: 16),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: OnepieceColors.liteFancyBlue.withValues(alpha: 0.28),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: OnepieceColors.fancyBlue.withValues(alpha: 0.16),
+              ),
+            ),
+            child: Text(
+              issue.issueDescription ?? '',
+              style: OnepieceFonts.contentStyle.copyWith(height: 1.45),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _sectionCard({required Widget child}) {
+    return Card(
+      elevation: 4,
+      shadowColor: Colors.black.withValues(alpha: 0.08),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: OnepieceColors.menuHoverColor.withValues(alpha: 0.45),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: child,
+      ),
+    );
+  }
+
+  Widget _sectionTitle(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+  }) {
+    return Row(
+      children: [
+        Container(
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
+            color: OnepieceColors.fancyBlue.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, size: 18, color: OnepieceColors.fancyBlue),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            title,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: OnepieceFonts.smallHeaderStyle,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _labelValue(String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: OnepieceFonts.contentStyle),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: OnepieceFonts.fancyBlueHintFont,
+        ),
+      ],
     );
   }
 }

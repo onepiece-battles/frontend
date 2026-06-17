@@ -24,6 +24,7 @@ class ChatNotifier with ChangeNotifier {
 
   /// Whether more history is available for a given chat.
   final Map<String, bool> _hasMoreHistory = {};
+  final Map<String, Future<void>> _historyLoadFutures = {};
 
   String? _activeChatId;
   Chat? _activeChat;
@@ -187,16 +188,41 @@ class ChatNotifier with ChangeNotifier {
   /// (they appear at the visual *top* of the reversed ListView).  Sorts by id
   /// so the oldest message is last in the Dart list = visual top.
   Future<void> loadMoreHistory(String chatId) async {
-    if (_loadingHistoryChats.contains(chatId)) return;
+    if (_loadingHistoryChats.contains(chatId)) {
+      final inFlight = _historyLoadFutures[chatId];
+      if (inFlight != null) {
+        await inFlight;
+      }
+      return;
+    }
     if (!(_hasMoreHistory[chatId] ?? true)) return;
 
+    final future = _loadMoreHistory(chatId);
+    _historyLoadFutures[chatId] = future;
+    await future;
+  }
+
+  Future<void> loadMoreHistoryAfterCurrent(String chatId) async {
+    final inFlight = _historyLoadFutures[chatId];
+    if (inFlight != null) {
+      await inFlight;
+    }
+    if (!(_hasMoreHistory[chatId] ?? true)) return;
+    await loadMoreHistory(chatId);
+  }
+
+  Future<void> _loadMoreHistory(String chatId) async {
     _loadingHistoryChats.add(chatId);
     notifyListeners();
+    var shouldNotify = false;
 
     try {
       final loadCount = (_historyLoadCount[chatId] ?? 0) + 1;
       const batchSize = 10;
-      final limit = loadCount * batchSize;
+      final alreadyLoadedCount = _messagesByChatId[chatId]?.length ?? 0;
+      final countedLimit = loadCount * batchSize;
+      final visibleLimit = alreadyLoadedCount + batchSize;
+      final limit = countedLimit > visibleLimit ? countedLimit : visibleLimit;
 
       final request = ListMessageRequest(
         userId: getIt<User>().id,
@@ -206,12 +232,14 @@ class ChatNotifier with ChangeNotifier {
       final response = await getIt<MessageDao>().listMessage(request);
       if (response == null) {
         _hasMoreHistory[chatId] = false;
+        shouldNotify = true;
         return;
       }
 
       final allLoaded = response.chats;
       if (allLoaded.isEmpty) {
         _hasMoreHistory[chatId] = false;
+        shouldNotify = true;
         return;
       }
 
@@ -232,14 +260,17 @@ class ChatNotifier with ChangeNotifier {
 
       // More history exists if server returned a full batch.
       _hasMoreHistory[chatId] = allLoaded.length >= limit;
-      _historyLoadCount[chatId] = loadCount;
-
-      _loadingHistoryChats.remove(chatId);
-      notifyListeners();
+      _historyLoadCount[chatId] = (limit + batchSize - 1) ~/ batchSize;
+      shouldNotify = true;
     } catch (_) {
-      _loadingHistoryChats.remove(chatId);
       _hasMoreHistory[chatId] = false;
-      notifyListeners();
+      shouldNotify = true;
+    } finally {
+      _loadingHistoryChats.remove(chatId);
+      _historyLoadFutures.remove(chatId);
+      if (shouldNotify) {
+        notifyListeners();
+      }
     }
   }
 

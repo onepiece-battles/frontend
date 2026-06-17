@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 // Local project imports
@@ -60,6 +61,7 @@ class _ChattingViewState extends State<ChattingView> {
   Timer? _pendingScroll;
   final Set<String> _preservingHistoryScrollChats = {};
   bool _didSelectInitialChat = false;
+  bool _activeChatWasAutoSelected = false;
 
   /// Dedicated notifier for search text — changes here rebuild only the
   /// chat-list filter, not the entire ChattingView.
@@ -83,11 +85,13 @@ class _ChattingViewState extends State<ChattingView> {
 
   void _selectInitialChat(ChatNotifier notifier) {
     if (_didSelectInitialChat || notifier.chats.isEmpty) return;
+    if (ResponsiveBreakpoints.isMobile(context)) return;
 
     final initialChatId = notifier.chats.first.id;
     if (initialChatId == null) return;
 
     _didSelectInitialChat = true;
+    _activeChatWasAutoSelected = true;
     activeConversationId = initialChatId;
     _lastProcessedChatId = "";
     typingController.text = chatIdToCachedMessage[initialChatId] ?? "";
@@ -101,25 +105,29 @@ class _ChattingViewState extends State<ChattingView> {
   Future<void> _loadEarlierMessages(String chatId) async {
     final notifier = Provider.of<ChatNotifier>(context, listen: false);
     if (!notifier.hasMoreHistory(chatId)) return;
-    if (notifier.isLoadingHistory(chatId)) return;
 
-    if (!scrollController.hasClients) return;
-    final previousExtent = scrollController.position.maxScrollExtent;
-    final previousPixels = scrollController.position.pixels;
+    final hadScrollPosition = scrollController.hasClients;
+    final previousExtent =
+        hadScrollPosition ? scrollController.position.maxScrollExtent : 0.0;
+    final previousPixels =
+        hadScrollPosition ? scrollController.position.pixels : 0.0;
 
     try {
       _preservingHistoryScrollChats.add(chatId);
-      await notifier.loadMoreHistory(chatId);
+      await notifier.loadMoreHistoryAfterCurrent(chatId);
+      await WidgetsBinding.instance.endOfFrame;
       await WidgetsBinding.instance.endOfFrame;
 
-      if (!scrollController.hasClients) return;
+      if (!hadScrollPosition || !scrollController.hasClients) return;
       final addedExtent =
           scrollController.position.maxScrollExtent - previousExtent;
       if (addedExtent <= 0) return;
 
-      final target = (previousPixels + addedExtent)
-          .clamp(0.0, scrollController.position.maxScrollExtent)
-          .toDouble();
+      final wasAtHistoryControl = previousPixels <= 24;
+      final target =
+          (wasAtHistoryControl ? previousPixels : previousPixels + addedExtent)
+              .clamp(0.0, scrollController.position.maxScrollExtent)
+              .toDouble();
       scrollController.jumpTo(target);
       chatIdToScrollOffset[chatId] = target;
     } finally {
@@ -222,6 +230,72 @@ class _ChattingViewState extends State<ChattingView> {
         AppLocalizations.of(context)!.user;
   }
 
+  bool _shouldShowTimeAfterMessage(List<Message> messages, int messageIndex) {
+    if (messageIndex < 0 || messageIndex >= messages.length - 1) return false;
+    final currentTimestamp =
+        messages[messageIndex].creationRecord?.actionTimestamp;
+    final nextTimestamp =
+        messages[messageIndex + 1].creationRecord?.actionTimestamp;
+    if (currentTimestamp == null || nextTimestamp == null) return false;
+    return nextTimestamp - currentTimestamp >
+        const Duration(minutes: 30).inMilliseconds;
+  }
+
+  Widget _buildMessageTimeMarker(BuildContext context, Message message) {
+    final timestamp = message.creationRecord?.actionTimestamp;
+    if (timestamp == null) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 20),
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: OnepieceColors.menuHoverColor.withValues(alpha: 0.45),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Text(
+            _messageTimeLabel(context, timestamp),
+            style: OnepieceFonts.superSmallContentStyle
+                .copyWith(color: Colors.grey[700]),
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _messageTimeLabel(BuildContext context, int timestampMillis) {
+    final now = DateTime.now();
+    final target = DateTime.fromMillisecondsSinceEpoch(timestampMillis);
+    final today = DateTime(now.year, now.month, now.day);
+    final targetDay = DateTime(target.year, target.month, target.day);
+    final dayDiff = today.difference(targetDay).inDays;
+    final time = DateFormat.jm().format(target);
+
+    if (dayDiff == 0) return time;
+    if (dayDiff == 1) {
+      return '${AppLocalizations.of(context)!.yesterday} $time';
+    }
+    if (dayDiff > 1 && dayDiff < 7) {
+      return '${_localizedWeekday(context, target.weekday)} $time';
+    }
+    return '${DateFormat.yMMMd().format(target)} $time';
+  }
+
+  String _localizedWeekday(BuildContext context, int weekday) {
+    final l10n = AppLocalizations.of(context)!;
+    return switch (weekday) {
+      DateTime.monday => l10n.monday,
+      DateTime.tuesday => l10n.tuesday,
+      DateTime.wednesday => l10n.wednesday,
+      DateTime.thursday => l10n.thursday,
+      DateTime.friday => l10n.friday,
+      DateTime.saturday => l10n.saturday,
+      DateTime.sunday => l10n.sunday,
+      _ => '',
+    };
+  }
+
   // ─────────────────────────────────────────────────────────────────────────
   // The top-level build does NOT watch ChatNotifier.  Instead, Selector
   // widgets below subscribe to only the slices of state they need, so:
@@ -240,6 +314,13 @@ class _ChattingViewState extends State<ChattingView> {
         if (isMobile) {
           return _buildMobileLayout(isMobile);
         }
+        if (!_didSelectInitialChat) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            _selectInitialChat(
+                Provider.of<ChatNotifier>(context, listen: false));
+          });
+        }
         return _buildDesktopLayout(isMobile);
       },
     );
@@ -251,6 +332,14 @@ class _ChattingViewState extends State<ChattingView> {
     return Selector<ChatNotifier, String?>(
       selector: (_, notifier) => notifier.activeChatId,
       builder: (context, activeChatId, _) {
+        if (activeChatId != null && _activeChatWasAutoSelected) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            _activeChatWasAutoSelected = false;
+            _clearActiveChat();
+          });
+          return _buildChatListPanel(isMobile: isMobile);
+        }
         if (activeChatId == null) {
           return _buildChatListPanel(isMobile: isMobile);
         }
@@ -583,6 +672,7 @@ class _ChattingViewState extends State<ChattingView> {
 
                         // 3. Update Local State for the NEW chat
                         activeConversationId = newChatId;
+                        _activeChatWasAutoSelected = false;
                         _lastProcessedChatId = ""; // Reset scroll logic
 
                         // 4. Restore Drafts for NEW chat
@@ -737,28 +827,40 @@ class _ChattingViewState extends State<ChattingView> {
                         return _buildHistoryControl(activeChatId);
                       }
 
-                      final msg = messages[index - 1];
+                      final messageIndex = index - 1;
+                      final msg = messages[messageIndex];
+                      final showTimeAfter =
+                          _shouldShowTimeAfterMessage(messages, messageIndex);
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 15.0),
-                        child: MessageItem(
-                            key: ValueKey(msg.id),
-                            message: msg,
-                            isMe: msg.userId == getIt<User>().id,
-                            preMessage: msg.preMessage,
-                            user: _messageMemberOrFallback(activeChat, msg),
-                            preMessageNickname: msg.preMessage != null
-                                ? _memberNicknameOrFallback(
-                                    activeChat, msg.preMessage!.userId)
-                                : null,
-                            replyMessage: (msg) {
-                              chatIdToRepliedMessage[msg.conversationId!] = msg;
-                              inputPreMessageNotifier.value = msg;
-                              Future.delayed(Duration.zero, () {
-                                if (focusNode.canRequestFocus) {
-                                  focusNode.requestFocus();
-                                }
-                              });
-                            }),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            MessageItem(
+                                key: ValueKey(msg.id),
+                                message: msg,
+                                isMe: msg.userId == getIt<User>().id,
+                                preMessage: msg.preMessage,
+                                user: _messageMemberOrFallback(activeChat, msg),
+                                preMessageNickname: msg.preMessage != null
+                                    ? _memberNicknameOrFallback(
+                                        activeChat, msg.preMessage!.userId)
+                                    : null,
+                                replyMessage: (msg) {
+                                  chatIdToRepliedMessage[msg.conversationId!] =
+                                      msg;
+                                  inputPreMessageNotifier.value = msg;
+                                  Future.delayed(Duration.zero, () {
+                                    if (focusNode.canRequestFocus) {
+                                      focusNode.requestFocus();
+                                    }
+                                  });
+                                }),
+                            if (showTimeAfter)
+                              _buildMessageTimeMarker(context, msg),
+                          ],
+                        ),
                       );
                     },
                   ),
@@ -1193,7 +1295,7 @@ class _ChattingViewState extends State<ChattingView> {
           padding: const EdgeInsets.fromLTRB(0, 10, 0, 14),
           child: Center(
             child: Text(
-              'No earlier messages',
+              AppLocalizations.of(context)!.noEarlierMessages,
               style: OnepieceFonts.superSmallContentStyle
                   .copyWith(color: Colors.grey[600]),
             ),
@@ -1207,7 +1309,7 @@ class _ChattingViewState extends State<ChattingView> {
           child: TextButton.icon(
             onPressed: () => _loadEarlierMessages(activeChatId),
             icon: const Icon(Icons.keyboard_arrow_up, size: 18),
-            label: const Text('Load earlier messages'),
+            label: Text(AppLocalizations.of(context)!.loadEarlierMessages),
             style: TextButton.styleFrom(
               foregroundColor: OnepieceColors.fancyBlue,
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
