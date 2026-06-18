@@ -154,7 +154,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                   ),
                   const SizedBox(
-                    height: 50,
+                    height: 30,
                   ),
                   const Image(
                     image: AssetImage(PathConstants.luffyFlag),
@@ -167,7 +167,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         fontSize: 20,
                         fontWeight: FontWeight.bold),
                   ),
-                  const SizedBox(height: 90),
+                  const SizedBox(height: 60),
                   SizedBox(
                     width: formWidth,
                     child: TextFormField(
@@ -390,7 +390,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       )
                     ],
                   ),
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 20),
                 ],
               ),
             ),

@@ -172,7 +172,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     const SizedBox(
-                      height: 60,
+                      height: 30,
                     ),
                     const Image(
                       image: AssetImage(PathConstants.luffyFlag),
@@ -357,7 +357,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     Container(
-                      height: 40,
+                      height: 20,
                     ),
                   ],
                 ),

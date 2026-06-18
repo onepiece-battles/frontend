@@ -99,8 +99,17 @@ class _ChattingViewState extends State<ChattingView> {
     inputPreMessageNotifier.value = chatIdToRepliedMessage[initialChatId];
 
     notifier.setActiveChat(initialChatId);
-    notifier.ensureHistoryLoaded(initialChatId);
-    _restoreScrollForChat(initialChatId, fallbackToBottom: false);
+    unawaited(_loadInitialHistoryAndRestoreScroll(initialChatId));
+  }
+
+  Future<void> _loadInitialHistoryAndRestoreScroll(String chatId) async {
+    await Provider.of<ChatNotifier>(context, listen: false)
+        .ensureHistoryLoaded(chatId);
+    if (!mounted || activeConversationId != chatId) return;
+    _restoreScrollForChat(
+      chatId,
+      fallbackToBottom: false,
+    );
   }
 
   Future<void> _loadEarlierMessages(String chatId) async {
@@ -160,7 +169,7 @@ class _ChattingViewState extends State<ChattingView> {
       _lastProcessedChatId = activeChatId;
       _previousMsgCount = messages.length;
       _previousNewestMessageId = newestMessageId;
-      _restoreScrollForChat(activeChatId, fallbackToBottom: true);
+      _restoreScrollForChat(activeChatId, fallbackToBottom: false);
       return;
     }
     if (messages.length > _previousMsgCount) {
@@ -715,12 +724,9 @@ class _ChattingViewState extends State<ChattingView> {
                         Provider.of<ChatNotifier>(context, listen: false)
                             .setActiveChat(newChatId);
 
-                        // 6. Load initial history if needed
-                        Provider.of<ChatNotifier>(context, listen: false)
-                            .ensureHistoryLoaded(newChatId);
-
-                        _restoreScrollForChat(newChatId,
-                            fallbackToBottom: false);
+                        // 6. Load initial history if needed, then restore.
+                        unawaited(
+                            _loadInitialHistoryAndRestoreScroll(newChatId));
                       },
                     ),
                   );
