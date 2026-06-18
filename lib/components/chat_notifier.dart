@@ -24,7 +24,7 @@ class ChatNotifier with ChangeNotifier {
 
   /// Whether more history is available for a given chat.
   final Map<String, bool> _hasMoreHistory = {};
-  final Map<String, Future<void>> _historyLoadFutures = {};
+  final Map<String, Future<int>> _historyLoadFutures = {};
 
   String? _activeChatId;
   Chat? _activeChat;
@@ -187,34 +187,44 @@ class ChatNotifier with ChangeNotifier {
   /// Loads older messages for [chatId] and appends them to the existing list
   /// (they appear at the visual *top* of the reversed ListView).  Sorts by id
   /// so the oldest message is last in the Dart list = visual top.
-  Future<void> loadMoreHistory(String chatId) async {
+  Future<int> loadMoreHistory(
+    String chatId, {
+    ValueChanged<int>? beforeNotify,
+  }) async {
     if (_loadingHistoryChats.contains(chatId)) {
       final inFlight = _historyLoadFutures[chatId];
       if (inFlight != null) {
-        await inFlight;
+        return await inFlight;
       }
-      return;
+      return 0;
     }
-    if (!(_hasMoreHistory[chatId] ?? true)) return;
+    if (!(_hasMoreHistory[chatId] ?? true)) return 0;
 
-    final future = _loadMoreHistory(chatId);
+    final future = _loadMoreHistory(chatId, beforeNotify: beforeNotify);
     _historyLoadFutures[chatId] = future;
-    await future;
+    return await future;
   }
 
-  Future<void> loadMoreHistoryAfterCurrent(String chatId) async {
+  Future<int> loadMoreHistoryAfterCurrent(
+    String chatId, {
+    ValueChanged<int>? beforeNotify,
+  }) async {
     final inFlight = _historyLoadFutures[chatId];
     if (inFlight != null) {
       await inFlight;
     }
-    if (!(_hasMoreHistory[chatId] ?? true)) return;
-    await loadMoreHistory(chatId);
+    if (!(_hasMoreHistory[chatId] ?? true)) return 0;
+    return await loadMoreHistory(chatId, beforeNotify: beforeNotify);
   }
 
-  Future<void> _loadMoreHistory(String chatId) async {
+  Future<int> _loadMoreHistory(
+    String chatId, {
+    ValueChanged<int>? beforeNotify,
+  }) async {
     _loadingHistoryChats.add(chatId);
     notifyListeners();
     var shouldNotify = false;
+    var insertedHistoryCount = 0;
 
     try {
       final loadCount = (_historyLoadCount[chatId] ?? 0) + 1;
@@ -233,14 +243,14 @@ class ChatNotifier with ChangeNotifier {
       if (response == null) {
         _hasMoreHistory[chatId] = false;
         shouldNotify = true;
-        return;
+        return 0;
       }
 
       final allLoaded = response.chats;
       if (allLoaded.isEmpty) {
         _hasMoreHistory[chatId] = false;
         shouldNotify = true;
-        return;
+        return 0;
       }
 
       // Sort by id ascending: oldest first → newest last.
@@ -256,19 +266,25 @@ class ChatNotifier with ChangeNotifier {
       if (onlyNew.isNotEmpty) {
         // Prepend older messages at the start (= visual top).
         _messagesByChatId[chatId] = [...onlyNew, ...existing];
+        insertedHistoryCount = onlyNew.length;
       }
 
       // More history exists if server returned a full batch.
       _hasMoreHistory[chatId] = allLoaded.length >= limit;
       _historyLoadCount[chatId] = (limit + batchSize - 1) ~/ batchSize;
       shouldNotify = true;
+      return insertedHistoryCount;
     } catch (_) {
       _hasMoreHistory[chatId] = false;
       shouldNotify = true;
+      return 0;
     } finally {
       _loadingHistoryChats.remove(chatId);
       _historyLoadFutures.remove(chatId);
       if (shouldNotify) {
+        if (insertedHistoryCount > 0) {
+          beforeNotify?.call(insertedHistoryCount);
+        }
         notifyListeners();
       }
     }

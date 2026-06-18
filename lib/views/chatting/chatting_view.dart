@@ -49,6 +49,7 @@ class _ChattingViewState extends State<ChattingView> {
   Map<String, String?> chatIdToCachedMessage = {};
   Map<String, Uint8List?> chatIdToCachedImage = {};
   Map<String, double> chatIdToScrollOffset = {};
+  final Map<String, int> _chatIdToVisibleMessageStart = {};
 
   final ValueNotifier<Message?> inputMessageNotifier = ValueNotifier(null);
   final ValueNotifier<Message?> inputPreMessageNotifier = ValueNotifier(null);
@@ -106,33 +107,22 @@ class _ChattingViewState extends State<ChattingView> {
     final notifier = Provider.of<ChatNotifier>(context, listen: false);
     if (!notifier.hasMoreHistory(chatId)) return;
 
-    final hadClients = scrollController.hasClients;
-    final oldOffset = hadClients ? scrollController.offset : 0.0;
-    final oldExtent = hadClients ? scrollController.position.maxScrollExtent : 0.0;
-
     _preservingHistoryScrollChats.add(chatId);
     try {
-      await notifier.loadMoreHistoryAfterCurrent(chatId);
+      final insertedHistoryCount = await notifier.loadMoreHistoryAfterCurrent(
+        chatId,
+        beforeNotify: (count) {
+          _chatIdToVisibleMessageStart[chatId] =
+              (_chatIdToVisibleMessageStart[chatId] ?? 0) + count;
+        },
+      );
+      if (insertedHistoryCount <= 0) return;
+      if (scrollController.hasClients) {
+        chatIdToScrollOffset[chatId] = scrollController.offset;
+      }
     } finally {
       _preservingHistoryScrollChats.remove(chatId);
     }
-
-    // Jump by the amount of new content added (old content shifted down).
-    // Retry over multiple frames in case ListView hasn't finished laying out
-    // the new items yet.
-    void apply([int retries = 8]) {
-      if (!scrollController.hasClients || !mounted) return;
-      final newExtent = scrollController.position.maxScrollExtent;
-      final added = (newExtent - oldExtent).clamp(0.0, newExtent);
-      if (added > 0 || retries <= 0) {
-        scrollController.jumpTo((oldOffset + added).clamp(0.0, newExtent));
-      }
-      if (retries > 0) {
-        WidgetsBinding.instance.addPostFrameCallback((_) => apply(retries - 1));
-      }
-    }
-
-    WidgetsBinding.instance.addPostFrameCallback((_) => apply());
   }
 
   @override
@@ -260,6 +250,46 @@ class _ChattingViewState extends State<ChattingView> {
                 .copyWith(color: Colors.grey[700]),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildMessageListItem(
+    Chat activeChat,
+    List<Message> messages,
+    int messageIndex,
+  ) {
+    final msg = messages[messageIndex];
+    final showTimeAfter = _shouldShowTimeAfterMessage(messages, messageIndex);
+
+    return Padding(
+      key: ValueKey('message_row_${msg.id}'),
+      padding: const EdgeInsets.only(bottom: 15.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          MessageItem(
+            key: ValueKey(msg.id),
+            message: msg,
+            isMe: msg.userId == getIt<User>().id,
+            preMessage: msg.preMessage,
+            user: _messageMemberOrFallback(activeChat, msg),
+            preMessageNickname: msg.preMessage != null
+                ? _memberNicknameOrFallback(activeChat, msg.preMessage!.userId)
+                : null,
+            replyMessage: (msg) {
+              chatIdToRepliedMessage[msg.conversationId!] = msg;
+              inputPreMessageNotifier.value = msg;
+              Future.delayed(Duration.zero, () {
+                if (focusNode.canRequestFocus) {
+                  focusNode.requestFocus();
+                }
+              });
+            },
+          ),
+          if (showTimeAfter) _buildMessageTimeMarker(context, msg),
+        ],
       ),
     );
   }
@@ -816,55 +846,59 @@ class _ChattingViewState extends State<ChattingView> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Expanded(
-                  child: ListView.builder(
-                    key: ValueKey('chat_$activeChatId'),
-                    controller: scrollController,
-                    addAutomaticKeepAlives: true,
-                    cacheExtent: 5000,
-                    padding: const EdgeInsets.fromLTRB(15, 0, 20, 0),
-                    itemCount: messages.length + 1,
-                    itemBuilder: (context, index) {
-                      if (index == 0) {
-                        return _buildHistoryControl(activeChatId);
-                      }
+                  child: Builder(builder: (context) {
+                    final visibleStart =
+                        ((_chatIdToVisibleMessageStart[activeChatId] ?? 0)
+                                .clamp(0, messages.length))
+                            .toInt();
+                    final centerKey = ValueKey('chat_center_$activeChatId');
 
-                      final messageIndex = index - 1;
-                      final msg = messages[messageIndex];
-                      final showTimeAfter =
-                          _shouldShowTimeAfterMessage(messages, messageIndex);
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 15.0),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            MessageItem(
-                                key: ValueKey(msg.id),
-                                message: msg,
-                                isMe: msg.userId == getIt<User>().id,
-                                preMessage: msg.preMessage,
-                                user: _messageMemberOrFallback(activeChat, msg),
-                                preMessageNickname: msg.preMessage != null
-                                    ? _memberNicknameOrFallback(
-                                        activeChat, msg.preMessage!.userId)
-                                    : null,
-                                replyMessage: (msg) {
-                                  chatIdToRepliedMessage[msg.conversationId!] =
-                                      msg;
-                                  inputPreMessageNotifier.value = msg;
-                                  Future.delayed(Duration.zero, () {
-                                    if (focusNode.canRequestFocus) {
-                                      focusNode.requestFocus();
-                                    }
-                                  });
-                                }),
-                            if (showTimeAfter)
-                              _buildMessageTimeMarker(context, msg),
-                          ],
+                    return CustomScrollView(
+                      key: ValueKey('chat_scroll_$activeChatId'),
+                      controller: scrollController,
+                      center: centerKey,
+                      cacheExtent: 5000,
+                      slivers: [
+                        SliverPadding(
+                          padding: const EdgeInsets.fromLTRB(15, 0, 20, 0),
+                          sliver: SliverList(
+                            delegate: SliverChildBuilderDelegate(
+                              (context, index) {
+                                if (index == visibleStart) {
+                                  return _buildHistoryControl(activeChatId);
+                                }
+
+                                final messageIndex = visibleStart - index - 1;
+                                return _buildMessageListItem(
+                                  activeChat,
+                                  messages,
+                                  messageIndex,
+                                );
+                              },
+                              childCount: visibleStart + 1,
+                            ),
+                          ),
                         ),
-                      );
-                    },
-                  ),
+                        SliverPadding(
+                          key: centerKey,
+                          padding: const EdgeInsets.fromLTRB(15, 0, 20, 0),
+                          sliver: SliverList(
+                            delegate: SliverChildBuilderDelegate(
+                              (context, index) {
+                                final messageIndex = visibleStart + index;
+                                return _buildMessageListItem(
+                                  activeChat,
+                                  messages,
+                                  messageIndex,
+                                );
+                              },
+                              childCount: messages.length - visibleStart,
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  }),
                 ),
                 const Divider(
                   height: 3,
@@ -1265,26 +1299,32 @@ class _ChattingViewState extends State<ChattingView> {
         return Padding(
           padding: const EdgeInsets.fromLTRB(0, 10, 0, 14),
           child: Center(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: OnepieceColors.liteFancyGreen.withValues(alpha: 0.7),
-                borderRadius: BorderRadius.circular(18),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const SizedBox(
-                    width: 14,
-                    height: 14,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+            child: SizedBox(
+              height: 36,
+              child: Center(
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: OnepieceColors.liteFancyGreen.withValues(alpha: 0.7),
+                    borderRadius: BorderRadius.circular(18),
                   ),
-                  const SizedBox(width: 8),
-                  Text(
-                    AppLocalizations.of(context)!.loading,
-                    style: OnepieceFonts.superSmallContentStyle,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        AppLocalizations.of(context)!.loading,
+                        style: OnepieceFonts.superSmallContentStyle,
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
@@ -1295,10 +1335,15 @@ class _ChattingViewState extends State<ChattingView> {
         return Padding(
           padding: const EdgeInsets.fromLTRB(0, 10, 0, 14),
           child: Center(
-            child: Text(
-              AppLocalizations.of(context)!.noEarlierMessages,
-              style: OnepieceFonts.superSmallContentStyle
-                  .copyWith(color: Colors.grey[600]),
+            child: SizedBox(
+              height: 36,
+              child: Center(
+                child: Text(
+                  AppLocalizations.of(context)!.noEarlierMessages,
+                  style: OnepieceFonts.superSmallContentStyle
+                      .copyWith(color: Colors.grey[600]),
+                ),
+              ),
             ),
           ),
         );
@@ -1307,16 +1352,23 @@ class _ChattingViewState extends State<ChattingView> {
       return Padding(
         padding: const EdgeInsets.fromLTRB(0, 10, 0, 14),
         child: Center(
-          child: TextButton.icon(
-            onPressed: () => _loadEarlierMessages(activeChatId),
-            icon: const Icon(Icons.keyboard_arrow_up, size: 18),
-            label: Text(AppLocalizations.of(context)!.loadEarlierMessages),
-            style: TextButton.styleFrom(
-              foregroundColor: OnepieceColors.fancyBlue,
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(18),
-                side: const BorderSide(color: OnepieceColors.liteFancyGreen),
+          child: SizedBox(
+            height: 36,
+            child: Center(
+              child: TextButton.icon(
+                onPressed: () => _loadEarlierMessages(activeChatId),
+                icon: const Icon(Icons.keyboard_arrow_up, size: 18),
+                label: Text(AppLocalizations.of(context)!.loadEarlierMessages),
+                style: TextButton.styleFrom(
+                  foregroundColor: OnepieceColors.fancyBlue,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18),
+                    side:
+                        const BorderSide(color: OnepieceColors.liteFancyGreen),
+                  ),
+                ),
               ),
             ),
           ),
