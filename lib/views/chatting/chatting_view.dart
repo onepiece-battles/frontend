@@ -35,8 +35,65 @@ class ChattingView extends StatefulWidget {
   State<ChattingView> createState() => _ChattingViewState();
 }
 
+class _ChatMessageScrollController extends ScrollController {
+  bool _positionAtBottomDuringLayout = false;
+
+  void beginInitialBottomPositioning() {
+    _positionAtBottomDuringLayout = true;
+  }
+
+  void endInitialBottomPositioning() {
+    _positionAtBottomDuringLayout = false;
+  }
+
+  @override
+  ScrollPosition createScrollPosition(
+    ScrollPhysics physics,
+    ScrollContext context,
+    ScrollPosition? oldPosition,
+  ) {
+    return _ChatMessageScrollPosition(
+      controller: this,
+      physics: physics,
+      context: context,
+      initialPixels: initialScrollOffset,
+      keepScrollOffset: keepScrollOffset,
+      oldPosition: oldPosition,
+      debugLabel: debugLabel,
+    );
+  }
+}
+
+class _ChatMessageScrollPosition extends ScrollPositionWithSingleContext {
+  _ChatMessageScrollPosition({
+    required this.controller,
+    required super.physics,
+    required super.context,
+    super.initialPixels,
+    super.keepScrollOffset,
+    super.oldPosition,
+    super.debugLabel,
+  });
+
+  final _ChatMessageScrollController controller;
+
+  @override
+  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
+    if (controller._positionAtBottomDuringLayout &&
+        hasPixels &&
+        maxScrollExtent > minScrollExtent &&
+        (pixels - maxScrollExtent).abs() >= 0.5) {
+      correctPixels(maxScrollExtent);
+      super.applyContentDimensions(minScrollExtent, maxScrollExtent);
+      return false;
+    }
+    return super.applyContentDimensions(minScrollExtent, maxScrollExtent);
+  }
+}
+
 class _ChattingViewState extends State<ChattingView> {
-  final ScrollController scrollController = ScrollController();
+  final _ChatMessageScrollController scrollController =
+      _ChatMessageScrollController();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   // Controllers
@@ -103,13 +160,23 @@ class _ChattingViewState extends State<ChattingView> {
   }
 
   Future<void> _loadInitialHistoryAndRestoreScroll(String chatId) async {
+    final shouldRestoreSavedOffset = chatIdToScrollOffset.containsKey(chatId);
+    if (!shouldRestoreSavedOffset) {
+      scrollController.beginInitialBottomPositioning();
+    }
     await Provider.of<ChatNotifier>(context, listen: false)
         .ensureHistoryLoaded(chatId);
     if (!mounted || activeConversationId != chatId) return;
-    _restoreScrollForChat(
-      chatId,
-      fallbackToBottom: false,
-    );
+    if (shouldRestoreSavedOffset) {
+      _restoreScrollForChat(chatId, fallbackToBottom: false);
+      return;
+    }
+    await WidgetsBinding.instance.endOfFrame;
+    if (!mounted || activeConversationId != chatId) return;
+    scrollController.endInitialBottomPositioning();
+    if (scrollController.hasClients) {
+      chatIdToScrollOffset[chatId] = scrollController.offset;
+    }
   }
 
   Future<void> _loadEarlierMessages(String chatId) async {
@@ -157,6 +224,7 @@ class _ChattingViewState extends State<ChattingView> {
     activeConversationId = "";
     _lastProcessedChatId = "";
     _previousNewestMessageId = null;
+    scrollController.endInitialBottomPositioning();
     Provider.of<ChatNotifier>(context, listen: false).setActiveChat(null);
     typingController.clear();
     inputPreMessageNotifier.value = null;
