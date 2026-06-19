@@ -116,7 +116,6 @@ class _ChattingViewState extends State<ChattingView> {
   String _lastProcessedChatId = "";
   int _previousMsgCount = 0;
   String? _previousNewestMessageId;
-  Timer? _pendingScroll;
   final Set<String> _preservingHistoryScrollChats = {};
   bool _didSelectInitialChat = false;
   bool _activeChatWasAutoSelected = false;
@@ -168,7 +167,7 @@ class _ChattingViewState extends State<ChattingView> {
         .ensureHistoryLoaded(chatId);
     if (!mounted || activeConversationId != chatId) return;
     if (shouldRestoreSavedOffset) {
-      _restoreScrollForChat(chatId, fallbackToBottom: false);
+      _restoreScrollForChat(chatId);
       return;
     }
     await WidgetsBinding.instance.endOfFrame;
@@ -204,7 +203,6 @@ class _ChattingViewState extends State<ChattingView> {
   @override
   void dispose() {
     _searchTextNotifier.dispose();
-    _pendingScroll?.cancel();
     scrollController.dispose();
     searchChattingController.dispose();
     typingController.dispose();
@@ -237,7 +235,6 @@ class _ChattingViewState extends State<ChattingView> {
       _lastProcessedChatId = activeChatId;
       _previousMsgCount = messages.length;
       _previousNewestMessageId = newestMessageId;
-      _restoreScrollForChat(activeChatId, fallbackToBottom: false);
       return;
     }
     if (messages.length > _previousMsgCount) {
@@ -254,22 +251,19 @@ class _ChattingViewState extends State<ChattingView> {
       if (scrollController.position.maxScrollExtent -
               scrollController.position.pixels <
           500) {
-        _scrollToBottom(0);
+        _scrollToBottom();
       }
     }
   }
 
-  void _restoreScrollForChat(String chatId, {required bool fallbackToBottom}) {
+  void _restoreScrollForChat(String chatId) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!scrollController.hasClients) return;
       final savedOffset = chatIdToScrollOffset[chatId];
+      if (savedOffset == null) return;
+      final minOffset = scrollController.position.minScrollExtent;
       final maxOffset = scrollController.position.maxScrollExtent;
-      final target = savedOffset != null
-          ? savedOffset.clamp(0.0, maxOffset).toDouble()
-          : fallbackToBottom
-              ? maxOffset
-              : null;
-      if (target == null) return;
+      final target = savedOffset.clamp(minOffset, maxOffset).toDouble();
       scrollController.jumpTo(target);
     });
   }
@@ -1124,11 +1118,6 @@ class _ChattingViewState extends State<ChattingView> {
                                       if (focusNode.canRequestFocus) {
                                         focusNode.requestFocus();
                                       }
-                                      _pendingScroll?.cancel();
-                                      if (scrollController.hasClients) {
-                                        scrollController.jumpTo(scrollController
-                                            .position.maxScrollExtent);
-                                      }
                                     });
                                   });
                                 },
@@ -1452,12 +1441,10 @@ class _ChattingViewState extends State<ChattingView> {
   }
 
   /// Scrolls to the bottom of the message list.
-  void _scrollToBottom(int extendValue) {
-    _pendingScroll?.cancel();
-    _pendingScroll = Timer(const Duration(milliseconds: 50), () {
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!scrollController.hasClients) return;
-      scrollController
-          .jumpTo(scrollController.position.maxScrollExtent + extendValue);
+      scrollController.jumpTo(scrollController.position.maxScrollExtent);
     });
   }
 
