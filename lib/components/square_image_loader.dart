@@ -8,12 +8,14 @@ class SquareImageLoader extends StatefulWidget {
   final String Function()? uriProvider;
   final double width;
   final double borderWidth;
+  final bool? fullImage;
 
   const SquareImageLoader({
     Key? key,
     required this.uriProvider,
     required this.width,
     required this.borderWidth,
+    this.fullImage,
   }) : super(key: key);
 
   @override
@@ -26,14 +28,21 @@ class _SquareImageLoaderState extends State<SquareImageLoader> {
   @override
   void initState() {
     super.initState();
-    _imageFuture = ImageCacheManager.getImage(widget.uriProvider!());
+    _imageFuture = ImageCacheManager.getImage(
+      widget.uriProvider!(),
+      fullImage: widget.fullImage,
+    );
   }
 
   @override
   void didUpdateWidget(covariant SquareImageLoader oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.uriProvider!() != oldWidget.uriProvider!()) {
-      _imageFuture = ImageCacheManager.getImage(widget.uriProvider!());
+    if (widget.uriProvider!() != oldWidget.uriProvider!() ||
+        widget.fullImage != oldWidget.fullImage) {
+      _imageFuture = ImageCacheManager.getImage(
+        widget.uriProvider!(),
+        fullImage: widget.fullImage,
+      );
     }
   }
 

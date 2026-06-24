@@ -12,12 +12,15 @@ import 'package:one_piece_battles_flutter/config/resource_permission_manager.dar
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:one_piece_battles_flutter/popup/notification_list.dart';
+import 'package:one_piece_battles_flutter/popup/create_feedback_popup.dart';
+import 'package:one_piece_battles_flutter/popup/onepiece_alert.dart';
 import 'package:one_piece_battles_flutter/popup/search_popup.dart';
 import 'package:one_piece_battles_flutter/popup/user_navigation.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:one_piece_battles_flutter/utils/image_helper.dart';
 import 'package:one_piece_battles_flutter/utils/responsive_breakpoints.dart';
+import 'package:one_piece_battles_flutter/utils/route_notifier.dart';
 import 'package:openapi/api.dart';
 import 'package:string_validator/string_validator.dart';
 
@@ -30,7 +33,6 @@ GetIt getIt = GetIt.instance;
 // --- CONFIGURATION & CONSTANTS ---
 const locales = [Locale('zh', 'CN'), Locale('en', 'US')];
 const List<ResourceType> notShownResources = [ResourceType.ROLE];
-final ValueNotifier<String> routeNotifier = ValueNotifier<String>('/home/abc');
 
 class MenuConfig {
   static const double shrinkLimitWidth = 120;
@@ -315,6 +317,7 @@ class _SideMenuState extends State<SideMenu> {
                   ],
                 ),
               ),
+              _buildFeedbackAction(context, isExpanded),
             ],
           ),
         ),
@@ -354,6 +357,7 @@ class _SideMenuState extends State<SideMenu> {
                   ],
                 ),
               ),
+              _buildFeedbackAction(context, isExpanded),
             ],
           ),
         ),
@@ -587,6 +591,63 @@ class _SideMenuState extends State<SideMenu> {
     );
   }
 
+  Widget _buildFeedbackAction(BuildContext context, bool isExpanded) {
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(8, 6, 8, 8),
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: Tooltip(
+            message: AppLocalizations.of(context)!.feedback,
+            child: Material(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(8),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(8),
+                hoverColor: OnepieceColors.liteFancyBlue,
+                onTap: () => _showFeedbackDialog(context),
+                child: const SizedBox(
+                  width: 42,
+                  height: 42,
+                  child: Icon(
+                    Icons.feedback_outlined,
+                    color: OnepieceColors.fancyBlue,
+                    size: 21,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showFeedbackDialog(BuildContext context) {
+    return showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return Dialog(
+          insetPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: CreateFeedbackPopup(
+            onIssueCreated: (message) {
+              OnepieceAlert.createAlertShower(context)(
+                AppLocalizations.of(context)!.hint,
+                message,
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildMenuItem({
     required BuildContext context,
     required Widget icon,
@@ -687,19 +748,24 @@ class _TopNavigationBarState extends State<TopNavigationBar> {
               if (isMobile)
                 IconButton(
                   icon: const Icon(Icons.menu,
-                      color: OnepieceColors.fancyBlue, size: 26),
+                      color: OnepieceColors.fancyBlue, size: 20),
                   padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
+                  visualDensity: VisualDensity.compact,
+                  constraints:
+                      const BoxConstraints.tightFor(width: 28, height: 32),
                   onPressed: () =>
                       widget.scaffoldKey.currentState?.openDrawer(),
                 ),
-              if (isMobile) const SizedBox(width: 8),
+              if (isMobile) const SizedBox(width: 4),
 
               // Breadcrumbs on the left
               if (isMobile)
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: _buildBreadcrumbs(context),
+                Expanded(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    child: _buildBreadcrumbs(context),
+                  ),
                 )
               else
                 Flexible(
@@ -711,8 +777,7 @@ class _TopNavigationBarState extends State<TopNavigationBar> {
 
               if (!isMobile) const SizedBox(width: 10),
 
-              // Push everything to the right on mobile
-              if (isMobile) const Spacer(),
+              if (isMobile) const SizedBox(width: 8),
 
               // Controls on the right
               if (isMobile)
@@ -739,69 +804,89 @@ class _TopNavigationBarState extends State<TopNavigationBar> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        NotificationList(context: context),
-        const SizedBox(width: 8),
+        NotificationList(context: context, size: 30, iconSize: 18),
+        const SizedBox(width: 4),
         // Language toggle
-        PopupMenuButton<String>(
-          tooltip: AppLocalizations.of(context)!.language,
-          icon: const Icon(Icons.language,
-              color: OnepieceColors.fancyBlue, size: 24),
-          offset: const Offset(0, 40),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          onSelected: (value) {
-            switch (value) {
-              case 'locale_zh':
-                setState(() => _tabTextIndexSelected = 0);
-                MyApp.setLocale(context, const Locale('zh', 'CN'));
-                getIt<UserDao>().updateUser(UpdateUserRequest(
-                    id: getIt<User>().id,
-                    nickname: getIt<User>().nickname,
-                    locale: I18nHelper.convertToOnepieceLocale(
-                        const Locale('zh', 'CN'))));
-                break;
-              case 'locale_en':
-                setState(() => _tabTextIndexSelected = 1);
-                MyApp.setLocale(context, const Locale('en', 'US'));
-                getIt<UserDao>().updateUser(UpdateUserRequest(
-                    id: getIt<User>().id,
-                    nickname: getIt<User>().nickname,
-                    locale: I18nHelper.convertToOnepieceLocale(
-                        const Locale('en', 'US'))));
-                break;
-            }
-          },
-          itemBuilder: (context) => [
-            PopupMenuItem<String>(
-              value: 'locale_zh',
-              child: Row(
-                children: [
-                  const Icon(Icons.language,
-                      size: 18, color: OnepieceColors.fancyBlue),
-                  const SizedBox(width: 8),
-                  Text(_tabTextIndexSelected == 0 ? '✓ 中文' : '  中文',
-                      style: const TextStyle(fontSize: 14)),
-                ],
+        SizedBox(
+          width: 30,
+          height: 30,
+          child: PopupMenuButton<String>(
+            tooltip: AppLocalizations.of(context)!.language,
+            padding: EdgeInsets.zero,
+            iconSize: 20,
+            icon: const Icon(Icons.language, color: OnepieceColors.fancyBlue),
+            offset: const Offset(0, 34),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            onSelected: (value) {
+              switch (value) {
+                case 'locale_zh':
+                  setState(() => _tabTextIndexSelected = 0);
+                  MyApp.setLocale(context, const Locale('zh', 'CN'));
+                  getIt<UserDao>().updateUser(UpdateUserRequest(
+                      id: getIt<User>().id,
+                      nickname: getIt<User>().nickname,
+                      locale: I18nHelper.convertToOnepieceLocale(
+                          const Locale('zh', 'CN'))));
+                  break;
+                case 'locale_en':
+                  setState(() => _tabTextIndexSelected = 1);
+                  MyApp.setLocale(context, const Locale('en', 'US'));
+                  getIt<UserDao>().updateUser(UpdateUserRequest(
+                      id: getIt<User>().id,
+                      nickname: getIt<User>().nickname,
+                      locale: I18nHelper.convertToOnepieceLocale(
+                          const Locale('en', 'US'))));
+                  break;
+              }
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem<String>(
+                value: 'locale_zh',
+                child: Row(
+                  children: [
+                    const Icon(Icons.language,
+                        size: 18, color: OnepieceColors.fancyBlue),
+                    const SizedBox(width: 8),
+                    Text(_tabTextIndexSelected == 0 ? '✓ 中文' : '  中文',
+                        style: const TextStyle(fontSize: 14)),
+                  ],
+                ),
               ),
-            ),
-            PopupMenuItem<String>(
-              value: 'locale_en',
-              child: Row(
-                children: [
-                  const Icon(Icons.language,
-                      size: 18, color: OnepieceColors.fancyBlue),
-                  const SizedBox(width: 8),
-                  Text(_tabTextIndexSelected == 1 ? '✓ English' : '  English',
-                      style: const TextStyle(fontSize: 14)),
-                ],
+              PopupMenuItem<String>(
+                value: 'locale_en',
+                child: Row(
+                  children: [
+                    const Icon(Icons.language,
+                        size: 18, color: OnepieceColors.fancyBlue),
+                    const SizedBox(width: 8),
+                    Text(_tabTextIndexSelected == 1 ? '✓ English' : '  English',
+                        style: const TextStyle(fontSize: 14)),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );
   }
 
   Widget _buildBreadcrumbs(BuildContext context) {
+    final bool isMobile = widget.isMobile;
+    final TextStyle clickableStyle =
+        OnepieceFonts.navigationTopBarStyleClickable.copyWith(
+      fontSize: isMobile ? 12 : 16,
+      decoration: TextDecoration.underline,
+      decorationColor: OnepieceColors.fancyBlue,
+    );
+    final TextStyle currentStyle =
+        OnepieceFonts.navigationTopBarStyleBold.copyWith(
+      fontSize: isMobile ? 12 : 16,
+      decoration: TextDecoration.underline,
+      decorationColor: Colors.black54,
+    );
+
     // Map definitions
     final Map<String, String> routeDisplayName = {
       ResourceType.CHARACTER.toString().toLowerCase():
@@ -836,16 +921,22 @@ class _TopNavigationBarState extends State<TopNavigationBar> {
         // Home Button
         crumbs.add(
           IconButton(
+            visualDensity: isMobile ? VisualDensity.compact : null,
+            padding: EdgeInsets.zero,
+            constraints: BoxConstraints.tightFor(
+              width: isMobile ? 28 : 48,
+              height: isMobile ? 32 : 48,
+            ),
             onPressed: () {
               context.goNamed('userHome',
                   extra: getIt<User>().id,
                   pathParameters: {'name': getIt<User>().nickname});
             },
-            icon: const Icon(
+            icon: Icon(
               Icons.home,
               color: OnepieceColors.fancyBlue,
-              size: 30,
-              shadows: [
+              size: isMobile ? 22 : 30,
+              shadows: const [
                 Shadow(
                     offset: Offset(2.0, 2.0),
                     blurRadius: 3.0,
@@ -867,13 +958,21 @@ class _TopNavigationBarState extends State<TopNavigationBar> {
           }
 
           bool isLast = i == routes.length - 1;
-          crumbs.add(const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 5),
-            child: Icon(Icons.arrow_forward_ios, size: 15),
+          crumbs.add(Padding(
+            padding: EdgeInsets.symmetric(horizontal: isMobile ? 2 : 5),
+            child: Icon(Icons.arrow_forward_ios, size: isMobile ? 10 : 15),
           ));
 
           if (!isLast) {
             crumbs.add(TextButton(
+              style: TextButton.styleFrom(
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                padding: EdgeInsets.symmetric(
+                  horizontal: isMobile ? 3 : 8,
+                  vertical: isMobile ? 2 : 8,
+                ),
+              ),
               onPressed: () {
                 if (Uri.decodeFull(part) == getIt<User>().nickname) {
                   context.goNamed('userHome',
@@ -883,17 +982,16 @@ class _TopNavigationBarState extends State<TopNavigationBar> {
                   context.go("${AppRouter.homePath}/$part");
                 }
               },
-              child: Text(text,
-                  style: OnepieceFonts.navigationTopBarStyleClickable),
+              child: Text(text, style: clickableStyle),
             ));
           } else {
             crumbs.add(Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 5),
-              child: Text(text, style: OnepieceFonts.navigationTopBarStyleBold),
+              padding: EdgeInsets.symmetric(horizontal: isMobile ? 3 : 5),
+              child: Text(text, style: currentStyle),
             ));
           }
         }
-        return Row(children: crumbs);
+        return Row(mainAxisSize: MainAxisSize.min, children: crumbs);
       },
     );
   }

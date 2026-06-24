@@ -8,12 +8,14 @@ class OriginalImageLoader extends StatefulWidget {
   final String Function()? uriProvider;
   final double maxWidth;
   final double maxHeight;
+  final bool? fullImage;
 
   const OriginalImageLoader({
     Key? key,
     required this.uriProvider,
     required this.maxWidth,
     this.maxHeight = 200,
+    this.fullImage,
   }) : super(key: key);
 
   @override
@@ -26,14 +28,21 @@ class _OriginalImageLoaderState extends State<OriginalImageLoader> {
   @override
   void initState() {
     super.initState();
-    _imageFuture = ImageCacheManager.getImage(widget.uriProvider!());
+    _imageFuture = ImageCacheManager.getImage(
+      widget.uriProvider!(),
+      fullImage: widget.fullImage,
+    );
   }
 
   @override
   void didUpdateWidget(covariant OriginalImageLoader oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.uriProvider!() != oldWidget.uriProvider!()) {
-      _imageFuture = ImageCacheManager.getImage(widget.uriProvider!());
+    if (widget.uriProvider!() != oldWidget.uriProvider!() ||
+        widget.fullImage != oldWidget.fullImage) {
+      _imageFuture = ImageCacheManager.getImage(
+        widget.uriProvider!(),
+        fullImage: widget.fullImage,
+      );
     }
   }
 
@@ -45,9 +54,7 @@ class _OriginalImageLoaderState extends State<OriginalImageLoader> {
           if (snapshot.connectionState == ConnectionState.done &&
               snapshot.hasData) {
             return ImageHelper.getOriginalImageFrame(
-                OnepieceColors.liteFancyBlue,
-                snapshot.data!,
-                widget.maxWidth,
+                OnepieceColors.liteFancyBlue, snapshot.data!, widget.maxWidth,
                 maxHeight: widget.maxHeight);
           } else if (snapshot.connectionState == ConnectionState.waiting) {
             // Stable-height placeholder — prevents layout jumps

@@ -10,6 +10,8 @@ class ImageLazyLoader extends StatefulWidget {
   final double width;
   final double borderWidth;
   final double borderRadios;
+  final bool? fullImage;
+
   /// When true, defers image loading until the widget scrolls into the
   /// viewport — drastically reduces initial load burst in data tables.
   final bool lazy;
@@ -20,6 +22,7 @@ class ImageLazyLoader extends StatefulWidget {
     required this.width,
     required this.borderWidth,
     required this.borderRadios,
+    this.fullImage,
     this.lazy = false,
   }) : super(key: key);
 
@@ -44,9 +47,10 @@ class _ImageLazyLoaderState extends State<ImageLazyLoader> {
     super.didUpdateWidget(oldWidget);
     final newUri = widget.uriProvider?.call();
     final oldUri = oldWidget.uriProvider?.call();
-    if (newUri != oldUri && _triggered) {
+    if ((newUri != oldUri || widget.fullImage != oldWidget.fullImage) &&
+        _triggered) {
       _imageFuture = (newUri != null && newUri.isNotEmpty)
-          ? ImageCacheManager.getImage(newUri)
+          ? ImageCacheManager.getImage(newUri, fullImage: widget.fullImage)
           : null;
     }
   }
@@ -56,7 +60,10 @@ class _ImageLazyLoaderState extends State<ImageLazyLoader> {
     _triggered = true;
     final uri = widget.uriProvider?.call();
     if (uri != null && uri.isNotEmpty) {
-      _imageFuture = ImageCacheManager.getImage(uri);
+      _imageFuture = ImageCacheManager.getImage(
+        uri,
+        fullImage: widget.fullImage,
+      );
     }
     if (mounted) setState(() {});
   }
@@ -69,8 +76,8 @@ class _ImageLazyLoaderState extends State<ImageLazyLoader> {
         width: widget.width,
         height: widget.width,
         child: CircularProgressIndicator(
-          valueColor: const AlwaysStoppedAnimation<Color>(
-              OnepieceColors.liteFancyBlue),
+          valueColor:
+              const AlwaysStoppedAnimation<Color>(OnepieceColors.liteFancyBlue),
           strokeWidth: widget.borderWidth,
         ),
       ),
@@ -103,8 +110,7 @@ class _ImageLazyLoaderState extends State<ImageLazyLoader> {
         width: widget.width,
         height: widget.width,
         decoration: BoxDecoration(
-          borderRadius:
-              BorderRadius.all(Radius.circular(widget.borderRadios)),
+          borderRadius: BorderRadius.all(Radius.circular(widget.borderRadios)),
           border: Border.all(
             color: OnepieceColors.liteFancyBlue.withValues(alpha: 0.3),
             width: widget.borderWidth,

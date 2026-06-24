@@ -4,6 +4,7 @@ import 'package:one_piece_battles_flutter/components/original_image_loader.dart'
 import 'package:one_piece_battles_flutter/components/square_image_loader.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
+import 'package:one_piece_battles_flutter/utils/base64_helper.dart';
 import 'package:openapi/api.dart';
 import 'package:popover/popover.dart';
 import '../l10n/app_localizations.dart';
@@ -191,10 +192,7 @@ class MessageItem extends StatelessWidget {
                   if (hasImage)
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8),
-                      child: OriginalImageLoader(
-                          key: ValueKey(message.imageContentUri),
-                          uriProvider: () => message.imageContentUri!,
-                          maxWidth: 200),
+                      child: _buildMessageImage(message.imageContentUri!, 200),
                     ),
                 ],
               ),
@@ -202,6 +200,24 @@ class MessageItem extends StatelessWidget {
           );
         }),
       ),
+    );
+  }
+
+  Widget _buildMessageImage(String imageUri, double maxWidth) {
+    if (imageUri.startsWith('data:image')) {
+      final base64Data = imageUri.split(',').last;
+      return Image.memory(
+        Base64Helper.decode(base64Data),
+        fit: BoxFit.contain,
+        width: maxWidth,
+        errorBuilder: (_, __, ___) => const Icon(Icons.broken_image),
+      );
+    }
+
+    return OriginalImageLoader(
+      key: ValueKey(imageUri),
+      uriProvider: () => imageUri,
+      maxWidth: maxWidth,
     );
   }
 
@@ -227,11 +243,7 @@ class MessageItem extends StatelessWidget {
                 style: const TextStyle(fontSize: 10, color: Colors.white),
               ),
             if (preMessage!.imageContentUri != null)
-              OriginalImageLoader(
-                key: ValueKey(preMessage!.imageContentUri),
-                uriProvider: () => preMessage!.imageContentUri!,
-                maxWidth: 100,
-              )
+              _buildMessageImage(preMessage!.imageContentUri!, 100)
           ],
         ));
   }

@@ -396,7 +396,9 @@ class _LoginPageState extends State<LoginPage> {
         ApiInitializer.initAuthInfo(response.accessToken!);
         ResourcePermissionManager.updateUserCache(response.user!);
         router.goNamed('characters');
-        context.read<WebSocketService>().connect(response.user!.id);
+        context
+            .read<WebSocketService>()
+            .connect(response.user!.id, response.accessToken!);
         return;
       }
       final verification = response.verification!;
@@ -438,7 +440,9 @@ class _LoginPageState extends State<LoginPage> {
         ApiInitializer.initAuthInfo(loginResponse.accessToken!);
         ResourcePermissionManager.updateUserCache(loginResponse.user!);
         router.goNamed('characters');
-        context.read<WebSocketService>().connect(loginResponse.user!.id);
+        context
+            .read<WebSocketService>()
+            .connect(loginResponse.user!.id, loginResponse.accessToken!);
       } else {
         setState(() {
           verificationI18n = loginResponse.verification;

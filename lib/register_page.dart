@@ -443,7 +443,9 @@ class _RegisterPageState extends State<RegisterPage> {
           usernameController.text, passwordController.text);
       if (!mounted) return; // ensure widget still in tree before using context
       router.goNamed('characters');
-      context.read<WebSocketService>().connect(value.user!.id);
+      context
+          .read<WebSocketService>()
+          .connect(value.user!.id, value.accessToken!);
     } catch (e, st) {
       debugPrint('Login after register failed: $e\n$st');
       if (!mounted) return;

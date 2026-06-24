@@ -968,79 +968,151 @@ class _ChattingViewState extends State<ChattingView> {
                     );
                   }),
                 ),
-                const Divider(
-                  height: 3,
-                  thickness: 1,
-                  color: OnepieceColors.liteFancyGreen,
-                ),
+                if (!isMobile)
+                  const Divider(
+                    height: 3,
+                    thickness: 1,
+                    color: OnepieceColors.liteFancyGreen,
+                  ),
                 StatefulBuilder(
                   builder: (BuildContext context, StateSetter buttonState) {
                     return ValueListenableBuilder<TextEditingValue>(
                       valueListenable: typingController,
                       builder: (context, textValue, child) {
+                        Future<void> pickImage() async {
+                          final XFile? pickedImage =
+                              await OnepieceImagePicker.pickWebImage();
+
+                          if (!context.mounted || pickedImage == null) {
+                            return;
+                          }
+
+                          chatIdToCachedImage[activeChatId] =
+                              await pickedImage.readAsBytes();
+                          buttonState(() {});
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            if (focusNode.canRequestFocus) {
+                              focusNode.requestFocus();
+                            }
+                          });
+                        }
+
                         return Column(
                           mainAxisAlignment: MainAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                EmojiSelection(
-                                  editingController: typingController,
-                                  focusNode: focusNode,
-                                ),
-                                IconButton(
-                                  onPressed: () async {
-                                    final XFile? pickedImage =
-                                        await OnepieceImagePicker
-                                            .pickWebImage();
-
-                                    if (!context.mounted ||
-                                        pickedImage == null) {
-                                      return;
-                                    }
-
-                                    chatIdToCachedImage[activeChatId] =
-                                        await pickedImage.readAsBytes();
-                                    buttonState(() {});
-                                    // Auto-focus the typing area so the user
-                                    // can start typing a caption immediately.
-                                    WidgetsBinding.instance
-                                        .addPostFrameCallback((_) {
-                                      if (focusNode.canRequestFocus) {
-                                        focusNode.requestFocus();
-                                      }
-                                    });
-                                  },
-                                  padding: EdgeInsets.zero,
-                                  splashColor: Colors.transparent,
-                                  highlightColor: Colors.transparent,
-                                  hoverColor: Colors.transparent,
-                                  focusColor: Colors.transparent,
-                                  splashRadius: 0.1,
-                                  visualDensity: VisualDensity.compact,
-                                  enableFeedback: false,
-                                  icon: const Icon(
-                                    Icons.image,
-                                    size: 20,
-                                    color: OnepieceColors.fancyBlue,
+                            if (!isMobile)
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  EmojiSelection(
+                                    editingController: typingController,
+                                    focusNode: focusNode,
                                   ),
-                                )
-                              ],
-                            ),
+                                  IconButton(
+                                    onPressed: pickImage,
+                                    padding: EdgeInsets.zero,
+                                    splashColor: Colors.transparent,
+                                    highlightColor: Colors.transparent,
+                                    hoverColor: Colors.transparent,
+                                    focusColor: Colors.transparent,
+                                    splashRadius: 0.1,
+                                    visualDensity: VisualDensity.compact,
+                                    enableFeedback: false,
+                                    icon: const Icon(
+                                      Icons.image,
+                                      size: 20,
+                                      color: OnepieceColors.fancyBlue,
+                                    ),
+                                  )
+                                ],
+                              ),
                             // ── Image preview + typing area ──────────────────────
                             Builder(builder: (ctx) {
                               final hasImage =
                                   chatIdToCachedImage[activeChatId] != null;
+                              final canSend =
+                                  typingController.text.trim().isNotEmpty ||
+                                      hasImage;
+
+                              void sendCurrentMessage() {
+                                buttonState(() {
+                                  final hasText =
+                                      typingController.text.trim().isNotEmpty;
+                                  final hasImage =
+                                      chatIdToCachedImage[activeChatId] != null;
+                                  if (!hasText && !hasImage) return;
+                                  final encodedImage = hasImage
+                                      ? Base64Helper.encode(
+                                          chatIdToCachedImage[activeChatId]!)
+                                      : null;
+
+                                  final SendMessageRequest request =
+                                      SendMessageRequest(
+                                    content: hasText
+                                        ? typingController.text.trim()
+                                        : null,
+                                    userId: getIt<User>().id,
+                                    profileImage: encodedImage,
+                                    conversationId: activeChat.id!,
+                                    type: MessageType.SEND_MESSAGE,
+                                    preMessageId:
+                                        inputPreMessageNotifier.value?.id,
+                                  );
+
+                                  if (hasText || hasImage) {
+                                    Provider.of<ChatNotifier>(context,
+                                            listen: false)
+                                        .addOptimisticMessage(Message(
+                                      id: 'opt_${DateTime.now().millisecondsSinceEpoch}',
+                                      userId: getIt<User>().id,
+                                      conversationId: activeChat.id!,
+                                      content: hasText
+                                          ? typingController.text.trim()
+                                          : null,
+                                      imageContentUri: encodedImage == null
+                                          ? null
+                                          : 'data:image;base64,$encodedImage',
+                                      creationRecord: ActionRecord(
+                                        actionTimestamp: DateTime.now()
+                                            .millisecondsSinceEpoch,
+                                        nickname: getIt<User>().nickname,
+                                      ),
+                                      preMessageId:
+                                          inputPreMessageNotifier.value?.id,
+                                      preMessage: inputPreMessageNotifier.value,
+                                    ));
+                                  }
+
+                                  final String jsonMessage =
+                                      jsonEncode(request.toJson());
+                                  Provider.of<ChatNotifier>(context,
+                                          listen: false)
+                                      .sendChatMessage(jsonMessage);
+
+                                  chatIdToCachedImage[activeChatId] = null;
+                                  chatIdToRepliedMessage[activeChatId] = null;
+                                  chatIdToCachedMessage[activeChatId] = null;
+                                  inputPreMessageNotifier.value = null;
+                                  typingController.clear();
+
+                                  WidgetsBinding.instance
+                                      .addPostFrameCallback((_) {
+                                    if (focusNode.canRequestFocus) {
+                                      focusNode.requestFocus();
+                                    }
+                                  });
+                                });
+                              }
 
                               // Shared TextField used in both layouts
                               final typingField = TextField(
                                 controller: typingController,
                                 enabled: true,
                                 textAlign: TextAlign.start,
-                                minLines: isMobile ? 1 : 5,
-                                maxLines: isMobile ? 1 : null,
+                                minLines: isMobile ? 1 : 6,
+                                maxLines: isMobile ? 4 : null,
                                 keyboardType: TextInputType.multiline,
                                 textInputAction: TextInputAction.send,
                                 autofocus: true,
@@ -1048,92 +1120,63 @@ class _ChattingViewState extends State<ChattingView> {
                                 focusNode: focusNode,
                                 style: OnepieceFonts.smallContentStyle,
                                 onChanged: (value) {},
-                                onSubmitted: (_) {
-                                  buttonState(() {
-                                    final hasText =
-                                        typingController.text.trim().isNotEmpty;
-                                    final hasImage =
-                                        chatIdToCachedImage[activeChatId] !=
-                                            null;
-                                    // Guard: nothing to send
-                                    if (!hasText && !hasImage) return;
-
-                                    final SendMessageRequest request =
-                                        SendMessageRequest(
-                                      content: hasText
-                                          ? typingController.text.trim()
-                                          : null,
-                                      userId: getIt<User>().id,
-                                      profileImage:
-                                          chatIdToCachedImage[activeChatId] ==
-                                                  null
-                                              ? null
-                                              : Base64Helper.encode(
-                                                  chatIdToCachedImage[
-                                                      activeChatId]!),
-                                      conversationId: activeChat.id!,
-                                      type: MessageType.SEND_MESSAGE,
-                                      preMessageId:
-                                          inputPreMessageNotifier.value?.id,
-                                    );
-
-                                    // Only optimistic for text-only
-                                    // messages.  Text+image waits for
-                                    // the server echo so the image URI
-                                    // is included.
-                                    if (hasText && !hasImage) {
-                                      Provider.of<ChatNotifier>(context,
-                                              listen: false)
-                                          .addOptimisticMessage(Message(
-                                        id: 'opt_${DateTime.now().millisecondsSinceEpoch}',
-                                        userId: getIt<User>().id,
-                                        conversationId: activeChat.id!,
-                                        content: typingController.text.trim(),
-                                        creationRecord: ActionRecord(
-                                          actionTimestamp: DateTime.now()
-                                              .millisecondsSinceEpoch,
-                                          nickname: getIt<User>().nickname,
-                                        ),
-                                        preMessageId:
-                                            inputPreMessageNotifier.value?.id,
-                                        preMessage:
-                                            inputPreMessageNotifier.value,
-                                      ));
-                                    }
-
-                                    final String jsonMessage =
-                                        jsonEncode(request.toJson());
-                                    Provider.of<ChatNotifier>(context,
-                                            listen: false)
-                                        .sendChatMessage(jsonMessage);
-
-                                    chatIdToCachedImage[activeChatId] = null;
-                                    chatIdToRepliedMessage[activeChatId] = null;
-                                    chatIdToCachedMessage[activeChatId] = null;
-                                    inputPreMessageNotifier.value = null;
-                                    typingController.clear();
-
-                                    WidgetsBinding.instance
-                                        .addPostFrameCallback((_) {
-                                      if (focusNode.canRequestFocus) {
-                                        focusNode.requestFocus();
-                                      }
-                                    });
-                                  });
-                                },
-                                decoration: const InputDecoration(
+                                onSubmitted: (_) => sendCurrentMessage(),
+                                decoration: InputDecoration(
+                                  filled: isMobile,
+                                  fillColor: Colors.white,
+                                  focusColor: Colors.white,
+                                  hoverColor: Colors.white,
                                   contentPadding: EdgeInsets.symmetric(
-                                      horizontal: 10, vertical: 0),
+                                    horizontal: isMobile ? 14 : 10,
+                                    vertical: isMobile ? 9 : 0,
+                                  ),
                                   isDense: true,
                                   labelStyle: OnepieceFonts.dropDownItemStyle,
                                   floatingLabelBehavior:
                                       FloatingLabelBehavior.never,
-                                  border: InputBorder.none,
-                                  focusedBorder: InputBorder.none,
-                                  disabledBorder: InputBorder.none,
-                                  enabledBorder: InputBorder.none,
+                                  border: isMobile
+                                      ? OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          borderSide: BorderSide.none,
+                                        )
+                                      : InputBorder.none,
+                                  focusedBorder: isMobile
+                                      ? OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          borderSide: BorderSide.none,
+                                        )
+                                      : InputBorder.none,
+                                  disabledBorder: isMobile
+                                      ? OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          borderSide: BorderSide.none,
+                                        )
+                                      : InputBorder.none,
+                                  enabledBorder: isMobile
+                                      ? OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          borderSide: BorderSide.none,
+                                        )
+                                      : InputBorder.none,
                                 ),
                               );
+                              final typingBox = isMobile
+                                  ? ConstrainedBox(
+                                      constraints: const BoxConstraints(
+                                        minHeight: 38,
+                                        maxHeight: 126,
+                                      ),
+                                      child: typingField,
+                                    )
+                                  : SizedBox(
+                                      height: 80,
+                                      width: double.infinity,
+                                      child: typingField,
+                                    );
 
                               if (hasImage && !isMobile) {
                                 // Desktop: image on left, typing on right
@@ -1200,13 +1243,193 @@ class _ChattingViewState extends State<ChattingView> {
                                       ),
                                       const SizedBox(width: 10),
                                       // ── Typing area ────────
-                                      Expanded(child: typingField),
+                                      Expanded(child: typingBox),
                                     ],
                                   ),
                                 );
                               }
 
                               // Mobile / no-image: full-width typing field
+                              if (isMobile) {
+                                return Container(
+                                  width: double.infinity,
+                                  padding:
+                                      const EdgeInsets.fromLTRB(6, 6, 6, 8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade100,
+                                    border: Border(
+                                      top: BorderSide(
+                                        color: Colors.grey.shade300,
+                                        width: 0.5,
+                                      ),
+                                    ),
+                                  ),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      if (hasImage)
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(bottom: 8),
+                                          child: Align(
+                                            alignment: Alignment.centerLeft,
+                                            child: Stack(
+                                              alignment:
+                                                  AlignmentDirectional.topStart,
+                                              children: [
+                                                ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                  child: ImageHelper
+                                                      .getSquareImageFrame(
+                                                    50,
+                                                    50,
+                                                    2,
+                                                    Colors.white,
+                                                    chatIdToCachedImage[
+                                                        activeChatId]!,
+                                                  ),
+                                                ),
+                                                Positioned(
+                                                  right: -2,
+                                                  top: -2,
+                                                  child: InkWell(
+                                                    onTap: () {
+                                                      chatIdToCachedImage[
+                                                          activeChatId] = null;
+                                                      buttonState(() {});
+                                                    },
+                                                    child: const CircleAvatar(
+                                                      backgroundColor:
+                                                          Colors.black54,
+                                                      radius: 8,
+                                                      child: Icon(
+                                                        Icons.close,
+                                                        size: 8,
+                                                        color: Colors.white,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
+                                        children: [
+                                          SizedBox(
+                                            width: 36,
+                                            height: 38,
+                                            child: DecoratedBox(
+                                              decoration: BoxDecoration(
+                                                color: Colors.white,
+                                                shape: BoxShape.circle,
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: Colors.black
+                                                        .withValues(
+                                                            alpha: 0.04),
+                                                    blurRadius: 4,
+                                                    offset: const Offset(0, 1),
+                                                  ),
+                                                ],
+                                              ),
+                                              child: EmojiSelection(
+                                                editingController:
+                                                    typingController,
+                                                focusNode: focusNode,
+                                                iconColor:
+                                                    const Color(0xFF4A4A4A),
+                                                iconSize: 22,
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Expanded(child: typingBox),
+                                          const SizedBox(width: 4),
+                                          SizedBox(
+                                            width: canSend ? 52 : 36,
+                                            height: 38,
+                                            child: canSend
+                                                ? ElevatedButton(
+                                                    onPressed:
+                                                        sendCurrentMessage,
+                                                    style: ElevatedButton
+                                                        .styleFrom(
+                                                      backgroundColor:
+                                                          OnepieceColors
+                                                              .fancyBlue,
+                                                      foregroundColor:
+                                                          Colors.white,
+                                                      elevation: 0,
+                                                      padding: EdgeInsets.zero,
+                                                      shape:
+                                                          RoundedRectangleBorder(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(8),
+                                                      ),
+                                                    ),
+                                                    child: Text(
+                                                      AppLocalizations.of(
+                                                              context)!
+                                                          .send,
+                                                      style: const TextStyle(
+                                                        fontSize: 12,
+                                                        fontWeight:
+                                                            FontWeight.w700,
+                                                      ),
+                                                    ),
+                                                  )
+                                                : DecoratedBox(
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.white,
+                                                      shape: BoxShape.circle,
+                                                      boxShadow: [
+                                                        BoxShadow(
+                                                          color: Colors.black
+                                                              .withValues(
+                                                                  alpha: 0.04),
+                                                          blurRadius: 4,
+                                                          offset: const Offset(
+                                                              0, 1),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    child: IconButton(
+                                                      onPressed: pickImage,
+                                                      padding: EdgeInsets.zero,
+                                                      splashColor:
+                                                          Colors.transparent,
+                                                      highlightColor:
+                                                          Colors.transparent,
+                                                      hoverColor:
+                                                          Colors.transparent,
+                                                      focusColor:
+                                                          Colors.transparent,
+                                                      splashRadius: 0.1,
+                                                      visualDensity:
+                                                          VisualDensity.compact,
+                                                      enableFeedback: false,
+                                                      icon: const Icon(
+                                                        Icons
+                                                            .add_photo_alternate_outlined,
+                                                        size: 22,
+                                                        color:
+                                                            Color(0xFF4A4A4A),
+                                                      ),
+                                                    ),
+                                                  ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }
+
                               return Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
@@ -1251,7 +1474,7 @@ class _ChattingViewState extends State<ChattingView> {
                                         ],
                                       ),
                                     ),
-                                  typingField,
+                                  typingBox,
                                 ],
                               );
                             }),

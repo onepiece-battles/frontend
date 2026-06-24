@@ -19,6 +19,7 @@ import '../../utils/i18n_helper.dart';
 import '../../utils/image_helper.dart';
 import '../../utils/nested_scroll_helper.dart';
 import '../../utils/responsive_breakpoints.dart';
+import '../../utils/route_notifier.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -121,15 +122,24 @@ class _CharacterViewState extends State<CharacterView>
   @override
   void initState() {
     super.initState();
+    routeNotifier.addListener(_refreshWhenListRouteIsActive);
     _search(false);
   }
 
   @override
   void dispose() {
+    routeNotifier.removeListener(_refreshWhenListRouteIsActive);
     searchNameController.dispose();
     scrollController.dispose();
     tableController.dispose();
     super.dispose();
+  }
+
+  void _refreshWhenListRouteIsActive() {
+    if (routeNotifier.value ==
+        '/home/${ResourceType.CHARACTER.toString().toLowerCase()}') {
+      _search(false);
+    }
   }
 
   void _search(bool filterChange) {

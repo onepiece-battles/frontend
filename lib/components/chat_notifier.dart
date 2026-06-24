@@ -88,6 +88,8 @@ class ChatNotifier with ChangeNotifier {
   // ── Message handler ─────────────────────────────────────────────────────
 
   void _handleIncomingMessage(Message message) {
+    if (_replaceNewestOptimisticImage(message)) return;
+
     // Dedup: if we optimistically added this message already, skip the echo.
     if (_isDuplicate(message)) return;
 
@@ -102,12 +104,23 @@ class ChatNotifier with ChangeNotifier {
 
   void _insertMessage(Message message) {
     final String conversationId = message.conversationId!;
+    _insertMessageWithoutNotify(message);
 
+    // Move chat to top of sidebar with new message preview
+    _promoteChatWithMessage(conversationId, message);
+
+    // Single notify — both message panel and sidebar update in one frame.
+    notifyListeners();
+  }
+
+  void _insertMessageWithoutNotify(Message message) {
+    final String conversationId = message.conversationId!;
     // Append — newest message at visual bottom.
     final List<Message> existing = _messagesByChatId[conversationId] ?? [];
     _messagesByChatId[conversationId] = [...existing, message];
+  }
 
-    // Move chat to top of sidebar with new message preview
+  void _promoteChatWithMessage(String conversationId, Message message) {
     final int index = _chats.indexWhere((e) => e.id == conversationId);
     if (index > 0) {
       final List<Chat> newChats = List<Chat>.from(_chats);
@@ -119,9 +132,6 @@ class ChatNotifier with ChangeNotifier {
       _chats[0].message = message;
     }
     _chatListVersion++;
-
-    // Single notify — both message panel and sidebar update in one frame.
-    notifyListeners();
   }
 
   /// Returns true if [message] is already the last message in its
@@ -139,7 +149,62 @@ class ChatNotifier with ChangeNotifier {
                 newest.imageContentUri == message.imageContentUri);
   }
 
+  bool _replaceNewestOptimisticImage(
+    Message message, {
+    bool notify = true,
+    bool promoteChat = true,
+  }) {
+    final incomingImageUri = message.imageContentUri;
+    final conversationId = message.conversationId;
+    if (incomingImageUri == null ||
+        incomingImageUri.startsWith('data:image') ||
+        conversationId == null) {
+      return false;
+    }
+
+    final existing = _messagesByChatId[conversationId] ?? [];
+    for (var i = existing.length - 1; i >= 0; i--) {
+      final current = existing[i];
+      final currentImageUri = current.imageContentUri;
+      final sameSender = current.userId == message.userId;
+      final sameContent = (current.content ?? '') == (message.content ?? '');
+      final isOptimisticImage = (current.id ?? '').startsWith('opt_') &&
+          currentImageUri != null &&
+          currentImageUri.startsWith('data:image');
+
+      if (sameSender && sameContent && isOptimisticImage) {
+        final updated = List<Message>.from(existing);
+        updated[i] = message;
+        _messagesByChatId[conversationId] = updated;
+        if (promoteChat) {
+          _promoteChatWithMessage(conversationId, message);
+        }
+        if (notify) {
+          notifyListeners();
+        }
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   void _handleChatUpdate(Chat update) {
+    final latestMessage = update.message;
+    if (latestMessage != null) {
+      latestMessage.conversationId ??= update.id;
+    }
+    if (latestMessage != null &&
+        latestMessage.conversationId != null &&
+        !_replaceNewestOptimisticImage(
+          latestMessage,
+          notify: false,
+          promoteChat: false,
+        ) &&
+        !_isDuplicate(latestMessage)) {
+      _insertMessageWithoutNotify(latestMessage);
+    }
+
     // New list: old duplicate removed, update inserted at top
     final List<Chat> newChats = List<Chat>.from(_chats);
     newChats.removeWhere((e) => e.id == update.id);

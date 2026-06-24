@@ -43,33 +43,37 @@ class ImageCacheManager {
   /// Cache hits bump the entry to the MRU end so it won't be evicted soon.
   /// Cache misses are fetched, decoded, and inserted — evicting LRU entries
   /// first when the cache exceeds [_maxEntries] or [_maxMemoryBytes].
-  static Future<Uint8List> getImage(String uri) async {
+  static Future<Uint8List> getImage(String uri, {bool? fullImage}) async {
+    final cacheKey = _cacheKey(uri, fullImage);
+
     // ── Cache hit: bump to MRU end ──────────────────────────────────────
-    if (_cache.containsKey(uri)) {
-      final data = _cache.remove(uri)!;
-      _cache[uri] = data;
+    if (_cache.containsKey(cacheKey)) {
+      final data = _cache.remove(cacheKey)!;
+      _cache[cacheKey] = data;
       return data;
     }
 
     // ── Cache miss: fetch, decode, insert ───────────────────────────────
-    final String image = await ImageHelper.loadImageByUri(uri);
+    final String image =
+        await ImageHelper.loadImageByUri(uri, fullImage: fullImage);
     final Uint8List decodedImage = Base64Helper.decode(image);
 
     _evictIfNeeded(decodedImage.length);
 
-    _cache[uri] = decodedImage;
-    _entrySizes[uri] = decodedImage.length;
+    _cache[cacheKey] = decodedImage;
+    _entrySizes[cacheKey] = decodedImage.length;
     _totalMemoryBytes += decodedImage.length;
 
     return decodedImage;
   }
 
   /// Remove a single entry from the cache.
-  static void remove(String uri) {
-    final removed = _cache.remove(uri);
+  static void remove(String uri, {bool? fullImage}) {
+    final cacheKey = _cacheKey(uri, fullImage);
+    final removed = _cache.remove(cacheKey);
     if (removed != null) {
-      _totalMemoryBytes -= (_entrySizes[uri] ?? 0);
-      _entrySizes.remove(uri);
+      _totalMemoryBytes -= (_entrySizes[cacheKey] ?? 0);
+      _entrySizes.remove(cacheKey);
     }
   }
 
@@ -100,4 +104,7 @@ class ImageCacheManager {
       }
     }
   }
+
+  static String _cacheKey(String uri, bool? fullImage) =>
+      '${fullImage == true ? 'full' : 'default'}:$uri';
 }

@@ -24,6 +24,7 @@ import 'package:one_piece_battles_flutter/views/user/user_view.dart';
 import 'package:one_piece_battles_flutter/register_page.dart';
 import 'package:one_piece_battles_flutter/login_page.dart';
 import 'package:one_piece_battles_flutter/home_page.dart';
+import 'package:one_piece_battles_flutter/utils/route_notifier.dart';
 import 'package:openapi/api.dart';
 
 GetIt getIt = GetIt.instance;

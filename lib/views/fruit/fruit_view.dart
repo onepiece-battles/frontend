@@ -17,6 +17,7 @@ import '../../utils/responsive_breakpoints.dart';
 import '../../utils/image_helper.dart';
 import '../../utils/nested_scroll_helper.dart';
 import '../../utils/permission_check.dart';
+import '../../utils/route_notifier.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -65,15 +66,24 @@ class _FruitViewState extends State<FruitView> {
   @override
   void initState() {
     super.initState();
+    routeNotifier.addListener(_refreshWhenListRouteIsActive);
     _search(false);
   }
 
   @override
   void dispose() {
+    routeNotifier.removeListener(_refreshWhenListRouteIsActive);
     searchNameController.dispose();
     mainController.dispose();
     tableController.dispose();
     super.dispose();
+  }
+
+  void _refreshWhenListRouteIsActive() {
+    if (routeNotifier.value ==
+        '/home/${ResourceType.FRUIT.toString().toLowerCase()}') {
+      _search(false);
+    }
   }
 
   void _search(bool filterChange) {

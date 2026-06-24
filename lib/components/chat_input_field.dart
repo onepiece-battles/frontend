@@ -24,7 +24,7 @@ class ChatInputField extends StatefulWidget {
     super.key,
     required this.webSocketManager,
     required this.selectedChatNotifier,
-    this.minLines = 1,
+    this.minLines = 2,
     this.maxLines = 5,
     required this.textEditingController,
     this.padding = const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
@@ -87,7 +87,7 @@ class _ChatInputFieldState extends State<ChatInputField> {
         children: [
           Expanded(
             child: SizedBox(
-              height: 40,
+              height: 80,
               width: 200,
               child: TextField(
                 controller: textEditingController,

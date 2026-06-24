@@ -34,8 +34,9 @@ class ImageHelper {
     );
   }
 
-  static Widget getOriginalImageFrame(Color borderColor,
-      Uint8List imageData, double maxWidth, {double maxHeight = 200}) {
+  static Widget getOriginalImageFrame(
+      Color borderColor, Uint8List imageData, double maxWidth,
+      {double maxHeight = 200}) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
       child: ConstrainedBox(
@@ -51,7 +52,6 @@ class ImageHelper {
       ),
     );
   }
-
 
   static Widget getRoundImageFrame(
       double width,
@@ -118,9 +118,8 @@ class ImageHelper {
       String svgPath, double width, double height, Color? color) {
     return SvgPicture.asset(
       "asset/$svgPath",
-      colorFilter: color != null
-          ? ColorFilter.mode(color, BlendMode.srcIn)
-          : null,
+      colorFilter:
+          color != null ? ColorFilter.mode(color, BlendMode.srcIn) : null,
       width: width,
       height: height,
     );
@@ -146,9 +145,9 @@ class ImageHelper {
     );
   }
 
-  static Future<String> loadImageByUri(String uri) async {
+  static Future<String> loadImageByUri(String uri, {bool? fullImage}) async {
     return await getIt<ImageDao>()
-        .getImage(GetImageRequest(uri: uri))
+        .getImage(GetImageRequest(uri: uri, fullImage: fullImage))
         .then((value) {
       return value!.image;
     });

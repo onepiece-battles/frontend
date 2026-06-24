@@ -17,6 +17,7 @@ import '../../utils/responsive_breakpoints.dart';
 import '../../utils/image_helper.dart';
 import '../../utils/nested_scroll_helper.dart';
 import '../../utils/permission_check.dart';
+import '../../utils/route_notifier.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -64,17 +65,26 @@ class _GroupViewState extends State<GroupView> {
   @override
   void initState() {
     super.initState();
+    routeNotifier.addListener(_refreshWhenListRouteIsActive);
     _search(false);
   }
 
   @override
   void dispose() {
+    routeNotifier.removeListener(_refreshWhenListRouteIsActive);
     scrollController.dispose();
     horizontalController.dispose();
     mainController.dispose();
     tableController.dispose();
     searchNameController.dispose();
     super.dispose();
+  }
+
+  void _refreshWhenListRouteIsActive() {
+    if (routeNotifier.value ==
+        '/home/${ResourceType.GROUP.toString().toLowerCase()}') {
+      _search(false);
+    }
   }
 
   void _search(bool filterChange) {

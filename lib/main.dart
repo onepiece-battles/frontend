@@ -62,10 +62,10 @@ void main() {
   web.document.head?.appendChild(styleElement);
   configureApp();
   getItSetUp();
-  final webSocketService = WebSocketService(); // Replace with your URL
+  final webSocketService = getIt<WebSocketService>();
   runApp(
     MultiProvider(providers: [
-      Provider<WebSocketService>(create: (_) => webSocketService),
+      Provider<WebSocketService>.value(value: webSocketService),
       ChangeNotifierProvider<ChatNotifier>(
         create: (context) => ChatNotifier(
           context.read<WebSocketService>(),
@@ -99,12 +99,11 @@ class MyCustomScrollBehavior extends MaterialScrollBehavior {
 
   @override
   Set<PointerDeviceKind> get dragDevices => {
-    PointerDeviceKind.touch,
-    PointerDeviceKind.mouse,
-    PointerDeviceKind.stylus,
-    PointerDeviceKind.trackpad,
-  };
-
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.stylus,
+        PointerDeviceKind.trackpad,
+      };
 }
 
 class _MyAppState extends State<MyApp> {
@@ -135,14 +134,15 @@ class _MyAppState extends State<MyApp> {
       theme: ThemeData(
         // Use system fonts that are guaranteed to be available instantly —
         // no network-dependent Google Fonts CDN loading.
-        fontFamily:
-            getIt<Locale>().languageCode == "en" ? '.AppleSystemUIFont' : 'PingFang SC',
+        fontFamily: getIt<Locale>().languageCode == "en"
+            ? '.AppleSystemUIFont'
+            : 'PingFang SC',
         fontFamilyFallback: const [
-          'PingFang SC',          // macOS / iOS Chinese
-          'Microsoft YaHei',      // Windows Chinese
-          'Hiragino Sans GB',     // older macOS
-          'STHeiti',              // macOS fallback
-          'Heiti SC',             // macOS fallback
+          'PingFang SC', // macOS / iOS Chinese
+          'Microsoft YaHei', // Windows Chinese
+          'Hiragino Sans GB', // older macOS
+          'STHeiti', // macOS fallback
+          'Heiti SC', // macOS fallback
           'sans-serif',
         ],
         inputDecorationTheme: MyInputTheme().theme(),

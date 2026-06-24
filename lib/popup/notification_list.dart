@@ -19,11 +19,15 @@ GetIt getIt = GetIt.instance;
 
 class NotificationList extends StatefulWidget {
   final VoidCallback? onRefresh;
+  final double size;
+  final double iconSize;
 
   const NotificationList({
     super.key,
     required BuildContext context,
     this.onRefresh,
+    this.size = 38,
+    this.iconSize = 22,
   });
 
   @override
@@ -84,8 +88,8 @@ class _NotificationListState extends State<NotificationList> {
         hoverColor: OnepieceColors.liteFancyBlue.withValues(alpha: 0.35),
         onTap: () => _showNotificationMenu(buttonContext),
         child: Container(
-          width: 38,
-          height: 38,
+          width: widget.size,
+          height: widget.size,
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(8),
@@ -103,16 +107,16 @@ class _NotificationListState extends State<NotificationList> {
             children: [
               ImageHelper.getSvgIcon(
                 'images/svgs/notification_false.svg',
-                22,
-                22,
+                widget.iconSize,
+                widget.iconSize,
               ),
               if (_internalNotifications.isNotEmpty)
                 Positioned(
-                  right: 5,
-                  top: 5,
+                  right: widget.size <= 32 ? 4 : 5,
+                  top: widget.size <= 32 ? 4 : 5,
                   child: Container(
-                    width: 9,
-                    height: 9,
+                    width: widget.size <= 32 ? 7 : 9,
+                    height: widget.size <= 32 ? 7 : 9,
                     decoration: BoxDecoration(
                       color: Colors.red,
                       borderRadius: BorderRadius.circular(9),

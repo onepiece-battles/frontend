@@ -716,7 +716,8 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                   : battle.receiver!.imageUri!,
               width: 120,
               borderWidth: 3,
-              borderRadios: 120);
+              borderRadios: 120,
+              fullImage: true);
     });
   }
 

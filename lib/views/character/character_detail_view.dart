@@ -292,7 +292,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
                 uriProvider: () => character.imageUri!,
                 width: 150,
                 borderWidth: 3,
-                borderRadios: 150),
+                borderRadios: 150,
+                fullImage: true),
       ),
       const SizedBox(height: 8),
       Text(I18nHelper.getDisplayNameFromI18n(character.name),
@@ -1580,7 +1581,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
                         uriProvider: () => character.imageUri!,
                         width: 200,
                         borderWidth: 3,
-                        borderRadios: 200)
+                        borderRadios: 200,
+                        fullImage: true)
                     : ImageHelper.getRoundImageFrame(
                         200,
                         200,

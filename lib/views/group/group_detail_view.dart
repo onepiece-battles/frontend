@@ -131,7 +131,8 @@ class _GroupDetailViewState extends State<GroupDetailView> {
               uriProvider: () => groupFullView.imageUri ?? '',
               width: 120,
               borderWidth: 2,
-              borderRadios: 15),
+              borderRadios: 15,
+              fullImage: true),
           const SizedBox(height: 8),
           Text(I18nHelper.getDisplayNameFromI18n(groupFullView.name),
               style: OnepieceFonts.headerStyle.copyWith(fontSize: 20)),
@@ -488,7 +489,8 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                       uriProvider: () => groupFullView.imageUri!,
                       width: 200,
                       borderWidth: 3,
-                      borderRadios: 20)
+                      borderRadios: 20,
+                      fullImage: true)
                   : ImageHelper.getRoundImageFrame(
                       200,
                       200,

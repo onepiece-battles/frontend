@@ -7,10 +7,16 @@ import '../constants/onepiece_colors.dart';
 class EmojiSelection extends StatefulWidget {
   final TextEditingController editingController;
   final FocusNode focusNode;
-  const EmojiSelection(
-      {super.key,
-      required this.editingController,
-      required this.focusNode});
+  final Color iconColor;
+  final double iconSize;
+
+  const EmojiSelection({
+    super.key,
+    required this.editingController,
+    required this.focusNode,
+    this.iconColor = OnepieceColors.fancyBlue,
+    this.iconSize = 20,
+  });
 
   @override
   State<EmojiSelection> createState() => _EmojiSelectionState();
@@ -99,10 +105,10 @@ class _EmojiSelectionState extends State<EmojiSelection> {
             bodyBuilder: (ctx) => _cachedPicker!,
           );
         },
-        icon: const Icon(
+        icon: Icon(
           Icons.face,
-          color: OnepieceColors.fancyBlue,
-          size: 20,
+          color: widget.iconColor,
+          size: widget.iconSize,
         ),
       );
     });

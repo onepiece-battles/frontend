@@ -17,6 +17,7 @@ import '../../utils/responsive_breakpoints.dart';
 import '../../utils/image_helper.dart';
 import '../../utils/nested_scroll_helper.dart';
 import '../../utils/permission_check.dart';
+import '../../utils/route_notifier.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -69,14 +70,23 @@ class _BattleViewState extends State<BattleView> {
   @override
   void initState() {
     super.initState();
+    routeNotifier.addListener(_refreshWhenListRouteIsActive);
     _search(false);
   }
 
   @override
   void dispose() {
+    routeNotifier.removeListener(_refreshWhenListRouteIsActive);
     mainController.dispose();
     tableController.dispose();
     super.dispose();
+  }
+
+  void _refreshWhenListRouteIsActive() {
+    if (routeNotifier.value ==
+        '/home/${ResourceType.BATTLE.toString().toLowerCase()}') {
+      _search(false);
+    }
   }
 
   void _search(bool filterChange) {
