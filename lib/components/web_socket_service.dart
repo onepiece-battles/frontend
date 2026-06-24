@@ -119,7 +119,7 @@ class WebSocketService {
 
   void _onData(dynamic event) {
     try {
-      final data = jsonDecode(event);
+      final data = _normalizeWebSocketJson(jsonDecode(event));
       // Determine message type and parse
       if (data is Map && data.containsKey('private_group')) {
         _messageController.add(Chat.fromJson(data));
@@ -139,6 +139,26 @@ class WebSocketService {
     } catch (e) {
       debugPrint('Error parsing WebSocket message: $e');
     }
+  }
+
+  dynamic _normalizeWebSocketJson(dynamic value) {
+    if (value is List) {
+      return value.map(_normalizeWebSocketJson).toList();
+    }
+    if (value is Map) {
+      return value.map((key, nestedValue) {
+        final normalizedKey = key is String ? _camelToSnake(key) : key;
+        return MapEntry(normalizedKey, _normalizeWebSocketJson(nestedValue));
+      });
+    }
+    return value;
+  }
+
+  String _camelToSnake(String value) {
+    return value.replaceAllMapped(
+      RegExp(r'(?<=[a-z0-9])[A-Z]'),
+      (match) => '_${match.group(0)!.toLowerCase()}',
+    );
   }
 
   void _onError(

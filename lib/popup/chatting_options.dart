@@ -22,7 +22,8 @@ class _ChattingOptionsState extends State<ChattingOptions> {
         Overlay.of(buttonContext).context.findRenderObject() as RenderBox;
     final buttonTopLeft =
         buttonBox.localToGlobal(Offset.zero, ancestor: overlay);
-    final buttonRect = buttonTopLeft & buttonBox.size;
+    final menuTopLeft = buttonTopLeft + Offset(0, buttonBox.size.height + 6);
+    final menuAnchorRect = menuTopLeft & Size(buttonBox.size.width, 1);
     final localizations = AppLocalizations.of(context)!;
 
     final selected = await showMenu<_ChattingAction>(
@@ -31,7 +32,7 @@ class _ChattingOptionsState extends State<ChattingOptions> {
       elevation: 8,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       position: RelativeRect.fromRect(
-        buttonRect,
+        menuAnchorRect,
         Offset.zero & overlay.size,
       ),
       items: [

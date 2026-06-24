@@ -101,6 +101,7 @@ class HomePageState extends State<HomePage> {
   final GlobalKey<_SideMenuState> _sideMenuKey = GlobalKey();
   final GlobalKey<_SideMenuState> _drawerSideMenuKey = GlobalKey();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  bool _isMobileDrawerPinned = false;
 
   @override
   Widget build(BuildContext context) {
@@ -119,13 +120,14 @@ class HomePageState extends State<HomePage> {
           return Scaffold(
             key: _scaffoldKey,
             backgroundColor: Colors.grey[50],
-            drawer: isMobile
+            drawer: isMobile && !_isMobileDrawerPinned
                 ? Drawer(
                     width: MenuConfig.maxDrawerWidth,
                     child: SideMenu(
                       key: _drawerSideMenuKey,
                       constraints: constraints,
                       isDrawer: true,
+                      onPinDrawer: _pinMobileDrawer,
                       onSearchRequested: _openSearchFromHome,
                     ),
                   )
@@ -133,6 +135,14 @@ class HomePageState extends State<HomePage> {
             body: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                if (isMobile && _isMobileDrawerPinned)
+                  SideMenu(
+                    key: _sideMenuKey,
+                    constraints: constraints,
+                    isPinnedRail: true,
+                    onUnpinRail: _unpinMobileDrawer,
+                    onSearchRequested: _openSearchFromHome,
+                  ),
                 if (!isMobile)
                   SideMenu(
                     key: _sideMenuKey,
@@ -149,6 +159,7 @@ class HomePageState extends State<HomePage> {
                           child: TopNavigationBar(
                             constraints: constraints,
                             isMobile: isMobile,
+                            showMenuButton: !_isMobileDrawerPinned,
                             scaffoldKey: _scaffoldKey,
                             onRoleChanged: () {
                               // Trigger side menu resource refresh
@@ -184,6 +195,19 @@ class HomePageState extends State<HomePage> {
     if (!mounted) return;
     _showSearchDialog(context);
   }
+
+  void _pinMobileDrawer() {
+    Navigator.of(context).maybePop();
+    setState(() {
+      _isMobileDrawerPinned = true;
+    });
+  }
+
+  void _unpinMobileDrawer() {
+    setState(() {
+      _isMobileDrawerPinned = false;
+    });
+  }
 }
 
 void _showSearchDialog(BuildContext context) {
@@ -207,12 +231,18 @@ void _showSearchDialog(BuildContext context) {
 class SideMenu extends StatefulWidget {
   final BoxConstraints constraints;
   final bool isDrawer;
+  final bool isPinnedRail;
   final VoidCallback? onSearchRequested;
+  final VoidCallback? onPinDrawer;
+  final VoidCallback? onUnpinRail;
   const SideMenu({
     super.key,
     required this.constraints,
     this.isDrawer = false,
+    this.isPinnedRail = false,
     this.onSearchRequested,
+    this.onPinDrawer,
+    this.onUnpinRail,
   });
 
   @override
@@ -221,6 +251,7 @@ class SideMenu extends StatefulWidget {
 
 class _SideMenuState extends State<SideMenu> {
   double _drawerWidth = 300;
+  double _expandedDrawerWidth = 300;
   bool _isHoveringResize = false;
   late List<ResourceType> loginRoleResources;
 
@@ -261,13 +292,35 @@ class _SideMenuState extends State<SideMenu> {
   }
 
   void collapse() {
-    if (widget.isDrawer) {
+    if (widget.isDrawer || widget.isPinnedRail) {
       Navigator.of(context).maybePop();
       return;
     }
     if (_drawerWidth <= MenuConfig.minDrawerWidth) return;
     setState(() {
       _drawerWidth = MenuConfig.minDrawerWidth;
+    });
+  }
+
+  void _togglePinnedNarrow() {
+    if (widget.isDrawer) {
+      widget.onPinDrawer?.call();
+      return;
+    }
+    if (widget.isPinnedRail) {
+      widget.onUnpinRail?.call();
+      return;
+    }
+    final isNarrow = _drawerWidth <= MenuConfig.minDrawerWidth + 1;
+    setState(() {
+      if (isNarrow) {
+        _drawerWidth = _expandedDrawerWidth.clamp(
+            MenuConfig.shrinkLimitWidth + 1, MenuConfig.maxDrawerWidth);
+      } else {
+        _expandedDrawerWidth = _drawerWidth.clamp(
+            MenuConfig.shrinkLimitWidth + 1, MenuConfig.maxDrawerWidth);
+        _drawerWidth = MenuConfig.minDrawerWidth;
+      }
     });
   }
 
@@ -284,8 +337,11 @@ class _SideMenuState extends State<SideMenu> {
 
   @override
   Widget build(BuildContext context) {
-    final bool isExpanded =
-        widget.isDrawer || _drawerWidth > MenuConfig.shrinkLimitWidth;
+    final double effectiveDrawerWidth =
+        widget.isPinnedRail ? MenuConfig.minDrawerWidth : _drawerWidth;
+    final bool isExpanded = widget.isDrawer ||
+        (!widget.isPinnedRail &&
+            effectiveDrawerWidth > MenuConfig.shrinkLimitWidth);
 
     // Drawer mode: full-width, no resize handle, wrapped in SafeArea
     if (widget.isDrawer) {
@@ -324,11 +380,11 @@ class _SideMenuState extends State<SideMenu> {
       );
     }
 
-    // Desktop mode: fixed width + resize handle
+    // Desktop/pinned mode: fixed width + optional resize handle
     return Stack(
       children: [
         Container(
-          width: _drawerWidth,
+          width: effectiveDrawerWidth,
           color: OnepieceColors.menuBackgroundColor,
           child: Column(
             children: [
@@ -361,14 +417,13 @@ class _SideMenuState extends State<SideMenu> {
             ],
           ),
         ),
-
-        // Resize Handle
-        Positioned(
-          left: _drawerWidth - 10,
-          top: 0,
-          bottom: 0,
-          child: _buildResizeHandle(),
-        ),
+        if (!widget.isPinnedRail)
+          Positioned(
+            left: _drawerWidth - 10,
+            top: 0,
+            bottom: 0,
+            child: _buildResizeHandle(),
+          ),
       ],
     );
   }
@@ -387,6 +442,9 @@ class _SideMenuState extends State<SideMenu> {
             _drawerWidth += details.delta.dx;
             _drawerWidth = _drawerWidth.clamp(
                 MenuConfig.minDrawerWidth, MenuConfig.maxDrawerWidth);
+            if (_drawerWidth > MenuConfig.shrinkLimitWidth) {
+              _expandedDrawerWidth = _drawerWidth;
+            }
           });
         },
         child: Container(
@@ -410,57 +468,105 @@ class _SideMenuState extends State<SideMenu> {
   }
 
   Widget _buildHeader(BuildContext context, bool isExpanded) {
-    return Container(
-      width: double.infinity,
-      height: 180,
-      color: OnepieceColors.deepFancyBlue,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: EdgeInsets.fromLTRB(isExpanded ? 8 : 4, 15, 0, 0),
-            child: Row(
-              children: [
-                _getUserNavigation(context),
-                if (isExpanded)
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                          child: Text(getIt<User>().nickname,
-                              style: OnepieceFonts.headerStyleWhite,
-                              maxLines: 1),
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Container(
+          width: double.infinity,
+          height: 180,
+          color: OnepieceColors.deepFancyBlue,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    isExpanded ? 8 : 8, isExpanded ? 15 : 42, 0, 0),
+                child: Row(
+                  children: [
+                    _getUserNavigation(context),
+                    if (isExpanded)
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 38),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 8),
+                                child: Text(getIt<User>().nickname,
+                                    style: OnepieceFonts.headerStyleWhite,
+                                    maxLines: 1),
+                              ),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 8.0),
+                                child: Text(getIt<User>().username,
+                                    style: OnepieceFonts.contentStyleWhite,
+                                    maxLines: 1),
+                              ),
+                            ],
+                          ),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Text(getIt<User>().username,
-                              style: OnepieceFonts.contentStyleWhite,
-                              maxLines: 1),
-                        ),
-                      ],
-                    ),
-                  ),
-              ],
+                      ),
+                  ],
+                ),
+              ),
+              const Spacer(),
+              _buildSearchButton(context, isExpanded),
+              const SizedBox(height: 15),
+            ],
+          ),
+        ),
+        Positioned(
+          top: isExpanded ? 8 : 7,
+          right: isExpanded ? 8 : 6,
+          child: _buildNarrowToggle(isExpanded),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNarrowToggle(bool isExpanded) {
+    final tooltip = widget.isDrawer
+        ? 'Pin menu'
+        : widget.isPinnedRail
+            ? 'Back to drawer'
+            : isExpanded
+                ? 'Collapse menu'
+                : 'Expand menu';
+    final icon = widget.isDrawer
+        ? Icons.push_pin_outlined
+        : widget.isPinnedRail
+            ? Icons.keyboard_double_arrow_left
+            : isExpanded
+                ? Icons.keyboard_double_arrow_left
+                : Icons.keyboard_double_arrow_right;
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: isExpanded && !widget.isDrawer
+            ? Colors.white.withValues(alpha: 0.12)
+            : OnepieceColors.fancyBlue,
+        borderRadius: BorderRadius.circular(8),
+        elevation: isExpanded && !widget.isDrawer ? 0 : 3,
+        shadowColor: Colors.black.withValues(alpha: 0.25),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(8),
+          hoverColor: isExpanded && !widget.isDrawer
+              ? Colors.white.withValues(alpha: 0.16)
+              : Colors.white.withValues(alpha: 0.18),
+          onTap: _togglePinnedNarrow,
+          child: SizedBox(
+            width: isExpanded ? 26 : 24,
+            height: isExpanded ? 26 : 24,
+            child: Icon(
+              icon,
+              size: isExpanded ? 15 : 14,
+              color: Colors.white,
             ),
           ),
-          if (!isExpanded) ...[
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10.0),
-              child: Text(getIt<User>().nickname,
-                  style: OnepieceFonts.contentStyleBoldWhite, maxLines: 1),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10.0),
-              child: Text(getIt<User>().username,
-                  style: OnepieceFonts.contentStyleWhite, maxLines: 1),
-            ),
-          ],
-          const Spacer(),
-          _buildSearchButton(context, isExpanded),
-          const SizedBox(height: 15),
-        ],
+        ),
       ),
     );
   }
@@ -699,6 +805,7 @@ class _SideMenuState extends State<SideMenu> {
 class TopNavigationBar extends StatefulWidget {
   final BoxConstraints constraints;
   final bool isMobile;
+  final bool showMenuButton;
   final GlobalKey<ScaffoldState> scaffoldKey;
   final VoidCallback onRoleChanged;
 
@@ -706,6 +813,7 @@ class TopNavigationBar extends StatefulWidget {
     super.key,
     required this.constraints,
     required this.isMobile,
+    this.showMenuButton = true,
     required this.scaffoldKey,
     required this.onRoleChanged,
   });
@@ -745,7 +853,7 @@ class _TopNavigationBarState extends State<TopNavigationBar> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               // Hamburger menu on mobile
-              if (isMobile)
+              if (isMobile && widget.showMenuButton)
                 IconButton(
                   icon: const Icon(Icons.menu,
                       color: OnepieceColors.fancyBlue, size: 20),
@@ -756,7 +864,7 @@ class _TopNavigationBarState extends State<TopNavigationBar> {
                   onPressed: () =>
                       widget.scaffoldKey.currentState?.openDrawer(),
                 ),
-              if (isMobile) const SizedBox(width: 4),
+              if (isMobile && widget.showMenuButton) const SizedBox(width: 4),
 
               // Breadcrumbs on the left
               if (isMobile)

@@ -18,8 +18,11 @@ GetIt getIt = GetIt.instance;
 class UserNavigation extends StatefulWidget {
   final BoxConstraints constraints;
 
-  const UserNavigation(
-      {super.key, required BuildContext context, required this.constraints});
+  const UserNavigation({
+    super.key,
+    required BuildContext context,
+    required this.constraints,
+  });
 
   @override
   State<UserNavigation> createState() => _UserNavigationState();
@@ -28,6 +31,7 @@ class UserNavigation extends StatefulWidget {
 class _UserNavigationState extends State<UserNavigation> {
   @override
   Widget build(BuildContext context) {
+    final avatarSize = widget.constraints.maxWidth > 1500 ? 70.0 : 60.0;
     return InkWell(
       splashColor: Colors.transparent,
       hoverColor: Colors.transparent,
@@ -116,18 +120,11 @@ class _UserNavigationState extends State<UserNavigation> {
           ],
         ),
       ),
-      child: widget.constraints.maxWidth > 1500
-          ? ImageLazyLoader(
-              uriProvider: () => getIt<User>().imageUri ?? '',
-              width: 70,
-              borderWidth: 3,
-              borderRadios: 70,
-            )
-          : ImageLazyLoader(
+      child: ImageLazyLoader(
         uriProvider: () => getIt<User>().imageUri ?? '',
-        width: 60,
+        width: avatarSize,
         borderWidth: 3,
-        borderRadios: 60,
+        borderRadios: avatarSize,
       ),
     );
   }

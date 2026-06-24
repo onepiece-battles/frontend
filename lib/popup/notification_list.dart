@@ -3,7 +3,6 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart' hide Notification;
 import 'package:get_it/get_it.dart';
-import 'package:one_piece_battles_flutter/repository/chatting_dao.dart';
 import 'package:one_piece_battles_flutter/repository/notification_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
@@ -423,13 +422,7 @@ class _NotificationListState extends State<NotificationList> {
         final CreateChatRequest request = CreateChatRequest(
             type: MessageType.CREATE_CHAT,
             ids: [e.notificationSourceId!, e.notificationTargetId!]);
-        final chat = await getIt<ChattingDao>().createChat(request);
-
-        if (chat != null) {
-          chatNotifier.upsertChat(chat);
-        } else {
-          chatNotifier.sendChatMessage(jsonEncode(request.toJson()));
-        }
+        chatNotifier.sendChatMessage(jsonEncode(request.toJson()));
       } else {
         await getIt<UserDao>().rejectFriend(
             RejectFriendRequest(friendId: e.notificationSourceId));
