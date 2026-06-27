@@ -8,6 +8,7 @@ import '../../l10n/app_localizations.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 
 import '../../components/image_lazy_loader.dart';
+import '../../components/desktop_card_layout.dart';
 import '../../components/page_foot.dart';
 import '../../constants/button_style.dart';
 import '../../constants/onepiece_colors.dart';
@@ -15,7 +16,6 @@ import '../../constants/onepiece_fonts.dart';
 import '../../utils/i18n_helper.dart';
 import '../../utils/responsive_breakpoints.dart';
 import '../../utils/image_helper.dart';
-import '../../utils/nested_scroll_helper.dart';
 import '../../utils/permission_check.dart';
 import '../../utils/route_notifier.dart';
 
@@ -118,41 +118,26 @@ class _GroupViewState extends State<GroupView> {
             ResponsiveBreakpoints.isMobileFromConstraints(constraints);
         return Center(
           child: ConstrainedBox(
-            constraints:
-                BoxConstraints(maxWidth: isNarrow ? double.infinity : 1200),
+            constraints: const BoxConstraints(maxWidth: double.infinity),
             child: Padding(
-              padding: const EdgeInsets.all(15.0),
+              padding: EdgeInsets.all(isNarrow ? 15 : 24),
               child: SizedBox(
                 width: double.infinity,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _createHeader(context),
-                    _createControlPanel(context, isNarrow: isNarrow),
+                    isNarrow
+                        ? CompactFilterPanel(
+                            child: _createControlPanel(context, isNarrow: true))
+                        : DesktopFilterPanel(
+                            child:
+                                _createControlPanel(context, isNarrow: false)),
                     const SizedBox(height: 10),
                     Expanded(
                       child: isNarrow
                           ? _buildMobileGroupCards(context)
-                          : Scrollbar(
-                              controller: mainController,
-                              thumbVisibility: true,
-                              trackVisibility: true,
-                              child: SingleChildScrollView(
-                                controller: mainController,
-                                child: Scrollbar(
-                                  controller: tableController,
-                                  thumbVisibility: true,
-                                  trackVisibility: true,
-                                  notificationPredicate: (notification) =>
-                                      notification.depth == 0,
-                                  child: NestedHorizontalScrollView(
-                                    controller: tableController,
-                                    verticalParentController: mainController,
-                                    child: _createGroupTable(context),
-                                  ),
-                                ),
-                              ),
-                            ),
+                          : _buildDesktopGroupCards(context),
                     ),
                     const SizedBox(height: 15),
                     if (totalPageNum > 1)
@@ -253,24 +238,9 @@ class _GroupViewState extends State<GroupView> {
             ),
           ),
           const SizedBox(width: 6),
-          InkWell(
-            onTap: () => setState(() => _showFilters = !_showFilters),
-            borderRadius: BorderRadius.circular(4),
-            child: Container(
-              height: 35,
-              width: 35,
-              decoration: BoxDecoration(
-                  border: Border.all(color: OnepieceColors.menuHoverColor),
-                  borderRadius: BorderRadius.circular(4),
-                  color: _showFilters
-                      ? OnepieceColors.fancyBlue.withValues(alpha: 0.1)
-                      : null),
-              child: Icon(Icons.filter_list,
-                  size: 20,
-                  color: _showFilters
-                      ? OnepieceColors.fancyBlue
-                      : Colors.grey[700]),
-            ),
+          ListFilterButton(
+            active: _showFilters,
+            onPressed: () => setState(() => _showFilters = !_showFilters),
           ),
         ]),
         if (_showFilters) ...[
@@ -718,6 +688,96 @@ class _GroupViewState extends State<GroupView> {
     );
   }
 
+  Widget _buildDesktopGroupCards(BuildContext context) {
+    if (currentGroupList.isEmpty) {
+      return Center(
+        child: Text(AppLocalizations.of(context)!.empty,
+            style: OnepieceFonts.contentStyle),
+      );
+    }
+    final categoryMap = <GroupCategory, String>{
+      GroupCategory.marine: AppLocalizations.of(context)!.marine,
+      GroupCategory.pirate: AppLocalizations.of(context)!.pirate,
+      GroupCategory.underWorld: AppLocalizations.of(context)!.underworld,
+      GroupCategory.government: AppLocalizations.of(context)!.worldGovernment,
+      GroupCategory.group: AppLocalizations.of(context)!.group,
+      GroupCategory.other: AppLocalizations.of(context)!.otherType,
+      GroupCategory.revolutionArmy:
+          AppLocalizations.of(context)!.revolutionaryArmy,
+    };
+
+    return DesktopSpotlightGrid<GroupListView>(
+      items: currentGroupList,
+      idOf: (group) => group.id,
+      controller: mainController,
+      cardBuilder: (context, group) => Material(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: () => context.goNamed('groupDetails',
+              extra: group.id,
+              pathParameters: {
+                'name': I18nHelper.getDisplayNameFromI18n(group.name)
+              }),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(children: [
+                  ImageLazyLoader(
+                    key: ValueKey(group.imageUri),
+                    uriProvider: () => group.imageUri!,
+                    width: 54,
+                    borderWidth: 1.5,
+                    borderRadios: 10,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          I18nHelper.getDisplayNameFromI18n(group.name),
+                          style: OnepieceFonts.contentStyleBold.copyWith(
+                              color: OnepieceColors.deepFancyBlue,
+                              fontSize: 17),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(group.creationRecord?.nickname ?? '',
+                            style: OnepieceFonts.smallContentStyle),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: OnepieceColors.fancyBlue.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(categoryMap[group.groupCategory] ?? '',
+                        style: OnepieceFonts.boldFancySmallFont),
+                  ),
+                ]),
+                const SizedBox(height: 12),
+                SizedBox(
+                  height: 48,
+                  child: group.groupCategory == GroupCategory.group
+                      ? _createGroupList(group.subGroups)
+                      : _createCharacterList(group.characterInGroup),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ignore: unused_element
   DataTable _createGroupTable(BuildContext context) {
     return DataTable(
       showCheckboxColumn: false,

@@ -4,6 +4,7 @@ import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
 import 'package:one_piece_battles_flutter/components/image_lazy_loader.dart';
+import '../../components/desktop_card_layout.dart';
 import '../../components/page_foot.dart';
 import 'package:openapi/api.dart';
 import '../../l10n/app_localizations.dart';
@@ -13,7 +14,6 @@ import '../../constants/onepiece_tag.dart';
 import '../../repository/user_dao.dart';
 import '../../utils/date_helper.dart';
 import '../../utils/image_helper.dart';
-import '../../utils/nested_scroll_helper.dart';
 import '../../utils/responsive_breakpoints.dart';
 
 GetIt getIt = GetIt.instance;
@@ -101,33 +101,32 @@ class _UserViewState extends State<UserView> {
             ResponsiveBreakpoints.isMobileFromConstraints(constraints);
         return Center(
           child: ConstrainedBox(
-            constraints:
-                BoxConstraints(maxWidth: isNarrow ? double.infinity : 1400),
+            constraints: const BoxConstraints(maxWidth: double.infinity),
             child: Padding(
-              padding: const EdgeInsets.all(15.0),
+              padding: EdgeInsets.all(isNarrow ? 15 : 24),
               child: SizedBox(
                 width: double.infinity,
                 child: Column(
                   children: [
                     _createHeader(context),
-                    _createControlPanel(context, isNarrow: isNarrow),
+                    isNarrow
+                        ? CompactFilterPanel(
+                            child: _createControlPanel(context, isNarrow: true))
+                        : DesktopFilterPanel(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _createControlPanel(context, isNarrow: false),
+                                const SizedBox(height: 10),
+                                _buildUserSortControls(context),
+                              ],
+                            ),
+                          ),
                     const SizedBox(height: 10),
                     Expanded(
                       child: isNarrow
                           ? _buildMobileUserCards(context)
-                          : SingleChildScrollView(
-                              controller: scrollController,
-                              scrollDirection: Axis.vertical,
-                              child: Scrollbar(
-                                thumbVisibility: true,
-                                controller: horizontalController,
-                                child: NestedHorizontalScrollView(
-                                  controller: horizontalController,
-                                  verticalParentController: scrollController,
-                                  child: _createUserTable(context),
-                                ),
-                              ),
-                            ),
+                          : _buildDesktopUserCards(context),
                     ),
                     const SizedBox(height: 15),
                     if (totalPageNum > 1)
@@ -210,24 +209,9 @@ class _UserViewState extends State<UserView> {
             ),
           ),
           const SizedBox(width: 6),
-          InkWell(
-            onTap: () => setState(() => _showFilters = !_showFilters),
-            borderRadius: BorderRadius.circular(4),
-            child: Container(
-              height: 35,
-              width: 35,
-              decoration: BoxDecoration(
-                  border: Border.all(color: OnepieceColors.menuHoverColor),
-                  borderRadius: BorderRadius.circular(4),
-                  color: _showFilters
-                      ? OnepieceColors.fancyBlue.withValues(alpha: 0.1)
-                      : null),
-              child: Icon(Icons.filter_list,
-                  size: 20,
-                  color: _showFilters
-                      ? OnepieceColors.fancyBlue
-                      : Colors.grey[700]),
-            ),
+          ListFilterButton(
+            active: _showFilters,
+            onPressed: () => setState(() => _showFilters = !_showFilters),
           ),
         ]),
         if (_showFilters) ...[
@@ -594,6 +578,139 @@ class _UserViewState extends State<UserView> {
     );
   }
 
+  Widget _buildUserSortControls(BuildContext context) {
+    final order = sortableEnumToSortOrderMap[UserSortableFieldsEnum.username];
+    return Row(children: [
+      Text('$totalItemCount ${AppLocalizations.of(context)!.user}',
+          style: OnepieceFonts.smallContentStyle),
+      const Spacer(),
+      DesktopSortChip(
+        label: AppLocalizations.of(context)!.email,
+        ascending: order == null ? null : order == SortOrder.ASC,
+        onTap: () => _toggleUserSort(UserSortableFieldsEnum.username),
+      ),
+    ]);
+  }
+
+  void _toggleUserSort(UserSortableFieldsEnum field) {
+    final current = sortableEnumToSortOrderMap[field];
+    SortOrder? next;
+    if (current == null) {
+      next = SortOrder.ASC;
+    } else if (current == SortOrder.ASC) {
+      next = SortOrder.DESC;
+    }
+    setState(() {
+      sortableEnumToSortOrderMap[field] = next;
+      sortKeys.removeWhere((item) => item.sortKey == field);
+      if (next != null) {
+        sortKeys.insert(0, UserSortableField(sortKey: field, sortOrder: next));
+      }
+      _search(false);
+    });
+  }
+
+  Widget _buildDesktopUserCards(BuildContext context) {
+    if (currentUserList.isEmpty) {
+      return Center(
+        child: Text(AppLocalizations.of(context)!.empty,
+            style: OnepieceFonts.contentStyle),
+      );
+    }
+    final roleMap = <UserRole, String>{
+      UserRole.NIKA: AppLocalizations.of(context)!.roleNika,
+      UserRole.NORMAL: AppLocalizations.of(context)!.roleNormal,
+      UserRole.VISITOR: AppLocalizations.of(context)!.roleVisitor,
+      UserRole.ADMIN: AppLocalizations.of(context)!.roleAdmin,
+    };
+    final accountMap = <AccountStatus, String>{
+      AccountStatus.loggedIn: AppLocalizations.of(context)!.accountLoggedIn,
+      AccountStatus.loggedOut: AppLocalizations.of(context)!.accountLoggedOut,
+      AccountStatus.stopped: AppLocalizations.of(context)!.accountStopped,
+      AccountStatus.closed: AppLocalizations.of(context)!.accountClosed,
+    };
+
+    return DesktopSpotlightGrid<User>(
+      items: currentUserList,
+      idOf: (user) => user.id,
+      controller: scrollController,
+      cardBuilder: (context, user) => Material(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: () => context.goNamed('userDetails',
+              extra: user.id, pathParameters: {'name': user.nickname}),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(children: [
+                  ImageLazyLoader(
+                    key: ValueKey(user.imageUri),
+                    uriProvider: () => user.imageUri!,
+                    width: 54,
+                    borderWidth: 1.5,
+                    borderRadios: 54,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(user.nickname,
+                            style: OnepieceFonts.contentStyleBold.copyWith(
+                                color: OnepieceColors.deepFancyBlue,
+                                fontSize: 17),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis),
+                        Text(user.username,
+                            style: OnepieceFonts.smallContentStyle,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis),
+                      ],
+                    ),
+                  ),
+                  OnepieceTag.getUserRoleTag(
+                      user.loginRole!, roleMap[user.loginRole]!),
+                ]),
+                const SizedBox(height: 12),
+                Row(children: [
+                  Icon(user.emailVerified! ? Icons.verified : Icons.cancel,
+                      size: 17,
+                      color: user.emailVerified! ? Colors.green : Colors.red),
+                  const SizedBox(width: 5),
+                  Text(
+                    user.emailVerified!
+                        ? AppLocalizations.of(context)!.verified
+                        : AppLocalizations.of(context)!.notVerified,
+                    style: OnepieceFonts.smallContentStyle,
+                  ),
+                  const Spacer(),
+                  Text(accountMap[user.accountStatus] ?? '',
+                      style: OnepieceFonts.boldFancySmallFont),
+                ]),
+                if (user.userRoles.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 5,
+                    runSpacing: 5,
+                    children: user.userRoles
+                        .map((role) =>
+                            OnepieceTag.getUserRoleTag(role, roleMap[role]!))
+                        .toList(),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ignore: unused_element
   DataTable _createUserTable(BuildContext context) {
     return DataTable(
       showCheckboxColumn: false,

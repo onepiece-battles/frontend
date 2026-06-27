@@ -20,6 +20,7 @@ class WebSocketService {
   Timer? _reconnectTimer;
   bool _isConnecting = false;
   int _reconnectAttempt = 0;
+  int _connectionGeneration = 0;
   // Flag to distinguish between network error vs user clicking "Logout"
   bool _isIntentionalDisconnect = false;
 
@@ -34,21 +35,23 @@ class WebSocketService {
       return;
     }
 
-    // If connected to someone else, disconnect first
-    disconnect();
+    // Invalidate callbacks from the previous transport before closing it.
+    _connectionGeneration++;
+    _closeTransport();
 
     currentId = userId;
     _accessToken = accessToken;
-    _isIntentionalDisconnect = false; // Reset flag
-    _initConnection();
+    _isIntentionalDisconnect = false;
+    _initConnection(_connectionGeneration);
   }
 
-  void _initConnection() {
+  void _initConnection(int generation) {
     if (currentId == null ||
         currentId!.isEmpty ||
         _accessToken == null ||
         _accessToken!.isEmpty ||
-        _isConnecting) {
+        _isConnecting ||
+        generation != _connectionGeneration) {
       return;
     }
 
@@ -61,35 +64,32 @@ class WebSocketService {
 
       _subscription = channel.stream.listen(
         _onData,
-        onError: (error, stackTrace) => _onError(error, stackTrace, channel),
-        onDone: () => _onDone(channel),
+        onError: (error, stackTrace) =>
+            _onError(error, stackTrace, channel, generation),
+        onDone: () => _onDone(channel, generation),
         cancelOnError: false,
       );
-      channel.ready.then((_) {
-        if (_channel != channel || _isIntentionalDisconnect) return;
+      channel.ready.timeout(const Duration(seconds: 12)).then((_) {
+        if (_channel != channel ||
+            _isIntentionalDisconnect ||
+            generation != _connectionGeneration) {
+          return;
+        }
         _isConnecting = false;
         _reconnectAttempt = 0;
         _startPing();
       }).catchError((error, stackTrace) {
-        if (_channel != channel) return null;
-        debugPrint("WebSocket connection failed: $error");
-        _isConnecting = false;
-        _stopPing();
-        _subscription?.cancel();
-        _subscription = null;
-        _channel = null;
-        try {
-          channel.sink.close();
-        } catch (_) {}
-        if (!_isIntentionalDisconnect) {
-          _scheduleReconnect();
+        if (_channel != channel || generation != _connectionGeneration) {
+          return null;
         }
+        debugPrint("WebSocket connection failed: $error");
+        _handleConnectionFailure(channel, generation);
         return null;
       });
     } catch (e) {
       debugPrint("Connection failed: $e");
       _isConnecting = false;
-      _scheduleReconnect();
+      _scheduleReconnect(generation);
     }
   }
 
@@ -165,30 +165,42 @@ class WebSocketService {
     Object error,
     StackTrace stackTrace,
     WebSocketChannel channel,
+    int generation,
   ) {
-    if (_channel != channel) return;
-    _isConnecting = false;
+    if (_channel != channel || generation != _connectionGeneration) return;
     debugPrint("WebSocket Error: $error");
-    // Don't manually call _onDone here; the stream listener will usually call
-    // onDone automatically after onError if cancelOnError is true.
+    _handleConnectionFailure(channel, generation);
   }
 
-  void _onDone(WebSocketChannel channel) {
-    if (_channel != channel) return;
+  void _onDone(WebSocketChannel channel, int generation) {
+    if (_channel != channel || generation != _connectionGeneration) return;
     debugPrint("WebSocket connection closed.");
+    _handleConnectionFailure(channel, generation);
+  }
+
+  void _handleConnectionFailure(
+    WebSocketChannel channel,
+    int generation,
+  ) {
+    if (_channel != channel || generation != _connectionGeneration) return;
     _isConnecting = false;
     _stopPing();
-    _channel = null;
+    _subscription?.cancel();
     _subscription = null;
+    _channel = null;
+    try {
+      channel.sink.close();
+    } catch (_) {}
 
-    // Only attempt to reconnect if the user didn't intentionally log out
     if (!_isIntentionalDisconnect) {
-      _scheduleReconnect();
+      _scheduleReconnect(generation);
     }
   }
 
-  void _scheduleReconnect() {
-    // Cancel existing timer if any
+  void _scheduleReconnect(int generation) {
+    if (_isIntentionalDisconnect || generation != _connectionGeneration) {
+      return;
+    }
     _reconnectTimer?.cancel();
 
     _reconnectAttempt++;
@@ -197,10 +209,11 @@ class WebSocketService {
     // Attempt to reconnect with bounded backoff instead of a tight loop.
     _reconnectTimer = Timer(Duration(seconds: delaySeconds), () {
       if (!_isIntentionalDisconnect &&
+          generation == _connectionGeneration &&
           currentId != null &&
           _accessToken != null) {
         debugPrint("Attempting to reconnect...");
-        _initConnection();
+        _initConnection(generation);
       }
     });
   }
@@ -210,26 +223,28 @@ class WebSocketService {
     debugPrint("Disconnecting WebSocket (Intentional Logout)");
     _stopPing();
 
-    // 1. Mark as intentional so we don't reconnect
     _isIntentionalDisconnect = true;
+    _connectionGeneration++;
     _isConnecting = false;
 
-    // 2. Stop any pending reconnection timers
     _reconnectTimer?.cancel();
     _reconnectTimer = null;
     _reconnectAttempt = 0;
 
-    // 3. Close the connection
+    _closeTransport();
+
+    currentId = null;
+    _accessToken = null;
+  }
+
+  void _closeTransport() {
+    _isConnecting = false;
     _subscription?.cancel();
     _subscription = null;
     if (_channel != null) {
       _channel!.sink.close();
       _channel = null;
     }
-
-    // 4. Clear User ID
-    currentId = null;
-    _accessToken = null;
   }
 
   Uri _webSocketUri() {

@@ -4,6 +4,7 @@ import '../../l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/components/image_lazy_loader.dart';
+import 'package:one_piece_battles_flutter/components/desktop_card_layout.dart';
 import 'package:one_piece_battles_flutter/components/page_foot.dart';
 import 'package:one_piece_battles_flutter/constants/button_style.dart';
 import 'package:one_piece_battles_flutter/repository/battle_dao.dart';
@@ -15,7 +16,6 @@ import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
 import '../../utils/responsive_breakpoints.dart';
 import '../../utils/image_helper.dart';
-import '../../utils/nested_scroll_helper.dart';
 import '../../utils/permission_check.dart';
 import '../../utils/route_notifier.dart';
 
@@ -121,41 +121,25 @@ class _BattleViewState extends State<BattleView> {
             ResponsiveBreakpoints.isMobileFromConstraints(constraints);
         return Center(
           child: ConstrainedBox(
-            constraints:
-                BoxConstraints(maxWidth: isNarrow ? double.infinity : 800),
+            constraints: const BoxConstraints(maxWidth: double.infinity),
             child: Padding(
-              padding: const EdgeInsets.all(15.0),
+              padding: EdgeInsets.all(isNarrow ? 15 : 24),
               child: SizedBox(
                 width: double.infinity,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _getHeaderText(context),
-                    _getControlRow(context, isNarrow: isNarrow),
+                    isNarrow
+                        ? CompactFilterPanel(
+                            child: _getControlRow(context, isNarrow: true))
+                        : DesktopFilterPanel(
+                            child: _getControlRow(context, isNarrow: false)),
                     const SizedBox(height: 10),
                     Expanded(
                       child: isNarrow
                           ? _buildMobileBattleCards(context)
-                          : Scrollbar(
-                              controller: mainController,
-                              thumbVisibility: true,
-                              trackVisibility: true,
-                              child: SingleChildScrollView(
-                                controller: mainController,
-                                child: Scrollbar(
-                                  controller: tableController,
-                                  thumbVisibility: true,
-                                  trackVisibility: true,
-                                  notificationPredicate: (notification) =>
-                                      notification.depth == 0,
-                                  child: NestedHorizontalScrollView(
-                                    controller: tableController,
-                                    verticalParentController: mainController,
-                                    child: _getBattlesTable(context),
-                                  ),
-                                ),
-                              ),
-                            ),
+                          : _buildDesktopBattleCards(context),
                     ),
                     const SizedBox(height: 15),
                     if (totalPageNum > 1)
@@ -251,25 +235,9 @@ class _BattleViewState extends State<BattleView> {
                 ),
               ),
               const SizedBox(width: 6),
-              InkWell(
-                onTap: () => setState(() => _showFilters = !_showFilters),
-                borderRadius: BorderRadius.circular(4),
-                child: Container(
-                  height: 35,
-                  width: 35,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: OnepieceColors.menuHoverColor),
-                    borderRadius: BorderRadius.circular(4),
-                    color: _showFilters
-                        ? OnepieceColors.fancyBlue.withValues(alpha: 0.1)
-                        : null,
-                  ),
-                  child: Icon(Icons.filter_list,
-                      size: 20,
-                      color: _showFilters
-                          ? OnepieceColors.fancyBlue
-                          : Colors.grey[700]),
-                ),
+              ListFilterButton(
+                active: _showFilters,
+                onPressed: () => setState(() => _showFilters = !_showFilters),
               ),
             ]),
             if (_showFilters) ...[
@@ -765,6 +733,91 @@ class _BattleViewState extends State<BattleView> {
     );
   }
 
+  Widget _buildDesktopBattleCards(BuildContext context) {
+    if (currentBattleList.isEmpty) {
+      return Center(
+        child: Text(AppLocalizations.of(context)!.empty,
+            style: OnepieceFonts.contentStyle),
+      );
+    }
+    final statusMap = <BattleStatus, String>{
+      BattleStatus.CREATED: AppLocalizations.of(context)!.battleStatusCreated,
+      BattleStatus.IN_PROGRESS:
+          AppLocalizations.of(context)!.battleStatusStarted,
+      BattleStatus.FINISHED: AppLocalizations.of(context)!.battleStatusFinished,
+      BattleStatus.FAILED: AppLocalizations.of(context)!.battleStatusFailed,
+    };
+
+    return DesktopSpotlightGrid<BattleListView>(
+      items: currentBattleList,
+      idOf: (battle) => battle.id,
+      controller: mainController,
+      minCardWidth: 390,
+      maxColumns: 4,
+      cardBuilder: (context, battle) {
+        final execution = battle.battleExecution;
+        return Material(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(14),
+            onTap: () => context.goNamed('battleDetails',
+                extra: battle.id, pathParameters: {'id': battle.id}),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(children: [
+                Row(children: [
+                  Expanded(
+                    child: _buildBattleCharCard(
+                      imageUri: battle.starter!.imageUri!,
+                      name: I18nHelper.getDisplayNameFromI18n(
+                          battle.starter!.name),
+                      score: execution?.starterScoreBefore?.toString() ?? '?',
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Text('VS',
+                        style: OnepieceFonts.contentStyleBoldFancyBlue),
+                  ),
+                  Expanded(
+                    child: _buildBattleCharCard(
+                      imageUri: battle.receiver!.imageUri!,
+                      name: I18nHelper.getDisplayNameFromI18n(
+                          battle.receiver!.name),
+                      score: execution?.receiverScoreBefore?.toString() ?? '?',
+                      alignRight: true,
+                    ),
+                  ),
+                ]),
+                const SizedBox(height: 14),
+                Row(children: [
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: OnepieceColors.fancyBlue.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(statusMap[execution?.battleStatus] ?? '',
+                        style: OnepieceFonts.boldFancySmallFont),
+                  ),
+                  const Spacer(),
+                  const Icon(Icons.person_outline,
+                      size: 15, color: Colors.black45),
+                  const SizedBox(width: 4),
+                  Text(battle.creationRecord?.nickname ?? '',
+                      style: OnepieceFonts.smallContentStyle),
+                ]),
+              ]),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // ignore: unused_element
   Widget _getBattlesTable(BuildContext context) {
     return DataTable(
       showCheckboxColumn: false,

@@ -6,11 +6,11 @@ import 'package:one_piece_battles_flutter/repository/issue_dao.dart';
 import 'package:openapi/api.dart';
 import '../../l10n/app_localizations.dart';
 import '../../components/page_foot.dart';
+import '../../components/desktop_card_layout.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
 import '../../utils/date_helper.dart';
 import '../../utils/image_helper.dart';
-import '../../utils/nested_scroll_helper.dart';
 import '../../utils/responsive_breakpoints.dart';
 import '../../utils/route_notifier.dart';
 
@@ -109,33 +109,36 @@ class _IssueViewState extends State<IssueView> {
             ResponsiveBreakpoints.isMobileFromConstraints(constraints);
         return Center(
           child: ConstrainedBox(
-            constraints:
-                BoxConstraints(maxWidth: isNarrow ? double.infinity : 1400),
+            constraints: const BoxConstraints(maxWidth: double.infinity),
             child: Padding(
-              padding: const EdgeInsets.all(15.0),
+              padding: EdgeInsets.all(isNarrow ? 15 : 24),
               child: SizedBox(
                 width: double.infinity,
                 child: Column(
                   children: [
                     _createHeader(context),
-                    _createControlPanel(context, isNarrow: isNarrow),
+                    isNarrow
+                        ? CompactFilterPanel(
+                            child: _createControlPanel(context, isNarrow: true))
+                        : DesktopFilterPanel(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: _createControlPanel(context,
+                                      isNarrow: false),
+                                ),
+                                const SizedBox(height: 10),
+                                _buildIssueSortControls(context),
+                              ],
+                            ),
+                          ),
                     const SizedBox(height: 10),
                     Expanded(
                       child: isNarrow
                           ? _buildMobileIssueCards(context)
-                          : SingleChildScrollView(
-                              controller: scrollController,
-                              scrollDirection: Axis.vertical,
-                              child: Scrollbar(
-                                thumbVisibility: true,
-                                controller: horizontalController,
-                                child: NestedHorizontalScrollView(
-                                  controller: horizontalController,
-                                  verticalParentController: scrollController,
-                                  child: _createIssueTable(context),
-                                ),
-                              ),
-                            ),
+                          : _buildDesktopIssueCards(context),
                     ),
                     const SizedBox(height: 15),
                     if (totalPageNum > 1)
@@ -221,24 +224,9 @@ class _IssueViewState extends State<IssueView> {
             ),
           ),
           const SizedBox(width: 6),
-          InkWell(
-            onTap: () => setState(() => _showFilters = !_showFilters),
-            borderRadius: BorderRadius.circular(4),
-            child: Container(
-              height: 35,
-              width: 35,
-              decoration: BoxDecoration(
-                  border: Border.all(color: OnepieceColors.menuHoverColor),
-                  borderRadius: BorderRadius.circular(4),
-                  color: _showFilters
-                      ? OnepieceColors.fancyBlue.withValues(alpha: 0.1)
-                      : null),
-              child: Icon(Icons.filter_list,
-                  size: 20,
-                  color: _showFilters
-                      ? OnepieceColors.fancyBlue
-                      : Colors.grey[700]),
-            ),
+          ListFilterButton(
+            active: _showFilters,
+            onPressed: () => setState(() => _showFilters = !_showFilters),
           ),
         ]),
         if (_showFilters) ...[
@@ -801,6 +789,139 @@ class _IssueViewState extends State<IssueView> {
     );
   }
 
+  Widget _buildIssueSortControls(BuildContext context) {
+    return Row(children: [
+      Text('$totalItemCount ${AppLocalizations.of(context)!.issue}',
+          style: OnepieceFonts.smallContentStyle),
+      const Spacer(),
+      Wrap(spacing: 6, children: [
+        _issueSortChip(AppLocalizations.of(context)!.issueType,
+            IssueSortableFieldEnum.issueType),
+        _issueSortChip(AppLocalizations.of(context)!.status,
+            IssueSortableFieldEnum.issueStatus),
+        _issueSortChip(AppLocalizations.of(context)!.creationTime,
+            IssueSortableFieldEnum.creationTimestamp),
+        _issueSortChip(AppLocalizations.of(context)!.modificationTime,
+            IssueSortableFieldEnum.modificationTimestamp),
+      ]),
+    ]);
+  }
+
+  Widget _issueSortChip(String label, IssueSortableFieldEnum field) {
+    final order = sortableEnumToSortOrderMap[field];
+    return DesktopSortChip(
+      label: label,
+      ascending: order == null ? null : order == SortOrder.ASC,
+      onTap: () => _toggleIssueSort(field),
+    );
+  }
+
+  void _toggleIssueSort(IssueSortableFieldEnum field) {
+    final current = sortableEnumToSortOrderMap[field];
+    SortOrder? next;
+    if (current == null) {
+      next = SortOrder.ASC;
+    } else if (current == SortOrder.ASC) {
+      next = SortOrder.DESC;
+    }
+    setState(() {
+      sortableEnumToSortOrderMap[field] = next;
+      sortKeys.removeWhere((item) => item.sortKey == field);
+      if (next != null) {
+        sortKeys.insert(0, IssueSortableField(sortKey: field, sortOrder: next));
+      }
+      _search(false);
+    });
+  }
+
+  Widget _buildDesktopIssueCards(BuildContext context) {
+    if (currentIssueList.isEmpty) {
+      return Center(
+        child: Text(AppLocalizations.of(context)!.empty,
+            style: OnepieceFonts.contentStyle),
+      );
+    }
+    final typeMap = <IssueType, String>{
+      IssueType.OTHER: AppLocalizations.of(context)!.otherType,
+      IssueType.FEATURE_SUGGESTION:
+          AppLocalizations.of(context)!.featureSuggestion,
+      IssueType.BUG_REPORT: AppLocalizations.of(context)!.bugReport,
+    };
+    final statusMap = <IssueStatus, String>{
+      IssueStatus.CREATED: AppLocalizations.of(context)!.statusCreated,
+      IssueStatus.IN_PROGRESS: AppLocalizations.of(context)!.statusInProgress,
+      IssueStatus.RESOLVED: AppLocalizations.of(context)!.statusResolved,
+      IssueStatus.REVOKED: AppLocalizations.of(context)!.statusRevoked,
+      IssueStatus.BACKLOGGED: AppLocalizations.of(context)!.statusBackLogged,
+    };
+
+    return DesktopSpotlightGrid<IssueListView>(
+      items: currentIssueList,
+      idOf: (issue) => issue.id!,
+      controller: scrollController,
+      cardBuilder: (context, issue) => Material(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: () => context.goNamed('issueDetails',
+              extra: issue.id, pathParameters: {'id': issue.id!}),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(issue.issueHeader ?? '',
+                    style: OnepieceFonts.contentStyleBold.copyWith(
+                        color: OnepieceColors.deepFancyBlue, fontSize: 17),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis),
+                const SizedBox(height: 12),
+                Row(children: [
+                  _issuePill(
+                      typeMap[issue.issueType] ?? '', OnepieceColors.fancyBlue),
+                  const SizedBox(width: 7),
+                  _issuePill(statusMap[issue.issueStatus] ?? '',
+                      OnepieceColors.iconGreen),
+                ]),
+                const SizedBox(height: 12),
+                Row(children: [
+                  const Icon(Icons.person_outline,
+                      size: 16, color: Colors.black45),
+                  const SizedBox(width: 5),
+                  Expanded(
+                    child: Text(issue.creationRecord?.nickname ?? '',
+                        style: OnepieceFonts.smallContentStyle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis),
+                  ),
+                  Text(
+                    DateHelper.getFormattedDatetimeFromTimestamp(
+                        issue.creationRecord!.actionTimestamp!, context),
+                    style: OnepieceFonts.superSmallContentStyle,
+                  ),
+                ]),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _issuePill(String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(label,
+          style: OnepieceFonts.boldFancySmallFont.copyWith(color: color)),
+    );
+  }
+
+  // ignore: unused_element
   DataTable _createIssueTable(BuildContext context) {
     return DataTable(
       showCheckboxColumn: false,
