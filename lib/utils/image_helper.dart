@@ -1,4 +1,5 @@
-import 'dart:typed_data';
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:one_piece_battles_flutter/repository/image_dao.dart';
@@ -27,7 +28,7 @@ class ImageHelper {
           aspectRatio: 1,
           child: FittedBox(
             fit: BoxFit.cover,
-            child: Image.memory(imageData),
+            child: _buildRasterImage(imageData),
           ),
         ),
       ),
@@ -44,7 +45,7 @@ class ImageHelper {
           maxWidth: maxWidth,
           maxHeight: maxHeight,
         ),
-        child: Image.memory(
+        child: _buildRasterImage(
           imageData,
           fit: BoxFit.contain,
           errorBuilder: (_, __, ___) => const Icon(Icons.broken_image),
@@ -78,7 +79,7 @@ class ImageHelper {
           aspectRatio: 1,
           child: FittedBox(
             fit: BoxFit.cover,
-            child: Image.memory(imageData),
+            child: _buildRasterImage(imageData),
           ),
         ),
       ),
@@ -151,5 +152,63 @@ class ImageHelper {
         .then((value) {
       return value!.image;
     });
+  }
+
+  static Widget _buildRasterImage(
+    Uint8List imageData, {
+    BoxFit? fit,
+    ImageErrorWidgetBuilder? errorBuilder,
+  }) {
+    if (!kIsWeb) {
+      return Image.memory(
+        imageData,
+        fit: fit,
+        errorBuilder: errorBuilder,
+      );
+    }
+
+    final mimeType = _detectImageMimeType(imageData);
+    final dataUri = 'data:$mimeType;base64,${base64Encode(imageData)}';
+    return Image.network(
+      dataUri,
+      fit: fit,
+      errorBuilder: errorBuilder,
+      webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
+    );
+  }
+
+  static String _detectImageMimeType(Uint8List data) {
+    if (data.length >= 8 &&
+        data[0] == 0x89 &&
+        data[1] == 0x50 &&
+        data[2] == 0x4e &&
+        data[3] == 0x47) {
+      return 'image/png';
+    }
+    if (data.length >= 3 &&
+        data[0] == 0xff &&
+        data[1] == 0xd8 &&
+        data[2] == 0xff) {
+      return 'image/jpeg';
+    }
+    if (data.length >= 4 &&
+        data[0] == 0x47 &&
+        data[1] == 0x49 &&
+        data[2] == 0x46 &&
+        data[3] == 0x38) {
+      return 'image/gif';
+    }
+    if (data.length >= 12 &&
+        data[0] == 0x52 &&
+        data[1] == 0x49 &&
+        data[2] == 0x46 &&
+        data[3] == 0x46 &&
+        data[8] == 0x57 &&
+        data[9] == 0x45 &&
+        data[10] == 0x42 &&
+        data[11] == 0x50) {
+      return 'image/webp';
+    }
+    return 'image/png';
   }
 }

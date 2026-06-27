@@ -1,4 +1,5 @@
 import 'package:animated_toggle_switch/animated_toggle_switch.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:one_piece_battles_flutter/components/web_socket_service.dart';
@@ -174,9 +175,21 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(
                       height: 30,
                     ),
-                    const Image(
-                      image: AssetImage(PathConstants.luffyFlag),
-                    ),
+                    kIsWeb
+                        ? Image.network(
+                            'assets/${PathConstants.luffyFlag}',
+                            width: 220,
+                            height: 142,
+                            fit: BoxFit.contain,
+                            webHtmlElementStrategy:
+                                WebHtmlElementStrategy.prefer,
+                          )
+                        : Image.asset(
+                            PathConstants.luffyFlag,
+                            width: 220,
+                            height: 142,
+                            fit: BoxFit.contain,
+                          ),
                     const SizedBox(
                       height: 50,
                     ),
@@ -288,35 +301,23 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(height: 5),
                     SizedBox(
                       width: formWidth,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          final signUp = Wrap(
+                            crossAxisAlignment: WrapCrossAlignment.center,
                             children: [
                               Text(
                                 AppLocalizations.of(context)!.noAccount,
                                 style: const TextStyle(
-                                    fontSize: 12, fontWeight: FontWeight.bold),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                               TextButton(
                                 onPressed: () {
                                   context.go(AppRouter.registerPath);
                                 },
-                                style: ButtonStyle(
-                                  overlayColor:
-                                      WidgetStateProperty.resolveWith<Color?>(
-                                    (Set<WidgetState> states) {
-                                      return Colors
-                                          .transparent; // No splash color
-                                    },
-                                  ),
-                                  padding: WidgetStateProperty.all<EdgeInsets>(
-                                      const EdgeInsets.symmetric(
-                                          horizontal: 2.0)),
-                                  // OR Use NoSplash.splashFactory to remove splash effect altogether
-                                  splashFactory: NoSplash.splashFactory,
-                                ),
+                                style: _loginLinkButtonStyle(),
                                 child: Text(
                                   AppLocalizations.of(context)!.registerAccount,
                                   style: const TextStyle(
@@ -325,35 +326,43 @@ class _LoginPageState extends State<LoginPage> {
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                              )
+                              ),
                             ],
-                          ),
-                          TextButton(
+                          );
+                          final forgotPassword = TextButton(
                             onPressed: () {
                               context.go(AppRouter.retrievePassword);
                             },
-                            style: ButtonStyle(
-                              overlayColor:
-                                  WidgetStateProperty.resolveWith<Color?>(
-                                (Set<WidgetState> states) {
-                                  return Colors.transparent; // No splash color
-                                },
-                              ),
-                              padding: WidgetStateProperty.all<EdgeInsets>(
-                                  const EdgeInsets.symmetric(horizontal: 2.0)),
-                              // OR Use NoSplash.splashFactory to remove splash effect altogether
-                              splashFactory: NoSplash.splashFactory,
-                            ),
+                            style: _loginLinkButtonStyle(),
                             child: Text(
                               AppLocalizations.of(context)!.forgotPassword,
+                              textAlign: TextAlign.right,
                               style: const TextStyle(
                                 color: OnepieceColors.fancyBlue,
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                          )
-                        ],
+                          );
+
+                          if (constraints.maxWidth < 260) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                signUp,
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: forgotPassword,
+                                ),
+                              ],
+                            );
+                          }
+
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [signUp, forgotPassword],
+                          );
+                        },
                       ),
                     ),
                     Container(
@@ -365,6 +374,17 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
         ));
+  }
+
+  ButtonStyle _loginLinkButtonStyle() {
+    return TextButton.styleFrom(
+      minimumSize: Size.zero,
+      padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
+      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      splashFactory: NoSplash.splashFactory,
+    ).copyWith(
+      overlayColor: const WidgetStatePropertyAll(Colors.transparent),
+    );
   }
 
   void _submitLogin() {

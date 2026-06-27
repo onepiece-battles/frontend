@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:provider/provider.dart';
 import 'package:web/web.dart' as web;
 import '../../l10n/app_localizations.dart';
@@ -75,6 +76,7 @@ void main() {
       ),
     ], child: const MyApp()),
   );
+  FlutterNativeSplash.remove();
 }
 
 class MyApp extends StatefulWidget {
