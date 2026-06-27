@@ -228,7 +228,7 @@ class ChatNotifier with ChangeNotifier {
       );
       if (response == null) return;
 
-      _chats = response.chats.toList();
+      _chats = response.chats.toList()..sort(_compareChatsByLatestMessage);
       if (_activeChatId != null) {
         _activeChat = _chats.cast<Chat?>().firstWhere(
               (chat) => chat?.id == _activeChatId,
@@ -243,6 +243,21 @@ class ChatNotifier with ChangeNotifier {
     } catch (error) {
       debugPrint('Error refreshing chats: $error');
     }
+  }
+
+  int _compareChatsByLatestMessage(Chat left, Chat right) {
+    final leftTimestamp = left.message?.creationRecord?.actionTimestamp;
+    final rightTimestamp = right.message?.creationRecord?.actionTimestamp;
+
+    if (leftTimestamp == null && rightTimestamp == null) {
+      return (left.id ?? '').compareTo(right.id ?? '');
+    }
+    if (leftTimestamp == null) return 1;
+    if (rightTimestamp == null) return -1;
+
+    final timestampOrder = rightTimestamp.compareTo(leftTimestamp);
+    if (timestampOrder != 0) return timestampOrder;
+    return (left.id ?? '').compareTo(right.id ?? '');
   }
 
   void sendChatMessage(String content) {
