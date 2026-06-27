@@ -1,5 +1,6 @@
-# Start from the Dart image to get both Dart and Flutter SDKs
-FROM dart:3.9.2 AS build-env
+# Flutter web output is architecture-independent. Build it on the native
+# BuildKit host platform so multi-arch builds do not run Dart under QEMU.
+FROM --platform=$BUILDPLATFORM dart:3.9.2 AS build-env
 #FROM registry.cn-hangzhou.aliyuncs.com/dart:3.3.4 AS build-env
 
 
@@ -15,7 +16,7 @@ RUN flutter config --enable-web
 WORKDIR /app
 COPY . .
 RUN flutter pub get
-RUN flutter build web
+RUN flutter build web --no-wasm-dry-run
 
 # Use the Nginx image to serve the app
 FROM nginx:alpine
