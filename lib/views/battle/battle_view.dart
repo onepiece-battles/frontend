@@ -117,8 +117,7 @@ class _BattleViewState extends State<BattleView> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isNarrow =
-            ResponsiveBreakpoints.isMobileFromConstraints(constraints);
+        final isNarrow = constraints.maxWidth < ResponsiveBreakpoints.tabletMax;
         return Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: double.infinity),
@@ -330,122 +329,132 @@ class _BattleViewState extends State<BattleView> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-            if (hasCreate)
-              SizedBox(
-                  height: 35,
-                  width: 120,
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child: ElevatedButton(
-                        onPressed: () => context.goNamed("createBattle"),
-                        style: OnepieceButtonStyle.getDefaultStyle(),
-                        child: Text(AppLocalizations.of(context)!.create)),
-                  )),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 6, 0),
-              child: SizedBox(
-                width: 200,
-                height: 35,
-                child: TextFormField(
-                  controller: starterNameController,
-                  onChanged: (v) {
-                    battleFilter.starterName = v.trim();
-                    _search(true);
-                  },
-                  decoration: InputDecoration(
-                      floatingLabelBehavior: FloatingLabelBehavior.never,
-                      disabledBorder: const OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: OnepieceColors.menuHoverColor)),
-                      enabledBorder: const OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: OnepieceColors.menuHoverColor)),
-                      focusedBorder: const OutlineInputBorder(
-                          borderSide: BorderSide(
-                              color: OnepieceColors.fancyGreen, width: 1.5)),
-                      prefixIcon: const Icon(Icons.search),
-                      labelText: AppLocalizations.of(context)!.starterName,
-                      labelStyle: OnepieceFonts.dropDownItemStyle),
+          Wrap(
+              spacing: 6,
+              runSpacing: 8,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                if (hasCreate)
+                  SizedBox(
+                      height: 35,
+                      width: 120,
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 10),
+                        child: ElevatedButton(
+                            onPressed: () => context.goNamed("createBattle"),
+                            style: OnepieceButtonStyle.getDefaultStyle(),
+                            child: Text(AppLocalizations.of(context)!.create)),
+                      )),
+                Padding(
+                  padding: EdgeInsets.zero,
+                  child: SizedBox(
+                    width: 200,
+                    height: 35,
+                    child: TextFormField(
+                      controller: starterNameController,
+                      onChanged: (v) {
+                        battleFilter.starterName = v.trim();
+                        _search(true);
+                      },
+                      decoration: InputDecoration(
+                          floatingLabelBehavior: FloatingLabelBehavior.never,
+                          disabledBorder: const OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: OnepieceColors.menuHoverColor)),
+                          enabledBorder: const OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: OnepieceColors.menuHoverColor)),
+                          focusedBorder: const OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: OnepieceColors.fancyGreen,
+                                  width: 1.5)),
+                          prefixIcon: const Icon(Icons.search),
+                          labelText: AppLocalizations.of(context)!.starterName,
+                          labelStyle: OnepieceFonts.dropDownItemStyle),
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 6, 0),
-              child: SizedBox(
-                width: 200,
-                height: 35,
-                child: TextFormField(
-                  controller: receiverNameController,
-                  onChanged: (v) {
-                    battleFilter.receiverName = v.trim();
-                    _search(true);
-                  },
-                  decoration: InputDecoration(
-                      labelStyle: OnepieceFonts.dropDownItemStyle,
-                      floatingLabelBehavior: FloatingLabelBehavior.never,
-                      disabledBorder: const OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: OnepieceColors.menuHoverColor)),
-                      enabledBorder: const OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: OnepieceColors.menuHoverColor)),
-                      focusedBorder: const OutlineInputBorder(
-                          borderSide: BorderSide(
-                              color: OnepieceColors.fancyGreen, width: 1.5)),
-                      prefixIcon: const Icon(Icons.search),
-                      labelText: AppLocalizations.of(context)!.receiverName),
+                Padding(
+                  padding: EdgeInsets.zero,
+                  child: SizedBox(
+                    width: 200,
+                    height: 35,
+                    child: TextFormField(
+                      controller: receiverNameController,
+                      onChanged: (v) {
+                        battleFilter.receiverName = v.trim();
+                        _search(true);
+                      },
+                      decoration: InputDecoration(
+                          labelStyle: OnepieceFonts.dropDownItemStyle,
+                          floatingLabelBehavior: FloatingLabelBehavior.never,
+                          disabledBorder: const OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: OnepieceColors.menuHoverColor)),
+                          enabledBorder: const OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: OnepieceColors.menuHoverColor)),
+                          focusedBorder: const OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: OnepieceColors.fancyGreen,
+                                  width: 1.5)),
+                          prefixIcon: const Icon(Icons.search),
+                          labelText:
+                              AppLocalizations.of(context)!.receiverName),
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          ]),
+              ]),
           const SizedBox(height: 10),
-          Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-            SizedBox(
-                height: 36,
-                child: ToggleSwitch(
-                  customWidths: const [140, 130, 150, 180],
-                  cornerRadius: 4,
-                  minWidth: 150,
-                  minHeight: 35,
-                  fontSize: 14,
-                  dividerColor: Colors.white,
-                  initialLabelIndex: initialLabelIndex,
-                  activeBgColor: const [OnepieceColors.fancyBlue],
-                  activeFgColor: Colors.white,
-                  inactiveBgColor: OnepieceColors.liteFancyGreen,
-                  inactiveFgColor: Colors.grey[600],
-                  totalSwitches: 4,
-                  labels: [
-                    AppLocalizations.of(context)!.allResources,
-                    AppLocalizations.of(context)!.myResource,
-                    AppLocalizations.of(context)!.systemResource,
-                    AppLocalizations.of(context)!.excludeSystem
-                  ],
-                  onToggle: (index) {
-                    initialLabelIndex = index!;
-                    if (index == 0) {
-                      battleFilter.systemResource = null;
-                      battleFilter.userId = null;
-                    }
-                    if (index == 1) {
-                      battleFilter.systemResource = null;
-                      battleFilter.userId = getIt<User>().id;
-                    }
-                    if (index == 2) {
-                      battleFilter.systemResource = true;
-                      battleFilter.userId = null;
-                    }
-                    if (index == 3) {
-                      battleFilter.systemResource = false;
-                      battleFilter.userId = null;
-                    }
-                    _search(true);
-                  },
-                )),
-            const SizedBox(width: 10),
-            _getBattleStatusFilter(context),
-          ])
+          Wrap(
+              spacing: 10,
+              runSpacing: 8,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                SizedBox(
+                    height: 36,
+                    child: ToggleSwitch(
+                      customWidths: const [140, 130, 150, 180],
+                      cornerRadius: 4,
+                      minWidth: 150,
+                      minHeight: 35,
+                      fontSize: 14,
+                      dividerColor: Colors.white,
+                      initialLabelIndex: initialLabelIndex,
+                      activeBgColor: const [OnepieceColors.fancyBlue],
+                      activeFgColor: Colors.white,
+                      inactiveBgColor: OnepieceColors.liteFancyGreen,
+                      inactiveFgColor: Colors.grey[600],
+                      totalSwitches: 4,
+                      labels: [
+                        AppLocalizations.of(context)!.allResources,
+                        AppLocalizations.of(context)!.myResource,
+                        AppLocalizations.of(context)!.systemResource,
+                        AppLocalizations.of(context)!.excludeSystem
+                      ],
+                      onToggle: (index) {
+                        initialLabelIndex = index!;
+                        if (index == 0) {
+                          battleFilter.systemResource = null;
+                          battleFilter.userId = null;
+                        }
+                        if (index == 1) {
+                          battleFilter.systemResource = null;
+                          battleFilter.userId = getIt<User>().id;
+                        }
+                        if (index == 2) {
+                          battleFilter.systemResource = true;
+                          battleFilter.userId = null;
+                        }
+                        if (index == 3) {
+                          battleFilter.systemResource = false;
+                          battleFilter.userId = null;
+                        }
+                        _search(true);
+                      },
+                    )),
+                _getBattleStatusFilter(context),
+              ])
         ],
       ),
     );

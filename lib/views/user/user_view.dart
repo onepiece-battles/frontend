@@ -97,8 +97,7 @@ class _UserViewState extends State<UserView> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isNarrow =
-            ResponsiveBreakpoints.isMobileFromConstraints(constraints);
+        final isNarrow = constraints.maxWidth < ResponsiveBreakpoints.tabletMax;
         return Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: double.infinity),
@@ -306,159 +305,159 @@ class _UserViewState extends State<UserView> {
     }
 
     // Desktop
-    return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-      Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(0, 0, 6, 0),
-            child: SizedBox(
-              width: 230,
-              height: 35,
-              child: TextFormField(
-                controller: searchNameController,
-                onChanged: (value) {
-                  userFilter.nickname = value;
-                  _search(true);
-                },
-                decoration: InputDecoration(
-                  floatingLabelBehavior: FloatingLabelBehavior.never,
-                  disabledBorder: const OutlineInputBorder(
-                      borderSide:
-                          BorderSide(color: OnepieceColors.menuHoverColor)),
-                  enabledBorder: const OutlineInputBorder(
-                      borderSide:
-                          BorderSide(color: OnepieceColors.menuHoverColor)),
-                  focusedBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
-                  prefixIcon: const Icon(Icons.search),
-                  labelText: AppLocalizations.of(context)!.name,
-                ),
+    return Wrap(
+      spacing: 6,
+      runSpacing: 8,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        Padding(
+          padding: EdgeInsets.zero,
+          child: SizedBox(
+            width: 230,
+            height: 35,
+            child: TextFormField(
+              controller: searchNameController,
+              onChanged: (value) {
+                userFilter.nickname = value;
+                _search(true);
+              },
+              decoration: InputDecoration(
+                floatingLabelBehavior: FloatingLabelBehavior.never,
+                disabledBorder: const OutlineInputBorder(
+                    borderSide:
+                        BorderSide(color: OnepieceColors.menuHoverColor)),
+                enabledBorder: const OutlineInputBorder(
+                    borderSide:
+                        BorderSide(color: OnepieceColors.menuHoverColor)),
+                focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
+                prefixIcon: const Icon(Icons.search),
+                labelText: AppLocalizations.of(context)!.name,
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(0, 0, 6, 0),
-            child: SizedBox(
-              width: 230,
-              height: 35,
-              child: TextFormField(
-                controller: searchEmailController,
-                onChanged: (value) {
-                  userFilter.username = value;
-                  _search(true);
-                },
-                decoration: InputDecoration(
-                  floatingLabelBehavior: FloatingLabelBehavior.never,
-                  disabledBorder: const OutlineInputBorder(
-                      borderSide:
-                          BorderSide(color: OnepieceColors.menuHoverColor)),
-                  enabledBorder: const OutlineInputBorder(
-                      borderSide:
-                          BorderSide(color: OnepieceColors.menuHoverColor)),
-                  focusedBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
-                  prefixIcon: const Icon(Icons.search),
-                  labelText: AppLocalizations.of(context)!.email,
-                ),
+        ),
+        Padding(
+          padding: EdgeInsets.zero,
+          child: SizedBox(
+            width: 230,
+            height: 35,
+            child: TextFormField(
+              controller: searchEmailController,
+              onChanged: (value) {
+                userFilter.username = value;
+                _search(true);
+              },
+              decoration: InputDecoration(
+                floatingLabelBehavior: FloatingLabelBehavior.never,
+                disabledBorder: const OutlineInputBorder(
+                    borderSide:
+                        BorderSide(color: OnepieceColors.menuHoverColor)),
+                enabledBorder: const OutlineInputBorder(
+                    borderSide:
+                        BorderSide(color: OnepieceColors.menuHoverColor)),
+                focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
+                prefixIcon: const Icon(Icons.search),
+                labelText: AppLocalizations.of(context)!.email,
               ),
             ),
           ),
-          DropdownButtonHideUnderline(
-            child: DropdownButton2(
-              isExpanded: true,
-              value: selectedUserRoles.isEmpty ? null : selectedUserRoles.last,
-              hint: Text(
-                AppLocalizations.of(context)!.loginRole,
-                style: OnepieceFonts.dropDownItemStyle,
+        ),
+        DropdownButtonHideUnderline(
+          child: DropdownButton2(
+            isExpanded: true,
+            value: selectedUserRoles.isEmpty ? null : selectedUserRoles.last,
+            hint: Text(
+              AppLocalizations.of(context)!.loginRole,
+              style: OnepieceFonts.dropDownItemStyle,
+            ),
+            onChanged: (value) {},
+            selectedItemBuilder: (context) {
+              return UserRole.values.map(
+                (item) {
+                  return Container(
+                    alignment: AlignmentDirectional.center,
+                    child: Text(
+                      selectedUserRoles
+                          .map((selectedType) {
+                            return enumValueToDisplayValue[selectedType];
+                          })
+                          .toSet()
+                          .join(', '),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      maxLines: 1,
+                    ),
+                  );
+                },
+              ).toList();
+            },
+            buttonStyleData: ButtonStyleData(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              height: 35,
+              width: 280,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(3),
+                color: OnepieceColors.liteFancyGreen,
               ),
-              onChanged: (value) {},
-              selectedItemBuilder: (context) {
-                return UserRole.values.map(
-                  (item) {
-                    return Container(
-                      alignment: AlignmentDirectional.center,
-                      child: Text(
-                        selectedUserRoles
-                            .map((selectedType) {
-                              return enumValueToDisplayValue[selectedType];
-                            })
-                            .toSet()
-                            .join(', '),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          overflow: TextOverflow.ellipsis,
+            ),
+            menuItemStyleData: const MenuItemStyleData(
+              height: 35,
+            ),
+            items: UserRole.values.map((UserRole userRole) {
+              return DropdownMenuItem<UserRole>(
+                value: userRole,
+                enabled: false,
+                child: StatefulBuilder(
+                  builder: (context, menuSetState) {
+                    final isSelected = selectedUserRoles.contains(userRole);
+                    return InkWell(
+                      hoverColor: Colors.transparent,
+                      splashColor: Colors.transparent,
+                      onTap: () {
+                        isSelected
+                            ? selectedUserRoles.remove(userRole)
+                            : selectedUserRoles.add(userRole);
+                        userFilter.userRoles = selectedUserRoles;
+                        // //This rebuilds the StatefulWidget to update the button's text
+                        setState(() {});
+                        //This rebuilds the dropdownMenu Widget to update the check mark
+                        menuSetState(() {});
+                        _search(true);
+                      },
+                      child: Container(
+                        height: double.infinity,
+                        padding: const EdgeInsets.symmetric(horizontal: 3.0),
+                        child: Row(
+                          children: [
+                            if (isSelected)
+                              const Icon(Icons.check_box_outlined)
+                            else
+                              const Icon(Icons.check_box_outline_blank),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                enumValueToDisplayValue[userRole]!,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                        maxLines: 1,
                       ),
                     );
                   },
-                ).toList();
-              },
-              buttonStyleData: ButtonStyleData(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                height: 35,
-                width: 280,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(3),
-                  color: OnepieceColors.liteFancyGreen,
                 ),
-              ),
-              menuItemStyleData: const MenuItemStyleData(
-                height: 35,
-              ),
-              items: UserRole.values.map((UserRole userRole) {
-                return DropdownMenuItem<UserRole>(
-                  value: userRole,
-                  enabled: false,
-                  child: StatefulBuilder(
-                    builder: (context, menuSetState) {
-                      final isSelected = selectedUserRoles.contains(userRole);
-                      return InkWell(
-                        hoverColor: Colors.transparent,
-                        splashColor: Colors.transparent,
-                        onTap: () {
-                          isSelected
-                              ? selectedUserRoles.remove(userRole)
-                              : selectedUserRoles.add(userRole);
-                          userFilter.userRoles = selectedUserRoles;
-                          // //This rebuilds the StatefulWidget to update the button's text
-                          setState(() {});
-                          //This rebuilds the dropdownMenu Widget to update the check mark
-                          menuSetState(() {});
-                          _search(true);
-                        },
-                        child: Container(
-                          height: double.infinity,
-                          padding: const EdgeInsets.symmetric(horizontal: 3.0),
-                          child: Row(
-                            children: [
-                              if (isSelected)
-                                const Icon(Icons.check_box_outlined)
-                              else
-                                const Icon(Icons.check_box_outline_blank),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  enumValueToDisplayValue[userRole]!,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                );
-              }).toList(),
-            ),
+              );
+            }).toList(),
           ),
-        ],
-      ),
-    ]);
+        ),
+      ],
+    );
   }
 
   // ── Mobile: card-based user list ─────────────────────────────────────

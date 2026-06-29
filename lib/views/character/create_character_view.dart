@@ -7,7 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:one_piece_battles_flutter/components/digit_text_form_field.dart';
 import 'package:one_piece_battles_flutter/components/string_text_form_field.dart';
-import 'package:one_piece_battles_flutter/constants/button_style.dart';
+import 'package:one_piece_battles_flutter/components/creation_form_card.dart';
 import 'package:one_piece_battles_flutter/utils/random_string_generator.dart';
 import 'package:openapi/api.dart';
 import '../../constants/onepiece_colors.dart';
@@ -22,7 +22,6 @@ import '../../utils/i18n_helper.dart';
 import '../../utils/image_helper.dart';
 import '../../utils/nested_scroll_helper.dart';
 import '../../utils/onepiece_image_picker.dart';
-import '../../utils/responsive_breakpoints.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -123,8 +122,8 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
 
   List<TextEditingController> characterControllerListRequired() {
     return <TextEditingController>[
-      characterNameEnController,
       characterNameCnController,
+      if (getIt<User>().loginRole == UserRole.NIKA) characterNameEnController,
       characterFruitLimitController,
       characterGroupGainController,
       characterAttackController,
@@ -180,251 +179,318 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
 
   final _formKey = GlobalKey<FormState>();
 
-  Widget _buildMobileLayout(BuildContext context) {
+  Widget _buildCardLayout(BuildContext context, bool isWide) {
+    final localizations = AppLocalizations.of(context)!;
+
+    final profileCard = CreationFormCard(
+      icon: Icons.person_rounded,
+      title: localizations.basicInfo,
+      badge: localizations.required,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _getAvatar(context),
+          const SizedBox(height: 18),
+          _buildStringField(
+              context, characterNameCnController, localizations.name, true),
+          if (getIt<User>().loginRole == UserRole.NIKA)
+            _buildStringField(
+                context, characterNameEnController, localizations.name, true),
+          _selectionLabel(localizations.battleStyle),
+          _getBattleStyle(context),
+          const SizedBox(height: 14),
+          _selectionLabel(localizations.race),
+          _getRace(context),
+          const SizedBox(height: 14),
+          _selectionLabel(localizations.hakis),
+          _getHakiList(context),
+        ],
+      ),
+    );
+
+    final detailsCard = CreationFormCard(
+      icon: Icons.badge_rounded,
+      title: localizations.characterDetail,
+      badge: localizations.optional,
+      child: Column(
+        children: [
+          _responsiveFieldGrid(
+            context,
+            [
+              _buildDigitField(context, characterBounty, localizations.bounty,
+                  10, 100000000000, false),
+              _buildDigitField(
+                  context, characterAge, localizations.age, 0, 100000, false),
+              _buildDigitField(context, characterHeight, localizations.height,
+                  1, 100000, false),
+              _buildStringField(context, characterBirthPlace,
+                  localizations.birthPlace, false),
+            ],
+          ),
+          _getBirthDropdown(context),
+        ],
+      ),
+    );
+
+    final battleCard = CreationFormCard(
+      icon: Icons.shield_rounded,
+      title: localizations.battleInfo,
+      badge: localizations.required,
+      child: _responsiveFieldGrid(
+        context,
+        [
+          _buildDigitField(context, characterAttackController,
+              localizations.characterAttack, 10, 1500, true),
+          _buildDigitField(context, characterDefenseController,
+              localizations.characterDefense, 10, 1400, true),
+          _buildDigitField(context, characterBloodController,
+              localizations.characterBlood, 100, 10000, true),
+          _buildDigitField(context, characterEnergyController,
+              localizations.characterEnergy, 100, 300, true),
+          _buildDigitField(context, characterSpeedController,
+              localizations.characterSpeed, 10, 200, true),
+          _buildDigitField(context, characterIntelligenceController,
+              localizations.characterIntelligence, 70, 260, true),
+          _buildDigitField(context, characterGroupGainController,
+              localizations.groupGain, 100, 200, true),
+          _buildDigitField(context, characterFruitLimitController,
+              localizations.fruitLimit, 1, 2, true),
+        ],
+      ),
+    );
+
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(12, 12, 12, 80),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        // Avatar
-        Center(
-            child: Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: _getAvatar(context),
-        )),
-        // Basic Info card
-        Card(
-          elevation: 0,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(AppLocalizations.of(context)!.basicInfo,
-                        style:
-                            OnepieceFonts.headerStyle.copyWith(fontSize: 16)),
-                    const SizedBox(height: 10),
-                    _buildStringField(context, characterNameEnController,
-                        AppLocalizations.of(context)!.name, true),
-                    const SizedBox(height: 6),
-                    const SizedBox(height: 6),
-                    _getBattleStyle(context),
-                    const SizedBox(height: 6),
-                    _getRace(context),
-                    const SizedBox(height: 6),
-                    _getHakiList(context),
-                    const SizedBox(height: 6),
-                    _buildDigitField(
-                        context,
-                        characterBounty,
-                        AppLocalizations.of(context)!.bounty,
-                        10,
-                        100000000000,
-                        false),
-                    _buildDigitField(context, characterAge,
-                        AppLocalizations.of(context)!.age, 0, 100000, false),
-                    _buildDigitField(context, characterHeight,
-                        AppLocalizations.of(context)!.height, 1, 100000, false),
-                    _buildStringField(context, characterBirthPlace,
-                        AppLocalizations.of(context)!.birthPlace, false),
-                    _getBirthDropdown(context),
-                  ])),
+      controller: _pageScrollController,
+      padding: EdgeInsets.fromLTRB(isWide ? 28 : 12, 18, isWide ? 28 : 12, 100),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1180),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                CreationPageHeader(
+                  icon: Icons.person_add_alt_1_rounded,
+                  title: localizations.createCharacter,
+                ),
+                const SizedBox(height: 18),
+                if (isWide)
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        flex: 5,
+                        child: Column(
+                          children: [
+                            profileCard,
+                            const SizedBox(height: 18),
+                            detailsCard,
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 18),
+                      Expanded(flex: 6, child: battleCard),
+                    ],
+                  )
+                else ...[
+                  profileCard,
+                  const SizedBox(height: 14),
+                  detailsCard,
+                  const SizedBox(height: 14),
+                  battleCard,
+                ],
+              ],
+            ),
+          ),
         ),
-        const SizedBox(height: 12),
-        // Battle Info card
-        Card(
-          elevation: 0,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(AppLocalizations.of(context)!.battleInfo,
-                        style:
-                            OnepieceFonts.headerStyle.copyWith(fontSize: 16)),
-                    const SizedBox(height: 10),
-                    _buildDigitField(
-                        context,
-                        characterAttackController,
-                        AppLocalizations.of(context)!.characterAttack,
-                        10,
-                        1500,
-                        true),
-                    _buildDigitField(
-                        context,
-                        characterDefenseController,
-                        AppLocalizations.of(context)!.characterDefense,
-                        10,
-                        1400,
-                        true),
-                    _buildDigitField(
-                        context,
-                        characterBloodController,
-                        AppLocalizations.of(context)!.characterBlood,
-                        100,
-                        10000,
-                        true),
-                    _buildDigitField(
-                        context,
-                        characterEnergyController,
-                        AppLocalizations.of(context)!.characterEnergy,
-                        100,
-                        300,
-                        true),
-                    _buildDigitField(
-                        context,
-                        characterSpeedController,
-                        AppLocalizations.of(context)!.characterSpeed,
-                        10,
-                        200,
-                        true),
-                    _buildDigitField(
-                        context,
-                        characterIntelligenceController,
-                        AppLocalizations.of(context)!.characterIntelligence,
-                        70,
-                        260,
-                        true),
-                    _buildDigitField(
-                        context,
-                        characterGroupGainController,
-                        AppLocalizations.of(context)!.groupGain,
-                        100,
-                        200,
-                        true),
-                    _buildDigitField(context, characterFruitLimitController,
-                        AppLocalizations.of(context)!.fruitLimit, 1, 2, true),
-                  ])),
-        ),
-      ]),
+      ),
+    );
+  }
+
+  Widget _selectionLabel(String label) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 7),
+      child: Text(
+        label,
+        style: OnepieceFonts.deepBlackHintFont
+            .copyWith(fontWeight: FontWeight.w600),
+      ),
+    );
+  }
+
+  Widget _responsiveFieldGrid(BuildContext context, List<Widget> fields) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final twoColumns = constraints.maxWidth >= 540;
+        final width =
+            twoColumns ? (constraints.maxWidth - 12) / 2 : constraints.maxWidth;
+        return Wrap(
+          spacing: 12,
+          children: fields
+              .map((field) => SizedBox(width: width, child: field))
+              .toList(),
+        );
+      },
     );
   }
 
   Widget _buildDigitField(BuildContext context, TextEditingController ctrl,
       String hint, int min, int max, bool required) {
     return Padding(
-        padding: const EdgeInsets.only(bottom: 10),
-        child: SizedBox(
-            height: 35,
-            child: TextFormField(
-              controller: ctrl,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                floatingLabelBehavior: FloatingLabelBehavior.never,
-                disabledBorder: const OutlineInputBorder(
-                    borderSide:
-                        BorderSide(color: OnepieceColors.menuHoverColor)),
-                enabledBorder: const OutlineInputBorder(
-                    borderSide:
-                        BorderSide(color: OnepieceColors.menuHoverColor)),
-                focusedBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(
-                        color: OnepieceColors.fancyGreen, width: 1.5)),
-                labelText: hint,
-                labelStyle: OnepieceFonts.dropDownItemStyle,
-              ),
-            )));
+      padding: const EdgeInsets.only(bottom: 14),
+      child: TextFormField(
+        controller: ctrl,
+        keyboardType: TextInputType.number,
+        textInputAction: TextInputAction.next,
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+        validator: (value) {
+          if (!required && (value == null || value.trim().isEmpty)) {
+            return null;
+          }
+          if (value == null || value.trim().isEmpty) {
+            return AppLocalizations.of(context)!.requiredField;
+          }
+          final number = int.tryParse(value.trim());
+          if (number == null) {
+            return AppLocalizations.of(context)!.fieldMustBeInt;
+          }
+          if (number < min || number > max) {
+            return AppLocalizations.of(context)!.valueExceedsLimit;
+          }
+          return null;
+        },
+        decoration: _fieldDecoration(hint, '$min – $max'),
+      ),
+    );
   }
 
   Widget _buildStringField(BuildContext context, TextEditingController ctrl,
       String hint, bool required) {
     return Padding(
-        padding: const EdgeInsets.only(bottom: 10),
-        child: SizedBox(
-            height: 35,
-            child: TextFormField(
-              controller: ctrl,
-              decoration: InputDecoration(
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                floatingLabelBehavior: FloatingLabelBehavior.never,
-                disabledBorder: const OutlineInputBorder(
-                    borderSide:
-                        BorderSide(color: OnepieceColors.menuHoverColor)),
-                enabledBorder: const OutlineInputBorder(
-                    borderSide:
-                        BorderSide(color: OnepieceColors.menuHoverColor)),
-                focusedBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(
-                        color: OnepieceColors.fancyGreen, width: 1.5)),
-                labelText: hint,
-                labelStyle: OnepieceFonts.dropDownItemStyle,
-              ),
-            )));
+      padding: const EdgeInsets.only(bottom: 14),
+      child: TextFormField(
+        controller: ctrl,
+        textInputAction: TextInputAction.next,
+        validator: (value) =>
+            required && (value == null || value.trim().isEmpty)
+                ? AppLocalizations.of(context)!.requiredField
+                : null,
+        decoration: _fieldDecoration(hint, null),
+      ),
+    );
+  }
+
+  InputDecoration _fieldDecoration(String label, String? hint) {
+    return InputDecoration(
+      labelText: label,
+      hintText: hint,
+      filled: true,
+      fillColor: Colors.white,
+      isDense: true,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 13, vertical: 13),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFDCE4EC)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFDCE4EC)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide:
+            const BorderSide(color: OnepieceColors.fancyGreen, width: 1.6),
+      ),
+    );
   }
 
   Widget _getBirthDropdown(BuildContext context) {
-    return Padding(
-        padding: const EdgeInsets.only(bottom: 10),
-        child: Row(children: [
-          Text(AppLocalizations.of(context)!.birthDay,
-              style: OnepieceFonts.deepBlackHintFont),
-          const Spacer(),
-          SizedBox(
-              width: 60,
-              child: DropdownButtonHideUnderline(
-                  child: DropdownButton2<String>(
-                isExpanded: true,
-                value: selectedMonth,
-                onChanged: (v) => setState(() => selectedMonth = v ?? ''),
-                buttonStyleData: ButtonStyleData(
-                    padding: const EdgeInsets.symmetric(horizontal: 5),
-                    height: 30,
-                    width: 60,
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(3),
-                        color: OnepieceColors.liteFancyGreen)),
-                menuItemStyleData: const MenuItemStyleData(height: 30),
-                items: List.generate(12, (i) => (i + 1).toString())
-                    .map((m) => DropdownMenuItem<String>(
-                        value: m,
-                        child: Text(m, style: const TextStyle(fontSize: 14))))
-                    .toList(),
-              ))),
-          Text(' ${AppLocalizations.of(context)!.month} ',
-              style: OnepieceFonts.smallContentStyle),
-          SizedBox(
-              width: 60,
-              child: DropdownButtonHideUnderline(
-                  child: DropdownButton2<String>(
-                isExpanded: true,
-                value: selectedDay,
-                onChanged: (v) => setState(() => selectedDay = v ?? ''),
-                buttonStyleData: ButtonStyleData(
-                    padding: const EdgeInsets.symmetric(horizontal: 5),
-                    height: 30,
-                    width: 60,
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(3),
-                        color: OnepieceColors.liteFancyGreen)),
-                menuItemStyleData: const MenuItemStyleData(height: 30),
-                items: List.generate(31, (i) => (i + 1).toString())
-                    .map((d) => DropdownMenuItem<String>(
-                        value: d,
-                        child: Text(d, style: const TextStyle(fontSize: 14))))
-                    .toList(),
-              ))),
-          Text(' ${AppLocalizations.of(context)!.day}',
-              style: OnepieceFonts.smallContentStyle),
-        ]));
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _selectionLabel(AppLocalizations.of(context)!.birthDay),
+        Row(children: [
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFFF7F9FC),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                      width: 60,
+                      child: DropdownButtonHideUnderline(
+                          child: DropdownButton2<String>(
+                        isExpanded: true,
+                        value: selectedMonth,
+                        onChanged: (v) =>
+                            setState(() => selectedMonth = v ?? ''),
+                        buttonStyleData: ButtonStyleData(
+                            padding: const EdgeInsets.symmetric(horizontal: 5),
+                            height: 30,
+                            width: 60,
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(3),
+                                color: OnepieceColors.liteFancyGreen)),
+                        menuItemStyleData: const MenuItemStyleData(height: 30),
+                        items: List.generate(12, (i) => (i + 1).toString())
+                            .map((m) => DropdownMenuItem<String>(
+                                value: m,
+                                child: Text(m,
+                                    style: const TextStyle(fontSize: 14))))
+                            .toList(),
+                      ))),
+                  Text(' ${AppLocalizations.of(context)!.month} ',
+                      style: OnepieceFonts.smallContentStyle),
+                  SizedBox(
+                      width: 60,
+                      child: DropdownButtonHideUnderline(
+                          child: DropdownButton2<String>(
+                        isExpanded: true,
+                        value: selectedDay,
+                        onChanged: (v) => setState(() => selectedDay = v ?? ''),
+                        buttonStyleData: ButtonStyleData(
+                            padding: const EdgeInsets.symmetric(horizontal: 5),
+                            height: 30,
+                            width: 60,
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(3),
+                                color: OnepieceColors.liteFancyGreen)),
+                        menuItemStyleData: const MenuItemStyleData(height: 30),
+                        items: List.generate(31, (i) => (i + 1).toString())
+                            .map((d) => DropdownMenuItem<String>(
+                                value: d,
+                                child: Text(d,
+                                    style: const TextStyle(fontSize: 14))))
+                            .toList(),
+                      ))),
+                  Text(' ${AppLocalizations.of(context)!.day}',
+                      style: OnepieceFonts.smallContentStyle),
+                ],
+              ),
+            ),
+          ),
+        ]),
+      ],
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isNarrow =
-            ResponsiveBreakpoints.isMobileFromConstraints(constraints);
-        dividerWidth = isNarrow ? constraints.maxWidth - 30 : 900;
-        sideWidth = isNarrow ? 8.0 : 50;
+        final useCardLayout = constraints.maxWidth.isFinite;
+        dividerWidth = useCardLayout ? constraints.maxWidth - 30 : 900;
+        sideWidth = useCardLayout ? 8.0 : 50;
         return Stack(
           children: [
-            if (isNarrow)
-              _buildMobileLayout(context)
+            if (useCardLayout)
+              ColoredBox(
+                color: const Color(0xFFF5F7FB),
+                child: _buildCardLayout(context, constraints.maxWidth >= 900),
+              )
             else
               SingleChildScrollView(
                 controller: _pageScrollController,
@@ -989,69 +1055,78 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
   }
 
   Widget _getAvatar(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(0, 0, 15.0, 0),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(
-          children: [
-            SizedBox(
-              width: 80,
-              height: 80,
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF7F9FC),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE7ECF2)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            width: 76,
+            height: 76,
+            padding: const EdgeInsets.all(3),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white,
+              border: Border.all(color: OnepieceColors.fancyGreen, width: 2),
+            ),
+            child: ClipOval(
               child: _pickedImage.isEmpty
-                  ? ClipOval(
-                      child: Image.asset(PathConstants.luffyHat),
-                    )
-                  : ClipOval(
-                      child: Image.memory(_pickedImage),
-                    ),
+                  ? Image.asset(PathConstants.luffyHat, fit: BoxFit.cover)
+                  : Image.memory(_pickedImage, fit: BoxFit.cover),
             ),
-            const SizedBox(
-              width: 10,
-            ),
-            Column(
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   AppLocalizations.of(context)!.uploadNewAvatar,
-                  style: OnepieceFonts.contentStyle,
+                  style: OnepieceFonts.deepBlackHintFont
+                      .copyWith(fontWeight: FontWeight.w600),
                 ),
-                const SizedBox(
-                  height: 10,
-                ),
-                Row(
+                const SizedBox(height: 8),
+                Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 10,
+                  runSpacing: 6,
                   children: [
-                    ElevatedButton(
+                    OutlinedButton.icon(
                       onPressed: _pickAndProcessImage,
-                      style: OnepieceButtonStyle.getDefaultStyle(),
-                      child: Text(AppLocalizations.of(context)!.chooseFile),
+                      icon: const Icon(Icons.upload_rounded, size: 18),
+                      label: Text(AppLocalizations.of(context)!.chooseFile),
                     ),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    SizedBox(
-                      width: 200,
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 180),
                       child: Text(
-                        _chosenImageName != ""
+                        _chosenImageName.isNotEmpty
                             ? _chosenImageName
                             : AppLocalizations.of(context)!.noFileChosen,
                         style: OnepieceFonts.contentStyle,
                         overflow: TextOverflow.ellipsis,
                       ),
-                    )
+                    ),
                   ],
                 ),
-                const SizedBox(
-                  height: 10,
-                ),
+                const SizedBox(height: 5),
                 Text(
                   AppLocalizations.of(context)!.maxFileSizeDescription,
-                  style: OnepieceFonts.contentStyle,
-                )
+                  style: OnepieceFonts.contentStyle.copyWith(
+                    color: OnepieceColors.menuIconColor,
+                    fontSize: 12,
+                  ),
+                ),
               ],
-            )
-          ],
-        )
-      ]),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -1099,12 +1174,12 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
           },
           buttonStyleData: ButtonStyleData(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            height: 35,
-            width:
-                MediaQuery.of(context).size.width < 600 ? double.infinity : 280,
+            height: 46,
+            width: double.infinity,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(3),
-              color: OnepieceColors.liteFancyGreen,
+              borderRadius: BorderRadius.circular(12),
+              color: const Color(0xFFF7F9FC),
+              border: Border.all(color: const Color(0xFFDCE4EC)),
             ),
           ),
           menuItemStyleData: const MenuItemStyleData(height: 35),
@@ -1173,12 +1248,12 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
           },
           buttonStyleData: ButtonStyleData(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            height: 35,
-            width:
-                MediaQuery.of(context).size.width < 600 ? double.infinity : 280,
+            height: 46,
+            width: double.infinity,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(3),
-              color: OnepieceColors.liteFancyGreen,
+              borderRadius: BorderRadius.circular(12),
+              color: const Color(0xFFF7F9FC),
+              border: Border.all(color: const Color(0xFFDCE4EC)),
             ),
           ),
           menuItemStyleData: const MenuItemStyleData(height: 35),
@@ -1236,12 +1311,12 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
           },
           buttonStyleData: ButtonStyleData(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            height: 35,
-            width:
-                MediaQuery.of(context).size.width < 600 ? double.infinity : 280,
+            height: 46,
+            width: double.infinity,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(3),
-              color: OnepieceColors.liteFancyGreen,
+              borderRadius: BorderRadius.circular(12),
+              color: const Color(0xFFF7F9FC),
+              border: Border.all(color: const Color(0xFFDCE4EC)),
             ),
           ),
           menuItemStyleData: const MenuItemStyleData(height: 35),
@@ -1301,14 +1376,24 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
         left: 0,
         right: 0,
         child: Container(
-          color: Colors.white,
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Color(0x1A16324F),
+                blurRadius: 18,
+                offset: Offset(0, -4),
+              ),
+            ],
+          ),
           child: Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                ElevatedButton(
-                  child: Text(AppLocalizations.of(context)!.clearForm),
+                OutlinedButton.icon(
+                  icon: const Icon(Icons.refresh_rounded, size: 18),
+                  label: Text(AppLocalizations.of(context)!.clearForm),
                   onPressed: () {
                     setState(() {
                       characterControllerListAll().forEach((element) {
@@ -1320,96 +1405,94 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                     });
                   },
                 ),
-                ElevatedButton(
-                  onPressed: !_allElementsAreFilled()
-                      ? null
-                      : () {
-                          final isValid = _formKey.currentState!.validate();
-                          if (!isValid) {
-                            return;
-                          }
-                          if (!_newImagePicked) {
-                            OnepieceAlert.getBasicAlertDialogFunc(
-                                context,
-                                AppLocalizations.of(context)!.hint,
-                                AppLocalizations.of(context)!
-                                    .characterImageRequired);
-                            return;
-                          }
-                          CreateCharacterRequest addCharacterRequest =
-                              CreateCharacterRequest(
-                            battleStyle: selectedBattleStyle,
-                            race: selectedRace,
-                            hakis: selectedHakis,
-                            name: RandomStringGenerator.generateI18n(
-                                characterNameEnController.text,
-                                characterNameCnController.text),
-                            maximumFruitCount: DataConverter.stringToInt(
-                                characterFruitLimitController.text.trim()),
-                            groupGain: DataConverter.stringToInt(
-                                characterGroupGainController.text.trim()),
-                            attack: DataConverter.stringToInt(
-                                characterAttackController.text.trim()),
-                            defense: DataConverter.stringToInt(
-                                characterDefenseController.text.trim()),
-                            intelligence: DataConverter.stringToInt(
-                                characterIntelligenceController.text.trim()),
-                            blood: DataConverter.stringToInt(
-                                characterBloodController.text.trim()),
-                            speed: DataConverter.stringToInt(
-                                characterSpeedController.text.trim()),
-                            energy: DataConverter.stringToInt(
-                                characterEnergyController.text.trim()),
-                            height: characterHeight.text.isEmpty
-                                ? null
-                                : DataConverter.stringToInt(
-                                    characterHeight.text.trim()),
-                            age: characterAge.text.isEmpty
-                                ? null
-                                : DataConverter.stringToInt(
-                                    characterAge.text.trim()),
-                            birthPlace: characterBirthPlace.text.trim(),
-                            dateOfBirth: "$selectedMonth-$selectedDay",
-                            bounty: characterBounty.text.isEmpty
-                                ? null
-                                : DataConverter.stringToInt(
-                                    characterBounty.text.trim()),
-                          );
-                          final router = GoRouter.of(context);
-                          getIt<CharacterDao>()
-                              .addCharacter(addCharacterRequest)
-                              .then((characterResponse) {
-                            if (!mounted) return;
-                            var encodedImage =
-                                Base64Helper.encode(_pickedImage);
-                            UploadImageRequest uploadImageRequest =
-                                UploadImageRequest(
-                                    resourceId: characterResponse!.id,
-                                    image: encodedImage,
-                                    type: ResourceType.CHARACTER);
-                            getIt<ImageDao>()
-                                .addImage(uploadImageRequest)
-                                .then((value) {
-                              if (!mounted) return;
-                              router.goNamed('characterDetails',
-                                  extra: characterResponse.id,
-                                  pathParameters: {
-                                    'name': I18nHelper.getDisplayNameFromI18n(
-                                        characterResponse.name)
-                                  });
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(132, 46),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  icon: const Icon(Icons.check_rounded, size: 19),
+                  onPressed: () {
+                    final isValid = _formKey.currentState!.validate();
+                    if (!isValid) {
+                      return;
+                    }
+                    if (!_newImagePicked) {
+                      OnepieceAlert.getBasicAlertDialogFunc(
+                          context,
+                          AppLocalizations.of(context)!.hint,
+                          AppLocalizations.of(context)!.characterImageRequired);
+                      return;
+                    }
+                    CreateCharacterRequest addCharacterRequest =
+                        CreateCharacterRequest(
+                      battleStyle: selectedBattleStyle,
+                      race: selectedRace,
+                      hakis: selectedHakis,
+                      name: RandomStringGenerator.generateI18n(
+                          characterNameEnController.text,
+                          characterNameCnController.text),
+                      maximumFruitCount: DataConverter.stringToInt(
+                          characterFruitLimitController.text.trim()),
+                      groupGain: DataConverter.stringToInt(
+                          characterGroupGainController.text.trim()),
+                      attack: DataConverter.stringToInt(
+                          characterAttackController.text.trim()),
+                      defense: DataConverter.stringToInt(
+                          characterDefenseController.text.trim()),
+                      intelligence: DataConverter.stringToInt(
+                          characterIntelligenceController.text.trim()),
+                      blood: DataConverter.stringToInt(
+                          characterBloodController.text.trim()),
+                      speed: DataConverter.stringToInt(
+                          characterSpeedController.text.trim()),
+                      energy: DataConverter.stringToInt(
+                          characterEnergyController.text.trim()),
+                      height: characterHeight.text.isEmpty
+                          ? null
+                          : DataConverter.stringToInt(
+                              characterHeight.text.trim()),
+                      age: characterAge.text.isEmpty
+                          ? null
+                          : DataConverter.stringToInt(characterAge.text.trim()),
+                      birthPlace: characterBirthPlace.text.trim(),
+                      dateOfBirth: "$selectedMonth-$selectedDay",
+                      bounty: characterBounty.text.isEmpty
+                          ? null
+                          : DataConverter.stringToInt(
+                              characterBounty.text.trim()),
+                    );
+                    final router = GoRouter.of(context);
+                    getIt<CharacterDao>()
+                        .addCharacter(addCharacterRequest)
+                        .then((characterResponse) {
+                      if (!mounted) return;
+                      var encodedImage = Base64Helper.encode(_pickedImage);
+                      UploadImageRequest uploadImageRequest =
+                          UploadImageRequest(
+                              resourceId: characterResponse!.id,
+                              image: encodedImage,
+                              type: ResourceType.CHARACTER);
+                      getIt<ImageDao>()
+                          .addImage(uploadImageRequest)
+                          .then((value) {
+                        if (!mounted) return;
+                        router.goNamed('characterDetails',
+                            extra: characterResponse.id,
+                            pathParameters: {
+                              'name': I18nHelper.getDisplayNameFromI18n(
+                                  characterResponse.name)
                             });
-                          });
-                        },
-                  child: Text(AppLocalizations.of(context)!.submitForm),
+                      });
+                    });
+                  },
+                  label: Text(AppLocalizations.of(context)!.submitForm),
                 ),
               ],
             ),
           ),
         ));
-  }
-
-  bool _allElementsAreFilled() {
-    return characterControllerListRequired().every((e) => e.text != '');
   }
 
   // 1. 抽象出选择并处理图片的逻辑到单独的方法

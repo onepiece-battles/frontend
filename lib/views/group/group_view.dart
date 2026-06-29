@@ -114,8 +114,7 @@ class _GroupViewState extends State<GroupView> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isNarrow =
-            ResponsiveBreakpoints.isMobileFromConstraints(constraints);
+        final isNarrow = constraints.maxWidth < ResponsiveBreakpoints.tabletMax;
         return Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: double.infinity),
@@ -363,8 +362,10 @@ class _GroupViewState extends State<GroupView> {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
+          Wrap(
+            spacing: 6,
+            runSpacing: 8,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               if (PermissionCheck.checkPermission(
                   getIt<User>().loginRoleResourcesPermissionMap,
@@ -384,7 +385,7 @@ class _GroupViewState extends State<GroupView> {
                   ),
                 ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(0, 0, 6, 0),
+                padding: EdgeInsets.zero,
                 child: SizedBox(
                   width: 200,
                   height: 35,
@@ -417,8 +418,10 @@ class _GroupViewState extends State<GroupView> {
           const SizedBox(
             height: 10,
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
+          Wrap(
+            spacing: 10,
+            runSpacing: 8,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               SizedBox(
                 height: 36,
@@ -466,9 +469,6 @@ class _GroupViewState extends State<GroupView> {
                     _search(true);
                   },
                 ),
-              ),
-              const SizedBox(
-                width: 10,
               ),
               DropdownButtonHideUnderline(
                 child: DropdownButton2(

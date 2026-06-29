@@ -2,21 +2,19 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:one_piece_battles_flutter/components/creation_form_card.dart';
 import 'package:one_piece_battles_flutter/components/image_lazy_loader.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:openapi/api.dart';
 import '../../l10n/app_localizations.dart';
-import '../../constants/button_style.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_tag.dart';
 import 'package:one_piece_battles_flutter/graph/character_data.dart';
 import '../../graph/character_bar_graph.dart';
 import '../../repository/battle_dao.dart';
-import '../../utils/responsive_breakpoints.dart';
 import '../../repository/character_dao.dart';
 import '../../utils/i18n_helper.dart';
 import '../../utils/image_helper.dart';
-import '../../utils/nested_scroll_helper.dart';
 
 GetIt getIt = GetIt.instance;
 Timer? _timer;
@@ -36,7 +34,6 @@ class _CreateBattleViewState extends State<CreateBattleView> {
   final ScrollController _starterScrollController = ScrollController();
   final ScrollController _receiverScrollController = ScrollController();
   final ScrollController _verticalScrollController = ScrollController();
-  final ScrollController _horizontalScrollController = ScrollController();
   ValueNotifier<CharacterListView?> starterSelectedItem = ValueNotifier(null);
   ValueNotifier<CharacterListView?> receiverSelectedItem = ValueNotifier(null);
   TextEditingController starterTextController = TextEditingController();
@@ -64,7 +61,6 @@ class _CreateBattleViewState extends State<CreateBattleView> {
     _starterScrollController.dispose();
     _receiverScrollController.dispose();
     _verticalScrollController.dispose();
-    _horizontalScrollController.dispose();
     starterSelectedItem.dispose();
     receiverSelectedItem.dispose();
     starterTextController.dispose();
@@ -121,49 +117,147 @@ class _CreateBattleViewState extends State<CreateBattleView> {
     );
   }
 
+  Widget _selectedCharacterSummary(CharacterListView? character, bool isSmall) {
+    if (character == null) {
+      return SizedBox(height: isSmall ? 44 : 58);
+    }
+
+    return Padding(
+      padding: EdgeInsets.only(top: isSmall ? 8 : 12, bottom: isSmall ? 4 : 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            I18nHelper.getDisplayNameFromI18n(character.name),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: OnepieceColors.fancyBlue,
+              fontSize: isSmall ? 13 : 18,
+              fontWeight: FontWeight.w700,
+              height: 1.2,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Container(
+            constraints: const BoxConstraints(maxWidth: 280),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: OnepieceColors.liteFancyGreen,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              '${AppLocalizations.of(context)!.combatPower} ${character.score}',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              softWrap: false,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: OnepieceColors.deepFancyBlue,
+                fontSize: isSmall ? 11 : 13,
+                fontWeight: FontWeight.w600,
+                height: 1.2,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isNarrow =
-            ResponsiveBreakpoints.isMobileFromConstraints(constraints);
-        return SingleChildScrollView(
-          scrollDirection: Axis.vertical,
-          controller: _verticalScrollController,
-          child: isNarrow
-              ? SingleChildScrollView(
-                  child: Column(children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(child: getLeftPanel(context)),
-                            const SizedBox(width: 8),
-                            Expanded(child: getRightPanel(context)),
-                          ]),
-                    ),
-                    _getFoot(context),
-                  ]),
-                )
-              : Center(
-                  child: NestedHorizontalScrollView(
-                    controller: _horizontalScrollController,
-                    verticalParentController: _verticalScrollController,
+        final isWide = constraints.maxWidth >= 900;
+        final localizations = AppLocalizations.of(context)!;
+        final starterCard = CreationFormCard(
+          icon: Icons.bolt_rounded,
+          title: localizations.starterName,
+          child: getLeftPanel(context),
+        );
+        final receiverCard = CreationFormCard(
+          icon: Icons.shield_rounded,
+          title: localizations.receiverName,
+          child: getRightPanel(context),
+        );
+
+        return Stack(
+          children: [
+            ColoredBox(
+              color: const Color(0xFFF5F7FB),
+              child: SingleChildScrollView(
+                controller: _verticalScrollController,
+                padding: EdgeInsets.fromLTRB(
+                  isWide ? 28 : 12,
+                  18,
+                  isWide ? 28 : 12,
+                  105,
+                ),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 1180),
                     child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
+                      children: [
+                        CreationPageHeader(
+                          icon: Icons.sports_martial_arts_rounded,
+                          title: localizations.createBattle,
+                        ),
+                        const SizedBox(height: 18),
+                        if (isWide)
                           Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                getLeftPanel(context),
-                                getRightPanel(context)
-                              ]),
-                          _getFoot(context),
-                        ]),
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(child: starterCard),
+                              const SizedBox(width: 18),
+                              Container(
+                                width: 44,
+                                height: 44,
+                                margin: const EdgeInsets.only(top: 80),
+                                alignment: Alignment.center,
+                                decoration: const BoxDecoration(
+                                  color: OnepieceColors.deepFancyBlue,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Text(
+                                  'VS',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 18),
+                              Expanded(child: receiverCard),
+                            ],
+                          )
+                        else ...[
+                          starterCard,
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 12),
+                            child: CircleAvatar(
+                              radius: 23,
+                              backgroundColor: OnepieceColors.deepFancyBlue,
+                              child: Text(
+                                'VS',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ),
+                          ),
+                          receiverCard,
+                        ],
+                      ],
+                    ),
                   ),
                 ),
+              ),
+            ),
+            _getFoot(context),
+          ],
         );
       },
     );
@@ -175,24 +269,22 @@ class _CreateBattleViewState extends State<CreateBattleView> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Padding(
-          padding: EdgeInsets.fromLTRB(
-              MediaQuery.of(context).size.width < 600 ? 0 : 60,
-              MediaQuery.of(context).size.width < 600 ? 6 : 10,
-              MediaQuery.of(context).size.width < 600 ? 0 : 30,
-              MediaQuery.of(context).size.width < 600 ? 6 : 10),
+          padding: EdgeInsets.symmetric(
+            vertical: MediaQuery.of(context).size.width < 600 ? 6 : 10,
+          ),
           child: ValueListenableBuilder<CharacterListView?>(
             valueListenable: starterSelectedItem,
             builder: (context, value, _) {
               final isSmall = MediaQuery.of(context).size.width < 600;
-              final imgSize = isSmall ? 54.0 : 180.0;
-              final graphW = isSmall ? 120.0 : 200.0;
-              final graphH = isSmall ? 120.0 : 180.0;
+              final imgSize = isSmall ? 64.0 : 130.0;
+              final graphW = isSmall ? 120.0 : 170.0;
+              final graphH = isSmall ? 120.0 : 140.0;
               return SizedBox(
-                width: isSmall ? double.infinity : 500,
+                width: double.infinity,
                 child: Column(
                   children: [
                     Padding(
-                      padding: EdgeInsets.only(top: isSmall ? 4 : 60),
+                      padding: EdgeInsets.only(top: isSmall ? 4 : 10),
                       child: isSmall
                           ? SizedBox(
                               height: 62,
@@ -280,47 +372,8 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                                                                 .energy))))),
                                 ]),
                     ),
-                    starterSelectedItem.value == null
-                        ? SizedBox(
-                            height: isSmall ? 48 : 80,
-                            child: const Text(
-                              "",
-                              style: OnepieceFonts.headerStyle,
-                            ),
-                          )
-                        : SizedBox(
-                            height: isSmall ? 48 : 80,
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(
-                                  vertical: isSmall ? 4.0 : 10.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    I18nHelper.getDisplayNameFromI18n(
-                                        starterSelectedItem.value!.name),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                        color: OnepieceColors.fancyBlue,
-                                        fontStyle: FontStyle.normal,
-                                        fontSize: isSmall ? 11 : 22,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  Text(
-                                    "${AppLocalizations.of(context)!.combatPower} ${starterSelectedItem.value!.score}",
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                        color: OnepieceColors.fancyGreen,
-                                        fontStyle: FontStyle.normal,
-                                        fontSize: isSmall ? 9 : 18,
-                                        fontWeight: FontWeight.w200),
-                                  )
-                                ],
-                              ),
-                            ),
-                          ),
+                    _selectedCharacterSummary(
+                        starterSelectedItem.value, isSmall),
                   ],
                 ),
               );
@@ -341,9 +394,10 @@ class _CreateBattleViewState extends State<CreateBattleView> {
     return StatefulBuilder(builder: (context, leftSearchState) {
       final isSmall = MediaQuery.of(context).size.width < 600;
       return Container(
-        decoration: const BoxDecoration(
-          color: OnepieceColors.liteFancyGreen,
-          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF7F9FC),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: const Color(0xFFE7ECF2)),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -352,23 +406,25 @@ class _CreateBattleViewState extends State<CreateBattleView> {
               padding: EdgeInsets.all(isSmall ? 8.0 : 15.0),
               child: SizedBox(
                 width: isSmall ? double.infinity : 400,
-                height: isSmall ? 36 : 60,
+                height: 46,
                 child: TextFormField(
                   controller: starterTextController,
                   decoration: InputDecoration(
-                    isDense: isSmall,
-                    contentPadding: EdgeInsets.symmetric(
-                        horizontal: 8, vertical: isSmall ? 6 : 12),
+                    isDense: true,
+                    filled: true,
+                    fillColor: Colors.white,
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 12),
                     floatingLabelBehavior: FloatingLabelBehavior.never,
-                    disabledBorder: const OutlineInputBorder(
-                        borderSide:
-                            BorderSide(color: OnepieceColors.menuHoverColor)),
-                    enabledBorder: const OutlineInputBorder(
-                        borderSide:
-                            BorderSide(color: OnepieceColors.menuHoverColor)),
-                    focusedBorder: const OutlineInputBorder(
-                        borderSide: BorderSide(
-                            color: OnepieceColors.fancyGreen, width: 2.2)),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFFDCE4EC)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(
+                          color: OnepieceColors.fancyGreen, width: 1.6),
+                    ),
                     prefixIcon: Icon(Icons.search, size: isSmall ? 18 : 24),
                     labelText: AppLocalizations.of(context)!.characterName,
                   ),
@@ -446,7 +502,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                           selected: starterSelectedId == character.id,
                           hoverColor: OnepieceColors.fancyBlue,
                           selectedTileColor: OnepieceColors.fancyBlue,
-                          tileColor: Colors.black54,
+                          tileColor: const Color(0xFF243B53),
                           title: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -545,25 +601,23 @@ class _CreateBattleViewState extends State<CreateBattleView> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Padding(
-            padding: EdgeInsets.fromLTRB(
-                MediaQuery.of(context).size.width < 600 ? 0 : 30,
-                MediaQuery.of(context).size.width < 600 ? 6 : 10,
-                MediaQuery.of(context).size.width < 600 ? 0 : 60,
-                MediaQuery.of(context).size.width < 600 ? 6 : 10),
+            padding: EdgeInsets.symmetric(
+              vertical: MediaQuery.of(context).size.width < 600 ? 6 : 10,
+            ),
             child: ValueListenableBuilder<CharacterListView?>(
                 valueListenable: receiverSelectedItem,
                 builder: (context, value, _) {
                   final isSmall = MediaQuery.of(context).size.width < 600;
-                  final imgSize = isSmall ? 54.0 : 180.0;
-                  final graphW = isSmall ? 120.0 : 200.0;
-                  final graphH = isSmall ? 120.0 : 180.0;
+                  final imgSize = isSmall ? 64.0 : 130.0;
+                  final graphW = isSmall ? 120.0 : 170.0;
+                  final graphH = isSmall ? 120.0 : 140.0;
                   return SizedBox(
-                    width: isSmall ? double.infinity : 500,
+                    width: double.infinity,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Padding(
-                          padding: EdgeInsets.only(top: isSmall ? 4 : 60),
+                          padding: EdgeInsets.only(top: isSmall ? 4 : 10),
                           child: isSmall
                               ? SizedBox(
                                   height: 62,
@@ -654,48 +708,8 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                                                           borderRadios: 100)))),
                                     ]),
                         ),
-                        receiverSelectedItem.value == null
-                            ? SizedBox(
-                                height: isSmall ? 48 : 80,
-                                child: const Text(
-                                  "",
-                                  style: OnepieceFonts.headerStyle,
-                                ),
-                              )
-                            : SizedBox(
-                                height: isSmall ? 48 : 80,
-                                child: Padding(
-                                  padding: EdgeInsets.only(
-                                      top: isSmall ? 4.0 : 10.0),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        I18nHelper.getDisplayNameFromI18n(
-                                            receiverSelectedItem.value!.name),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                            color: OnepieceColors.fancyBlue,
-                                            fontStyle: FontStyle.normal,
-                                            fontSize: isSmall ? 11 : 22,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      Text(
-                                        "${AppLocalizations.of(context)!.combatPower} ${receiverSelectedItem.value!.score}",
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                            color: OnepieceColors.fancyGreen,
-                                            fontStyle: FontStyle.normal,
-                                            fontSize: isSmall ? 9 : 18,
-                                            fontWeight: FontWeight.w200),
-                                      )
-                                    ],
-                                  ),
-                                ),
-                              ),
+                        _selectedCharacterSummary(
+                            receiverSelectedItem.value, isSmall),
                       ],
                     ),
                   );
@@ -714,9 +728,10 @@ class _CreateBattleViewState extends State<CreateBattleView> {
     return StatefulBuilder(builder: (context, rightSearchState) {
       final isSmall = MediaQuery.of(context).size.width < 600;
       return Container(
-          decoration: const BoxDecoration(
-            color: OnepieceColors.liteFancyGreen,
-            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF7F9FC),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: const Color(0xFFE7ECF2)),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
@@ -725,23 +740,25 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                 padding: EdgeInsets.all(isSmall ? 8.0 : 15.0),
                 child: SizedBox(
                   width: isSmall ? double.infinity : 400,
-                  height: isSmall ? 36 : 60,
+                  height: 46,
                   child: TextFormField(
                     controller: receiverTextController,
                     decoration: InputDecoration(
-                      isDense: isSmall,
-                      contentPadding: EdgeInsets.symmetric(
-                          horizontal: 8, vertical: isSmall ? 6 : 12),
+                      isDense: true,
+                      filled: true,
+                      fillColor: Colors.white,
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 12),
                       floatingLabelBehavior: FloatingLabelBehavior.never,
-                      disabledBorder: const OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: OnepieceColors.menuHoverColor)),
-                      enabledBorder: const OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: OnepieceColors.menuHoverColor)),
-                      focusedBorder: const OutlineInputBorder(
-                          borderSide: BorderSide(
-                              color: OnepieceColors.fancyGreen, width: 2.2)),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Color(0xFFDCE4EC)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(
+                            color: OnepieceColors.fancyGreen, width: 1.6),
+                      ),
                       prefixIcon: Icon(Icons.search, size: isSmall ? 18 : 24),
                       labelText: AppLocalizations.of(context)!.characterName,
                     ),
@@ -820,7 +837,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                             selected: receiverSelectedId == character.id,
                             hoverColor: OnepieceColors.fancyBlue,
                             selectedTileColor: OnepieceColors.fancyBlue,
-                            tileColor: Colors.black54,
+                            tileColor: const Color(0xFF243B53),
                             title: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -912,87 +929,114 @@ class _CreateBattleViewState extends State<CreateBattleView> {
 
   Widget _getFoot(BuildContext context) {
     final isSmall = MediaQuery.of(context).size.width < 600;
-    return ValueListenableBuilder<CharacterListView?>(
-        valueListenable: starterSelectedItem,
-        builder: (context, value, _) {
-          return ValueListenableBuilder<CharacterListView?>(
-              valueListenable: receiverSelectedItem,
-              builder: (context, value, _) {
-                return Padding(
-                  padding: EdgeInsets.symmetric(vertical: isSmall ? 24 : 50),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.only(right: isSmall ? 5 : 8),
-                        child: ElevatedButton(
-                          style: OnepieceButtonStyle.getDefaultStyle(),
-                          child: Text(
-                            AppLocalizations.of(context)!.back,
-                            style: TextStyle(fontSize: isSmall ? 12 : null),
-                          ),
-                          onPressed: () {
-                            context.goNamed("battle");
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(right: isSmall ? 5 : 8),
-                        child: ElevatedButton(
-                          style: OnepieceButtonStyle.getDefaultStyle(),
-                          onPressed: (starterSelectedId.isEmpty &&
-                                  receiverSelectedId.isEmpty)
-                              ? null
-                              : () {
-                                  setState(() {
-                                    starterSelectedItem.value = null;
-                                    starterSelectedId = "";
-                                    receiverSelectedItem.value = null;
-                                    receiverSelectedId = "";
-                                  });
-                                },
-                          child: Text(
-                            AppLocalizations.of(context)!.clearForm,
-                            style: TextStyle(fontSize: isSmall ? 12 : null),
-                          ),
-                        ),
-                      ),
-                      ElevatedButton(
-                        style: OnepieceButtonStyle.getDefaultStyle(),
-                        onPressed: (starterSelectedId.isEmpty ||
-                                receiverSelectedId.isEmpty)
-                            ? null
-                            : () {
-                                CreateBattleRequest request =
-                                    CreateBattleRequest(
-                                        userId: getIt<User>().id,
-                                        starterId: starterSelectedId,
-                                        receiverId: receiverSelectedId);
-                                final router = GoRouter.of(context);
-                                Future<CreateBattleResponse?> response =
-                                    getIt<BattleDao>().createBattle(request);
-                                response.then((value) {
-                                  if (!mounted) return;
-                                  if (value?.battleId != null) {
-                                    router.goNamed('battleDetails',
-                                        extra: value?.battleId,
-                                        pathParameters: {
-                                          'id': value!.battleId!
-                                        });
-                                  } else {
-                                    router.goNamed("battle");
-                                  }
-                                });
+    return Positioned(
+      left: 0,
+      right: 0,
+      bottom: 0,
+      child: Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Color(0x1A16324F),
+              blurRadius: 18,
+              offset: Offset(0, -4),
+            ),
+          ],
+        ),
+        child: ValueListenableBuilder<CharacterListView?>(
+            valueListenable: starterSelectedItem,
+            builder: (context, value, _) {
+              return ValueListenableBuilder<CharacterListView?>(
+                  valueListenable: receiverSelectedItem,
+                  builder: (context, value, _) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 11),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.only(right: isSmall ? 5 : 8),
+                            child: OutlinedButton.icon(
+                              icon: const Icon(Icons.arrow_back_rounded,
+                                  size: 18),
+                              label: Text(
+                                AppLocalizations.of(context)!.back,
+                                style: TextStyle(fontSize: isSmall ? 12 : null),
+                              ),
+                              onPressed: () {
+                                context.goNamed("battle");
                               },
-                        child: Text(
-                          AppLocalizations.of(context)!.create,
-                          style: TextStyle(fontSize: isSmall ? 12 : null),
-                        ),
+                            ),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.only(right: isSmall ? 5 : 8),
+                            child: OutlinedButton.icon(
+                              icon: const Icon(Icons.refresh_rounded, size: 18),
+                              onPressed: (starterSelectedId.isEmpty &&
+                                      receiverSelectedId.isEmpty)
+                                  ? null
+                                  : () {
+                                      setState(() {
+                                        starterSelectedItem.value = null;
+                                        starterSelectedId = "";
+                                        receiverSelectedItem.value = null;
+                                        receiverSelectedId = "";
+                                      });
+                                    },
+                              label: Text(
+                                AppLocalizations.of(context)!.clearForm,
+                                style: TextStyle(fontSize: isSmall ? 12 : null),
+                              ),
+                            ),
+                          ),
+                          ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              minimumSize: Size(isSmall ? 88 : 120, 46),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            icon: const Icon(Icons.sports_martial_arts_rounded,
+                                size: 18),
+                            onPressed: (starterSelectedId.isEmpty ||
+                                    receiverSelectedId.isEmpty)
+                                ? null
+                                : () {
+                                    CreateBattleRequest request =
+                                        CreateBattleRequest(
+                                            userId: getIt<User>().id,
+                                            starterId: starterSelectedId,
+                                            receiverId: receiverSelectedId);
+                                    final router = GoRouter.of(context);
+                                    Future<CreateBattleResponse?> response =
+                                        getIt<BattleDao>()
+                                            .createBattle(request);
+                                    response.then((value) {
+                                      if (!mounted) return;
+                                      if (value?.battleId != null) {
+                                        router.goNamed('battleDetails',
+                                            extra: value?.battleId,
+                                            pathParameters: {
+                                              'id': value!.battleId!
+                                            });
+                                      } else {
+                                        router.goNamed("battle");
+                                      }
+                                    });
+                                  },
+                            label: Text(
+                              AppLocalizations.of(context)!.create,
+                              style: TextStyle(fontSize: isSmall ? 12 : null),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                );
-              });
-        });
+                    );
+                  });
+            }),
+      ),
+    );
   }
 }
