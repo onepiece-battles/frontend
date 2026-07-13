@@ -29,8 +29,8 @@ COPY --from=build-env /app/build/web /usr/share/nginx/html
 
 # replace with new nginx config file
 COPY nginx.conf /etc/nginx/nginx.conf
-COPY www.onepiece-battles.com.pem /etc/nginx/ssl/www.onepiece-battles.com.pem
-COPY www.onepiece-battles.com.key /etc/nginx/ssl/www.onepiece-battles.com.key
+COPY onepiece-battles.com.pem /etc/nginx/ssl/onepiece-battles.com.pem
+COPY onepiece-battles.com.key /etc/nginx/ssl/onepiece-battles.com.key
 
 # TLS key and certificate MUST be mounted at runtime via a volume or secret.
 # Do NOT bake them into the image. Example docker run invocation:
