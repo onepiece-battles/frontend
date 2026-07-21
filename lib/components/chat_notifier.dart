@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:one_piece_battles_flutter/components/web_socket_service.dart';
@@ -29,12 +31,11 @@ class ChatNotifier with ChangeNotifier {
   String? _activeChatId;
   Chat? _activeChat;
 
+  StreamSubscription<dynamic>? _incomingSubscription;
+
   ChatNotifier(this._webSocketService) {
-    _webSocketService.incomingMessages.listen(_handleIncomingData);
-    if (_chats.isNotEmpty) {
-      _activeChat = _chats.first;
-      _activeChatId = _activeChat!.id;
-    }
+    _incomingSubscription =
+        _webSocketService.incomingMessages.listen(_handleIncomingData);
   }
 
   /// Monotonically increasing counter bumped on every chat-list mutation.
@@ -88,10 +89,13 @@ class ChatNotifier with ChangeNotifier {
   // ── Message handler ─────────────────────────────────────────────────────
 
   void _handleIncomingMessage(Message message) {
-    if (_replaceNewestOptimisticImage(message)) return;
+    if (_replaceNewestOptimistic(message)) return;
 
-    // Dedup: if we optimistically added this message already, skip the echo.
-    if (_isDuplicate(message)) return;
+    // If we already have a message with this exact server-assigned id,
+    // update it in place (e.g. a retraction event re-delivers the same id
+    // with `retracted: true`) instead of appending a duplicate or silently
+    // dropping the update.
+    if (_updateMessageInPlace(message)) return;
 
     _insertMessage(message);
   }
@@ -100,6 +104,24 @@ class ChatNotifier with ChangeNotifier {
   /// instead of waiting for the server echo.  The echo is deduplicated.
   void addOptimisticMessage(Message message) {
     _insertMessage(message);
+  }
+
+  /// Marks a message as retracted locally, right after the retract API call
+  /// succeeds. The API only returns a success flag (no updated message, and
+  /// no live websocket broadcast reaches other participants today), so the
+  /// retracting user's own copy is scrubbed optimistically here.
+  void markMessageRetracted(String conversationId, String messageId) {
+    final existing = _messagesByChatId[conversationId] ?? [];
+    final index = existing.indexWhere((m) => m.id == messageId);
+    if (index == -1) return;
+
+    final message = existing[index];
+    message.retracted = true;
+    message.content = null;
+    message.imageContentUri = null;
+    message.voiceContentUri = null;
+    _messagesByChatId[conversationId] = List<Message>.from(existing);
+    notifyListeners();
   }
 
   void _insertMessage(Message message) {
@@ -134,45 +156,62 @@ class ChatNotifier with ChangeNotifier {
     _chatListVersion++;
   }
 
-  /// Returns true if [message] is already the last message in its
-  /// conversation (i.e. it was optimistically added), to avoid showing a
-  /// duplicate when the server echoes back.
-  bool _isDuplicate(Message message) {
-    final existing = _messagesByChatId[message.conversationId] ?? [];
-    if (existing.isEmpty) return false;
-    // Newest message is at the end of the list
-    final newest = existing.last;
-    return newest.userId == message.userId &&
-        newest.conversationId == message.conversationId &&
-        (newest.content != null && newest.content == message.content ||
-            newest.imageContentUri != null &&
-                newest.imageContentUri == message.imageContentUri);
+  /// If a message with this exact server-assigned id already exists locally,
+  /// replaces it in place (covers redelivery after reconnect, and updates
+  /// like a retraction event carrying the same id with new content) instead
+  /// of appending a duplicate or relying on a content-based heuristic that
+  /// would also misfire on two legitimate identical messages sent back to
+  /// back. Returns whether an existing entry was found.
+  bool _updateMessageInPlace(Message message, {bool notify = true}) {
+    final conversationId = message.conversationId;
+    final id = message.id;
+    if (conversationId == null || id == null) return false;
+
+    final existing = _messagesByChatId[conversationId] ?? [];
+    final index = existing.indexWhere((m) => m.id == id);
+    if (index == -1) return false;
+
+    final updated = List<Message>.from(existing);
+    updated[index] = message;
+    _messagesByChatId[conversationId] = updated;
+    if (notify) notifyListeners();
+    return true;
   }
 
-  bool _replaceNewestOptimisticImage(
+  /// Finds the most recent still-optimistic (client-generated, `opt_`-id)
+  /// placeholder matching [message]'s sender/content/attachment and replaces
+  /// it in place with the server's authoritative echo — covers both text
+  /// and image sends, so optimistic entries always get reconciled with a
+  /// real id instead of staying fake forever (which broke reply-to-message
+  /// and produced duplicates on the next history fetch).
+  bool _replaceNewestOptimistic(
     Message message, {
     bool notify = true,
     bool promoteChat = true,
   }) {
-    final incomingImageUri = message.imageContentUri;
     final conversationId = message.conversationId;
-    if (incomingImageUri == null ||
-        incomingImageUri.startsWith('data:image') ||
-        conversationId == null) {
-      return false;
-    }
+    if (conversationId == null) return false;
+
+    final incomingImageUri = message.imageContentUri;
+    final sameContent = message.content;
 
     final existing = _messagesByChatId[conversationId] ?? [];
     for (var i = existing.length - 1; i >= 0; i--) {
       final current = existing[i];
-      final currentImageUri = current.imageContentUri;
-      final sameSender = current.userId == message.userId;
-      final sameContent = (current.content ?? '') == (message.content ?? '');
-      final isOptimisticImage = (current.id ?? '').startsWith('opt_') &&
-          currentImageUri != null &&
-          currentImageUri.startsWith('data:image');
+      final isOptimistic = (current.id ?? '').startsWith('opt_');
+      if (!isOptimistic || current.userId != message.userId) continue;
 
-      if (sameSender && sameContent && isOptimisticImage) {
+      final currentImageUri = current.imageContentUri;
+      final contentMatches = (current.content ?? '') == (sameContent ?? '');
+      final isImageReplacement = incomingImageUri != null &&
+          currentImageUri != null &&
+          currentImageUri.startsWith('data:image') &&
+          contentMatches;
+      final isTextReplacement = incomingImageUri == null &&
+          currentImageUri == null &&
+          contentMatches;
+
+      if (isImageReplacement || isTextReplacement) {
         final updated = List<Message>.from(existing);
         updated[i] = message;
         _messagesByChatId[conversationId] = updated;
@@ -196,12 +235,12 @@ class ChatNotifier with ChangeNotifier {
     }
     if (latestMessage != null &&
         latestMessage.conversationId != null &&
-        !_replaceNewestOptimisticImage(
+        !_replaceNewestOptimistic(
           latestMessage,
           notify: false,
           promoteChat: false,
         ) &&
-        !_isDuplicate(latestMessage)) {
+        !_updateMessageInPlace(latestMessage, notify: false)) {
       _insertMessageWithoutNotify(latestMessage);
     }
 
@@ -260,13 +299,16 @@ class ChatNotifier with ChangeNotifier {
     return (left.id ?? '').compareTo(right.id ?? '');
   }
 
-  void sendChatMessage(String content) {
-    _webSocketService.sendMessage(content);
+  /// Returns whether the message was actually handed to an open socket —
+  /// false means the caller should tell the user delivery is uncertain
+  /// instead of assuming the optimistic bubble reflects reality.
+  bool sendChatMessage(String content) {
+    return _webSocketService.sendMessage(content);
   }
 
   /// Loads older messages for [chatId] and appends them to the existing list
-  /// (they appear at the visual *top* of the reversed ListView).  Sorts by id
-  /// so the oldest message is last in the Dart list = visual top.
+  /// (they appear at the visual *top* of the reversed ListView). Relies on
+  /// the server's chronological ordering (oldest first per batch).
   Future<int> loadMoreHistory(
     String chatId, {
     ValueChanged<int>? beforeNotify,
@@ -333,9 +375,9 @@ class ChatNotifier with ChangeNotifier {
         return 0;
       }
 
-      // Sort by id ascending: oldest first → newest last.
-      allLoaded.sort((a, b) => (a.id ?? '').compareTo(b.id ?? ''));
-
+      // Trust server order: MessageDao's query already returns this batch
+      // oldest-first (message.id is a random UUID, not time-ordered, so
+      // sorting by id here would scramble chronological order).
       final existing = _messagesByChatId[chatId] ?? [];
       final existingIds = existing.map((e) => e.id).toSet();
 
@@ -380,7 +422,9 @@ class ChatNotifier with ChangeNotifier {
 
   @override
   void dispose() {
-    _webSocketService.dispose();
+    // Note: WebSocketService is a shared, app-lifetime singleton — it is not
+    // owned by this notifier, so only the subscription is torn down here.
+    _incomingSubscription?.cancel();
     super.dispose();
   }
 }

@@ -339,5 +339,9 @@
   "groupRenameApiNotConnected": "群聊改名接口暂未接入",
   "addMemberApiNotConnected": "添加成员接口暂未接入",
   "addCharactersToGroup": "添加角色",
-  "noCharactersFound": "没有找到角色"
+  "noCharactersFound": "没有找到角色",
+  "delete": "删除",
+  "messageRetracted": "此消息已被删除",
+  "messageStillSending": "消息发送中，请稍候",
+  "messageNotSent": "消息未发送 — 连接已断开，请重试"
 }

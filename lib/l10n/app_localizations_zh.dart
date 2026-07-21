@@ -1030,4 +1030,16 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get noCharactersFound => '没有找到角色';
+
+  @override
+  String get delete => '删除';
+
+  @override
+  String get messageRetracted => '此消息已被删除';
+
+  @override
+  String get messageStillSending => '消息发送中，请稍候';
+
+  @override
+  String get messageNotSent => '消息未发送 — 连接已断开，请重试';
 }

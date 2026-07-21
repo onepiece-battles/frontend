@@ -1037,4 +1037,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noCharactersFound => 'No characters found';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get messageRetracted => 'This message was deleted';
+
+  @override
+  String get messageStillSending =>
+      'Please wait until the message finishes sending';
+
+  @override
+  String get messageNotSent =>
+      'Message not sent — connection lost. Please try again.';
 }

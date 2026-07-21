@@ -24,6 +24,14 @@ class WebSocketService {
   // Flag to distinguish between network error vs user clicking "Logout"
   bool _isIntentionalDisconnect = false;
 
+  /// Last time any data (chat traffic) was received on the current
+  /// connection — used by the ping loop to detect a connection that looks
+  /// open but is actually silently dead (no close frame ever arrives).
+  DateTime? _lastReceivedAt;
+
+  /// Whether the socket is currently open and ready to send.
+  bool get isConnected => _channel != null && !_isConnecting;
+
   WebSocketService();
 
   /// Call this when the app starts or user logs in
@@ -95,8 +103,31 @@ class WebSocketService {
 
   void _startPing() {
     _pingTimer?.cancel();
+    _lastReceivedAt = DateTime.now();
     // Send a ping every 30 seconds (less than the 60s timeout)
     _pingTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
+      final channel = _channel;
+      if (channel == null) {
+        timer.cancel();
+        return;
+      }
+
+      // The server acknowledges pings by logging them only — it never sends
+      // anything back. So "ping still succeeds" alone can't prove liveness
+      // (some transports/proxies accept writes into a half-dead socket
+      // without erroring). Instead, watch how long it's been since we last
+      // received *anything* — if pings have gone out for 3 cycles straight
+      // with no data back at all, the connection is very likely silently
+      // dead and won't self-report via onError/onDone; force a reconnect.
+      final silentFor =
+          DateTime.now().difference(_lastReceivedAt ?? DateTime.now());
+      if (silentFor > const Duration(seconds: 90)) {
+        debugPrint(
+            "WebSocket appears dead (no data received in ${silentFor.inSeconds}s) — forcing reconnect");
+        _handleConnectionFailure(channel, _connectionGeneration);
+        return;
+      }
+
       // Send a JSON ping object as most servers expect structured messages
       sendMessage(jsonEncode({'type': 'ping'}));
     });
@@ -107,17 +138,25 @@ class WebSocketService {
     _pingTimer = null;
   }
 
-  void sendMessage(String message) {
-    if (_channel != null) {
-      try {
-        _channel!.sink.add(message);
-      } catch (e) {
-        debugPrint("Error sending message: $e");
-      }
+  /// Attempts to send [message]. Returns false without throwing if the
+  /// socket isn't currently open (e.g. mid-reconnect) so callers can surface
+  /// a "not sent" state instead of assuming delivery.
+  bool sendMessage(String message) {
+    if (!isConnected) {
+      debugPrint("Cannot send: WebSocket is not connected");
+      return false;
+    }
+    try {
+      _channel!.sink.add(message);
+      return true;
+    } catch (e) {
+      debugPrint("Error sending message: $e");
+      return false;
     }
   }
 
   void _onData(dynamic event) {
+    _lastReceivedAt = DateTime.now();
     try {
       final data = _normalizeWebSocketJson(jsonDecode(event));
       // Determine message type and parse

@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:one_piece_battles_flutter/components/chat_notifier.dart';
 import 'package:one_piece_battles_flutter/components/original_image_loader.dart';
 import 'package:one_piece_battles_flutter/components/square_image_loader.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
+import 'package:one_piece_battles_flutter/repository/message_dao.dart';
 import 'package:one_piece_battles_flutter/utils/base64_helper.dart';
 import 'package:openapi/api.dart';
 import 'package:popover/popover.dart';
+import 'package:provider/provider.dart';
 import '../l10n/app_localizations.dart';
+
+// `getIt` comes from the chat_notifier.dart import above.
 
 class MessageItem extends StatelessWidget {
   final Message message;
@@ -53,7 +58,7 @@ class MessageItem extends StatelessWidget {
               ),
               SquareImageLoader(
                   key: ValueKey(user.imageUri),
-                  uriProvider: () => user.imageUri!,
+                  uriProvider: () => user.imageUri ?? '',
                   width: 40,
                   borderWidth: 2),
             ],
@@ -101,7 +106,43 @@ class MessageItem extends StatelessWidget {
           );
   }
 
+  bool get _isConfirmed => !(message.id ?? '').startsWith('opt_');
+
+  Future<void> _retractMessage(BuildContext context) async {
+    final conversationId = message.conversationId;
+    final messageId = message.id;
+    if (conversationId == null || messageId == null) return;
+    final response = await getIt<MessageDao>().retractMessage(
+      RetractMessageRequest(
+        type: MessageType.RETRACT_MESSAGE,
+        chatId: conversationId,
+        userId: getIt<User>().id,
+        messageId: messageId,
+      ),
+    );
+    if (response?.result == true && context.mounted) {
+      Provider.of<ChatNotifier>(context, listen: false)
+          .markMessageRetracted(conversationId, messageId);
+    }
+  }
+
   Widget getContent(BuildContext context) {
+    if (message.retracted == true) {
+      return Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color: Colors.grey[300],
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        child: Text(
+          AppLocalizations.of(context)!.messageRetracted,
+          style: OnepieceFonts.superSmallContentStyle.copyWith(
+            fontStyle: FontStyle.italic,
+          ),
+        ),
+      );
+    }
+
     // 1. Define the popup logic in a reusable function
     void showMessageMenu(BuildContext innerContext) {
       showPopover(
@@ -148,7 +189,28 @@ class MessageItem extends StatelessWidget {
                 child: Text(AppLocalizations.of(context)!.copy,
                     style: OnepieceFonts.superSmallContentStyleWhite),
               ),
-            )
+            ),
+            if (isMe && _isConfirmed) ...[
+              const SizedBox(
+                height: 15,
+                width: 2,
+                child: VerticalDivider(
+                  thickness: 1,
+                  color: Colors.grey,
+                ),
+              ),
+              InkWell(
+                onTap: () {
+                  Navigator.of(ctx).pop();
+                  _retractMessage(context);
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(AppLocalizations.of(context)!.delete,
+                      style: OnepieceFonts.superSmallContentStyleWhite),
+                ),
+              ),
+            ],
           ],
         ),
       );
@@ -228,7 +290,7 @@ class MessageItem extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
-          color: Colors.grey[300],
+          color: Colors.grey[600],
         ),
         padding: const EdgeInsets.all(6),
         child: Column(

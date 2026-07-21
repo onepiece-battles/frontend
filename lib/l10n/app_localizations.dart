@@ -2143,6 +2143,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No characters found'**
   String get noCharactersFound;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @messageRetracted.
+  ///
+  /// In en, this message translates to:
+  /// **'This message was deleted'**
+  String get messageRetracted;
+
+  /// No description provided for @messageStillSending.
+  ///
+  /// In en, this message translates to:
+  /// **'Please wait until the message finishes sending'**
+  String get messageStillSending;
+
+  /// No description provided for @messageNotSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Message not sent — connection lost. Please try again.'**
+  String get messageNotSent;
 }
 
 class _AppLocalizationsDelegate

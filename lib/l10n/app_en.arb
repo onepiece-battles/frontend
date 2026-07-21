@@ -339,5 +339,9 @@
   "groupRenameApiNotConnected": "Group rename API is not connected yet",
   "addMemberApiNotConnected": "Add member API is not connected yet",
   "addCharactersToGroup": "Add characters",
-  "noCharactersFound": "No characters found"
+  "noCharactersFound": "No characters found",
+  "delete": "Delete",
+  "messageRetracted": "This message was deleted",
+  "messageStillSending": "Please wait until the message finishes sending",
+  "messageNotSent": "Message not sent — connection lost. Please try again."
 }

@@ -350,6 +350,20 @@ class _ChattingViewState extends State<ChattingView> {
                 ? _memberNicknameOrFallback(activeChat, msg.preMessage!.userId)
                 : null,
             replyMessage: (msg) {
+              // A still-optimistic message (client-generated 'opt_' id, not
+              // yet echoed back by the server) has no real id the backend
+              // can store as a reply target — referencing it would send an
+              // unparseable preMessageId and fail server-side. Block it here
+              // rather than let that request error out.
+              if ((msg.id ?? '').startsWith('opt_')) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                        AppLocalizations.of(context)!.messageStillSending),
+                  ),
+                );
+                return;
+              }
               chatIdToRepliedMessage[msg.conversationId!] = msg;
               inputPreMessageNotifier.value = msg;
               Future.delayed(Duration.zero, () {
@@ -618,9 +632,7 @@ class _ChattingViewState extends State<ChattingView> {
               final displayChats = searchText.isEmpty
                   ? chats
                   : chats.where((chat) {
-                      final name = chat.group!
-                          ? chat.name!
-                          : getTargetMember(chat).nickname;
+                      final name = chatDisplayName(chat);
                       return name.toLowerCase().contains(searchText);
                     }).toList();
 
@@ -660,9 +672,7 @@ class _ChattingViewState extends State<ChattingView> {
                               // Chat Name
                               Expanded(
                                 child: Text(
-                                  chat.group!
-                                      ? chat.name!
-                                      : getTargetMember(chat).nickname,
+                                  chatDisplayName(chat),
                                   overflow: TextOverflow.ellipsis,
                                   style:
                                       OnepieceFonts.smallContentFancyBlueStyle,
@@ -674,7 +684,9 @@ class _ChattingViewState extends State<ChattingView> {
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
-                                  if (chat.message != null)
+                                  if (chat.message?.creationRecord
+                                          ?.actionTimestamp !=
+                                      null)
                                     Text(
                                       TimeHelper.humanDateFromTimestamp(
                                           chat.message!.creationRecord!
@@ -748,9 +760,10 @@ class _ChattingViewState extends State<ChattingView> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      leading: chat.group!
-                          ? getLeading(
-                              chat.members.map((e) => e.imageUri!).toList())
+                      leading: chat.group == true
+                          ? getLeading(chat.members
+                              .map((e) => e.imageUri ?? '')
+                              .toList())
                           : getSingleLeading(chat),
                       // inside ListView.builder -> ListTile
                       // Inside _buildChatList -> ListView.builder -> ListTile
@@ -839,9 +852,7 @@ class _ChattingViewState extends State<ChattingView> {
                     Expanded(
                       child: Text(
                         style: OnepieceFonts.smallContentFancyBlueStyle,
-                        activeChat.group!
-                            ? activeChat.name!
-                            : getTargetMember(activeChat).nickname,
+                        chatDisplayName(activeChat),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -1036,6 +1047,11 @@ class _ChattingViewState extends State<ChattingView> {
                                   typingController.text.trim().isNotEmpty ||
                                       hasImage;
 
+                              void clearAttachedImage() {
+                                chatIdToCachedImage[activeChatId] = null;
+                                buttonState(() {});
+                              }
+
                               void sendCurrentMessage() {
                                 buttonState(() {
                                   final hasText =
@@ -1087,9 +1103,20 @@ class _ChattingViewState extends State<ChattingView> {
 
                                   final String jsonMessage =
                                       jsonEncode(request.toJson());
-                                  Provider.of<ChatNotifier>(context,
+                                  final bool sent = Provider.of<ChatNotifier>(
+                                          context,
                                           listen: false)
                                       .sendChatMessage(jsonMessage);
+                                  if (!sent) {
+                                    ScaffoldMessenger.of(context)
+                                        .showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                            AppLocalizations.of(context)!
+                                                .messageNotSent),
+                                      ),
+                                    );
+                                  }
 
                                   chatIdToCachedImage[activeChatId] = null;
                                   chatIdToRepliedMessage[activeChatId] = null;
@@ -1216,11 +1243,7 @@ class _ChattingViewState extends State<ChattingView> {
                                                 right: 2,
                                                 top: 2,
                                                 child: InkWell(
-                                                  onTap: () {
-                                                    chatIdToCachedImage[
-                                                        activeChatId] = null;
-                                                    buttonState(() {});
-                                                  },
+                                                  onTap: clearAttachedImage,
                                                   child: Container(
                                                     width: 22,
                                                     height: 22,
@@ -1294,11 +1317,7 @@ class _ChattingViewState extends State<ChattingView> {
                                                   right: -2,
                                                   top: -2,
                                                   child: InkWell(
-                                                    onTap: () {
-                                                      chatIdToCachedImage[
-                                                          activeChatId] = null;
-                                                      buttonState(() {});
-                                                    },
+                                                    onTap: clearAttachedImage,
                                                     child: const CircleAvatar(
                                                       backgroundColor:
                                                           Colors.black54,
@@ -1457,11 +1476,7 @@ class _ChattingViewState extends State<ChattingView> {
                                             right: -2,
                                             top: -2,
                                             child: InkWell(
-                                              onTap: () {
-                                                chatIdToCachedImage[
-                                                    activeChatId] = null;
-                                                buttonState(() {});
-                                              },
+                                              onTap: clearAttachedImage,
                                               child: const CircleAvatar(
                                                 backgroundColor: Colors.black54,
                                                 radius: 8,
@@ -1493,11 +1508,11 @@ class _ChattingViewState extends State<ChattingView> {
                                           padding: const EdgeInsets.fromLTRB(
                                               10, 0, 0, 0),
                                           child: Container(
-                                            decoration: const BoxDecoration(
-                                                borderRadius: BorderRadius.all(
-                                                    Radius.circular(5)),
-                                                color: OnepieceColors
-                                                    .liteFancyGreen),
+                                            decoration: BoxDecoration(
+                                                borderRadius:
+                                                    const BorderRadius.all(
+                                                        Radius.circular(5)),
+                                                color: Colors.grey[600]),
                                             child: Padding(
                                               padding:
                                                   const EdgeInsets.all(4.0),
@@ -1677,6 +1692,16 @@ class _ChattingViewState extends State<ChattingView> {
     } else {
       return chat.members.first;
     }
+  }
+
+  /// Both `group` and `name` are nullable on the generated [Chat] model —
+  /// falls back to the other member's nickname (or an empty group name)
+  /// instead of crashing when either is missing.
+  String chatDisplayName(Chat chat) {
+    if (chat.group == true) {
+      return chat.name ?? '';
+    }
+    return getTargetMember(chat).nickname;
   }
 
   Widget getLeading(List<String> imageUrls) {
