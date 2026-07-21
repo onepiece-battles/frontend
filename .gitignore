@@ -50,6 +50,3 @@ app.*.map.json
 .env.*
 *.key
 *.pem
-!www.onepiece-battles.com.pem
-
-

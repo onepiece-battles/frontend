@@ -413,18 +413,19 @@ class _RegisterPageState extends State<RegisterPage> {
         password: passwordController.text,
         confirmedPassword: confirmedPasswordController.text,
         locale: I18nHelper.convertToOnepieceLocale(getIt<Locale>()));
-    Future<RegisterResponse?> response = userDao.register(request);
-    response.then((value) {
-      if (value!.registerResult) {
+    userDao.register(request).then((value) {
+      if (!mounted || value == null) return;
+      if (value.registerResult) {
         handleRegisterSuccess();
       } else {
-        if (!mounted) return;
         setState(() {
           Locale myLocale = Localizations.localeOf(context);
           verificationMessage = I18nHelper.getDisplayNameFromI18nByLocale(
               value.verification, myLocale);
         });
       }
+    }).catchError((error, stackTrace) {
+      debugPrint('Registration failed: $error\n$stackTrace');
     });
   }
 
@@ -455,9 +456,10 @@ class _RegisterPageState extends State<RegisterPage> {
 
   static const _storage = FlutterSecureStorage();
 
+  // Only the username is persisted for convenience prefill; the password is
+  // never stored so it can't be recovered from disk if the device is compromised.
   Future<void> saveUserCredentials(String username, String password) async {
     await _storage.write(key: 'username', value: username);
-    await _storage.write(key: 'password', value: password);
   }
 
   bool isValidNickname(String input) {
@@ -466,7 +468,9 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   bool isValidPassword(String input) {
-    RegExp regex = RegExp(r'^[0-9a-zA-Z\u4e00-\u9fa5]+$');
+    // Unlike nicknames, passwords should allow symbols/punctuation; only
+    // reject empty input and whitespace characters.
+    RegExp regex = RegExp(r'^\S+$');
     return regex.hasMatch(input);
   }
 }

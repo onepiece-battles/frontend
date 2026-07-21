@@ -43,9 +43,8 @@ class _LoginPageState extends State<LoginPage> {
   bool _buttonEnabled = false;
   String verificationMessage = "";
   I18nText? verificationI18n = I18nText();
-  TextEditingController emailController =
-      TextEditingController(text: "onepiecebattles@163.com");
-  TextEditingController passwordController = TextEditingController(text: "abc");
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
   Logger logger = Logger('_LoginPageState');
   UserDao userDao = UserDao.empty();
 
@@ -56,14 +55,9 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   fetchUserCredentials() async {
-    Map<String, String> userCredentials = await getUserCredentials();
+    String savedUsername = await getUserCredentials();
     setState(() {
-      emailController.text = userCredentials['username'] ?? "";
-      passwordController.text = userCredentials['password'] ?? "";
-      if (emailController.text.isNotEmpty &&
-          passwordController.text.isNotEmpty) {
-        _buttonEnabled = true;
-      }
+      emailController.text = savedUsername;
     });
   }
 
@@ -455,7 +449,9 @@ class _LoginPageState extends State<LoginPage> {
       LoginRequest loginRequest =
           LoginRequest(email: fullUsername, password: password);
       LoginResponse? loginResponse = await getIt<UserDao>().login(loginRequest);
-      if (loginResponse!.verification == null) {
+      if (loginResponse == null) return;
+      if (!mounted) return;
+      if (loginResponse.verification == null) {
         if (!mounted) return;
         ApiInitializer.initAuthInfo(loginResponse.accessToken!);
         ResourcePermissionManager.updateUserCache(loginResponse.user!);
@@ -482,14 +478,13 @@ class _LoginPageState extends State<LoginPage> {
 
   static const _storage = FlutterSecureStorage();
 
+  // Only the username is persisted for convenience prefill; the password is
+  // never stored so it can't be recovered from disk if the device is compromised.
   Future<void> saveUserCredentials(String username, String password) async {
     await _storage.write(key: 'username', value: username);
-    await _storage.write(key: 'password', value: password);
   }
 
-  Future<Map<String, String>> getUserCredentials() async {
-    final username = await _storage.read(key: 'username') ?? '';
-    final password = await _storage.read(key: 'password') ?? '';
-    return {'username': username, 'password': password};
+  Future<String> getUserCredentials() async {
+    return await _storage.read(key: 'username') ?? '';
   }
 }

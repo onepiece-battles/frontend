@@ -80,15 +80,21 @@ class _UserViewState extends State<UserView> {
         pageIndex: selectedPageNum,
         sortKeys: sortKeys,
         userFilter: userFilter);
-    Future<ListUsersResponse?> listUserResponse =
-        getIt<UserDao>().listUser(listUserRequest);
 
-    listUserResponse.then((value) {
+    getIt<UserDao>().listUser(listUserRequest).then((value) {
       if (!mounted) return;
       setState(() {
-        currentUserList = value!.users;
-        totalItemCount = value.totalSize!;
-        totalPageNum = (totalItemCount / 10).ceil();
+        currentUserList = value?.users ?? [];
+        totalItemCount = value?.totalSize ?? 0;
+        totalPageNum = (totalItemCount / itemCountPerPage).ceil();
+      });
+    }).catchError((error, stackTrace) {
+      logger.severe('Failed to fetch user list', error, stackTrace);
+      if (!mounted) return;
+      setState(() {
+        currentUserList = [];
+        totalItemCount = 0;
+        totalPageNum = 0;
       });
     });
   }
@@ -503,7 +509,7 @@ class _UserViewState extends State<UserView> {
                     Row(children: [
                       ImageLazyLoader(
                           key: UniqueKey(),
-                          uriProvider: () => user.imageUri!,
+                          uriProvider: () => user.imageUri ?? '',
                           width: 44,
                           borderWidth: 1.5,
                           borderRadios: 44),
@@ -512,19 +518,20 @@ class _UserViewState extends State<UserView> {
                           child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                            Text(user.nickname.toString(),
+                            Text(user.nickname,
                                 style: OnepieceFonts.headerStyle
                                     .copyWith(fontSize: 15),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis),
                             const SizedBox(height: 2),
-                            Text(user.username.toString(),
+                            Text(user.username,
                                 style: OnepieceFonts.smallContentStyle,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis),
                           ])),
-                      OnepieceTag.getUserRoleTag(
-                          user.loginRole!, roleMap[user.loginRole]!),
+                      if (user.loginRole != null)
+                        OnepieceTag.getUserRoleTag(
+                            user.loginRole!, roleMap[user.loginRole]!),
                     ]),
                     const SizedBox(height: 8),
                     Row(
@@ -532,21 +539,21 @@ class _UserViewState extends State<UserView> {
                         children: [
                           Row(mainAxisSize: MainAxisSize.min, children: [
                             Icon(
-                                user.emailVerified!
+                                user.emailVerified == true
                                     ? Icons.check
                                     : Icons.cancel,
                                 size: 16,
-                                color: user.emailVerified!
+                                color: user.emailVerified == true
                                     ? Colors.greenAccent
                                     : Colors.redAccent),
                             const SizedBox(width: 4),
                             Text(
-                                user.emailVerified!
+                                user.emailVerified == true
                                     ? AppLocalizations.of(context)!.verified
                                     : AppLocalizations.of(context)!.notVerified,
                                 style: TextStyle(
                                     fontSize: 12,
-                                    color: user.emailVerified!
+                                    color: user.emailVerified == true
                                         ? Colors.greenAccent
                                         : Colors.redAccent)),
                           ]),
@@ -565,8 +572,10 @@ class _UserViewState extends State<UserView> {
                     ],
                     const SizedBox(height: 4),
                     Text(
-                        DateHelper.getFormattedDatetimeFromTimestamp(
-                            user.creationRecord!.actionTimestamp!, context),
+                        user.creationRecord?.actionTimestamp != null
+                            ? DateHelper.getFormattedDatetimeFromTimestamp(
+                                user.creationRecord!.actionTimestamp!, context)
+                            : '',
                         style:
                             const TextStyle(fontSize: 11, color: Colors.grey)),
                   ]),
@@ -648,7 +657,7 @@ class _UserViewState extends State<UserView> {
                 Row(children: [
                   ImageLazyLoader(
                     key: ValueKey(user.imageUri),
-                    uriProvider: () => user.imageUri!,
+                    uriProvider: () => user.imageUri ?? '',
                     width: 54,
                     borderWidth: 1.5,
                     borderRadios: 54,
@@ -671,17 +680,23 @@ class _UserViewState extends State<UserView> {
                       ],
                     ),
                   ),
-                  OnepieceTag.getUserRoleTag(
-                      user.loginRole!, roleMap[user.loginRole]!),
+                  if (user.loginRole != null)
+                    OnepieceTag.getUserRoleTag(
+                        user.loginRole!, roleMap[user.loginRole]!),
                 ]),
                 const SizedBox(height: 12),
                 Row(children: [
-                  Icon(user.emailVerified! ? Icons.verified : Icons.cancel,
+                  Icon(
+                      user.emailVerified == true
+                          ? Icons.verified
+                          : Icons.cancel,
                       size: 17,
-                      color: user.emailVerified! ? Colors.green : Colors.red),
+                      color: user.emailVerified == true
+                          ? Colors.green
+                          : Colors.red),
                   const SizedBox(width: 5),
                   Text(
-                    user.emailVerified!
+                    user.emailVerified == true
                         ? AppLocalizations.of(context)!.verified
                         : AppLocalizations.of(context)!.notVerified,
                     style: OnepieceFonts.smallContentStyle,
@@ -888,7 +903,7 @@ class _UserViewState extends State<UserView> {
                     padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
                     child: ImageLazyLoader(
                         key: UniqueKey(),
-                        uriProvider: () => user.imageUri!,
+                        uriProvider: () => user.imageUri ?? '',
                         width: 40,
                         borderWidth: 1.5,
                         borderRadios: 40)),
@@ -903,17 +918,20 @@ class _UserViewState extends State<UserView> {
               )),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: boolToEmailRowMap[user.emailVerified],
+                child: boolToEmailRowMap[user.emailVerified] ??
+                    const SizedBox.shrink(),
               )),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child:
-                    Text(accountStatusEnumToDisplayValue[user.accountStatus]!),
+                child: Text(
+                    accountStatusEnumToDisplayValue[user.accountStatus] ?? ''),
               )),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: OnepieceTag.getUserRoleTag(
-                    user.loginRole!, userRoleToDisplayNameMap[user.loginRole]!),
+                child: user.loginRole == null
+                    ? const SizedBox.shrink()
+                    : OnepieceTag.getUserRoleTag(user.loginRole!,
+                        userRoleToDisplayNameMap[user.loginRole]!),
               )),
               DataCell(
                 Padding(
@@ -931,13 +949,19 @@ class _UserViewState extends State<UserView> {
               ),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: Text(DateHelper.getFormattedDatetimeFromTimestamp(
-                    user.modificationRecord!.actionTimestamp!, context)),
+                child: Text(
+                    user.modificationRecord?.actionTimestamp != null
+                        ? DateHelper.getFormattedDatetimeFromTimestamp(
+                            user.modificationRecord!.actionTimestamp!,
+                            context)
+                        : ''),
               )),
               DataCell(Padding(
                 padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: Text(DateHelper.getFormattedDatetimeFromTimestamp(
-                    user.creationRecord!.actionTimestamp!, context)),
+                child: Text(user.creationRecord?.actionTimestamp != null
+                    ? DateHelper.getFormattedDatetimeFromTimestamp(
+                        user.creationRecord!.actionTimestamp!, context)
+                    : ''),
               )),
             ],
           ),
