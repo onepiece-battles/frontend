@@ -53,20 +53,25 @@ class _OriginalImageLoaderState extends State<OriginalImageLoader> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done &&
               snapshot.hasData) {
+            // Sizes itself to the image's own aspect ratio — see
+            // ImageHelper.getOriginalImageFrame / _AspectFitImage.
             return ImageHelper.getOriginalImageFrame(
                 OnepieceColors.liteFancyBlue, snapshot.data!, widget.maxWidth,
                 maxHeight: widget.maxHeight);
           } else if (snapshot.connectionState == ConnectionState.waiting) {
-            // Stable-height placeholder — prevents layout jumps
-            return Container(
-              width: widget.maxWidth,
-              height: widget.maxHeight.clamp(80.0, 200.0),
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Center(
-                child: Icon(Icons.image, color: Colors.grey, size: 32),
+            // Small neutral spinner — deliberately not a colored box, since
+            // we don't yet know the image's aspect ratio and don't want to
+            // guess a size that the loaded image would then have to jump
+            // away from.
+            return const SizedBox(
+              width: 60,
+              height: 60,
+              child: Center(
+                child: SizedBox(
+                  width: 22,
+                  height: 22,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
               ),
             );
           } else {

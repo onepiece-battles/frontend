@@ -115,6 +115,12 @@ class _ChattingViewState extends State<ChattingView> {
   String activeConversationId = "";
   String _lastProcessedChatId = "";
   int _previousMsgCount = 0;
+
+  /// Bumped on every call to [_loadInitialHistoryAndRestoreScroll] so a
+  /// superseded call (user switched chats again before it finished) can
+  /// tell it's stale and must not touch scroll state on behalf of a chat
+  /// that's no longer active.
+  int _scrollPositioningRequestId = 0;
   String? _previousNewestMessageId;
   final Set<String> _preservingHistoryScrollChats = {};
   bool _didSelectInitialChat = false;
@@ -159,19 +165,29 @@ class _ChattingViewState extends State<ChattingView> {
   }
 
   Future<void> _loadInitialHistoryAndRestoreScroll(String chatId) async {
+    final int requestId = ++_scrollPositioningRequestId;
+    // Unconditionally cancel any bottom-forcing left on by a previous call
+    // to this method that's still in flight (e.g. the user already switched
+    // away from the chat that armed it) — otherwise that flag can get stuck
+    // `true` forever, which makes every later layout pass (including one
+    // triggered by an image finishing loading) snap the view back to the
+    // bottom regardless of where it's supposed to be. That stuck-flag state
+    // is what caused the "bounces back and forth" behavior.
+    scrollController.endInitialBottomPositioning();
+
     final shouldRestoreSavedOffset = chatIdToScrollOffset.containsKey(chatId);
     if (!shouldRestoreSavedOffset) {
       scrollController.beginInitialBottomPositioning();
     }
     await Provider.of<ChatNotifier>(context, listen: false)
         .ensureHistoryLoaded(chatId);
-    if (!mounted || activeConversationId != chatId) return;
+    if (!mounted || requestId != _scrollPositioningRequestId) return;
     if (shouldRestoreSavedOffset) {
       _restoreScrollForChat(chatId);
       return;
     }
     await WidgetsBinding.instance.endOfFrame;
-    if (!mounted || activeConversationId != chatId) return;
+    if (!mounted || requestId != _scrollPositioningRequestId) return;
     scrollController.endInitialBottomPositioning();
     if (scrollController.hasClients) {
       chatIdToScrollOffset[chatId] = scrollController.offset;
@@ -222,6 +238,7 @@ class _ChattingViewState extends State<ChattingView> {
     activeConversationId = "";
     _lastProcessedChatId = "";
     _previousNewestMessageId = null;
+    _scrollPositioningRequestId++; // invalidate any in-flight history load
     scrollController.endInitialBottomPositioning();
     Provider.of<ChatNotifier>(context, listen: false).setActiveChat(null);
     typingController.clear();

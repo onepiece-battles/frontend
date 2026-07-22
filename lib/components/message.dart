@@ -7,6 +7,7 @@ import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:one_piece_battles_flutter/repository/message_dao.dart';
 import 'package:one_piece_battles_flutter/utils/base64_helper.dart';
+import 'package:one_piece_battles_flutter/utils/image_helper.dart';
 import 'package:openapi/api.dart';
 import 'package:popover/popover.dart';
 import 'package:provider/provider.dart';
@@ -268,11 +269,14 @@ class MessageItem extends StatelessWidget {
   Widget _buildMessageImage(String imageUri, double maxWidth) {
     if (imageUri.startsWith('data:image')) {
       final base64Data = imageUri.split(',').last;
-      return Image.memory(
+      // Same aspect-ratio-sized rendering as OriginalImageLoader below, so
+      // when the server echo arrives (this message's id changes and Flutter
+      // swaps this branch out for OriginalImageLoader) the bubble doesn't
+      // visibly resize.
+      return ImageHelper.getOriginalImageFrame(
+        OnepieceColors.fancyBlue,
         Base64Helper.decode(base64Data),
-        fit: BoxFit.contain,
-        width: maxWidth,
-        errorBuilder: (_, __, ___) => const Icon(Icons.broken_image),
+        maxWidth,
       );
     }
 
