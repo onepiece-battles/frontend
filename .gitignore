@@ -50,3 +50,8 @@ app.*.map.json
 .env.*
 *.key
 *.pem
+# TLS certificates & private keys (must be mounted at runtime, never committed)
+onepiece-battles.com.key
+onepiece-battles.com.pem
+www.onepiece-battles.com.key
+www.onepiece-battles.com.pem

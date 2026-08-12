@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+#
+# Pre-commit hook: block secrets / private keys from being committed.
+# Uses gitleaks to scan only the staged changes.
+#
+# One-time setup after cloning:  git config core.hooksPath .githooks
+# Install the scanner:           brew install gitleaks
+#
+set -euo pipefail
+
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo "⚠️  gitleaks 未安装，已跳过密钥扫描。请安装以启用保护：brew install gitleaks" >&2
+  exit 0
+fi
+
+if ! gitleaks git --staged --redact --no-banner; then
+  echo "" >&2
+  echo "🛑 提交被拦截：暂存内容中检测到疑似密钥 / 私钥。" >&2
+  echo "   • 确认无误后请从暂存区移除相关文件再提交。" >&2
+  echo "   • 如确认是误报，可在 .gitleaks.toml 中配置 allowlist。" >&2
+  echo "   • 紧急跳过（不推荐）：git commit --no-verify" >&2
+  exit 1
+fi
