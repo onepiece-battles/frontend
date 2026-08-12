@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import 'package:one_piece_battles_flutter/components/chat_notifier.dart';
 import 'package:one_piece_battles_flutter/components/image_lazy_loader.dart';
 import 'package:one_piece_battles_flutter/components/web_socket_service.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
@@ -82,11 +84,16 @@ class _UserNavigationState extends State<UserNavigation> {
                 onPressed: () async {
                   final router = GoRouter.of(context);
                   final navigator = Navigator.of(context);
+                  // Capture before the async gap (context is unsafe after).
+                  final chatNotifier = context.read<ChatNotifier>();
                   try {
                     await getIt<UserDao>()
                         .logout(LogoutRequest(userId: getIt<User>().id));
                   } catch (_) {}
                   getIt<WebSocketService>().disconnect();
+                  // Drop the remembered chat/scroll so the next login starts
+                  // fresh on the first chat and nothing leaks across users.
+                  chatNotifier.clearChatViewState();
                   if (getIt.isRegistered<User>()) {
                     getIt.unregister<User>();
                   }

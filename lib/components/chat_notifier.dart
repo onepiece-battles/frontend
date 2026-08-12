@@ -420,6 +420,47 @@ class ChatNotifier with ChangeNotifier {
     await loadMoreHistory(chatId);
   }
 
+  // ── View UI-state persistence ───────────────────────────────────────────
+  // ChattingView is rebuilt from scratch every time the user leaves and
+  // returns to the chat page (a plain ShellRoute disposes its State), so its
+  // per-chat scroll position and pagination anchor would be lost. Persist
+  // them here — this notifier lives for the whole app session — so the view
+  // can drop the user back exactly where they left off, on the same chat.
+  // These are plain storage, not reactive state; they never notifyListeners.
+  final Map<String, double> _viewScrollOffsets = {};
+  final Map<String, int> _viewVisibleStarts = {};
+
+  /// The remembered scroll offset for [chatId], or null if none saved.
+  double? viewScrollOffset(String chatId) => _viewScrollOffsets[chatId];
+  void setViewScrollOffset(String chatId, double offset) {
+    _viewScrollOffsets[chatId] = offset;
+  }
+
+  /// The remembered "load-earlier" pagination anchor for [chatId] (how many
+  /// older messages sit above the scroll center). Defaults to 0.
+  int viewVisibleStart(String chatId) => _viewVisibleStarts[chatId] ?? 0;
+  void setViewVisibleStart(String chatId, int start) {
+    _viewVisibleStarts[chatId] = start;
+  }
+
+  /// Clears the remembered active chat plus all per-chat view and message
+  /// state. Call on logout so the next login starts fresh on the first chat
+  /// and nothing leaks across user sessions.
+  void clearChatViewState() {
+    _activeChatId = null;
+    _activeChat = null;
+    _viewScrollOffsets.clear();
+    _viewVisibleStarts.clear();
+    _messagesByChatId.clear();
+    _historyLoadCount.clear();
+    _hasMoreHistory.clear();
+    _historyLoadFutures.clear();
+    _loadingHistoryChats.clear();
+    _chats = [];
+    _chatListVersion++;
+    notifyListeners();
+  }
+
   @override
   void dispose() {
     // Note: WebSocketService is a shared, app-lifetime singleton — it is not

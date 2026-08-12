@@ -101,15 +101,28 @@ class _ChattingViewState extends State<ChattingView> {
   TextEditingController typingController = TextEditingController();
   FocusNode focusNode = FocusNode();
 
-  // Local State Caches
+  // Local State Caches (drafts — reset on navigation, that's acceptable).
   Map<String, Message?> chatIdToRepliedMessage = {};
   Map<String, String?> chatIdToCachedMessage = {};
   Map<String, Uint8List?> chatIdToCachedImage = {};
-  Map<String, double> chatIdToScrollOffset = {};
-  final Map<String, int> _chatIdToVisibleMessageStart = {};
+
+  // Scroll offset and the "load-earlier" pagination anchor are NOT kept here:
+  // this State is destroyed whenever the user navigates to another page, so
+  // they're persisted in ChatNotifier (which survives) and read back on
+  // re-entry so we can restore the exact chat + position the user left on.
 
   final ValueNotifier<Message?> inputMessageNotifier = ValueNotifier(null);
   final ValueNotifier<Message?> inputPreMessageNotifier = ValueNotifier(null);
+
+  /// Cached reference to the app-lifetime ChatNotifier, so scroll-position
+  /// persistence works even from [dispose] (where reading a Provider is
+  /// unsafe).
+  late final ChatNotifier _chatNotifier;
+
+  /// True while we're programmatically positioning the scroll view (restoring
+  /// a saved offset or snapping to bottom). Suppresses the scroll listener so
+  /// those transient positions aren't mistaken for the user's real position.
+  bool _restoringScroll = false;
 
   // Tracking
   String activeConversationId = "";
@@ -133,39 +146,62 @@ class _ChattingViewState extends State<ChattingView> {
   @override
   void initState() {
     super.initState();
+    _chatNotifier = Provider.of<ChatNotifier>(context, listen: false);
+    scrollController.addListener(_persistActiveChatScrollOffset);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _refreshChatsAndSelectInitial();
+      _refreshChatsAndRestoreOrSelect();
     });
   }
 
-  Future<void> _refreshChatsAndSelectInitial() async {
-    if (!mounted) return;
-    final notifier = Provider.of<ChatNotifier>(context, listen: false);
-    await notifier.refreshChats();
-    if (!mounted) return;
-    _selectInitialChat(notifier);
+  /// Keeps ChatNotifier's remembered scroll offset for the active chat live on
+  /// every user scroll, so leaving the page (which disposes this State) always
+  /// preserves the true last position, regardless of dispose ordering.
+  void _persistActiveChatScrollOffset() {
+    if (_restoringScroll) return;
+    if (activeConversationId.isEmpty || !scrollController.hasClients) return;
+    _chatNotifier.setViewScrollOffset(
+        activeConversationId, scrollController.offset);
   }
 
-  void _selectInitialChat(ChatNotifier notifier) {
+  Future<void> _refreshChatsAndRestoreOrSelect() async {
+    if (!mounted) return;
+    await _chatNotifier.refreshChats();
+    if (!mounted) return;
+    _restoreOrSelectInitialChat(_chatNotifier);
+  }
+
+  /// On entering the chat page, restore the chat the user was last viewing
+  /// (remembered in ChatNotifier across navigation). Only auto-select the
+  /// first chat on a genuine first entry — nothing remembered yet, or the
+  /// remembered chat no longer exists (e.g. after switching users).
+  void _restoreOrSelectInitialChat(ChatNotifier notifier) {
     if (_didSelectInitialChat || notifier.chats.isEmpty) return;
     if (ResponsiveBreakpoints.isMobile(context)) return;
-
-    final initialChatId = notifier.chats.first.id;
-    if (initialChatId == null) return;
-
     _didSelectInitialChat = true;
-    _activeChatWasAutoSelected = true;
-    activeConversationId = initialChatId;
-    _lastProcessedChatId = "";
-    typingController.text = chatIdToCachedMessage[initialChatId] ?? "";
-    inputPreMessageNotifier.value = chatIdToRepliedMessage[initialChatId];
 
-    notifier.setActiveChat(initialChatId);
-    unawaited(_loadInitialHistoryAndRestoreScroll(initialChatId));
+    final rememberedId = notifier.activeChatId;
+    final bool rememberedStillExists = rememberedId != null &&
+        notifier.chats.any((chat) => chat.id == rememberedId);
+    final String? targetId =
+        rememberedStillExists ? rememberedId : notifier.chats.first.id;
+    if (targetId == null) return;
+
+    // Only counts as an auto-selection (which mobile undoes) when we fell
+    // back to the first chat rather than restoring the user's own choice.
+    _activeChatWasAutoSelected = !rememberedStillExists;
+    activeConversationId = targetId;
+    _lastProcessedChatId = "";
+    typingController.text = chatIdToCachedMessage[targetId] ?? "";
+    inputPreMessageNotifier.value = chatIdToRepliedMessage[targetId];
+
+    notifier.setActiveChat(targetId);
+    unawaited(_loadInitialHistoryAndRestoreScroll(targetId));
   }
 
   Future<void> _loadInitialHistoryAndRestoreScroll(String chatId) async {
     final int requestId = ++_scrollPositioningRequestId;
+    // Suppress the scroll listener while we position programmatically.
+    _restoringScroll = true;
     // Unconditionally cancel any bottom-forcing left on by a previous call
     // to this method that's still in flight (e.g. the user already switched
     // away from the chat that armed it) — otherwise that flag can get stuck
@@ -175,41 +211,50 @@ class _ChattingViewState extends State<ChattingView> {
     // is what caused the "bounces back and forth" behavior.
     scrollController.endInitialBottomPositioning();
 
-    final shouldRestoreSavedOffset = chatIdToScrollOffset.containsKey(chatId);
+    // Capture the remembered offset up front, before any await, so a stray
+    // scroll event can't clobber it before we read it.
+    final double? savedOffset = _chatNotifier.viewScrollOffset(chatId);
+    final bool shouldRestoreSavedOffset = savedOffset != null;
     if (!shouldRestoreSavedOffset) {
       scrollController.beginInitialBottomPositioning();
     }
-    await Provider.of<ChatNotifier>(context, listen: false)
-        .ensureHistoryLoaded(chatId);
-    if (!mounted || requestId != _scrollPositioningRequestId) return;
-    if (shouldRestoreSavedOffset) {
-      _restoreScrollForChat(chatId);
+    await _chatNotifier.ensureHistoryLoaded(chatId);
+    if (!mounted || requestId != _scrollPositioningRequestId) {
+      _restoringScroll = false;
       return;
     }
+    if (shouldRestoreSavedOffset) {
+      _restoreScrollForChat(chatId, savedOffset, requestId);
+      return; // clears _restoringScroll after the jump completes
+    }
     await WidgetsBinding.instance.endOfFrame;
-    if (!mounted || requestId != _scrollPositioningRequestId) return;
+    if (!mounted || requestId != _scrollPositioningRequestId) {
+      _restoringScroll = false;
+      return;
+    }
     scrollController.endInitialBottomPositioning();
     if (scrollController.hasClients) {
-      chatIdToScrollOffset[chatId] = scrollController.offset;
+      _chatNotifier.setViewScrollOffset(chatId, scrollController.offset);
     }
+    _restoringScroll = false;
   }
 
   Future<void> _loadEarlierMessages(String chatId) async {
-    final notifier = Provider.of<ChatNotifier>(context, listen: false);
-    if (!notifier.hasMoreHistory(chatId)) return;
+    if (!_chatNotifier.hasMoreHistory(chatId)) return;
 
     _preservingHistoryScrollChats.add(chatId);
     try {
-      final insertedHistoryCount = await notifier.loadMoreHistoryAfterCurrent(
+      final insertedHistoryCount =
+          await _chatNotifier.loadMoreHistoryAfterCurrent(
         chatId,
         beforeNotify: (count) {
-          _chatIdToVisibleMessageStart[chatId] =
-              (_chatIdToVisibleMessageStart[chatId] ?? 0) + count;
+          _chatNotifier.setViewVisibleStart(
+              chatId, _chatNotifier.viewVisibleStart(chatId) + count);
         },
       );
       if (insertedHistoryCount <= 0) return;
       if (scrollController.hasClients) {
-        chatIdToScrollOffset[chatId] = scrollController.offset;
+        _chatNotifier.setViewScrollOffset(chatId, scrollController.offset);
       }
     } finally {
       _preservingHistoryScrollChats.remove(chatId);
@@ -218,6 +263,16 @@ class _ChattingViewState extends State<ChattingView> {
 
   @override
   void dispose() {
+    // Belt-and-suspenders: capture the final scroll position before the
+    // controller is torn down, in case the last user scroll didn't reach the
+    // live listener (the listener already keeps it current on every scroll).
+    if (!_restoringScroll &&
+        activeConversationId.isNotEmpty &&
+        scrollController.hasClients) {
+      _chatNotifier.setViewScrollOffset(
+          activeConversationId, scrollController.offset);
+    }
+    scrollController.removeListener(_persistActiveChatScrollOffset);
     _searchTextNotifier.dispose();
     scrollController.dispose();
     searchChattingController.dispose();
@@ -232,7 +287,8 @@ class _ChattingViewState extends State<ChattingView> {
     if (activeConversationId.isNotEmpty) {
       chatIdToCachedMessage[activeConversationId] = typingController.text;
       if (scrollController.hasClients) {
-        chatIdToScrollOffset[activeConversationId] = scrollController.offset;
+        _chatNotifier.setViewScrollOffset(
+            activeConversationId, scrollController.offset);
       }
     }
     activeConversationId = "";
@@ -240,7 +296,7 @@ class _ChattingViewState extends State<ChattingView> {
     _previousNewestMessageId = null;
     _scrollPositioningRequestId++; // invalidate any in-flight history load
     scrollController.endInitialBottomPositioning();
-    Provider.of<ChatNotifier>(context, listen: false).setActiveChat(null);
+    _chatNotifier.setActiveChat(null);
     typingController.clear();
     inputPreMessageNotifier.value = null;
   }
@@ -273,15 +329,20 @@ class _ChattingViewState extends State<ChattingView> {
     }
   }
 
-  void _restoreScrollForChat(String chatId) {
+  void _restoreScrollForChat(String chatId, double savedOffset, int requestId) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!scrollController.hasClients) return;
-      final savedOffset = chatIdToScrollOffset[chatId];
-      if (savedOffset == null) return;
-      final minOffset = scrollController.position.minScrollExtent;
-      final maxOffset = scrollController.position.maxScrollExtent;
-      final target = savedOffset.clamp(minOffset, maxOffset).toDouble();
-      scrollController.jumpTo(target);
+      if (!mounted || requestId != _scrollPositioningRequestId) {
+        _restoringScroll = false;
+        return;
+      }
+      if (scrollController.hasClients) {
+        final minOffset = scrollController.position.minScrollExtent;
+        final maxOffset = scrollController.position.maxScrollExtent;
+        final target = savedOffset.clamp(minOffset, maxOffset).toDouble();
+        scrollController.jumpTo(target);
+        _chatNotifier.setViewScrollOffset(chatId, target);
+      }
+      _restoringScroll = false;
     });
   }
 
@@ -449,8 +510,7 @@ class _ChattingViewState extends State<ChattingView> {
         if (!_didSelectInitialChat) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (!mounted) return;
-            _selectInitialChat(
-                Provider.of<ChatNotifier>(context, listen: false));
+            _restoreOrSelectInitialChat(_chatNotifier);
           });
         }
         return _buildDesktopLayout(isMobile);
@@ -796,8 +856,8 @@ class _ChattingViewState extends State<ChattingView> {
                           chatIdToCachedMessage[activeConversationId] =
                               typingController.text;
                           if (scrollController.hasClients) {
-                            chatIdToScrollOffset[activeConversationId] =
-                                scrollController.offset;
+                            _chatNotifier.setViewScrollOffset(
+                                activeConversationId, scrollController.offset);
                           }
                         }
 
@@ -943,10 +1003,10 @@ class _ChattingViewState extends State<ChattingView> {
               children: [
                 Expanded(
                   child: Builder(builder: (context) {
-                    final visibleStart =
-                        ((_chatIdToVisibleMessageStart[activeChatId] ?? 0)
-                                .clamp(0, messages.length))
-                            .toInt();
+                    final visibleStart = _chatNotifier
+                        .viewVisibleStart(activeChatId)
+                        .clamp(0, messages.length)
+                        .toInt();
                     final centerKey = ValueKey('chat_center_$activeChatId');
 
                     return CustomScrollView(
