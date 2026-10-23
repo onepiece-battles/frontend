@@ -10,7 +10,6 @@ import 'package:one_piece_battles_flutter/components/desktop_card_layout.dart';
 import 'package:one_piece_battles_flutter/components/page_foot.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
-import 'package:one_piece_battles_flutter/repository/character_dao.dart';
 import 'package:one_piece_battles_flutter/utils/permission_check.dart';
 import 'package:openapi/api.dart';
 import 'package:toggle_switch/toggle_switch.dart';
@@ -20,6 +19,9 @@ import '../../utils/i18n_helper.dart';
 import '../../utils/image_helper.dart';
 import '../../utils/responsive_breakpoints.dart';
 import '../../utils/route_notifier.dart';
+import 'character_list_controller.dart';
+import 'widgets/character_stat_pair.dart';
+import 'widgets/character_mobile_roster.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -33,6 +35,7 @@ class CharacterView extends StatefulWidget {
 class _CharacterViewState extends State<CharacterView>
     with AutomaticKeepAliveClientMixin {
   final Logger logger = Logger('CharacterView');
+  final CharacterListController _controller = CharacterListController();
   final GlobalKey _tableKey = GlobalKey();
   // Controllers
   final TextEditingController searchNameController = TextEditingController();
@@ -129,6 +132,7 @@ class _CharacterViewState extends State<CharacterView>
     routeNotifier.removeListener(_refreshWhenListRouteIsActive);
     searchNameController.dispose();
     scrollController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -150,7 +154,7 @@ class _CharacterViewState extends State<CharacterView>
         sortKeys: sortKeys,
         characterFilter: characterFilter);
 
-    getIt<CharacterDao>().listCharacter(listCharacterRequest).then((value) {
+    _controller.listCharacter(listCharacterRequest).then((value) {
       if (!mounted) return;
       setState(() {
         currentCharacterList = value!.characters;
@@ -183,7 +187,21 @@ class _CharacterViewState extends State<CharacterView>
                     // Compact cards on mobile, a richer roster on desktop.
                     Expanded(
                       child: isNarrow
-                          ? _buildMobileCharacterCards()
+                          ? CharacterMobileRoster(
+                              characters: currentCharacterList,
+                              scrollController: scrollController,
+                              battleStyleMap: battleStyleToDisplayValue,
+                              raceMap: raceEnumToDisplayName,
+                              hakiMap: hakiEnumValueToDisplayValue,
+                              expandedRowIds: _expandedRowIds,
+                              onToggleExpand: (id) => setState(() {
+                                    if (_expandedRowIds.contains(id)) {
+                                      _expandedRowIds.remove(id);
+                                    } else {
+                                      _expandedRowIds.add(id);
+                                    }
+                                  }),
+                            )
                           : _buildDesktopCharacterRoster(),
                     ),
                     const SizedBox(height: 15),
@@ -653,210 +671,6 @@ class _CharacterViewState extends State<CharacterView>
     );
   }
 
-  // ── Mobile: card-based character list ─────────────────────────────────
-
-  Widget _buildMobileCharacterCards() {
-    if (currentCharacterList.isEmpty) {
-      return Center(
-        child: Text(AppLocalizations.of(context)!.empty,
-            style: OnepieceFonts.contentStyle),
-      );
-    }
-    return ListView.builder(
-      controller: scrollController,
-      itemCount: currentCharacterList.length,
-      itemBuilder: (context, index) {
-        final character = currentCharacterList[index];
-        final isExpanded = _expandedRowIds.contains(character.id);
-        final isEven = index.isEven;
-
-        return Card(
-          color: isEven ? OnepieceColors.liteFancyGreen : Colors.white,
-          margin: const EdgeInsets.only(bottom: 8),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(10),
-            onTap: () => context.goNamed('characterDetails',
-                extra: character.id,
-                pathParameters: {
-                  'name': I18nHelper.getDisplayNameFromI18n(character.name)
-                }),
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Top row: image + name + score
-                  Row(
-                    children: [
-                      ImageLazyLoader(
-                        key: ValueKey(character.imageUri),
-                        uriProvider: () => character.imageUri!,
-                        width: 48,
-                        borderWidth: 2,
-                        borderRadios: 48,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              I18nHelper.getDisplayNameFromI18n(character.name),
-                              style: OnepieceFonts.headerStyle
-                                  .copyWith(fontSize: 16),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              '${raceEnumToDisplayName[character.race] ?? ""}  ·  ${battleStyleToDisplayValue[character.battleStyle] ?? ""}',
-                              style: OnepieceFonts.smallContentStyle,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(character.score.toString(),
-                              style: OnepieceFonts.boldFancySmallFont
-                                  .copyWith(fontSize: 18)),
-                          if (character.bounty != null && character.bounty! > 0)
-                            Text(
-                              '₿${character.bounty}',
-                              style: GoogleFonts.lobster(
-                                  fontSize: 13, color: Colors.orange[700]),
-                            ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  // Haki tags
-                  if (character.hakis.isNotEmpty)
-                    Wrap(
-                      spacing: 4,
-                      runSpacing: 2,
-                      children: (character.hakis.toList()
-                            ..sort(
-                                (a, b) => a.toString().compareTo(b.toString())))
-                          .map((e) => OnepieceTag.getHakiTag(
-                              e, hakiEnumValueToDisplayValue[e]!))
-                          .toList(),
-                    ),
-                  // Expand toggle
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: InkWell(
-                      onTap: () {
-                        setState(() {
-                          if (isExpanded) {
-                            _expandedRowIds.remove(character.id);
-                          } else {
-                            _expandedRowIds.add(character.id);
-                          }
-                        });
-                      },
-                      borderRadius: BorderRadius.circular(4),
-                      child: Padding(
-                        padding: const EdgeInsets.all(4),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              AppLocalizations.of(context)!.detailInformation,
-                              style: const TextStyle(
-                                  fontSize: 12,
-                                  color: OnepieceColors.fancyBlue),
-                            ),
-                            Icon(
-                              isExpanded
-                                  ? Icons.expand_less
-                                  : Icons.expand_more,
-                              size: 18,
-                              color: OnepieceColors.fancyBlue,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  // Expanded stats
-                  if (isExpanded) _buildMobileStatRows(character),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildMobileStatRows(CharacterListView character) {
-    final stats = <_StatPair>[
-      _StatPair(AppLocalizations.of(context)!.characterAttack,
-          character.attack.toString(),
-          icon: 'images/character_digits_icon/attack.svg'),
-      _StatPair(AppLocalizations.of(context)!.characterDefense,
-          character.defense.toString(),
-          icon: 'images/character_digits_icon/defense.svg'),
-      _StatPair(AppLocalizations.of(context)!.characterIntelligence,
-          character.intelligence.toString(),
-          icon: 'images/character_digits_icon/intelligence.svg'),
-      _StatPair(AppLocalizations.of(context)!.characterBlood,
-          character.blood.toString(),
-          icon: 'images/character_digits_icon/blood.svg'),
-      _StatPair(AppLocalizations.of(context)!.characterSpeed,
-          character.speed.toString(),
-          icon: 'images/character_digits_icon/speed.svg'),
-      _StatPair(AppLocalizations.of(context)!.groupGain,
-          character.groupGain.toString(),
-          icon: 'images/character_digits_icon/group_gain.svg'),
-      _StatPair(AppLocalizations.of(context)!.fruitLimit,
-          character.maximumFruitCount.toString()),
-    ];
-
-    return Container(
-      margin: const EdgeInsets.only(top: 4),
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: OnepieceColors.liteFancyGreen.withValues(alpha: 0.4),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Wrap(
-        spacing: 16,
-        runSpacing: 6,
-        children: stats.map((stat) {
-          return SizedBox(
-            width: (MediaQuery.of(context).size.width - 80) / 2,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (stat.icon != null)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 4),
-                    child:
-                        ImageHelper.getTextFormFieldIcon(stat.icon!, false, 14),
-                  ),
-                Text(stat.label,
-                    style:
-                        OnepieceFonts.smallContentStyle.copyWith(fontSize: 12)),
-                const SizedBox(width: 4),
-                Text(stat.value,
-                    style: OnepieceFonts.boldFancySmallFont
-                        .copyWith(fontSize: 13)),
-              ],
-            ),
-          );
-        }).toList(),
-      ),
-    );
-  }
-
   // ── Desktop: profile-card roster ────────────────────────────────────────
 
   Widget _buildDesktopCharacterRoster() {
@@ -1188,26 +1002,26 @@ class _CharacterViewState extends State<CharacterView>
   }
 
   Widget _buildDesktopStats(CharacterListView character) {
-    final stats = <_StatPair>[
-      _StatPair(AppLocalizations.of(context)!.characterAttack,
+    final stats = <StatPair>[
+      StatPair(AppLocalizations.of(context)!.characterAttack,
           character.attack.toString(),
           icon: 'images/character_digits_icon/attack.svg'),
-      _StatPair(AppLocalizations.of(context)!.characterDefense,
+      StatPair(AppLocalizations.of(context)!.characterDefense,
           character.defense.toString(),
           icon: 'images/character_digits_icon/defense.svg'),
-      _StatPair(AppLocalizations.of(context)!.characterIntelligence,
+      StatPair(AppLocalizations.of(context)!.characterIntelligence,
           character.intelligence.toString(),
           icon: 'images/character_digits_icon/intelligence.svg'),
-      _StatPair(AppLocalizations.of(context)!.characterBlood,
+      StatPair(AppLocalizations.of(context)!.characterBlood,
           character.blood.toString(),
           icon: 'images/character_digits_icon/blood.svg'),
-      _StatPair(AppLocalizations.of(context)!.characterSpeed,
+      StatPair(AppLocalizations.of(context)!.characterSpeed,
           character.speed.toString(),
           icon: 'images/character_digits_icon/speed.svg'),
-      _StatPair(AppLocalizations.of(context)!.groupGain,
+      StatPair(AppLocalizations.of(context)!.groupGain,
           character.groupGain.toString(),
           icon: 'images/character_digits_icon/group_gain.svg'),
-      _StatPair(AppLocalizations.of(context)!.fruitLimit,
+      StatPair(AppLocalizations.of(context)!.fruitLimit,
           character.maximumFruitCount.toString()),
     ];
 
@@ -1456,26 +1270,26 @@ class _CharacterViewState extends State<CharacterView>
 
       // ── Expanded stat sub-rows ───────────────────────────────────
       if (isExpanded) {
-        final stats = <_StatPair>[
-          _StatPair(AppLocalizations.of(context)!.characterAttack,
+        final stats = <StatPair>[
+          StatPair(AppLocalizations.of(context)!.characterAttack,
               character.attack.toString(),
               icon: 'images/character_digits_icon/attack.svg'),
-          _StatPair(AppLocalizations.of(context)!.characterDefense,
+          StatPair(AppLocalizations.of(context)!.characterDefense,
               character.defense.toString(),
               icon: 'images/character_digits_icon/defense.svg'),
-          _StatPair(AppLocalizations.of(context)!.characterIntelligence,
+          StatPair(AppLocalizations.of(context)!.characterIntelligence,
               character.intelligence.toString(),
               icon: 'images/character_digits_icon/intelligence.svg'),
-          _StatPair(AppLocalizations.of(context)!.characterBlood,
+          StatPair(AppLocalizations.of(context)!.characterBlood,
               character.blood.toString(),
               icon: 'images/character_digits_icon/blood.svg'),
-          _StatPair(AppLocalizations.of(context)!.characterSpeed,
+          StatPair(AppLocalizations.of(context)!.characterSpeed,
               character.speed.toString(),
               icon: 'images/character_digits_icon/speed.svg'),
-          _StatPair(AppLocalizations.of(context)!.groupGain,
+          StatPair(AppLocalizations.of(context)!.groupGain,
               character.groupGain.toString(),
               icon: 'images/character_digits_icon/group_gain.svg'),
-          _StatPair(AppLocalizations.of(context)!.fruitLimit,
+          StatPair(AppLocalizations.of(context)!.fruitLimit,
               character.maximumFruitCount.toString()),
         ];
 
@@ -1516,12 +1330,4 @@ class _CharacterViewState extends State<CharacterView>
 
   @override
   bool get wantKeepAlive => true;
-}
-
-/// Lightweight value object for the expandable stat rows.
-class _StatPair {
-  final String label;
-  final String value;
-  final String? icon;
-  const _StatPair(this.label, this.value, {this.icon});
 }
