@@ -26,6 +26,7 @@ import '../../utils/responsive_breakpoints.dart';
 import 'character_detail_controller.dart';
 import 'widgets/character_battles_section.dart';
 import 'widgets/character_groups_section.dart';
+import 'widgets/character_fruits_section.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -67,12 +68,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
   TextEditingController characterSpeedController = TextEditingController();
   TextEditingController characterEnergyController = TextEditingController();
 
-  // fruit search data
-  TextEditingController fruitNameController = TextEditingController();
-  FruitFilter fruitFilter = FruitFilter();
-  List<FruitListView> searchingFruitList = [];
   List<Haki> selectedHakis = [];
-  String? selectedFruitId;
   String? selectedImage;
 
   double dividerWidth = 860;
@@ -98,7 +94,6 @@ class _CharacterDetailState extends State<CharacterDetail> {
 
   bool basicInfoEditable = false;
   bool combatInfoEditable = false;
-  bool fruitSearchEnabled = false;
   bool showBaseValue = false;
 
   @override
@@ -126,20 +121,6 @@ class _CharacterDetailState extends State<CharacterDetail> {
     _characterFuture = _loadData();
   }
 
-  _eatFruit() {
-    EatFruitRequest request =
-        EatFruitRequest(characterId: character.id, fruitId: selectedFruitId!);
-    Future<EatFruitResponse?> response = _controller.eatFruit(request);
-    response.then(
-      (value) {
-        if (!mounted) return;
-        setState(() {
-          _refreshCharacterData();
-        });
-      },
-    );
-  }
-
   bool _updateData(CharacterFullView characterFullView) {
     if (_preparedCharacterId == characterFullView.id) return false;
     _preparedCharacterId = characterFullView.id;
@@ -161,9 +142,6 @@ class _CharacterDetailState extends State<CharacterDetail> {
     // nika role has the edit permission for all resources
     if (getIt<User>().loginRole == UserRole.NIKA) {
       _editButtonVisible = true;
-    }
-    if (fruits.length < character.maximumFruitCount) {
-      fruitSearchEnabled = true;
     }
     return true;
   }
@@ -242,7 +220,16 @@ class _CharacterDetailState extends State<CharacterDetail> {
           const SizedBox(height: 12),
           _buildMobileCombatInfo(context),
           const SizedBox(height: 12),
-          _buildMobileFruits(context),
+          CharacterFruitsSection(
+              character: character,
+              editButtonVisible: _editButtonVisible,
+              controller: _controller,
+              onFruitEaten: () {
+                setState(() {
+                  _refreshCharacterData();
+                });
+              },
+              isNarrow: true),
           if (fruits.isNotEmpty) const SizedBox(height: 12),
           CharacterGroupsSection(groups: groups, isNarrow: true),
           const SizedBox(height: 12),
@@ -559,182 +546,6 @@ class _CharacterDetailState extends State<CharacterDetail> {
     });
   }
 
-  Widget _buildMobileFruits(BuildContext context) {
-    final fruitMap = _fruitTypeMap(context);
-    return StatefulBuilder(builder: (context, fruitSetState) {
-      return Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        child: Padding(
-            padding: const EdgeInsets.all(12),
-            child:
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(AppLocalizations.of(context)!.devilFruit,
-                  style: OnepieceFonts.headerStyle.copyWith(fontSize: 16)),
-              const SizedBox(height: 10),
-              if (fruits.isNotEmpty)
-                ...fruits.map((f) => Card(
-                      margin: const EdgeInsets.only(bottom: 6),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8)),
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(8),
-                        onTap: () => context.goNamed('fruitDetails',
-                            extra: f.id,
-                            pathParameters: {
-                              'name': I18nHelper.getDisplayNameFromI18n(f.name!)
-                            }),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 8),
-                          child: Row(children: [
-                            Expanded(
-                                child: Text(
-                                    I18nHelper.getDisplayNameFromI18n(f.name!),
-                                    style: OnepieceFonts.contentStyle)),
-                            OnepieceTag.getFruitTag(
-                                f.fruitType!, fruitMap[f.fruitType]!),
-                          ]),
-                        ),
-                      ),
-                    )),
-              if (character.maximumFruitCount > fruits.length &&
-                  _editButtonVisible) ...[
-                const SizedBox(height: 8),
-                SizedBox(
-                    height: 35,
-                    child: TextFormField(
-                      controller: fruitNameController,
-                      decoration: InputDecoration(
-                        floatingLabelBehavior: FloatingLabelBehavior.never,
-                        contentPadding:
-                            const EdgeInsets.symmetric(horizontal: 10),
-                        disabledBorder: const OutlineInputBorder(
-                            borderSide: BorderSide(
-                                color: OnepieceColors.menuHoverColor)),
-                        enabledBorder: const OutlineInputBorder(
-                            borderSide: BorderSide(
-                                color: OnepieceColors.menuHoverColor)),
-                        focusedBorder: const OutlineInputBorder(
-                            borderSide: BorderSide(
-                                color: OnepieceColors.fancyGreen, width: 2.2)),
-                        prefixIcon: const Icon(Icons.search, size: 20),
-                        labelText: AppLocalizations.of(context)!.search,
-                      ),
-                      onChanged: (v) {
-                        selectedFruitId = null;
-                        fruitSetState(() {});
-                        if (v.isEmpty) {
-                          searchingFruitList = [];
-                          fruitSetState(() {});
-                          return;
-                        }
-                        fruitFilter.name = v;
-                        fruitFilter.languageCode = I18nHelper.getLanguageCode();
-                        _controller
-                            .listFruit(ListFruitRequest(
-                                pageSize: 5,
-                                pageIndex: 1,
-                                sortKeys: [],
-                                fruitFilter: fruitFilter))
-                            .then((r) {
-                          if (mounted) {
-                            fruitSetState(() => searchingFruitList = r!.fruits);
-                          }
-                        });
-                      },
-                    )),
-                if (searchingFruitList.isNotEmpty)
-                  Container(
-                      constraints: const BoxConstraints(maxHeight: 200),
-                      decoration: const BoxDecoration(
-                          color: OnepieceColors.menuBackgroundColor,
-                          borderRadius: BorderRadius.all(Radius.circular(8))),
-                      child: ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: searchingFruitList.length,
-                          itemBuilder: (_, i) => _buildFruitSearchResultCard(
-                              context: context,
-                              fruit: searchingFruitList[i],
-                              fruitMap: fruitMap,
-                              fruitSetState: fruitSetState))),
-              ],
-            ])),
-      );
-    });
-  }
-
-  Widget _buildFruitSearchResultCard({
-    required BuildContext context,
-    required FruitListView fruit,
-    required Map<FruitType, String> fruitMap,
-    required StateSetter fruitSetState,
-  }) {
-    final isSelected = selectedFruitId == fruit.id;
-    final alreadyEaten = fruits.map((e) => e.id).contains(fruit.id);
-    return Card(
-      elevation: isSelected ? 2 : 0,
-      margin: const EdgeInsets.fromLTRB(6, 6, 6, 2),
-      color: isSelected
-          ? OnepieceColors.liteFancyBlue.withValues(alpha: 0.65)
-          : Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-        side: BorderSide(
-          color: isSelected
-              ? OnepieceColors.fancyBlue.withValues(alpha: 0.35)
-              : OnepieceColors.menuHoverColor.withValues(alpha: 0.45),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          InkWell(
-            borderRadius: BorderRadius.circular(8),
-            hoverColor: OnepieceColors.liteFancyBlue,
-            onTap: () {
-              fruitSetState(() {
-                selectedFruitId = isSelected ? null : fruit.id;
-              });
-            },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      I18nHelper.getDisplayNameFromI18n(fruit.name!),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: isSelected
-                          ? OnepieceFonts.contentStyleBold
-                          : OnepieceFonts.contentStyle,
-                    ),
-                  ),
-                  OnepieceTag.getFruitTag(
-                      fruit.fruitType!, fruitMap[fruit.fruitType!]!),
-                ],
-              ),
-            ),
-          ),
-          if (isSelected && !alreadyEaten)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
-              child: ElevatedButton(
-                onPressed: () {
-                  _eatFruit();
-                  fruitNameController.text = '';
-                  selectedFruitId = null;
-                  searchingFruitList = [];
-                  fruitSetState(() {});
-                },
-                child: Text(AppLocalizations.of(context)!.eat),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
   // ── Mobile helpers ────────────────────────────────────────────────
 
   Widget _mobileField(BuildContext context, bool editable,
@@ -905,15 +716,6 @@ class _CharacterDetailState extends State<CharacterDetail> {
 
   // ── Shared lookup maps ────────────────────────────────────────────
 
-  Map<FruitType, String> _fruitTypeMap(BuildContext context) => {
-        FruitType.logia: AppLocalizations.of(context)!.logiaFruit,
-        FruitType.zoan: AppLocalizations.of(context)!.zoanFruit,
-        FruitType.ancientZoan: AppLocalizations.of(context)!.ancientZoanFruit,
-        FruitType.mythicalZoan: AppLocalizations.of(context)!.mythicalZoanFruit,
-        FruitType.artificialZoan:
-            AppLocalizations.of(context)!.artificialZoanFruit,
-        FruitType.paramecia: AppLocalizations.of(context)!.parameciaFruit,
-      };
   Map<BattleStyle, String> _bsMap(BuildContext context) => {
         BattleStyle.BODY: AppLocalizations.of(context)!.body,
         BattleStyle.SCIENCE: AppLocalizations.of(context)!.science,
@@ -1083,11 +885,18 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                 width: dividerWidth,
                                 child: const Divider(
                                     color: Colors.grey, thickness: 1))),
-                        _getFruitSearchBar(context),
-                        if (fruits.isNotEmpty)
-                          Padding(
-                              padding: EdgeInsets.fromLTRB(sideWidth, 8, 8, 8),
-                              child: _getFruitList(context)),
+                        CharacterFruitsSection(
+                            character: character,
+                            editButtonVisible: _editButtonVisible,
+                            controller: _controller,
+                            onFruitEaten: () {
+                              setState(() {
+                                _refreshCharacterData();
+                              });
+                            },
+                            isNarrow: false,
+                            dividerWidth: dividerWidth,
+                            sideWidth: sideWidth),
                         Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8),
                             child: SizedBox(
@@ -2217,190 +2026,6 @@ class _CharacterDetailState extends State<CharacterDetail> {
       characterBloodController.text = character.blood.toString();
       characterSpeedController.text = character.speed.toString();
     }
-  }
-
-  Widget _getFruitSearchBar(BuildContext context) {
-    Map<FruitType, String> fruitTypeToDisplayValue = {
-      FruitType.logia: AppLocalizations.of(context)!.logiaFruit,
-      FruitType.zoan: AppLocalizations.of(context)!.zoanFruit,
-      FruitType.ancientZoan: AppLocalizations.of(context)!.ancientZoanFruit,
-      FruitType.mythicalZoan: AppLocalizations.of(context)!.mythicalZoanFruit,
-      FruitType.artificialZoan:
-          AppLocalizations.of(context)!.artificialZoanFruit,
-      FruitType.paramecia: AppLocalizations.of(context)!.parameciaFruit,
-    };
-    return StatefulBuilder(builder: (context, fruitSetState) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: sideWidth),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                SizedBox(
-                  width: 160,
-                  child: Text(
-                    AppLocalizations.of(context)!.devilFruit,
-                    style: OnepieceFonts.headerStyle,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (character.maximumFruitCount > fruits.length && _editButtonVisible)
-            Padding(
-              padding: EdgeInsets.fromLTRB(sideWidth, 8, 8, 0),
-              child: SizedBox(
-                width: 200,
-                height: 35,
-                child: TextFormField(
-                  enabled: fruitSearchEnabled,
-                  controller: fruitNameController,
-                  decoration: InputDecoration(
-                    floatingLabelBehavior: FloatingLabelBehavior.never,
-                    disabledBorder: const OutlineInputBorder(
-                        borderSide:
-                            BorderSide(color: OnepieceColors.menuHoverColor)),
-                    enabledBorder: const OutlineInputBorder(
-                        borderSide:
-                            BorderSide(color: OnepieceColors.menuHoverColor)),
-                    focusedBorder: const OutlineInputBorder(
-                        borderSide: BorderSide(
-                            color: OnepieceColors.fancyGreen, width: 2.2)),
-                    prefixIcon: const Icon(Icons.search),
-                    labelText: AppLocalizations.of(context)!.search,
-                  ),
-                  onChanged: (value) {
-                    selectedFruitId = null;
-                    fruitSetState(() {});
-                    if (value.isEmpty) {
-                      searchingFruitList = [];
-                      fruitSetState(() {});
-                      return;
-                    }
-                    fruitFilter.name = value;
-                    fruitFilter.languageCode = I18nHelper.getLanguageCode();
-                    ListFruitRequest request = ListFruitRequest(
-                        pageSize: 5,
-                        pageIndex: 1,
-                        sortKeys: [],
-                        fruitFilter: fruitFilter);
-                    Future<ListFruitResponse?> response =
-                        _controller.listFruit(request);
-                    response.then(
-                      (value) {
-                        fruitSetState(() {
-                          searchingFruitList = value!.fruits;
-                        });
-                      },
-                    );
-                  },
-                ),
-              ),
-            ),
-          Padding(
-            padding: EdgeInsets.fromLTRB(sideWidth, 8, 8, 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Container(
-                    width: dividerWidth - sideWidth - 16,
-                    constraints: const BoxConstraints(maxHeight: 300),
-                    decoration: const BoxDecoration(
-                      color: OnepieceColors.menuBackgroundColor,
-                      borderRadius: BorderRadius.all(Radius.circular(8)),
-                    ),
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: searchingFruitList.length,
-                      itemBuilder: (context, index) {
-                        var fruit = searchingFruitList[index];
-                        return _buildFruitSearchResultCard(
-                            context: context,
-                            fruit: fruit,
-                            fruitMap: fruitTypeToDisplayValue,
-                            fruitSetState: fruitSetState);
-                      },
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      );
-    });
-  }
-
-  Widget _getFruitList(BuildContext context) {
-    Map<FruitType, String> fruitTypeToDisplayValue = {
-      FruitType.logia: AppLocalizations.of(context)!.logiaFruit,
-      FruitType.zoan: AppLocalizations.of(context)!.zoanFruit,
-      FruitType.ancientZoan: AppLocalizations.of(context)!.ancientZoanFruit,
-      FruitType.mythicalZoan: AppLocalizations.of(context)!.mythicalZoanFruit,
-      FruitType.artificialZoan:
-          AppLocalizations.of(context)!.artificialZoanFruit,
-      FruitType.paramecia: AppLocalizations.of(context)!.parameciaFruit,
-    };
-    return Container(
-      width: dividerWidth - sideWidth - 16,
-      decoration: const BoxDecoration(
-        color: OnepieceColors.menuBackgroundColor,
-        borderRadius: BorderRadius.all(Radius.circular(8)),
-      ),
-      child: ListView.builder(
-        shrinkWrap: true,
-        itemCount: fruits.length,
-        itemBuilder: (context, index) {
-          var fruit = fruits[index];
-          return Card(
-            elevation: 0,
-            margin: const EdgeInsets.fromLTRB(8, 6, 8, 2),
-            color: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-              side: BorderSide(
-                color: OnepieceColors.menuHoverColor.withValues(alpha: 0.45),
-              ),
-            ),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(8),
-              hoverColor: OnepieceColors.liteFancyBlue,
-              onTap: () {
-                context.goNamed('fruitDetails',
-                    extra: fruit.id,
-                    pathParameters: {
-                      'name': I18nHelper.getDisplayNameFromI18n(fruit.name!)
-                    });
-              },
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        I18nHelper.getDisplayNameFromI18n(fruit.name!),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: OnepieceFonts.contentStyle,
-                      ),
-                    ),
-                    OnepieceTag.getFruitTag(
-                      fruit.fruitType!,
-                      fruitTypeToDisplayValue[fruit.fruitType!]!,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
   }
 
   bool _basicInfoUpdated() {
