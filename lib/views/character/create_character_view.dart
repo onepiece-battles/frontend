@@ -14,14 +14,13 @@ import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
 import '../../constants/path_constants.dart';
 import '../../popup/onepiece_alert.dart';
-import '../../repository/character_dao.dart';
-import '../../repository/image_dao.dart';
 import '../../utils/base64_helper.dart';
 import '../../utils/data_converter.dart';
 import '../../utils/i18n_helper.dart';
 import '../../utils/image_helper.dart';
 import '../../utils/nested_scroll_helper.dart';
 import '../../utils/onepiece_image_picker.dart';
+import 'create_character_controller.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -35,6 +34,7 @@ class CreateCharacterView extends StatefulWidget {
 class _CreateCharacterViewState extends State<CreateCharacterView> {
   final ScrollController _pageScrollController = ScrollController();
   final ScrollController _horizontalScrollController = ScrollController();
+  final CreateCharacterController _controller = CreateCharacterController();
   TextEditingController characterNameEnController = TextEditingController(
       text: RandomStringGenerator.generateRandomName(
           8,
@@ -163,6 +163,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
     for (final controller in characterControllerListAll()) {
       controller.dispose();
     }
+    _controller.dispose();
     super.dispose();
   }
 
@@ -1464,7 +1465,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                               characterBounty.text.trim()),
                     );
                     final router = GoRouter.of(context);
-                    getIt<CharacterDao>()
+                    _controller
                         .addCharacter(addCharacterRequest)
                         .then((characterResponse) {
                       if (!mounted) return;
@@ -1474,8 +1475,8 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                               resourceId: characterResponse!.id,
                               image: encodedImage,
                               type: ResourceType.CHARACTER);
-                      getIt<ImageDao>()
-                          .addImage(uploadImageRequest)
+                      _controller
+                          .uploadImage(uploadImageRequest)
                           .then((value) {
                         if (!mounted) return;
                         router.goNamed('characterDetails',
