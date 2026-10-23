@@ -2360,7 +2360,6 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                     isSelected
                                         ? selectedHakis.remove(haki)
                                         : selectedHakis.add(haki);
-                                    debugPrint("$selectedHakis");
                                     // //This rebuilds the StatefulWidget to update the button's text
                                     combatState(() {});
                                     //This rebuilds the dropdownMenu Widget to update the check mark

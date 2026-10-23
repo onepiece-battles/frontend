@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:openapi/api.dart';
 
 class FileDao {
@@ -12,7 +11,6 @@ class FileDao {
 
   Future<DownloadFileResponse?> downloadFile(
       DownloadFileRequest request) async {
-    debugPrint('start downloading pdf');
     return await fileApi.downloadFile(request);
   }
 }
