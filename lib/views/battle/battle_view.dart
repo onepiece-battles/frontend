@@ -3,21 +3,19 @@ import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
-import 'package:one_piece_battles_flutter/components/image_lazy_loader.dart';
 import 'package:one_piece_battles_flutter/components/desktop_card_layout.dart';
 import 'package:one_piece_battles_flutter/components/page_foot.dart';
 import 'package:one_piece_battles_flutter/constants/button_style.dart';
-import 'package:one_piece_battles_flutter/repository/battle_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
-import 'package:logging/logging.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
 import '../../utils/responsive_breakpoints.dart';
-import '../../utils/image_helper.dart';
 import '../../utils/permission_check.dart';
 import '../../utils/route_notifier.dart';
+import 'battle_list_controller.dart';
+import 'widgets/battle_roster.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -29,7 +27,7 @@ class BattleView extends StatefulWidget {
 }
 
 class _BattleViewState extends State<BattleView> {
-  Logger logger = Logger('BattleView');
+  final BattleListController _controller = BattleListController();
   TextEditingController starterNameController = TextEditingController();
   TextEditingController receiverNameController = TextEditingController();
 
@@ -42,19 +40,6 @@ class _BattleViewState extends State<BattleView> {
   List<BattleStatus> selectedBattleStatus = [];
 
   ScrollController mainController = ScrollController();
-  ScrollController tableController = ScrollController();
-
-  // first all columns will be sorted by creation id desc.
-  Map<BattleSortableFieldsEnum, SortOrder?> sortableEnumToSortOrderMap = {
-    BattleSortableFieldsEnum.winnerName: null,
-  };
-
-  // sorting icon map
-  Map<SortOrder?, String> sortOrderToPath = const {
-    null: 'images/svgs/sort-solid.svg',
-    SortOrder.ASC: 'images/svgs/sort-up-solid.svg',
-    SortOrder.DESC: 'images/svgs/sort-down-solid.svg'
-  };
 
   List<BattleSortableField> sortKeys = [];
   int initialLabelIndex = 0;
@@ -64,8 +49,6 @@ class _BattleViewState extends State<BattleView> {
   int itemCountPerPage = 10;
   int totalItemCount = 0;
 
-  bool onlyShowSystemResource = false;
-  bool donNotShowSystemResource = false;
 
   @override
   void initState() {
@@ -78,7 +61,7 @@ class _BattleViewState extends State<BattleView> {
   void dispose() {
     routeNotifier.removeListener(_refreshWhenListRouteIsActive);
     mainController.dispose();
-    tableController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -102,7 +85,7 @@ class _BattleViewState extends State<BattleView> {
         sortKeys: sortKeys,
         battleFilter: battleFilter);
     Future<ListBattleResponse?> response =
-        getIt<BattleDao>().listBattles(request);
+        _controller.listBattles(request);
     response.then((value) {
       if (!mounted) return;
       setState(() {
@@ -136,9 +119,11 @@ class _BattleViewState extends State<BattleView> {
                             child: _getControlRow(context, isNarrow: false)),
                     const SizedBox(height: 10),
                     Expanded(
-                      child: isNarrow
-                          ? _buildMobileBattleCards(context)
-                          : _buildDesktopBattleCards(context),
+                      child: BattleRoster(
+                        battles: currentBattleList,
+                        controller: mainController,
+                        isNarrow: isNarrow,
+                      ),
                     ),
                     const SizedBox(height: 15),
                     if (totalPageNum > 1)
@@ -565,519 +550,5 @@ class _BattleViewState extends State<BattleView> {
         ),
       ),
     );
-  }
-
-  // ── Mobile: card-based battle list ────────────────────────────────────
-
-  Widget _buildMobileBattleCards(BuildContext context) {
-    if (currentBattleList.isEmpty) {
-      return Center(
-        child: Text(AppLocalizations.of(context)!.empty,
-            style: OnepieceFonts.contentStyle),
-      );
-    }
-
-    final statusMap = <BattleStatus, String>{
-      BattleStatus.CREATED: AppLocalizations.of(context)!.battleStatusCreated,
-      BattleStatus.IN_PROGRESS:
-          AppLocalizations.of(context)!.battleStatusStarted,
-      BattleStatus.FINISHED: AppLocalizations.of(context)!.battleStatusFinished,
-      BattleStatus.FAILED: AppLocalizations.of(context)!.battleStatusFailed,
-    };
-
-    return ListView.builder(
-      controller: mainController,
-      itemCount: currentBattleList.length,
-      itemBuilder: (context, index) {
-        final battle = currentBattleList[index];
-        final exec = battle.battleExecution;
-        final isEven = index.isEven;
-
-        return Card(
-          color: isEven ? OnepieceColors.liteFancyGreen : Colors.white,
-          margin: const EdgeInsets.only(bottom: 8),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(10),
-            onTap: () => context.goNamed('battleDetails',
-                extra: battle.id, pathParameters: {'id': battle.id}),
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                children: [
-                  // Starter vs Receiver row
-                  Row(
-                    children: [
-                      // Starter
-                      Expanded(
-                        child: _buildBattleCharCard(
-                          imageUri: battle.starter!.imageUri!,
-                          name: I18nHelper.getDisplayNameFromI18n(
-                              battle.starter!.name),
-                          score: exec?.starterScoreBefore?.toString() ?? '?',
-                        ),
-                      ),
-                      // VS
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        child: Column(
-                          children: [
-                            Text('VS',
-                                style: OnepieceFonts.boldFancySmallFont
-                                    .copyWith(
-                                        color: OnepieceColors.fancyBlue,
-                                        fontSize: 16)),
-                            const SizedBox(height: 4),
-                            // Winner indicator
-                            if (exec?.winnerId != null)
-                              ImageLazyLoader(
-                                key: UniqueKey(),
-                                uriProvider: () =>
-                                    exec!.winnerId == battle.starterId
-                                        ? battle.starter!.imageUri!
-                                        : battle.receiver!.imageUri!,
-                                width: 30,
-                                borderWidth: 2,
-                                borderRadios: 30,
-                              )
-                            else
-                              Container(
-                                width: 30,
-                                height: 30,
-                                decoration: const BoxDecoration(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(4)),
-                                ),
-                                child: FittedBox(
-                                  fit: BoxFit.fill,
-                                  child: ImageHelper.getSvgIconWithColor(
-                                      'images/svgs/question.svg',
-                                      100,
-                                      100,
-                                      OnepieceColors.liteFancyBlue),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                      // Receiver
-                      Expanded(
-                        child: _buildBattleCharCard(
-                          imageUri: battle.receiver!.imageUri!,
-                          name: I18nHelper.getDisplayNameFromI18n(
-                              battle.receiver!.name),
-                          score: exec?.receiverScoreBefore?.toString() ?? '?',
-                          alignRight: true,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  // Status + Creator row
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color:
-                              OnepieceColors.fancyBlue.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          statusMap[exec?.battleStatus] ?? '',
-                          style: OnepieceFonts.smallContentStyle.copyWith(
-                              color: OnepieceColors.fancyBlue, fontSize: 12),
-                        ),
-                      ),
-                      Text(
-                        battle.creationRecord?.nickname ?? '',
-                        style: OnepieceFonts.smallContentStyle,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildBattleCharCard({
-    required String imageUri,
-    required String name,
-    required String score,
-    bool alignRight = false,
-  }) {
-    final children = [
-      ImageLazyLoader(
-        key: UniqueKey(),
-        uriProvider: () => imageUri,
-        width: 44,
-        borderWidth: 2,
-        borderRadios: 44,
-      ),
-      const SizedBox(width: 8),
-      Column(
-        crossAxisAlignment:
-            alignRight ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-        children: [
-          Text(name,
-              style: OnepieceFonts.contentStyle.copyWith(fontSize: 13),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis),
-          const SizedBox(height: 2),
-          Text(score, style: OnepieceFonts.boldFancySmallFont),
-        ],
-      ),
-    ];
-    return Row(
-      mainAxisAlignment:
-          alignRight ? MainAxisAlignment.end : MainAxisAlignment.start,
-      children: alignRight ? children.reversed.toList() : children,
-    );
-  }
-
-  Widget _buildDesktopBattleCards(BuildContext context) {
-    if (currentBattleList.isEmpty) {
-      return Center(
-        child: Text(AppLocalizations.of(context)!.empty,
-            style: OnepieceFonts.contentStyle),
-      );
-    }
-    final statusMap = <BattleStatus, String>{
-      BattleStatus.CREATED: AppLocalizations.of(context)!.battleStatusCreated,
-      BattleStatus.IN_PROGRESS:
-          AppLocalizations.of(context)!.battleStatusStarted,
-      BattleStatus.FINISHED: AppLocalizations.of(context)!.battleStatusFinished,
-      BattleStatus.FAILED: AppLocalizations.of(context)!.battleStatusFailed,
-    };
-
-    return DesktopSpotlightGrid<BattleListView>(
-      items: currentBattleList,
-      idOf: (battle) => battle.id,
-      controller: mainController,
-      minCardWidth: 390,
-      maxColumns: 4,
-      cardBuilder: (context, battle) {
-        final execution = battle.battleExecution;
-        return Material(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(14),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(14),
-            onTap: () => context.goNamed('battleDetails',
-                extra: battle.id, pathParameters: {'id': battle.id}),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(children: [
-                Row(children: [
-                  Expanded(
-                    child: _buildBattleCharCard(
-                      imageUri: battle.starter!.imageUri!,
-                      name: I18nHelper.getDisplayNameFromI18n(
-                          battle.starter!.name),
-                      score: execution?.starterScoreBefore?.toString() ?? '?',
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Text('VS',
-                        style: OnepieceFonts.contentStyleBoldFancyBlue),
-                  ),
-                  Expanded(
-                    child: _buildBattleCharCard(
-                      imageUri: battle.receiver!.imageUri!,
-                      name: I18nHelper.getDisplayNameFromI18n(
-                          battle.receiver!.name),
-                      score: execution?.receiverScoreBefore?.toString() ?? '?',
-                      alignRight: true,
-                    ),
-                  ),
-                ]),
-                const SizedBox(height: 14),
-                Row(children: [
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: OnepieceColors.fancyBlue.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(statusMap[execution?.battleStatus] ?? '',
-                        style: OnepieceFonts.boldFancySmallFont),
-                  ),
-                  const Spacer(),
-                  const Icon(Icons.person_outline,
-                      size: 15, color: Colors.black45),
-                  const SizedBox(width: 4),
-                  Text(battle.creationRecord?.nickname ?? '',
-                      style: OnepieceFonts.smallContentStyle),
-                ]),
-              ]),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  // ignore: unused_element
-  Widget _getBattlesTable(BuildContext context) {
-    return DataTable(
-      showCheckboxColumn: false,
-      showBottomBorder: true,
-      headingRowHeight: 50,
-      border: const TableBorder(
-          top: BorderSide(color: OnepieceColors.themeColor),
-          bottom: BorderSide(color: OnepieceColors.themeColor)),
-      columns: _createColumns(),
-      rows: _createRows(context),
-      columnSpacing: 20,
-    );
-  }
-
-  List<DataColumn> _createColumns() {
-    return [
-      DataColumn(
-        label: Tooltip(
-          message: AppLocalizations.of(context)!.resetSort,
-          preferBelow: true,
-          child: ImageHelper.getIconButtonFromSvg(
-            'images/svgs/reset.svg',
-            OnepieceColors.fancyBlue,
-            25,
-            25,
-            () {
-              // filter will not be cleared
-              sortKeys = [];
-              sortableEnumToSortOrderMap = {
-                BattleSortableFieldsEnum.winnerName: null,
-              };
-              _search(false);
-            },
-          ),
-        ),
-      ),
-      _createSingleColumn(AppLocalizations.of(context)!.initiator, null, 150),
-      _createSingleColumn(AppLocalizations.of(context)!.receiver, null, 150),
-      _createSingleColumn(AppLocalizations.of(context)!.winner, null, 60),
-      _createSingleColumn(AppLocalizations.of(context)!.status, null, 70),
-      _createSingleColumn(AppLocalizations.of(context)!.creator, null, 150),
-    ];
-  }
-
-  DataColumn _createSingleColumn(String displayText,
-      BattleSortableFieldsEnum? sortableFieldsEnum, double? width) {
-    return DataColumn(
-        label: InkWell(
-      hoverColor: Colors.transparent,
-      splashColor: Colors.transparent,
-      onTap: sortableFieldsEnum == null
-          ? null
-          : () {
-              setState(() {
-                var sortOrder = sortableEnumToSortOrderMap[sortableFieldsEnum];
-                var sortKey = sortableFieldsEnum;
-                if (sortOrder == null) {
-                  sortOrder = SortOrder.ASC;
-                } else if (sortOrder == SortOrder.ASC) {
-                  sortOrder = SortOrder.DESC;
-                } else {
-                  sortOrder = null;
-                }
-                sortableEnumToSortOrderMap[sortableFieldsEnum] = sortOrder;
-                sortKeys.removeWhere((element) => element.sortKey == sortKey);
-                if (sortOrder != null) {
-                  sortKeys.insert(
-                      0,
-                      BattleSortableField(
-                          sortKey: sortKey, sortOrder: sortOrder));
-                }
-                _search(false);
-              });
-            },
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(5, 10, 0, 10),
-        child: SizedBox(
-          width: width,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Text(
-                displayText,
-                style: sortableEnumToSortOrderMap[sortableFieldsEnum] == null
-                    ? OnepieceFonts.tableHeaderStyle
-                    : OnepieceFonts.selectedTableHeaderStyle,
-              ),
-              if (sortableFieldsEnum != null)
-                Padding(
-                  padding: const EdgeInsets.all(5.0),
-                  child: ImageHelper.getSvgIconWithColor(
-                    sortOrderToPath[
-                        sortableEnumToSortOrderMap[sortableFieldsEnum]]!,
-                    15,
-                    15,
-                    sortableEnumToSortOrderMap[sortableFieldsEnum] == null
-                        ? Colors.grey
-                        : OnepieceColors.themeColor,
-                  ),
-                )
-            ],
-          ),
-        ),
-      ),
-    ));
-  }
-
-  List<DataRow> _createRows(BuildContext context) {
-    Map<BattleStatus, String> battleStatusToDisplayName = {
-      BattleStatus.CREATED: AppLocalizations.of(context)!.battleStatusCreated,
-      BattleStatus.IN_PROGRESS:
-          AppLocalizations.of(context)!.battleStatusStarted,
-      BattleStatus.FINISHED: AppLocalizations.of(context)!.battleStatusFinished,
-      BattleStatus.FAILED: AppLocalizations.of(context)!.battleStatusFailed,
-    };
-    return currentBattleList
-        .asMap()
-        .entries
-        .map(
-          (entry) => DataRow(
-            color: WidgetStateProperty.resolveWith<Color?>(
-                (Set<WidgetState> states) {
-              if (entry.key.isEven) {
-                return OnepieceColors
-                    .liteFancyGreen; // Use whatever color you need for even rows
-              }
-              return null; // Use default (transparent) color for odd rows
-            }),
-            onSelectChanged: (value) {
-              context.goNamed('battleDetails',
-                  extra: entry.value.id,
-                  pathParameters: {'id': entry.value.id});
-            },
-            cells: [
-              _getDataCell("${entry.key + 1}"),
-              DataCell(
-                Row(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                      child: ImageLazyLoader(
-                          key: UniqueKey(),
-                          uriProvider: () => entry.value.starter!.imageUri!,
-                          width: 40,
-                          borderWidth: 1.5,
-                          borderRadios: 40),
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                          child: Text(I18nHelper.getDisplayNameFromI18n(
-                              entry.value.starter!.name)),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 5.0),
-                          child: Text(
-                              entry.value.battleExecution!.starterScoreBefore!
-                                  .toString(),
-                              style: OnepieceFonts.boldFancySmallFont),
-                        )
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              DataCell(
-                Row(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                      child: ImageLazyLoader(
-                          key: UniqueKey(),
-                          uriProvider: () => entry.value.receiver!.imageUri!,
-                          width: 40,
-                          borderWidth: 1.5,
-                          borderRadios: 40),
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                          child: Text(I18nHelper.getDisplayNameFromI18n(
-                              entry.value.receiver!.name)),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 5.0),
-                          child: Text(
-                              entry.value.battleExecution!.receiverScoreBefore!
-                                  .toString(),
-                              style: OnepieceFonts.boldFancySmallFont),
-                        )
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              DataCell(
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      entry.value.battleExecution!.winnerId == null
-                          ? Container(
-                              width: 40,
-                              height: 40,
-                              decoration: const BoxDecoration(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(2.0)),
-                              ),
-                              child: FittedBox(
-                                fit: BoxFit.fill,
-                                child: ImageHelper.getSvgIconWithColor(
-                                    'images/svgs/question.svg',
-                                    100,
-                                    100,
-                                    OnepieceColors.liteFancyBlue),
-                              ),
-                            )
-                          : ImageLazyLoader(
-                              key: UniqueKey(),
-                              uriProvider: () =>
-                                  entry.value.battleExecution!.winnerId ==
-                                          entry.value.starterId
-                                      ? entry.value.starter!.imageUri!
-                                      : entry.value.receiver!.imageUri!,
-                              width: 40,
-                              borderWidth: 1.5,
-                              borderRadios: 40),
-                    ],
-                  ),
-                ),
-              ),
-              _getDataCell(battleStatusToDisplayName[
-                  entry.value.battleExecution!.battleStatus]!),
-              _getDataCell(entry.value.creationRecord!.nickname.toString()),
-            ],
-          ),
-        )
-        .toList();
-  }
-
-  DataCell _getDataCell(String value) {
-    return DataCell(Padding(
-      padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-      child: Text(value),
-    ));
   }
 }
