@@ -33,3 +33,19 @@
 - **建议修复**:移除 `toCharacterEntity(UpdateCharacterRequest)` 上的 `@Mapping(target = "imageUri", ignore = true)`,让其从请求映射(前端已发当前值,可正确保留)。`CreateCharacterRequest`/`Character` 两处的 ignore 维持不变(创建走单独上传、内部转换)。
 
 ---
+
+## 重构范围说明 · `refactor/views` 分支(一次性批量重构)
+
+> 本段记录继 `character_detail` / `character_view` 之后、对其余巨型 view 的一次性重构范围。
+> 全程仅做**静态验证**(`flutter analyze` 零告警 + `flutter build web` 通过),由使用者在最后统一做人工冒烟。
+
+**已完成(行为保持,逐个 commit):**
+1. **数据访问解耦(全量)**:为每个 view/view-widget 新建数据访问 Controller,把所有 `getIt<XxxDao>()` 调用收口到 Controller。现 `lib/views` 下已无任何 `getIt<SomeDao>()`(仅 Controller 内部通过 `GetIt.instance` 兜底,支持测试注入)。涉及 fruit/group/battle/issue/user/chatting 各 list、detail、create view 以及 `add_group_character_dialog`。
+2. **列表页拆分**:fruit/group/battle/issue/user 五个列表页的移动端卡片列表 + 桌面端 SpotlightGrid 抽成独立 `widgets/*_roster.dart`(展示组件,展开状态经回调上提)。
+3. **死代码清理**:删除各列表页早已被卡片布局取代、仅挂 `// ignore: unused_element` 的 DataTable 老路径(`_create*Table`/`_createColumns`/`_createRows` 等)与其专用的 `sortOrderToPath` / `sortableEnumToSortOrderMap`;删除 `create_character_view` / `create_group_view` 中 `useCardLayout = maxWidth.isFinite` 恒为 true、`else` 永不可达的遗留布局分支;删除各处未使用的 ScrollController(`tableController`/`horizontalController` 等)、`logger`、`onlyShowSystemResource` 等字段与随之失效的 import。
+
+**暂缓(⚪️ 需配合逐块人工冒烟再做,本轮未动):**
+- **编辑类详情页的表单区块抽取**:`fruit_detail_view` / `group_detail_view` / `battle_detail_view` 以及 `create_*_view` 的移动端/桌面端**可编辑表单 + 提交逻辑**尚未像 `character_detail` 那样抽成 StatefulWidget 区块。这类改动会改写有状态的编辑/提交流程,`character_detail` 当初是靠"逐块冒烟"验证的;本轮为一次性批量、无逐块冒烟,故仅做解耦+清理,表单区块抽取留待后续逐块冒烟时进行。
+- **`chatting_view`(1828 行)**:已基于 Provider/`ChatNotifier`,无服务定位器耦合、无死代码;其体量来自聊天 UI 固有的有状态逻辑(滚动位置恢复、websocket、图片上传)。强行拆 `_buildChatView` 风险高,留待逐块冒烟时处理。
+
+---
