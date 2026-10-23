@@ -16,7 +16,6 @@ import 'package:one_piece_battles_flutter/repository/character_dao.dart';
 import 'package:openapi/api.dart';
 import '../../l10n/app_localizations.dart';
 import '../../popup/onepiece_alert.dart';
-import '../../repository/fruit_dao.dart';
 import '../../repository/image_dao.dart';
 import '../../utils/base64_helper.dart';
 import '../../utils/data_converter.dart';
@@ -26,6 +25,7 @@ import '../../utils/onepiece_image_picker.dart';
 import '../../utils/permission_check.dart';
 import '../../utils/nested_scroll_helper.dart';
 import '../../utils/responsive_breakpoints.dart';
+import 'character_detail_controller.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -39,11 +39,13 @@ class CharacterDetail extends StatefulWidget {
 }
 
 class _CharacterDetailState extends State<CharacterDetail> {
+  final CharacterDetailController _controller = CharacterDetailController();
   ScrollController verticalController = ScrollController();
 
   @override
   void dispose() {
     verticalController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -119,7 +121,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
   }
 
   Future<CharacterFullView?> _loadData() {
-    return getIt<CharacterDao>().getCharacter(
+    return _controller.getCharacter(
         GetCharacterFullViewRequest(characterId: widget.characterId));
   }
 
@@ -131,8 +133,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
   _eatFruit() {
     EatFruitRequest request =
         EatFruitRequest(characterId: character.id, fruitId: selectedFruitId!);
-    Future<EatFruitResponse?> response =
-        getIt<CharacterDao>().eatFruit(request);
+    Future<EatFruitResponse?> response = _controller.eatFruit(request);
     response.then(
       (value) {
         if (!mounted) return;
@@ -634,8 +635,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
                         }
                         fruitFilter.name = v;
                         fruitFilter.languageCode = I18nHelper.getLanguageCode();
-                        getIt<FruitDao>()
-                            .list(ListFruitRequest(
+                        _controller
+                            .listFruit(ListFruitRequest(
                                 pageSize: 5,
                                 pageIndex: 1,
                                 sortKeys: [],
@@ -1190,7 +1191,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
           : DataConverter.stringToInt(characterHeight.text.trim()),
       score: character.score,
     );
-    getIt<CharacterDao>().update(updated).then((v) {
+    _controller.updateCharacter(updated).then((v) {
       if (!mounted) return;
       showAlert(alertHint, I18nHelper.getDisplayNameFromI18n(v!.result));
       if (v.success) {
@@ -1232,7 +1233,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
       battleStyle: selectedBattleStyle,
       name: character.name,
     );
-    getIt<CharacterDao>().update(updated).then((v) {
+    _controller.updateCharacter(updated).then((v) {
       if (!mounted) return;
       showAlert(alertHint, I18nHelper.getDisplayNameFromI18n(v!.result));
       if (v.success) {
@@ -1251,8 +1252,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
     final router = GoRouter.of(context);
     final alertHint = AppLocalizations.of(context)!.hint;
     final showAlert = OnepieceAlert.createAlertShower(context);
-    getIt<ImageDao>()
-        .addImage(UploadImageRequest(
+    _controller
+        .uploadImage(UploadImageRequest(
             type: ResourceType.CHARACTER,
             resourceId: character.id,
             image: selectedImage!))
@@ -2635,7 +2636,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
                         sortKeys: [],
                         fruitFilter: fruitFilter);
                     Future<ListFruitResponse?> response =
-                        getIt<FruitDao>().list(request);
+                        _controller.listFruit(request);
                     response.then(
                       (value) {
                         fruitSetState(() {
