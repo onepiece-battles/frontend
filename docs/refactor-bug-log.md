@@ -34,6 +34,18 @@
 
 ---
 
+## BUG-003 — 水果详情页「桌面端」编辑会清空其它字段 🟡(重构中修复)
+- **类型**:既有前端缺陷(编辑类区块抽取时发现),与 BUG-002 同类。
+- **文件**:`lib/views/fruit/fruit_detail_view.dart`(桌面端 `_getBasicInfo` / `_getCombatInfo` 内联提交)。
+- **现象 / 根因**:
+  - 后端 `FruitService.updateFruit` → `FruitConverter.toFruitEntity(UpdateFruitRequest)` → `fruitDao.update(entity)`,`FruitDao` 的 `update` 继承自 BaseDao,是**全列更新**;转换器只映射请求里存在的字段。
+  - 前端**移动端**提交的是**完整** `UpdateFruitRequest`(名称+类型+能量+全部 6 组 slope/intercept),安全;
+  - 但**桌面端**是两个独立的**部分**提交:基础区块只发 `{id, name, fruitType}`、战斗区块只发那几组系数。缺失字段在请求里为 null → 全列更新把它们**写成 null**。即:在桌面端编辑基础信息会清空该水果的全部战斗系数(反之亦然)。
+  - 另注:移动端把 `energyConsume` 放在战斗区块、桌面端放在基础区块(布局不一致)。
+- **修复**:抽取 `Fruit*InfoSection` 区块时,让每个编辑区块都提交**完整** `UpdateFruitRequest`(自己负责的字段取自本区块控件,其余字段取自已加载的 `fruit` 模型),移动端/桌面端行为统一。这与移动端既有行为一致,并消除桌面端的清字段问题。冒烟重点:桌面端分别编辑基础/战斗信息后,其它字段应保持不变。
+
+---
+
 ## 重构范围说明 · `refactor/views` 分支(一次性批量重构)
 
 > 本段记录继 `character_detail` / `character_view` 之后、对其余巨型 view 的一次性重构范围。

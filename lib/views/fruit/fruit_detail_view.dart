@@ -2,12 +2,10 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
-import 'package:one_piece_battles_flutter/utils/data_converter.dart';
 import 'fruit_detail_controller.dart';
+import 'widgets/fruit_combat_info_section.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
-import '../../components/digit_text_form_field.dart';
-import '../../components/fruit_digit_text_form_field.dart';
 import '../../components/image_lazy_loader.dart';
 import '../../components/string_text_form_field.dart';
 import '../../constants/onepiece_colors.dart';
@@ -61,19 +59,6 @@ class _FruitDetailViewState extends State<FruitDetailView> {
     horizontalController.dispose();
     verticalController.dispose();
     nameController.dispose();
-    energyConsumeController.dispose();
-    attackSlopeController.dispose();
-    attackInterceptController.dispose();
-    defenseSlopeController.dispose();
-    defenseInterceptController.dispose();
-    intelligenceSlopeController.dispose();
-    intelligenceInterceptController.dispose();
-    bloodSlopeController.dispose();
-    bloodInterceptController.dispose();
-    speedSlopeController.dispose();
-    speedInterceptController.dispose();
-    groupGainSlopeController.dispose();
-    groupGainInterceptController.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -82,33 +67,7 @@ class _FruitDetailViewState extends State<FruitDetailView> {
   // 1. basic info
   final TextEditingController nameController = TextEditingController();
 
-  // 2. combat info
-  final TextEditingController energyConsumeController = TextEditingController();
-
-  final TextEditingController attackSlopeController = TextEditingController();
-  final TextEditingController attackInterceptController =
-      TextEditingController();
-  final TextEditingController defenseSlopeController = TextEditingController();
-  final TextEditingController defenseInterceptController =
-      TextEditingController();
-  final TextEditingController intelligenceSlopeController =
-      TextEditingController();
-  final TextEditingController intelligenceInterceptController =
-      TextEditingController();
-  final TextEditingController bloodSlopeController = TextEditingController();
-  final TextEditingController bloodInterceptController =
-      TextEditingController();
-  final TextEditingController speedSlopeController = TextEditingController();
-  final TextEditingController speedInterceptController =
-      TextEditingController();
-  final TextEditingController groupGainSlopeController =
-      TextEditingController();
-  final TextEditingController groupGainInterceptController =
-      TextEditingController();
-
-  final _battleFormKey = GlobalKey<FormState>();
   bool _basicInfoEditable = false;
-  bool _combatInfoEditable = false;
   bool _editButtonVisible = false;
 
   final double sideW = 50;
@@ -132,7 +91,6 @@ class _FruitDetailViewState extends State<FruitDetailView> {
 
     // 2. reset state
     _basicInfoEditable = false;
-    _combatInfoEditable = false;
     // 3. update controller data
     _updateControllerData();
 
@@ -155,23 +113,6 @@ class _FruitDetailViewState extends State<FruitDetailView> {
   void _updateControllerData() {
     nameController.text =
         I18nHelper.getDisplayNameFromI18n(fruitFullView.name!);
-    energyConsumeController.text = fruitFullView.energyConsume!.toString();
-
-    attackSlopeController.text = fruitFullView.attackSlope.toString();
-    attackInterceptController.text = fruitFullView.attackIntercept.toString();
-    defenseSlopeController.text = fruitFullView.defenseSlope.toString();
-    defenseInterceptController.text = fruitFullView.defenseIntercept.toString();
-    bloodSlopeController.text = fruitFullView.bloodSlope.toString();
-    bloodInterceptController.text = fruitFullView.bloodIntercept.toString();
-    speedSlopeController.text = fruitFullView.speedSlope.toString();
-    speedInterceptController.text = fruitFullView.speedIntercept.toString();
-    intelligenceSlopeController.text =
-        fruitFullView.intelligenceSlope.toString();
-    intelligenceInterceptController.text =
-        fruitFullView.intelligenceIntercept.toString();
-    groupGainSlopeController.text = fruitFullView.groupGainSlope.toString();
-    groupGainInterceptController.text =
-        fruitFullView.groupGainIntercept.toString();
   }
 
   // ── Mobile card layout ────────────────────────────────────────────
@@ -241,85 +182,12 @@ class _FruitDetailViewState extends State<FruitDetailView> {
               const Divider(),
             ])),
         const SizedBox(height: 12),
-        // Combat Info
-        Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child:
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Row(children: [
-                Text(AppLocalizations.of(context)!.battleInfo,
-                    style: OnepieceFonts.headerStyle.copyWith(fontSize: 16)),
-                const Spacer(),
-                if (_editButtonVisible)
-                  TextButton.icon(
-                    onPressed: () => setState(() {
-                      _combatInfoEditable = !_combatInfoEditable;
-                      if (!_combatInfoEditable && _combatInfoUpdated()) {
-                        _submitCombatInfo();
-                      }
-                    }),
-                    icon: Icon(_combatInfoEditable ? Icons.check : Icons.edit,
-                        size: 14, color: OnepieceColors.fancyBlue),
-                    label: Text(
-                        _combatInfoEditable
-                            ? AppLocalizations.of(context)!.submitForm
-                            : AppLocalizations.of(context)!.editHint,
-                        style: const TextStyle(
-                            fontSize: 11, color: OnepieceColors.fancyBlue)),
-                  ),
-              ]),
-              const SizedBox(height: 10),
-              _mobileField(
-                  context,
-                  _combatInfoEditable,
-                  energyConsumeController,
-                  AppLocalizations.of(context)!.energyConsume,
-                  null,
-                  isNum: true),
-              _mobileStatPair(
-                  context,
-                  _combatInfoEditable,
-                  attackSlopeController,
-                  attackInterceptController,
-                  AppLocalizations.of(context)!.characterAttack,
-                  'images/character_digits_icon/attack.svg'),
-              _mobileStatPair(
-                  context,
-                  _combatInfoEditable,
-                  defenseSlopeController,
-                  defenseInterceptController,
-                  AppLocalizations.of(context)!.characterDefense,
-                  'images/character_digits_icon/defense.svg'),
-              _mobileStatPair(
-                  context,
-                  _combatInfoEditable,
-                  bloodSlopeController,
-                  bloodInterceptController,
-                  AppLocalizations.of(context)!.characterBlood,
-                  'images/character_digits_icon/blood.svg'),
-              _mobileStatPair(
-                  context,
-                  _combatInfoEditable,
-                  intelligenceSlopeController,
-                  intelligenceInterceptController,
-                  AppLocalizations.of(context)!.characterIntelligence,
-                  'images/character_digits_icon/intelligence.svg'),
-              _mobileStatPair(
-                  context,
-                  _combatInfoEditable,
-                  speedSlopeController,
-                  speedInterceptController,
-                  AppLocalizations.of(context)!.characterSpeed,
-                  'images/character_digits_icon/speed.svg'),
-              _mobileStatPair(
-                  context,
-                  _combatInfoEditable,
-                  groupGainSlopeController,
-                  groupGainInterceptController,
-                  AppLocalizations.of(context)!.groupGain,
-                  'images/character_digits_icon/group_gain.svg'),
-              const Divider(),
-            ])),
+        FruitCombatInfoSection(
+          fruit: fruitFullView,
+          editButtonVisible: _editButtonVisible,
+          controller: _controller,
+          isNarrow: true,
+        ),
         // Characters
         if (characters.isNotEmpty) ...[
           const SizedBox(height: 12),
@@ -415,82 +283,6 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                 ])));
   }
 
-  Widget _mobileStatPair(
-      BuildContext context,
-      bool editable,
-      TextEditingController slope,
-      TextEditingController intercept,
-      String label,
-      String icon) {
-    final sv = slope.text.isNotEmpty ? slope.text : '0';
-    final iv = intercept.text.isNotEmpty ? intercept.text : '0';
-    return Padding(
-        padding: const EdgeInsets.only(bottom: 10),
-        child: editable
-            ? Row(children: [
-                Expanded(
-                    child: SizedBox(
-                        height: 35,
-                        child: TextFormField(
-                            controller: slope,
-                            keyboardType: TextInputType.number,
-                            decoration: InputDecoration(
-                              contentPadding:
-                                  const EdgeInsets.symmetric(horizontal: 8),
-                              floatingLabelBehavior:
-                                  FloatingLabelBehavior.never,
-                              disabledBorder: const OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                      color: OnepieceColors.menuHoverColor)),
-                              enabledBorder: const OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                      color: OnepieceColors.menuHoverColor)),
-                              focusedBorder: const OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                      color: OnepieceColors.fancyGreen)),
-                              prefixIcon: ImageHelper.getTextFormFieldIcon(
-                                  icon, true, 18),
-                              labelText: label,
-                            )))),
-                const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 4),
-                    child: Text('×', style: TextStyle(fontSize: 16))),
-                Expanded(
-                    child: SizedBox(
-                        height: 35,
-                        child: TextFormField(
-                            controller: intercept,
-                            keyboardType: TextInputType.number,
-                            decoration: const InputDecoration(
-                              contentPadding:
-                                  EdgeInsets.symmetric(horizontal: 8),
-                              floatingLabelBehavior:
-                                  FloatingLabelBehavior.never,
-                              disabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                      color: OnepieceColors.menuHoverColor)),
-                              enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                      color: OnepieceColors.menuHoverColor)),
-                              focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                      color: OnepieceColors.fancyGreen)),
-                              labelText: '+',
-                            )))),
-              ])
-            : Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Row(children: [
-                  ImageHelper.getTextFormFieldIcon(icon, true, 20),
-                  const SizedBox(width: 10),
-                  Text(label, style: OnepieceFonts.deepBlackHintFont),
-                  const Spacer(),
-                  Text('$sv × x + $iv',
-                      style: OnepieceFonts.contentStyle
-                          .copyWith(fontSize: 16, fontWeight: FontWeight.w600)),
-                ])));
-  }
-
   Widget _mobileDropdown<T>(
       bool enabled,
       T value,
@@ -541,25 +333,19 @@ class _FruitDetailViewState extends State<FruitDetailView> {
       name: I18nHelper.getI18nFromDisplayName(
           fruitFullView.name!, nameController.text),
       fruitType: selectedFruitType,
-      energyConsume: DataConverter.stringToInt(energyConsumeController.text),
-      attackSlope: DataConverter.stringToDouble(attackSlopeController.text),
-      attackIntercept:
-          DataConverter.stringToInt(attackInterceptController.text),
-      defenseSlope: DataConverter.stringToDouble(defenseSlopeController.text),
-      defenseIntercept:
-          DataConverter.stringToInt(defenseInterceptController.text),
-      intelligenceSlope:
-          DataConverter.stringToDouble(intelligenceSlopeController.text),
-      intelligenceIntercept:
-          DataConverter.stringToInt(intelligenceInterceptController.text),
-      bloodSlope: DataConverter.stringToDouble(bloodSlopeController.text),
-      bloodIntercept: DataConverter.stringToInt(bloodInterceptController.text),
-      speedSlope: DataConverter.stringToDouble(speedSlopeController.text),
-      speedIntercept: DataConverter.stringToInt(speedInterceptController.text),
-      groupGainSlope:
-          DataConverter.stringToDouble(groupGainSlopeController.text),
-      groupGainIntercept:
-          DataConverter.stringToInt(groupGainInterceptController.text),
+      energyConsume: fruitFullView.energyConsume,
+      attackSlope: fruitFullView.attackSlope,
+      attackIntercept: fruitFullView.attackIntercept,
+      defenseSlope: fruitFullView.defenseSlope,
+      defenseIntercept: fruitFullView.defenseIntercept,
+      intelligenceSlope: fruitFullView.intelligenceSlope,
+      intelligenceIntercept: fruitFullView.intelligenceIntercept,
+      bloodSlope: fruitFullView.bloodSlope,
+      bloodIntercept: fruitFullView.bloodIntercept,
+      speedSlope: fruitFullView.speedSlope,
+      speedIntercept: fruitFullView.speedIntercept,
+      groupGainSlope: fruitFullView.groupGainSlope,
+      groupGainIntercept: fruitFullView.groupGainIntercept,
     );
     _controller.update(updated).then((v) {
       if (!mounted) return;
@@ -574,9 +360,6 @@ class _FruitDetailViewState extends State<FruitDetailView> {
       }
     });
   }
-
-  void _submitCombatInfo() => _submitBasicInfo();
-  bool _combatInfoUpdated() => true;
 
   @override
   Widget build(BuildContext context) {
@@ -623,7 +406,13 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                                           EdgeInsets.symmetric(vertical: 8),
                                       child: Divider(
                                           color: Colors.grey, thickness: 1)),
-                                  _getCombatInfo(context),
+                                  FruitCombatInfoSection(
+                                    fruit: fruitFullView,
+                                    editButtonVisible: _editButtonVisible,
+                                    controller: _controller,
+                                    isNarrow: false,
+                                    sideWidth: sideW,
+                                  ),
                                   const SizedBox(
                                       height: 30,
                                       child: Divider(
@@ -826,16 +615,6 @@ class _FruitDetailViewState extends State<FruitDetailView> {
               ),
             ),
             _getDropDownList(context, basicState),
-            DigitTextFormField(
-                context,
-                _basicInfoEditable,
-                energyConsumeController,
-                AppLocalizations.of(context)!.energyConsume,
-                1,
-                10,
-                ImageHelper.getTextFormFieldIcon(
-                    'images/character_digits_icon/energy.svg', true, 25),
-                true),
           ],
         ),
       );
@@ -910,223 +689,6 @@ class _FruitDetailViewState extends State<FruitDetailView> {
         ),
       ),
     );
-  }
-
-  Widget _getCombatInfo(BuildContext context) {
-    return StatefulBuilder(builder: (context, combatState) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: sideW),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Text(
-                  AppLocalizations.of(context)!.battleInfo,
-                  style: OnepieceFonts.headerStyle,
-                ),
-                const SizedBox(
-                  width: 15,
-                ),
-                if (_editButtonVisible)
-                  Tooltip(
-                    message: _combatInfoEditable
-                        ? AppLocalizations.of(context)!.submitForm
-                        : AppLocalizations.of(context)!.editHint,
-                    child: InkWell(
-                      hoverColor: Colors.transparent,
-                      splashColor: Colors.transparent,
-                      onTap: () {
-                        combatState(() {
-                          _combatInfoEditable = !_combatInfoEditable;
-                          if (!_combatInfoEditable) {
-                            var updatedFruit = UpdateFruitRequest(
-                              id: widget.fruitId,
-                              // digit info
-                              attackSlope: DataConverter.stringToDouble(
-                                  attackSlopeController.text.trim()),
-                              attackIntercept: DataConverter.stringToInt(
-                                  attackInterceptController.text.trim()),
-                              defenseSlope: DataConverter.stringToDouble(
-                                  defenseSlopeController.text.trim()),
-                              defenseIntercept: DataConverter.stringToInt(
-                                  defenseInterceptController.text.trim()),
-                              bloodSlope: DataConverter.stringToDouble(
-                                  bloodSlopeController.text.trim()),
-                              bloodIntercept: DataConverter.stringToInt(
-                                  bloodInterceptController.text.trim()),
-                              groupGainSlope: DataConverter.stringToDouble(
-                                  groupGainSlopeController.text.trim()),
-                              groupGainIntercept: DataConverter.stringToInt(
-                                  groupGainInterceptController.text.trim()),
-                              speedSlope: DataConverter.stringToDouble(
-                                  speedSlopeController.text.trim()),
-                              speedIntercept: DataConverter.stringToInt(
-                                  speedInterceptController.text.trim()),
-                              intelligenceSlope: DataConverter.stringToDouble(
-                                  intelligenceSlopeController.text.trim()),
-                              intelligenceIntercept: DataConverter.stringToInt(
-                                  intelligenceInterceptController.text.trim()),
-                              energyConsume: DataConverter.stringToInt(
-                                  energyConsumeController.text),
-                              // basic info
-                              name: fruitFullView.name,
-                            );
-                            final router = GoRouter.of(context);
-                            final alertHint =
-                                AppLocalizations.of(context)!.hint;
-                            final showAlert =
-                                OnepieceAlert.createAlertShower(context);
-                            _controller
-                                .update(updatedFruit)
-                                .then((value) {
-                              if (!mounted) return;
-                              showAlert(
-                                  alertHint,
-                                  I18nHelper.getDisplayNameFromI18n(
-                                      value!.result));
-                              if (value.success) {
-                                router.goNamed('fruitDetails',
-                                    extra: widget.fruitId,
-                                    pathParameters: {
-                                      'name': I18nHelper.getDisplayNameFromI18n(
-                                          fruitFullView.name)
-                                    });
-                              }
-                            });
-                          }
-                        });
-                      },
-                      child: SizedBox(
-                          width: 25,
-                          height: 25,
-                          child: !_combatInfoEditable
-                              ? ImageHelper.getSvgIconWithColor(
-                                  'images/svgs/edit.svg',
-                                  150,
-                                  150,
-                                  OnepieceColors.fancyBlue)
-                              : ImageHelper.getSvgIconWithColor(
-                                  'images/svgs/check.svg',
-                                  150,
-                                  150,
-                                  OnepieceColors.fancyBlue)),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          const SizedBox(
-            height: 15,
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: sideW),
-            child: Form(
-              key: _battleFormKey,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Column(
-                    children: [
-                      FruitDigitTextFormField(
-                          context,
-                          _combatInfoEditable,
-                          attackSlopeController,
-                          attackInterceptController,
-                          AppLocalizations.of(context)!.attackStrengthen,
-                          0.8,
-                          1.5,
-                          -100,
-                          300,
-                          ImageHelper.getTextFormFieldIcon(
-                              'images/character_digits_icon/attack.svg',
-                              true,
-                              25)),
-                      FruitDigitTextFormField(
-                          context,
-                          _combatInfoEditable,
-                          defenseSlopeController,
-                          defenseInterceptController,
-                          AppLocalizations.of(context)!.defenseStrengthen,
-                          0.8,
-                          1.5,
-                          -100,
-                          800,
-                          ImageHelper.getTextFormFieldIcon(
-                              'images/character_digits_icon/defense.svg',
-                              true,
-                              25)),
-                      FruitDigitTextFormField(
-                          context,
-                          _combatInfoEditable,
-                          bloodSlopeController,
-                          bloodInterceptController,
-                          AppLocalizations.of(context)!.bloodStrengthen,
-                          0.8,
-                          1.5,
-                          -1000,
-                          3000,
-                          ImageHelper.getTextFormFieldIcon(
-                              'images/character_digits_icon/blood.svg',
-                              true,
-                              25)),
-                    ],
-                  ),
-                  Column(
-                    children: [
-                      FruitDigitTextFormField(
-                          context,
-                          _combatInfoEditable,
-                          intelligenceSlopeController,
-                          intelligenceInterceptController,
-                          AppLocalizations.of(context)!.intelligenceStrengthen,
-                          0.8,
-                          2,
-                          -30,
-                          30,
-                          ImageHelper.getTextFormFieldIcon(
-                              'images/character_digits_icon/intelligence.svg',
-                              true,
-                              25)),
-                      FruitDigitTextFormField(
-                          context,
-                          _combatInfoEditable,
-                          speedSlopeController,
-                          speedInterceptController,
-                          AppLocalizations.of(context)!.speedStrengthen,
-                          0.8,
-                          3,
-                          -10,
-                          30,
-                          ImageHelper.getTextFormFieldIcon(
-                              'images/character_digits_icon/speed.svg',
-                              true,
-                              25)),
-                      FruitDigitTextFormField(
-                          context,
-                          _combatInfoEditable,
-                          groupGainSlopeController,
-                          groupGainInterceptController,
-                          AppLocalizations.of(context)!.groupStrengthen,
-                          0.8,
-                          2,
-                          -10,
-                          30,
-                          ImageHelper.getTextFormFieldIcon(
-                              'images/character_digits_icon/group_gain.svg',
-                              true,
-                              25)),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          )
-        ],
-      );
-    });
   }
 
   Widget _getCharacterList(BuildContext context) {
