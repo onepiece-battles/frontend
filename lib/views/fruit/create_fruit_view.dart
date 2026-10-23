@@ -7,7 +7,7 @@ import 'package:openapi/api.dart';
 import '../../components/creation_form_card.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
-import '../../repository/fruit_dao.dart';
+import 'create_fruit_controller.dart';
 import '../../utils/data_converter.dart';
 import '../../utils/i18n_helper.dart';
 import '../../utils/random_string_generator.dart';
@@ -23,7 +23,7 @@ class CreateFruitView extends StatefulWidget {
 
 class _CreateFruitViewState extends State<CreateFruitView> {
   final ScrollController _pageScrollController = ScrollController();
-  final ScrollController _horizontalScrollController = ScrollController();
+  final CreateFruitController _controller = CreateFruitController();
   TextEditingController fruitNameEnController = TextEditingController(text: "");
   TextEditingController fruitNameChController = TextEditingController(text: "");
   TextEditingController attackSlopeController = TextEditingController(text: "");
@@ -73,7 +73,7 @@ class _CreateFruitViewState extends State<CreateFruitView> {
   @override
   void dispose() {
     _pageScrollController.dispose();
-    _horizontalScrollController.dispose();
+    _controller.dispose();
     for (final controller in fruitControllerList()) {
       controller.dispose();
     }
@@ -83,7 +83,6 @@ class _CreateFruitViewState extends State<CreateFruitView> {
   FruitType selectedFruitType = FruitType.paramecia;
 
   double dividerWidth = 800;
-  double sideWidth = 50;
   final _formKey = GlobalKey<FormState>();
 
   Widget _buildResponsiveLayout(BuildContext context, bool isWide) {
@@ -539,7 +538,7 @@ class _CreateFruitViewState extends State<CreateFruitView> {
                     );
 
                     final router = GoRouter.of(context);
-                    getIt<FruitDao>().add(addFruitRequest).then((value) {
+                    _controller.add(addFruitRequest).then((value) {
                       if (!mounted) return;
                       router.goNamed('fruitDetails',
                           extra: value!.id,
