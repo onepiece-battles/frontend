@@ -24,6 +24,7 @@ import '../../utils/permission_check.dart';
 import '../../utils/nested_scroll_helper.dart';
 import '../../utils/responsive_breakpoints.dart';
 import 'character_detail_controller.dart';
+import 'widgets/character_battles_section.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -99,10 +100,6 @@ class _CharacterDetailState extends State<CharacterDetail> {
   bool fruitSearchEnabled = false;
   bool showBaseValue = false;
 
-  int battleStartIndex = 0;
-  int battleEndIndex = 0;
-  int pageCount = 1;
-
   @override
   void initState() {
     super.initState();
@@ -150,7 +147,6 @@ class _CharacterDetailState extends State<CharacterDetail> {
     fruits = characterFullView.fruits;
     groups = characterFullView.groups;
     selectedHakis = characterFullView.hakis.toList(growable: true);
-    battleEndIndex = battles.length >= 10 ? 10 : battles.length;
     _editButtonVisible = (PermissionCheck.checkPermission(
                 getIt<User>().loginRoleResourcesPermissionMap,
                 ResourceType.CHARACTER,
@@ -249,7 +245,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
           if (fruits.isNotEmpty) const SizedBox(height: 12),
           _buildMobileGroups(context),
           const SizedBox(height: 12),
-          _buildMobileBattles(context),
+          CharacterBattlesSection(character: character, isNarrow: true),
         ]),
       ),
     );
@@ -800,106 +796,6 @@ class _CharacterDetailState extends State<CharacterDetail> {
     );
   }
 
-  Widget _buildMobileBattles(BuildContext context) {
-    final statusMap = {
-      BattleStatus.CREATED: AppLocalizations.of(context)!.battleStatusCreated,
-      BattleStatus.IN_PROGRESS:
-          AppLocalizations.of(context)!.battleStatusStarted,
-      BattleStatus.FINISHED: AppLocalizations.of(context)!.battleStatusFinished,
-      BattleStatus.FAILED: AppLocalizations.of(context)!.battleStatusFailed
-    };
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      child: Padding(
-          padding: const EdgeInsets.all(12),
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(AppLocalizations.of(context)!.relatedBattles,
-                style: OnepieceFonts.headerStyle.copyWith(fontSize: 16)),
-            const SizedBox(height: 10),
-            if (battles.isEmpty)
-              Text(AppLocalizations.of(context)!.empty,
-                  style: OnepieceFonts.contentStyle)
-            else ...[
-              ...battles.take(10).map((b) {
-                final ex = b.battleExecution;
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 6),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(8),
-                    onTap: () => context.goNamed('battleDetails',
-                        extra: b.id, pathParameters: {'id': b.id}),
-                    child: Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: Row(children: [
-                          _battleCharMini(
-                              context, b.starter!, ex?.starterScoreBefore),
-                          const SizedBox(width: 6),
-                          Column(children: [
-                            Text('VS',
-                                style: OnepieceFonts.boldFancySmallFont
-                                    .copyWith(
-                                        color: OnepieceColors.fancyBlue,
-                                        fontSize: 12)),
-                            ex?.winnerId != null
-                                ? ImageLazyLoader(
-                                    key: ValueKey('w${b.id}'),
-                                    uriProvider: () =>
-                                        ex!.winnerId == b.starterId
-                                            ? b.starter!.imageUri!
-                                            : b.receiver!.imageUri!,
-                                    width: 24,
-                                    borderWidth: 1.5,
-                                    borderRadios: 24)
-                                : Icon(Icons.help_outline,
-                                    size: 24, color: Colors.grey[400]),
-                          ]),
-                          const SizedBox(width: 6),
-                          _battleCharMini(
-                              context, b.receiver!, ex?.receiverScoreBefore),
-                          const Spacer(),
-                          Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 6, vertical: 2),
-                                    decoration: BoxDecoration(
-                                        color: OnepieceColors.fancyBlue
-                                            .withValues(alpha: 0.12),
-                                        borderRadius:
-                                            BorderRadius.circular(10)),
-                                    child: Text(
-                                        statusMap[ex?.battleStatus] ?? '',
-                                        style: const TextStyle(
-                                            fontSize: 10,
-                                            color: OnepieceColors.fancyBlue))),
-                                if (ex?.winnerId != null) ...[
-                                  const SizedBox(height: 2),
-                                  Text(
-                                      getScoreText(character.id == ex!.winnerId
-                                          ? ex.winnerScoreChange!
-                                          : ex.loserScoreChange!),
-                                      style: OnepieceFonts.boldFancyBlueHintFont
-                                          .copyWith(fontSize: 12))
-                                ],
-                              ]),
-                        ])),
-                  ),
-                );
-              }),
-              if (battles.length > 10)
-                Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Center(
-                        child: Text(
-                            '${battles.length} ${AppLocalizations.of(context)!.relatedBattles}',
-                            style: OnepieceFonts.smallContentStyle))),
-            ],
-          ])),
-    );
-  }
-
   // ── Mobile helpers ────────────────────────────────────────────────
 
   Widget _mobileField(BuildContext context, bool editable,
@@ -1066,25 +962,6 @@ class _CharacterDetailState extends State<CharacterDetail> {
                           ))))
               .toList(),
         )));
-  }
-
-  Widget _battleCharMini(BuildContext context, Character char, int? score) {
-    return Expanded(
-        child: Column(children: [
-      ImageLazyLoader(
-          key: ValueKey(char.imageUri),
-          uriProvider: () => char.imageUri!,
-          width: 32,
-          borderWidth: 1.5,
-          borderRadios: 32),
-      const SizedBox(height: 2),
-      Text(I18nHelper.getDisplayNameFromI18n(char.name),
-          style: const TextStyle(fontSize: 10),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis),
-      Text(score?.toString() ?? '?',
-          style: OnepieceFonts.boldFancySmallFont.copyWith(fontSize: 11)),
-    ]));
   }
 
   // ── Shared lookup maps ────────────────────────────────────────────
@@ -1309,7 +1186,11 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                 width: dividerWidth,
                                 child: const Divider(
                                     color: Colors.grey, thickness: 1))),
-                        _getBattle(context),
+                        CharacterBattlesSection(
+                            character: character,
+                            isNarrow: false,
+                            dividerWidth: dividerWidth,
+                            sideWidth: sideWidth),
                         const SizedBox(height: 60),
                       ]),
                 ),
@@ -2740,332 +2621,6 @@ class _CharacterDetailState extends State<CharacterDetail> {
     );
   }
 
-  Widget _getBattle(BuildContext context) {
-    return StatefulBuilder(builder: (context, battleListState) {
-      return Padding(
-        padding: EdgeInsets.fromLTRB(sideWidth, 8, sideWidth, 8),
-        child: SizedBox(
-          width: dividerWidth,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    AppLocalizations.of(context)!.relatedBattles,
-                    style: OnepieceFonts.headerStyle,
-                  ),
-                  if (battles.length > 10)
-                    _getPageController(context, battleListState)
-                ],
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              _getBattlesTable(context),
-              const SizedBox(
-                height: 10,
-              ),
-            ],
-          ),
-        ),
-      );
-    });
-  }
-
-  Widget _getBattlesTable(BuildContext context) {
-    return DataTable(
-      showCheckboxColumn: false,
-      showBottomBorder: true,
-      headingRowHeight: 50,
-      border: const TableBorder(
-          top: BorderSide(color: OnepieceColors.themeColor),
-          bottom: BorderSide(color: OnepieceColors.themeColor)),
-      columns: _createColumns(character.id, context),
-      rows: _createRows(context),
-      columnSpacing: 8,
-    );
-  }
-
-  Widget _getPageController(BuildContext context, Function battleListState) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 80.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          SizedBox(
-            width: 40,
-            height: 30,
-            child: Center(
-              child: IconButton(
-                focusColor: Colors.transparent,
-                hoverColor: Colors.transparent,
-                splashColor: Colors.transparent,
-                color: Colors.transparent,
-                highlightColor: Colors.transparent,
-                onPressed: battleStartIndex == 0
-                    ? null
-                    : () {
-                        battleListState(() {
-                          pageCount--;
-                          battleStartIndex = battleStartIndex - 10;
-                          if (battleEndIndex % 10 != 0) {
-                            battleEndIndex =
-                                battleEndIndex - battleEndIndex % 10;
-                          } else {
-                            battleEndIndex = battleEndIndex - 10;
-                          }
-                          if (battleStartIndex < 0) {
-                            battleStartIndex = 0;
-                          }
-                        });
-                      },
-                icon: Icon(
-                  Icons.keyboard_arrow_left_sharp,
-                  size: 20,
-                  color: battleStartIndex == 0
-                      ? Colors.transparent
-                      : OnepieceColors.fancyBlue,
-                ),
-              ),
-            ),
-          ),
-          SizedBox(
-            width: 20,
-            height: 30,
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.only(top: 5.0),
-                child: Text(
-                  pageCount.toString(),
-                  style: const TextStyle(
-                      color: OnepieceColors.fancyBlue, fontSize: 15),
-                ),
-              ),
-            ),
-          ),
-          SizedBox(
-            width: 40,
-            height: 30,
-            child: Center(
-              child: IconButton(
-                focusColor: Colors.transparent,
-                hoverColor: Colors.transparent,
-                splashColor: Colors.transparent,
-                color: Colors.transparent,
-                highlightColor: Colors.transparent,
-                onPressed: battleEndIndex == battles.length
-                    ? null
-                    : () {
-                        battleListState(() {
-                          pageCount++;
-                          battleStartIndex = battleStartIndex + 10;
-                          battleEndIndex = battleEndIndex + 10;
-                          if (battleEndIndex > battles.length) {
-                            battleEndIndex = battles.length;
-                          }
-                        });
-                      },
-                icon: Icon(
-                  Icons.keyboard_arrow_right_sharp,
-                  size: 20,
-                  color: battleEndIndex == battles.length
-                      ? Colors.transparent
-                      : OnepieceColors.fancyBlue,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  List<DataColumn> _createColumns(
-      String currentCharacterId, BuildContext context) {
-    var headerStyle = OnepieceFonts.tableHeaderStyle;
-    return [
-      const DataColumn(
-        label: Text(""),
-      ),
-      DataColumn(
-        label: SizedBox(
-            width: 150,
-            child: Text(
-              AppLocalizations.of(context)!.initiator,
-              style: headerStyle,
-            )),
-      ),
-      DataColumn(
-        label: SizedBox(
-            width: 150,
-            child: Text(AppLocalizations.of(context)!.receiver,
-                style: headerStyle)),
-      ),
-      DataColumn(
-        label: SizedBox(
-            width: 150,
-            child:
-                Text(AppLocalizations.of(context)!.winner, style: headerStyle)),
-      ),
-      DataColumn(
-        label: SizedBox(
-            width: 80,
-            child:
-                Text(AppLocalizations.of(context)!.status, style: headerStyle)),
-      ),
-      DataColumn(
-        label: SizedBox(
-            width: 150,
-            child: Text(AppLocalizations.of(context)!.combatScoreChange,
-                style: headerStyle)),
-      ),
-    ];
-  }
-
-  List<DataRow> _createRows(BuildContext context) {
-    Map<BattleStatus, String> battleStatusToDisplayName = {
-      BattleStatus.CREATED: AppLocalizations.of(context)!.battleStatusCreated,
-      BattleStatus.IN_PROGRESS:
-          AppLocalizations.of(context)!.battleStatusStarted,
-      BattleStatus.FINISHED: AppLocalizations.of(context)!.battleStatusFinished,
-      BattleStatus.FAILED: AppLocalizations.of(context)!.battleStatusFailed,
-    };
-    var battles = character.battles;
-    return battles
-        .getRange(battleStartIndex, battleEndIndex)
-        .toList()
-        .asMap()
-        .entries
-        .map((entry) => DataRow(
-                onSelectChanged: (value) {
-                  context.goNamed('battleDetails',
-                      extra: entry.value.id,
-                      pathParameters: {'id': entry.value.id});
-                },
-                cells: [
-                  _getDataCell("${entry.key + 1}", false),
-                  DataCell(
-                    Row(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                          child: ImageLazyLoader(
-                              key: UniqueKey(),
-                              uriProvider: () => entry.value.starter!.imageUri!,
-                              width: 40,
-                              borderWidth: 1.5,
-                              borderRadios: 40),
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                              child: Text(I18nHelper.getDisplayNameFromI18n(
-                                  entry.value.starter!.name)),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(left: 5.0),
-                              child: Text(
-                                  entry.value.battleExecution!
-                                      .starterScoreBefore!
-                                      .toString(),
-                                  style: OnepieceFonts.boldFancySmallFont),
-                            )
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  DataCell(
-                    Row(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                          child: ImageLazyLoader(
-                              key: UniqueKey(),
-                              uriProvider: () =>
-                                  entry.value.receiver!.imageUri!,
-                              width: 40,
-                              borderWidth: 1.5,
-                              borderRadios: 40),
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                              child: Text(I18nHelper.getDisplayNameFromI18n(
-                                  entry.value.receiver!.name)),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(left: 5.0),
-                              child: Text(
-                                  entry.value.battleExecution!
-                                      .receiverScoreBefore!
-                                      .toString(),
-                                  style: OnepieceFonts.boldFancySmallFont),
-                            )
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  DataCell(
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                      child: ImageLazyLoader(
-                          key: UniqueKey(),
-                          uriProvider: () =>
-                              entry.value.battleExecution!.winnerId ==
-                                      entry.value.starterId
-                                  ? entry.value.starter!.imageUri!
-                                  : entry.value.receiver!.imageUri!,
-                          width: 40,
-                          borderWidth: 1.5,
-                          borderRadios: 40),
-                    ),
-                  ),
-                  _getDataCell(
-                      battleStatusToDisplayName[
-                          entry.value.battleExecution!.battleStatus]!,
-                      false),
-                  DataCell(
-                    Row(
-                      children: [
-                        entry.value.battleExecution!.winnerId != null
-                            ? Text(
-                                style: OnepieceFonts.boldFancyBlueHintFont,
-                                character.id ==
-                                        entry.value.battleExecution!.winnerId
-                                    ? getScoreText(entry.value.battleExecution!
-                                        .winnerScoreChange!)
-                                    : getScoreText(entry.value.battleExecution!
-                                        .loserScoreChange!))
-                            : const Text(""),
-                        const SizedBox(
-                          width: 10,
-                        ),
-                        entry.value.battleExecution!.winnerId != null
-                            ? Text(
-                                style: OnepieceFonts.superSmallContentStyle,
-                                character.id == entry.value.starterId
-                                    ? "(${entry.value.battleExecution!.starterScoreBefore!} -> ${entry.value.battleExecution!.starterScoreAfter!})"
-                                    : "(${entry.value.battleExecution!.receiverScoreBefore!} ->${entry.value.battleExecution!.receiverScoreAfter!})")
-                            : const Text(""),
-                      ],
-                    ),
-                  ),
-                ]))
-        .toList();
-  }
-
   bool _basicInfoUpdated() {
     return character.race.toString() != selectedRace.toString() ||
         character.battleStyle.toString() != selectedBattleStyle.toString() ||
@@ -3105,16 +2660,4 @@ class _CharacterDetailState extends State<CharacterDetail> {
         character.energy.toString() != characterEnergyController.text;
   }
 
-  String getScoreText(int scoreChange) {
-    return scoreChange >= 0 ? "+ $scoreChange" : "- ${(0 - scoreChange)}";
-  }
-
-  DataCell _getDataCell(String value, bool heightLight) {
-    return DataCell(heightLight
-        ? Text(
-            value,
-            style: OnepieceFonts.tableHeightStyle,
-          )
-        : Text(value));
-  }
 }
