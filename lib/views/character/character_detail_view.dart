@@ -12,11 +12,9 @@ import 'package:one_piece_battles_flutter/components/string_text_form_field.dart
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_tag.dart';
-import 'package:one_piece_battles_flutter/repository/character_dao.dart';
 import 'package:openapi/api.dart';
 import '../../l10n/app_localizations.dart';
 import '../../popup/onepiece_alert.dart';
-import '../../repository/image_dao.dart';
 import '../../utils/base64_helper.dart';
 import '../../utils/data_converter.dart';
 import '../../utils/i18n_helper.dart';
@@ -1436,97 +1434,13 @@ class _CharacterDetailState extends State<CharacterDetail> {
                         basicState(() {
                           basicInfoEditable = !basicInfoEditable;
                           if (!basicInfoEditable) {
+                            // Shared with the mobile layout; see _submitBasicInfo
+                            // / _uploadImage (both route through the controller).
                             if (_basicInfoUpdated()) {
-                              var updatedCharacter = UpdateCharacterRequest(
-                                  id: character.id,
-                                  maximumFruitCount:
-                                      character.maximumFruitCount,
-                                  // keep combat info consistent with original data!
-                                  hakis: character.hakis,
-                                  groupGain: character.groupGain,
-                                  attack: character.attack,
-                                  defense: character.defense,
-                                  intelligence: character.intelligence,
-                                  blood: character.blood,
-                                  speed: character.speed,
-                                  energy: character.energy,
-                                  baseGroupGain: character.baseGroupGain,
-                                  baseAttack: character.baseAttack,
-                                  baseDefense: character.baseDefense,
-                                  baseIntelligence: character.baseIntelligence,
-                                  baseBlood: character.baseBlood,
-                                  baseSpeed: character.baseSpeed,
-                                  // basic info
-                                  imageUri: character.imageUri,
-                                  systemResource: character.systemResource,
-                                  battleStyle: selectedBattleStyle,
-                                  race: selectedRace,
-                                  name: I18nHelper.getI18nFromDisplayName(
-                                      character.name,
-                                      characterNameController.text),
-                                  dateOfBirth: _formattedBirthday(),
-                                  birthPlace: characterBirthPlace.text,
-                                  age: characterAge.text.isEmpty
-                                      ? null
-                                      : DataConverter.stringToInt(
-                                          characterAge.text.trim()),
-                                  bounty: characterBounty.text.isEmpty
-                                      ? null
-                                      : DataConverter.stringToInt(
-                                          characterBounty.text.trim()),
-                                  height: characterHeight.text.isEmpty
-                                      ? null
-                                      : DataConverter.stringToInt(
-                                          characterHeight.text.trim()),
-                                  score: character.score);
-                              final router = GoRouter.of(context);
-                              final alertHint =
-                                  AppLocalizations.of(context)!.hint;
-                              final showAlert =
-                                  OnepieceAlert.createAlertShower(context);
-                              getIt<CharacterDao>()
-                                  .update(updatedCharacter)
-                                  .then((value) {
-                                if (!mounted) return;
-                                showAlert(
-                                    alertHint,
-                                    I18nHelper.getDisplayNameFromI18n(
-                                        value!.result));
-                                if (value.success) {
-                                  router.goNamed('characterDetails',
-                                      extra: character.id,
-                                      pathParameters: {
-                                        'name':
-                                            I18nHelper.getDisplayNameFromI18n(
-                                                character.name)
-                                      });
-                                }
-                              });
+                              _submitBasicInfo(context);
                             }
                             if (selectedImage != null) {
-                              final router2 = GoRouter.of(context);
-                              final alertHint2 =
-                                  AppLocalizations.of(context)!.hint;
-                              final showAlert2 =
-                                  OnepieceAlert.createAlertShower(context);
-                              getIt<ImageDao>()
-                                  .addImage(UploadImageRequest(
-                                      type: ResourceType.CHARACTER,
-                                      resourceId: character.id,
-                                      image: selectedImage!))
-                                  .then((value) {
-                                if (!mounted) return;
-                                showAlert2(
-                                    alertHint2,
-                                    I18nHelper.getDisplayNameFromI18n(
-                                        value!.result));
-                                router2.goNamed('characterDetails',
-                                    extra: character.id,
-                                    pathParameters: {
-                                      'name': I18nHelper.getDisplayNameFromI18n(
-                                          character.name)
-                                    });
-                              });
+                              _uploadImage(context);
                             }
                           }
                         });
@@ -2134,73 +2048,10 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                     changeValue();
                                   }
                                   if (!combatInfoEditable) {
+                                    // Shared with the mobile layout; see
+                                    // _submitCombatInfo (routes through the controller).
                                     if (_combatInfoUpdated()) {
-                                      var updatedCharacter =
-                                          UpdateCharacterRequest(
-                                        // combat info update
-                                        groupGain: character.groupGain,
-                                        attack: character.attack,
-                                        defense: character.defense,
-                                        intelligence: character.intelligence,
-                                        blood: character.blood,
-                                        speed: character.speed,
-                                        maximumFruitCount:
-                                            DataConverter.stringToInt(
-                                                characterFruitLimitController
-                                                    .text),
-                                        baseGroupGain:
-                                            DataConverter.stringToInt(
-                                                characterGroupGainController
-                                                    .text),
-                                        baseAttack: DataConverter.stringToInt(
-                                            characterAttackController.text),
-                                        baseDefense: DataConverter.stringToInt(
-                                            characterDefenseController.text),
-                                        baseIntelligence:
-                                            DataConverter.stringToInt(
-                                                characterIntelligenceController
-                                                    .text),
-                                        baseBlood: DataConverter.stringToInt(
-                                            characterBloodController.text),
-                                        baseSpeed: DataConverter.stringToInt(
-                                            characterSpeedController.text),
-                                        energy: DataConverter.stringToInt(
-                                            characterEnergyController.text),
-                                        hakis: selectedHakis,
-                                        /* basic info keep consistent with original
-                                       value, will probably updated on backend */
-                                        id: character.id,
-                                        race: character.race,
-                                        score: character.score,
-                                        battleStyle: selectedBattleStyle,
-                                        name: character.name,
-                                      );
-                                      final router3 = GoRouter.of(context);
-                                      final alertHint3 =
-                                          AppLocalizations.of(context)!.hint;
-                                      final showAlert3 =
-                                          OnepieceAlert.createAlertShower(
-                                              context);
-                                      getIt<CharacterDao>()
-                                          .update(updatedCharacter)
-                                          .then((value) {
-                                        if (!mounted) return;
-                                        showAlert3(
-                                            alertHint3,
-                                            I18nHelper.getDisplayNameFromI18n(
-                                                value!.result));
-                                        if (value.success) {
-                                          showBaseValue = false;
-                                          router3.replaceNamed(
-                                              'characterDetails',
-                                              extra: character.id,
-                                              pathParameters: {
-                                                'name': I18nHelper
-                                                    .getDisplayNameFromI18n(
-                                                        character.name)
-                                              });
-                                        }
-                                      });
+                                      _submitCombatInfo(context);
                                     }
                                   }
                                 });

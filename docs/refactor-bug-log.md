@@ -20,3 +20,16 @@
 - **修复**:在 `getItSetUp()` 中以 `registerSingleton<Locale>` 初始化一次;`setLocale` 中统一 `registerSingleton` 更新(单一数据源);删除 `build()` 内与 `MyApp.setLocale` 内的重复注册;`ThemeData.fontFamily` 改为直接读 `_locale`。
 
 ---
+
+## BUG-002 — 编辑角色基础/战斗信息会清空其头像(后端)🔴
+- **类型**:既有后端缺陷(非本次重构引入;前端冒烟测试时发现)。
+- **文件**:`backend/.../character/model/converter/CharacterEntityConverter.java:66`
+- **现象**:在角色详情页编辑基础信息或战斗信息并提交后,该角色的 `image_uri` 被写成 null,头像消失。生产环境同样存在(开发库里已有一个 `image_uri` 为 NULL 的角色)。
+- **根因**:
+  - `toCharacterEntity(UpdateCharacterRequest)` 标了 `@Mapping(target = "imageUri", ignore = true)`,转换出的 `CharacterEntity.imageUri = null`。
+  - `CharacterDao.update` 继承自 `BaseDao`,是**全列更新**(`CharacterService.updateProfile` 正是依赖它写 `image_uri`),于是把 `image_uri` 覆盖为 null。
+  - 前端在 `_submitBasicInfo` / `_submitCombatInfo` 中已发送 `imageUri: character.imageUri` 试图保留,但被后端转换器丢弃,前端无法绕过。
+- **验证**:`UpdateCharacterRequest` 确有 `imageUri` 字段与 getter。
+- **建议修复**:移除 `toCharacterEntity(UpdateCharacterRequest)` 上的 `@Mapping(target = "imageUri", ignore = true)`,让其从请求映射(前端已发当前值,可正确保留)。`CreateCharacterRequest`/`Character` 两处的 ignore 维持不变(创建走单独上传、内部转换)。
+
+---
