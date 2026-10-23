@@ -9,8 +9,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:one_piece_battles_flutter/components/image_lazy_loader.dart';
 import 'package:one_piece_battles_flutter/components/string_text_form_field.dart';
 import 'package:one_piece_battles_flutter/popup/join_group.dart';
-import 'package:one_piece_battles_flutter/repository/character_dao.dart';
-import 'package:one_piece_battles_flutter/repository/group_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:one_piece_battles_flutter/utils/image_helper.dart';
 import 'package:one_piece_battles_flutter/utils/nested_scroll_helper.dart';
@@ -22,10 +20,10 @@ import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
 import '../../utils/responsive_breakpoints.dart';
 import '../../popup/onepiece_alert.dart';
-import '../../repository/image_dao.dart';
 import '../../utils/base64_helper.dart';
 import '../../utils/onepiece_image_picker.dart';
 import '../../utils/permission_check.dart';
+import 'group_detail_controller.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -54,7 +52,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
   String? selectedImage;
   bool _basicInfoEditable = false;
   bool _editButtonVisible = false;
-  final double divW = 900;
+  final GroupDetailController _controller = GroupDetailController();
 
   @override
   void initState() {
@@ -76,11 +74,12 @@ class _GroupDetailViewState extends State<GroupDetailView> {
     groupNameController.dispose();
     scrollController.dispose();
     _pageScrollController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
   Future<GroupFullView?> _loadData() {
-    return getIt<GroupDao>()
+    return _controller
         .getGroupFullView(GetGroupRequest(id: widget.groupId));
   }
 
@@ -395,7 +394,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                                 AppLocalizations.of(context)!.hint;
                             final showAlert =
                                 OnepieceAlert.createAlertShower(context);
-                            getIt<GroupDao>().updateGroups(group).then((value) {
+                            _controller.updateGroups(group).then((value) {
                               if (!mounted) return;
                               showAlert(
                                   alertHint,
@@ -417,7 +416,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                                 AppLocalizations.of(context)!.hint;
                             final showAlert2 =
                                 OnepieceAlert.createAlertShower(context);
-                            getIt<ImageDao>()
+                            _controller
                                 .addImage(UploadImageRequest(
                                     type: ResourceType.GROUP,
                                     resourceId: groupFullView.id,
@@ -817,7 +816,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
       // Simulate fetching children from the backend
       List<TreeNode> fetchedChildren = [];
       if (node.group.groupCategory == GroupCategory.group) {
-        getIt<GroupDao>()
+        _controller
             .listChildGroups(ListChildGroupsRequest(groupId: node.group.id))
             .then((value) {
           fetchedChildren = value!.childGroups.map((e) {
@@ -830,7 +829,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
           });
         });
       } else {
-        getIt<GroupDao>()
+        _controller
             .listChildCharacters(
                 ListChildCharactersRequest(groupId: node.group.id))
             .then((value) {
@@ -988,7 +987,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
     cardState(() {
       _loadingCharacterCombatIds.add(characterId);
     });
-    getIt<CharacterDao>()
+    _controller
         .getCharacter(GetCharacterFullViewRequest(characterId: characterId))
         .then((value) {
       if (!mounted) return;
