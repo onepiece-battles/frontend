@@ -1,20 +1,16 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
-import 'package:one_piece_battles_flutter/components/image_lazy_loader.dart';
 import '../../components/desktop_card_layout.dart';
 import '../../components/page_foot.dart';
 import 'package:openapi/api.dart';
 import '../../l10n/app_localizations.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
-import '../../constants/onepiece_tag.dart';
-import '../../repository/user_dao.dart';
-import '../../utils/date_helper.dart';
-import '../../utils/image_helper.dart';
 import '../../utils/responsive_breakpoints.dart';
+import 'user_list_controller.dart';
+import 'widgets/user_roster.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -32,13 +28,8 @@ class _UserViewState extends State<UserView> {
   UserFilter userFilter = UserFilter();
   List<User> currentUserList = [];
   List<UserSortableField> sortKeys = [];
+  final UserListController _controller = UserListController();
 
-  // sorting related fields
-  Map<SortOrder?, String> sortOrderToPath = const {
-    null: 'images/svgs/sort-solid.svg',
-    SortOrder.ASC: 'images/svgs/sort-up-solid.svg',
-    SortOrder.DESC: 'images/svgs/sort-down-solid.svg'
-  };
   Map<UserSortableFieldsEnum, SortOrder?> sortableEnumToSortOrderMap = {
     UserSortableFieldsEnum.username: null,
     UserSortableFieldsEnum.loginRole: null,
@@ -46,7 +37,6 @@ class _UserViewState extends State<UserView> {
   };
   List<UserRole> selectedUserRoles = [];
   ScrollController scrollController = ScrollController();
-  ScrollController horizontalController = ScrollController();
 
   int selectedPageNum = 1;
   bool _showFilters = false;
@@ -54,8 +44,6 @@ class _UserViewState extends State<UserView> {
   int itemCountPerPage = 10;
   int totalItemCount = 0;
 
-  bool onlyShowSystemResource = false;
-  bool donNotShowSystemResource = false;
 
   @override
   void initState() {
@@ -67,7 +55,7 @@ class _UserViewState extends State<UserView> {
   void dispose() {
     searchNameController.dispose();
     scrollController.dispose();
-    horizontalController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -81,7 +69,7 @@ class _UserViewState extends State<UserView> {
         sortKeys: sortKeys,
         userFilter: userFilter);
 
-    getIt<UserDao>().listUser(listUserRequest).then((value) {
+    _controller.listUser(listUserRequest).then((value) {
       if (!mounted) return;
       setState(() {
         currentUserList = value?.users ?? [];
@@ -129,9 +117,11 @@ class _UserViewState extends State<UserView> {
                           ),
                     const SizedBox(height: 10),
                     Expanded(
-                      child: isNarrow
-                          ? _buildMobileUserCards(context)
-                          : _buildDesktopUserCards(context),
+                      child: UserRoster(
+                        users: currentUserList,
+                        controller: scrollController,
+                        isNarrow: isNarrow,
+                      ),
                     ),
                     const SizedBox(height: 15),
                     if (totalPageNum > 1)
@@ -466,126 +456,6 @@ class _UserViewState extends State<UserView> {
     );
   }
 
-  // ── Mobile: card-based user list ─────────────────────────────────────
-
-  Widget _buildMobileUserCards(BuildContext context) {
-    final roleMap = <UserRole, String>{
-      UserRole.NIKA: AppLocalizations.of(context)!.roleNika,
-      UserRole.NORMAL: AppLocalizations.of(context)!.roleNormal,
-      UserRole.VISITOR: AppLocalizations.of(context)!.roleVisitor,
-      UserRole.ADMIN: AppLocalizations.of(context)!.roleAdmin,
-    };
-    final accountMap = <AccountStatus, String>{
-      AccountStatus.loggedIn: AppLocalizations.of(context)!.accountLoggedIn,
-      AccountStatus.loggedOut: AppLocalizations.of(context)!.accountLoggedOut,
-      AccountStatus.stopped: AppLocalizations.of(context)!.accountStopped,
-      AccountStatus.closed: AppLocalizations.of(context)!.accountClosed,
-    };
-
-    if (currentUserList.isEmpty) {
-      return Center(
-          child: Text(AppLocalizations.of(context)!.empty,
-              style: OnepieceFonts.contentStyle));
-    }
-
-    return ListView.builder(
-      controller: scrollController,
-      itemCount: currentUserList.length,
-      itemBuilder: (context, index) {
-        final user = currentUserList[index];
-        return Card(
-          margin: const EdgeInsets.only(bottom: 8),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(10),
-            onTap: () => context.goNamed('userDetails',
-                extra: user.id, pathParameters: {'name': user.nickname}),
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(children: [
-                      ImageLazyLoader(
-                          key: UniqueKey(),
-                          uriProvider: () => user.imageUri ?? '',
-                          width: 44,
-                          borderWidth: 1.5,
-                          borderRadios: 44),
-                      const SizedBox(width: 10),
-                      Expanded(
-                          child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                            Text(user.nickname,
-                                style: OnepieceFonts.headerStyle
-                                    .copyWith(fontSize: 15),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis),
-                            const SizedBox(height: 2),
-                            Text(user.username,
-                                style: OnepieceFonts.smallContentStyle,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis),
-                          ])),
-                      if (user.loginRole != null)
-                        OnepieceTag.getUserRoleTag(
-                            user.loginRole!, roleMap[user.loginRole]!),
-                    ]),
-                    const SizedBox(height: 8),
-                    Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(mainAxisSize: MainAxisSize.min, children: [
-                            Icon(
-                                user.emailVerified == true
-                                    ? Icons.check
-                                    : Icons.cancel,
-                                size: 16,
-                                color: user.emailVerified == true
-                                    ? Colors.greenAccent
-                                    : Colors.redAccent),
-                            const SizedBox(width: 4),
-                            Text(
-                                user.emailVerified == true
-                                    ? AppLocalizations.of(context)!.verified
-                                    : AppLocalizations.of(context)!.notVerified,
-                                style: TextStyle(
-                                    fontSize: 12,
-                                    color: user.emailVerified == true
-                                        ? Colors.greenAccent
-                                        : Colors.redAccent)),
-                          ]),
-                          Text(accountMap[user.accountStatus] ?? '',
-                              style: OnepieceFonts.smallContentStyle),
-                        ]),
-                    if (user.userRoles.isNotEmpty) ...[
-                      const SizedBox(height: 6),
-                      Wrap(
-                          spacing: 4,
-                          runSpacing: 2,
-                          children: user.userRoles
-                              .map((e) =>
-                                  OnepieceTag.getUserRoleTag(e, roleMap[e]!))
-                              .toList()),
-                    ],
-                    const SizedBox(height: 4),
-                    Text(
-                        user.creationRecord?.actionTimestamp != null
-                            ? DateHelper.getFormattedDatetimeFromTimestamp(
-                                user.creationRecord!.actionTimestamp!, context)
-                            : '',
-                        style:
-                            const TextStyle(fontSize: 11, color: Colors.grey)),
-                  ]),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   Widget _buildUserSortControls(BuildContext context) {
     final order = sortableEnumToSortOrderMap[UserSortableFieldsEnum.username];
     return Row(children: [
@@ -616,356 +486,5 @@ class _UserViewState extends State<UserView> {
       }
       _search(false);
     });
-  }
-
-  Widget _buildDesktopUserCards(BuildContext context) {
-    if (currentUserList.isEmpty) {
-      return Center(
-        child: Text(AppLocalizations.of(context)!.empty,
-            style: OnepieceFonts.contentStyle),
-      );
-    }
-    final roleMap = <UserRole, String>{
-      UserRole.NIKA: AppLocalizations.of(context)!.roleNika,
-      UserRole.NORMAL: AppLocalizations.of(context)!.roleNormal,
-      UserRole.VISITOR: AppLocalizations.of(context)!.roleVisitor,
-      UserRole.ADMIN: AppLocalizations.of(context)!.roleAdmin,
-    };
-    final accountMap = <AccountStatus, String>{
-      AccountStatus.loggedIn: AppLocalizations.of(context)!.accountLoggedIn,
-      AccountStatus.loggedOut: AppLocalizations.of(context)!.accountLoggedOut,
-      AccountStatus.stopped: AppLocalizations.of(context)!.accountStopped,
-      AccountStatus.closed: AppLocalizations.of(context)!.accountClosed,
-    };
-
-    return DesktopSpotlightGrid<User>(
-      items: currentUserList,
-      idOf: (user) => user.id,
-      controller: scrollController,
-      cardBuilder: (context, user) => Material(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(14),
-          onTap: () => context.goNamed('userDetails',
-              extra: user.id, pathParameters: {'name': user.nickname}),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(children: [
-                  ImageLazyLoader(
-                    key: ValueKey(user.imageUri),
-                    uriProvider: () => user.imageUri ?? '',
-                    width: 54,
-                    borderWidth: 1.5,
-                    borderRadios: 54,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(user.nickname,
-                            style: OnepieceFonts.contentStyleBold.copyWith(
-                                color: OnepieceColors.deepFancyBlue,
-                                fontSize: 17),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis),
-                        Text(user.username,
-                            style: OnepieceFonts.smallContentStyle,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis),
-                      ],
-                    ),
-                  ),
-                  if (user.loginRole != null)
-                    OnepieceTag.getUserRoleTag(
-                        user.loginRole!, roleMap[user.loginRole]!),
-                ]),
-                const SizedBox(height: 12),
-                Row(children: [
-                  Icon(
-                      user.emailVerified == true
-                          ? Icons.verified
-                          : Icons.cancel,
-                      size: 17,
-                      color: user.emailVerified == true
-                          ? Colors.green
-                          : Colors.red),
-                  const SizedBox(width: 5),
-                  Text(
-                    user.emailVerified == true
-                        ? AppLocalizations.of(context)!.verified
-                        : AppLocalizations.of(context)!.notVerified,
-                    style: OnepieceFonts.smallContentStyle,
-                  ),
-                  const Spacer(),
-                  Text(accountMap[user.accountStatus] ?? '',
-                      style: OnepieceFonts.boldFancySmallFont),
-                ]),
-                if (user.userRoles.isNotEmpty) ...[
-                  const SizedBox(height: 10),
-                  Wrap(
-                    spacing: 5,
-                    runSpacing: 5,
-                    children: user.userRoles
-                        .map((role) =>
-                            OnepieceTag.getUserRoleTag(role, roleMap[role]!))
-                        .toList(),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ignore: unused_element
-  DataTable _createUserTable(BuildContext context) {
-    return DataTable(
-      showCheckboxColumn: false,
-      showBottomBorder: true,
-      border: const TableBorder(
-          top: BorderSide(color: OnepieceColors.themeColor),
-          bottom: BorderSide(color: OnepieceColors.themeColor)),
-      columns: _createColumns(),
-      rows: _createRows(context),
-      columnSpacing: 20,
-    );
-  }
-
-  List<DataColumn> _createColumns() {
-    return [
-      DataColumn(
-        label: Tooltip(
-          message: AppLocalizations.of(context)!.resetSort,
-          child: ImageHelper.getIconButtonFromSvg(
-            'images/svgs/reset.svg',
-            OnepieceColors.fancyBlue,
-            25,
-            25,
-            () {
-              // filter will not be cleared
-              sortKeys = [];
-              sortableEnumToSortOrderMap = {
-                UserSortableFieldsEnum.nickname: null,
-                UserSortableFieldsEnum.username: null,
-                UserSortableFieldsEnum.loginRole: null,
-              };
-              _search(false);
-            },
-          ),
-        ),
-      ),
-      _createSingleColumn(AppLocalizations.of(context)!.name, null, 120),
-      _createSingleColumn(AppLocalizations.of(context)!.email,
-          UserSortableFieldsEnum.username, 130),
-      _createSingleColumn(AppLocalizations.of(context)!.emailStatus, null, 120),
-      _createSingleColumn(
-          AppLocalizations.of(context)!.accountStatus, null, 150),
-      _createSingleColumn(AppLocalizations.of(context)!.loginRole, null, null),
-      _createSingleColumn(
-          AppLocalizations.of(context)!.allUserRoles, null, 280),
-      _createSingleColumn(
-          AppLocalizations.of(context)!.creationTime, null, 150),
-      _createSingleColumn(
-          AppLocalizations.of(context)!.modificationTime, null, 150),
-    ];
-  }
-
-  DataColumn _createSingleColumn(String displayText,
-      UserSortableFieldsEnum? userSortableFieldsEnum, double? width) {
-    return DataColumn(
-      label: InkWell(
-        hoverColor: Colors.transparent,
-        splashColor: Colors.transparent,
-        onTap: userSortableFieldsEnum == null
-            ? null
-            : () {
-                setState(() {
-                  var sortOrder =
-                      sortableEnumToSortOrderMap[userSortableFieldsEnum];
-                  var sortKey = userSortableFieldsEnum;
-                  if (sortOrder == null) {
-                    sortOrder = SortOrder.ASC;
-                  } else if (sortOrder == SortOrder.ASC) {
-                    sortOrder = SortOrder.DESC;
-                  } else {
-                    sortOrder = null;
-                  }
-                  sortableEnumToSortOrderMap[userSortableFieldsEnum] =
-                      sortOrder;
-                  sortKeys.removeWhere((element) => element.sortKey == sortKey);
-                  if (sortOrder != null) {
-                    sortKeys.insert(
-                        0,
-                        UserSortableField(
-                            sortKey: sortKey, sortOrder: sortOrder));
-                  }
-                  _search(false);
-                });
-              },
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(5, 10, 0, 10),
-          child: SizedBox(
-            width: width,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Text(
-                  displayText,
-                  style:
-                      sortableEnumToSortOrderMap[userSortableFieldsEnum] == null
-                          ? OnepieceFonts.tableHeaderStyle
-                          : OnepieceFonts.selectedTableHeaderStyle,
-                ),
-                const SizedBox(
-                  width: 10,
-                ),
-                if (userSortableFieldsEnum != null)
-                  Padding(
-                    padding: const EdgeInsets.all(5.0),
-                    child: ImageHelper.getSvgIconWithColor(
-                      sortOrderToPath[
-                          sortableEnumToSortOrderMap[userSortableFieldsEnum]]!,
-                      12,
-                      12,
-                      sortableEnumToSortOrderMap[userSortableFieldsEnum] == null
-                          ? Colors.grey
-                          : OnepieceColors.themeColor,
-                    ),
-                  )
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  List<DataRow> _createRows(BuildContext context) {
-    Map<UserRole, String> userRoleToDisplayNameMap = {
-      UserRole.NIKA: AppLocalizations.of(context)!.roleNika,
-      UserRole.NORMAL: AppLocalizations.of(context)!.roleNormal,
-      UserRole.VISITOR: AppLocalizations.of(context)!.roleVisitor,
-      UserRole.ADMIN: AppLocalizations.of(context)!.roleAdmin
-    };
-    Map<AccountStatus, String> accountStatusEnumToDisplayValue = {
-      AccountStatus.loggedIn: AppLocalizations.of(context)!.accountLoggedIn,
-      AccountStatus.loggedOut: AppLocalizations.of(context)!.accountLoggedOut,
-      AccountStatus.stopped: AppLocalizations.of(context)!.accountStopped,
-      AccountStatus.closed: AppLocalizations.of(context)!.accountClosed,
-    };
-    Map<bool, Widget> boolToEmailRowMap = {
-      true: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Text(
-            AppLocalizations.of(context)!.verified,
-            style: const TextStyle(color: Colors.greenAccent),
-          ),
-          const Icon(
-            Icons.check,
-            color: Colors.greenAccent,
-            size: 20,
-          )
-        ],
-      ),
-      false: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Text(
-            AppLocalizations.of(context)!.notVerified,
-            style: const TextStyle(color: Colors.redAccent),
-          ),
-          const Icon(
-            Icons.cancel,
-            color: Colors.redAccent,
-            size: 20,
-          )
-        ],
-      )
-    };
-    return currentUserList
-        .map(
-          (user) => DataRow(
-            onSelectChanged: (value) {
-              context.goNamed('userDetails',
-                  extra: user.id, pathParameters: {'name': user.nickname});
-            },
-            cells: [
-              DataCell(
-                Padding(
-                    padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                    child: ImageLazyLoader(
-                        key: UniqueKey(),
-                        uriProvider: () => user.imageUri ?? '',
-                        width: 40,
-                        borderWidth: 1.5,
-                        borderRadios: 40)),
-              ),
-              DataCell(Padding(
-                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: Text(user.nickname.toString()),
-              )),
-              DataCell(Padding(
-                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: Text(user.username.toString()),
-              )),
-              DataCell(Padding(
-                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: boolToEmailRowMap[user.emailVerified] ??
-                    const SizedBox.shrink(),
-              )),
-              DataCell(Padding(
-                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: Text(
-                    accountStatusEnumToDisplayValue[user.accountStatus] ?? ''),
-              )),
-              DataCell(Padding(
-                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: user.loginRole == null
-                    ? const SizedBox.shrink()
-                    : OnepieceTag.getUserRoleTag(user.loginRole!,
-                        userRoleToDisplayNameMap[user.loginRole]!),
-              )),
-              DataCell(
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                  child: Row(
-                    children: user.userRoles
-                        .map((e) => Padding(
-                              padding: const EdgeInsets.only(right: 5),
-                              child: OnepieceTag.getUserRoleTag(
-                                  e, userRoleToDisplayNameMap[e]!),
-                            ))
-                        .toList(),
-                  ),
-                ),
-              ),
-              DataCell(Padding(
-                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: Text(
-                    user.modificationRecord?.actionTimestamp != null
-                        ? DateHelper.getFormattedDatetimeFromTimestamp(
-                            user.modificationRecord!.actionTimestamp!,
-                            context)
-                        : ''),
-              )),
-              DataCell(Padding(
-                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: Text(user.creationRecord?.actionTimestamp != null
-                    ? DateHelper.getFormattedDatetimeFromTimestamp(
-                        user.creationRecord!.actionTimestamp!, context)
-                    : ''),
-              )),
-            ],
-          ),
-        )
-        .toList();
   }
 }
