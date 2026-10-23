@@ -48,9 +48,9 @@ void getItSetUp() {
   getIt.registerLazySingleton<WebSocketService>(() => WebSocketService());
   getIt.registerLazySingleton<User>(
       () => User(id: "", username: "", nickname: ""));
+  // Single source of truth for the app locale. Updated via _MyAppState.setLocale.
+  getIt.registerSingleton<Locale>(const Locale('zh', 'CN'));
 }
-
-void webSocketSetUp() {}
 
 void main() {
   final styleElement = web.document.createElement('style');
@@ -88,7 +88,6 @@ class MyApp extends StatefulWidget {
   static void setLocale(BuildContext context, Locale locale) {
     _MyAppState? state = context.findAncestorStateOfType<_MyAppState>();
     state?.setLocale(locale);
-    getIt.registerLazySingleton<Locale>(() => locale);
   }
 }
 
@@ -125,18 +124,19 @@ class _MyAppState extends State<MyApp> {
     setState(() {
       _locale = locale;
     });
+    // Keep the DI-provided locale in sync (single source of truth).
+    getIt.registerSingleton<Locale>(locale);
   }
 
   @override
   Widget build(BuildContext context) {
-    getIt.registerLazySingleton<Locale>(() => _locale);
     return MaterialApp.router(
       locale: _locale,
       scrollBehavior: MyCustomScrollBehavior(),
       theme: ThemeData(
         // Use system fonts that are guaranteed to be available instantly —
         // no network-dependent Google Fonts CDN loading.
-        fontFamily: getIt<Locale>().languageCode == "en"
+        fontFamily: _locale.languageCode == "en"
             ? '.AppleSystemUIFont'
             : 'PingFang SC',
         fontFamilyFallback: const [
