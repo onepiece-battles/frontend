@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 
-import 'package:animated_toggle_switch/animated_toggle_switch.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -11,7 +10,6 @@ import 'package:one_piece_battles_flutter/components/image_lazy_loader.dart';
 import 'package:one_piece_battles_flutter/components/string_text_form_field.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
-import 'package:one_piece_battles_flutter/constants/onepiece_tag.dart';
 import 'package:openapi/api.dart';
 import '../../l10n/app_localizations.dart';
 import '../../popup/onepiece_alert.dart';
@@ -27,6 +25,7 @@ import 'character_detail_controller.dart';
 import 'widgets/character_battles_section.dart';
 import 'widgets/character_groups_section.dart';
 import 'widgets/character_fruits_section.dart';
+import 'widgets/character_combat_info_section.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -57,18 +56,6 @@ class _CharacterDetailState extends State<CharacterDetail> {
   TextEditingController characterBirthPlace = TextEditingController();
   TextEditingController characterBounty = TextEditingController();
 
-  // battle data controller
-  TextEditingController characterFruitLimitController = TextEditingController();
-  TextEditingController characterGroupGainController = TextEditingController();
-  TextEditingController characterAttackController = TextEditingController();
-  TextEditingController characterDefenseController = TextEditingController();
-  TextEditingController characterIntelligenceController =
-      TextEditingController();
-  TextEditingController characterBloodController = TextEditingController();
-  TextEditingController characterSpeedController = TextEditingController();
-  TextEditingController characterEnergyController = TextEditingController();
-
-  List<Haki> selectedHakis = [];
   String? selectedImage;
 
   double dividerWidth = 860;
@@ -88,13 +75,10 @@ class _CharacterDetailState extends State<CharacterDetail> {
   String? selectedMonth;
 
   final _basicFormKey = GlobalKey<FormState>();
-  final _digitFormKey = GlobalKey<FormState>();
 
   bool _editButtonVisible = false;
 
   bool basicInfoEditable = false;
-  bool combatInfoEditable = false;
-  bool showBaseValue = false;
 
   @override
   void initState() {
@@ -128,7 +112,6 @@ class _CharacterDetailState extends State<CharacterDetail> {
     battles = characterFullView.battles;
     fruits = characterFullView.fruits;
     groups = characterFullView.groups;
-    selectedHakis = characterFullView.hakis.toList(growable: true);
     _editButtonVisible = (PermissionCheck.checkPermission(
                 getIt<User>().loginRoleResourcesPermissionMap,
                 ResourceType.CHARACTER,
@@ -162,15 +145,6 @@ class _CharacterDetailState extends State<CharacterDetail> {
         character.bounty == null ? "" : character.bounty.toString();
     selectedBattleStyle = character.battleStyle;
     selectedRace = character.race;
-    // update combat information
-    characterFruitLimitController.text = character.maximumFruitCount.toString();
-    characterGroupGainController.text = character.groupGain.toString();
-    characterAttackController.text = character.attack.toString();
-    characterDefenseController.text = character.defense.toString();
-    characterIntelligenceController.text = character.intelligence.toString();
-    characterBloodController.text = character.blood.toString();
-    characterSpeedController.text = character.speed.toString();
-    characterEnergyController.text = character.energy.toString();
   }
 
   (String?, String?) _parseBirthday(String? birthday) {
@@ -218,7 +192,12 @@ class _CharacterDetailState extends State<CharacterDetail> {
           const SizedBox(height: 12),
           _buildMobileBasicInfo(context),
           const SizedBox(height: 12),
-          _buildMobileCombatInfo(context),
+          CharacterCombatInfoSection(
+              character: character,
+              editButtonVisible: _editButtonVisible,
+              controller: _controller,
+              selectedBattleStyle: selectedBattleStyle,
+              isNarrow: true),
           const SizedBox(height: 12),
           CharacterFruitsSection(
               character: character,
@@ -387,165 +366,6 @@ class _CharacterDetailState extends State<CharacterDetail> {
     );
   }
 
-  Widget _buildMobileCombatInfo(BuildContext context) {
-    final hakiMap = {
-      Haki.busoshoku: AppLocalizations.of(context)!.busoshoku,
-      Haki.haoshoku: AppLocalizations.of(context)!.haoshoku,
-      Haki.kenbunshoku: AppLocalizations.of(context)!.kenbunshoku
-    };
-    return StatefulBuilder(builder: (context, localSetState) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [
-            Text(AppLocalizations.of(context)!.battleInfo,
-                style: OnepieceFonts.headerStyle.copyWith(fontSize: 16)),
-            if (_editButtonVisible) ...[
-              const SizedBox(width: 4),
-              InkWell(
-                onTap: () => localSetState(() {
-                  combatInfoEditable = !combatInfoEditable;
-                  if (combatInfoEditable) {
-                    showBaseValue = true;
-                    changeValue();
-                  }
-                  if (!combatInfoEditable && _combatInfoUpdated()) {
-                    _submitCombatInfo(context);
-                  }
-                }),
-                borderRadius: BorderRadius.circular(12),
-                child: Padding(
-                  padding: const EdgeInsets.all(2),
-                  child: Icon(
-                      combatInfoEditable ? Icons.check_circle : Icons.edit,
-                      size: 18,
-                      color: OnepieceColors.fancyBlue),
-                ),
-              ),
-            ],
-            const Spacer(),
-            if (fruits.isNotEmpty)
-              Row(mainAxisSize: MainAxisSize.min, children: [
-                Text(AppLocalizations.of(context)!.realValue,
-                    style: const TextStyle(
-                        fontSize: 13, fontWeight: FontWeight.w500)),
-                Transform.scale(
-                  scale: 0.7,
-                  child: Switch(
-                    value: showBaseValue,
-                    activeTrackColor:
-                        OnepieceColors.fancyBlue.withValues(alpha: 0.4),
-                    thumbColor:
-                        WidgetStateProperty.all(OnepieceColors.fancyBlue),
-                    onChanged: (v) => localSetState(() {
-                      showBaseValue = v;
-                      changeValue();
-                    }),
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                ),
-                Text(AppLocalizations.of(context)!.basicValue,
-                    style: const TextStyle(
-                        fontSize: 13, fontWeight: FontWeight.w500)),
-              ]),
-          ]),
-          const SizedBox(height: 10),
-          if (combatInfoEditable)
-            _mobileMultiSelect<Haki>(
-                Haki.values,
-                hakiMap,
-                selectedHakis,
-                AppLocalizations.of(context)!.hakis,
-                (h) => localSetState(() {
-                      if (selectedHakis.contains(h)) {
-                        selectedHakis.remove(h);
-                      } else {
-                        selectedHakis.add(h);
-                      }
-                    }))
-          else if (character.hakis.isNotEmpty)
-            Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Wrap(
-                    spacing: 4,
-                    children: character.hakis
-                        .map((e) => OnepieceTag.getHakiTag(e, hakiMap[e]!))
-                        .toList())),
-          Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Row(children: [
-                ImageHelper.getTextFormFieldIcon(
-                    'images/svgs/user.svg', true, 20),
-                const SizedBox(width: 8),
-                Text(AppLocalizations.of(context)!.combatPower,
-                    style: OnepieceFonts.contentStyleBold),
-                const Spacer(),
-                Text('${character.score}',
-                    style: OnepieceFonts.contentStyleBoldFancyBlue
-                        .copyWith(fontSize: 18)),
-              ])),
-          _mobileField(
-              context,
-              combatInfoEditable,
-              characterAttackController,
-              AppLocalizations.of(context)!.characterAttack,
-              'images/character_digits_icon/attack.svg',
-              isNum: true),
-          _mobileField(
-              context,
-              combatInfoEditable,
-              characterDefenseController,
-              AppLocalizations.of(context)!.characterDefense,
-              'images/character_digits_icon/defense.svg',
-              isNum: true),
-          _mobileField(
-              context,
-              combatInfoEditable,
-              characterBloodController,
-              AppLocalizations.of(context)!.characterBlood,
-              'images/character_digits_icon/blood.svg',
-              isNum: true),
-          _mobileField(
-              context,
-              combatInfoEditable,
-              characterEnergyController,
-              AppLocalizations.of(context)!.characterEnergy,
-              'images/character_digits_icon/energy.svg',
-              isNum: true),
-          _mobileField(
-              context,
-              combatInfoEditable,
-              characterSpeedController,
-              AppLocalizations.of(context)!.characterSpeed,
-              'images/character_digits_icon/speed.svg',
-              isNum: true),
-          _mobileField(
-              context,
-              combatInfoEditable,
-              characterIntelligenceController,
-              AppLocalizations.of(context)!.characterIntelligence,
-              'images/character_digits_icon/intelligence.svg',
-              isNum: true),
-          _mobileField(
-              context,
-              combatInfoEditable,
-              characterGroupGainController,
-              AppLocalizations.of(context)!.groupGain,
-              'images/character_digits_icon/group_gain.svg',
-              isNum: true),
-          _mobileField(
-              context,
-              combatInfoEditable,
-              characterFruitLimitController,
-              AppLocalizations.of(context)!.fruitLimit,
-              'images/character_digits_icon/fruit_limit.svg',
-              isNum: true),
-          const Divider(),
-        ]),
-      );
-    });
-  }
-
   // ── Mobile helpers ────────────────────────────────────────────────
 
   Widget _mobileField(BuildContext context, bool editable,
@@ -662,58 +482,6 @@ class _CharacterDetailState extends State<CharacterDetail> {
         )));
   }
 
-  Widget _mobileMultiSelect<T>(List<T> items, Map<T, String> displayMap,
-      List<T> selected, String hint, Function(T) onChanged) {
-    return Padding(
-        padding: const EdgeInsets.only(bottom: 10),
-        child: DropdownButtonHideUnderline(
-            child: DropdownButton2<T>(
-          isExpanded: true,
-          value: selected.isNotEmpty ? selected.last : null,
-          hint: Text(hint, style: OnepieceFonts.dropDownItemStyle),
-          onChanged: (T? v) {},
-          selectedItemBuilder: (_) => items
-              .map((_) => Container(
-                  alignment: Alignment.centerLeft,
-                  child: Text(selected.map((e) => displayMap[e]!).join(', '),
-                      style: const TextStyle(
-                          fontSize: 16, overflow: TextOverflow.ellipsis),
-                      maxLines: 1)))
-              .toList(),
-          buttonStyleData: ButtonStyleData(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              height: 35,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(3),
-                  color: OnepieceColors.liteFancyGreen)),
-          menuItemStyleData: const MenuItemStyleData(height: 30),
-          items: items
-              .map((i) => DropdownMenuItem<T>(
-                  value: i,
-                  enabled: false,
-                  child: StatefulBuilder(
-                      builder: (_, ms) => InkWell(
-                            hoverColor: Colors.transparent,
-                            splashColor: Colors.transparent,
-                            onTap: () {
-                              onChanged(i);
-                              ms(() {});
-                            },
-                            child: Row(children: [
-                              Icon(
-                                  selected.contains(i)
-                                      ? Icons.check_box_outlined
-                                      : Icons.check_box_outline_blank,
-                                  size: 20),
-                              const SizedBox(width: 8),
-                              Text(displayMap[i]!,
-                                  style: const TextStyle(fontSize: 16))
-                            ]),
-                          ))))
-              .toList(),
-        )));
-  }
-
   // ── Shared lookup maps ────────────────────────────────────────────
 
   Map<BattleStyle, String> _bsMap(BuildContext context) => {
@@ -796,49 +564,6 @@ class _CharacterDetailState extends State<CharacterDetail> {
     });
   }
 
-  void _submitCombatInfo(BuildContext context) {
-    final router = GoRouter.of(context);
-    final alertHint = AppLocalizations.of(context)!.hint;
-    final showAlert = OnepieceAlert.createAlertShower(context);
-    final updated = UpdateCharacterRequest(
-      groupGain: character.groupGain,
-      attack: character.attack,
-      defense: character.defense,
-      intelligence: character.intelligence,
-      blood: character.blood,
-      speed: character.speed,
-      maximumFruitCount:
-          DataConverter.stringToInt(characterFruitLimitController.text),
-      baseGroupGain:
-          DataConverter.stringToInt(characterGroupGainController.text),
-      baseAttack: DataConverter.stringToInt(characterAttackController.text),
-      baseDefense: DataConverter.stringToInt(characterDefenseController.text),
-      baseIntelligence:
-          DataConverter.stringToInt(characterIntelligenceController.text),
-      baseBlood: DataConverter.stringToInt(characterBloodController.text),
-      baseSpeed: DataConverter.stringToInt(characterSpeedController.text),
-      energy: DataConverter.stringToInt(characterEnergyController.text),
-      hakis: selectedHakis,
-      id: character.id,
-      race: character.race,
-      score: character.score,
-      battleStyle: selectedBattleStyle,
-      name: character.name,
-    );
-    _controller.updateCharacter(updated).then((v) {
-      if (!mounted) return;
-      showAlert(alertHint, I18nHelper.getDisplayNameFromI18n(v!.result));
-      if (v.success) {
-        showBaseValue = false;
-        router.replaceNamed('characterDetails',
-            extra: character.id,
-            pathParameters: {
-              'name': I18nHelper.getDisplayNameFromI18n(character.name)
-            });
-      }
-    });
-  }
-
   void _uploadImage(BuildContext context) {
     if (selectedImage == null) return;
     final router = GoRouter.of(context);
@@ -878,7 +603,14 @@ class _CharacterDetailState extends State<CharacterDetail> {
                                 width: dividerWidth,
                                 child: const Divider(
                                     color: Colors.grey, thickness: 1))),
-                        _getCombatInfo(context),
+                        CharacterCombatInfoSection(
+                            character: character,
+                            editButtonVisible: _editButtonVisible,
+                            controller: _controller,
+                            selectedBattleStyle: selectedBattleStyle,
+                            isNarrow: false,
+                            dividerWidth: dividerWidth,
+                            sideWidth: sideWidth),
                         Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8),
                             child: SizedBox(
@@ -1612,422 +1344,6 @@ class _CharacterDetailState extends State<CharacterDetail> {
     );
   }
 
-  Widget _getCombatInfo(BuildContext context) {
-    Map<Haki, String> hakiEnumValueToDisplayValue = {
-      Haki.busoshoku: AppLocalizations.of(context)!.busoshoku,
-      Haki.haoshoku: AppLocalizations.of(context)!.haoshoku,
-      Haki.kenbunshoku: AppLocalizations.of(context)!.kenbunshoku,
-    };
-    return StatefulBuilder(builder: (context, combatState) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(0, 3, 0, 0),
-            child: SizedBox(
-              width: dividerWidth,
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: sideWidth),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Text(
-                          AppLocalizations.of(context)!.battleInfo,
-                          style: OnepieceFonts.headerStyle,
-                        ),
-                        const SizedBox(
-                          width: 15,
-                        ),
-                        if (_editButtonVisible)
-                          Tooltip(
-                            message: combatInfoEditable
-                                ? AppLocalizations.of(context)!.submitForm
-                                : AppLocalizations.of(context)!.editHint,
-                            child: InkWell(
-                              hoverColor: Colors.transparent,
-                              splashColor: Colors.transparent,
-                              onTap: () {
-                                combatState(() {
-                                  combatInfoEditable = !combatInfoEditable;
-                                  if (combatInfoEditable) {
-                                    showBaseValue = true;
-                                    changeValue();
-                                  }
-                                  if (!combatInfoEditable) {
-                                    // Shared with the mobile layout; see
-                                    // _submitCombatInfo (routes through the controller).
-                                    if (_combatInfoUpdated()) {
-                                      _submitCombatInfo(context);
-                                    }
-                                  }
-                                });
-                              },
-                              child: SizedBox(
-                                  width: 25,
-                                  height: 25,
-                                  child: !combatInfoEditable
-                                      ? ImageHelper.getSvgIconWithColor(
-                                          'images/svgs/edit.svg',
-                                          150,
-                                          150,
-                                          OnepieceColors.fancyBlue)
-                                      : ImageHelper.getSvgIconWithColor(
-                                          'images/svgs/check.svg',
-                                          150,
-                                          150,
-                                          OnepieceColors.fancyBlue)),
-                            ),
-                          ),
-                      ],
-                    ),
-                    if (fruits.isNotEmpty)
-                      SizedBox(
-                        width: 80,
-                        height: 26,
-                        child: AnimatedToggleSwitch<bool>.dual(
-                          current: showBaseValue,
-                          first: false,
-                          second: true,
-                          spacing: 1.0,
-                          style: const ToggleStyle(
-                            borderColor: Colors.transparent,
-                            backgroundColor:
-                                OnepieceColors.menuSelectedTileColor,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black26,
-                                spreadRadius: 1,
-                                blurRadius: 2,
-                                offset: Offset(0, 1.5),
-                              ),
-                            ],
-                          ),
-                          borderWidth: 3.0,
-                          height: 36,
-                          onChanged: (b) => combatState(() {
-                            showBaseValue = !showBaseValue;
-                            changeValue();
-                          }),
-                          styleBuilder: (b) => ToggleStyle(
-                              indicatorColor: b ? Colors.white : Colors.white),
-                          iconBuilder: (value) => value
-                              ? ImageHelper.getTextFormFieldIcon(
-                                  'images/svgs/user.svg', true, 20)
-                              : ImageHelper.getTextFormFieldIcon(
-                                  'images/svgs/fruit_total.svg', true, 20),
-                          textBuilder: (value) => value
-                              ? Text(
-                                  AppLocalizations.of(context)!.basicValue,
-                                  style: const TextStyle(
-                                      color: Colors.black87,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600),
-                                )
-                              : Text(
-                                  AppLocalizations.of(context)!.realValue,
-                                  style: const TextStyle(
-                                      color: Colors.black87,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600),
-                                ),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          SizedBox(
-            width: dividerWidth,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (character.hakis.isNotEmpty && !combatInfoEditable)
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(sideWidth, 0, 0, 0),
-                    child: Row(
-                      children: character.hakis
-                          .map((e) => Padding(
-                                padding: const EdgeInsets.only(right: 5),
-                                child: OnepieceTag.getHakiTag(
-                                    e, hakiEnumValueToDisplayValue[e]!),
-                              ))
-                          .toList(),
-                    ),
-                  ),
-                if (combatInfoEditable)
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(sideWidth, 0, 0, 0),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton2(
-                        isExpanded: true,
-                        value:
-                            selectedHakis.isEmpty ? null : selectedHakis.last,
-                        hint: Text(
-                          AppLocalizations.of(context)!.hakis,
-                          style: OnepieceFonts.dropDownItemStyle,
-                        ),
-                        onChanged: (value) {},
-                        selectedItemBuilder: (context) {
-                          return Haki.values.map(
-                            (item) {
-                              return Container(
-                                alignment: AlignmentDirectional.center,
-                                child: Text(
-                                  selectedHakis
-                                      .map((selectedType) {
-                                        return hakiEnumValueToDisplayValue[
-                                            selectedType];
-                                      })
-                                      .toSet()
-                                      .join(', '),
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  maxLines: 1,
-                                ),
-                              );
-                            },
-                          ).toList();
-                        },
-                        buttonStyleData: ButtonStyleData(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          height: 35,
-                          width: 200,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(3),
-                            color: OnepieceColors.liteFancyGreen,
-                          ),
-                        ),
-                        menuItemStyleData: const MenuItemStyleData(
-                          height: 35,
-                        ),
-                        items: Haki.values.map((Haki haki) {
-                          return DropdownMenuItem<Haki>(
-                            value: haki,
-                            enabled: false,
-                            child: StatefulBuilder(
-                              builder: (context, menuSetState) {
-                                final isSelected = selectedHakis.contains(haki);
-                                return InkWell(
-                                  hoverColor: Colors.transparent,
-                                  splashColor: Colors.transparent,
-                                  onTap: () {
-                                    isSelected
-                                        ? selectedHakis.remove(haki)
-                                        : selectedHakis.add(haki);
-                                    // //This rebuilds the StatefulWidget to update the button's text
-                                    combatState(() {});
-                                    //This rebuilds the dropdownMenu Widget to update the check mark
-                                    menuSetState(() {});
-                                  },
-                                  child: Container(
-                                    height: double.infinity,
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 3.0),
-                                    child: Row(
-                                      children: [
-                                        if (isSelected)
-                                          const Icon(Icons.check_box_outlined)
-                                        else
-                                          const Icon(
-                                              Icons.check_box_outline_blank),
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          child: Text(
-                                            hakiEnumValueToDisplayValue[haki]!,
-                                            style: const TextStyle(
-                                              fontSize: 16,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    ),
-                  ),
-                Padding(
-                  padding: EdgeInsets.fromLTRB(sideWidth, 0, sideWidth, 0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Tooltip(
-                        message: AppLocalizations.of(context)!.getByJoinCombat,
-                        child: Text(
-                          AppLocalizations.of(context)!.combatPower,
-                          style: OnepieceFonts.contentStyleBold,
-                        ),
-                      ),
-                      Text(
-                        " ${character.score}",
-                        style: OnepieceFonts.contentStyleBoldFancyBlue,
-                      )
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(
-            height: 30,
-          ),
-          Form(
-            key: _digitFormKey,
-            child: SizedBox(
-              width: dividerWidth,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.only(left: sideWidth),
-                    child: Column(
-                      children: [
-                        DigitTextFormField(
-                            context,
-                            combatInfoEditable,
-                            characterAttackController,
-                            AppLocalizations.of(context)!.characterAttack,
-                            10,
-                            1500,
-                            ImageHelper.getTextFormFieldIcon(
-                                'images/character_digits_icon/attack.svg',
-                                true,
-                                21),
-                            true),
-                        DigitTextFormField(
-                            context,
-                            combatInfoEditable,
-                            characterDefenseController,
-                            AppLocalizations.of(context)!.characterDefense,
-                            10,
-                            1400,
-                            ImageHelper.getTextFormFieldIcon(
-                                'images/character_digits_icon/defense.svg',
-                                true,
-                                22),
-                            true),
-                        DigitTextFormField(
-                            context,
-                            combatInfoEditable,
-                            characterBloodController,
-                            AppLocalizations.of(context)!.characterBlood,
-                            100,
-                            10000,
-                            ImageHelper.getTextFormFieldIcon(
-                                'images/character_digits_icon/blood.svg',
-                                true,
-                                22),
-                            true),
-                        DigitTextFormField(
-                            context,
-                            combatInfoEditable,
-                            characterEnergyController,
-                            AppLocalizations.of(context)!.characterEnergy,
-                            100,
-                            300,
-                            ImageHelper.getTextFormFieldIcon(
-                                'images/character_digits_icon/energy.svg',
-                                true,
-                                null),
-                            true),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(right: sideWidth),
-                    child: Column(
-                      children: [
-                        DigitTextFormField(
-                            context,
-                            combatInfoEditable,
-                            characterSpeedController,
-                            AppLocalizations.of(context)!.characterSpeed,
-                            10,
-                            200,
-                            ImageHelper.getTextFormFieldIcon(
-                                'images/character_digits_icon/speed.svg',
-                                true,
-                                22),
-                            true),
-                        DigitTextFormField(
-                            context,
-                            combatInfoEditable,
-                            characterIntelligenceController,
-                            AppLocalizations.of(context)!.characterIntelligence,
-                            70,
-                            260,
-                            ImageHelper.getTextFormFieldIcon(
-                                'images/character_digits_icon/intelligence.svg',
-                                true,
-                                20),
-                            true),
-                        DigitTextFormField(
-                            context,
-                            combatInfoEditable,
-                            characterGroupGainController,
-                            AppLocalizations.of(context)!.groupGain,
-                            100,
-                            200,
-                            ImageHelper.getTextFormFieldIcon(
-                                'images/character_digits_icon/group_gain.svg',
-                                true,
-                                20),
-                            true),
-                        DigitTextFormField(
-                            context,
-                            combatInfoEditable,
-                            characterFruitLimitController,
-                            AppLocalizations.of(context)!.fruitLimit,
-                            1,
-                            2,
-                            ImageHelper.getTextFormFieldIcon(
-                                'images/character_digits_icon/fruit_limit.svg',
-                                true,
-                                null),
-                            true),
-                      ],
-                    ),
-                  )
-                ],
-              ),
-            ),
-          )
-        ],
-      );
-    });
-  }
-
-  changeValue() {
-    if (showBaseValue) {
-      characterAttackController.text = character.baseAttack.toString();
-      characterDefenseController.text = character.baseDefense.toString();
-      characterBloodController.text = character.baseBlood.toString();
-      characterIntelligenceController.text =
-          character.baseIntelligence.toString();
-      characterGroupGainController.text = character.baseGroupGain.toString();
-      characterSpeedController.text = character.baseSpeed.toString();
-    } else {
-      characterGroupGainController.text = character.groupGain.toString();
-      characterAttackController.text = character.attack.toString();
-      characterDefenseController.text = character.defense.toString();
-      characterIntelligenceController.text = character.intelligence.toString();
-      characterBloodController.text = character.blood.toString();
-      characterSpeedController.text = character.speed.toString();
-    }
-  }
-
   bool _basicInfoUpdated() {
     return character.race.toString() != selectedRace.toString() ||
         character.battleStyle.toString() != selectedBattleStyle.toString() ||
@@ -2051,20 +1367,6 @@ class _CharacterDetailState extends State<CharacterDetail> {
     } else {
       return value.toString() == text;
     }
-  }
-
-  bool _combatInfoUpdated() {
-    return character.groupGain.toString() !=
-            characterGroupGainController.text ||
-        character.maximumFruitCount.toString() !=
-            characterFruitLimitController.text ||
-        character.attack.toString() != characterAttackController.text ||
-        character.defense.toString() != characterDefenseController.text ||
-        character.intelligence.toString() !=
-            characterIntelligenceController.text ||
-        character.speed.toString() != characterSpeedController.text ||
-        character.blood.toString() != characterBloodController.text ||
-        character.energy.toString() != characterEnergyController.text;
   }
 
 }
