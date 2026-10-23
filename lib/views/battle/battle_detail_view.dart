@@ -9,12 +9,11 @@ import 'package:one_piece_battles_flutter/components/image_lazy_loader.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:one_piece_battles_flutter/graph/character_bar_graph.dart';
 import 'package:one_piece_battles_flutter/popup/onepiece_alert.dart';
-import 'package:one_piece_battles_flutter/repository/battle_dao.dart';
-import 'package:one_piece_battles_flutter/repository/file_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:provider/provider.dart';
 import 'package:one_piece_battles_flutter/utils/image_helper.dart';
 import 'package:openapi/api.dart';
+import 'battle_detail_controller.dart';
 import '../../l10n/app_localizations.dart';
 import 'package:one_piece_battles_flutter/graph/character_data.dart';
 import '../../constants/onepiece_fonts.dart';
@@ -43,6 +42,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
   ValueNotifier<Uint8List?> pdfData = ValueNotifier(null);
   final ScrollController _pageScrollController = ScrollController();
   final ScrollController _horizontalScrollController = ScrollController();
+  final BattleDetailController _controller = BattleDetailController();
 
   @override
   void initState() {
@@ -55,11 +55,12 @@ class _BattleDetailViewState extends State<BattleDetailView> {
     _timer?.cancel();
     _pageScrollController.dispose();
     _horizontalScrollController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
   _loadData() {
-    return getIt<BattleDao>()
+    return _controller
         .getBattleFullView(GetBattleFullViewRequest(battleId: widget.battleId));
   }
 
@@ -71,7 +72,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
       if (battleExecutionData.reportFileId != null) {
         return;
       }
-      getIt<BattleDao>()
+      _controller
           .getBattleExecution(request)
           .then((value) => _updateBattleExecution(value!));
     });
@@ -140,7 +141,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
     final battleTitle = AppLocalizations.of(context)!.battle;
     final startSuccess = AppLocalizations.of(context)!.startSuccess;
     final showAlert = OnepieceAlert.createAlertShower(context);
-    getIt<BattleDao>()
+    _controller
         .startBattle(StartBattleRequest(battleId: battle.id))
         .then((value) {
       if (!mounted) return;
@@ -788,7 +789,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
           splashColor: Colors.transparent,
           onTap: canDownload
               ? () {
-                  getIt<FileDao>()
+                  _controller
                       .downloadFile(DownloadFileRequest(
                           id: battleExecutionData.reportFileId!))
                       .then((response) async {
@@ -836,7 +837,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
               child: ElevatedButton(
                   onPressed: () {
                     final router = GoRouter.of(context);
-                    getIt<BattleDao>()
+                    _controller
                         .createBattle(CreateBattleRequest(
                             userId: getIt<User>().id,
                             starterId: battle.starterId,

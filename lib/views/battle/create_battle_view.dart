@@ -6,13 +6,12 @@ import 'package:one_piece_battles_flutter/components/creation_form_card.dart';
 import 'package:one_piece_battles_flutter/components/image_lazy_loader.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:openapi/api.dart';
+import 'create_battle_controller.dart';
 import '../../l10n/app_localizations.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_tag.dart';
 import 'package:one_piece_battles_flutter/graph/character_data.dart';
 import '../../graph/character_bar_graph.dart';
-import '../../repository/battle_dao.dart';
-import '../../repository/character_dao.dart';
 import '../../utils/i18n_helper.dart';
 import '../../utils/image_helper.dart';
 
@@ -49,6 +48,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
   bool receiverIsLoading = false;
   bool starterToEnd = false;
   bool receiverToEnd = false;
+  final CreateBattleController _controller = CreateBattleController();
 
   @override
   void initState() {
@@ -65,6 +65,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
     receiverSelectedItem.dispose();
     starterTextController.dispose();
     receiverTextController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -76,7 +77,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
         sortKeys: [],
         characterFilter: CharacterFilter());
     Future<ListCharacterResponse?> listCharacterResponse =
-        getIt<CharacterDao>().listCharacter(listCharacterRequest);
+        _controller.listCharacter(listCharacterRequest);
     listCharacterResponse.then((value) {
       setState(() {
         starterCharacters = value!.characters;
@@ -443,7 +444,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                               sortKeys: [],
                               characterFilter: starterCharacterFilter);
                       Future<ListCharacterResponse?> listCharacterResponse =
-                          getIt<CharacterDao>()
+                          _controller
                               .listCharacter(listCharacterRequest);
                       listCharacterResponse.then((value) {
                         leftSearchState(() {
@@ -777,7 +778,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                                 sortKeys: [],
                                 characterFilter: receiverCharacterFilter);
                         Future<ListCharacterResponse?> listCharacterResponse =
-                            getIt<CharacterDao>()
+                            _controller
                                 .listCharacter(listCharacterRequest);
                         listCharacterResponse.then((value) {
                           rightSearchState(() {
@@ -1011,7 +1012,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                                             receiverId: receiverSelectedId);
                                     final router = GoRouter.of(context);
                                     Future<CreateBattleResponse?> response =
-                                        getIt<BattleDao>()
+                                        _controller
                                             .createBattle(request);
                                     response.then((value) {
                                       if (!mounted) return;
