@@ -2,8 +2,8 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
-import 'package:one_piece_battles_flutter/repository/fruit_dao.dart';
 import 'package:one_piece_battles_flutter/utils/data_converter.dart';
+import 'fruit_detail_controller.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
 import '../../components/digit_text_form_field.dart';
@@ -37,6 +37,7 @@ class _FruitDetailViewState extends State<FruitDetailView> {
   late Future<FruitFullView?> _fruitFuture;
   String? _hydratedFruitId;
   List<CharacterInFruitView> characters = [];
+  final FruitDetailController _controller = FruitDetailController();
   final ScrollController horizontalController = ScrollController();
   final ScrollController verticalController = ScrollController();
 
@@ -73,6 +74,7 @@ class _FruitDetailViewState extends State<FruitDetailView> {
     speedInterceptController.dispose();
     groupGainSlopeController.dispose();
     groupGainInterceptController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -109,11 +111,10 @@ class _FruitDetailViewState extends State<FruitDetailView> {
   bool _combatInfoEditable = false;
   bool _editButtonVisible = false;
 
-  final double divW = 800;
   final double sideW = 50;
 
   Future<FruitFullView?> _loadData() {
-    return getIt<FruitDao>().get(GetFruitRequest(fruitId: widget.fruitId));
+    return _controller.get(GetFruitRequest(fruitId: widget.fruitId));
   }
 
   // will be executed every time page refreshes
@@ -560,7 +561,7 @@ class _FruitDetailViewState extends State<FruitDetailView> {
       groupGainIntercept:
           DataConverter.stringToInt(groupGainInterceptController.text),
     );
-    getIt<FruitDao>().update(updated).then((v) {
+    _controller.update(updated).then((v) {
       if (!mounted) return;
       showAlert(AppLocalizations.of(context)!.hint,
           I18nHelper.getDisplayNameFromI18n(v!.result));
@@ -754,7 +755,7 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                                 AppLocalizations.of(context)!.hint;
                             final showAlert =
                                 OnepieceAlert.createAlertShower(context);
-                            getIt<FruitDao>()
+                            _controller
                                 .update(updatedFruit)
                                 .then((value) {
                               if (!mounted) return;
@@ -977,7 +978,7 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                                 AppLocalizations.of(context)!.hint;
                             final showAlert =
                                 OnepieceAlert.createAlertShower(context);
-                            getIt<FruitDao>()
+                            _controller
                                 .update(updatedFruit)
                                 .then((value) {
                               if (!mounted) return;
