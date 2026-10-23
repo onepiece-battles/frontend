@@ -2,10 +2,9 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/components/image_lazy_loader.dart';
-import 'package:one_piece_battles_flutter/repository/issue_dao.dart';
 import 'package:openapi/api.dart';
+import 'issue_detail_controller.dart';
 
-import '../../app_router.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
 import '../../l10n/app_localizations.dart';
@@ -26,6 +25,7 @@ class _IssueDetailViewState extends State<IssueDetailView> {
   late IssueFullView issue;
   bool _issueStatusEditable = false;
   IssueStatus? _selectedIssueStatus;
+  final IssueDetailController _controller = IssueDetailController();
 
   @override
   void initState() {
@@ -42,8 +42,14 @@ class _IssueDetailViewState extends State<IssueDetailView> {
     }
   }
 
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   Future<IssueFullView?> _loadData() {
-    return getIt<IssueDao>()
+    return _controller
         .getIssueFullView(GetIssueFullViewRequest(id: widget.issueId));
   }
 
@@ -393,7 +399,7 @@ class _IssueDetailViewState extends State<IssueDetailView> {
         Issue(id: issue.id, issueStatus: _selectedIssueStatus),
       ],
     );
-    getIt<IssueDao>().batchUpdateIssue(request).then((value) {
+    _controller.batchUpdateIssue(request).then((value) {
       if (!mounted) return;
       setState(() {
         _issueFuture = _loadData();
