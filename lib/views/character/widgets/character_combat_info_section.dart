@@ -25,10 +25,6 @@ class CharacterCombatInfoSection extends StatefulWidget {
   final CharacterFullView character;
   final bool editButtonVisible;
   final CharacterDetailController controller;
-
-  /// The current battle-style selection from the basic-info section; sent along
-  /// with the combat update to preserve it (matches the previous behaviour).
-  final BattleStyle selectedBattleStyle;
   final bool isNarrow;
   final double dividerWidth;
   final double sideWidth;
@@ -38,7 +34,6 @@ class CharacterCombatInfoSection extends StatefulWidget {
     required this.character,
     required this.editButtonVisible,
     required this.controller,
-    required this.selectedBattleStyle,
     required this.isNarrow,
     this.dividerWidth = 860,
     this.sideWidth = 50,
@@ -175,7 +170,7 @@ class _CharacterCombatInfoSectionState
       id: character.id,
       race: character.race,
       score: character.score,
-      battleStyle: widget.selectedBattleStyle,
+      battleStyle: character.battleStyle,
       name: character.name,
     );
     widget.controller.updateCharacter(updated).then((v) {
