@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:one_piece_battles_flutter/repository/chatting_dao.dart';
-import 'package:one_piece_battles_flutter/repository/user_dao.dart';
 import 'package:openapi/api.dart';
+import 'create_chatting_controller.dart';
 
 import '../../app_router.dart';
 import '../../constants/onepiece_colors.dart';
@@ -19,12 +18,13 @@ class CreateChattingView extends StatefulWidget {
 class _CreateChattingViewState extends State<CreateChattingView> {
   final TextEditingController searchFriendController = TextEditingController();
   final ScrollController userListController = ScrollController();
+  final CreateChattingController _controller = CreateChattingController();
   Set<String> selectedUserIds = {};
   List<User> allUsers = [];
   List<User> users = [];
 
   void _listUser() {
-    getIt<UserDao>()
+    _controller
         .listFriend(ListFriendRequest(userId: getIt<User>().id))
         .then((value) {
       if (!mounted) return;
@@ -45,6 +45,7 @@ class _CreateChattingViewState extends State<CreateChattingView> {
   void dispose() {
     searchFriendController.dispose();
     userListController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -141,7 +142,7 @@ class _CreateChattingViewState extends State<CreateChattingView> {
                             : () {
                                 localSetState(() {
                                   selectedUserIds.add(getIt<User>().id);
-                                  getIt<ChattingDao>().createChat(
+                                  _controller.createChat(
                                     CreateChatRequest(
                                         ids: selectedUserIds.toList()),
                                   );
