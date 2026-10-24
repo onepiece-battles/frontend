@@ -86,15 +86,28 @@ class _ChatMessageScrollPosition extends ScrollPositionWithSingleContext {
 
   final _ChatMessageScrollController controller;
 
+  /// How far above the previous bottom still counts as "at the bottom" when
+  /// deciding whether late content growth should re-pin the view.
+  static const double _bottomPinSlack = 8.0;
+
   @override
   bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
     if (controller._positionAtBottomDuringLayout &&
         hasPixels &&
-        maxScrollExtent > minScrollExtent &&
-        (pixels - maxScrollExtent).abs() >= 0.5) {
-      correctPixels(maxScrollExtent);
-      super.applyContentDimensions(minScrollExtent, maxScrollExtent);
-      return false;
+        maxScrollExtent > minScrollExtent) {
+      // Only snap to the bottom when we were already sitting there: on the
+      // very first layout (no dimensions yet), or when the current offset is
+      // still at the previous bottom. This lets late content growth — a
+      // message image finishing its load and expanding from the 60px spinner
+      // to its real height — re-pin us to the newest message, while leaving a
+      // user who has deliberately scrolled up where they are.
+      final bool wasAtBottom = !hasContentDimensions ||
+          pixels >= this.maxScrollExtent - _bottomPinSlack;
+      if (wasAtBottom && (pixels - maxScrollExtent).abs() >= 0.5) {
+        correctPixels(maxScrollExtent);
+        super.applyContentDimensions(minScrollExtent, maxScrollExtent);
+        return false;
+      }
     }
     return super.applyContentDimensions(minScrollExtent, maxScrollExtent);
   }
@@ -237,29 +250,63 @@ class _ChattingViewState extends State<ChattingView> {
       return; // clears _restoringScroll after the jump completes
     }
     // Hold the bottom-pin until layout stops growing instead of releasing it
-    // after a single frame. The first open otherwise lands slightly above the
-    // bottom because late layout passes — the centered sliver settling and
-    // message images finishing loading — grow the content after the pin was
-    // already released. Re-assert the bottom each frame until maxScrollExtent
-    // is stable for a few frames (capped so a very slow image can't block).
-    double lastMax = double.nan;
-    var stableFrames = 0;
-    for (var i = 0; i < 30; i++) {
-      await WidgetsBinding.instance.endOfFrame;
-      if (!mounted || requestId != _scrollPositioningRequestId) {
-        _restoringScroll = false;
-        return;
+    // after a single frame — the first open otherwise lands above the bottom
+    // because late layout passes grow the content after the pin was released.
+    // Two regimes, because message images are the hard case:
+    final messages = _chatNotifier.getMessagesForChat(chatId);
+    final bool hasPendingImages =
+        messages.any((m) => m.imageContentUri != null);
+
+    if (hasPendingImages) {
+      // A message image renders as a fixed 60px spinner and only grows to its
+      // real height once the bytes arrive — possibly hundreds of ms later,
+      // over the network — so a "layout is stable" check can't see that the
+      // content is still going to grow. Instead keep the pin armed for a
+      // bounded wall-clock window: firmly sit at the bottom for the first few
+      // frames (the user can't have scrolled yet), then let
+      // applyContentDimensions re-snap us whenever an image finishes and grows
+      // the content (it only re-pins while we're still at the bottom, so it
+      // won't fight a user who has started scrolling up to read history).
+      final deadline =
+          DateTime.now().add(const Duration(milliseconds: 2500));
+      var frame = 0;
+      while (DateTime.now().isBefore(deadline)) {
+        await WidgetsBinding.instance.endOfFrame;
+        if (!mounted || requestId != _scrollPositioningRequestId) {
+          _restoringScroll = false;
+          return;
+        }
+        if (!scrollController.hasClients) continue;
+        if (frame < 6) {
+          final maxExtent = scrollController.position.maxScrollExtent;
+          if ((scrollController.offset - maxExtent).abs() > 0.5) {
+            scrollController.jumpTo(maxExtent);
+          }
+        }
+        frame++;
       }
-      if (!scrollController.hasClients) continue;
-      final maxExtent = scrollController.position.maxScrollExtent;
-      if ((scrollController.offset - maxExtent).abs() > 0.5) {
-        scrollController.jumpTo(maxExtent);
-      }
-      if (maxExtent == lastMax) {
-        if (++stableFrames >= 3) break;
-      } else {
-        stableFrames = 0;
-        lastMax = maxExtent;
+    } else {
+      // No images: the content reaches its final height within a few frames,
+      // so re-assert the bottom each frame until maxScrollExtent is stable.
+      double lastMax = double.nan;
+      var stableFrames = 0;
+      for (var i = 0; i < 30; i++) {
+        await WidgetsBinding.instance.endOfFrame;
+        if (!mounted || requestId != _scrollPositioningRequestId) {
+          _restoringScroll = false;
+          return;
+        }
+        if (!scrollController.hasClients) continue;
+        final maxExtent = scrollController.position.maxScrollExtent;
+        if ((scrollController.offset - maxExtent).abs() > 0.5) {
+          scrollController.jumpTo(maxExtent);
+        }
+        if (maxExtent == lastMax) {
+          if (++stableFrames >= 3) break;
+        } else {
+          stableFrames = 0;
+          lastMax = maxExtent;
+        }
       }
     }
     scrollController.endInitialBottomPositioning();
@@ -1652,11 +1699,12 @@ class _ChattingViewState extends State<ChattingView> {
     return Container(
       width: 48,
       height: 48,
-      decoration: const BoxDecoration(
-        shape: BoxShape.circle,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
         color: OnepieceColors.liteFancyBlue,
       ),
-      child: ClipOval(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(14),
         child: GridView.builder(
           shrinkWrap: true,
           padding: const EdgeInsets.all(2),
