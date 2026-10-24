@@ -46,6 +46,17 @@
 
 ---
 
+## BUG-004 — 编辑群组名称/类型会清空其父群组链接与头像 🟡(重构中修复)
+- **类型**:既有前端缺陷(抽群组详情编辑区块时发现),与 BUG-002/003 同类但更严重。
+- **文件**:`lib/views/group/group_detail_view.dart`(桌面端 `_getBasicInfo` 内联提交)。
+- **现象 / 根因**:
+  - 后端 `GroupService.update(Group)` → `GroupConverter.toGroupEntity(group)`(只 ignore `profileImage`)→ `groupDao.update(entity)`,`GroupDao.update` 继承自 BaseDao,是**全列更新**,且**不做 fetch-merge**。
+  - 前端编辑基础信息时只发 `Group(id, groupCategory, name)`,于是 `fatherGroupId`、`imageUri`、`creationRecordId`、`modificationRecordId` 在请求里为 null → 全列更新把它们**写成 null**。
+  - 后果:桌面端改一次群名/类型,该群的**父群组链接(fatherGroupId)丢失**、头像被清、创建/修改记录被清(若这些列为 NOT NULL,则编辑直接报错)。头像虽有独立 addImage 兜底,但 fatherGroupId/记录无兜底。
+- **修复**:抽 `GroupBasicInfoSection` 时,提交发送**完整** `Group`(仅 name/category 取自本区块,`fatherGroupId`/`imageUri`/`creationRecordId`/`modificationRecordId` 取自已加载的 groupFullView)。冒烟重点:桌面端改群名/类型后,父子群组关系与头像应保持不变。
+
+---
+
 ## 重构范围说明 · `refactor/views` 分支(一次性批量重构)
 
 > 本段记录继 `character_detail` / `character_view` 之后、对其余巨型 view 的一次性重构范围。

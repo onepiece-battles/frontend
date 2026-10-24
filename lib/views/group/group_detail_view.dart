@@ -1,29 +1,22 @@
-import 'dart:typed_data';
 import 'dart:ui';
-import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:one_piece_battles_flutter/components/image_lazy_loader.dart';
-import 'package:one_piece_battles_flutter/components/string_text_form_field.dart';
 import 'package:one_piece_battles_flutter/popup/join_group.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:one_piece_battles_flutter/utils/image_helper.dart';
 import 'package:one_piece_battles_flutter/utils/nested_scroll_helper.dart';
 import 'package:openapi/api.dart';
-import 'package:one_piece_battles_flutter/constants/onepiece_tag.dart';
 import '../../l10n/app_localizations.dart';
 import '../../constants/button_style.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
 import '../../utils/responsive_breakpoints.dart';
-import '../../popup/onepiece_alert.dart';
-import '../../utils/base64_helper.dart';
-import '../../utils/onepiece_image_picker.dart';
 import '../../utils/permission_check.dart';
 import 'group_detail_controller.dart';
+import 'widgets/group_basic_info_section.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -38,7 +31,6 @@ class GroupDetailView extends StatefulWidget {
 
 class _GroupDetailViewState extends State<GroupDetailView> {
   late GroupNode root;
-  TextEditingController groupNameController = TextEditingController();
   ScrollController scrollController = ScrollController();
   final ScrollController _pageScrollController = ScrollController();
   late Future<GroupFullView?> _groupFuture;
@@ -48,9 +40,6 @@ class _GroupDetailViewState extends State<GroupDetailView> {
   List<Group> subGroups = [];
   final Map<String, CharacterFullView> _characterCombatCache = {};
   final Set<String> _loadingCharacterCombatIds = {};
-  late GroupCategory selectedGroupCategory;
-  String? selectedImage;
-  bool _basicInfoEditable = false;
   bool _editButtonVisible = false;
   final GroupDetailController _controller = GroupDetailController();
 
@@ -71,7 +60,6 @@ class _GroupDetailViewState extends State<GroupDetailView> {
 
   @override
   void dispose() {
-    groupNameController.dispose();
     scrollController.dispose();
     _pageScrollController.dispose();
     _controller.dispose();
@@ -89,8 +77,6 @@ class _GroupDetailViewState extends State<GroupDetailView> {
     groupFullView = group;
     characters = group.characters;
     subGroups = group.subGroups;
-    selectedGroupCategory = group.groupCategory!;
-    groupNameController.text = I18nHelper.getDisplayNameFromI18n(group.name!);
     root = GroupNode(
         groupFullView.subGroups.map((e) => GroupNode([], false, e)).toList(),
         true,
@@ -118,60 +104,16 @@ class _GroupDetailViewState extends State<GroupDetailView> {
   }
 
   Widget _buildMobileLayout(BuildContext context) {
-    final catMap = _getCategoryMap(context);
     return SingleChildScrollView(
       controller: _pageScrollController,
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 80),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        // Header: image + name + category
-        Center(
-            child: Column(children: [
-          ImageLazyLoader(
-              uriProvider: () => groupFullView.imageUri ?? '',
-              width: 120,
-              borderWidth: 2,
-              borderRadios: 15,
-              fullImage: true),
-          const SizedBox(height: 8),
-          Text(I18nHelper.getDisplayNameFromI18n(groupFullView.name),
-              style: OnepieceFonts.headerStyle.copyWith(fontSize: 20)),
-          const SizedBox(height: 4),
-          OnepieceTag.getGroupTag(groupFullView.groupCategory!,
-              catMap[groupFullView.groupCategory]!),
-          if (_editButtonVisible) ...[
-            const SizedBox(height: 8),
-            TextButton.icon(
-              onPressed: () =>
-                  setState(() => _basicInfoEditable = !_basicInfoEditable),
-              icon: Icon(_basicInfoEditable ? Icons.check : Icons.edit,
-                  size: 14, color: OnepieceColors.fancyBlue),
-              label: Text(
-                  _basicInfoEditable
-                      ? AppLocalizations.of(context)!.submitForm
-                      : AppLocalizations.of(context)!.editHint,
-                  style: const TextStyle(
-                      fontSize: 11, color: OnepieceColors.fancyBlue)),
-            ),
-          ],
-        ])),
-        const SizedBox(height: 12),
-        // Basic info form (if editable)
-        if (_basicInfoEditable)
-          Card(
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(AppLocalizations.of(context)!.basicInfo,
-                          style:
-                              OnepieceFonts.headerStyle.copyWith(fontSize: 16)),
-                      const SizedBox(height: 10),
-                      ..._buildMobileGroupForm(context),
-                    ])),
-          ),
+        GroupBasicInfoSection(
+          group: groupFullView,
+          editButtonVisible: _editButtonVisible,
+          controller: _controller,
+          isNarrow: true,
+        ),
         const SizedBox(height: 12),
         // Members
         Padding(
@@ -181,42 +123,6 @@ class _GroupDetailViewState extends State<GroupDetailView> {
       ]),
     );
   }
-
-  List<Widget> _buildMobileGroupForm(BuildContext context) {
-    // Simplified form — reuse existing controller methods
-    return [
-      SizedBox(
-          height: 35,
-          child: TextFormField(
-            controller: groupNameController,
-            decoration: InputDecoration(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 10),
-                floatingLabelBehavior: FloatingLabelBehavior.never,
-                disabledBorder: const OutlineInputBorder(
-                    borderSide:
-                        BorderSide(color: OnepieceColors.menuHoverColor)),
-                enabledBorder: const OutlineInputBorder(
-                    borderSide:
-                        BorderSide(color: OnepieceColors.menuHoverColor)),
-                focusedBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
-                prefixIcon: const Icon(Icons.edit, size: 18),
-                labelText: AppLocalizations.of(context)!.name),
-          )),
-    ];
-  }
-
-  Map<GroupCategory, String> _getCategoryMap(BuildContext context) =>
-      <GroupCategory, String>{
-        GroupCategory.pirate: AppLocalizations.of(context)!.pirate,
-        GroupCategory.marine: AppLocalizations.of(context)!.marine,
-        GroupCategory.government: AppLocalizations.of(context)!.worldGovernment,
-        GroupCategory.underWorld: AppLocalizations.of(context)!.underworld,
-        GroupCategory.group: AppLocalizations.of(context)!.group,
-        GroupCategory.other: AppLocalizations.of(context)!.otherType,
-        GroupCategory.revolutionArmy:
-            AppLocalizations.of(context)!.revolutionaryArmy,
-      };
 
   @override
   Widget build(BuildContext context) {
@@ -251,7 +157,11 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                             children: [
                               Padding(
                                 padding: const EdgeInsets.only(left: 15.0),
-                                child: _getBasicInfo(context),
+                                child: GroupBasicInfoSection(
+                                    group: groupFullView,
+                                    editButtonVisible: _editButtonVisible,
+                                    controller: _controller,
+                                    isNarrow: false),
                               ),
                               Padding(
                                 padding:
@@ -349,256 +259,6 @@ class _GroupDetailViewState extends State<GroupDetailView> {
           );
         }
       },
-    );
-  }
-
-  Widget _getBasicInfo(BuildContext context) {
-    return StatefulBuilder(builder: (context, basicInfoState) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Text(
-                AppLocalizations.of(context)!.basicInfo,
-                style: OnepieceFonts.headerStyle,
-              ),
-              const SizedBox(
-                width: 15,
-              ),
-              if (_editButtonVisible)
-                Tooltip(
-                  message: _basicInfoEditable
-                      ? AppLocalizations.of(context)!.submitForm
-                      : AppLocalizations.of(context)!.editHint,
-                  child: InkWell(
-                    hoverColor: Colors.transparent,
-                    splashColor: Colors.transparent,
-                    onTap: () {
-                      basicInfoState(() {
-                        _basicInfoEditable = !_basicInfoEditable;
-                        if (!_basicInfoEditable) {
-                          if (groupFullView.groupCategory !=
-                                  selectedGroupCategory ||
-                              I18nHelper.getDisplayNameFromI18n(
-                                      groupFullView.name) !=
-                                  groupNameController.text) {
-                            Group group = Group(
-                                id: groupFullView.id,
-                                groupCategory: selectedGroupCategory,
-                                name: I18nHelper.getI18nFromDisplayName(
-                                    groupFullView.name!,
-                                    groupNameController.text));
-                            final router = GoRouter.of(context);
-                            final alertHint =
-                                AppLocalizations.of(context)!.hint;
-                            final showAlert =
-                                OnepieceAlert.createAlertShower(context);
-                            _controller.updateGroups(group).then((value) {
-                              if (!mounted) return;
-                              showAlert(
-                                  alertHint,
-                                  I18nHelper.getDisplayNameFromI18n(
-                                      value!.result));
-                              if (value.success) {
-                                router.goNamed('groupDetails',
-                                    extra: groupFullView.id,
-                                    pathParameters: {
-                                      'name': I18nHelper.getDisplayNameFromI18n(
-                                          group.name)
-                                    });
-                              }
-                            });
-                          }
-                          if (selectedImage != null) {
-                            final router2 = GoRouter.of(context);
-                            final alertHint2 =
-                                AppLocalizations.of(context)!.hint;
-                            final showAlert2 =
-                                OnepieceAlert.createAlertShower(context);
-                            _controller
-                                .addImage(UploadImageRequest(
-                                    type: ResourceType.GROUP,
-                                    resourceId: groupFullView.id,
-                                    image: selectedImage!))
-                                .then((value) {
-                              if (!mounted) return;
-                              showAlert2(
-                                  alertHint2,
-                                  I18nHelper.getDisplayNameFromI18n(
-                                      value!.result));
-                              router2.goNamed('groupDetails',
-                                  extra: groupFullView.id,
-                                  pathParameters: {
-                                    'name': I18nHelper.getDisplayNameFromI18n(
-                                        groupFullView.name)
-                                  });
-                            });
-                          }
-                        }
-                      });
-                    },
-                    child: SizedBox(
-                        width: 25,
-                        height: 25,
-                        child: !_basicInfoEditable
-                            ? ImageHelper.getSvgIconWithColor(
-                                'images/svgs/edit.svg',
-                                150,
-                                150,
-                                OnepieceColors.fancyBlue)
-                            : ImageHelper.getSvgIconWithColor(
-                                'images/svgs/check.svg',
-                                150,
-                                150,
-                                OnepieceColors.fancyBlue)),
-                  ),
-                ),
-            ],
-          ),
-          InkWell(
-            hoverColor: Colors.transparent,
-            splashColor: Colors.transparent,
-            onTap: _basicInfoEditable
-                ? () async {
-                    final alertTitle = AppLocalizations.of(context)!.alert;
-                    final alertMsg =
-                        AppLocalizations.of(context)!.imageSizeExceedsLimit;
-                    final showAlert = OnepieceAlert.createAlertShower(context);
-                    basicInfoState(() async {
-                      XFile? pickedImage =
-                          await OnepieceImagePicker.pickWebImage();
-                      Uint8List imageInByte = await pickedImage!.readAsBytes();
-                      if (!ImageHelper.isValidImageSize(
-                          500 * 1024, imageInByte)) {
-                        showAlert(alertTitle, alertMsg);
-                        return;
-                      }
-                      basicInfoState(() {
-                        selectedImage = Base64Helper.encode(imageInByte);
-                      });
-                    });
-                  }
-                : null,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 5),
-              child: selectedImage == null
-                  ? ImageLazyLoader(
-                      uriProvider: () => groupFullView.imageUri!,
-                      width: 200,
-                      borderWidth: 3,
-                      borderRadios: 20,
-                      fullImage: true)
-                  : ImageHelper.getRoundImageFrame(
-                      200,
-                      200,
-                      3,
-                      OnepieceColors.liteFancyBlue,
-                      20,
-                      Base64Helper.decode(selectedImage!)),
-            ),
-          ),
-          StringTextFormField(
-              context,
-              _basicInfoEditable,
-              groupNameController,
-              AppLocalizations.of(context)!.name,
-              30,
-              ImageHelper.getTextFormFieldIcon(
-                  'images/character_digits_icon/name.svg', true, null),
-              true),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              ImageHelper.getTextFormFieldIcon(
-                  'images/svgs/type.svg', true, 22),
-              const SizedBox(
-                width: 10,
-              ),
-              SizedBox(
-                width: 300,
-                child: Text(
-                  AppLocalizations.of(context)!.category,
-                  style: OnepieceFonts.deepBlackHintFont,
-                ),
-              ),
-            ],
-          ),
-          _getDropDownList(context, basicInfoState),
-        ],
-      );
-    });
-  }
-
-  Widget _getDropDownList(BuildContext context, Function basicInfoState) {
-    Map<GroupCategory, String> groupCategoryToDisplayName = {
-      GroupCategory.marine: AppLocalizations.of(context)!.marine,
-      GroupCategory.pirate: AppLocalizations.of(context)!.pirate,
-      GroupCategory.underWorld: AppLocalizations.of(context)!.underworld,
-      GroupCategory.government: AppLocalizations.of(context)!.worldGovernment,
-      GroupCategory.other: AppLocalizations.of(context)!.otherType,
-      GroupCategory.group: AppLocalizations.of(context)!.group,
-      GroupCategory.revolutionArmy:
-          AppLocalizations.of(context)!.revolutionaryArmy,
-    };
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(0, 5, 0, 10),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton2(
-          isExpanded: true,
-          value: selectedGroupCategory,
-          hint: Text(
-            AppLocalizations.of(context)!.groupCategory,
-            style: OnepieceFonts.dropDownItemStyle,
-          ),
-          onChanged: !_basicInfoEditable ||
-                  GroupCategory.group == groupFullView.groupCategory
-              ? null
-              : (value) {
-                  basicInfoState(() {
-                    selectedGroupCategory = value! as GroupCategory;
-                  });
-                },
-          buttonStyleData: ButtonStyleData(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              height: 35,
-              width: 300,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(3),
-                color: OnepieceColors.liteFancyGreen,
-              )),
-          menuItemStyleData: const MenuItemStyleData(
-            height: 35,
-          ),
-          items: selectedGroupCategory != GroupCategory.group
-              ? GroupCategory.values
-                  .where((element) => element != GroupCategory.group)
-                  .map((GroupCategory groupCategory) {
-                  return DropdownMenuItem<GroupCategory>(
-                    value: groupCategory,
-                    child: Text(
-                      groupCategoryToDisplayName[groupCategory]!,
-                      style: const TextStyle(
-                        fontSize: 14,
-                      ),
-                    ),
-                  );
-                }).toList()
-              : GroupCategory.values
-                  .where((element) => element == GroupCategory.group)
-                  .map((GroupCategory groupCategory) {
-                  return DropdownMenuItem<GroupCategory>(
-                    value: groupCategory,
-                    child: Text(
-                      groupCategoryToDisplayName[groupCategory]!,
-                      style: const TextStyle(
-                        fontSize: 14,
-                      ),
-                    ),
-                  );
-                }).toList(),
-        ),
-      ),
     );
   }
 
