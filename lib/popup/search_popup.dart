@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/components/image_lazy_loader.dart';
-import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_tag.dart';
 import 'package:one_piece_battles_flutter/repository/group_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
@@ -108,13 +107,14 @@ class _SearchPopupState extends State<SearchPopup> {
         ),
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: OnepieceColors.liteFancyBlue.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(10),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: OnepieceColors.separator),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.18),
-                blurRadius: 22,
-                offset: const Offset(0, 12),
+                color: Colors.black.withValues(alpha: 0.12),
+                blurRadius: 30,
+                offset: const Offset(0, 14),
               ),
             ],
           ),
@@ -134,7 +134,7 @@ class _SearchPopupState extends State<SearchPopup> {
                       height: 24,
                       child: CircularProgressIndicator(
                         strokeWidth: 2.4,
-                        color: Colors.white,
+                        color: OnepieceColors.fancyBlue,
                       ),
                     ),
                   ),
@@ -171,9 +171,17 @@ class _SearchPopupState extends State<SearchPopup> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(title, style: OnepieceFonts.selectedTableHeaderStyle),
+          Text(
+            title.toUpperCase(),
+            style: const TextStyle(
+              color: OnepieceColors.secondaryLabel,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.6,
+            ),
+          ),
           const SizedBox(height: 6),
-          Divider(height: 1, color: Colors.white.withValues(alpha: 0.35)),
+          const Divider(height: 1, color: OnepieceColors.separator),
           const SizedBox(height: 6),
           child,
         ],
@@ -184,49 +192,41 @@ class _SearchPopupState extends State<SearchPopup> {
   Widget _getSearchBar(BuildContext context) {
     return TextFormField(
       autofocus: true,
-      cursorColor: Colors.white,
+      cursorColor: OnepieceColors.fancyBlue,
       controller: searchBarController,
+      style: const TextStyle(color: OnepieceColors.primaryLabel, fontSize: 15),
       decoration: InputDecoration(
         floatingLabelBehavior: FloatingLabelBehavior.never,
-        labelStyle: OnepieceFonts.whiteHintFont,
+        filled: true,
+        fillColor: OnepieceColors.surface,
+        labelStyle:
+            const TextStyle(color: OnepieceColors.secondaryLabel, fontSize: 15),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(7.0),
-          borderSide: BorderSide(
-            color: Colors.white.withValues(alpha: 0.82),
-            width: 1.2,
-          ),
+          borderRadius: BorderRadius.circular(12.0),
+          borderSide: BorderSide.none,
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(7.0),
-          borderSide: const BorderSide(
-            color: Colors.white,
-            width: 1.8,
-          ),
+          borderRadius: BorderRadius.circular(12.0),
+          borderSide: const BorderSide(color: Colors.red, width: 1.5),
         ),
         focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(7.0),
-          borderSide: const BorderSide(
-            color: Colors.white,
-            width: 2.2,
-          ),
+          borderRadius: BorderRadius.circular(12.0),
+          borderSide: const BorderSide(color: Colors.red, width: 1.5),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(7.0),
+          borderRadius: BorderRadius.circular(12.0),
           borderSide: const BorderSide(
-            color: Colors.white,
-            width: 2.2,
+            color: OnepieceColors.fancyBlue,
+            width: 1.5,
           ),
         ),
         disabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(7.0),
-          borderSide: BorderSide(
-            color: Colors.white.withValues(alpha: 0.6),
-            width: 1.2,
-          ),
+          borderRadius: BorderRadius.circular(12.0),
+          borderSide: BorderSide.none,
         ),
         prefixIcon: const Icon(
           Icons.search,
-          color: Colors.white,
+          color: OnepieceColors.secondaryLabel,
         ),
         labelText: AppLocalizations.of(context)!.searchResourceDetail,
       ),
@@ -264,7 +264,7 @@ class _SearchPopupState extends State<SearchPopup> {
                   minLeadingWidth: 10,
                   contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   onTap: () {
                     Navigator.pop(context);
@@ -275,8 +275,7 @@ class _SearchPopupState extends State<SearchPopup> {
                               I18nHelper.getDisplayNameFromI18n(character.name)
                         });
                   },
-                  hoverColor:
-                      OnepieceColors.liteFancyGreen.withValues(alpha: 0.34),
+                  hoverColor: OnepieceColors.surface,
                   title: Row(
                     children: [
                       Expanded(
@@ -295,7 +294,7 @@ class _SearchPopupState extends State<SearchPopup> {
                               child: Text(
                                 I18nHelper.getDisplayNameFromI18n(
                                     character.name),
-                                style: OnepieceFonts.smallContentStyleWhite,
+                                style: const TextStyle(color: OnepieceColors.primaryLabel, fontSize: 15),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -354,7 +353,7 @@ class _SearchPopupState extends State<SearchPopup> {
                   minLeadingWidth: 10,
                   contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   onTap: () {
                     Navigator.pop(context);
@@ -364,14 +363,13 @@ class _SearchPopupState extends State<SearchPopup> {
                           'name': I18nHelper.getDisplayNameFromI18n(fruit.name!)
                         });
                   },
-                  hoverColor:
-                      OnepieceColors.liteFancyGreen.withValues(alpha: 0.34),
+                  hoverColor: OnepieceColors.surface,
                   title: Row(
                     children: [
                       Expanded(
                         child: Text(
                           I18nHelper.getDisplayNameFromI18n(fruit.name!),
-                          style: OnepieceFonts.smallContentStyleWhite,
+                          style: const TextStyle(color: OnepieceColors.primaryLabel, fontSize: 15),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -428,7 +426,7 @@ class _SearchPopupState extends State<SearchPopup> {
                     minLeadingWidth: 10,
                     contentPadding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                     onTap: () {
                       Navigator.pop(context);
@@ -439,8 +437,7 @@ class _SearchPopupState extends State<SearchPopup> {
                                 I18nHelper.getDisplayNameFromI18n(group.name)
                           });
                     },
-                    hoverColor:
-                        OnepieceColors.liteFancyGreen.withValues(alpha: 0.34),
+                    hoverColor: OnepieceColors.surface,
                     title: Row(
                       children: [
                         Expanded(
@@ -459,7 +456,7 @@ class _SearchPopupState extends State<SearchPopup> {
                               Expanded(
                                 child: Text(
                                   I18nHelper.getDisplayNameFromI18n(group.name),
-                                  style: OnepieceFonts.smallContentStyleWhite,
+                                  style: const TextStyle(color: OnepieceColors.primaryLabel, fontSize: 15),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
