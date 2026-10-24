@@ -456,8 +456,8 @@ class _CharacterBasicInfoSectionState
               height: 30,
               width: 60,
               decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(3),
-                  color: OnepieceColors.liteFancyGreen)),
+                  borderRadius: BorderRadius.circular(10),
+                  color: OnepieceColors.surface)),
           menuItemStyleData: const MenuItemStyleData(height: 30),
           items: List.generate(count, (i) => (i + 1).toString())
               .map((m) => DropdownMenuItem<String>(
@@ -497,8 +497,8 @@ class _CharacterBasicInfoSectionState
               padding: const EdgeInsets.symmetric(horizontal: 12),
               height: 35,
               decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(3),
-                  color: OnepieceColors.liteFancyGreen)),
+                  borderRadius: BorderRadius.circular(10),
+                  color: OnepieceColors.surface)),
           menuItemStyleData: const MenuItemStyleData(height: 30),
           items: items
               .map((i) => DropdownMenuItem<T>(
@@ -740,8 +740,7 @@ class _CharacterBasicInfoSectionState
                                             decoration: BoxDecoration(
                                                 borderRadius:
                                                     BorderRadius.circular(3),
-                                                color: OnepieceColors
-                                                    .liteFancyGreen),
+                                                color: OnepieceColors.surface),
                                             height: 30,
                                             width: 60,
                                           ),
@@ -815,8 +814,7 @@ class _CharacterBasicInfoSectionState
                                             decoration: BoxDecoration(
                                                 borderRadius:
                                                     BorderRadius.circular(3),
-                                                color: OnepieceColors
-                                                    .liteFancyGreen),
+                                                color: OnepieceColors.surface),
                                             height: 30,
                                             width: 60,
                                           ),
@@ -972,8 +970,8 @@ class _CharacterBasicInfoSectionState
                 ? widget.dividerWidth - widget.sideWidth - 20
                 : 300,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(3),
-              color: OnepieceColors.liteFancyGreen,
+              borderRadius: BorderRadius.circular(10),
+              color: OnepieceColors.surface,
             ),
           ),
           menuItemStyleData: const MenuItemStyleData(
@@ -1035,8 +1033,8 @@ class _CharacterBasicInfoSectionState
                 ? widget.dividerWidth - widget.sideWidth - 20
                 : 300,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(3),
-              color: OnepieceColors.liteFancyGreen,
+              borderRadius: BorderRadius.circular(10),
+              color: OnepieceColors.surface,
             ),
           ),
           menuItemStyleData: const MenuItemStyleData(

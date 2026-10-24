@@ -209,8 +209,8 @@ class _CharacterCombatInfoSectionState
               padding: const EdgeInsets.symmetric(horizontal: 12),
               height: 35,
               decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(3),
-                  color: OnepieceColors.liteFancyGreen)),
+                  borderRadius: BorderRadius.circular(10),
+                  color: OnepieceColors.surface)),
           menuItemStyleData: const MenuItemStyleData(height: 30),
           items: items
               .map((i) => DropdownMenuItem<T>(
@@ -578,8 +578,8 @@ class _CharacterCombatInfoSectionState
                         height: 35,
                         width: 200,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(3),
-                          color: OnepieceColors.liteFancyGreen,
+                          borderRadius: BorderRadius.circular(10),
+                          color: OnepieceColors.surface,
                         ),
                       ),
                       menuItemStyleData: const MenuItemStyleData(

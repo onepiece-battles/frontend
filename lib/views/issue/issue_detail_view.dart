@@ -325,7 +325,7 @@ class _IssueDetailViewState extends State<IssueDetailView> {
                           border: Border.all(
                             color: _issueStatusEditable
                                 ? OnepieceColors.fancyGreen
-                                : OnepieceColors.menuHoverColor,
+                                : OnepieceColors.separator,
                             width: _issueStatusEditable ? 1.8 : 1,
                           ),
                         ),

@@ -515,10 +515,10 @@ class _NicknameSectionState extends State<_NicknameSection> {
                           floatingLabelBehavior: FloatingLabelBehavior.never,
                           disabledBorder: OutlineInputBorder(
                               borderSide: BorderSide(
-                                  color: OnepieceColors.menuHoverColor)),
+                                  color: OnepieceColors.separator)),
                           enabledBorder: OutlineInputBorder(
                               borderSide: BorderSide(
-                                  color: OnepieceColors.menuHoverColor)),
+                                  color: OnepieceColors.separator)),
                           focusedBorder: OutlineInputBorder(
                               borderSide: BorderSide(
                                   color: OnepieceColors.fancyGreen,

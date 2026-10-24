@@ -24,10 +24,10 @@ Widget mobileField(BuildContext context, bool editable,
                 floatingLabelBehavior: FloatingLabelBehavior.never,
                 disabledBorder: const OutlineInputBorder(
                     borderSide:
-                        BorderSide(color: OnepieceColors.menuHoverColor)),
+                        BorderSide(color: OnepieceColors.separator)),
                 enabledBorder: const OutlineInputBorder(
                     borderSide:
-                        BorderSide(color: OnepieceColors.menuHoverColor)),
+                        BorderSide(color: OnepieceColors.separator)),
                 focusedBorder: const OutlineInputBorder(
                     borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
                 prefixIcon: icon != null
