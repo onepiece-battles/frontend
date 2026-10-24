@@ -123,14 +123,12 @@ class _AddGroupCharacterDialogState extends State<AddGroupCharacterDialog> {
       width: dialogWidth,
       height: dialogHeight,
       child: Card(
-        elevation: 4,
+        elevation: 2,
         color: Colors.white,
-        shadowColor: Colors.black.withValues(alpha: 0.12),
+        shadowColor: Colors.black.withValues(alpha: 0.08),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: BorderSide(
-            color: OnepieceColors.menuHoverColor.withValues(alpha: 0.45),
-          ),
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: OnepieceColors.separator),
         ),
         child: Column(
           children: [
@@ -157,9 +155,12 @@ class _AddGroupCharacterDialogState extends State<AddGroupCharacterDialog> {
   Widget _buildHeader(BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 14, 8, 12),
-      decoration: BoxDecoration(
-        color: OnepieceColors.liteFancyBlue.withValues(alpha: 0.45),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        border: Border(
+          bottom: BorderSide(color: OnepieceColors.separator, width: 0.5),
+        ),
       ),
       child: Row(
         children: [
@@ -167,11 +168,8 @@ class _AddGroupCharacterDialogState extends State<AddGroupCharacterDialog> {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: OnepieceColors.surface,
               borderRadius: BorderRadius.circular(9),
-              border: Border.all(
-                color: OnepieceColors.fancyBlue.withValues(alpha: 0.18),
-              ),
             ),
             child: const Icon(Icons.person_add_alt_1_outlined,
                 color: OnepieceColors.fancyBlue, size: 20),
@@ -182,13 +180,13 @@ class _AddGroupCharacterDialogState extends State<AddGroupCharacterDialog> {
               AppLocalizations.of(context)!.addCharactersToGroup,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: OnepieceFonts.smallHeaderStyle.copyWith(fontSize: 18),
+              style: OnepieceFonts.smallHeaderStyle.copyWith(fontSize: 18, color: OnepieceColors.primaryLabel),
             ),
           ),
           IconButton(
             visualDensity: VisualDensity.compact,
             onPressed: () => Navigator.of(context).pop(),
-            icon: const Icon(Icons.close, size: 20),
+            icon: const Icon(Icons.close, size: 20, color: OnepieceColors.secondaryLabel),
           ),
         ],
       ),
@@ -198,20 +196,24 @@ class _AddGroupCharacterDialogState extends State<AddGroupCharacterDialog> {
   InputDecoration _searchDecoration(BuildContext context) {
     return InputDecoration(
       isDense: true,
+      filled: true,
+      fillColor: OnepieceColors.surface,
       contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       floatingLabelBehavior: FloatingLabelBehavior.never,
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: OnepieceColors.menuHoverColor),
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide.none,
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(10),
         borderSide:
-            const BorderSide(color: OnepieceColors.fancyGreen, width: 2),
+            const BorderSide(color: OnepieceColors.fancyBlue, width: 1.5),
       ),
-      prefixIcon: const Icon(Icons.search, size: 19),
+      prefixIcon: const Icon(Icons.search,
+          size: 19, color: OnepieceColors.secondaryLabel),
       labelText: AppLocalizations.of(context)!.search,
-      labelStyle: OnepieceFonts.smallContentStyle,
+      labelStyle:
+          const TextStyle(color: OnepieceColors.secondaryLabel, fontSize: 14),
     );
   }
 
@@ -220,7 +222,7 @@ class _AddGroupCharacterDialogState extends State<AddGroupCharacterDialog> {
       return const Center(
         child: CircularProgressIndicator(
           valueColor: AlwaysStoppedAnimation<Color>(
-            OnepieceColors.liteFancyBlue,
+            OnepieceColors.fancyBlue,
           ),
         ),
       );
@@ -309,19 +311,19 @@ class _CharacterSelectionCard extends StatelessWidget {
       elevation: selected ? 2 : 0,
       margin: const EdgeInsets.only(bottom: 8),
       color: selected
-          ? OnepieceColors.liteFancyBlue.withValues(alpha: 0.7)
+          ? OnepieceColors.fancyBlue.withValues(alpha: 0.10)
           : Colors.white,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(10),
         side: BorderSide(
           color: selected
-              ? OnepieceColors.fancyBlue.withValues(alpha: 0.35)
-              : OnepieceColors.menuHoverColor.withValues(alpha: 0.5),
+              ? OnepieceColors.fancyBlue
+              : OnepieceColors.separator,
         ),
       ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(8),
-        hoverColor: OnepieceColors.liteFancyBlue,
+        borderRadius: BorderRadius.circular(10),
+        hoverColor: OnepieceColors.surface,
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),

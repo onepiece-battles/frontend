@@ -48,14 +48,12 @@ class _AddFriendViewState extends State<AddFriendView> {
         width: dialogWidth,
         height: dialogHeight.toDouble(),
         child: Card(
-          elevation: 4,
+          elevation: 2,
           color: Colors.white,
-          shadowColor: Colors.black.withValues(alpha: 0.12),
+          shadowColor: Colors.black.withValues(alpha: 0.08),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: BorderSide(
-              color: OnepieceColors.menuHoverColor.withValues(alpha: 0.45),
-            ),
+            borderRadius: BorderRadius.circular(16),
+            side: const BorderSide(color: OnepieceColors.separator),
           ),
           child: Column(
             children: [
@@ -166,9 +164,12 @@ class _AddFriendViewState extends State<AddFriendView> {
   Widget _buildHeader(BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 14, 8, 12),
-      decoration: BoxDecoration(
-        color: OnepieceColors.liteFancyBlue.withValues(alpha: 0.45),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        border: Border(
+          bottom: BorderSide(color: OnepieceColors.separator, width: 0.5),
+        ),
       ),
       child: Row(
         children: [
@@ -176,11 +177,8 @@ class _AddFriendViewState extends State<AddFriendView> {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: OnepieceColors.surface,
               borderRadius: BorderRadius.circular(9),
-              border: Border.all(
-                color: OnepieceColors.fancyBlue.withValues(alpha: 0.18),
-              ),
             ),
             child: const Icon(Icons.group_add_outlined,
                 color: OnepieceColors.fancyBlue, size: 20),
@@ -191,13 +189,13 @@ class _AddFriendViewState extends State<AddFriendView> {
               AppLocalizations.of(context)!.addFriend,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: OnepieceFonts.smallHeaderStyle.copyWith(fontSize: 18),
+              style: OnepieceFonts.smallHeaderStyle.copyWith(fontSize: 18, color: OnepieceColors.primaryLabel),
             ),
           ),
           IconButton(
             visualDensity: VisualDensity.compact,
             onPressed: () => Navigator.of(context).pop(),
-            icon: const Icon(Icons.close, size: 20),
+            icon: const Icon(Icons.close, size: 20, color: OnepieceColors.secondaryLabel),
           ),
         ],
       ),
