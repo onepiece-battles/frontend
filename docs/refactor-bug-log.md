@@ -67,8 +67,15 @@
 2. **列表页拆分**:fruit/group/battle/issue/user 五个列表页的移动端卡片列表 + 桌面端 SpotlightGrid 抽成独立 `widgets/*_roster.dart`(展示组件,展开状态经回调上提)。
 3. **死代码清理**:删除各列表页早已被卡片布局取代、仅挂 `// ignore: unused_element` 的 DataTable 老路径(`_create*Table`/`_createColumns`/`_createRows` 等)与其专用的 `sortOrderToPath` / `sortableEnumToSortOrderMap`;删除 `create_character_view` / `create_group_view` 中 `useCardLayout = maxWidth.isFinite` 恒为 true、`else` 永不可达的遗留布局分支;删除各处未使用的 ScrollController(`tableController`/`horizontalController` 等)、`logger`、`onlyShowSystemResource` 等字段与随之失效的 import。
 
-**暂缓(⚪️ 需配合逐块人工冒烟再做,本轮未动):**
-- **编辑类详情页的表单区块抽取**:`fruit_detail_view` / `group_detail_view` / `battle_detail_view` 以及 `create_*_view` 的移动端/桌面端**可编辑表单 + 提交逻辑**尚未像 `character_detail` 那样抽成 StatefulWidget 区块。这类改动会改写有状态的编辑/提交流程,`character_detail` 当初是靠"逐块冒烟"验证的;本轮为一次性批量、无逐块冒烟,故仅做解耦+清理,表单区块抽取留待后续逐块冒烟时进行。
-- **`chatting_view`(1828 行)**:已基于 Provider/`ChatNotifier`,无服务定位器耦合、无死代码;其体量来自聊天 UI 固有的有状态逻辑(滚动位置恢复、websocket、图片上传)。强行拆 `_buildChatView` 风险高,留待逐块冒烟时处理。
+**后续已完成(逐块冒烟 / 自主静态验证):**
+- **`fruit_detail_view`** → 拆成 FruitBasicInfoSection / FruitCombatInfoSection / FruitCharactersSection + 共享 fruit_detail_fields,视图 1413→271 行;顺带修 BUG-003(桌面端部分提交清字段)。
+- **`group_detail_view`** → 拆成 GroupBasicInfoSection + GroupMembersPanel(成员树/懒加载/战斗数值整体搬入),视图 1161→249 行;顺带修 BUG-004(编辑群名/类型清空父群组链接与头像)。
+- **`battle_detail_view`** → 本质是单一的"战斗执行"实时屏(Timer 轮询 + BattleExecutionData notifier 贯穿各处),不适合按区块拆分;改为抽出 BattleExecutionData 模型到独立文件、纯展示 helper(charMini/workflowStep/workflowConnector)到 widgets,视图 975→777 行。
+- **性能**:移除 24 处 `ImageLazyLoader/SquareImageLoader` 上的 `key: UniqueKey()`——它导致每次父级重建都丢弃元素并重新加载图片;两个 loader 都走 ImageCacheManager 缓存且在 didUpdateWidget 里按 URI 变化重载,去掉 key 后元素按位置复用、URI 变化自愈,图片不再每次 setState 重闪。(ImageCacheManager 本身已是带内存/条目上限的 LRU,无需改。)
+
+**保持现状(单一职责的内聚屏,拆分无收益):**
+- **`chatting_view`(1828 行)**:已基于 Provider/`ChatNotifier`,无服务定位器耦合、无死代码;体量来自聊天 UI 固有的有状态逻辑(滚动恢复、websocket、图片上传)。
+- **`create_*_view`(创建表单)**:单一创建流程、一次性整表提交,各字段区块无清晰的内聚边界;已完成数据访问解耦 + 死代码清理(如 create_character 的遗留 else 布局)。
+- **`user_profile`**:早已是 controller + 分区 widget 结构,无需处理。
 
 ---
