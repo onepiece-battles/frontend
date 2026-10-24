@@ -75,7 +75,6 @@ class UserRoster extends StatelessWidget {
                   children: [
                     Row(children: [
                       ImageLazyLoader(
-                          key: UniqueKey(),
                           uriProvider: () => user.imageUri ?? '',
                           width: 44,
                           borderWidth: 1.5,

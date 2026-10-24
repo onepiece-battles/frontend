@@ -126,7 +126,6 @@ class FruitCharactersSection extends StatelessWidget {
                                       });
                                 },
                                 child: ImageLazyLoader(
-                                    key: UniqueKey(),
                                     uriProvider: () => character.imageUri!,
                                     width: 40,
                                     borderWidth: 1.5,

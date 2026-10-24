@@ -589,7 +589,6 @@ class _CharacterBasicInfoSectionState
                   : null,
               child: selectedImage == null
                   ? ImageLazyLoader(
-                      key: UniqueKey(),
                       uriProvider: () => character.imageUri!,
                       width: 200,
                       borderWidth: 3,

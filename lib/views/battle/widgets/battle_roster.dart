@@ -97,7 +97,6 @@ class BattleRoster extends StatelessWidget {
                             // Winner indicator
                             if (exec?.winnerId != null)
                               ImageLazyLoader(
-                                key: UniqueKey(),
                                 uriProvider: () =>
                                     exec!.winnerId == battle.starterId
                                         ? battle.starter!.imageUri!
@@ -180,7 +179,6 @@ class BattleRoster extends StatelessWidget {
   }) {
     final children = [
       ImageLazyLoader(
-        key: UniqueKey(),
         uriProvider: () => imageUri,
         width: 44,
         borderWidth: 2,

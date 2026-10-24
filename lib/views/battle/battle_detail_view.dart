@@ -579,7 +579,6 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                       });
                 },
                 child: ImageLazyLoader(
-                    key: UniqueKey(),
                     uriProvider: () => battle.starter!.imageUri!,
                     width: 120,
                     borderWidth: 3,
@@ -634,7 +633,6 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                       });
                 },
                 child: ImageLazyLoader(
-                    key: UniqueKey(),
                     uriProvider: () => battle.receiver!.imageUri!,
                     width: 120,
                     borderWidth: 3,
@@ -711,7 +709,6 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                   120, 120, OnepieceColors.liteFancyBlue),
             )
           : ImageLazyLoader(
-              key: UniqueKey(),
               uriProvider: () => battle.starter!.id == model.winnerId
                   ? battle.starter!.imageUri!
                   : battle.receiver!.imageUri!,

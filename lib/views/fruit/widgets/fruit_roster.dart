@@ -347,7 +347,6 @@ class FruitRoster extends StatelessWidget {
                     child: Padding(
                         padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
                         child: ImageLazyLoader(
-                            key: UniqueKey(),
                             uriProvider: () => character.imageUri!,
                             width: 40,
                             borderWidth: 1.5,

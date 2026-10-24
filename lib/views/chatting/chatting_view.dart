@@ -1614,7 +1614,6 @@ class _ChattingViewState extends State<ChattingView> {
                                                           .imageContentUri !=
                                                       null)
                                                     SquareImageLoader(
-                                                      key: UniqueKey(),
                                                       uriProvider: () =>
                                                           chatIdToRepliedMessage[
                                                                   activeChatId]!

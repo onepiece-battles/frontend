@@ -484,7 +484,6 @@ class _GroupDetailViewState extends State<GroupDetailView> {
               padding: const EdgeInsets.symmetric(vertical: 5),
               child: selectedImage == null
                   ? ImageLazyLoader(
-                      key: UniqueKey(),
                       uriProvider: () => groupFullView.imageUri!,
                       width: 200,
                       borderWidth: 3,
@@ -752,7 +751,6 @@ class _GroupDetailViewState extends State<GroupDetailView> {
                     child: Row(
                       children: [
                         ImageLazyLoader(
-                            key: UniqueKey(),
                             uriProvider: () => e.imageUri!,
                             width: 40,
                             borderWidth: 1.5,
@@ -1105,7 +1103,6 @@ class _GroupDetailViewState extends State<GroupDetailView> {
           splashColor: Colors.transparent,
           onTap: onTap,
           child: ImageLazyLoader(
-              key: UniqueKey(),
               uriProvider: () => imageUri,
               width: 38,
               borderWidth: 1.4,
