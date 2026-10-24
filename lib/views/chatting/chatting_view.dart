@@ -227,10 +227,31 @@ class _ChattingViewState extends State<ChattingView> {
       _restoreScrollForChat(chatId, savedOffset, requestId);
       return; // clears _restoringScroll after the jump completes
     }
-    await WidgetsBinding.instance.endOfFrame;
-    if (!mounted || requestId != _scrollPositioningRequestId) {
-      _restoringScroll = false;
-      return;
+    // Hold the bottom-pin until layout stops growing instead of releasing it
+    // after a single frame. The first open otherwise lands slightly above the
+    // bottom because late layout passes — the centered sliver settling and
+    // message images finishing loading — grow the content after the pin was
+    // already released. Re-assert the bottom each frame until maxScrollExtent
+    // is stable for a few frames (capped so a very slow image can't block).
+    double lastMax = double.nan;
+    var stableFrames = 0;
+    for (var i = 0; i < 30; i++) {
+      await WidgetsBinding.instance.endOfFrame;
+      if (!mounted || requestId != _scrollPositioningRequestId) {
+        _restoringScroll = false;
+        return;
+      }
+      if (!scrollController.hasClients) continue;
+      final maxExtent = scrollController.position.maxScrollExtent;
+      if ((scrollController.offset - maxExtent).abs() > 0.5) {
+        scrollController.jumpTo(maxExtent);
+      }
+      if (maxExtent == lastMax) {
+        if (++stableFrames >= 3) break;
+      } else {
+        stableFrames = 0;
+        lastMax = maxExtent;
+      }
     }
     scrollController.endInitialBottomPositioning();
     if (scrollController.hasClients) {
