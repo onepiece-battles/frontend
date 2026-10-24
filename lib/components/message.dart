@@ -277,7 +277,8 @@ class MessageItem extends StatelessWidget {
     );
   }
 
-  Widget _buildMessageImage(String imageUri, double maxWidth) {
+  Widget _buildMessageImage(String imageUri, double maxWidth,
+      {bool fullImage = true}) {
     if (imageUri.startsWith('data:image')) {
       final base64Data = imageUri.split(',').last;
       // Same aspect-ratio-sized rendering as OriginalImageLoader below, so
@@ -291,10 +292,17 @@ class MessageItem extends StatelessWidget {
       );
     }
 
+    // The inline bubble image is still shown small (capped at [maxWidth]),
+    // but it loads the full-resolution original rather than the downscaled
+    // thumbnail so it stays crisp on high-DPI screens — and shares the
+    // ImageCacheManager 'full' entry with the tap-to-zoom viewer, so opening
+    // the viewer is instant. The tiny reply-quote preview opts out
+    // (fullImage: false) to avoid fetching a big original for a 100px quote.
     return OriginalImageLoader(
-      key: ValueKey(imageUri),
+      key: ValueKey('${fullImage ? 'full' : 'thumb'}:$imageUri'),
       uriProvider: () => imageUri,
       maxWidth: maxWidth,
+      fullImage: fullImage,
     );
   }
 
@@ -323,7 +331,8 @@ class MessageItem extends StatelessWidget {
               GestureDetector(
                 onTap: () => showChatImageViewer(
                     context, preMessage!.imageContentUri!),
-                child: _buildMessageImage(preMessage!.imageContentUri!, 100),
+                child: _buildMessageImage(preMessage!.imageContentUri!, 100,
+                    fullImage: false),
               )
           ],
         ));
