@@ -14,6 +14,8 @@ import 'package:provider/provider.dart';
 import 'package:one_piece_battles_flutter/utils/image_helper.dart';
 import 'package:openapi/api.dart';
 import 'battle_detail_controller.dart';
+import 'battle_execution_data.dart';
+import 'widgets/battle_detail_widgets.dart';
 import '../../l10n/app_localizations.dart';
 import 'package:one_piece_battles_flutter/graph/character_data.dart';
 import '../../constants/onepiece_fonts.dart';
@@ -118,25 +120,6 @@ class _BattleDetailViewState extends State<BattleDetailView> {
     return statusMap[battle.battleExecution?.battleStatus] ?? '';
   }
 
-  Widget _charMini(Character char, int? score) {
-    return Column(children: [
-      ImageLazyLoader(
-          key: ValueKey(char.imageUri),
-          uriProvider: () => char.imageUri!,
-          width: 52,
-          borderWidth: 1.5,
-          borderRadios: 52),
-      const SizedBox(height: 2),
-      Text(I18nHelper.getDisplayNameFromI18n(char.name),
-          style: const TextStyle(fontSize: 11),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          textAlign: TextAlign.center),
-      Text(score?.toString() ?? '?',
-          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-    ]);
-  }
-
   void _startBattle(BuildContext context) {
     final battleTitle = AppLocalizations.of(context)!.battle;
     final startSuccess = AppLocalizations.of(context)!.startSuccess;
@@ -148,71 +131,6 @@ class _BattleDetailViewState extends State<BattleDetailView> {
       battleExecutionData.battleStatus = BattleStatus.IN_PROGRESS;
       showAlert(battleTitle, startSuccess);
     });
-  }
-
-  Widget _workflowConnector(bool active, double iconSize) {
-    return Padding(
-      padding: EdgeInsets.only(left: iconSize / 2 - 1, top: 3, bottom: 3),
-      child: Container(
-        width: 2,
-        height: iconSize * 0.7,
-        decoration: BoxDecoration(
-          color: active
-              ? OnepieceColors.fancyBlue
-              : OnepieceColors.liteFancyBlue.withValues(alpha: 0.55),
-          borderRadius: BorderRadius.circular(2),
-        ),
-      ),
-    );
-  }
-
-  Widget _workflowStep({
-    required String label,
-    required bool done,
-    required double iconSize,
-    bool failed = false,
-  }) {
-    final color = failed
-        ? Colors.red
-        : done
-            ? OnepieceColors.fancyBlue
-            : OnepieceColors.liteFancyBlue;
-    final style = done && !failed
-        ? OnepieceFonts.fancyBlueHintFont
-        : OnepieceFonts.liteFancyBlueHintFont;
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: iconSize + 8,
-          height: iconSize + 8,
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: done || failed ? 0.12 : 0.08),
-            shape: BoxShape.circle,
-          ),
-          child: Center(
-            child: failed
-                ? ImageHelper.getSvgIconWithColor(
-                    'images/svgs/failed.svg', iconSize, iconSize, Colors.red)
-                : Icon(
-                    done ? Icons.check_circle : Icons.radio_button_unchecked,
-                    size: iconSize,
-                    color: color,
-                  ),
-          ),
-        ),
-        const SizedBox(width: 10),
-        Flexible(
-          child: Text(
-            label,
-            style: style,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        )
-      ],
-    );
   }
 
   @override
@@ -259,7 +177,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                                     child: Column(children: [
                                       Row(children: [
                                         Expanded(
-                                            child: _charMini(
+                                            child: charMini(
                                                 battle.starter!,
                                                 battle.battleExecution
                                                     ?.starterScoreBefore)),
@@ -276,7 +194,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                                                           FontWeight.bold)),
                                             ])),
                                         Expanded(
-                                            child: _charMini(
+                                            child: charMini(
                                                 battle.receiver!,
                                                 battle.battleExecution
                                                     ?.receiverScoreBefore)),
@@ -469,20 +387,20 @@ class _BattleDetailViewState extends State<BattleDetailView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _workflowStep(
+              workflowStep(
                 label: AppLocalizations.of(context)!.battleStatusCreated,
                 done: true,
                 iconSize: iconSize,
               ),
-              _workflowConnector(!isCreated, iconSize),
-              _workflowStep(
+              workflowConnector(!isCreated, iconSize),
+              workflowStep(
                 label: AppLocalizations.of(context)!.battleInProgress,
                 done: isInProgress || isFinished || isFailed,
                 iconSize: iconSize,
                 failed: isFailed,
               ),
-              _workflowConnector(isFinished || isFailed, iconSize),
-              _workflowStep(
+              workflowConnector(isFinished || isFailed, iconSize),
+              workflowStep(
                 label: isFailed
                     ? AppLocalizations.of(context)!.battleStatusFailed
                     : AppLocalizations.of(context)!.battleFinished,
@@ -750,19 +668,19 @@ class _BattleDetailViewState extends State<BattleDetailView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _workflowStep(
+              workflowStep(
                 label: AppLocalizations.of(context)!.battleReportWaiting,
                 done: hasWinner,
                 iconSize: iconSize,
               ),
-              _workflowConnector(isGenerating || isFinished, iconSize),
-              _workflowStep(
+              workflowConnector(isGenerating || isFinished, iconSize),
+              workflowStep(
                 label: AppLocalizations.of(context)!.battleReportInProgress,
                 done: isGenerating || isFinished,
                 iconSize: iconSize,
               ),
-              _workflowConnector(isFinished, iconSize),
-              _workflowStep(
+              workflowConnector(isFinished, iconSize),
+              workflowStep(
                 label: AppLocalizations.of(context)!.battleReportGenerated,
                 done: isFinished,
                 iconSize: iconSize,
@@ -855,121 +773,5 @@ class _BattleDetailViewState extends State<BattleDetailView> {
               height: 10,
             );
     });
-  }
-}
-
-class BattleExecutionData extends ChangeNotifier {
-  BattleStatus _battleStatus;
-  BattleReportStage _battleReportStage;
-  String? _reportFileId;
-  String? _winnerId;
-  int? _winnerScoreChange;
-  int? _loserScoreChange;
-
-  int? _starterScoreBefore;
-  int? _starterScoreAfter;
-  int? _receiverScoreBefore;
-  int? _receiverScoreAfter;
-
-  BattleExecutionData(
-      this._battleStatus,
-      this._battleReportStage,
-      this._reportFileId,
-      this._winnerId,
-      this._winnerScoreChange,
-      this._loserScoreChange,
-      this._starterScoreBefore,
-      this._starterScoreAfter,
-      this._receiverScoreBefore,
-      this._receiverScoreAfter);
-
-  BattleStatus get battleStatus => _battleStatus;
-
-  BattleReportStage get battleReportStage => _battleReportStage;
-
-  String? get reportFileId => _reportFileId;
-
-  String? get winnerId => _winnerId;
-
-  int? get winnerScoreChange => _winnerScoreChange;
-
-  int? get loserScoreChange => _loserScoreChange;
-
-  int? get receiverScoreBefore => _receiverScoreBefore;
-
-  int? get receiverScoreAfter => _receiverScoreAfter;
-
-  int? get starterScoreBefore => _starterScoreBefore;
-
-  int? get starterScoreAfter => _starterScoreAfter;
-
-  set battleStatus(BattleStatus battleStatus) {
-    if (_battleStatus != battleStatus) {
-      _battleStatus = battleStatus;
-      notifyListeners();
-    }
-  }
-
-  set battleReportStage(BattleReportStage battleReportStage) {
-    if (_battleReportStage != battleReportStage) {
-      _battleReportStage = battleReportStage;
-      notifyListeners();
-    }
-  }
-
-  set reportFileId(String? reportFileId) {
-    if (_reportFileId != reportFileId) {
-      _reportFileId = reportFileId;
-      notifyListeners();
-    }
-  }
-
-  set winnerId(String? winnerId) {
-    if (_winnerId != winnerId) {
-      _winnerId = winnerId;
-      notifyListeners();
-    }
-  }
-
-  set winnerScoreChange(int? winnerScoreChange) {
-    if (_winnerScoreChange != winnerScoreChange) {
-      _winnerScoreChange = winnerScoreChange;
-      notifyListeners();
-    }
-  }
-
-  set loserScoreChange(int? loserScoreChange) {
-    if (_loserScoreChange != loserScoreChange) {
-      _loserScoreChange = loserScoreChange;
-      notifyListeners();
-    }
-  }
-
-  set starterScoreBefore(int? starterScoreBefore) {
-    if (_starterScoreBefore != starterScoreBefore) {
-      _starterScoreBefore = starterScoreBefore;
-      notifyListeners();
-    }
-  }
-
-  set starterScoreAfter(int? starterScoreAfter) {
-    if (_starterScoreAfter != starterScoreAfter) {
-      _starterScoreAfter = starterScoreAfter;
-      notifyListeners();
-    }
-  }
-
-  set receiverScoreBefore(int? receiverScoreBefore) {
-    if (_receiverScoreBefore != receiverScoreBefore) {
-      _receiverScoreBefore = receiverScoreBefore;
-      notifyListeners();
-    }
-  }
-
-  set receiverScoreAfter(int? receiverScoreAfter) {
-    if (_receiverScoreAfter != receiverScoreAfter) {
-      _receiverScoreAfter = receiverScoreAfter;
-      notifyListeners();
-    }
   }
 }
