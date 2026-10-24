@@ -24,6 +24,11 @@ class WebSocketService {
   // Flag to distinguish between network error vs user clicking "Logout"
   bool _isIntentionalDisconnect = false;
 
+  /// Invoked each time the socket becomes ready — on the initial connect and
+  /// on every successful reconnect. The chat layer hooks this to send its
+  /// incremental SYNC cursors so the server replays only missed messages.
+  void Function()? onConnected;
+
   /// Last time any data (chat traffic) was received on the current
   /// connection — used by the ping loop to detect a connection that looks
   /// open but is actually silently dead (no close frame ever arrives).
@@ -86,6 +91,7 @@ class WebSocketService {
         _isConnecting = false;
         _reconnectAttempt = 0;
         _startPing();
+        onConnected?.call();
       }).catchError((error, stackTrace) {
         if (_channel != channel || generation != _connectionGeneration) {
           return null;
