@@ -539,21 +539,14 @@ class _ChattingViewState extends State<ChattingView> {
         if (activeChat == null) {
           return _buildChatListPanel(isMobile: isMobile);
         }
-        // Nested Selector for messages — avoids context.select in builder
-        return Selector<ChatNotifier, List<Message>>(
-          selector: (_, n) => n.getMessagesForChat(activeChatId),
-          builder: (_, messages, __) {
-            _autoScrollOnNewMessages(messages, activeChatId);
-            return PopScope(
-              canPop: false,
-              onPopInvokedWithResult: (bool didPop, dynamic result) {
-                if (didPop) return;
-                _clearActiveChat();
-              },
-              child: _buildChatView(context, activeChat, activeChatId, messages,
-                  isMobile: true),
-            );
+        return PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (bool didPop, dynamic result) {
+            if (didPop) return;
+            _clearActiveChat();
           },
+          child: _buildChatView(context, activeChat, activeChatId,
+              isMobile: true),
         );
       },
     );
@@ -619,15 +612,8 @@ class _ChattingViewState extends State<ChattingView> {
         if (activeChat == null) {
           return const SizedBox.shrink();
         }
-        // Nested Selector for messages — avoids context.select in builder
-        return Selector<ChatNotifier, List<Message>>(
-          selector: (_, n) => n.getMessagesForChat(activeChatId),
-          builder: (_, messages, __) {
-            _autoScrollOnNewMessages(messages, activeChatId);
-            return _buildChatView(context, activeChat, activeChatId, messages,
-                isMobile: isMobile);
-          },
-        );
+        return _buildChatView(context, activeChat, activeChatId,
+            isMobile: isMobile);
       },
     );
   }
@@ -895,7 +881,7 @@ class _ChattingViewState extends State<ChattingView> {
   // RIGHT SIDE: Active Chat View
   // ---------------------------------------------------------------------------
   Widget _buildChatView(BuildContext context, Chat activeChat,
-      String activeChatId, List<Message> messages,
+      String activeChatId,
       {required bool isMobile}) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
@@ -1002,7 +988,15 @@ class _ChattingViewState extends State<ChattingView> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Expanded(
-                  child: Builder(builder: (context) {
+                  // Only the message list rebuilds when this chat's messages
+                  // change — the header and input bar above/below stay put, so
+                  // receiving a message no longer rebuilds the text field you
+                  // are typing in.
+                  child: Selector<ChatNotifier, List<Message>>(
+                    selector: (_, n) => n.getMessagesForChat(activeChatId),
+                    builder: (context, messages, _) {
+                      _autoScrollOnNewMessages(messages, activeChatId);
+                      return Builder(builder: (context) {
                     final visibleStart = _chatNotifier
                         .viewVisibleStart(activeChatId)
                         .clamp(0, messages.length)
@@ -1054,7 +1048,9 @@ class _ChattingViewState extends State<ChattingView> {
                         ),
                       ],
                     );
-                  }),
+                      });
+                    },
+                  ),
                 ),
                 if (!isMobile)
                   const Divider(
