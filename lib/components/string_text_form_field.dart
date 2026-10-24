@@ -77,35 +77,35 @@ class StringTextFormField extends StatelessWidget {
               isDense: true,
               contentPadding: const EdgeInsets.fromLTRB(10, 10, 0, 10),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(5.0),
+                borderRadius: BorderRadius.circular(10.0),
                 borderSide: const BorderSide(
-                  color: OnepieceColors.fancyBlue,
+                  color: OnepieceColors.separator,
                   width: 1.0,
                 ),
               ),
               errorBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(5.0),
+                borderRadius: BorderRadius.circular(10.0),
                 borderSide: const BorderSide(
                   color: Colors.red,
                   width: 1.5,
                 ),
               ),
               focusedErrorBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(5.0),
+                borderRadius: BorderRadius.circular(10.0),
                 borderSide: const BorderSide(
                   color: Colors.red,
                   width: 1.5,
                 ),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(5.0),
+                borderRadius: BorderRadius.circular(10.0),
                 borderSide: const BorderSide(
                   color: OnepieceColors.fancyBlue,
                   width: 1.5,
                 ),
               ),
               disabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(5.0),
+                borderRadius: BorderRadius.circular(10.0),
                 borderSide: const BorderSide(
                   color: Colors.white,
                   width: 1.0,
@@ -113,7 +113,7 @@ class StringTextFormField extends StatelessWidget {
               ),
               filled: true,
               fillColor:
-                  editable ? Colors.white : OnepieceColors.liteFancyGreen,
+                  editable ? Colors.white : OnepieceColors.surface,
             ),
           ),
         ),

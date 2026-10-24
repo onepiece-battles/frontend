@@ -384,11 +384,11 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
       contentPadding: const EdgeInsets.symmetric(horizontal: 13, vertical: 13),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFFDCE4EC)),
+        borderSide: const BorderSide(color: OnepieceColors.separator),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFFDCE4EC)),
+        borderSide: const BorderSide(color: OnepieceColors.separator),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -407,7 +407,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: const Color(0xFFF7F9FC),
+                color: OnepieceColors.surface,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
@@ -426,8 +426,8 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                             height: 30,
                             width: 60,
                             decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(3),
-                                color: OnepieceColors.liteFancyGreen)),
+                                borderRadius: BorderRadius.circular(10),
+                                color: OnepieceColors.surface)),
                         menuItemStyleData: const MenuItemStyleData(height: 30),
                         items: List.generate(12, (i) => (i + 1).toString())
                             .map((m) => DropdownMenuItem<String>(
@@ -450,8 +450,8 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                             height: 30,
                             width: 60,
                             decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(3),
-                                color: OnepieceColors.liteFancyGreen)),
+                                borderRadius: BorderRadius.circular(10),
+                                color: OnepieceColors.surface)),
                         menuItemStyleData: const MenuItemStyleData(height: 30),
                         items: List.generate(31, (i) => (i + 1).toString())
                             .map((d) => DropdownMenuItem<String>(
@@ -493,7 +493,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFFF7F9FC),
+        color: OnepieceColors.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: const Color(0xFFE7ECF2)),
       ),
@@ -612,8 +612,8 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
             width: double.infinity,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              color: const Color(0xFFF7F9FC),
-              border: Border.all(color: const Color(0xFFDCE4EC)),
+              color: OnepieceColors.surface,
+              border: Border.all(color: OnepieceColors.separator),
             ),
           ),
           menuItemStyleData: const MenuItemStyleData(height: 35),
@@ -686,8 +686,8 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
             width: double.infinity,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              color: const Color(0xFFF7F9FC),
-              border: Border.all(color: const Color(0xFFDCE4EC)),
+              color: OnepieceColors.surface,
+              border: Border.all(color: OnepieceColors.separator),
             ),
           ),
           menuItemStyleData: const MenuItemStyleData(height: 35),
@@ -749,8 +749,8 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
             width: double.infinity,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              color: const Color(0xFFF7F9FC),
-              border: Border.all(color: const Color(0xFFDCE4EC)),
+              color: OnepieceColors.surface,
+              border: Border.all(color: OnepieceColors.separator),
             ),
           ),
           menuItemStyleData: const MenuItemStyleData(height: 35),
@@ -812,13 +812,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
         child: Container(
           decoration: const BoxDecoration(
             color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Color(0x1A16324F),
-                blurRadius: 18,
-                offset: Offset(0, -4),
-              ),
-            ],
+            border: Border(top: BorderSide(color: OnepieceColors.separator, width: 0.5)),
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),

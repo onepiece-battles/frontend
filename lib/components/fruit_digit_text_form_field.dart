@@ -102,35 +102,35 @@ class _FruitDigitTextFormFieldState extends State<FruitDigitTextFormField> {
                   contentPadding: const EdgeInsets.fromLTRB(10, 10, 0, 10),
                   hintText: "${widget.slopeMin} - ${widget.slopeMax}",
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(5.0),
+                    borderRadius: BorderRadius.circular(10.0),
                     borderSide: const BorderSide(
-                      color: OnepieceColors.fancyBlue,
+                      color: OnepieceColors.separator,
                       width: 1.0,
                     ),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(5.0),
+                    borderRadius: BorderRadius.circular(10.0),
                     borderSide: const BorderSide(
                       color: OnepieceColors.fancyBlue,
                       width: 1.5,
                     ),
                   ),
                   disabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(5.0),
+                    borderRadius: BorderRadius.circular(10.0),
                     borderSide: const BorderSide(
                       color: Colors.white,
                       width: 1.0,
                     ),
                   ),
                   errorBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(5.0),
+                    borderRadius: BorderRadius.circular(10.0),
                     borderSide: const BorderSide(
                       color: Colors.red,
                       width: 1.5,
                     ),
                   ),
                   focusedErrorBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(5.0),
+                    borderRadius: BorderRadius.circular(10.0),
                     borderSide: const BorderSide(
                       color: Colors.red,
                       width: 1.5,
@@ -139,7 +139,7 @@ class _FruitDigitTextFormFieldState extends State<FruitDigitTextFormField> {
                   filled: true,
                   fillColor: widget.editable
                       ? Colors.white
-                      : OnepieceColors.liteFancyGreen,
+                      : OnepieceColors.surface,
                 ),
               ),
             ),
@@ -179,36 +179,36 @@ class _FruitDigitTextFormFieldState extends State<FruitDigitTextFormField> {
                   contentPadding: const EdgeInsets.fromLTRB(10, 10, 0, 10),
                   hintText: "${widget.interceptMin} - ${widget.interceptMax}",
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(5.0),
+                    borderRadius: BorderRadius.circular(10.0),
                     borderSide: const BorderSide(
-                      color: OnepieceColors.fancyBlue,
+                      color: OnepieceColors.separator,
                       width: 1.0,
                     ),
                   ),
                   isDense: true,
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(5.0),
+                    borderRadius: BorderRadius.circular(10.0),
                     borderSide: const BorderSide(
                       color: OnepieceColors.fancyBlue,
                       width: 1.5,
                     ),
                   ),
                   disabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(5.0),
+                    borderRadius: BorderRadius.circular(10.0),
                     borderSide: const BorderSide(
                       color: Colors.white,
                       width: 1.0,
                     ),
                   ),
                   errorBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(5.0),
+                    borderRadius: BorderRadius.circular(10.0),
                     borderSide: const BorderSide(
                       color: Colors.red,
                       width: 1.5,
                     ),
                   ),
                   focusedErrorBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(5.0),
+                    borderRadius: BorderRadius.circular(10.0),
                     borderSide: const BorderSide(
                       color: Colors.red,
                       width: 1.5,
@@ -217,7 +217,7 @@ class _FruitDigitTextFormFieldState extends State<FruitDigitTextFormField> {
                   filled: true,
                   fillColor: widget.editable
                       ? Colors.white
-                      : OnepieceColors.liteFancyGreen,
+                      : OnepieceColors.surface,
                 ),
               ),
             ),

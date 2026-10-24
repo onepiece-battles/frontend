@@ -145,7 +145,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
             constraints: const BoxConstraints(maxWidth: 280),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: OnepieceColors.liteFancyGreen,
+              color: OnepieceColors.surface,
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
@@ -394,7 +394,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
       final isSmall = MediaQuery.of(context).size.width < 600;
       return Container(
         decoration: BoxDecoration(
-          color: const Color(0xFFF7F9FC),
+          color: OnepieceColors.surface,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(color: const Color(0xFFE7ECF2)),
         ),
@@ -417,7 +417,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                     floatingLabelBehavior: FloatingLabelBehavior.never,
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFFDCE4EC)),
+                      borderSide: const BorderSide(color: OnepieceColors.separator),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -725,7 +725,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
       final isSmall = MediaQuery.of(context).size.width < 600;
       return Container(
           decoration: BoxDecoration(
-            color: const Color(0xFFF7F9FC),
+            color: OnepieceColors.surface,
             borderRadius: BorderRadius.circular(14),
             border: Border.all(color: const Color(0xFFE7ECF2)),
           ),
@@ -748,7 +748,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                       floatingLabelBehavior: FloatingLabelBehavior.never,
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFFDCE4EC)),
+                        borderSide: const BorderSide(color: OnepieceColors.separator),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -931,13 +931,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
       child: Container(
         decoration: const BoxDecoration(
           color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Color(0x1A16324F),
-              blurRadius: 18,
-              offset: Offset(0, -4),
-            ),
-          ],
+          border: Border(top: BorderSide(color: OnepieceColors.separator, width: 0.5)),
         ),
         child: ValueListenableBuilder<CharacterListView?>(
             valueListenable: starterSelectedItem,

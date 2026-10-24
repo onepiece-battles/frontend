@@ -21,15 +21,8 @@ class CreationFormCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE3EAF2)),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x0D16324F),
-            blurRadius: 24,
-            offset: Offset(0, 8),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: OnepieceColors.separator),
       ),
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -42,7 +35,7 @@ class CreationFormCard extends StatelessWidget {
                   width: 38,
                   height: 38,
                   decoration: BoxDecoration(
-                    color: OnepieceColors.liteFancyGreen,
+                    color: OnepieceColors.surface,
                     borderRadius: BorderRadius.circular(11),
                   ),
                   child: Icon(icon, color: OnepieceColors.fancyBlue, size: 21),
@@ -52,8 +45,8 @@ class CreationFormCard extends StatelessWidget {
                   child: Text(
                     title,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: OnepieceColors.deepFancyBlue,
-                          fontWeight: FontWeight.w700,
+                          color: OnepieceColors.primaryLabel,
+                          fontWeight: FontWeight.w600,
                         ),
                   ),
                 ),
@@ -62,7 +55,7 @@ class CreationFormCard extends StatelessWidget {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF2F5F8),
+                      color: OnepieceColors.surface,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
@@ -98,19 +91,11 @@ class CreationPageHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 18),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF0F5596), Color(0xFF3C7EC8)],
-        ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x263C7EC8),
-            blurRadius: 20,
-            offset: Offset(0, 8),
-          ),
-        ],
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: OnepieceColors.separator),
       ),
       child: Row(
         children: [
@@ -118,18 +103,18 @@ class CreationPageHeader extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: .16),
+              color: OnepieceColors.surface,
               borderRadius: BorderRadius.circular(13),
             ),
-            child: Icon(icon, color: Colors.white),
+            child: Icon(icon, color: OnepieceColors.fancyBlue),
           ),
           const SizedBox(width: 14),
           Expanded(
             child: Text(
               title,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w800,
+                    color: OnepieceColors.primaryLabel,
+                    fontWeight: FontWeight.w700,
                   ),
             ),
           ),
