@@ -59,7 +59,7 @@ class GroupRoster extends StatelessWidget {
         final isEven = index.isEven;
 
         return Card(
-          color: isEven ? OnepieceColors.liteFancyGreen : Colors.white,
+          color: isEven ? OnepieceColors.surface : Colors.white,
           margin: const EdgeInsets.only(bottom: 8),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),

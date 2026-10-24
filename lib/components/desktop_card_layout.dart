@@ -83,31 +83,20 @@ class _ControlSurface extends StatelessWidget {
       width: double.infinity,
       padding: padding,
       decoration: BoxDecoration(
-        color: const Color(0xFFFBFCFE),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: OnepieceColors.deepFancyBlue.withValues(alpha: 0.12),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: OnepieceColors.deepFancyBlue.withValues(alpha: 0.06),
-            blurRadius: 14,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: OnepieceColors.separator),
       ),
       child: Theme(
         data: Theme.of(context).copyWith(
           inputDecorationTheme: InputDecorationTheme(
             filled: true,
-            fillColor: Colors.white,
+            fillColor: OnepieceColors.surface,
             isDense: true,
             prefixIconColor: OnepieceColors.fancyBlue,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(7),
-              borderSide: BorderSide(
-                color: OnepieceColors.deepFancyBlue.withValues(alpha: 0.16),
-              ),
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(color: OnepieceColors.separator),
             ),
           ),
         ),
