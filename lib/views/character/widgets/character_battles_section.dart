@@ -389,7 +389,6 @@ class _CharacterBattlesSectionState extends State<CharacterBattlesSection> {
                         Padding(
                           padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
                           child: ImageLazyLoader(
-                              key: UniqueKey(),
                               uriProvider: () => entry.value.starter!.imageUri!,
                               width: 40,
                               borderWidth: 1.5,
@@ -423,7 +422,6 @@ class _CharacterBattlesSectionState extends State<CharacterBattlesSection> {
                         Padding(
                           padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
                           child: ImageLazyLoader(
-                              key: UniqueKey(),
                               uriProvider: () =>
                                   entry.value.receiver!.imageUri!,
                               width: 40,
@@ -456,7 +454,6 @@ class _CharacterBattlesSectionState extends State<CharacterBattlesSection> {
                     Padding(
                       padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
                       child: ImageLazyLoader(
-                          key: UniqueKey(),
                           uriProvider: () =>
                               entry.value.battleExecution!.winnerId ==
                                       entry.value.starterId

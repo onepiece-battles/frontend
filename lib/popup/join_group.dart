@@ -611,7 +611,6 @@ class _JoinGroupState extends State<JoinGroup> {
                 Expanded(
                   child: Center(
                     child: ImageLazyLoader(
-                        key: UniqueKey(),
                         uriProvider: () => imageUri,
                         width: 72,
                         borderWidth: 1.6,

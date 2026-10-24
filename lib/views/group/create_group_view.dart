@@ -1,7 +1,6 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:one_piece_battles_flutter/repository/group_dao.dart';
 import 'package:one_piece_battles_flutter/utils/string_extensions.dart';
 import 'package:openapi/api.dart';
 import '../../components/creation_form_card.dart';
@@ -9,13 +8,13 @@ import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
 import '../../constants/path_constants.dart';
 import '../../popup/onepiece_alert.dart';
-import '../../repository/image_dao.dart';
 import '../../utils/base64_helper.dart';
 import '../../utils/data_validator.dart';
 import '../../utils/i18n_helper.dart';
 import '../../utils/image_helper.dart';
 import '../../utils/onepiece_image_picker.dart';
 import '../../utils/random_string_generator.dart';
+import 'create_group_controller.dart';
 import '../../l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
@@ -36,11 +35,13 @@ class _CreateGroupViewState extends State<CreateGroupView> {
 
   GroupCategory selectedGroupCategory = GroupCategory.pirate;
   final _formKey = GlobalKey<FormState>();
+  final CreateGroupController _controller = CreateGroupController();
 
   @override
   void dispose() {
     groupNameEnController.dispose();
     groupNameChController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -152,142 +153,27 @@ class _CreateGroupViewState extends State<CreateGroupView> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final useCardLayout = constraints.maxWidth.isFinite;
         return Stack(
           children: [
-            if (useCardLayout)
-              ColoredBox(
-                color: const Color(0xFFF5F7FB),
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.vertical,
-                  padding: EdgeInsets.fromLTRB(
-                    constraints.maxWidth >= 700 ? 28 : 12,
-                    18,
-                    constraints.maxWidth >= 700 ? 28 : 12,
-                    100,
-                  ),
-                  child: Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 720),
-                      child: _buildMobileLayout(context),
-                    ),
-                  ),
-                ),
-              )
-            else
-              SingleChildScrollView(
+            ColoredBox(
+              color: const Color(0xFFF5F7FB),
+              child: SingleChildScrollView(
                 scrollDirection: Axis.vertical,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 0, 0, 15),
-                        child: Text(
-                          AppLocalizations.of(context)!.basicInfo,
-                          style: OnepieceFonts.headerStyle,
-                        ),
-                      ),
-                      _getAvatar(context),
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8.0),
-                        child: Row(
-                          children: [
-                            Form(
-                              key: _formKey,
-                              child: SizedBox(
-                                width: MediaQuery.of(context).size.width > 600
-                                    ? 300
-                                    : MediaQuery.of(context).size.width - 60,
-                                child: TextFormField(
-                                  controller: groupNameChController,
-                                  validator: (value) {
-                                    if (value!.isWhiteSpace()) {
-                                      return AppLocalizations.of(context)!
-                                          .requiredField;
-                                    }
-                                    if (!DataValidator.validName(value)) {
-                                      return AppLocalizations.of(context)!
-                                          .invalidName;
-                                    }
-                                    return null;
-                                  },
-                                  autovalidateMode:
-                                      AutovalidateMode.onUserInteraction,
-                                  maxLength: 30,
-                                  maxLengthEnforcement:
-                                      MaxLengthEnforcement.enforced,
-                                  decoration: InputDecoration(
-                                    labelText:
-                                        AppLocalizations.of(context)!.groupName,
-                                    prefixIcon: const Icon(Icons.people),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(
-                              width: 25,
-                            ),
-                            if (getIt<User>().loginRole == UserRole.NIKA)
-                              SizedBox(
-                                width: MediaQuery.of(context).size.width > 600
-                                    ? 300
-                                    : MediaQuery.of(context).size.width - 60,
-                                child: TextFormField(
-                                  controller: groupNameEnController,
-                                  validator: (value) {
-                                    if (value == null || value.isWhiteSpace()) {
-                                      return AppLocalizations.of(context)!
-                                          .requiredField;
-                                    }
-                                    if (!DataValidator.validName(value)) {
-                                      return AppLocalizations.of(context)!
-                                          .invalidName;
-                                    }
-                                    return null;
-                                  },
-                                  autovalidateMode:
-                                      AutovalidateMode.onUserInteraction,
-                                  maxLength: 30,
-                                  maxLengthEnforcement:
-                                      MaxLengthEnforcement.enforced,
-                                  decoration: InputDecoration(
-                                    labelText:
-                                        AppLocalizations.of(context)!.groupName,
-                                    prefixIcon: const Icon(Icons.people),
-                                  ),
-                                ),
-                              )
-                          ],
-                        ),
-                      ),
-                      Row(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(0, 0, 8, 10),
-                            child: Text(
-                              AppLocalizations.of(context)!.groupCategory,
-                              style: OnepieceFonts.tableHeaderStyle,
-                            ),
-                          ),
-                          _getDropDownList(context),
-                        ],
-                      ),
-                      const Padding(
-                        padding: EdgeInsets.fromLTRB(0, 0, 0, 8),
-                        child: Divider(
-                          height: 2,
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 40,
-                      )
-                    ],
+                padding: EdgeInsets.fromLTRB(
+                  constraints.maxWidth >= 700 ? 28 : 12,
+                  18,
+                  constraints.maxWidth >= 700 ? 28 : 12,
+                  100,
+                ),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 720),
+                    child: _buildMobileLayout(context),
                   ),
                 ),
               ),
-            _getFootBar(context)
+            ),
+            _getFootBar(context),
           ],
         );
       },
@@ -519,7 +405,7 @@ class _CreateGroupViewState extends State<CreateGroupView> {
                       groupCategory: selectedGroupCategory,
                     );
                     final router = GoRouter.of(context);
-                    getIt<GroupDao>()
+                    _controller
                         .createGroup(createGroupRequest)
                         .then((createGroupResponse) {
                       if (!mounted) return;
@@ -529,7 +415,7 @@ class _CreateGroupViewState extends State<CreateGroupView> {
                               resourceId: createGroupResponse!.id.toString(),
                               image: encodedImage,
                               type: ResourceType.GROUP);
-                      getIt<ImageDao>()
+                      _controller
                           .addImage(uploadImageRequest)
                           .then((value) {
                         if (!mounted) return;

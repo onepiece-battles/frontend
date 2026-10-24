@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:one_piece_battles_flutter/repository/user_dao.dart';
 import 'package:openapi/api.dart';
+import 'user_detail_controller.dart';
 import '../../l10n/app_localizations.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
@@ -23,14 +23,21 @@ class UserDetailView extends StatefulWidget {
 
 class _UserDetailViewState extends State<UserDetailView> {
   late User user;
+  final UserDetailController _controller = UserDetailController();
 
   @override
   void initState() {
     super.initState();
   }
 
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   _loadData() {
-    return getIt<UserDao>().get(GetUserRequest(userId: widget.userId));
+    return _controller.get(GetUserRequest(userId: widget.userId));
   }
 
   _prepareData(User user) {

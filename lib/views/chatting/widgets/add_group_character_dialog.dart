@@ -3,13 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:openapi/api.dart';
 
-import '../../../app_router.dart';
 import '../../../components/square_image_loader.dart';
 import '../../../constants/onepiece_colors.dart';
 import '../../../constants/onepiece_fonts.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../../repository/character_dao.dart';
-import '../../../repository/group_dao.dart';
+import 'add_group_character_controller.dart';
 import '../../../utils/i18n_helper.dart' hide getIt;
 
 class AddGroupCharacterDialog extends StatefulWidget {
@@ -30,6 +28,7 @@ class AddGroupCharacterDialog extends StatefulWidget {
 class _AddGroupCharacterDialogState extends State<AddGroupCharacterDialog> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  final AddGroupCharacterController _controller = AddGroupCharacterController();
   final Set<String> _selectedCharacterIds = {};
   List<CharacterListView> _characters = [];
   Timer? _searchDebounce;
@@ -47,6 +46,7 @@ class _AddGroupCharacterDialogState extends State<AddGroupCharacterDialog> {
     _searchDebounce?.cancel();
     _searchController.dispose();
     _scrollController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -66,7 +66,7 @@ class _AddGroupCharacterDialogState extends State<AddGroupCharacterDialog> {
     );
 
     try {
-      final response = await getIt<CharacterDao>().listCharacter(request);
+      final response = await _controller.listCharacter(request);
       if (!mounted) return;
       setState(() {
         _characters = response?.characters ?? [];
@@ -97,7 +97,7 @@ class _AddGroupCharacterDialogState extends State<AddGroupCharacterDialog> {
     });
 
     try {
-      await getIt<GroupDao>().addCharacter(
+      await _controller.addCharacter(
         AddCharacterRequest(
           groupId: widget.groupId,
           characterIds: _selectedCharacterIds.toList(),

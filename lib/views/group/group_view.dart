@@ -2,12 +2,10 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
-import 'package:one_piece_battles_flutter/repository/group_dao.dart';
 import 'package:openapi/api.dart';
 import '../../l10n/app_localizations.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 
-import '../../components/image_lazy_loader.dart';
 import '../../components/desktop_card_layout.dart';
 import '../../components/page_foot.dart';
 import '../../constants/button_style.dart';
@@ -15,9 +13,10 @@ import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
 import '../../utils/i18n_helper.dart';
 import '../../utils/responsive_breakpoints.dart';
-import '../../utils/image_helper.dart';
 import '../../utils/permission_check.dart';
 import '../../utils/route_notifier.dart';
+import 'group_list_controller.dart';
+import 'widgets/group_roster.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -29,33 +28,19 @@ class GroupView extends StatefulWidget {
 }
 
 class _GroupViewState extends State<GroupView> {
-  ScrollController scrollController = ScrollController();
-  ScrollController horizontalController = ScrollController();
+  final GroupListController _controller = GroupListController();
   TextEditingController searchNameController = TextEditingController();
   GroupFilter groupFilter = GroupFilter();
   List<GroupListView> currentGroupList = [];
   List<GroupSortableField> sortKeys = [];
 
-  // group sorting options
-  Map<SortOrder?, String> sortOrderToPath = const {
-    null: 'images/svgs/sort-solid.svg',
-    SortOrder.ASC: 'images/svgs/sort-up-solid.svg',
-    SortOrder.DESC: 'images/svgs/sort-down-solid.svg'
-  };
-  Map<GroupSortableFieldsEnum, SortOrder?> sortableEnumToSortOrderMap = {
-    GroupSortableFieldsEnum.name: null,
-    GroupSortableFieldsEnum.category: null,
-  };
   ScrollController mainController = ScrollController();
-  ScrollController tableController = ScrollController();
   int initialLabelIndex = 0;
   bool _showFilters = false;
   // group filter options
 
   List<GroupCategory> selectedGroupCategories = [];
 
-  bool onlyShowSystemResource = false;
-  bool donNotShowSystemResource = false;
 
   int selectedPageNum = 1;
   int totalPageNum = 0;
@@ -72,11 +57,9 @@ class _GroupViewState extends State<GroupView> {
   @override
   void dispose() {
     routeNotifier.removeListener(_refreshWhenListRouteIsActive);
-    scrollController.dispose();
-    horizontalController.dispose();
     mainController.dispose();
-    tableController.dispose();
     searchNameController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -98,7 +81,7 @@ class _GroupViewState extends State<GroupView> {
         sortKeys: sortKeys,
         groupFilter: groupFilter);
     Future<ListGroupResponse?> listGroupResponse =
-        getIt<GroupDao>().listGroups(listGroupRequest);
+        _controller.listGroups(listGroupRequest);
 
     listGroupResponse.then((value) {
       if (!mounted) return;
@@ -134,9 +117,11 @@ class _GroupViewState extends State<GroupView> {
                                 _createControlPanel(context, isNarrow: false)),
                     const SizedBox(height: 10),
                     Expanded(
-                      child: isNarrow
-                          ? _buildMobileGroupCards(context)
-                          : _buildDesktopGroupCards(context),
+                      child: GroupRoster(
+                        groups: currentGroupList,
+                        controller: mainController,
+                        isNarrow: isNarrow,
+                      ),
                     ),
                     const SizedBox(height: 15),
                     if (totalPageNum > 1)
@@ -572,483 +557,5 @@ class _GroupViewState extends State<GroupView> {
             ],
           )
         ]);
-  }
-
-  // ── Mobile: card-based group list ─────────────────────────────────────
-
-  Widget _buildMobileGroupCards(BuildContext context) {
-    final categoryMap = <GroupCategory, String>{
-      GroupCategory.marine: AppLocalizations.of(context)!.marine,
-      GroupCategory.pirate: AppLocalizations.of(context)!.pirate,
-      GroupCategory.underWorld: AppLocalizations.of(context)!.underworld,
-      GroupCategory.government: AppLocalizations.of(context)!.worldGovernment,
-      GroupCategory.group: AppLocalizations.of(context)!.group,
-      GroupCategory.other: AppLocalizations.of(context)!.otherType,
-      GroupCategory.revolutionArmy:
-          AppLocalizations.of(context)!.revolutionaryArmy,
-    };
-
-    if (currentGroupList.isEmpty) {
-      return Center(
-        child: Text(AppLocalizations.of(context)!.empty,
-            style: OnepieceFonts.contentStyle),
-      );
-    }
-
-    return ListView.builder(
-      controller: mainController,
-      itemCount: currentGroupList.length,
-      itemBuilder: (context, index) {
-        final group = currentGroupList[index];
-        final isEven = index.isEven;
-
-        return Card(
-          color: isEven ? OnepieceColors.liteFancyGreen : Colors.white,
-          margin: const EdgeInsets.only(bottom: 8),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(10),
-            onTap: () => context.goNamed('groupDetails',
-                extra: group.id,
-                pathParameters: {
-                  'name': I18nHelper.getDisplayNameFromI18n(group.name)
-                }),
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Top row: image + name + category
-                  Row(
-                    children: [
-                      RepaintBoundary(
-                        child: ImageLazyLoader(
-                          key: ValueKey(group.imageUri),
-                          uriProvider: () => group.imageUri!,
-                          width: 44,
-                          borderWidth: 1.5,
-                          borderRadios: 5,
-                          lazy: true,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              I18nHelper.getDisplayNameFromI18n(group.name),
-                              style: OnepieceFonts.headerStyle
-                                  .copyWith(fontSize: 15),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              group.creationRecord?.nickname ?? '',
-                              style: OnepieceFonts.smallContentStyle,
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color:
-                              OnepieceColors.fancyBlue.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          categoryMap[group.groupCategory] ?? '',
-                          style: OnepieceFonts.smallContentStyle.copyWith(
-                              color: OnepieceColors.fancyBlue, fontSize: 11),
-                        ),
-                      ),
-                    ],
-                  ),
-                  // Members row
-                  if (group.characterInGroup.isNotEmpty ||
-                      group.subGroups.isNotEmpty) ...[
-                    const SizedBox(height: 8),
-                    SizedBox(
-                      height: 46,
-                      child: group.groupCategory == GroupCategory.group
-                          ? _createGroupList(group.subGroups)
-                          : _createCharacterList(group.characterInGroup),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildDesktopGroupCards(BuildContext context) {
-    if (currentGroupList.isEmpty) {
-      return Center(
-        child: Text(AppLocalizations.of(context)!.empty,
-            style: OnepieceFonts.contentStyle),
-      );
-    }
-    final categoryMap = <GroupCategory, String>{
-      GroupCategory.marine: AppLocalizations.of(context)!.marine,
-      GroupCategory.pirate: AppLocalizations.of(context)!.pirate,
-      GroupCategory.underWorld: AppLocalizations.of(context)!.underworld,
-      GroupCategory.government: AppLocalizations.of(context)!.worldGovernment,
-      GroupCategory.group: AppLocalizations.of(context)!.group,
-      GroupCategory.other: AppLocalizations.of(context)!.otherType,
-      GroupCategory.revolutionArmy:
-          AppLocalizations.of(context)!.revolutionaryArmy,
-    };
-
-    return DesktopSpotlightGrid<GroupListView>(
-      items: currentGroupList,
-      idOf: (group) => group.id,
-      controller: mainController,
-      cardBuilder: (context, group) => Material(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(14),
-          onTap: () => context.goNamed('groupDetails',
-              extra: group.id,
-              pathParameters: {
-                'name': I18nHelper.getDisplayNameFromI18n(group.name)
-              }),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(children: [
-                  ImageLazyLoader(
-                    key: ValueKey(group.imageUri),
-                    uriProvider: () => group.imageUri!,
-                    width: 54,
-                    borderWidth: 1.5,
-                    borderRadios: 10,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          I18nHelper.getDisplayNameFromI18n(group.name),
-                          style: OnepieceFonts.contentStyleBold.copyWith(
-                              color: OnepieceColors.deepFancyBlue,
-                              fontSize: 17),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Text(group.creationRecord?.nickname ?? '',
-                            style: OnepieceFonts.smallContentStyle),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: OnepieceColors.fancyBlue.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(categoryMap[group.groupCategory] ?? '',
-                        style: OnepieceFonts.boldFancySmallFont),
-                  ),
-                ]),
-                const SizedBox(height: 12),
-                SizedBox(
-                  height: 48,
-                  child: group.groupCategory == GroupCategory.group
-                      ? _createGroupList(group.subGroups)
-                      : _createCharacterList(group.characterInGroup),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ignore: unused_element
-  DataTable _createGroupTable(BuildContext context) {
-    return DataTable(
-      showCheckboxColumn: false,
-      showBottomBorder: true,
-      headingRowHeight: 50,
-      border: const TableBorder(
-          top: BorderSide(color: OnepieceColors.themeColor),
-          bottom: BorderSide(color: OnepieceColors.themeColor)),
-      columns: _createColumns(),
-      rows: _createRows(context),
-      columnSpacing: 15,
-    );
-  }
-
-  List<DataColumn> _createColumns() {
-    return [
-      DataColumn(
-        label: Tooltip(
-          preferBelow: true,
-          message: AppLocalizations.of(context)!.resetSort,
-          child: ImageHelper.getIconButtonFromSvg(
-            'images/svgs/reset.svg',
-            OnepieceColors.fancyBlue,
-            25,
-            25,
-            () {
-              // filter will not be cleared
-              sortKeys = [];
-              sortableEnumToSortOrderMap = {
-                GroupSortableFieldsEnum.name: null,
-                GroupSortableFieldsEnum.category: null,
-              };
-              _search(true);
-            },
-          ),
-        ),
-      ),
-      _createSingleColumn(AppLocalizations.of(context)!.name, null, 120),
-      _createSingleColumn(AppLocalizations.of(context)!.category, null, 120),
-      _createSingleColumn(AppLocalizations.of(context)!.creator, null, 100),
-      _createSingleColumn(AppLocalizations.of(context)!.member, null, 600),
-    ];
-  }
-
-  DataColumn _createSingleColumn(String displayText,
-      GroupSortableFieldsEnum? groupSortableFieldsEnum, double? width) {
-    return DataColumn(
-      label: InkWell(
-        hoverColor: Colors.transparent,
-        splashColor: Colors.transparent,
-        onTap: groupSortableFieldsEnum == null
-            ? null
-            : () {
-                setState(() {
-                  var sortOrder =
-                      sortableEnumToSortOrderMap[groupSortableFieldsEnum];
-                  var sortKey = groupSortableFieldsEnum;
-                  if (sortOrder == null) {
-                    sortOrder = SortOrder.ASC;
-                  } else if (sortOrder == SortOrder.ASC) {
-                    sortOrder = SortOrder.DESC;
-                  } else {
-                    sortOrder = null;
-                  }
-                  sortableEnumToSortOrderMap[groupSortableFieldsEnum] =
-                      sortOrder;
-                  sortKeys.removeWhere((element) => element.sortKey == sortKey);
-                  if (sortOrder != null) {
-                    sortKeys.insert(
-                        0,
-                        GroupSortableField(
-                            sortKey: sortKey, sortOrder: sortOrder));
-                  }
-                  _search(false);
-                });
-              },
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(5, 10, 0, 10),
-          child: SizedBox(
-            width: width,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Text(
-                  displayText,
-                  style: sortableEnumToSortOrderMap[groupSortableFieldsEnum] ==
-                          null
-                      ? OnepieceFonts.tableHeaderStyle
-                      : OnepieceFonts.selectedTableHeaderStyle,
-                ),
-                const SizedBox(
-                  width: 10,
-                ),
-                if (groupSortableFieldsEnum != null)
-                  Padding(
-                    padding: const EdgeInsets.all(5.0),
-                    child: ImageHelper.getSvgIconWithColor(
-                      sortOrderToPath[
-                          sortableEnumToSortOrderMap[groupSortableFieldsEnum]]!,
-                      12,
-                      12,
-                      sortableEnumToSortOrderMap[groupSortableFieldsEnum] ==
-                              null
-                          ? Colors.grey
-                          : OnepieceColors.themeColor,
-                    ),
-                  )
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  List<DataRow> _createRows(BuildContext context) {
-    Map<GroupCategory, String> enumValueToDisplayValue =
-        <GroupCategory, String>{
-      GroupCategory.marine: AppLocalizations.of(context)!.marine,
-      GroupCategory.pirate: AppLocalizations.of(context)!.pirate,
-      GroupCategory.underWorld: AppLocalizations.of(context)!.underworld,
-      GroupCategory.government: AppLocalizations.of(context)!.worldGovernment,
-      GroupCategory.group: AppLocalizations.of(context)!.group,
-      GroupCategory.other: AppLocalizations.of(context)!.otherType,
-      GroupCategory.revolutionArmy:
-          AppLocalizations.of(context)!.revolutionaryArmy,
-    };
-    return currentGroupList
-        .asMap()
-        .entries
-        .map(
-          (entry) => DataRow(
-            color: WidgetStateProperty.resolveWith<Color?>(
-                (Set<WidgetState> states) {
-              if (entry.key.isEven) {
-                return OnepieceColors
-                    .liteFancyGreen; // Use whatever color you need for even rows
-              }
-              return null; // Use default (transparent) color for odd rows
-            }),
-            onSelectChanged: (value) {
-              context.goNamed('groupDetails',
-                  extra: entry.value.id,
-                  pathParameters: {
-                    'name': I18nHelper.getDisplayNameFromI18n(entry.value.name)
-                  });
-            },
-            cells: [
-              DataCell(
-                Padding(
-                    padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                    child: RepaintBoundary(
-                      child: ImageLazyLoader(
-                          key: ValueKey(entry.value.imageUri),
-                          uriProvider: () => entry.value.imageUri!,
-                          width: 40,
-                          borderWidth: 1.5,
-                          borderRadios: 5,
-                          lazy: true),
-                    )),
-              ),
-              DataCell(Padding(
-                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child:
-                    Text(I18nHelper.getDisplayNameFromI18n(entry.value.name)),
-              )),
-              DataCell(Padding(
-                  padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                  child: Text(
-                      enumValueToDisplayValue[entry.value.groupCategory!]!))),
-              DataCell(Padding(
-                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: Text(entry.value.creationRecord!.nickname!),
-              )),
-              DataCell(
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                  child: SizedBox(
-                    width: 700,
-                    child: entry.value.groupCategory == GroupCategory.group
-                        ? _createGroupList(entry.value.subGroups)
-                        : _createCharacterList(entry.value.characterInGroup),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        )
-        .toList();
-  }
-
-  Widget _createCharacterList(List<CharacterInGroupLite> characters) {
-    if (characters.isEmpty) {
-      return const Text("");
-    }
-    // 使用 ListView.builder 替代 SingleChildScrollView + Row
-    return ListView.builder(
-      scrollDirection: Axis.horizontal,
-      itemCount: characters.length,
-      // 提升滑动性能
-      physics: const ClampingScrollPhysics(),
-      itemBuilder: (context, index) {
-        final character = characters[index];
-        return InkWell(
-          hoverColor: Colors.transparent,
-          splashColor: Colors.transparent,
-          onTap: () {
-            context.goNamed('characterDetails',
-                extra: character.id,
-                pathParameters: {
-                  'name': I18nHelper.getDisplayNameFromI18n(character.name!)
-                });
-          },
-          child: Tooltip(
-            message: I18nHelper.getDisplayNameFromI18n(character.name),
-            preferBelow: false,
-            showDuration: const Duration(seconds: 1),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-              child: RepaintBoundary(
-                child: ImageLazyLoader(
-                    key: ValueKey(character.imageUri),
-                    uriProvider: () => character.imageUri!,
-                    width: 40,
-                    borderWidth: 1.5,
-                    borderRadios: 40,
-                    lazy: true),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _createGroupList(List<Group> groups) {
-    if (groups.isEmpty) {
-      return const Text("");
-    }
-    return ListView.builder(
-      scrollDirection: Axis.horizontal,
-      itemCount: groups.length,
-      physics: const ClampingScrollPhysics(),
-      itemBuilder: (context, index) {
-        final group = groups[index];
-        return InkWell(
-          hoverColor: Colors.transparent,
-          splashColor: Colors.transparent,
-          onTap: () {
-            context.goNamed('groupDetails', extra: group.id, pathParameters: {
-              'name': I18nHelper.getDisplayNameFromI18n(group.name!)
-            });
-          },
-          child: Tooltip(
-            message: I18nHelper.getDisplayNameFromI18n(group.name),
-            preferBelow: false,
-            showDuration: const Duration(seconds: 1),
-            child: Padding(
-                padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
-                child: RepaintBoundary(
-                  child: ImageLazyLoader(
-                      key: ValueKey(group.imageUri),
-                      uriProvider: () => group.imageUri!,
-                      width: 40,
-                      borderWidth: 1.5,
-                      borderRadios: 3,
-                      lazy: true),
-                )),
-          ),
-        );
-      },
-    );
   }
 }

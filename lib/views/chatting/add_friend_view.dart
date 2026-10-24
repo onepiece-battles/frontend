@@ -7,7 +7,7 @@ import '../../app_router.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
 import '../../l10n/app_localizations.dart';
-import '../../repository/user_dao.dart';
+import 'add_friend_controller.dart';
 import 'widgets/chat_user_search_widgets.dart';
 
 Timer? _timer;
@@ -22,6 +22,7 @@ class AddFriendView extends StatefulWidget {
 class _AddFriendViewState extends State<AddFriendView> {
   final TextEditingController searchUserController = TextEditingController();
   final ScrollController userListController = ScrollController();
+  final AddFriendController _controller = AddFriendController();
   List<User> users = [];
   String selectedUserId = "";
   UserFilter userFilter = UserFilter();
@@ -31,6 +32,7 @@ class _AddFriendViewState extends State<AddFriendView> {
     _timer?.cancel();
     searchUserController.dispose();
     userListController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -76,7 +78,7 @@ class _AddFriendViewState extends State<AddFriendView> {
                           sortKeys: [],
                           userFilter: userFilter,
                         );
-                        getIt<UserDao>()
+                        _controller
                             .listUser(listUserRequest)
                             .then((value) {
                           if (!mounted) return;
@@ -137,7 +139,7 @@ class _AddFriendViewState extends State<AddFriendView> {
                             ? null
                             : () {
                                 final navigator = Navigator.of(context);
-                                getIt<UserDao>()
+                                _controller
                                     .addFriend(AddFriendRequest(
                                         friendId: selectedUserId))
                                     .then((value) {

@@ -197,7 +197,6 @@ class CharacterGroupsSection extends StatelessWidget {
                             Padding(
                                 padding: const EdgeInsets.only(right: 6),
                                 child: ImageLazyLoader(
-                                    key: UniqueKey(),
                                     uriProvider: () => currentGroup.imageUri!,
                                     width: 50,
                                     borderWidth: 2,
