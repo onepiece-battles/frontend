@@ -270,10 +270,16 @@ class ChatNotifier with ChangeNotifier {
       _insertMessageWithoutNotify(latestMessage);
     }
 
-    // New list: old duplicate removed, update inserted at top
-    final List<Chat> newChats = List<Chat>.from(_chats);
-    newChats.removeWhere((e) => e.id == update.id);
-    newChats.insert(0, update);
+    // Old duplicate removed, then the chat is placed in its correct
+    // recency-sorted position (most recent first) rather than blindly at the
+    // top. Blind insert(0) per frame made the initial WebSocket chat sync
+    // order the sidebar by arrival order, which drifted the auto-selected chat
+    // to the bottom and shuffled the list; sorting keeps it stable and
+    // consistent with refreshChats().
+    final List<Chat> newChats = List<Chat>.from(_chats)
+      ..removeWhere((e) => e.id == update.id)
+      ..add(update)
+      ..sort(_compareChatsByLatestMessage);
     _chats = newChats;
     _chatListVersion++;
     notifyListeners();
