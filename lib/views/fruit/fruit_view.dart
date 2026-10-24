@@ -220,10 +220,10 @@ class _FruitViewState extends State<FruitView> {
                     floatingLabelBehavior: FloatingLabelBehavior.never,
                     disabledBorder: const OutlineInputBorder(
                         borderSide:
-                            BorderSide(color: OnepieceColors.menuHoverColor)),
+                            BorderSide(color: OnepieceColors.separator)),
                     enabledBorder: const OutlineInputBorder(
                         borderSide:
-                            BorderSide(color: OnepieceColors.menuHoverColor)),
+                            BorderSide(color: OnepieceColors.separator)),
                     focusedBorder: const OutlineInputBorder(
                         borderSide: BorderSide(
                             color: OnepieceColors.fancyGreen, width: 1.5)),
@@ -255,7 +255,7 @@ class _FruitViewState extends State<FruitView> {
                   initialLabelIndex: initialLabelIndex,
                   activeBgColor: const [OnepieceColors.fancyBlue],
                   activeFgColor: Colors.white,
-                  inactiveBgColor: OnepieceColors.liteFancyGreen,
+                  inactiveBgColor: OnepieceColors.surface,
                   inactiveFgColor: Colors.grey[600],
                   totalSwitches: 4,
                   labels: [
@@ -330,10 +330,10 @@ class _FruitViewState extends State<FruitView> {
                         floatingLabelBehavior: FloatingLabelBehavior.never,
                         disabledBorder: const OutlineInputBorder(
                             borderSide: BorderSide(
-                                color: OnepieceColors.menuHoverColor)),
+                                color: OnepieceColors.separator)),
                         enabledBorder: const OutlineInputBorder(
                             borderSide: BorderSide(
-                                color: OnepieceColors.menuHoverColor)),
+                                color: OnepieceColors.separator)),
                         focusedBorder: const OutlineInputBorder(
                             borderSide: BorderSide(
                                 color: OnepieceColors.fancyGreen, width: 1.5)),
@@ -357,7 +357,7 @@ class _FruitViewState extends State<FruitView> {
                 initialLabelIndex: initialLabelIndex,
                 activeBgColor: const [OnepieceColors.fancyBlue],
                 activeFgColor: Colors.white,
-                inactiveBgColor: OnepieceColors.liteFancyGreen,
+                inactiveBgColor: OnepieceColors.surface,
                 inactiveFgColor: Colors.grey[600],
                 totalSwitches: 4,
                 labels: [
@@ -438,8 +438,8 @@ class _FruitViewState extends State<FruitView> {
             height: 35,
             width: 250,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(3),
-              color: OnepieceColors.liteFancyGreen,
+              borderRadius: BorderRadius.circular(10),
+              color: OnepieceColors.surface,
             )),
         menuItemStyleData: const MenuItemStyleData(
           height: 35,

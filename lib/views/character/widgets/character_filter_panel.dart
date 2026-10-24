@@ -100,10 +100,10 @@ class _CharacterFilterPanelState extends State<CharacterFilterPanel> {
                       floatingLabelBehavior: FloatingLabelBehavior.never,
                       disabledBorder: const OutlineInputBorder(
                           borderSide:
-                              BorderSide(color: OnepieceColors.menuHoverColor)),
+                              BorderSide(color: OnepieceColors.separator)),
                       enabledBorder: const OutlineInputBorder(
                           borderSide:
-                              BorderSide(color: OnepieceColors.menuHoverColor)),
+                              BorderSide(color: OnepieceColors.separator)),
                       focusedBorder: const OutlineInputBorder(
                         borderSide: BorderSide(
                             color: OnepieceColors.fancyGreen, width: 1.5),
@@ -122,7 +122,7 @@ class _CharacterFilterPanelState extends State<CharacterFilterPanel> {
                 height: 35,
                 width: 35,
                 decoration: BoxDecoration(
-                  border: Border.all(color: OnepieceColors.menuHoverColor),
+                  border: Border.all(color: OnepieceColors.separator),
                   borderRadius: BorderRadius.circular(4),
                   color: _showFilters
                       ? OnepieceColors.fancyBlue.withValues(alpha: 0.1)
@@ -152,7 +152,7 @@ class _CharacterFilterPanelState extends State<CharacterFilterPanel> {
                 fontSize: 12.0,
                 initialLabelIndex: initialLabelIndex,
                 activeBgColor: const [OnepieceColors.fancyBlue],
-                inactiveBgColor: OnepieceColors.liteFancyGreen,
+                inactiveBgColor: OnepieceColors.surface,
                 inactiveFgColor: Colors.grey[600],
                 totalSwitches: 4,
                 labels: [
@@ -222,14 +222,7 @@ class _CharacterFilterPanelState extends State<CharacterFilterPanel> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.black.withValues(alpha: 0.07)),
-        boxShadow: [
-          BoxShadow(
-            color: OnepieceColors.deepFancyBlue.withValues(alpha: 0.07),
-            blurRadius: 18,
-            offset: const Offset(0, 6),
-          ),
-        ],
+        border: Border.all(color: OnepieceColors.separator),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -261,15 +254,15 @@ class _CharacterFilterPanelState extends State<CharacterFilterPanel> {
                           const EdgeInsets.symmetric(horizontal: 14),
                       floatingLabelBehavior: FloatingLabelBehavior.never,
                       filled: true,
-                      fillColor: Colors.grey.withValues(alpha: 0.06),
+                      fillColor: OnepieceColors.surface,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(11),
                         borderSide: BorderSide.none,
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(11),
-                        borderSide: BorderSide(
-                            color: Colors.black.withValues(alpha: 0.07)),
+                        borderSide:
+                            const BorderSide(color: OnepieceColors.separator),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(11),
@@ -440,12 +433,10 @@ class _CharacterFilterPanelState extends State<CharacterFilterPanel> {
           height: cardStyle ? 42 : 35,
           width: width,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(cardStyle ? 11 : 3),
-            color: cardStyle
-                ? OnepieceColors.fancyBlue.withValues(alpha: 0.06)
-                : OnepieceColors.liteFancyGreen,
+            borderRadius: BorderRadius.circular(cardStyle ? 11 : 10),
+            color: OnepieceColors.surface,
             border: cardStyle
-                ? Border.all(color: Colors.black.withValues(alpha: 0.07))
+                ? Border.all(color: OnepieceColors.separator)
                 : null,
           ),
         ),

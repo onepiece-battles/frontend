@@ -96,7 +96,7 @@ class IssueRoster extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(
-                                color: OnepieceColors.liteFancyGreen
+                                color: OnepieceColors.surface
                                     .withValues(alpha: 0.6),
                                 borderRadius: BorderRadius.circular(12)),
                             child: Text(statusMap[issue.issueStatus] ?? '',

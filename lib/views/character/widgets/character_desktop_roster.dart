@@ -273,7 +273,7 @@ class CharacterDesktopRoster extends StatelessWidget {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                     decoration: BoxDecoration(
-                      color: OnepieceColors.liteFancyGreen,
+                      color: OnepieceColors.surface,
                       borderRadius: BorderRadius.circular(9),
                     ),
                     child: Row(

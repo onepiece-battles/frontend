@@ -52,7 +52,7 @@ class CharacterMobileRoster extends StatelessWidget {
         final isEven = index.isEven;
 
         return Card(
-          color: isEven ? OnepieceColors.liteFancyGreen : Colors.white,
+          color: isEven ? OnepieceColors.surface : Colors.white,
           margin: const EdgeInsets.only(bottom: 8),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -190,7 +190,7 @@ class CharacterMobileRoster extends StatelessWidget {
       margin: const EdgeInsets.only(top: 4),
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: OnepieceColors.liteFancyGreen.withValues(alpha: 0.4),
+        color: OnepieceColors.surface,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Wrap(

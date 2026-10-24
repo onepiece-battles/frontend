@@ -205,10 +205,10 @@ class _IssueViewState extends State<IssueView> {
                     floatingLabelBehavior: FloatingLabelBehavior.never,
                     disabledBorder: const OutlineInputBorder(
                         borderSide:
-                            BorderSide(color: OnepieceColors.menuHoverColor)),
+                            BorderSide(color: OnepieceColors.separator)),
                     enabledBorder: const OutlineInputBorder(
                         borderSide:
-                            BorderSide(color: OnepieceColors.menuHoverColor)),
+                            BorderSide(color: OnepieceColors.separator)),
                     focusedBorder: const OutlineInputBorder(
                         borderSide:
                             BorderSide(color: OnepieceColors.fancyGreen)),
@@ -239,10 +239,10 @@ class _IssueViewState extends State<IssueView> {
                   floatingLabelBehavior: FloatingLabelBehavior.never,
                   disabledBorder: const OutlineInputBorder(
                       borderSide:
-                          BorderSide(color: OnepieceColors.menuHoverColor)),
+                          BorderSide(color: OnepieceColors.separator)),
                   enabledBorder: const OutlineInputBorder(
                       borderSide:
-                          BorderSide(color: OnepieceColors.menuHoverColor)),
+                          BorderSide(color: OnepieceColors.separator)),
                   focusedBorder: const OutlineInputBorder(
                       borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
                   prefixIcon: const Icon(Icons.search, size: 20),
@@ -264,10 +264,10 @@ class _IssueViewState extends State<IssueView> {
                   floatingLabelBehavior: FloatingLabelBehavior.never,
                   disabledBorder: const OutlineInputBorder(
                       borderSide:
-                          BorderSide(color: OnepieceColors.menuHoverColor)),
+                          BorderSide(color: OnepieceColors.separator)),
                   enabledBorder: const OutlineInputBorder(
                       borderSide:
-                          BorderSide(color: OnepieceColors.menuHoverColor)),
+                          BorderSide(color: OnepieceColors.separator)),
                   focusedBorder: const OutlineInputBorder(
                       borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
                   prefixIcon: const Icon(Icons.search, size: 20),
@@ -298,8 +298,8 @@ class _IssueViewState extends State<IssueView> {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 height: 35,
                 decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(3),
-                    color: OnepieceColors.liteFancyGreen)),
+                    borderRadius: BorderRadius.circular(10),
+                    color: OnepieceColors.surface)),
             menuItemStyleData: const MenuItemStyleData(height: 35),
             items: IssueType.values
                 .map((type) => DropdownMenuItem<IssueType>(
@@ -423,10 +423,10 @@ class _IssueViewState extends State<IssueView> {
                   floatingLabelBehavior: FloatingLabelBehavior.never,
                   disabledBorder: const OutlineInputBorder(
                       borderSide:
-                          BorderSide(color: OnepieceColors.menuHoverColor)),
+                          BorderSide(color: OnepieceColors.separator)),
                   enabledBorder: const OutlineInputBorder(
                       borderSide:
-                          BorderSide(color: OnepieceColors.menuHoverColor)),
+                          BorderSide(color: OnepieceColors.separator)),
                   focusedBorder: const OutlineInputBorder(
                       borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
                   prefixIcon: const Icon(Icons.search),
@@ -450,10 +450,10 @@ class _IssueViewState extends State<IssueView> {
                   floatingLabelBehavior: FloatingLabelBehavior.never,
                   disabledBorder: const OutlineInputBorder(
                       borderSide:
-                          BorderSide(color: OnepieceColors.menuHoverColor)),
+                          BorderSide(color: OnepieceColors.separator)),
                   enabledBorder: const OutlineInputBorder(
                       borderSide:
-                          BorderSide(color: OnepieceColors.menuHoverColor)),
+                          BorderSide(color: OnepieceColors.separator)),
                   focusedBorder: const OutlineInputBorder(
                       borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
                   prefixIcon: const Icon(Icons.search),
@@ -477,10 +477,10 @@ class _IssueViewState extends State<IssueView> {
                   floatingLabelBehavior: FloatingLabelBehavior.never,
                   disabledBorder: const OutlineInputBorder(
                       borderSide:
-                          BorderSide(color: OnepieceColors.menuHoverColor)),
+                          BorderSide(color: OnepieceColors.separator)),
                   enabledBorder: const OutlineInputBorder(
                       borderSide:
-                          BorderSide(color: OnepieceColors.menuHoverColor)),
+                          BorderSide(color: OnepieceColors.separator)),
                   focusedBorder: const OutlineInputBorder(
                       borderSide: BorderSide(color: OnepieceColors.fancyGreen)),
                   prefixIcon: const Icon(Icons.search),
