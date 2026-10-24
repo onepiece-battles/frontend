@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:one_piece_battles_flutter/components/chat_image_viewer.dart';
 import 'package:one_piece_battles_flutter/components/chat_notifier.dart';
 import 'package:one_piece_battles_flutter/components/original_image_loader.dart';
 import 'package:one_piece_battles_flutter/components/square_image_loader.dart';
@@ -255,9 +256,17 @@ class MessageItem extends StatelessWidget {
                   // Gap between text and image
                   if (hasText && hasImage) const SizedBox(height: 6),
                   if (hasImage)
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: _buildMessageImage(message.imageContentUri!, 200),
+                    GestureDetector(
+                      // Tap to open the full-screen zoomable viewer; the
+                      // long-press menu still comes from the bubble's outer
+                      // GestureDetector.
+                      onTap: () => showChatImageViewer(
+                          context, message.imageContentUri!),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child:
+                            _buildMessageImage(message.imageContentUri!, 200),
+                      ),
                     ),
                 ],
               ),
@@ -311,7 +320,11 @@ class MessageItem extends StatelessWidget {
                 style: const TextStyle(fontSize: 10, color: Colors.white),
               ),
             if (preMessage!.imageContentUri != null)
-              _buildMessageImage(preMessage!.imageContentUri!, 100)
+              GestureDetector(
+                onTap: () => showChatImageViewer(
+                    context, preMessage!.imageContentUri!),
+                child: _buildMessageImage(preMessage!.imageContentUri!, 100),
+              )
           ],
         ));
   }

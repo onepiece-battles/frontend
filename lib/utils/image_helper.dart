@@ -151,6 +151,17 @@ class ImageHelper {
     });
   }
 
+  /// Public, web-safe raster image for already-decoded bytes, used by the
+  /// full-screen chat image viewer so it shares the exact same decode path as
+  /// inline images (Image.memory off web, data-URI Image.network on web —
+  /// Image.memory is unreliable on web for some encodings).
+  static Widget rasterImage(
+    Uint8List imageData, {
+    BoxFit? fit,
+    ImageErrorWidgetBuilder? errorBuilder,
+  }) =>
+      _buildRasterImage(imageData, fit: fit, errorBuilder: errorBuilder);
+
   static Widget _buildRasterImage(
     Uint8List imageData, {
     BoxFit? fit,
