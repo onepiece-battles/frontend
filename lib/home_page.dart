@@ -347,7 +347,7 @@ class _SideMenuState extends State<SideMenu> {
     if (widget.isDrawer) {
       return SafeArea(
         child: Container(
-          color: OnepieceColors.menuBackgroundColor,
+          color: Colors.white,
           child: Column(
             children: [
               _buildHeader(context, isExpanded),
@@ -355,19 +355,10 @@ class _SideMenuState extends State<SideMenu> {
                 child: ListView(
                   padding: EdgeInsets.zero,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(8, 10, 0, 10),
-                      child: Text(AppLocalizations.of(context)!.route,
-                          style: const TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.w800)),
-                    ),
+                    _buildSectionLabel(AppLocalizations.of(context)!.route),
                     _buildResourceList(context, isExpanded),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(8, 20, 0, 10),
-                      child: Text(AppLocalizations.of(context)!.user,
-                          style: const TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.w800)),
-                    ),
+                    _buildSectionLabel(AppLocalizations.of(context)!.user,
+                        top: 20),
                     _buildUserActions(context, isExpanded),
                     const SizedBox(height: 40),
                   ],
@@ -385,7 +376,12 @@ class _SideMenuState extends State<SideMenu> {
       children: [
         Container(
           width: effectiveDrawerWidth,
-          color: OnepieceColors.menuBackgroundColor,
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            border: Border(
+              right: BorderSide(color: OnepieceColors.separator, width: 0.5),
+            ),
+          ),
           child: Column(
             children: [
               _buildHeader(context, isExpanded),
@@ -394,20 +390,11 @@ class _SideMenuState extends State<SideMenu> {
                   padding: EdgeInsets.zero,
                   children: [
                     if (isExpanded)
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(8, 10, 0, 10),
-                        child: Text(AppLocalizations.of(context)!.route,
-                            style: const TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.w800)),
-                      ),
+                      _buildSectionLabel(AppLocalizations.of(context)!.route),
                     _buildResourceList(context, isExpanded),
                     if (isExpanded)
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(8, 20, 0, 10),
-                        child: Text(AppLocalizations.of(context)!.user,
-                            style: const TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.w800)),
-                      ),
+                      _buildSectionLabel(AppLocalizations.of(context)!.user,
+                          top: 20),
                     _buildUserActions(context, isExpanded),
                     const SizedBox(height: 40), // Bottom padding
                   ],
@@ -473,48 +460,49 @@ class _SideMenuState extends State<SideMenu> {
       children: [
         Container(
           width: double.infinity,
-          height: 180,
-          color: OnepieceColors.deepFancyBlue,
+          color: Colors.white,
+          padding: EdgeInsets.fromLTRB(
+              isExpanded ? 12 : 8, isExpanded ? 16 : 40, 12, 12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
-                padding: EdgeInsets.fromLTRB(
-                    isExpanded ? 8 : 8, isExpanded ? 15 : 42, 0, 0),
-                child: Row(
-                  children: [
-                    _getUserNavigation(context),
-                    if (isExpanded)
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.only(right: 38),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 8),
-                                child: Text(getIt<User>().nickname,
-                                    style: OnepieceFonts.headerStyleWhite,
-                                    maxLines: 1),
-                              ),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 8.0),
-                                child: Text(getIt<User>().username,
-                                    style: OnepieceFonts.contentStyleWhite,
-                                    maxLines: 1),
-                              ),
-                            ],
-                          ),
+              Row(
+                children: [
+                  _getUserNavigation(context),
+                  if (isExpanded)
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 12, right: 30),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(getIt<User>().nickname,
+                                style: const TextStyle(
+                                  color: OnepieceColors.primaryLabel,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis),
+                            const SizedBox(height: 2),
+                            Text(getIt<User>().username,
+                                style: const TextStyle(
+                                  color: OnepieceColors.secondaryLabel,
+                                  fontSize: 13,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis),
+                          ],
                         ),
                       ),
-                  ],
-                ),
+                    ),
+                ],
               ),
-              const Spacer(),
+              const SizedBox(height: 16),
               _buildSearchButton(context, isExpanded),
-              const SizedBox(height: 15),
+              const SizedBox(height: 12),
+              const Divider(
+                  height: 1, thickness: 0.5, color: OnepieceColors.separator),
             ],
           ),
         ),
@@ -545,25 +533,19 @@ class _SideMenuState extends State<SideMenu> {
     return Tooltip(
       message: tooltip,
       child: Material(
-        color: isExpanded && !widget.isDrawer
-            ? Colors.white.withValues(alpha: 0.12)
-            : OnepieceColors.fancyBlue,
+        color: OnepieceColors.surface,
         borderRadius: BorderRadius.circular(8),
-        elevation: isExpanded && !widget.isDrawer ? 0 : 3,
-        shadowColor: Colors.black.withValues(alpha: 0.25),
         child: InkWell(
           borderRadius: BorderRadius.circular(8),
-          hoverColor: isExpanded && !widget.isDrawer
-              ? Colors.white.withValues(alpha: 0.16)
-              : Colors.white.withValues(alpha: 0.18),
+          hoverColor: OnepieceColors.separator,
           onTap: _togglePinnedNarrow,
           child: SizedBox(
             width: isExpanded ? 26 : 24,
             height: isExpanded ? 26 : 24,
             child: Icon(
               icon,
-              size: isExpanded ? 15 : 14,
-              color: Colors.white,
+              size: isExpanded ? 16 : 15,
+              color: OnepieceColors.secondaryLabel,
             ),
           ),
         ),
@@ -572,27 +554,33 @@ class _SideMenuState extends State<SideMenu> {
   }
 
   Widget _buildSearchButton(BuildContext context, bool isExpanded) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: Material(
-        color: OnepieceColors.fancyGreen,
-        borderRadius: BorderRadius.circular(3.0),
-        child: InkWell(
-          onTap: widget.onSearchRequested,
-          child: Container(
-            height: 33,
-            padding: EdgeInsets.symmetric(horizontal: isExpanded ? 6.0 : 2.0),
-            child: Row(
-              mainAxisAlignment: isExpanded
-                  ? MainAxisAlignment.spaceBetween
-                  : MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.search, size: 20, color: Colors.white),
-                if (isExpanded)
-                  Text(AppLocalizations.of(context)!.searchResourceShortcut,
-                      style: OnepieceFonts.superSmallContentStyleWhite),
+    return Material(
+      color: OnepieceColors.surface,
+      borderRadius: BorderRadius.circular(10),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(10),
+        onTap: widget.onSearchRequested,
+        child: Container(
+          height: 38,
+          padding: EdgeInsets.symmetric(horizontal: isExpanded ? 12.0 : 0),
+          child: Row(
+            mainAxisAlignment:
+                isExpanded ? MainAxisAlignment.start : MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.search,
+                  size: 19, color: OnepieceColors.secondaryLabel),
+              if (isExpanded) ...[
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    AppLocalizations.of(context)!.searchResourceShortcut,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                        color: OnepieceColors.secondaryLabel, fontSize: 13),
+                  ),
+                ),
               ],
-            ),
+            ],
           ),
         ),
       ),
@@ -711,7 +699,7 @@ class _SideMenuState extends State<SideMenu> {
               borderRadius: BorderRadius.circular(8),
               child: InkWell(
                 borderRadius: BorderRadius.circular(8),
-                hoverColor: OnepieceColors.liteFancyBlue,
+                hoverColor: OnepieceColors.surface,
                 onTap: () => _showFeedbackDialog(context),
                 child: const SizedBox(
                   width: 42,
@@ -754,6 +742,22 @@ class _SideMenuState extends State<SideMenu> {
     );
   }
 
+  /// Muted, uppercase section label (Apple-style grouped-list subheader).
+  Widget _buildSectionLabel(String text, {double top = 10}) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(20, top, 0, 8),
+      child: Text(
+        text.toUpperCase(),
+        style: const TextStyle(
+          color: OnepieceColors.secondaryLabel,
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.6,
+        ),
+      ),
+    );
+  }
+
   Widget _buildMenuItem({
     required BuildContext context,
     required Widget icon,
@@ -779,9 +783,9 @@ class _SideMenuState extends State<SideMenu> {
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             leading: icon,
             selected: isSelected,
-            selectedTileColor: OnepieceColors.fancyBlue,
+            selectedTileColor: OnepieceColors.surface,
             onTap: onTap,
-            hoverColor: OnepieceColors.liteFancyBlue,
+            hoverColor: OnepieceColors.surface,
             title: isExpanded
                 ? Text(
                     text,
@@ -789,7 +793,11 @@ class _SideMenuState extends State<SideMenu> {
                     overflow: TextOverflow.clip,
                     style: OnepieceFonts.contentStyle.copyWith(
                       fontSize: 16,
-                      color: isSelected ? Colors.white : Colors.black,
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.w400,
+                      color: isSelected
+                          ? OnepieceColors.fancyBlue
+                          : OnepieceColors.primaryLabel,
                     ),
                   )
                 : const SizedBox(),
@@ -985,14 +993,13 @@ class _TopNavigationBarState extends State<TopNavigationBar> {
     final TextStyle clickableStyle =
         OnepieceFonts.navigationTopBarStyleClickable.copyWith(
       fontSize: isMobile ? 12 : 16,
-      decoration: TextDecoration.underline,
-      decorationColor: OnepieceColors.fancyBlue,
+      fontWeight: FontWeight.w600,
     );
     final TextStyle currentStyle =
         OnepieceFonts.navigationTopBarStyleBold.copyWith(
       fontSize: isMobile ? 12 : 16,
-      decoration: TextDecoration.underline,
-      decorationColor: Colors.black54,
+      fontWeight: FontWeight.w600,
+      color: OnepieceColors.primaryLabel,
     );
 
     // Map definitions
@@ -1043,13 +1050,7 @@ class _TopNavigationBarState extends State<TopNavigationBar> {
             icon: Icon(
               Icons.home,
               color: OnepieceColors.fancyBlue,
-              size: isMobile ? 22 : 30,
-              shadows: const [
-                Shadow(
-                    offset: Offset(2.0, 2.0),
-                    blurRadius: 3.0,
-                    color: Colors.grey)
-              ],
+              size: isMobile ? 22 : 28,
             ),
           ),
         );
@@ -1068,7 +1069,9 @@ class _TopNavigationBarState extends State<TopNavigationBar> {
           bool isLast = i == routes.length - 1;
           crumbs.add(Padding(
             padding: EdgeInsets.symmetric(horizontal: isMobile ? 2 : 5),
-            child: Icon(Icons.arrow_forward_ios, size: isMobile ? 10 : 15),
+            child: Icon(Icons.arrow_forward_ios,
+                size: isMobile ? 10 : 13,
+                color: OnepieceColors.secondaryLabel),
           ));
 
           if (!isLast) {

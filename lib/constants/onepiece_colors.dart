@@ -20,6 +20,26 @@ class OnepieceColors {
   static const menuHoverColor = Color.fromARGB(250, 209, 209, 213);
   static const menuSelectedTileColor = Color.fromARGB(250, 209, 209, 213);
 
+  // ───────────────────────────────────────────────────────────────────────
+  // Apple-style neutral palette — the clean, comfortable, premium system
+  // first shipped on the chatting page, now shared app-wide.  Use these for
+  // hairline separators, soft surface fills, and muted/primary labels so
+  // every screen reads with the same calm neutral language.  The brand blue
+  // (fancyBlue) stays the single accent for primary actions and selection.
+  // ───────────────────────────────────────────────────────────────────────
+
+  /// systemGray5 — hairline separators / borders.
+  static const separator = Color(0xFFE5E5EA);
+
+  /// systemGray6 — soft surface fill (selected rows, input fields, chips).
+  static const surface = Color(0xFFF2F2F7);
+
+  /// systemGray — secondary / muted label text.
+  static const secondaryLabel = Color(0xFF8E8E93);
+
+  /// Primary label text (near-black, softer than pure black).
+  static const primaryLabel = Color(0xFF1C1C1E);
+
   // tag colors
 
   static const fruitLogia = Color.fromARGB(225, 0, 255, 0);

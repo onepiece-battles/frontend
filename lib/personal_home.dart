@@ -271,20 +271,26 @@ class _UserHomeState extends State<UserHome> {
       margin: const EdgeInsets.fromLTRB(0, 10, 0, 8),
       color: Colors.white,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-        side: BorderSide(
-          color: OnepieceColors.menuHoverColor.withValues(alpha: 0.45),
-        ),
+        borderRadius: BorderRadius.circular(14),
+        side: const BorderSide(color: OnepieceColors.separator),
       ),
+      clipBehavior: Clip.antiAlias,
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
           initiallyExpanded: initiallyExpanded,
-          tilePadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-          childrenPadding: const EdgeInsets.fromLTRB(8, 0, 8, 10),
-          title: Text(title, style: OnepieceFonts.contentStyleBoldFancyBlue),
-          iconColor: OnepieceColors.fancyBlue,
-          collapsedIconColor: OnepieceColors.fancyBlue,
+          tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 14),
+          title: Text(
+            title,
+            style: const TextStyle(
+              color: OnepieceColors.primaryLabel,
+              fontSize: 17,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          iconColor: OnepieceColors.secondaryLabel,
+          collapsedIconColor: OnepieceColors.secondaryLabel,
           children: [child],
         ),
       ),
@@ -314,12 +320,14 @@ class _UserHomeState extends State<UserHome> {
 
   Widget _buildResourceTypeTitle(String title) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(4, 8, 4, 8),
+      padding: const EdgeInsets.fromLTRB(4, 10, 4, 8),
       child: Text(
-        title,
-        style: OnepieceFonts.smallContentStyle.copyWith(
-          color: OnepieceColors.fancyBlue,
-          fontWeight: FontWeight.w700,
+        title.toUpperCase(),
+        style: const TextStyle(
+          color: OnepieceColors.secondaryLabel,
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.6,
         ),
       ),
     );
@@ -327,10 +335,15 @@ class _UserHomeState extends State<UserHome> {
 
   Widget _getHeader(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 18.0),
+      padding: const EdgeInsets.fromLTRB(4, 20, 4, 10),
       child: Text(
         AppLocalizations.of(context)!.homePage,
-        style: OnepieceFonts.headerStyle,
+        style: const TextStyle(
+          color: OnepieceColors.primaryLabel,
+          fontSize: 28,
+          fontWeight: FontWeight.w700,
+          letterSpacing: -0.5,
+        ),
       ),
     );
   }
@@ -475,14 +488,17 @@ class _UserHomeState extends State<UserHome> {
   Widget _buildEmptyResourceStrip(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 18),
       decoration: BoxDecoration(
-        color: OnepieceColors.liteFancyBlue.withValues(alpha: 0.14),
-        borderRadius: BorderRadius.circular(8),
+        color: OnepieceColors.surface,
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
         AppLocalizations.of(context)!.empty,
-        style: OnepieceFonts.smallContentStyle,
+        style: const TextStyle(
+          color: OnepieceColors.secondaryLabel,
+          fontSize: 14,
+        ),
       ),
     );
   }
@@ -493,17 +509,11 @@ class _UserHomeState extends State<UserHome> {
     required double imgSize,
     required double borderRadius,
   }) {
-    return Card(
-      elevation: 0,
-      color: OnepieceColors.liteFancyBlue.withValues(alpha: 0.16),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-        side: BorderSide(
-          color: OnepieceColors.menuHoverColor.withValues(alpha: 0.55),
-        ),
-      ),
+    return Material(
+      color: OnepieceColors.surface,
+      borderRadius: BorderRadius.circular(14),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
-        borderRadius: BorderRadius.circular(10),
         onTap: () => context.goNamed(routeName),
         child: Padding(
           padding: const EdgeInsets.all(8),
@@ -517,20 +527,22 @@ class _UserHomeState extends State<UserHome> {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(borderRadius),
                   border: Border.all(
-                    color: OnepieceColors.fancyBlue.withValues(alpha: 0.18),
-                    width: 2,
+                    color: OnepieceColors.separator,
+                    width: 1.5,
                   ),
                 ),
-                child: Icon(
-                  Icons.question_mark,
-                  size: imgSize * 0.44,
-                  color: OnepieceColors.fancyBlue.withValues(alpha: 0.65),
+                child: const Icon(
+                  Icons.add,
+                  color: OnepieceColors.fancyBlue,
                 ),
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: 8),
               Text(
                 AppLocalizations.of(context)!.notCreated,
-                style: OnepieceFonts.smallContentStyle,
+                style: const TextStyle(
+                  color: OnepieceColors.secondaryLabel,
+                  fontSize: 13,
+                ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
@@ -548,13 +560,18 @@ class _UserHomeState extends State<UserHome> {
       required double borderRadius,
       required double imgSize,
       required VoidCallback onTap}) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(14),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
-        borderRadius: BorderRadius.circular(10),
         onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(8),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: OnepieceColors.separator),
+          ),
+          padding: const EdgeInsets.all(10),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -563,9 +580,13 @@ class _UserHomeState extends State<UserHome> {
                   width: imgSize,
                   borderWidth: 2,
                   borderRadios: borderRadius),
-              const SizedBox(height: 6),
+              const SizedBox(height: 8),
               Text(name,
-                  style: OnepieceFonts.smallContentStyle,
+                  style: const TextStyle(
+                    color: OnepieceColors.primaryLabel,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.center),
@@ -585,14 +606,19 @@ class _UserHomeState extends State<UserHome> {
       return const SizedBox.shrink();
     }
 
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(14),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
-        borderRadius: BorderRadius.circular(10),
         onTap: () => context.goNamed('battleDetails',
             extra: battle.id, pathParameters: {'id': battle.id}),
-        child: Padding(
-          padding: const EdgeInsets.all(10),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: OnepieceColors.separator),
+          ),
+          padding: const EdgeInsets.all(12),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -662,13 +688,13 @@ class _UserHomeState extends State<UserHome> {
                           ]),
                     ),
                   ]),
-              const SizedBox(height: 10),
+              const SizedBox(height: 12),
               Container(
                 decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(6),
-                    color: OnepieceColors.fancyBlue.withValues(alpha: 0.85)),
+                    borderRadius: BorderRadius.circular(10),
+                    color: OnepieceColors.fancyBlue),
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
