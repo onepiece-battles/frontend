@@ -270,7 +270,7 @@ class _CreateFruitViewState extends State<CreateFruitView> {
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: const Color(0xFFF7F9FC),
+          color: OnepieceColors.surface,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(color: const Color(0xFFE7ECF2)),
         ),
@@ -358,11 +358,11 @@ class _CreateFruitViewState extends State<CreateFruitView> {
       contentPadding: const EdgeInsets.symmetric(horizontal: 13, vertical: 13),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFFDCE4EC)),
+        borderSide: const BorderSide(color: OnepieceColors.separator),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFFDCE4EC)),
+        borderSide: const BorderSide(color: OnepieceColors.separator),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -437,8 +437,8 @@ class _CreateFruitViewState extends State<CreateFruitView> {
               width: double.infinity,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
-                color: const Color(0xFFF7F9FC),
-                border: Border.all(color: const Color(0xFFDCE4EC)),
+                color: OnepieceColors.surface,
+                border: Border.all(color: OnepieceColors.separator),
               )),
           menuItemStyleData: const MenuItemStyleData(
             height: 35,
@@ -467,13 +467,7 @@ class _CreateFruitViewState extends State<CreateFruitView> {
         child: Container(
           decoration: const BoxDecoration(
             color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Color(0x1A16324F),
-                blurRadius: 18,
-                offset: Offset(0, -4),
-              ),
-            ],
+            border: Border(top: BorderSide(color: OnepieceColors.separator, width: 0.5)),
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
