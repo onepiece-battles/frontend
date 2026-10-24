@@ -75,7 +75,7 @@ class _LoginPageState extends State<LoginPage> {
           autofocus: true,
           child: Scaffold(
             bottomNavigationBar: const ICP(),
-            backgroundColor: Colors.grey[300],
+            backgroundColor: Colors.grey[50],
             body: SafeArea(
               child: SingleChildScrollView(
                 scrollDirection: Axis.vertical,
@@ -280,7 +280,7 @@ class _LoginPageState extends State<LoginPage> {
                         onPressed: () => _visitorLogin(),
                         style: ElevatedButton.styleFrom(
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(3),
+                              borderRadius: BorderRadius.circular(10),
                             ),
                             foregroundColor: Colors.white),
                         child: Text(

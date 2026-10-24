@@ -5,8 +5,9 @@ class OnepieceButtonStyle {
   static ButtonStyle getDefaultStyle() {
     return ElevatedButton.styleFrom(
         backgroundColor: OnepieceColors.fancyBlue,
+        elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(3),
+          borderRadius: BorderRadius.circular(10),
         ),
         foregroundColor: Colors.white);
   }
@@ -14,9 +15,10 @@ class OnepieceButtonStyle {
   static ButtonStyle getFatherGroupButtonStyle() {
     return ElevatedButton.styleFrom(
         backgroundColor: OnepieceColors.fancyBlue,
+        elevation: 0,
         padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 10, 0),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(3),
+          borderRadius: BorderRadius.circular(10),
         ),
         foregroundColor: Colors.white);
   }

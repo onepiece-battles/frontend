@@ -215,12 +215,11 @@ void _showSearchDialog(BuildContext context) {
     filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
     context: context,
     builder: ((context) {
-      return Dialog(
-        backgroundColor: OnepieceColors.liteFancyGreen,
+      return const Dialog(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         alignment: Alignment.topCenter,
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-        child: const SearchPopup(),
+        child: SearchPopup(),
       );
     }),
   );

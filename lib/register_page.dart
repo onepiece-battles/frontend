@@ -64,7 +64,7 @@ class _RegisterPageState extends State<RegisterPage> {
         autofocus: true,
         child: Scaffold(
           bottomNavigationBar: const ICP(),
-          backgroundColor: Colors.grey[300],
+          backgroundColor: Colors.grey[50],
           body: SafeArea(
             child: SingleChildScrollView(
               scrollDirection: Axis.vertical,

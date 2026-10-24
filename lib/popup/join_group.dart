@@ -338,11 +338,11 @@ class _JoinGroupState extends State<JoinGroup> {
           disabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide:
-                  const BorderSide(color: OnepieceColors.menuHoverColor)),
+                  const BorderSide(color: OnepieceColors.separator)),
           enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide:
-                  const BorderSide(color: OnepieceColors.menuHoverColor)),
+                  const BorderSide(color: OnepieceColors.separator)),
           focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: const BorderSide(
@@ -595,13 +595,13 @@ class _JoinGroupState extends State<JoinGroup> {
         padding: const EdgeInsets.all(7),
         decoration: BoxDecoration(
           color: selected
-              ? OnepieceColors.liteFancyGreen.withValues(alpha: 0.65)
-              : OnepieceColors.liteFancyBlue.withValues(alpha: 0.22),
-          borderRadius: BorderRadius.circular(8),
+              ? OnepieceColors.fancyBlue.withValues(alpha: 0.10)
+              : OnepieceColors.surface,
+          borderRadius: BorderRadius.circular(10),
           border: Border.all(
             color: selected
-                ? OnepieceColors.fancyGreen.withValues(alpha: 0.35)
-                : OnepieceColors.menuHoverColor.withValues(alpha: 0.5),
+                ? OnepieceColors.fancyBlue
+                : OnepieceColors.separator,
           ),
         ),
         child: Stack(

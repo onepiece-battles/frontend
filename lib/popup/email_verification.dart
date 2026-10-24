@@ -156,7 +156,7 @@ class _EmailVerificationState extends State<EmailVerification> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 decoration: BoxDecoration(
-                  color: OnepieceColors.liteFancyGreen.withValues(alpha: 0.35),
+                  color: OnepieceColors.surface,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
                     color:
@@ -207,7 +207,7 @@ class _EmailVerificationState extends State<EmailVerification> {
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                       borderSide: const BorderSide(
-                        color: OnepieceColors.menuHoverColor,
+                        color: OnepieceColors.separator,
                       ),
                     ),
                     focusedBorder: OutlineInputBorder(
