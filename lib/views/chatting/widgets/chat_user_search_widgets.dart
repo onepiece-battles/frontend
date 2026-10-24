@@ -8,23 +8,26 @@ import '../../../constants/onepiece_fonts.dart';
 InputDecoration chatUserSearchDecoration(String label) {
   return InputDecoration(
     isDense: true,
+    filled: true,
+    fillColor: OnepieceColors.surface,
     contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
     floatingLabelBehavior: FloatingLabelBehavior.never,
     disabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8),
-      borderSide: const BorderSide(color: OnepieceColors.menuHoverColor),
+      borderRadius: BorderRadius.circular(10),
+      borderSide: BorderSide.none,
     ),
     enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8),
-      borderSide: const BorderSide(color: OnepieceColors.menuHoverColor),
+      borderRadius: BorderRadius.circular(10),
+      borderSide: BorderSide.none,
     ),
     focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8),
-      borderSide: const BorderSide(color: OnepieceColors.fancyGreen, width: 2),
+      borderRadius: BorderRadius.circular(10),
+      borderSide: const BorderSide(color: OnepieceColors.fancyBlue, width: 1.5),
     ),
-    prefixIcon: const Icon(Icons.search, size: 19),
+    prefixIcon: const Icon(Icons.search, size: 19, color: OnepieceColors.secondaryLabel),
     labelText: label,
-    labelStyle: OnepieceFonts.smallContentStyle,
+    labelStyle:
+        const TextStyle(color: OnepieceColors.secondaryLabel, fontSize: 14),
   );
 }
 
@@ -51,22 +54,22 @@ class ChatUserSearchCard extends StatelessWidget {
       elevation: selected ? 2 : 0,
       margin: const EdgeInsets.only(bottom: 8),
       color: disabled
-          ? OnepieceColors.menuHoverColor.withValues(alpha: 0.25)
+          ? OnepieceColors.surface
           : selected
-              ? OnepieceColors.liteFancyBlue.withValues(alpha: 0.7)
+              ? OnepieceColors.fancyBlue.withValues(alpha: 0.10)
               : Colors.white,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(10),
         side: BorderSide(
           color: selected
-              ? OnepieceColors.fancyBlue.withValues(alpha: 0.35)
-              : OnepieceColors.menuHoverColor.withValues(alpha: 0.5),
+              ? OnepieceColors.fancyBlue
+              : OnepieceColors.separator,
         ),
       ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(10),
         hoverColor:
-            disabled ? Colors.transparent : OnepieceColors.liteFancyBlue,
+            disabled ? Colors.transparent : OnepieceColors.surface,
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
