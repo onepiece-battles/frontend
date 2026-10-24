@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -36,6 +37,31 @@ class ChatNotifier with ChangeNotifier {
   ChatNotifier(this._webSocketService) {
     _incomingSubscription =
         _webSocketService.incomingMessages.listen(_handleIncomingData);
+    // On every (re)connect, tell the server what we already have so it replays
+    // only newer messages per conversation instead of the whole recent history.
+    _webSocketService.onConnected = _sendSyncCursors;
+  }
+
+  /// Sends the per-conversation sync cursors: the largest creation_record_id
+  /// (ActionRecord.id) this client already holds for each conversation. The
+  /// server pushes only messages after each cursor; conversations with no
+  /// locally-held messages are omitted, so the server falls back to a recent
+  /// batch for them (e.g. a fresh login). Optimistic (opt_) messages have no
+  /// creationRecord and are naturally skipped.
+  void _sendSyncCursors() {
+    final cursors = <String, int>{};
+    _messagesByChatId.forEach((chatId, messages) {
+      int? maxCursor;
+      for (final message in messages) {
+        final cursor = message.creationRecord?.id;
+        if (cursor != null && (maxCursor == null || cursor > maxCursor)) {
+          maxCursor = cursor;
+        }
+      }
+      if (maxCursor != null) cursors[chatId] = maxCursor;
+    });
+    _webSocketService
+        .sendMessage(jsonEncode({'type': 'SYNC', 'cursors': cursors}));
   }
 
   /// Monotonically increasing counter bumped on every chat-list mutation.
@@ -464,8 +490,10 @@ class ChatNotifier with ChangeNotifier {
   @override
   void dispose() {
     // Note: WebSocketService is a shared, app-lifetime singleton — it is not
-    // owned by this notifier, so only the subscription is torn down here.
+    // owned by this notifier, so only the subscription and our connect hook
+    // are torn down here.
     _incomingSubscription?.cancel();
+    _webSocketService.onConnected = null;
     super.dispose();
   }
 }
