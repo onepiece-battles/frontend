@@ -28,6 +28,15 @@ import 'widgets/chat_detail_drawer.dart';
 
 GetIt getIt = GetIt.instance;
 
+// ─── Apple-style neutral palette, used across the chatting page ───
+// Kept local to the chat view so the rest of the app's blue-forward palette
+// (OnepieceColors) is untouched; these are the system-gray neutrals that make
+// the chat read like Messages: hairline separators, soft fills, muted labels.
+const Color _kSeparator = Color(0xFFE5E5EA); // systemGray5 hairline
+const Color _kSurface = Color(0xFFF2F2F7); // systemGray6 fill (selected / input)
+const Color _kSecondaryText = Color(0xFF8E8E93); // systemGray secondary label
+const Color _kPrimaryText = Color(0xFF1C1C1E); // primary label
+
 class ChattingView extends StatefulWidget {
   const ChattingView({super.key});
 
@@ -77,15 +86,28 @@ class _ChatMessageScrollPosition extends ScrollPositionWithSingleContext {
 
   final _ChatMessageScrollController controller;
 
+  /// How far above the previous bottom still counts as "at the bottom" when
+  /// deciding whether late content growth should re-pin the view.
+  static const double _bottomPinSlack = 8.0;
+
   @override
   bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
     if (controller._positionAtBottomDuringLayout &&
         hasPixels &&
-        maxScrollExtent > minScrollExtent &&
-        (pixels - maxScrollExtent).abs() >= 0.5) {
-      correctPixels(maxScrollExtent);
-      super.applyContentDimensions(minScrollExtent, maxScrollExtent);
-      return false;
+        maxScrollExtent > minScrollExtent) {
+      // Only snap to the bottom when we were already sitting there: on the
+      // very first layout (no dimensions yet), or when the current offset is
+      // still at the previous bottom. This lets late content growth — a
+      // message image finishing its load and expanding from the 60px spinner
+      // to its real height — re-pin us to the newest message, while leaving a
+      // user who has deliberately scrolled up where they are.
+      final bool wasAtBottom = !hasContentDimensions ||
+          pixels >= this.maxScrollExtent - _bottomPinSlack;
+      if (wasAtBottom && (pixels - maxScrollExtent).abs() >= 0.5) {
+        correctPixels(maxScrollExtent);
+        super.applyContentDimensions(minScrollExtent, maxScrollExtent);
+        return false;
+      }
     }
     return super.applyContentDimensions(minScrollExtent, maxScrollExtent);
   }
@@ -227,10 +249,65 @@ class _ChattingViewState extends State<ChattingView> {
       _restoreScrollForChat(chatId, savedOffset, requestId);
       return; // clears _restoringScroll after the jump completes
     }
-    await WidgetsBinding.instance.endOfFrame;
-    if (!mounted || requestId != _scrollPositioningRequestId) {
-      _restoringScroll = false;
-      return;
+    // Hold the bottom-pin until layout stops growing instead of releasing it
+    // after a single frame — the first open otherwise lands above the bottom
+    // because late layout passes grow the content after the pin was released.
+    // Two regimes, because message images are the hard case:
+    final messages = _chatNotifier.getMessagesForChat(chatId);
+    final bool hasPendingImages =
+        messages.any((m) => m.imageContentUri != null);
+
+    if (hasPendingImages) {
+      // A message image renders as a fixed 60px spinner and only grows to its
+      // real height once the bytes arrive — possibly hundreds of ms later,
+      // over the network — so a "layout is stable" check can't see that the
+      // content is still going to grow. Instead keep the pin armed for a
+      // bounded wall-clock window: firmly sit at the bottom for the first few
+      // frames (the user can't have scrolled yet), then let
+      // applyContentDimensions re-snap us whenever an image finishes and grows
+      // the content (it only re-pins while we're still at the bottom, so it
+      // won't fight a user who has started scrolling up to read history).
+      final deadline =
+          DateTime.now().add(const Duration(milliseconds: 2500));
+      var frame = 0;
+      while (DateTime.now().isBefore(deadline)) {
+        await WidgetsBinding.instance.endOfFrame;
+        if (!mounted || requestId != _scrollPositioningRequestId) {
+          _restoringScroll = false;
+          return;
+        }
+        if (!scrollController.hasClients) continue;
+        if (frame < 6) {
+          final maxExtent = scrollController.position.maxScrollExtent;
+          if ((scrollController.offset - maxExtent).abs() > 0.5) {
+            scrollController.jumpTo(maxExtent);
+          }
+        }
+        frame++;
+      }
+    } else {
+      // No images: the content reaches its final height within a few frames,
+      // so re-assert the bottom each frame until maxScrollExtent is stable.
+      double lastMax = double.nan;
+      var stableFrames = 0;
+      for (var i = 0; i < 30; i++) {
+        await WidgetsBinding.instance.endOfFrame;
+        if (!mounted || requestId != _scrollPositioningRequestId) {
+          _restoringScroll = false;
+          return;
+        }
+        if (!scrollController.hasClients) continue;
+        final maxExtent = scrollController.position.maxScrollExtent;
+        if ((scrollController.offset - maxExtent).abs() > 0.5) {
+          scrollController.jumpTo(maxExtent);
+        }
+        if (maxExtent == lastMax) {
+          if (++stableFrames >= 3) break;
+        } else {
+          stableFrames = 0;
+          lastMax = maxExtent;
+        }
+      }
     }
     scrollController.endInitialBottomPositioning();
     if (scrollController.hasClients) {
@@ -564,11 +641,9 @@ class _ChattingViewState extends State<ChattingView> {
           child: _buildChatListPanel(isMobile: false),
         ),
         const VerticalDivider(
-          thickness: 1.2,
-          color: OnepieceColors.liteFancyGreen,
-          indent: 10,
-          endIndent: 8,
-          width: 2,
+          thickness: 0.5,
+          color: _kSeparator,
+          width: 1,
         ),
         Expanded(child: _buildMessagePanel(isMobile)),
       ],
@@ -628,63 +703,50 @@ class _ChattingViewState extends State<ChattingView> {
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(8, 8, 8, 6),
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: SizedBox(
-                    height: 36,
-                    child: TextFormField(
-                      controller: searchChattingController,
-                      onChanged: (value) {
-                        // Update the notifier — rebuilds only the filtered list
-                        _searchTextNotifier.value = value;
-                      },
-                      decoration: InputDecoration(
-                        isDense: true,
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 10),
-                        labelStyle: OnepieceFonts.dropDownItemStyle,
-                        floatingLabelBehavior: FloatingLabelBehavior.never,
-                        disabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(
-                              color: OnepieceColors.menuHoverColor),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(
-                              color: OnepieceColors.menuHoverColor),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(
-                              color: OnepieceColors.fancyGreen, width: 2),
-                        ),
-                        prefixIcon: const Icon(Icons.search, size: 19),
-                        labelText: AppLocalizations.of(context)!.name,
+          padding: const EdgeInsets.fromLTRB(12, 10, 8, 6),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 38,
+                  child: TextFormField(
+                    controller: searchChattingController,
+                    onChanged: (value) {
+                      // Update the notifier — rebuilds only the filtered list
+                      _searchTextNotifier.value = value;
+                    },
+                    style: const TextStyle(fontSize: 15, color: _kPrimaryText),
+                    decoration: InputDecoration(
+                      isDense: true,
+                      filled: true,
+                      fillColor: _kSurface,
+                      contentPadding: EdgeInsets.zero,
+                      floatingLabelBehavior: FloatingLabelBehavior.never,
+                      hintText: AppLocalizations.of(context)!.name,
+                      hintStyle: const TextStyle(
+                          fontSize: 15, color: _kSecondaryText),
+                      prefixIcon: const Icon(Icons.search,
+                          size: 19, color: _kSecondaryText),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide.none,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide.none,
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide.none,
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
-                ChattingOptions(context: context)
-              ],
-            ),
+              ),
+              const SizedBox(width: 6),
+              ChattingOptions(context: context)
+            ],
           ),
         ),
         Expanded(
@@ -706,166 +768,155 @@ class _ChattingViewState extends State<ChattingView> {
                 itemBuilder: (context, index) {
                   final chat = displayChats[index];
                   final isSelected = activeChatId == chat.id;
-                  return Card(
+                  return Padding(
                     // Key is crucial for reordering animations/updates
                     key: ValueKey(chat.id),
-                    elevation: isSelected ? 2 : 0,
-                    margin: const EdgeInsets.symmetric(vertical: 5),
-                    color: isSelected
-                        ? OnepieceColors.liteFancyBlue.withValues(alpha: 0.10)
-                        : Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      side: BorderSide(
-                        color: isSelected
-                            ? OnepieceColors.fancyBlue.withValues(alpha: 0.04)
-                            : OnepieceColors.menuHoverColor
-                                .withValues(alpha: 0.45),
-                      ),
-                    ),
-                    child: ListTile(
-                      title: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                    padding: const EdgeInsets.symmetric(vertical: 1),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: () {
+                          final newChatId = chat.id!;
+
+                          // If the tapped chat is already active, do nothing.
+                          if (activeConversationId == newChatId) return;
+
+                          // Handle focus & draft/scroll caching for the OLD chat.
+                          FocusScope.of(context).unfocus();
+                          if (activeConversationId.isNotEmpty) {
+                            chatIdToCachedMessage[activeConversationId] =
+                                typingController.text;
+                            if (scrollController.hasClients) {
+                              _chatNotifier.setViewScrollOffset(
+                                  activeConversationId,
+                                  scrollController.offset);
+                            }
+                          }
+
+                          // Update local state for the NEW chat.
+                          activeConversationId = newChatId;
+                          _activeChatWasAutoSelected = false;
+                          _lastProcessedChatId = ""; // Reset scroll logic
+
+                          // Restore drafts for the NEW chat.
+                          typingController.text =
+                              chatIdToCachedMessage[newChatId] ?? "";
+                          inputPreMessageNotifier.value =
+                              chatIdToRepliedMessage[newChatId];
+
+                          // Switch the active chat, then load/restore history.
+                          Provider.of<ChatNotifier>(context, listen: false)
+                              .setActiveChat(newChatId);
+                          unawaited(
+                              _loadInitialHistoryAndRestoreScroll(newChatId));
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 9),
+                          decoration: BoxDecoration(
+                            color: isSelected ? _kSurface : Colors.transparent,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              // Chat Name
+                              chat.group == true
+                                  ? getLeading(chat.members
+                                      .map((e) => e.imageUri ?? '')
+                                      .toList())
+                                  : getSingleLeading(chat),
+                              const SizedBox(width: 12),
                               Expanded(
-                                child: Text(
-                                  chatDisplayName(chat),
-                                  overflow: TextOverflow.ellipsis,
-                                  style:
-                                      OnepieceFonts.smallContentFancyBlueStyle,
-                                ),
-                              ),
-                              const SizedBox(width: 5),
-
-                              // RIGHT COLUMN: Date & Unread Badge
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  if (chat.message?.creationRecord
-                                          ?.actionTimestamp !=
-                                      null)
-                                    Text(
-                                      TimeHelper.humanDateFromTimestamp(
-                                          chat.message!.creationRecord!
-                                              .actionTimestamp!,
-                                          context),
-                                      style:
-                                          OnepieceFonts.boldLiteFancySmallFont,
-                                    )
-                                  else
-                                    // Fallback for new chats without messages
-                                    const Text(
-                                      "New",
-                                      style: TextStyle(
-                                          fontSize: 10, color: Colors.green),
-                                    ),
-
-                                  // --- UNREAD COUNT BADGE ---
-                                  if (chat.unreadCount != null &&
-                                      chat.unreadCount! > 0)
-                                    Container(
-                                      margin: const EdgeInsets.only(top: 5),
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 6, vertical: 2),
-                                      decoration: BoxDecoration(
-                                        color: Colors.red,
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      constraints: const BoxConstraints(
-                                        minWidth: 20,
-                                        minHeight: 20,
-                                      ),
-                                      child: Text(
-                                        chat.unreadCount! > 99
-                                            ? '99+'
-                                            : chat.unreadCount.toString(),
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.bold,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            chatDisplayName(chat),
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(
+                                              color: _kPrimaryText,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
                                         ),
-                                        textAlign: TextAlign.center,
-                                      ),
+                                        const SizedBox(width: 6),
+                                        if (chat.message?.creationRecord
+                                                ?.actionTimestamp !=
+                                            null)
+                                          Text(
+                                            TimeHelper.humanDateFromTimestamp(
+                                                chat.message!.creationRecord!
+                                                    .actionTimestamp!,
+                                                context),
+                                            style: const TextStyle(
+                                                color: _kSecondaryText,
+                                                fontSize: 12),
+                                          )
+                                        else
+                                          const Text(
+                                            "New",
+                                            style: TextStyle(
+                                                fontSize: 12,
+                                                color:
+                                                    OnepieceColors.fancyGreen),
+                                          ),
+                                      ],
                                     ),
-                                ],
+                                    const SizedBox(height: 3),
+                                    Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Expanded(
+                                          child: _buildChatPreview(
+                                              context, chat, activeChatId),
+                                        ),
+                                        if (chat.unreadCount != null &&
+                                            chat.unreadCount! > 0)
+                                          Container(
+                                            margin:
+                                                const EdgeInsets.only(left: 6),
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 6, vertical: 2),
+                                            constraints: const BoxConstraints(
+                                              minWidth: 20,
+                                              minHeight: 20,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: OnepieceColors.fancyBlue,
+                                              borderRadius:
+                                                  BorderRadius.circular(11),
+                                            ),
+                                            child: Text(
+                                              chat.unreadCount! > 99
+                                                  ? '99+'
+                                                  : chat.unreadCount.toString(),
+                                              textAlign: TextAlign.center,
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 8),
-                          // Draft Indicator OR Last Message Preview
-                          if ((chatIdToRepliedMessage[chat.id] != null ||
-                                  (chatIdToCachedMessage[chat.id] != null &&
-                                      chatIdToCachedMessage[chat.id]!
-                                          .isNotEmpty)) &&
-                              activeChatId != chat.id)
-                            Text(
-                              "[${AppLocalizations.of(context)!.draft}]",
-                              style: OnepieceFonts.smallContentStyle
-                                  .copyWith(color: Colors.red),
-                            )
-                          else if (chat.message != null)
-                            Text(
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                                style: OnepieceFonts.superSmallContentStyle,
-                                "${_memberNicknameOrFallback(chat, chat.message!.userId)}: ${chat.message!.content != null ? chat.message!.content!.split('\n').first : AppLocalizations.of(context)!.image}")
-                        ],
+                        ),
                       ),
-                      selected: isSelected,
-                      focusColor: OnepieceColors.liteFancyBlue,
-                      selectedTileColor: OnepieceColors.liteFancyBlue,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      leading: chat.group == true
-                          ? getLeading(chat.members
-                              .map((e) => e.imageUri ?? '')
-                              .toList())
-                          : getSingleLeading(chat),
-                      // inside ListView.builder -> ListTile
-                      // Inside _buildChatList -> ListView.builder -> ListTile
-                      onTap: () {
-                        final newChatId = chat.id!;
-
-                        // 1. If clicking the SAME chat that is already active (rare but possible), do nothing
-                        if (activeConversationId == newChatId) return;
-
-                        // 2. Handle Focus & Cache for the OLD chat (if any)
-                        FocusScope.of(context).unfocus();
-                        if (activeConversationId.isNotEmpty) {
-                          chatIdToCachedMessage[activeConversationId] =
-                              typingController.text;
-                          if (scrollController.hasClients) {
-                            _chatNotifier.setViewScrollOffset(
-                                activeConversationId, scrollController.offset);
-                          }
-                        }
-
-                        // 3. Update Local State for the NEW chat
-                        activeConversationId = newChatId;
-                        _activeChatWasAutoSelected = false;
-                        _lastProcessedChatId = ""; // Reset scroll logic
-
-                        // 4. Restore Drafts for NEW chat
-                        typingController.text =
-                            chatIdToCachedMessage[newChatId] ?? "";
-                        inputPreMessageNotifier.value =
-                            chatIdToRepliedMessage[newChatId];
-
-                        // 5. Update Provider (This triggers the view switch)
-                        Provider.of<ChatNotifier>(context, listen: false)
-                            .setActiveChat(newChatId);
-
-                        // 6. Load initial history if needed, then restore.
-                        unawaited(
-                            _loadInitialHistoryAndRestoreScroll(newChatId));
-                      },
                     ),
                   );
                 },
@@ -887,39 +938,37 @@ class _ChattingViewState extends State<ChattingView> {
       mainAxisAlignment: MainAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 15.0, top: 5.0, bottom: 5.0),
+        Container(
+          padding: EdgeInsets.fromLTRB(isMobile ? 4 : 18, 10, 6, 10),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            border: Border(
+              bottom: BorderSide(color: _kSeparator, width: 0.5),
+            ),
+          ),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              if (isMobile)
+                GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onTap: _clearActiveChat,
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                    child: Icon(Icons.arrow_back_ios_new,
+                        size: 20, color: OnepieceColors.fancyBlue),
+                  ),
+                ),
               Expanded(
-                child: Row(
-                  children: [
-                    if (isMobile)
-                      Container(
-                        margin: const EdgeInsets.only(right: 5),
-                        child: GestureDetector(
-                          behavior: HitTestBehavior
-                              .translucent, // Ensures tap is caught
-                          onTap: () {
-                            _clearActiveChat();
-                          },
-                          child: const Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Icon(Icons.arrow_back,
-                                size: 24, color: OnepieceColors.fancyBlue),
-                          ),
-                        ),
-                      ),
-                    Expanded(
-                      child: Text(
-                        style: OnepieceFonts.smallContentFancyBlueStyle,
-                        chatDisplayName(activeChat),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  chatDisplayName(activeChat),
+                  textAlign: isMobile ? TextAlign.center : TextAlign.start,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: _kPrimaryText,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
               IconButton(
@@ -939,18 +988,11 @@ class _ChattingViewState extends State<ChattingView> {
                 icon: const Icon(
                   Icons.more_horiz,
                   color: OnepieceColors.fancyBlue,
-                  size: 20,
+                  size: 22,
                 ),
               )
             ],
           ),
-        ),
-        const Divider(
-          thickness: 1,
-          color: OnepieceColors.liteFancyGreen,
-          height: 1,
-          indent: 0,
-          endIndent: 0,
         ),
         Expanded(
           child: Scaffold(
@@ -1052,12 +1094,6 @@ class _ChattingViewState extends State<ChattingView> {
                     },
                   ),
                 ),
-                if (!isMobile)
-                  const Divider(
-                    height: 3,
-                    thickness: 1,
-                    color: OnepieceColors.liteFancyGreen,
-                  ),
                 StatefulBuilder(
                   builder: (BuildContext context, StateSetter buttonState) {
                     return ValueListenableBuilder<TextEditingValue>(
@@ -1085,34 +1121,7 @@ class _ChattingViewState extends State<ChattingView> {
                           mainAxisAlignment: MainAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            if (!isMobile)
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  EmojiSelection(
-                                    editingController: typingController,
-                                    focusNode: focusNode,
-                                  ),
-                                  IconButton(
-                                    onPressed: pickImage,
-                                    padding: EdgeInsets.zero,
-                                    splashColor: Colors.transparent,
-                                    highlightColor: Colors.transparent,
-                                    hoverColor: Colors.transparent,
-                                    focusColor: Colors.transparent,
-                                    splashRadius: 0.1,
-                                    visualDensity: VisualDensity.compact,
-                                    enableFeedback: false,
-                                    icon: const Icon(
-                                      Icons.image,
-                                      size: 20,
-                                      color: OnepieceColors.fancyBlue,
-                                    ),
-                                  )
-                                ],
-                              ),
-                            // ── Image preview + typing area ──────────────────────
+                            // ── Composer: pill field + circular send button ──
                             Builder(builder: (ctx) {
                               final hasImage =
                                   chatIdToCachedImage[activeChatId] != null;
@@ -1211,444 +1220,238 @@ class _ChattingViewState extends State<ChattingView> {
                                 controller: typingController,
                                 enabled: true,
                                 textAlign: TextAlign.start,
-                                minLines: isMobile ? 1 : 6,
-                                maxLines: isMobile ? 4 : null,
+                                minLines: 1,
+                                maxLines: isMobile ? 5 : 6,
                                 keyboardType: TextInputType.multiline,
                                 textInputAction: TextInputAction.send,
                                 autofocus: true,
-                                cursorHeight: 15,
+                                cursorHeight: 16,
                                 focusNode: focusNode,
-                                style: OnepieceFonts.smallContentStyle,
+                                style: const TextStyle(
+                                  fontSize: 15,
+                                  color: _kPrimaryText,
+                                  height: 1.3,
+                                ),
                                 onChanged: (value) {},
                                 onSubmitted: (_) => sendCurrentMessage(),
                                 decoration: InputDecoration(
-                                  filled: isMobile,
-                                  fillColor: Colors.white,
-                                  focusColor: Colors.white,
-                                  hoverColor: Colors.white,
-                                  contentPadding: EdgeInsets.symmetric(
-                                    horizontal: isMobile ? 14 : 10,
-                                    vertical: isMobile ? 9 : 0,
-                                  ),
-                                  isDense: true,
-                                  labelStyle: OnepieceFonts.dropDownItemStyle,
+                                  isCollapsed: true,
+                                  contentPadding:
+                                      const EdgeInsets.symmetric(vertical: 9),
+                                  hintText: AppLocalizations.of(context)!.message,
+                                  hintStyle: const TextStyle(
+                                      color: _kSecondaryText, fontSize: 15),
                                   floatingLabelBehavior:
                                       FloatingLabelBehavior.never,
-                                  border: isMobile
-                                      ? OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                          borderSide: BorderSide.none,
-                                        )
-                                      : InputBorder.none,
-                                  focusedBorder: isMobile
-                                      ? OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                          borderSide: BorderSide.none,
-                                        )
-                                      : InputBorder.none,
-                                  disabledBorder: isMobile
-                                      ? OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                          borderSide: BorderSide.none,
-                                        )
-                                      : InputBorder.none,
-                                  enabledBorder: isMobile
-                                      ? OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                          borderSide: BorderSide.none,
-                                        )
-                                      : InputBorder.none,
+                                  border: InputBorder.none,
+                                  focusedBorder: InputBorder.none,
+                                  disabledBorder: InputBorder.none,
+                                  enabledBorder: InputBorder.none,
                                 ),
                               );
-                              final typingBox = isMobile
-                                  ? ConstrainedBox(
-                                      constraints: const BoxConstraints(
-                                        minHeight: 38,
-                                        maxHeight: 126,
-                                      ),
-                                      child: typingField,
-                                    )
-                                  : SizedBox(
-                                      height: 80,
-                                      width: double.infinity,
-                                      child: typingField,
-                                    );
+                              final typingBox = ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  minHeight: 24,
+                                  maxHeight: isMobile ? 120 : 150,
+                                ),
+                                child: typingField,
+                              );
 
-                              if (hasImage && !isMobile) {
-                                // Desktop: image on left, typing on right
-                                return Padding(
-                                  padding: const EdgeInsets.only(
-                                      bottom: 8.0, left: 10.0),
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      // ── Image panel ──────────
-                                      Container(
-                                        height: 120,
-                                        width: 120,
-                                        decoration: BoxDecoration(
-                                          color: Colors.grey[200],
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                          border: Border.all(
-                                            color:
-                                                OnepieceColors.liteFancyGreen,
-                                            width: 1.5,
+                              // Unified composer for desktop and mobile:
+                              // reply chip + attachment thumb stacked above a
+                              // rounded pill (photo button, growing text field,
+                              // inline emoji) and a circular send button.
+                              return Container(
+                                decoration: const BoxDecoration(
+                                  color: Colors.white,
+                                  border: Border(
+                                    top: BorderSide(
+                                        color: _kSeparator, width: 0.5),
+                                  ),
+                                ),
+                                padding: EdgeInsets.fromLTRB(
+                                  isMobile ? 8 : 16,
+                                  8,
+                                  isMobile ? 8 : 16,
+                                  isMobile ? 10 : 14,
+                                ),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // Reply context chip
+                                    ValueListenableBuilder<Message?>(
+                                      valueListenable: inputPreMessageNotifier,
+                                      builder: (context, value, _) {
+                                        final replied =
+                                            chatIdToRepliedMessage[
+                                                activeChatId];
+                                        if (replied == null) {
+                                          return const SizedBox.shrink();
+                                        }
+                                        return Container(
+                                          margin:
+                                              const EdgeInsets.only(bottom: 8),
+                                          padding: const EdgeInsets.fromLTRB(
+                                              10, 8, 4, 8),
+                                          decoration: const BoxDecoration(
+                                            color: _kSurface,
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(12)),
+                                            border: Border(
+                                              left: BorderSide(
+                                                  color:
+                                                      OnepieceColors.fancyBlue,
+                                                  width: 3),
+                                            ),
                                           ),
-                                        ),
-                                        child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(7),
-                                          child: Stack(
-                                            fit: StackFit.expand,
+                                          child: Row(
                                             children: [
-                                              Image.memory(
-                                                chatIdToCachedImage[
-                                                    activeChatId]!,
-                                                fit: BoxFit.cover,
+                                              Expanded(
+                                                child: Column(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      _memberNicknameOrFallback(
+                                                          activeChat,
+                                                          replied.userId),
+                                                      style: const TextStyle(
+                                                        color: OnepieceColors
+                                                            .fancyBlue,
+                                                        fontSize: 12,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                      ),
+                                                    ),
+                                                    if (replied.content != null)
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .only(top: 2),
+                                                        child: Text(
+                                                          replied.content!,
+                                                          maxLines: 1,
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                          style:
+                                                              const TextStyle(
+                                                            color:
+                                                                _kSecondaryText,
+                                                            fontSize: 13,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    if (replied
+                                                            .imageContentUri !=
+                                                        null)
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .only(top: 4),
+                                                        child: ClipRRect(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(6),
+                                                          child:
+                                                              SquareImageLoader(
+                                                            uriProvider: () =>
+                                                                replied
+                                                                    .imageContentUri!,
+                                                            width: 36,
+                                                            borderWidth: 1,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                  ],
+                                                ),
                                               ),
-                                              Positioned(
-                                                right: 2,
-                                                top: 2,
-                                                child: InkWell(
-                                                  onTap: clearAttachedImage,
-                                                  child: Container(
-                                                    width: 22,
-                                                    height: 22,
-                                                    decoration:
-                                                        const BoxDecoration(
-                                                      color: Colors.black54,
-                                                      shape: BoxShape.circle,
-                                                    ),
-                                                    child: const Icon(
-                                                      Icons.close,
-                                                      size: 14,
-                                                      color: Colors.white,
-                                                    ),
-                                                  ),
+                                              InkWell(
+                                                onTap: () {
+                                                  chatIdToRepliedMessage[
+                                                      activeChatId] = null;
+                                                  inputPreMessageNotifier
+                                                      .value = null;
+                                                  Future.delayed(
+                                                      Duration.zero, () {
+                                                    if (focusNode
+                                                        .canRequestFocus) {
+                                                      focusNode.requestFocus();
+                                                    }
+                                                  });
+                                                },
+                                                child: const Padding(
+                                                  padding: EdgeInsets.all(4),
+                                                  child: Icon(Icons.close,
+                                                      size: 18,
+                                                      color: _kSecondaryText),
                                                 ),
                                               ),
                                             ],
                                           ),
+                                        );
+                                      },
+                                    ),
+                                    // Pending attachment thumbnail
+                                    if (hasImage)
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                            bottom: 8, left: 2),
+                                        child: _buildAttachmentThumb(
+                                          chatIdToCachedImage[activeChatId]!,
+                                          clearAttachedImage,
                                         ),
                                       ),
-                                      const SizedBox(width: 10),
-                                      // ── Typing area ────────
-                                      Expanded(child: typingBox),
-                                    ],
-                                  ),
-                                );
-                              }
-
-                              // Mobile / no-image: full-width typing field
-                              if (isMobile) {
-                                return Container(
-                                  width: double.infinity,
-                                  padding:
-                                      const EdgeInsets.fromLTRB(6, 6, 6, 8),
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey.shade100,
-                                    border: Border(
-                                      top: BorderSide(
-                                        color: Colors.grey.shade300,
-                                        width: 0.5,
-                                      ),
-                                    ),
-                                  ),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      if (hasImage)
-                                        Padding(
-                                          padding:
-                                              const EdgeInsets.only(bottom: 8),
-                                          child: Align(
-                                            alignment: Alignment.centerLeft,
-                                            child: Stack(
-                                              alignment:
-                                                  AlignmentDirectional.topStart,
+                                    // Composer row
+                                    Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
+                                      children: [
+                                        _buildComposerIcon(
+                                          icon: Icons.photo_outlined,
+                                          onTap: pickImage,
+                                        ),
+                                        const SizedBox(width: 2),
+                                        Expanded(
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                              border: Border.all(
+                                                  color: _kSeparator),
+                                            ),
+                                            padding: const EdgeInsets.fromLTRB(
+                                                14, 2, 6, 2),
+                                            child: Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.end,
                                               children: [
-                                                ClipRRect(
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
-                                                  child: ImageHelper
-                                                      .getSquareImageFrame(
-                                                    50,
-                                                    50,
-                                                    2,
-                                                    Colors.white,
-                                                    chatIdToCachedImage[
-                                                        activeChatId]!,
-                                                  ),
-                                                ),
-                                                Positioned(
-                                                  right: -2,
-                                                  top: -2,
-                                                  child: InkWell(
-                                                    onTap: clearAttachedImage,
-                                                    child: const CircleAvatar(
-                                                      backgroundColor:
-                                                          Colors.black54,
-                                                      radius: 8,
-                                                      child: Icon(
-                                                        Icons.close,
-                                                        size: 8,
-                                                        color: Colors.white,
-                                                      ),
-                                                    ),
-                                                  ),
+                                                Expanded(child: typingBox),
+                                                EmojiSelection(
+                                                  editingController:
+                                                      typingController,
+                                                  focusNode: focusNode,
+                                                  iconColor: _kSecondaryText,
+                                                  iconSize: 22,
                                                 ),
                                               ],
                                             ),
                                           ),
                                         ),
-                                      Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.end,
-                                        children: [
-                                          SizedBox(
-                                            width: 36,
-                                            height: 38,
-                                            child: DecoratedBox(
-                                              decoration: BoxDecoration(
-                                                color: Colors.white,
-                                                shape: BoxShape.circle,
-                                                boxShadow: [
-                                                  BoxShadow(
-                                                    color: Colors.black
-                                                        .withValues(
-                                                            alpha: 0.04),
-                                                    blurRadius: 4,
-                                                    offset: const Offset(0, 1),
-                                                  ),
-                                                ],
-                                              ),
-                                              child: EmojiSelection(
-                                                editingController:
-                                                    typingController,
-                                                focusNode: focusNode,
-                                                iconColor:
-                                                    const Color(0xFF4A4A4A),
-                                                iconSize: 22,
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(width: 4),
-                                          Expanded(child: typingBox),
-                                          const SizedBox(width: 4),
-                                          SizedBox(
-                                            width: canSend ? 52 : 36,
-                                            height: 38,
-                                            child: canSend
-                                                ? ElevatedButton(
-                                                    onPressed:
-                                                        sendCurrentMessage,
-                                                    style: ElevatedButton
-                                                        .styleFrom(
-                                                      backgroundColor:
-                                                          OnepieceColors
-                                                              .fancyBlue,
-                                                      foregroundColor:
-                                                          Colors.white,
-                                                      elevation: 0,
-                                                      padding: EdgeInsets.zero,
-                                                      shape:
-                                                          RoundedRectangleBorder(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(8),
-                                                      ),
-                                                    ),
-                                                    child: Text(
-                                                      AppLocalizations.of(
-                                                              context)!
-                                                          .send,
-                                                      style: const TextStyle(
-                                                        fontSize: 12,
-                                                        fontWeight:
-                                                            FontWeight.w700,
-                                                      ),
-                                                    ),
-                                                  )
-                                                : DecoratedBox(
-                                                    decoration: BoxDecoration(
-                                                      color: Colors.white,
-                                                      shape: BoxShape.circle,
-                                                      boxShadow: [
-                                                        BoxShadow(
-                                                          color: Colors.black
-                                                              .withValues(
-                                                                  alpha: 0.04),
-                                                          blurRadius: 4,
-                                                          offset: const Offset(
-                                                              0, 1),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    child: IconButton(
-                                                      onPressed: pickImage,
-                                                      padding: EdgeInsets.zero,
-                                                      splashColor:
-                                                          Colors.transparent,
-                                                      highlightColor:
-                                                          Colors.transparent,
-                                                      hoverColor:
-                                                          Colors.transparent,
-                                                      focusColor:
-                                                          Colors.transparent,
-                                                      splashRadius: 0.1,
-                                                      visualDensity:
-                                                          VisualDensity.compact,
-                                                      enableFeedback: false,
-                                                      icon: const Icon(
-                                                        Icons
-                                                            .add_photo_alternate_outlined,
-                                                        size: 22,
-                                                        color:
-                                                            Color(0xFF4A4A4A),
-                                                      ),
-                                                    ),
-                                                  ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              }
-
-                              return Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  if (hasImage && isMobile)
-                                    Padding(
-                                      padding:
-                                          const EdgeInsets.only(bottom: 10.0),
-                                      child: Stack(
-                                        alignment:
-                                            AlignmentDirectional.topStart,
-                                        children: [
-                                          ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                            child:
-                                                ImageHelper.getSquareImageFrame(
-                                                    50,
-                                                    50,
-                                                    2,
-                                                    Colors.white,
-                                                    chatIdToCachedImage[
-                                                        activeChatId]!),
-                                          ),
-                                          Positioned(
-                                            right: -2,
-                                            top: -2,
-                                            child: InkWell(
-                                              onTap: clearAttachedImage,
-                                              child: const CircleAvatar(
-                                                backgroundColor: Colors.black54,
-                                                radius: 8,
-                                                child: Icon(Icons.close,
-                                                    size: 8,
-                                                    color: Colors.white),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+                                        const SizedBox(width: 6),
+                                        _buildSendButton(
+                                          enabled: canSend,
+                                          onSend: sendCurrentMessage,
+                                        ),
+                                      ],
                                     ),
-                                  typingBox,
-                                ],
+                                  ],
+                                ),
                               );
                             }),
-
-                            // ── Reply preview ──────────────────────────────
-                            ValueListenableBuilder<Message?>(
-                                valueListenable: inputPreMessageNotifier,
-                                builder: (context, value, _) {
-                                  if (chatIdToRepliedMessage[activeChatId] ==
-                                      null) {
-                                    return const Text("");
-                                  } else {
-                                    return Row(
-                                      children: [
-                                        Padding(
-                                          padding: const EdgeInsets.fromLTRB(
-                                              10, 0, 0, 0),
-                                          child: Container(
-                                            decoration: BoxDecoration(
-                                                borderRadius:
-                                                    const BorderRadius.all(
-                                                        Radius.circular(5)),
-                                                color: Colors.grey[600]),
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.all(4.0),
-                                              child: Column(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.start,
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.end,
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  if (chatIdToRepliedMessage[
-                                                              activeChatId]!
-                                                          .content !=
-                                                      null)
-                                                    Text(
-                                                      "${_memberNicknameOrFallback(activeChat, chatIdToRepliedMessage[activeChatId]!.userId)}: ${chatIdToRepliedMessage[activeChatId]!.content!}",
-                                                      style: OnepieceFonts
-                                                          .tagStyle,
-                                                    ),
-                                                  if (chatIdToRepliedMessage[
-                                                              activeChatId]!
-                                                          .imageContentUri !=
-                                                      null)
-                                                    SquareImageLoader(
-                                                      uriProvider: () =>
-                                                          chatIdToRepliedMessage[
-                                                                  activeChatId]!
-                                                              .imageContentUri!,
-                                                      width: 40,
-                                                      borderWidth: 1,
-                                                    )
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        IconButton(
-                                          onPressed: () {
-                                            chatIdToRepliedMessage[
-                                                activeChatId] = null;
-                                            inputPreMessageNotifier.value =
-                                                null;
-                                            Future.delayed(Duration.zero, () {
-                                              if (focusNode.canRequestFocus) {
-                                                focusNode.requestFocus();
-                                              }
-                                            });
-                                          },
-                                          icon: const Icon(
-                                              size: 20,
-                                              color:
-                                                  OnepieceColors.liteFancyGreen,
-                                              Icons.cancel_rounded),
-                                          style: ButtonStyle(
-                                            overlayColor:
-                                                WidgetStateProperty.all(
-                                                    Colors.transparent),
-                                          ),
-                                        )
-                                      ],
-                                    );
-                                  }
-                                }),
                           ],
                         );
                       },
@@ -1750,6 +1553,120 @@ class _ChattingViewState extends State<ChattingView> {
     });
   }
 
+  /// Last-message preview line for a chat-list row: a red "[draft]" marker
+  /// when there's an unsent draft for a chat you aren't currently in,
+  /// otherwise the sender + first line of the latest message.
+  Widget _buildChatPreview(
+      BuildContext context, Chat chat, String? activeChatId) {
+    final bool hasDraft = (chatIdToRepliedMessage[chat.id] != null ||
+            (chatIdToCachedMessage[chat.id] != null &&
+                chatIdToCachedMessage[chat.id]!.isNotEmpty)) &&
+        activeChatId != chat.id;
+    if (hasDraft) {
+      return Text(
+        "[${AppLocalizations.of(context)!.draft}]",
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: const TextStyle(color: Colors.red, fontSize: 13),
+      );
+    }
+    if (chat.message != null) {
+      final nickname = _memberNicknameOrFallback(chat, chat.message!.userId);
+      final preview = chat.message!.content != null
+          ? chat.message!.content!.split('\n').first
+          : AppLocalizations.of(context)!.image;
+      return Text(
+        "$nickname: $preview",
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: const TextStyle(color: _kSecondaryText, fontSize: 13),
+      );
+    }
+    return const SizedBox.shrink();
+  }
+
+  /// Circular iMessage-style send button: filled brand blue when there's
+  /// something to send, a muted disc otherwise, with a subtle scale-in.
+  Widget _buildSendButton(
+      {required bool enabled, required VoidCallback onSend}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 1),
+      child: AnimatedScale(
+        scale: enabled ? 1.0 : 0.85,
+        duration: const Duration(milliseconds: 120),
+        curve: Curves.easeOut,
+        child: Material(
+          color: enabled ? OnepieceColors.fancyBlue : const Color(0xFFCBD2DA),
+          shape: const CircleBorder(),
+          child: InkWell(
+            customBorder: const CircleBorder(),
+            onTap: enabled ? onSend : null,
+            child: const SizedBox(
+              width: 34,
+              height: 34,
+              child: Icon(Icons.arrow_upward_rounded,
+                  color: Colors.white, size: 20),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// A flat, feedback-free composer affordance (e.g. the photo picker).
+  Widget _buildComposerIcon(
+      {required IconData icon, required VoidCallback onTap}) {
+    return IconButton(
+      onPressed: onTap,
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
+      splashColor: Colors.transparent,
+      highlightColor: Colors.transparent,
+      hoverColor: Colors.transparent,
+      focusColor: Colors.transparent,
+      splashRadius: 0.1,
+      visualDensity: VisualDensity.compact,
+      enableFeedback: false,
+      icon: Icon(icon, size: 24, color: OnepieceColors.fancyBlue),
+    );
+  }
+
+  /// The pending-attachment thumbnail shown above the composer, with a
+  /// close badge to drop it before sending.
+  Widget _buildAttachmentThumb(Uint8List bytes, VoidCallback onRemove) {
+    return Stack(
+      alignment: AlignmentDirectional.topStart,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Image.memory(
+            bytes,
+            width: 72,
+            height: 72,
+            fit: BoxFit.cover,
+          ),
+        ),
+        Positioned(
+          right: -6,
+          top: -6,
+          child: InkWell(
+            onTap: onRemove,
+            child: Container(
+              margin: const EdgeInsets.all(4),
+              width: 20,
+              height: 20,
+              decoration: const BoxDecoration(
+                color: Colors.black54,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.close, size: 13, color: Colors.white),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   /// Scrolls to the bottom of the message list.
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -1780,28 +1697,32 @@ class _ChattingViewState extends State<ChattingView> {
     final List<String> displayedImages =
         imageUrls.length > 9 ? imageUrls.sublist(0, 9) : imageUrls;
     return Container(
-      width: 45,
-      height: 45,
-      decoration: const BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(3)),
-          color: OnepieceColors.liteFancyBlue),
-      child: GridView.builder(
-        shrinkWrap: true,
-        padding: const EdgeInsets.all(2),
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
-          crossAxisSpacing: 1.0,
-          mainAxisSpacing: 1.0,
+      width: 48,
+      height: 48,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        color: OnepieceColors.liteFancyBlue,
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(14),
+        child: GridView.builder(
+          shrinkWrap: true,
+          padding: const EdgeInsets.all(2),
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            crossAxisSpacing: 1.0,
+            mainAxisSpacing: 1.0,
+          ),
+          itemCount: displayedImages.length,
+          itemBuilder: (context, index) {
+            return SquareImageLoader(
+                key: ValueKey(displayedImages[index]),
+                uriProvider: () => displayedImages[index],
+                width: 40,
+                borderWidth: 0.5);
+          },
         ),
-        itemCount: displayedImages.length,
-        itemBuilder: (context, index) {
-          return SquareImageLoader(
-              key: ValueKey(displayedImages[index]),
-              uriProvider: () => displayedImages[index],
-              width: 40,
-              borderWidth: 0.5);
-        },
       ),
     );
   }
@@ -1809,14 +1730,14 @@ class _ChattingViewState extends State<ChattingView> {
   Widget getSingleLeading(Chat chat) {
     final uri = getTargetMember(chat).imageUri ?? '';
     return SizedBox(
-      width: 45,
-      height: 45,
+      width: 48,
+      height: 48,
       child: ImageLazyLoader(
         key: ValueKey(uri),
         uriProvider: () => uri,
-        width: 40,
-        borderWidth: 1.5,
-        borderRadios: 3,
+        width: 46,
+        borderWidth: 1,
+        borderRadios: 23,
       ),
     );
   }
