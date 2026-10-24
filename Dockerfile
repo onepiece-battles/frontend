@@ -31,10 +31,11 @@ COPY --from=build-env /app/build/web /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/nginx.conf
 
 # TLS key and certificate MUST be mounted at runtime via a volume or secret.
-# Do NOT bake them into the image. Example docker run invocation:
-#   docker run -p 443:443 \
-#     -v /path/to/www.onepiece-battles.com.pem:/etc/nginx/ssl/www.onepiece-battles.com.pem \
-#     -v /path/to/www.onepiece-battles.com.key:/etc/nginx/ssl/www.onepiece-battles.com.key \
+# Do NOT bake them into the image. The certificate is single-domain for the
+# apex host onepiece-battles.com. Example docker run invocation:
+#   docker run -p 80:80 -p 443:443 \
+#     -v /path/to/deploy/onepiece-battles.com.pem:/etc/nginx/ssl/onepiece-battles.com.pem \
+#     -v /path/to/deploy/onepiece-battles.com.key:/etc/nginx/ssl/onepiece-battles.com.key \
 #     your-image:tag
 
 # Expose ports
