@@ -165,7 +165,27 @@ class WebSocketService {
     _lastReceivedAt = DateTime.now();
     try {
       final data = _normalizeWebSocketJson(jsonDecode(event));
-      // Determine message type and parse
+
+      // Preferred path: a self-describing envelope {type, payload}.
+      if (data is Map &&
+          data.containsKey('type') &&
+          data.containsKey('payload')) {
+        final payload = data['payload'];
+        if (payload is Map) {
+          switch (data['type']) {
+            case 'CHAT':
+              _messageController.add(Chat.fromJson(payload));
+              break;
+            case 'MESSAGE':
+              final message = Message.fromJson(payload);
+              if (message != null) _messageController.add(message);
+              break;
+          }
+        }
+        return;
+      }
+
+      // Fallback: legacy bare frames (pre-envelope server) — field sniffing.
       if (data is Map && data.containsKey('private_group')) {
         _messageController.add(Chat.fromJson(data));
       } else if (data is Map && data.containsKey('message')) {
@@ -180,7 +200,6 @@ class WebSocketService {
               data.containsKey('conversation_id'))) {
         _messageController.add(Message.fromJson(data));
       }
-      // Add other message types here...
     } catch (e) {
       debugPrint('Error parsing WebSocket message: $e');
     }
