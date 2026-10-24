@@ -29,10 +29,10 @@ Widget mobileField(BuildContext context, bool editable,
                     floatingLabelBehavior: FloatingLabelBehavior.never,
                     disabledBorder: const OutlineInputBorder(
                         borderSide:
-                            BorderSide(color: OnepieceColors.menuHoverColor)),
+                            BorderSide(color: OnepieceColors.separator)),
                     enabledBorder: const OutlineInputBorder(
                         borderSide:
-                            BorderSide(color: OnepieceColors.menuHoverColor)),
+                            BorderSide(color: OnepieceColors.separator)),
                     focusedBorder: const OutlineInputBorder(
                         borderSide:
                             BorderSide(color: OnepieceColors.fancyGreen)),
@@ -82,10 +82,10 @@ Widget mobileStatPair(
                             floatingLabelBehavior: FloatingLabelBehavior.never,
                             disabledBorder: const OutlineInputBorder(
                                 borderSide: BorderSide(
-                                    color: OnepieceColors.menuHoverColor)),
+                                    color: OnepieceColors.separator)),
                             enabledBorder: const OutlineInputBorder(
                                 borderSide: BorderSide(
-                                    color: OnepieceColors.menuHoverColor)),
+                                    color: OnepieceColors.separator)),
                             focusedBorder: const OutlineInputBorder(
                                 borderSide: BorderSide(
                                     color: OnepieceColors.fancyGreen)),
@@ -107,10 +107,10 @@ Widget mobileStatPair(
                             floatingLabelBehavior: FloatingLabelBehavior.never,
                             disabledBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
-                                    color: OnepieceColors.menuHoverColor)),
+                                    color: OnepieceColors.separator)),
                             enabledBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
-                                    color: OnepieceColors.menuHoverColor)),
+                                    color: OnepieceColors.separator)),
                             focusedBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
                                     color: OnepieceColors.fancyGreen)),
@@ -161,8 +161,8 @@ Widget mobileDropdown<T>(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             height: 35,
             decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(3),
-                color: OnepieceColors.liteFancyGreen)),
+                borderRadius: BorderRadius.circular(10),
+                color: OnepieceColors.surface)),
         menuItemStyleData: const MenuItemStyleData(height: 30),
         items: items
             .map((i) => DropdownMenuItem<T>(

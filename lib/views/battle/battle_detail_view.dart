@@ -373,16 +373,8 @@ class _BattleDetailViewState extends State<BattleDetailView> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-                color: OnepieceColors.liteFancyBlue.withValues(alpha: 0.45)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.04),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              )
-            ],
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: OnepieceColors.separator),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -654,16 +646,8 @@ class _BattleDetailViewState extends State<BattleDetailView> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-                color: OnepieceColors.liteFancyBlue.withValues(alpha: 0.45)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.04),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              )
-            ],
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: OnepieceColors.separator),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

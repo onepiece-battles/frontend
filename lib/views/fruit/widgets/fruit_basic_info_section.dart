@@ -303,8 +303,8 @@ class _FruitBasicInfoSectionState extends State<FruitBasicInfoSection> {
               height: 34,
               width: 300,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(3),
-                color: OnepieceColors.liteFancyGreen,
+                borderRadius: BorderRadius.circular(10),
+                color: OnepieceColors.surface,
               )),
           menuItemStyleData: const MenuItemStyleData(
             height: 35,

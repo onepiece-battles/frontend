@@ -153,10 +153,10 @@ class _CharacterFruitsSectionState extends State<CharacterFruitsSection> {
                           const EdgeInsets.symmetric(horizontal: 10),
                       disabledBorder: const OutlineInputBorder(
                           borderSide: BorderSide(
-                              color: OnepieceColors.menuHoverColor)),
+                              color: OnepieceColors.separator)),
                       enabledBorder: const OutlineInputBorder(
                           borderSide: BorderSide(
-                              color: OnepieceColors.menuHoverColor)),
+                              color: OnepieceColors.separator)),
                       focusedBorder: const OutlineInputBorder(
                           borderSide: BorderSide(
                               color: OnepieceColors.fancyGreen, width: 2.2)),
@@ -302,10 +302,10 @@ class _CharacterFruitsSectionState extends State<CharacterFruitsSection> {
                   floatingLabelBehavior: FloatingLabelBehavior.never,
                   disabledBorder: const OutlineInputBorder(
                       borderSide:
-                          BorderSide(color: OnepieceColors.menuHoverColor)),
+                          BorderSide(color: OnepieceColors.separator)),
                   enabledBorder: const OutlineInputBorder(
                       borderSide:
-                          BorderSide(color: OnepieceColors.menuHoverColor)),
+                          BorderSide(color: OnepieceColors.separator)),
                   focusedBorder: const OutlineInputBorder(
                       borderSide: BorderSide(
                           color: OnepieceColors.fancyGreen, width: 2.2)),
