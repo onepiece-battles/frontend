@@ -225,11 +225,12 @@ class MessageItem extends StatelessWidget {
       onExit: (_) => BrowserContextMenu.enableContextMenu(),
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          color: isMe ? OnepieceColors.fancyBlue : Colors.grey[900],
+          // iMessage-style rounded bubble: brand blue for me, light neutral
+          // grey (not near-black) for received, with legible text on each.
+          borderRadius: BorderRadius.circular(18),
+          color: isMe ? OnepieceColors.fancyBlue : const Color(0xFFE9E9EB),
         ),
-        // Consistent padding — text, image, or both all get the same inset
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
         child: Builder(builder: (innerContext) {
           return GestureDetector(
             onSecondaryTap: () => showMessageMenu(innerContext),
@@ -242,10 +243,11 @@ class MessageItem extends StatelessWidget {
                   if (hasText)
                     Text(
                       message.content!,
-                      style: OnepieceFonts.tagStyle.copyWith(
-                        // Slightly larger for readability in chat bubbles
-                        fontSize: 13,
-                        height: 1.35,
+                      style: TextStyle(
+                        color:
+                            isMe ? Colors.white : const Color(0xFF1C1C1E),
+                        fontSize: 16,
+                        height: 1.3,
                       ),
                       softWrap: true,
                       textAlign: TextAlign.start,
@@ -254,7 +256,7 @@ class MessageItem extends StatelessWidget {
                   if (hasText && hasImage) const SizedBox(height: 6),
                   if (hasImage)
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(12),
                       child: _buildMessageImage(message.imageContentUri!, 200),
                     ),
                 ],
