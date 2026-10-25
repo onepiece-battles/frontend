@@ -200,9 +200,11 @@ class _GroupViewState extends State<GroupView> {
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
                   floatingLabelBehavior: FloatingLabelBehavior.never,
                   disabledBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: OnepieceColors.separator)),
+                      borderSide:
+                          BorderSide(color: OnepieceColors.menuHoverColor)),
                   enabledBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: OnepieceColors.separator)),
+                      borderSide:
+                          BorderSide(color: OnepieceColors.menuHoverColor)),
                   focusedBorder: const OutlineInputBorder(
                       borderSide: BorderSide(
                           color: OnepieceColors.fancyGreen, width: 1.5)),
@@ -235,7 +237,7 @@ class _GroupViewState extends State<GroupView> {
               initialLabelIndex: initialLabelIndex,
               activeBgColor: const [OnepieceColors.fancyBlue],
               activeFgColor: Colors.white,
-              inactiveBgColor: OnepieceColors.surface,
+              inactiveBgColor: OnepieceColors.liteFancyGreen,
               inactiveFgColor: Colors.grey[600],
               totalSwitches: 4,
               labels: [
@@ -294,7 +296,7 @@ class _GroupViewState extends State<GroupView> {
               height: 35,
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(3),
-                  color: OnepieceColors.surface)),
+                  color: OnepieceColors.liteFancyGreen)),
           menuItemStyleData: const MenuItemStyleData(height: 35),
           items: GroupCategory.values
               .map((gc) => DropdownMenuItem<GroupCategory>(

@@ -143,15 +143,30 @@ class CharacterDesktopRoster extends StatelessWidget {
               ]),
               const SizedBox(height: 8),
               Wrap(spacing: 14, runSpacing: 4, children: [
-                Text('${loc.combatPower} ${character.score}',
-                    style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: OnepieceColors.primaryLabel)),
-                Text('${loc.bounty} ${character.bounty ?? '—'}',
-                    style:
-                        OnepieceFonts.smallContentStyle.copyWith(fontSize: 12)),
+                Text.rich(TextSpan(
+                  style: OnepieceFonts.smallContentStyle.copyWith(fontSize: 12),
+                  children: [
+                    TextSpan(text: '${loc.combatPower} '),
+                    TextSpan(
+                        text: '${character.score}',
+                        style: const TextStyle(
+                            color: OnepieceColors.primaryLabel,
+                            fontWeight: FontWeight.w600)),
+                  ],
+                )),
+                Text.rich(TextSpan(
+                  style: OnepieceFonts.smallContentStyle.copyWith(fontSize: 12),
+                  children: [
+                    TextSpan(text: '${loc.bounty} '),
+                    TextSpan(
+                        text: '${character.bounty ?? '—'}',
+                        style: const TextStyle(
+                            color: OnepieceColors.primaryLabel,
+                            fontWeight: FontWeight.w500)),
+                  ],
+                )),
               ]),
+              const Divider(height: 1, color: OnepieceColors.separator),
               Row(children: [
                 Expanded(
                     child: Wrap(

@@ -66,8 +66,7 @@ class FruitRoster extends StatelessWidget {
         final isEven = index.isEven;
 
         return Card(
-          elevation: 0,
-          color: isEven ? OnepieceColors.surface : Colors.white,
+          color: isEven ? OnepieceColors.liteFancyGreen : Colors.white,
           margin: const EdgeInsets.only(bottom: 4),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -142,7 +141,8 @@ class FruitRoster extends StatelessWidget {
                       margin: const EdgeInsets.only(top: 4),
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: OnepieceColors.surface.withValues(alpha: 0.4),
+                        color: OnepieceColors.liteFancyGreen
+                            .withValues(alpha: 0.4),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Wrap(
