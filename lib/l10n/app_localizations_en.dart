@@ -853,6 +853,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get basicValue => 'Base value';
 
   @override
+  String get statMultiplier => 'Multiplier';
+
+  @override
+  String get statAdjustment => 'Adjustment';
+
+  @override
+  String get statFormulaHint => 'Result = base value × multiplier + adjustment';
+
+  @override
   String get realValue => 'Fruit SNH';
 
   @override

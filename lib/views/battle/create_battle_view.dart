@@ -145,7 +145,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
             constraints: const BoxConstraints(maxWidth: 280),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: OnepieceColors.liteFancyGreen,
+              color: OnepieceColors.surface,
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
@@ -187,7 +187,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
         return Stack(
           children: [
             ColoredBox(
-              color: const Color(0xFFF5F7FB),
+              color: OnepieceColors.surface,
               child: SingleChildScrollView(
                 controller: _verticalScrollController,
                 padding: EdgeInsets.fromLTRB(
@@ -198,7 +198,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                 ),
                 child: Center(
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 1180),
+                    constraints: const BoxConstraints(maxWidth: 1040),
                     child: Column(
                       children: [
                         CreationPageHeader(
@@ -394,7 +394,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
       final isSmall = MediaQuery.of(context).size.width < 600;
       return Container(
         decoration: BoxDecoration(
-          color: const Color(0xFFF7F9FC),
+          color: OnepieceColors.surface,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(color: const Color(0xFFE7ECF2)),
         ),
@@ -417,7 +417,8 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                     floatingLabelBehavior: FloatingLabelBehavior.never,
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFFDCE4EC)),
+                      borderSide:
+                          const BorderSide(color: OnepieceColors.separator),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -442,8 +443,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                               sortKeys: [],
                               characterFilter: starterCharacterFilter);
                       Future<ListCharacterResponse?> listCharacterResponse =
-                          _controller
-                              .listCharacter(listCharacterRequest);
+                          _controller.listCharacter(listCharacterRequest);
                       listCharacterResponse.then((value) {
                         leftSearchState(() {
                           starterCharacters = value!.characters;
@@ -725,7 +725,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
       final isSmall = MediaQuery.of(context).size.width < 600;
       return Container(
           decoration: BoxDecoration(
-            color: const Color(0xFFF7F9FC),
+            color: OnepieceColors.surface,
             borderRadius: BorderRadius.circular(14),
             border: Border.all(color: const Color(0xFFE7ECF2)),
           ),
@@ -748,7 +748,8 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                       floatingLabelBehavior: FloatingLabelBehavior.never,
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFFDCE4EC)),
+                        borderSide:
+                            const BorderSide(color: OnepieceColors.separator),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -773,8 +774,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                                 sortKeys: [],
                                 characterFilter: receiverCharacterFilter);
                         Future<ListCharacterResponse?> listCharacterResponse =
-                            _controller
-                                .listCharacter(listCharacterRequest);
+                            _controller.listCharacter(listCharacterRequest);
                         listCharacterResponse.then((value) {
                           rightSearchState(() {
                             receiverCharacters = value!.characters;
@@ -931,13 +931,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
       child: Container(
         decoration: const BoxDecoration(
           color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Color(0x1A16324F),
-              blurRadius: 18,
-              offset: Offset(0, -4),
-            ),
-          ],
+          border: Border(top: BorderSide(color: OnepieceColors.separator)),
         ),
         child: ValueListenableBuilder<CharacterListView?>(
             valueListenable: starterSelectedItem,
@@ -948,8 +942,10 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                     return Padding(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 11),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      child: Wrap(
+                        alignment: WrapAlignment.center,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        runSpacing: 8,
                         children: [
                           Padding(
                             padding: EdgeInsets.only(right: isSmall ? 5 : 8),
@@ -989,6 +985,9 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                           ElevatedButton.icon(
                             style: ElevatedButton.styleFrom(
                               minimumSize: Size(isSmall ? 88 : 120, 46),
+                              backgroundColor: OnepieceColors.fancyBlue,
+                              foregroundColor: Colors.white,
+                              elevation: 0,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -1006,8 +1005,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                                             receiverId: receiverSelectedId);
                                     final router = GoRouter.of(context);
                                     Future<CreateBattleResponse?> response =
-                                        _controller
-                                            .createBattle(request);
+                                        _controller.createBattle(request);
                                     response.then((value) {
                                       if (!mounted) return;
                                       if (value?.battleId != null) {

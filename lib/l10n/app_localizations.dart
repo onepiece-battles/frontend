@@ -1778,6 +1778,24 @@ abstract class AppLocalizations {
   /// **'Base value'**
   String get basicValue;
 
+  /// No description provided for @statMultiplier.
+  ///
+  /// In en, this message translates to:
+  /// **'Multiplier'**
+  String get statMultiplier;
+
+  /// No description provided for @statAdjustment.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjustment'**
+  String get statAdjustment;
+
+  /// No description provided for @statFormulaHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Result = base value × multiplier + adjustment'**
+  String get statFormulaHint;
+
   /// No description provided for @realValue.
   ///
   /// In en, this message translates to:

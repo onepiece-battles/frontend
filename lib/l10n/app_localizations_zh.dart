@@ -849,6 +849,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get basicValue => '基础值';
 
   @override
+  String get statMultiplier => '倍率';
+
+  @override
+  String get statAdjustment => '增减值';
+
+  @override
+  String get statFormulaHint => '最终数值 = 基础值 × 倍率 + 增减值';
+
+  @override
   String get realValue => '果实加成';
 
   @override

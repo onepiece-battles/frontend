@@ -93,11 +93,11 @@ class _CreateFruitViewState extends State<CreateFruitView> {
       badge: localizations.required,
       child: Column(
         children: [
-          _buildStringField(
-              context, fruitNameChController, localizations.name, true),
+          _buildStringField(context, fruitNameChController,
+              '${localizations.name} (CN)', true),
           if (getIt<User>().loginRole == UserRole.NIKA)
-            _buildStringField(
-                context, fruitNameEnController, localizations.name, true),
+            _buildStringField(context, fruitNameEnController,
+                '${localizations.name} (EN)', true),
           _getDropDownList(context),
         ],
       ),
@@ -109,11 +109,17 @@ class _CreateFruitViewState extends State<CreateFruitView> {
       badge: localizations.required,
       child: Column(
         children: [
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(localizations.statFormulaHint,
+                style: OnepieceFonts.smallContentStyle),
+          ),
+          const SizedBox(height: 20),
           _buildDigitField(context, fruitEnergyConsumeController,
               localizations.energyConsume, 1, 10),
           LayoutBuilder(
             builder: (context, constraints) {
-              final pairWidth = constraints.maxWidth >= 660
+              final pairWidth = constraints.maxWidth >= 480
                   ? (constraints.maxWidth - 14) / 2
                   : constraints.maxWidth;
               return Wrap(
@@ -193,7 +199,7 @@ class _CreateFruitViewState extends State<CreateFruitView> {
       padding: EdgeInsets.fromLTRB(isWide ? 28 : 12, 18, isWide ? 28 : 12, 100),
       child: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1180),
+          constraints: const BoxConstraints(maxWidth: 1040),
           child: Form(
             key: _formKey,
             child: Column(
@@ -207,7 +213,7 @@ class _CreateFruitViewState extends State<CreateFruitView> {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SizedBox(width: 330, child: basicCard),
+                      SizedBox(width: 280, child: basicCard),
                       const SizedBox(width: 18),
                       Expanded(child: battleCard),
                     ],
@@ -270,9 +276,8 @@ class _CreateFruitViewState extends State<CreateFruitView> {
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: const Color(0xFFF7F9FC),
+          color: OnepieceColors.surface,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: const Color(0xFFE7ECF2)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -281,46 +286,35 @@ class _CreateFruitViewState extends State<CreateFruitView> {
                 style: OnepieceFonts.deepBlackHintFont
                     .copyWith(fontWeight: FontWeight.w600)),
             const SizedBox(height: 10),
+            const SizedBox(height: 8),
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Flexible(
-                  child: Text(
-                    AppLocalizations.of(context)!.basicValue,
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 7),
-                  child: Text('×'),
-                ),
                 Expanded(
-                  child: TextFormField(
-                    controller: slope,
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
-                    validator: (value) => _validateNumber(
-                        context, value, slopeMin, slopeMax, true),
-                    decoration: _fieldDecoration(
-                      '${slopeMin.toString()} – ${slopeMax.toString()}',
-                    ),
-                  ),
-                ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 7),
-                  child: Text('+'),
-                ),
+                    child: TextFormField(
+                  controller: slope,
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  textInputAction: TextInputAction.next,
+                  validator: (value) =>
+                      _validateNumber(context, value, slopeMin, slopeMax, true),
+                  decoration: _fieldDecoration(
+                      AppLocalizations.of(context)!.statMultiplier,
+                      hint: '$slopeMin – $slopeMax'),
+                )),
+                const SizedBox(width: 12),
                 Expanded(
-                  child: TextFormField(
-                    controller: intercept,
-                    keyboardType:
-                        const TextInputType.numberWithOptions(signed: true),
-                    validator: (value) => _validateNumber(
-                        context, value, interceptMin, interceptMax, false),
-                    decoration:
-                        _fieldDecoration('$interceptMin – $interceptMax'),
-                  ),
-                ),
+                    child: TextFormField(
+                  controller: intercept,
+                  keyboardType:
+                      const TextInputType.numberWithOptions(signed: true),
+                  textInputAction: TextInputAction.next,
+                  validator: (value) => _validateNumber(
+                      context, value, interceptMin, interceptMax, false),
+                  decoration: _fieldDecoration(
+                      AppLocalizations.of(context)!.statAdjustment,
+                      hint: '$interceptMin – $interceptMax'),
+                )),
               ],
             ),
           ],
@@ -349,27 +343,7 @@ class _CreateFruitViewState extends State<CreateFruitView> {
   }
 
   InputDecoration _fieldDecoration(String label, {String? hint}) {
-    return InputDecoration(
-      labelText: label,
-      hintText: hint,
-      filled: true,
-      fillColor: Colors.white,
-      isDense: true,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 13, vertical: 13),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFFDCE4EC)),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFFDCE4EC)),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide:
-            const BorderSide(color: OnepieceColors.fancyGreen, width: 1.6),
-      ),
-    );
+    return creationFieldDecoration(label, hint: hint);
   }
 
   @override
@@ -380,7 +354,7 @@ class _CreateFruitViewState extends State<CreateFruitView> {
         return Stack(
           children: [
             ColoredBox(
-              color: const Color(0xFFF5F7FB),
+              color: OnepieceColors.surface,
               child: _buildResponsiveLayout(context, isWide),
             ),
             _getFootBar(context)
@@ -437,8 +411,8 @@ class _CreateFruitViewState extends State<CreateFruitView> {
               width: double.infinity,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
-                color: const Color(0xFFF7F9FC),
-                border: Border.all(color: const Color(0xFFDCE4EC)),
+                color: OnepieceColors.surface,
+                border: Border.all(color: OnepieceColors.separator),
               )),
           menuItemStyleData: const MenuItemStyleData(
             height: 35,
@@ -467,20 +441,17 @@ class _CreateFruitViewState extends State<CreateFruitView> {
         child: Container(
           decoration: const BoxDecoration(
             color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Color(0x1A16324F),
-                blurRadius: 18,
-                offset: Offset(0, -4),
-              ),
-            ],
+            border: Border(top: BorderSide(color: OnepieceColors.separator)),
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: Wrap(
+              alignment: WrapAlignment.end,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 12,
+              runSpacing: 8,
               children: [
-                OutlinedButton.icon(
+                TextButton.icon(
                   icon: const Icon(Icons.refresh_rounded, size: 18),
                   label: Text(AppLocalizations.of(context)!.clearForm),
                   onPressed: () {
@@ -494,13 +465,16 @@ class _CreateFruitViewState extends State<CreateFruitView> {
                 ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size(132, 46),
+                    backgroundColor: OnepieceColors.fancyBlue,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                   icon: const Icon(Icons.check_rounded, size: 19),
                   onPressed: () {
-                    final isValid = _formKey.currentState!.validate();
+                    final isValid = validateCreationForm(_formKey);
                     if (!isValid) {
                       return;
                     }

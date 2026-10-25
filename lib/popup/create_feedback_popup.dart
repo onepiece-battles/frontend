@@ -67,7 +67,7 @@ class _CreateFeedbackPopupState extends State<CreateFeedbackPopup> {
                   width: 38,
                   height: 38,
                   decoration: BoxDecoration(
-                    color: OnepieceColors.fancyBlue.withValues(alpha: 0.12),
+                    color: OnepieceColors.surface,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(
@@ -84,6 +84,7 @@ class _CreateFeedbackPopupState extends State<CreateFeedbackPopup> {
                       AppLocalizations.of(context)!.feedback,
                       style: OnepieceFonts.fancyBlueSmallTitle.copyWith(
                         fontSize: 20,
+                        color: OnepieceColors.primaryLabel,
                       ),
                     ),
                   ),
@@ -110,7 +111,7 @@ class _CreateFeedbackPopupState extends State<CreateFeedbackPopup> {
               enabled: !_isSubmitting,
               maxLines: 1,
               controller: headerController,
-              style: OnepieceFonts.smallContentStyle.copyWith(fontSize: 12),
+              style: OnepieceFonts.smallContentStyle.copyWith(fontSize: 14),
               autovalidateMode: AutovalidateMode.onUserInteraction,
               maxLength: 30,
               maxLengthEnforcement: MaxLengthEnforcement.enforced,
@@ -145,8 +146,10 @@ class _CreateFeedbackPopupState extends State<CreateFeedbackPopup> {
               ),
             ),
             const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+            Wrap(
+              alignment: WrapAlignment.end,
+              spacing: 8,
+              runSpacing: 8,
               children: [
                 TextButton(
                   onPressed: _isSubmitting
@@ -170,7 +173,7 @@ class _CreateFeedbackPopupState extends State<CreateFeedbackPopup> {
                     foregroundColor: OnepieceColors.fancyBlue,
                     side: const BorderSide(color: OnepieceColors.fancyBlue),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                   child: Text(AppLocalizations.of(context)!.clearAll),
@@ -184,7 +187,7 @@ class _CreateFeedbackPopupState extends State<CreateFeedbackPopup> {
                     backgroundColor: OnepieceColors.fancyBlue,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 18,
@@ -214,7 +217,8 @@ class _CreateFeedbackPopupState extends State<CreateFeedbackPopup> {
     return Text(
       label,
       style: OnepieceFonts.smallContentFancyBlueStyle.copyWith(
-        fontWeight: FontWeight.w700,
+        fontWeight: FontWeight.w600,
+        color: OnepieceColors.primaryLabel,
       ),
     );
   }
@@ -240,8 +244,8 @@ class _CreateFeedbackPopupState extends State<CreateFeedbackPopup> {
         buttonStyleData: ButtonStyleData(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(6),
-            border: Border.all(color: OnepieceColors.liteFancyBlue),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: OnepieceColors.separator),
             color: Colors.transparent,
           ),
           height: 36,
@@ -252,7 +256,7 @@ class _CreateFeedbackPopupState extends State<CreateFeedbackPopup> {
         ),
         dropdownStyleData: DropdownStyleData(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(6),
+            borderRadius: BorderRadius.circular(10),
             color: Colors.white,
           ),
         ),
@@ -289,37 +293,37 @@ class _CreateFeedbackPopupState extends State<CreateFeedbackPopup> {
         color: Colors.black38,
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(6.0),
+        borderRadius: BorderRadius.circular(10.0),
         borderSide: const BorderSide(
-          color: OnepieceColors.liteFancyBlue,
+          color: OnepieceColors.separator,
           width: 1.0,
         ),
       ),
       errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(6.0),
+        borderRadius: BorderRadius.circular(10.0),
         borderSide: const BorderSide(
           color: Colors.red,
           width: 1.5,
         ),
       ),
       focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(6.0),
+        borderRadius: BorderRadius.circular(10.0),
         borderSide: const BorderSide(
           color: Colors.red,
           width: 1.5,
         ),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(6.0),
+        borderRadius: BorderRadius.circular(10.0),
         borderSide: const BorderSide(
           color: OnepieceColors.fancyBlue,
           width: 1.5,
         ),
       ),
       disabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(6.0),
+        borderRadius: BorderRadius.circular(10.0),
         borderSide: const BorderSide(
-          color: OnepieceColors.liteFancyBlue,
+          color: OnepieceColors.separator,
           width: 1.0,
         ),
       ),

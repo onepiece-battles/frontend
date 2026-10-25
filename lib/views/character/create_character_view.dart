@@ -185,11 +185,11 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
         children: [
           _getAvatar(context),
           const SizedBox(height: 18),
-          _buildStringField(
-              context, characterNameCnController, localizations.name, true),
+          _buildStringField(context, characterNameCnController,
+              '${localizations.name} (CN)', true),
           if (getIt<User>().loginRole == UserRole.NIKA)
-            _buildStringField(
-                context, characterNameEnController, localizations.name, true),
+            _buildStringField(context, characterNameEnController,
+                '${localizations.name} (EN)', true),
           _selectionLabel(localizations.battleStyle),
           _getBattleStyle(context),
           const SizedBox(height: 14),
@@ -258,7 +258,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
       padding: EdgeInsets.fromLTRB(isWide ? 28 : 12, 18, isWide ? 28 : 12, 100),
       child: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1180),
+          constraints: const BoxConstraints(maxWidth: 1040),
           child: Form(
             key: _formKey,
             child: Column(
@@ -273,7 +273,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
-                        flex: 5,
+                        flex: 4,
                         child: Column(
                           children: [
                             profileCard,
@@ -315,7 +315,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
   Widget _responsiveFieldGrid(BuildContext context, List<Widget> fields) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final twoColumns = constraints.maxWidth >= 540;
+        final twoColumns = constraints.maxWidth >= 360;
         final width =
             twoColumns ? (constraints.maxWidth - 12) / 2 : constraints.maxWidth;
         return Wrap(
@@ -375,27 +375,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
   }
 
   InputDecoration _fieldDecoration(String label, String? hint) {
-    return InputDecoration(
-      labelText: label,
-      hintText: hint,
-      filled: true,
-      fillColor: Colors.white,
-      isDense: true,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 13, vertical: 13),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFFDCE4EC)),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFFDCE4EC)),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide:
-            const BorderSide(color: OnepieceColors.fancyGreen, width: 1.6),
-      ),
-    );
+    return creationFieldDecoration(label, hint: hint);
   }
 
   Widget _getBirthDropdown(BuildContext context) {
@@ -407,7 +387,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: const Color(0xFFF7F9FC),
+                color: OnepieceColors.surface,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
@@ -426,8 +406,8 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                             height: 30,
                             width: 60,
                             decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(3),
-                                color: OnepieceColors.liteFancyGreen)),
+                                borderRadius: BorderRadius.circular(10),
+                                color: OnepieceColors.surface)),
                         menuItemStyleData: const MenuItemStyleData(height: 30),
                         items: List.generate(12, (i) => (i + 1).toString())
                             .map((m) => DropdownMenuItem<String>(
@@ -450,8 +430,8 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                             height: 30,
                             width: 60,
                             decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(3),
-                                color: OnepieceColors.liteFancyGreen)),
+                                borderRadius: BorderRadius.circular(10),
+                                color: OnepieceColors.surface)),
                         menuItemStyleData: const MenuItemStyleData(height: 30),
                         items: List.generate(31, (i) => (i + 1).toString())
                             .map((d) => DropdownMenuItem<String>(
@@ -478,7 +458,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
         return Stack(
           children: [
             ColoredBox(
-              color: const Color(0xFFF5F7FB),
+              color: OnepieceColors.surface,
               child: _buildCardLayout(context, constraints.maxWidth >= 900),
             ),
             _getFootBar(context),
@@ -493,9 +473,8 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFFF7F9FC),
+        color: OnepieceColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE7ECF2)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -507,7 +486,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: Colors.white,
-              border: Border.all(color: OnepieceColors.fancyGreen, width: 2),
+              border: Border.all(color: OnepieceColors.separator),
             ),
             child: ClipOval(
               child: _pickedImage.isEmpty
@@ -612,8 +591,8 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
             width: double.infinity,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              color: const Color(0xFFF7F9FC),
-              border: Border.all(color: const Color(0xFFDCE4EC)),
+              color: OnepieceColors.surface,
+              border: Border.all(color: OnepieceColors.separator),
             ),
           ),
           menuItemStyleData: const MenuItemStyleData(height: 35),
@@ -686,8 +665,8 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
             width: double.infinity,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              color: const Color(0xFFF7F9FC),
-              border: Border.all(color: const Color(0xFFDCE4EC)),
+              color: OnepieceColors.surface,
+              border: Border.all(color: OnepieceColors.separator),
             ),
           ),
           menuItemStyleData: const MenuItemStyleData(height: 35),
@@ -749,8 +728,8 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
             width: double.infinity,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              color: const Color(0xFFF7F9FC),
-              border: Border.all(color: const Color(0xFFDCE4EC)),
+              color: OnepieceColors.surface,
+              border: Border.all(color: OnepieceColors.separator),
             ),
           ),
           menuItemStyleData: const MenuItemStyleData(height: 35),
@@ -812,20 +791,17 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
         child: Container(
           decoration: const BoxDecoration(
             color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Color(0x1A16324F),
-                blurRadius: 18,
-                offset: Offset(0, -4),
-              ),
-            ],
+            border: Border(top: BorderSide(color: OnepieceColors.separator)),
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: Wrap(
+              alignment: WrapAlignment.end,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 12,
+              runSpacing: 8,
               children: [
-                OutlinedButton.icon(
+                TextButton.icon(
                   icon: const Icon(Icons.refresh_rounded, size: 18),
                   label: Text(AppLocalizations.of(context)!.clearForm),
                   onPressed: () {
@@ -842,13 +818,16 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                 ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size(132, 46),
+                    backgroundColor: OnepieceColors.fancyBlue,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                   icon: const Icon(Icons.check_rounded, size: 19),
                   onPressed: () {
-                    final isValid = _formKey.currentState!.validate();
+                    final isValid = validateCreationForm(_formKey);
                     if (!isValid) {
                       return;
                     }
@@ -908,9 +887,7 @@ class _CreateCharacterViewState extends State<CreateCharacterView> {
                               resourceId: characterResponse!.id,
                               image: encodedImage,
                               type: ResourceType.CHARACTER);
-                      _controller
-                          .uploadImage(uploadImageRequest)
-                          .then((value) {
+                      _controller.uploadImage(uploadImageRequest).then((value) {
                         if (!mounted) return;
                         router.goNamed('characterDetails',
                             extra: characterResponse.id,
