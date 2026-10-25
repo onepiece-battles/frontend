@@ -5,6 +5,8 @@ import 'package:openapi/api.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import 'package:one_piece_battles_flutter/components/desktop_card_layout.dart';
 import 'package:one_piece_battles_flutter/config/my_input_theme.dart';
+import 'package:one_piece_battles_flutter/constants/onepiece_tag.dart';
+import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:one_piece_battles_flutter/l10n/app_localizations.dart';
 import 'package:one_piece_battles_flutter/repository/character_dao.dart';
 import 'package:one_piece_battles_flutter/repository/fruit_dao.dart';
@@ -69,6 +71,36 @@ void main() {
               widget is GroupRoster ||
               widget is BattleRoster);
           expect(tester.getSize(roster).height, greaterThan(580));
+          final loc = AppLocalizations.of(tester.element(roster))!;
+          if (view.key == 'character' || view.key == 'fruit') {
+            final label =
+                view.key == 'character' ? loc.busoshoku : loc.parameciaFruit;
+            final expectedColor = view.key == 'character'
+                ? OnepieceTag.hakiToColor[Haki.busoshoku]
+                : OnepieceTag.fruitTypeToColor[FruitType.paramecia];
+            expect(
+                find.ancestor(
+                    of: find.text(label).first,
+                    matching: find.byWidgetPredicate((widget) =>
+                        widget is Container &&
+                        widget.decoration is BoxDecoration &&
+                        (widget.decoration as BoxDecoration).color ==
+                            expectedColor)),
+                findsOneWidget);
+          }
+          if (view.key == 'character') {
+            final bounty = find.byWidgetPredicate((widget) =>
+                widget is Text &&
+                (widget.data ?? widget.textSpan?.toPlainText() ?? '')
+                    .contains('3000000000'));
+            final text = tester.widget<Text>(bounty.first);
+            final style = text.data != null
+                ? text.style
+                : ((text.textSpan as TextSpan).children!.last as TextSpan)
+                    .style;
+            expect(style?.fontFamily, 'Lobster');
+            expect(style?.color, OnepieceFonts.bountyStyle.color);
+          }
           final viewport = tester.getRect(roster);
           final desktopCards = find.descendant(
               of: roster, matching: find.byType(DesktopSpotlightCard));
@@ -91,8 +123,7 @@ void main() {
           final filterButton = filters.evaluate().isEmpty
               ? find.byIcon(Icons.filter_list)
               : filters;
-          final loc = AppLocalizations.of(tester.element(roster));
-          expect(find.text(loc!.myResource), findsNothing);
+          expect(find.text(loc.myResource), findsNothing);
           await tester.tap(filterButton);
           await tester.pump();
           expect(find.text(loc.myResource), findsOneWidget);
