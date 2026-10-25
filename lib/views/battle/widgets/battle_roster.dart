@@ -59,8 +59,9 @@ class BattleRoster extends StatelessWidget {
         final isEven = index.isEven;
 
         return Card(
-          color: isEven ? OnepieceColors.liteFancyGreen : Colors.white,
-          margin: const EdgeInsets.only(bottom: 8),
+          elevation: 0,
+          color: isEven ? OnepieceColors.surface : Colors.white,
+          margin: const EdgeInsets.only(bottom: 4),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           child: InkWell(
@@ -68,7 +69,7 @@ class BattleRoster extends StatelessWidget {
             onTap: () => context.goNamed('battleDetails',
                 extra: battle.id, pathParameters: {'id': battle.id}),
             child: Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(8),
               child: Column(
                 children: [
                   // Starter vs Receiver row
@@ -92,7 +93,7 @@ class BattleRoster extends StatelessWidget {
                                 style: OnepieceFonts.boldFancySmallFont
                                     .copyWith(
                                         color: OnepieceColors.fancyBlue,
-                                        fontSize: 16)),
+                                        fontSize: 14)),
                             const SizedBox(height: 4),
                             // Winner indicator
                             if (exec?.winnerId != null)
@@ -102,7 +103,8 @@ class BattleRoster extends StatelessWidget {
                                         ? battle.starter!.imageUri!
                                         : battle.receiver!.imageUri!,
                                 width: 30,
-                                borderWidth: 2,
+                                borderWidth: 1,
+                                lazy: true,
                                 borderRadios: 30,
                               )
                             else
@@ -137,7 +139,7 @@ class BattleRoster extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 6),
                   // Status + Creator row
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -156,10 +158,14 @@ class BattleRoster extends StatelessWidget {
                               color: OnepieceColors.fancyBlue, fontSize: 12),
                         ),
                       ),
-                      Text(
+                      Flexible(
+                          child: Text(
                         battle.creationRecord?.nickname ?? '',
-                        style: OnepieceFonts.smallContentStyle,
-                      ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: OnepieceFonts.smallContentStyle
+                            .copyWith(fontSize: 12),
+                      )),
                     ],
                   ),
                 ],
@@ -180,12 +186,14 @@ class BattleRoster extends StatelessWidget {
     final children = [
       ImageLazyLoader(
         uriProvider: () => imageUri,
-        width: 44,
-        borderWidth: 2,
-        borderRadios: 44,
+        width: 32,
+        borderWidth: 1,
+        lazy: true,
+        borderRadios: 32,
       ),
       const SizedBox(width: 8),
-      Column(
+      Flexible(
+          child: Column(
         crossAxisAlignment:
             alignRight ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
@@ -196,7 +204,7 @@ class BattleRoster extends StatelessWidget {
           const SizedBox(height: 2),
           Text(score, style: OnepieceFonts.boldFancySmallFont),
         ],
-      ),
+      )),
     ];
     return Row(
       mainAxisAlignment:
@@ -220,8 +228,9 @@ class BattleRoster extends StatelessWidget {
       items: battles,
       idOf: (battle) => battle.id,
       controller: controller,
-      minCardWidth: 390,
-      maxColumns: 4,
+      minCardWidth: 280,
+      maxColumns: 6,
+      gap: 10,
       cardBuilder: (context, battle) {
         final execution = battle.battleExecution;
         return Material(
@@ -232,7 +241,7 @@ class BattleRoster extends StatelessWidget {
             onTap: () => context.goNamed('battleDetails',
                 extra: battle.id, pathParameters: {'id': battle.id}),
             child: Padding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(10),
               child: Column(children: [
                 Row(children: [
                   Expanded(
@@ -258,7 +267,7 @@ class BattleRoster extends StatelessWidget {
                     ),
                   ),
                 ]),
-                const SizedBox(height: 14),
+                const SizedBox(height: 6),
                 Row(children: [
                   Container(
                     padding:

@@ -49,7 +49,7 @@ class _FruitViewState extends State<FruitView> {
   bool _showFilters = false;
   int selectedPageNum = 1;
   int totalPageNum = 0;
-  int itemCountPerPage = 10;
+  int itemCountPerPage = 24;
   int totalItemCount = 0;
 
   @override
@@ -110,27 +110,15 @@ class _FruitViewState extends State<FruitView> {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: double.infinity),
             child: Padding(
-              padding: EdgeInsets.all(isNarrow ? 15 : 24),
+              padding: EdgeInsets.all(isNarrow ? 8 : 12),
               child: SizedBox(
                 width: double.infinity,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _getHeaderText(context),
-                    isNarrow
-                        ? CompactFilterPanel(
-                            child: _getControlRow(context, isNarrow: true))
-                        : DesktopFilterPanel(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _getControlRow(context, isNarrow: false),
-                                const SizedBox(height: 10),
-                                _buildFruitSortControls(context),
-                              ],
-                            ),
-                          ),
-                    const SizedBox(height: 10),
+                    CompactFilterPanel(child: _getControlRow(context)),
+                    const SizedBox(height: 6),
                     Expanded(
                       child: FruitRoster(
                         fruits: currentFruitList,
@@ -144,7 +132,7 @@ class _FruitViewState extends State<FruitView> {
                         isNarrow: isNarrow,
                       ),
                     ),
-                    const SizedBox(height: 15),
+                    const SizedBox(height: 4),
                     if (totalPageNum > 1)
                       Column(
                         mainAxisAlignment: MainAxisAlignment.end,
@@ -174,190 +162,88 @@ class _FruitViewState extends State<FruitView> {
 
   Widget _getHeaderText(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(0, 0, 0, 20),
+      padding: const EdgeInsets.only(bottom: 6),
       child: Text(
         AppLocalizations.of(context)!.devilFruit,
-        style: OnepieceFonts.headerStyle,
+        style: OnepieceFonts.headerStyle.copyWith(fontSize: 20),
       ),
     );
   }
 
-  Widget _getControlRow(BuildContext context, {required bool isNarrow}) {
+  Widget _getControlRow(BuildContext context) {
     final hasCreate = PermissionCheck.checkPermission(
         getIt<User>().loginRoleResourcesPermissionMap,
         ResourceType.FRUIT,
         Permission.CREATE);
 
-    if (isNarrow) {
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 6),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [
-            if (hasCreate)
-              Padding(
-                padding: const EdgeInsets.only(right: 6),
-                child: SizedBox(
-                  height: 35,
-                  child: ElevatedButton(
-                      onPressed: () => context.goNamed("createFruit"),
-                      style: OnepieceButtonStyle.getDefaultStyle(),
-                      child: Text(AppLocalizations.of(context)!.create,
-                          style: const TextStyle(fontSize: 13))),
-                ),
-              ),
-            Expanded(
-              child: SizedBox(
-                height: 35,
-                child: TextFormField(
-                  controller: searchNameController,
-                  onChanged: (v) {
-                    fruitFilter.name = v;
-                    _search(true);
-                  },
-                  decoration: InputDecoration(
-                    contentPadding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                    floatingLabelBehavior: FloatingLabelBehavior.never,
-                    disabledBorder: const OutlineInputBorder(
-                        borderSide:
-                            BorderSide(color: OnepieceColors.menuHoverColor)),
-                    enabledBorder: const OutlineInputBorder(
-                        borderSide:
-                            BorderSide(color: OnepieceColors.menuHoverColor)),
-                    focusedBorder: const OutlineInputBorder(
-                        borderSide: BorderSide(
-                            color: OnepieceColors.fancyGreen, width: 1.5)),
-                    prefixIcon: const Icon(Icons.search, size: 20),
-                    labelText: AppLocalizations.of(context)!.name,
-                    labelStyle: OnepieceFonts.dropDownItemStyle,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 6),
-            ListFilterButton(
-              active: _showFilters,
-              onPressed: () => setState(() => _showFilters = !_showFilters),
-            ),
-          ]),
-          if (_showFilters) ...[
-            const SizedBox(height: 6),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: SizedBox(
-                height: 36,
-                child: ToggleSwitch(
-                  customWidths: const [90, 90, 100, 120],
-                  cornerRadius: 4,
-                  minHeight: 35,
-                  fontSize: 12,
-                  dividerColor: Colors.white,
-                  initialLabelIndex: initialLabelIndex,
-                  activeBgColor: const [OnepieceColors.fancyBlue],
-                  activeFgColor: Colors.white,
-                  inactiveBgColor: OnepieceColors.liteFancyGreen,
-                  inactiveFgColor: Colors.grey[600],
-                  totalSwitches: 4,
-                  labels: [
-                    AppLocalizations.of(context)!.allResources,
-                    AppLocalizations.of(context)!.myResource,
-                    AppLocalizations.of(context)!.systemResource,
-                    AppLocalizations.of(context)!.excludeSystem
-                  ],
-                  onToggle: (index) {
-                    initialLabelIndex = index!;
-                    if (index == 0) {
-                      fruitFilter.systemResource = null;
-                      fruitFilter.userId = null;
-                    }
-                    if (index == 1) {
-                      fruitFilter.systemResource = null;
-                      fruitFilter.userId = getIt<User>().id;
-                    }
-                    if (index == 2) {
-                      fruitFilter.systemResource = true;
-                      fruitFilter.userId = null;
-                    }
-                    if (index == 3) {
-                      fruitFilter.systemResource = false;
-                      fruitFilter.userId = null;
-                    }
-                    _search(true);
-                  },
-                ),
-              ),
-            ),
-            const SizedBox(height: 6),
-            _getFruitTypeFilter(context),
-          ],
-        ]),
-      );
-    }
-
-    // Desktop
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
-      child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-              if (hasCreate)
-                SizedBox(
-                  height: 35,
-                  width: 120,
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child: ElevatedButton(
-                        style: OnepieceButtonStyle.getDefaultStyle(),
-                        onPressed: () => context.goNamed("createFruit"),
-                        child: Text(AppLocalizations.of(context)!.create)),
-                  ),
-                ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 0, 6, 0),
-                child: SizedBox(
-                  width: 200,
-                  height: 35,
-                  child: TextFormField(
-                    controller: searchNameController,
-                    onChanged: (v) {
-                      fruitFilter.name = v;
-                      _search(true);
-                    },
-                    decoration: InputDecoration(
-                        labelStyle: OnepieceFonts.dropDownItemStyle,
-                        floatingLabelBehavior: FloatingLabelBehavior.never,
-                        disabledBorder: const OutlineInputBorder(
-                            borderSide: BorderSide(
-                                color: OnepieceColors.menuHoverColor)),
-                        enabledBorder: const OutlineInputBorder(
-                            borderSide: BorderSide(
-                                color: OnepieceColors.menuHoverColor)),
-                        focusedBorder: const OutlineInputBorder(
-                            borderSide: BorderSide(
-                                color: OnepieceColors.fancyGreen, width: 1.5)),
-                        prefixIcon: const Icon(Icons.search),
-                        labelText: AppLocalizations.of(context)!.name),
-                  ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          if (hasCreate)
+            Padding(
+              padding: const EdgeInsets.only(right: 6),
+              child: SizedBox(
+                height: 35,
+                child: ElevatedButton(
+                    onPressed: () => context.goNamed("createFruit"),
+                    style: OnepieceButtonStyle.getDefaultStyle(),
+                    child: Text(AppLocalizations.of(context)!.create,
+                        style: const TextStyle(fontSize: 13))),
+              ),
+            ),
+          Expanded(
+            child: SizedBox(
+              height: 35,
+              child: TextFormField(
+                controller: searchNameController,
+                onChanged: (v) {
+                  fruitFilter.name = v;
+                  _search(true);
+                },
+                decoration: InputDecoration(
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                  floatingLabelBehavior: FloatingLabelBehavior.never,
+                  disabledBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: OnepieceColors.separator)),
+                  enabledBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: OnepieceColors.separator)),
+                  focusedBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(
+                          color: OnepieceColors.fancyGreen, width: 1.5)),
+                  prefixIcon: const Icon(Icons.search, size: 20),
+                  labelText: AppLocalizations.of(context)!.name,
+                  labelStyle:
+                      OnepieceFonts.dropDownItemStyle.copyWith(fontSize: 13),
                 ),
               ),
-              _getFruitTypeFilter(context),
-            ]),
-            const SizedBox(height: 10),
-            SizedBox(
+            ),
+          ),
+          const SizedBox(width: 6),
+          ListFilterButton(
+            active: _showFilters ||
+                initialLabelIndex != 0 ||
+                selectedFruitTypes.isNotEmpty,
+            onPressed: () => setState(() => _showFilters = !_showFilters),
+          ),
+        ]),
+        if (_showFilters) ...[
+          const SizedBox(height: 6),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: SizedBox(
               height: 36,
               child: ToggleSwitch(
-                customWidths: const [150, 150, 150, 180],
+                customWidths: const [90, 90, 100, 120],
                 cornerRadius: 4,
-                minWidth: 150,
                 minHeight: 35,
-                fontSize: 14,
+                fontSize: 12,
                 dividerColor: Colors.white,
                 initialLabelIndex: initialLabelIndex,
                 activeBgColor: const [OnepieceColors.fancyBlue],
                 activeFgColor: Colors.white,
-                inactiveBgColor: OnepieceColors.liteFancyGreen,
+                inactiveBgColor: OnepieceColors.surface,
                 inactiveFgColor: Colors.grey[600],
                 totalSwitches: 4,
                 labels: [
@@ -388,7 +274,13 @@ class _FruitViewState extends State<FruitView> {
                 },
               ),
             ),
-          ]),
+          ),
+          const SizedBox(height: 6),
+          _getFruitTypeFilter(context),
+          const SizedBox(height: 4),
+          _buildFruitSortControls(context),
+        ],
+      ]),
     );
   }
 
@@ -439,7 +331,7 @@ class _FruitViewState extends State<FruitView> {
             width: 250,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(3),
-              color: OnepieceColors.liteFancyGreen,
+              color: OnepieceColors.surface,
             )),
         menuItemStyleData: const MenuItemStyleData(
           height: 35,
@@ -498,9 +390,13 @@ class _FruitViewState extends State<FruitView> {
   Widget _buildFruitSortControls(BuildContext context) {
     final order = sortableEnumToSortOrderMap[FruitSortableFieldsEnum.fruitType];
     return Row(children: [
-      Text('$totalItemCount ${AppLocalizations.of(context)!.devilFruit}',
-          style: OnepieceFonts.smallContentStyle),
-      const Spacer(),
+      Expanded(
+          child: Text(
+              '$totalItemCount ${AppLocalizations.of(context)!.devilFruit}',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: OnepieceFonts.smallContentStyle)),
+      const SizedBox(width: 8),
       DesktopSortChip(
         label: AppLocalizations.of(context)!.fruitType,
         ascending: order == null ? null : order == SortOrder.ASC,

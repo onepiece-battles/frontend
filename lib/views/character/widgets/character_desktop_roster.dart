@@ -55,18 +55,21 @@ class CharacterDesktopRoster extends StatelessWidget {
           children: [
             Text(
               '$totalItemCount ${AppLocalizations.of(context)!.character}',
-              style: OnepieceFonts.smallContentStyle,
+              style: OnepieceFonts.smallContentStyle.copyWith(fontSize: 12),
             ),
             const Spacer(),
             _buildScoreSortButton(context),
           ],
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 6),
         Expanded(
           child: DesktopSpotlightGrid<CharacterListView>(
             items: characters,
             idOf: (character) => character.id,
             controller: scrollController,
+            minCardWidth: 280,
+            maxColumns: 6,
+            gap: 10,
             cardBuilder: _buildCard,
           ),
         ),
@@ -98,7 +101,7 @@ class CharacterDesktopRoster extends StatelessWidget {
               'name': I18nHelper.getDisplayNameFromI18n(character.name)
             }),
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -108,27 +111,28 @@ class CharacterDesktopRoster extends StatelessWidget {
                   child: ImageLazyLoader(
                     key: ValueKey(character.imageUri),
                     uriProvider: () => character.imageUri ?? '',
-                    width: 48,
+                    width: 36,
                     borderWidth: 0,
-                    borderRadios: 48,
+                    borderRadios: 36,
                     lazy: true,
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(I18nHelper.getDisplayNameFromI18n(character.name),
                           style: const TextStyle(
-                              fontSize: 17,
+                              fontSize: 14,
                               fontWeight: FontWeight.w600,
                               color: OnepieceColors.primaryLabel),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis),
                       const SizedBox(height: 4),
                       Text('$race · $battleStyle',
-                          style: OnepieceFonts.smallContentStyle,
+                          style: OnepieceFonts.smallContentStyle
+                              .copyWith(fontSize: 12),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis),
                     ],
@@ -137,60 +141,41 @@ class CharacterDesktopRoster extends StatelessWidget {
                 const Icon(Icons.chevron_right,
                     size: 18, color: OnepieceColors.secondaryLabel),
               ]),
-              const SizedBox(height: 20),
+              const SizedBox(height: 8),
+              Wrap(spacing: 14, runSpacing: 4, children: [
+                Text('${loc.combatPower} ${character.score}',
+                    style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: OnepieceColors.primaryLabel)),
+                Text('${loc.bounty} ${character.bounty ?? '—'}',
+                    style:
+                        OnepieceFonts.smallContentStyle.copyWith(fontSize: 12)),
+              ]),
               Row(children: [
                 Expanded(
-                    child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(loc.combatPower,
-                        style: OnepieceFonts.smallContentStyle),
-                    const SizedBox(height: 4),
-                    Text(character.score.toString(),
-                        style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w600,
-                            color: OnepieceColors.primaryLabel)),
-                  ],
+                    child: Wrap(
+                  spacing: 4,
+                  runSpacing: 4,
+                  children: (character.hakis.toList()
+                        ..sort((first, second) =>
+                            first.toString().compareTo(second.toString())))
+                      .map((haki) =>
+                          ResourceBadge(hakiMap[haki] ?? '', compact: true))
+                      .toList(),
                 )),
-                Expanded(
-                    child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(loc.bounty, style: OnepieceFonts.smallContentStyle),
-                    const SizedBox(height: 4),
-                    Text(character.bounty?.toString() ?? '—',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            color: OnepieceColors.primaryLabel)),
-                  ],
-                )),
-              ]),
-              if (character.hakis.isNotEmpty) ...[
-                const SizedBox(height: 16),
-                Wrap(
-                    spacing: 6,
-                    runSpacing: 6,
-                    children: (character.hakis.toList()
-                          ..sort((first, second) =>
-                              first.toString().compareTo(second.toString())))
-                        .map((haki) => ResourceBadge(hakiMap[haki] ?? ''))
-                        .toList()),
-              ],
-              const SizedBox(height: 12),
-              const Divider(height: 1, color: OnepieceColors.separator),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton.icon(
+                TextButton.icon(
+                  style: TextButton.styleFrom(
+                      minimumSize: const Size(0, 32),
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      textStyle: const TextStyle(fontSize: 12)),
                   onPressed: () => onToggleExpand(character.id),
                   icon: Icon(isExpanded ? Icons.expand_less : Icons.expand_more,
-                      size: 18),
+                      size: 16),
                   label: Text(loc.detailInformation),
                 ),
-              ),
+              ]),
               if (isExpanded) _buildStats(context, character),
             ],
           ),
@@ -233,7 +218,7 @@ class CharacterDesktopRoster extends StatelessWidget {
                       const SizedBox(height: 3),
                       Text(stat.value,
                           style: const TextStyle(
-                              fontSize: 15,
+                              fontSize: 13,
                               fontWeight: FontWeight.w500,
                               color: OnepieceColors.primaryLabel)),
                     ],

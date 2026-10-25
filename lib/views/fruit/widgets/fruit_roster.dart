@@ -66,8 +66,9 @@ class FruitRoster extends StatelessWidget {
         final isEven = index.isEven;
 
         return Card(
-          color: isEven ? OnepieceColors.liteFancyGreen : Colors.white,
-          margin: const EdgeInsets.only(bottom: 8),
+          elevation: 0,
+          color: isEven ? OnepieceColors.surface : Colors.white,
+          margin: const EdgeInsets.only(bottom: 4),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           child: InkWell(
@@ -78,7 +79,7 @@ class FruitRoster extends StatelessWidget {
                   'name': I18nHelper.getDisplayNameFromI18n(fruit.name!)
                 }),
             child: Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -89,7 +90,7 @@ class FruitRoster extends StatelessWidget {
                         child: Text(
                           I18nHelper.getDisplayNameFromI18n(fruit.name),
                           style:
-                              OnepieceFonts.headerStyle.copyWith(fontSize: 16),
+                              OnepieceFonts.headerStyle.copyWith(fontSize: 14),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -141,8 +142,7 @@ class FruitRoster extends StatelessWidget {
                       margin: const EdgeInsets.only(top: 4),
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: OnepieceColors.liteFancyGreen
-                            .withValues(alpha: 0.4),
+                        color: OnepieceColors.surface.withValues(alpha: 0.4),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Wrap(
@@ -228,6 +228,9 @@ class FruitRoster extends StatelessWidget {
       items: fruits,
       idOf: (fruit) => fruit.id!,
       controller: controller,
+      minCardWidth: 280,
+      maxColumns: 6,
+      gap: 10,
       cardBuilder: (context, fruit) {
         final expanded = expandedRowIds.contains(fruit.id);
         return Material(
@@ -241,7 +244,7 @@ class FruitRoster extends StatelessWidget {
                   'name': I18nHelper.getDisplayNameFromI18n(fruit.name!)
                 }),
             child: Padding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -250,7 +253,7 @@ class FruitRoster extends StatelessWidget {
                       child: Text(
                         I18nHelper.getDisplayNameFromI18n(fruit.name),
                         style: OnepieceFonts.contentStyleBold.copyWith(
-                            color: OnepieceColors.primaryLabel, fontSize: 17),
+                            color: OnepieceColors.primaryLabel, fontSize: 14),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -258,16 +261,21 @@ class FruitRoster extends StatelessWidget {
                     Flexible(
                         child: ResourceBadge(typeMap[fruit.fruitType] ?? '')),
                   ]),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 6),
                   if (fruit.characters.isNotEmpty)
                     SizedBox(
-                        height: 44,
+                        height: 34,
                         child: _createCharacterList(context, fruit.characters)),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 6),
                   const Divider(height: 1, color: OnepieceColors.separator),
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton.icon(
+                      style: TextButton.styleFrom(
+                          minimumSize: const Size(0, 32),
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          textStyle: const TextStyle(fontSize: 12)),
                       onPressed: () => onToggleExpand(fruit.id!),
                       icon: Icon(expanded
                           ? Icons.keyboard_arrow_up
@@ -363,7 +371,7 @@ class FruitRoster extends StatelessWidget {
                         padding: const EdgeInsets.fromLTRB(3, 3, 3, 3),
                         child: ImageLazyLoader(
                             uriProvider: () => character.imageUri!,
-                            width: 40,
+                            width: 24,
                             borderWidth: 1.5,
                             borderRadios: 40)),
                   ),
