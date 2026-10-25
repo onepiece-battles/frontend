@@ -17,6 +17,7 @@ import '../../repository/image_dao.dart';
 import '../../repository/user_dao.dart';
 import '../../repository/email_dao.dart';
 import '../../utils/base64_helper.dart';
+import '../../utils/i18n_helper.dart';
 import '../../utils/image_helper.dart';
 import '../../utils/onepiece_image_picker.dart';
 import '../../utils/responsive_breakpoints.dart';
@@ -175,7 +176,9 @@ class UserProfileController extends ChangeNotifier {
       _currentData = previousData;
       if (context.mounted) {
         OnepieceAlert.getBasicAlertDialogFunc(
-            context, "Error", "Failed to save avatar");
+            context,
+            AppLocalizations.of(context)!.error,
+            AppLocalizations.of(context)!.saveAvatarFailed);
       }
     } finally {
       isSavingAvatar = false;
@@ -220,7 +223,9 @@ class UserProfileController extends ChangeNotifier {
       debugPrint("Error sending verification email: $e");
       if (context.mounted) {
         OnepieceAlert.getBasicAlertDialogFunc(
-            context, "Error", "Failed to send verification email");
+            context,
+            AppLocalizations.of(context)!.error,
+            AppLocalizations.of(context)!.sendVerificationEmailFailed);
       }
     } finally {
       isSendingVerificationEmail = false;
@@ -248,7 +253,8 @@ class UserProfileController extends ChangeNotifier {
 
     try {
       final response = await _userDao.updateUser(UpdateUserRequest(
-        locale: OnepieceLocale.zhCN,
+        locale:
+            I18nHelper.convertToOnepieceLocale(Localizations.localeOf(context)),
         nickname: trimmedNickname,
         id: GetIt.I<User>().id,
       ));
@@ -282,7 +288,9 @@ class UserProfileController extends ChangeNotifier {
       _currentData = previousData;
       if (context.mounted) {
         OnepieceAlert.getBasicAlertDialogFunc(
-            context, "Error", "Failed to save nickname");
+            context,
+            AppLocalizations.of(context)!.error,
+            AppLocalizations.of(context)!.saveNicknameFailed);
       }
       return false;
     } finally {

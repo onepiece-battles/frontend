@@ -89,33 +89,33 @@ class _GroupMembersPanelState extends State<GroupMembersPanel> {
         final availableWidth = constraints.hasBoundedWidth
             ? constraints.maxWidth
             : MediaQuery.of(context).size.width;
-        final panelWidth = isNarrow ? availableWidth : 760.0;
+        final panelWidth = availableWidth;
         final contentWidth = isNarrow
             ? (panelWidth - 32 > 280 ? panelWidth - 32 : 280.0)
-            : 700.0;
+            : panelWidth - 48;
 
         return SizedBox(
           width: panelWidth,
           child: Card(
-            elevation: 2,
+            elevation: 0,
             shadowColor: Colors.black.withValues(alpha: 0.08),
             color: Colors.white,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(20),
               side: BorderSide(
-                color: OnepieceColors.menuHoverColor.withValues(alpha: 0.45),
+                color: OnepieceColors.separator.withValues(alpha: 0.7),
               ),
             ),
             child: Padding(
               padding: EdgeInsets.fromLTRB(
-                  isNarrow ? 12 : 18, 14, isNarrow ? 12 : 18, 16),
+                  isNarrow ? 12 : 24, 24, isNarrow ? 12 : 24, 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Container(
+                      if (isNarrow) Container(
                         width: 34,
                         height: 34,
                         decoration: BoxDecoration(
@@ -126,14 +126,16 @@ class _GroupMembersPanelState extends State<GroupMembersPanel> {
                         child: const Icon(Icons.account_tree_outlined,
                             size: 20, color: OnepieceColors.fancyGreen),
                       ),
-                      const SizedBox(width: 10),
+                      if (isNarrow) const SizedBox(width: 10),
                       Expanded(
                         child: Text(
                           groupFullView.groupCategory == GroupCategory.group
                               ? AppLocalizations.of(context)!.groupStructure
                               : AppLocalizations.of(context)!.groupMember,
                           style: OnepieceFonts.headerStyle.copyWith(
-                            fontSize: isNarrow ? 18 : 22,
+                            fontSize: isNarrow ? 18 : 19,
+                            fontWeight: FontWeight.w600,
+                            color: OnepieceColors.primaryLabel,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -184,6 +186,12 @@ class _GroupMembersPanelState extends State<GroupMembersPanel> {
                     ),
                   ],
                   const SizedBox(height: 12),
+                  if (groupFullView.characters.isEmpty && groupFullView.subGroups.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Text(AppLocalizations.of(context)!.empty,
+                        style: const TextStyle(color: OnepieceColors.secondaryLabel, fontSize: 14)),
+                    ),
                   NestedHorizontalScrollView(
                     verticalParentController: _pageScrollController,
                     child: SizedBox(

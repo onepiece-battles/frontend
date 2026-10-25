@@ -48,21 +48,20 @@ class _FruitDigitTextFormFieldState extends State<FruitDigitTextFormField> {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 10.0),
-          child: SizedBox(
-            width: 300,
-            height: 30,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 30, minWidth: 300, maxWidth: 300),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 widget.icon,
-                Padding(
+                Expanded(child: Padding(
                   padding: const EdgeInsets.only(left: 3),
                   child: Text(
                     widget.label,
                     style: OnepieceFonts.deepBlackHintFont,
                   ),
-                ),
+                )),
               ],
             ),
           ),

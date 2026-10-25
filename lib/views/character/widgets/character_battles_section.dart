@@ -98,7 +98,7 @@ class _CharacterBattlesSectionState extends State<CharacterBattlesSection> {
                               context, b.starter!, ex?.starterScoreBefore),
                           const SizedBox(width: 6),
                           Column(children: [
-                            Text('VS',
+                            Text(AppLocalizations.of(context)!.versus,
                                 style: OnepieceFonts.boldFancySmallFont
                                     .copyWith(
                                         color: OnepieceColors.fancyBlue,
@@ -156,7 +156,8 @@ class _CharacterBattlesSectionState extends State<CharacterBattlesSection> {
                     padding: const EdgeInsets.only(top: 4),
                     child: Center(
                         child: Text(
-                            '${battles.length} ${AppLocalizations.of(context)!.relatedBattles}',
+                            AppLocalizations.of(context)!
+                                .relatedBattleCount(battles.length),
                             style: OnepieceFonts.smallContentStyle))),
             ],
           ])),
@@ -198,7 +199,8 @@ class _CharacterBattlesSectionState extends State<CharacterBattlesSection> {
               children: [
                 Text(
                   AppLocalizations.of(context)!.relatedBattles,
-                  style: OnepieceFonts.headerStyle,
+                  style: OnepieceFonts.headerStyle
+                      .copyWith(fontSize: 19, fontWeight: FontWeight.w600),
                 ),
                 if (battles.length > 10) _getPageController(context)
               ],
@@ -218,8 +220,8 @@ class _CharacterBattlesSectionState extends State<CharacterBattlesSection> {
       showBottomBorder: true,
       headingRowHeight: 50,
       border: const TableBorder(
-          top: BorderSide(color: OnepieceColors.themeColor),
-          bottom: BorderSide(color: OnepieceColors.themeColor)),
+          top: BorderSide(color: OnepieceColors.separator),
+          bottom: BorderSide(color: OnepieceColors.separator)),
       columns: _createColumns(context),
       rows: _createRows(context),
       columnSpacing: 8,

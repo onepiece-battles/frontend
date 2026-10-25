@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../components/resource_detail_layout.dart';
 import 'package:go_router/go_router.dart';
 import 'package:openapi/api.dart';
 
@@ -243,6 +244,41 @@ class _FruitCombatInfoSectionState extends State<FruitCombatInfoSection> {
   // ── Desktop ────────────────────────────────────────────────────────
 
   Widget _buildDesktop(BuildContext context) {
+    if (combatInfoEditable) {
+      return DetailEditor(width: 960, child: _buildDesktopEditor(context));
+    }
+    final loc = AppLocalizations.of(context)!;
+    String formula(
+        TextEditingController slope, TextEditingController intercept) {
+      final addition = num.tryParse(intercept.text) ?? 0;
+      return '${slope.text} × ${loc.basicValue} ${addition < 0 ? '−' : '+'} ${addition.abs()}';
+    }
+
+    return DetailSection(
+        title: loc.battleInfo,
+        action: widget.editButtonVisible
+            ? DetailEditButton(onPressed: _toggleEdit)
+            : null,
+        child: DetailFieldGrid(fields: [
+          DetailValue(loc.energyConsume, energyConsumeController.text),
+          DetailValue(loc.attackStrengthen,
+              formula(attackSlopeController, attackInterceptController)),
+          DetailValue(loc.defenseStrengthen,
+              formula(defenseSlopeController, defenseInterceptController)),
+          DetailValue(loc.bloodStrengthen,
+              formula(bloodSlopeController, bloodInterceptController)),
+          DetailValue(
+              loc.intelligenceStrengthen,
+              formula(intelligenceSlopeController,
+                  intelligenceInterceptController)),
+          DetailValue(loc.speedStrengthen,
+              formula(speedSlopeController, speedInterceptController)),
+          DetailValue(loc.groupStrengthen,
+              formula(groupGainSlopeController, groupGainInterceptController)),
+        ]));
+  }
+
+  Widget _buildDesktopEditor(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -360,7 +396,8 @@ class _FruitCombatInfoSectionState extends State<FruitCombatInfoSection> {
                             combatInfoEditable,
                             intelligenceSlopeController,
                             intelligenceInterceptController,
-                            AppLocalizations.of(context)!.intelligenceStrengthen,
+                            AppLocalizations.of(context)!
+                                .intelligenceStrengthen,
                             0.8,
                             2,
                             -30,

@@ -37,21 +37,20 @@ class DigitTextFormField extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
-          width: 300,
-          height: 30,
+        ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 30, minWidth: 300, maxWidth: 300),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               icon,
-              Padding(
+              Expanded(child: Padding(
                 padding: const EdgeInsets.only(left: 3),
                 child: Text(
                   label,
                   style: OnepieceFonts.deepBlackHintFont,
                 ),
-              ),
+              )),
             ],
           ),
         ),

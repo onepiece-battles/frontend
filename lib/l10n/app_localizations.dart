@@ -107,25 +107,25 @@ abstract class AppLocalizations {
   /// No description provided for @accountClosed.
   ///
   /// In en, this message translates to:
-  /// **'Closed'**
+  /// **'Deleted'**
   String get accountClosed;
 
   /// No description provided for @accountLoggedIn.
   ///
   /// In en, this message translates to:
-  /// **'Logged In'**
+  /// **'Signed In'**
   String get accountLoggedIn;
 
   /// No description provided for @accountLoggedOut.
   ///
   /// In en, this message translates to:
-  /// **'Logged Out'**
+  /// **'Signed Out'**
   String get accountLoggedOut;
 
   /// No description provided for @accountStopped.
   ///
   /// In en, this message translates to:
-  /// **'Stopped'**
+  /// **'Disabled'**
   String get accountStopped;
 
   /// No description provided for @age.
@@ -143,19 +143,19 @@ abstract class AppLocalizations {
   /// No description provided for @ancientZoanFruit.
   ///
   /// In en, this message translates to:
-  /// **'Ancient (Zoan)'**
+  /// **'Ancient Zoan'**
   String get ancientZoanFruit;
 
   /// No description provided for @artificialZoanFruit.
   ///
   /// In en, this message translates to:
-  /// **'Artificial (Zoan)'**
+  /// **'Artificial Zoan'**
   String get artificialZoanFruit;
 
   /// No description provided for @attackStrengthen.
   ///
   /// In en, this message translates to:
-  /// **'Attack Index'**
+  /// **'Attack Bonus'**
   String get attackStrengthen;
 
   /// No description provided for @avatarHeader.
@@ -179,7 +179,7 @@ abstract class AppLocalizations {
   /// No description provided for @backToLoginPage.
   ///
   /// In en, this message translates to:
-  /// **'Back to login page'**
+  /// **'Back to Sign In'**
   String get backToLoginPage;
 
   /// No description provided for @basicInfo.
@@ -203,7 +203,7 @@ abstract class AppLocalizations {
   /// No description provided for @battleInProgress.
   ///
   /// In en, this message translates to:
-  /// **'In Progress...'**
+  /// **'In Progress'**
   String get battleInProgress;
 
   /// No description provided for @battleInfo.
@@ -239,7 +239,7 @@ abstract class AppLocalizations {
   /// No description provided for @battleUnFinished.
   ///
   /// In en, this message translates to:
-  /// **'On Going ...'**
+  /// **'Unfinished'**
   String get battleUnFinished;
 
   /// No description provided for @battleNotInProgress.
@@ -251,13 +251,13 @@ abstract class AppLocalizations {
   /// No description provided for @battleReportWaiting.
   ///
   /// In en, this message translates to:
-  /// **'Report Waiting ...'**
+  /// **'Report Pending'**
   String get battleReportWaiting;
 
   /// No description provided for @battleReportInProgress.
   ///
   /// In en, this message translates to:
-  /// **'Report Generating'**
+  /// **'Generating Report…'**
   String get battleReportInProgress;
 
   /// No description provided for @battleReportGenerated.
@@ -299,19 +299,19 @@ abstract class AppLocalizations {
   /// No description provided for @birthPlace.
   ///
   /// In en, this message translates to:
-  /// **'Birth place'**
+  /// **'Birthplace'**
   String get birthPlace;
 
   /// No description provided for @bloodStrengthen.
   ///
   /// In en, this message translates to:
-  /// **'Blood Index'**
+  /// **'Health Bonus'**
   String get bloodStrengthen;
 
   /// No description provided for @body.
   ///
   /// In en, this message translates to:
-  /// **'Taijutsu'**
+  /// **'Martial Arts'**
   String get body;
 
   /// No description provided for @bounty.
@@ -329,7 +329,7 @@ abstract class AppLocalizations {
   /// No description provided for @busoshoku.
   ///
   /// In en, this message translates to:
-  /// **'Busoshoku'**
+  /// **'Armament Haki'**
   String get busoshoku;
 
   /// No description provided for @cancelPopUp.
@@ -359,7 +359,7 @@ abstract class AppLocalizations {
   /// No description provided for @characterBlood.
   ///
   /// In en, this message translates to:
-  /// **'Blood'**
+  /// **'Health'**
   String get characterBlood;
 
   /// No description provided for @characterDefense.
@@ -383,13 +383,13 @@ abstract class AppLocalizations {
   /// No description provided for @characterFruits.
   ///
   /// In en, this message translates to:
-  /// **'Fruits'**
+  /// **'Devil Fruits'**
   String get characterFruits;
 
   /// No description provided for @characterImageRequired.
   ///
   /// In en, this message translates to:
-  /// **'Please upload character head image'**
+  /// **'Please upload a character portrait.'**
   String get characterImageRequired;
 
   /// No description provided for @characterIntelligence.
@@ -401,7 +401,7 @@ abstract class AppLocalizations {
   /// No description provided for @characterName.
   ///
   /// In en, this message translates to:
-  /// **'Name'**
+  /// **'Character Name'**
   String get characterName;
 
   /// No description provided for @characterSpeed.
@@ -425,7 +425,7 @@ abstract class AppLocalizations {
   /// No description provided for @chooseFile.
   ///
   /// In en, this message translates to:
-  /// **'Choose file ...'**
+  /// **'Choose File'**
   String get chooseFile;
 
   /// No description provided for @chooseFruit.
@@ -509,13 +509,13 @@ abstract class AppLocalizations {
   /// No description provided for @defenseStrengthen.
   ///
   /// In en, this message translates to:
-  /// **'Defense index'**
+  /// **'Defense Bonus'**
   String get defenseStrengthen;
 
   /// No description provided for @detailInformation.
   ///
   /// In en, this message translates to:
-  /// **'Detail Information'**
+  /// **'Details'**
   String get detailInformation;
 
   /// No description provided for @devilFruit.
@@ -575,13 +575,13 @@ abstract class AppLocalizations {
   /// No description provided for @endOfList.
   ///
   /// In en, this message translates to:
-  /// **'end of list ...'**
+  /// **'End of list'**
   String get endOfList;
 
   /// No description provided for @energyConsume.
   ///
   /// In en, this message translates to:
-  /// **'Energy Consume'**
+  /// **'Energy Cost'**
   String get energyConsume;
 
   /// No description provided for @english.
@@ -593,7 +593,7 @@ abstract class AppLocalizations {
   /// No description provided for @featureSuggestion.
   ///
   /// In en, this message translates to:
-  /// **'Feature Related Suggestion'**
+  /// **'Feature Suggestion'**
   String get featureSuggestion;
 
   /// No description provided for @feedback.
@@ -611,7 +611,7 @@ abstract class AppLocalizations {
   /// No description provided for @feedbackContentHint.
   ///
   /// In en, this message translates to:
-  /// **'Describe in detail.'**
+  /// **'Describe the issue or suggestion in detail.'**
   String get feedbackContentHint;
 
   /// No description provided for @feedbackTitle.
@@ -623,13 +623,13 @@ abstract class AppLocalizations {
   /// No description provided for @feedbackTitleHint.
   ///
   /// In en, this message translates to:
-  /// **'General Description.'**
+  /// **'Briefly describe your issue or suggestion.'**
   String get feedbackTitleHint;
 
   /// No description provided for @fieldMustBeInt.
   ///
   /// In en, this message translates to:
-  /// **'Number must be Integer.'**
+  /// **'Please enter a whole number.'**
   String get fieldMustBeInt;
 
   /// No description provided for @fist.
@@ -671,7 +671,7 @@ abstract class AppLocalizations {
   /// No description provided for @groupBattle.
   ///
   /// In en, this message translates to:
-  /// **'Group Fight'**
+  /// **'Group Battle'**
   String get groupBattle;
 
   /// No description provided for @groupCategory.
@@ -683,13 +683,13 @@ abstract class AppLocalizations {
   /// No description provided for @groupEmblemRequired.
   ///
   /// In en, this message translates to:
-  /// **'Please upload group emblem'**
+  /// **'Please upload a group emblem.'**
   String get groupEmblemRequired;
 
   /// No description provided for @groupGain.
   ///
   /// In en, this message translates to:
-  /// **'Group Gain (%)'**
+  /// **'Teamwork Bonus (%)'**
   String get groupGain;
 
   /// No description provided for @groupName.
@@ -701,19 +701,19 @@ abstract class AppLocalizations {
   /// No description provided for @groupStrengthen.
   ///
   /// In en, this message translates to:
-  /// **'Group gain index'**
+  /// **'Teamwork Bonus'**
   String get groupStrengthen;
 
   /// No description provided for @hakis.
   ///
   /// In en, this message translates to:
-  /// **'Hakis'**
+  /// **'Haki'**
   String get hakis;
 
   /// No description provided for @haoshoku.
   ///
   /// In en, this message translates to:
-  /// **'Haoshoku'**
+  /// **'Conqueror’s Haki'**
   String get haoshoku;
 
   /// No description provided for @height.
@@ -749,13 +749,13 @@ abstract class AppLocalizations {
   /// No description provided for @intelligenceStrengthen.
   ///
   /// In en, this message translates to:
-  /// **'Intelligence index'**
+  /// **'Intelligence Bonus'**
   String get intelligenceStrengthen;
 
   /// No description provided for @invalidName.
   ///
   /// In en, this message translates to:
-  /// **'name should only contains alphabet letters (chinese characters) and digits'**
+  /// **'Use letters, Chinese characters, numbers, spaces, hyphens, middle dots, or periods.'**
   String get invalidName;
 
   /// No description provided for @issue.
@@ -791,7 +791,7 @@ abstract class AppLocalizations {
   /// No description provided for @kenbunshoku.
   ///
   /// In en, this message translates to:
-  /// **'Kenbunshoku'**
+  /// **'Observation Haki'**
   String get kenbunshoku;
 
   /// No description provided for @language.
@@ -803,37 +803,37 @@ abstract class AppLocalizations {
   /// No description provided for @leaved.
   ///
   /// In en, this message translates to:
-  /// **'leaved'**
+  /// **'Left'**
   String get leaved;
 
   /// No description provided for @leg.
   ///
   /// In en, this message translates to:
-  /// **'leg'**
+  /// **'Leg'**
   String get leg;
 
   /// No description provided for @listToEnd.
   ///
   /// In en, this message translates to:
-  /// **'END OF LIST'**
+  /// **'End of list'**
   String get listToEnd;
 
   /// No description provided for @loading.
   ///
   /// In en, this message translates to:
-  /// **'Loading ...'**
+  /// **'Loading…'**
   String get loading;
 
   /// No description provided for @localizationDescription.
   ///
   /// In en, this message translates to:
-  /// **'Customize language and region related settings'**
+  /// **'Customize your language and region settings.'**
   String get localizationDescription;
 
   /// No description provided for @localizationHeader.
   ///
   /// In en, this message translates to:
-  /// **'Localization'**
+  /// **'Language and Region'**
   String get localizationHeader;
 
   /// No description provided for @logiaFruit.
@@ -845,13 +845,13 @@ abstract class AppLocalizations {
   /// No description provided for @loginRole.
   ///
   /// In en, this message translates to:
-  /// **'login role'**
+  /// **'Sign-in Role'**
   String get loginRole;
 
   /// No description provided for @logout.
   ///
   /// In en, this message translates to:
-  /// **'Logout'**
+  /// **'Sign Out'**
   String get logout;
 
   /// No description provided for @marine.
@@ -863,7 +863,7 @@ abstract class AppLocalizations {
   /// No description provided for @maxFileSizeDescription.
   ///
   /// In en, this message translates to:
-  /// **'The maximum file size allowed is 200 kb'**
+  /// **'Maximum file size: 200 KB.'**
   String get maxFileSizeDescription;
 
   /// No description provided for @modificationTime.
@@ -875,7 +875,7 @@ abstract class AppLocalizations {
   /// No description provided for @mythicalZoanFruit.
   ///
   /// In en, this message translates to:
-  /// **'Mythical (Zoan)'**
+  /// **'Mythical Zoan'**
   String get mythicalZoanFruit;
 
   /// No description provided for @name.
@@ -893,7 +893,7 @@ abstract class AppLocalizations {
   /// No description provided for @no.
   ///
   /// In en, this message translates to:
-  /// **'NO'**
+  /// **'No'**
   String get no;
 
   /// No description provided for @noAccount.
@@ -911,7 +911,7 @@ abstract class AppLocalizations {
   /// No description provided for @noSystemResource.
   ///
   /// In en, this message translates to:
-  /// **'Exclude System Resource'**
+  /// **'Exclude System Resources'**
   String get noSystemResource;
 
   /// No description provided for @notVerified.
@@ -971,13 +971,13 @@ abstract class AppLocalizations {
   /// No description provided for @receiver.
   ///
   /// In en, this message translates to:
-  /// **'Receiver'**
+  /// **'Opponent'**
   String get receiver;
 
   /// No description provided for @registerAccount.
   ///
   /// In en, this message translates to:
-  /// **'Register Now！'**
+  /// **'Register Now'**
   String get registerAccount;
 
   /// No description provided for @registerPasswordHint.
@@ -989,13 +989,13 @@ abstract class AppLocalizations {
   /// No description provided for @registerPasswordHint2.
   ///
   /// In en, this message translates to:
-  /// **'Confirmed password'**
+  /// **'Confirm Password'**
   String get registerPasswordHint2;
 
   /// No description provided for @registerUserNameHint.
   ///
   /// In en, this message translates to:
-  /// **'Please choose your nick name'**
+  /// **'Choose a nickname'**
   String get registerUserNameHint;
 
   /// No description provided for @relatedBattles.
@@ -1025,31 +1025,31 @@ abstract class AppLocalizations {
   /// No description provided for @roleAdmin.
   ///
   /// In en, this message translates to:
-  /// **'ADMIN'**
+  /// **'Administrator'**
   String get roleAdmin;
 
   /// No description provided for @roleNika.
   ///
   /// In en, this message translates to:
-  /// **'NIKA'**
+  /// **'Nika'**
   String get roleNika;
 
   /// No description provided for @roleNormal.
   ///
   /// In en, this message translates to:
-  /// **'NORMAL USER'**
+  /// **'Standard User'**
   String get roleNormal;
 
   /// No description provided for @roleVisitor.
   ///
   /// In en, this message translates to:
-  /// **'VISITOR'**
+  /// **'Guest'**
   String get roleVisitor;
 
   /// No description provided for @route.
   ///
   /// In en, this message translates to:
-  /// **'Nav'**
+  /// **'Navigation'**
   String get route;
 
   /// No description provided for @science.
@@ -1061,25 +1061,25 @@ abstract class AppLocalizations {
   /// No description provided for @searchReceiver.
   ///
   /// In en, this message translates to:
-  /// **'search receiver ...'**
+  /// **'Search opponents…'**
   String get searchReceiver;
 
   /// No description provided for @searchResource.
   ///
   /// In en, this message translates to:
-  /// **'Search resource'**
+  /// **'Search Resources'**
   String get searchResource;
 
   /// No description provided for @searchResourceDetail.
   ///
   /// In en, this message translates to:
-  /// **'[ character name| fruit name | group name ]'**
+  /// **'Character, Devil Fruit, or group name'**
   String get searchResourceDetail;
 
   /// No description provided for @searchStarter.
   ///
   /// In en, this message translates to:
-  /// **'search starter ...'**
+  /// **'Search initiators…'**
   String get searchStarter;
 
   /// No description provided for @selectCharacter.
@@ -1097,7 +1097,7 @@ abstract class AppLocalizations {
   /// No description provided for @shoot.
   ///
   /// In en, this message translates to:
-  /// **'Gun'**
+  /// **'Marksmanship'**
   String get shoot;
 
   /// No description provided for @signIn.
@@ -1109,25 +1109,25 @@ abstract class AppLocalizations {
   /// No description provided for @signUp.
   ///
   /// In en, this message translates to:
-  /// **'Sign up'**
+  /// **'Sign Up'**
   String get signUp;
 
   /// No description provided for @signUpHeadLine.
   ///
   /// In en, this message translates to:
-  /// **'Create a free account right now!'**
+  /// **'Create a free account'**
   String get signUpHeadLine;
 
   /// No description provided for @singleBattle.
   ///
   /// In en, this message translates to:
-  /// **'Single Battle'**
+  /// **'One-on-One'**
   String get singleBattle;
 
   /// No description provided for @speedStrengthen.
   ///
   /// In en, this message translates to:
-  /// **'Speed Index'**
+  /// **'Speed Bonus'**
   String get speedStrengthen;
 
   /// No description provided for @startBattle.
@@ -1193,7 +1193,7 @@ abstract class AppLocalizations {
   /// No description provided for @title.
   ///
   /// In en, this message translates to:
-  /// **'title'**
+  /// **'Title'**
   String get title;
 
   /// No description provided for @underworld.
@@ -1217,7 +1217,7 @@ abstract class AppLocalizations {
   /// No description provided for @uploadGroupEmblem.
   ///
   /// In en, this message translates to:
-  /// **'Update Group Emblem '**
+  /// **'Upload Group Emblem'**
   String get uploadGroupEmblem;
 
   /// No description provided for @uploadNewAvatar.
@@ -1253,13 +1253,13 @@ abstract class AppLocalizations {
   /// No description provided for @valueExceedsLimit.
   ///
   /// In en, this message translates to:
-  /// **'Value Exceeds Limit'**
+  /// **'Value exceeds the allowed range.'**
   String get valueExceedsLimit;
 
   /// No description provided for @valueRange.
   ///
   /// In en, this message translates to:
-  /// **'Value Range : '**
+  /// **'Allowed range: '**
   String get valueRange;
 
   /// No description provided for @verified.
@@ -1289,7 +1289,7 @@ abstract class AppLocalizations {
   /// No description provided for @yes.
   ///
   /// In en, this message translates to:
-  /// **'YES'**
+  /// **'Yes'**
   String get yes;
 
   /// No description provided for @zoanFruit.
@@ -1301,13 +1301,13 @@ abstract class AppLocalizations {
   /// No description provided for @onceBelongTo.
   ///
   /// In en, this message translates to:
-  /// **'ex-member'**
+  /// **'Former Member'**
   String get onceBelongTo;
 
   /// No description provided for @userProfile.
   ///
   /// In en, this message translates to:
-  /// **'User Account'**
+  /// **'Profile'**
   String get userProfile;
 
   /// No description provided for @sendEmail.
@@ -1325,7 +1325,7 @@ abstract class AppLocalizations {
   /// No description provided for @emailSent.
   ///
   /// In en, this message translates to:
-  /// **'Mail Sent'**
+  /// **'Verification email sent'**
   String get emailSent;
 
   /// No description provided for @myCharacters.
@@ -1349,13 +1349,13 @@ abstract class AppLocalizations {
   /// No description provided for @homePage.
   ///
   /// In en, this message translates to:
-  /// **'Personal Home'**
+  /// **'My Home'**
   String get homePage;
 
   /// No description provided for @selectTypeWarning.
   ///
   /// In en, this message translates to:
-  /// **'Please select type！'**
+  /// **'Please select a type.'**
   String get selectTypeWarning;
 
   /// No description provided for @notCreated.
@@ -1367,7 +1367,7 @@ abstract class AppLocalizations {
   /// No description provided for @goToCreationPage.
   ///
   /// In en, this message translates to:
-  /// **'Go to creation page'**
+  /// **'Create Now'**
   String get goToCreationPage;
 
   /// No description provided for @characters.
@@ -1391,13 +1391,13 @@ abstract class AppLocalizations {
   /// No description provided for @historyGroups.
   ///
   /// In en, this message translates to:
-  /// **'History Group List'**
+  /// **'Former Groups'**
   String get historyGroups;
 
   /// No description provided for @searchList.
   ///
   /// In en, this message translates to:
-  /// **'Search List'**
+  /// **'Search Results'**
   String get searchList;
 
   /// No description provided for @eaten.
@@ -1415,13 +1415,13 @@ abstract class AppLocalizations {
   /// No description provided for @currentMember.
   ///
   /// In en, this message translates to:
-  /// **'Current member'**
+  /// **'Current Member'**
   String get currentMember;
 
   /// No description provided for @exMember.
   ///
   /// In en, this message translates to:
-  /// **'Ex-member'**
+  /// **'Former Member'**
   String get exMember;
 
   /// No description provided for @groupMember.
@@ -1433,25 +1433,25 @@ abstract class AppLocalizations {
   /// No description provided for @wakeUp.
   ///
   /// In en, this message translates to:
-  /// **'WakeUp'**
+  /// **'Awakened'**
   String get wakeUp;
 
   /// No description provided for @sleep.
   ///
   /// In en, this message translates to:
-  /// **'Sleeping'**
+  /// **'Not Awakened'**
   String get sleep;
 
   /// No description provided for @owner.
   ///
   /// In en, this message translates to:
-  /// **'Owners'**
+  /// **'Owner'**
   String get owner;
 
   /// No description provided for @currentlyNone.
   ///
   /// In en, this message translates to:
-  /// **'Empty'**
+  /// **'None yet'**
   String get currentlyNone;
 
   /// No description provided for @human.
@@ -1463,7 +1463,7 @@ abstract class AppLocalizations {
   /// No description provided for @fishman.
   ///
   /// In en, this message translates to:
-  /// **'Fish-Men'**
+  /// **'Fish-Man'**
   String get fishman;
 
   /// No description provided for @merfolk.
@@ -1481,19 +1481,19 @@ abstract class AppLocalizations {
   /// No description provided for @longArm.
   ///
   /// In en, this message translates to:
-  /// **'Long Arm Tribe'**
+  /// **'Longarm Tribe'**
   String get longArm;
 
   /// No description provided for @longLeg.
   ///
   /// In en, this message translates to:
-  /// **'Long Leg Tribe'**
+  /// **'Longleg Tribe'**
   String get longLeg;
 
   /// No description provided for @snakeNeck.
   ///
   /// In en, this message translates to:
-  /// **'Snake Neck Tribe'**
+  /// **'Snakeneck Tribe'**
   String get snakeNeck;
 
   /// No description provided for @threeEye.
@@ -1517,13 +1517,13 @@ abstract class AppLocalizations {
   /// No description provided for @worldNobel.
   ///
   /// In en, this message translates to:
-  /// **'World Nobel (Human)'**
+  /// **'Celestial Dragon (Human)'**
   String get worldNobel;
 
   /// No description provided for @dwarves.
   ///
   /// In en, this message translates to:
-  /// **'Dwarves Tribe'**
+  /// **'Dwarf'**
   String get dwarves;
 
   /// No description provided for @race.
@@ -1541,13 +1541,13 @@ abstract class AppLocalizations {
   /// No description provided for @starterName.
   ///
   /// In en, this message translates to:
-  /// **'starter'**
+  /// **'Initiator'**
   String get starterName;
 
   /// No description provided for @receiverName.
   ///
   /// In en, this message translates to:
-  /// **'receiver'**
+  /// **'Opponent'**
   String get receiverName;
 
   /// No description provided for @accountStatus.
@@ -1589,13 +1589,13 @@ abstract class AppLocalizations {
   /// No description provided for @retrievePassword.
   ///
   /// In en, this message translates to:
-  /// **'Retrieve Password'**
+  /// **'Reset Password'**
   String get retrievePassword;
 
   /// No description provided for @member.
   ///
   /// In en, this message translates to:
-  /// **'Crew'**
+  /// **'Crew Member'**
   String get member;
 
   /// No description provided for @caption.
@@ -1625,7 +1625,7 @@ abstract class AppLocalizations {
   /// No description provided for @firstMate.
   ///
   /// In en, this message translates to:
-  /// **'First mate'**
+  /// **'First Mate'**
   String get firstMate;
 
   /// No description provided for @helmsman.
@@ -1667,7 +1667,7 @@ abstract class AppLocalizations {
   /// No description provided for @positionList.
   ///
   /// In en, this message translates to:
-  /// **'Position List'**
+  /// **'Positions'**
   String get positionList;
 
   /// No description provided for @updatePassword.
@@ -1679,13 +1679,13 @@ abstract class AppLocalizations {
   /// No description provided for @combatPower.
   ///
   /// In en, this message translates to:
-  /// **'Score'**
+  /// **'Battle Rating'**
   String get combatPower;
 
   /// No description provided for @getByJoinCombat.
   ///
   /// In en, this message translates to:
-  /// **'Improve by joining combats'**
+  /// **'Increase your rating by taking part in battles.'**
   String get getByJoinCombat;
 
   /// No description provided for @next.
@@ -1715,13 +1715,13 @@ abstract class AppLocalizations {
   /// No description provided for @loginInfo.
   ///
   /// In en, this message translates to:
-  /// **'Login Information'**
+  /// **'Sign-in Information'**
   String get loginInfo;
 
   /// No description provided for @loginRoleOrLastLoginRole.
   ///
   /// In en, this message translates to:
-  /// **'Login role/Last login role'**
+  /// **'Current or Last Sign-in Role'**
   String get loginRoleOrLastLoginRole;
 
   /// No description provided for @permissionInfo.
@@ -1739,7 +1739,7 @@ abstract class AppLocalizations {
   /// No description provided for @issueDetail.
   ///
   /// In en, this message translates to:
-  /// **'Issue Detail'**
+  /// **'Feedback Details'**
   String get issueDetail;
 
   /// No description provided for @viewReport.
@@ -1751,7 +1751,7 @@ abstract class AppLocalizations {
   /// No description provided for @imageSizeExceedsLimit.
   ///
   /// In en, this message translates to:
-  /// **'Image size exceeds limit!'**
+  /// **'The image exceeds the size limit.'**
   String get imageSizeExceedsLimit;
 
   /// No description provided for @alert.
@@ -1769,7 +1769,7 @@ abstract class AppLocalizations {
   /// No description provided for @fieldMustBeDigit.
   ///
   /// In en, this message translates to:
-  /// **'Field must be digit'**
+  /// **'Please enter a number.'**
   String get fieldMustBeDigit;
 
   /// No description provided for @basicValue.
@@ -1799,7 +1799,7 @@ abstract class AppLocalizations {
   /// No description provided for @realValue.
   ///
   /// In en, this message translates to:
-  /// **'Fruit SNH'**
+  /// **'With Fruit Bonuses'**
   String get realValue;
 
   /// No description provided for @startSuccess.
@@ -1835,25 +1835,25 @@ abstract class AppLocalizations {
   /// No description provided for @invalidPassword.
   ///
   /// In en, this message translates to:
-  /// **'Password should only consists of digits, English letters and underline'**
+  /// **'Use only letters, numbers, and underscores.'**
   String get invalidPassword;
 
   /// No description provided for @invalidNickname.
   ///
   /// In en, this message translates to:
-  /// **'Nickname should only consists of digits, English letters and chinese characters'**
+  /// **'Use only letters, numbers, and Chinese characters.'**
   String get invalidNickname;
 
   /// No description provided for @passwordNotMatch.
   ///
   /// In en, this message translates to:
-  /// **'Password not match'**
+  /// **'Passwords do not match.'**
   String get passwordNotMatch;
 
   /// No description provided for @lengthExceedsLimit.
   ///
   /// In en, this message translates to:
-  /// **'String length exceeds limit，maximum is 20'**
+  /// **'Use no more than 20 characters.'**
   String get lengthExceedsLimit;
 
   /// No description provided for @reselect.
@@ -1865,19 +1865,19 @@ abstract class AppLocalizations {
   /// No description provided for @groupStructure.
   ///
   /// In en, this message translates to:
-  /// **'Team Structure'**
+  /// **'Group Structure'**
   String get groupStructure;
 
   /// No description provided for @fatherGroups.
   ///
   /// In en, this message translates to:
-  /// **'Superior groups'**
+  /// **'Parent Groups'**
   String get fatherGroups;
 
   /// No description provided for @thisGroup.
   ///
   /// In en, this message translates to:
-  /// **'Current group'**
+  /// **'Current Group'**
   String get thisGroup;
 
   /// No description provided for @selected.
@@ -1895,19 +1895,19 @@ abstract class AppLocalizations {
   /// No description provided for @selectNewMembers.
   ///
   /// In en, this message translates to:
-  /// **'Add new members'**
+  /// **'Add Members'**
   String get selectNewMembers;
 
   /// No description provided for @myAccount.
   ///
   /// In en, this message translates to:
-  /// **'My account'**
+  /// **'My Account'**
   String get myAccount;
 
   /// No description provided for @maxFileSize500.
   ///
   /// In en, this message translates to:
-  /// **'The maximum file size allowed is 500 kb.'**
+  /// **'Maximum file size: 500 KB.'**
   String get maxFileSize500;
 
   /// No description provided for @animal.
@@ -1925,7 +1925,7 @@ abstract class AppLocalizations {
   /// No description provided for @lifeless_object.
   ///
   /// In en, this message translates to:
-  /// **'Lifeless Object'**
+  /// **'Inanimate Object'**
   String get lifeless_object;
 
   /// No description provided for @sword.
@@ -1937,13 +1937,13 @@ abstract class AppLocalizations {
   /// No description provided for @stick.
   ///
   /// In en, this message translates to:
-  /// **'Stick'**
+  /// **'Staff'**
   String get stick;
 
   /// No description provided for @rifle.
   ///
   /// In en, this message translates to:
-  /// **'Gun'**
+  /// **'Rifle'**
   String get rifle;
 
   /// No description provided for @fightAgain.
@@ -1955,25 +1955,25 @@ abstract class AppLocalizations {
   /// No description provided for @loginAsVisitor.
   ///
   /// In en, this message translates to:
-  /// **'Visitor Login'**
+  /// **'Continue as Guest'**
   String get loginAsVisitor;
 
   /// No description provided for @allResources.
   ///
   /// In en, this message translates to:
-  /// **'All Resource'**
+  /// **'All Resources'**
   String get allResources;
 
   /// No description provided for @myResource.
   ///
   /// In en, this message translates to:
-  /// **'My Resource'**
+  /// **'My Resources'**
   String get myResource;
 
   /// No description provided for @excludeSystem.
   ///
   /// In en, this message translates to:
-  /// **'No System Resource'**
+  /// **'Exclude System Resources'**
   String get excludeSystem;
 
   /// No description provided for @message.
@@ -1985,7 +1985,7 @@ abstract class AppLocalizations {
   /// No description provided for @createChatting.
   ///
   /// In en, this message translates to:
-  /// **'New Chat'**
+  /// **'New Group Chat'**
   String get createChatting;
 
   /// No description provided for @addFriend.
@@ -2003,7 +2003,7 @@ abstract class AppLocalizations {
   /// No description provided for @chatting.
   ///
   /// In en, this message translates to:
-  /// **'Chatting'**
+  /// **'Chat'**
   String get chatting;
 
   /// No description provided for @image.
@@ -2015,13 +2015,13 @@ abstract class AppLocalizations {
   /// No description provided for @noChatting.
   ///
   /// In en, this message translates to:
-  /// **'Empty Chatting Room'**
+  /// **'No conversations yet'**
   String get noChatting;
 
   /// No description provided for @yesterday.
   ///
   /// In en, this message translates to:
-  /// **'yesterday'**
+  /// **'Yesterday'**
   String get yesterday;
 
   /// No description provided for @monday.
@@ -2081,7 +2081,7 @@ abstract class AppLocalizations {
   /// No description provided for @cancelSelection.
   ///
   /// In en, this message translates to:
-  /// **'Cancel'**
+  /// **'Cancel Selection'**
   String get cancelSelection;
 
   /// No description provided for @draft.
@@ -2093,7 +2093,7 @@ abstract class AppLocalizations {
   /// No description provided for @reference.
   ///
   /// In en, this message translates to:
-  /// **'Reference'**
+  /// **'Reply'**
   String get reference;
 
   /// No description provided for @copy.
@@ -2141,13 +2141,13 @@ abstract class AppLocalizations {
   /// No description provided for @groupRenameApiNotConnected.
   ///
   /// In en, this message translates to:
-  /// **'Group rename API is not connected yet'**
+  /// **'Renaming group chats is not available yet.'**
   String get groupRenameApiNotConnected;
 
   /// No description provided for @addMemberApiNotConnected.
   ///
   /// In en, this message translates to:
-  /// **'Add member API is not connected yet'**
+  /// **'Adding members is not available yet.'**
   String get addMemberApiNotConnected;
 
   /// No description provided for @addCharactersToGroup.
@@ -2185,6 +2185,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Message not sent — connection lost. Please try again.'**
   String get messageNotSent;
+
+  /// No description provided for @previousPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous Page'**
+  String get previousPage;
+
+  /// No description provided for @nextPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Next Page'**
+  String get nextPage;
+
+  /// No description provided for @jumpToPageTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Jump to Page'**
+  String get jumpToPageTooltip;
+
+  /// No description provided for @pageNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Page Number'**
+  String get pageNumber;
+
+  /// No description provided for @pinMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Pin Menu'**
+  String get pinMenu;
+
+  /// No description provided for @backToDrawer.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Drawer Menu'**
+  String get backToDrawer;
+
+  /// No description provided for @collapseMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse Menu'**
+  String get collapseMenu;
+
+  /// No description provided for @expandMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand Menu'**
+  String get expandMenu;
+
+  /// No description provided for @error.
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get error;
+
+  /// No description provided for @saveAvatarFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save your avatar. Please try again.'**
+  String get saveAvatarFailed;
+
+  /// No description provided for @sendVerificationEmailFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not send the verification email. Please try again.'**
+  String get sendVerificationEmailFailed;
+
+  /// No description provided for @saveNicknameFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save your nickname. Please try again.'**
+  String get saveNicknameFailed;
+
+  /// No description provided for @newConversation.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get newConversation;
+
+  /// No description provided for @versus.
+  ///
+  /// In en, this message translates to:
+  /// **'VS'**
+  String get versus;
+
+  /// No description provided for @characterCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 character} other{{count} characters}}'**
+  String characterCount(int count);
+
+  /// No description provided for @fruitCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 Devil Fruit} other{{count} Devil Fruits}}'**
+  String fruitCount(int count);
+
+  /// No description provided for @userCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 user} other{{count} users}}'**
+  String userCount(int count);
+
+  /// No description provided for @issueCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 feedback item} other{{count} feedback items}}'**
+  String issueCount(int count);
+
+  /// No description provided for @relatedBattleCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 related battle} other{{count} related battles}}'**
+  String relatedBattleCount(int count);
+
+  /// No description provided for @characterLimitCounter.
+  ///
+  /// In en, this message translates to:
+  /// **'{current}/{max} characters'**
+  String characterLimitCounter(int current, int max);
 }
 
 class _AppLocalizationsDelegate

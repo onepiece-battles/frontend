@@ -12,16 +12,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountCheck => 'Already have an account?';
 
   @override
-  String get accountClosed => 'Closed';
+  String get accountClosed => 'Deleted';
 
   @override
-  String get accountLoggedIn => 'Logged In';
+  String get accountLoggedIn => 'Signed In';
 
   @override
-  String get accountLoggedOut => 'Logged Out';
+  String get accountLoggedOut => 'Signed Out';
 
   @override
-  String get accountStopped => 'Stopped';
+  String get accountStopped => 'Disabled';
 
   @override
   String get age => 'Age';
@@ -30,13 +30,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get allUserRoles => 'All Roles';
 
   @override
-  String get ancientZoanFruit => 'Ancient (Zoan)';
+  String get ancientZoanFruit => 'Ancient Zoan';
 
   @override
-  String get artificialZoanFruit => 'Artificial (Zoan)';
+  String get artificialZoanFruit => 'Artificial Zoan';
 
   @override
-  String get attackStrengthen => 'Attack Index';
+  String get attackStrengthen => 'Attack Bonus';
 
   @override
   String get avatarHeader => 'Public Avatar';
@@ -48,7 +48,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get back => 'Back';
 
   @override
-  String get backToLoginPage => 'Back to login page';
+  String get backToLoginPage => 'Back to Sign In';
 
   @override
   String get basicInfo => 'Basic Information';
@@ -60,7 +60,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get battleFinished => 'Finished';
 
   @override
-  String get battleInProgress => 'In Progress...';
+  String get battleInProgress => 'In Progress';
 
   @override
   String get battleInfo => 'Battle Information';
@@ -78,16 +78,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get battleStatusFinished => 'Finished';
 
   @override
-  String get battleUnFinished => 'On Going ...';
+  String get battleUnFinished => 'Unfinished';
 
   @override
   String get battleNotInProgress => 'Not Started';
 
   @override
-  String get battleReportWaiting => 'Report Waiting ...';
+  String get battleReportWaiting => 'Report Pending';
 
   @override
-  String get battleReportInProgress => 'Report Generating';
+  String get battleReportInProgress => 'Generating Report…';
 
   @override
   String get battleReportGenerated => 'Report Available';
@@ -108,13 +108,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get birthDay => 'Birthday';
 
   @override
-  String get birthPlace => 'Birth place';
+  String get birthPlace => 'Birthplace';
 
   @override
-  String get bloodStrengthen => 'Blood Index';
+  String get bloodStrengthen => 'Health Bonus';
 
   @override
-  String get body => 'Taijutsu';
+  String get body => 'Martial Arts';
 
   @override
   String get bounty => 'Bounty';
@@ -123,7 +123,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bugReport => 'Bug Report';
 
   @override
-  String get busoshoku => 'Busoshoku';
+  String get busoshoku => 'Armament Haki';
 
   @override
   String get cancelPopUp => 'Cancel';
@@ -138,7 +138,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get characterAttack => 'Attack';
 
   @override
-  String get characterBlood => 'Blood';
+  String get characterBlood => 'Health';
 
   @override
   String get characterDefense => 'Defense';
@@ -150,16 +150,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get characterEnergy => 'Energy';
 
   @override
-  String get characterFruits => 'Fruits';
+  String get characterFruits => 'Devil Fruits';
 
   @override
-  String get characterImageRequired => 'Please upload character head image';
+  String get characterImageRequired => 'Please upload a character portrait.';
 
   @override
   String get characterIntelligence => 'Intelligence';
 
   @override
-  String get characterName => 'Name';
+  String get characterName => 'Character Name';
 
   @override
   String get characterSpeed => 'Speed';
@@ -171,7 +171,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chinese => 'Chinese';
 
   @override
-  String get chooseFile => 'Choose file ...';
+  String get chooseFile => 'Choose File';
 
   @override
   String get chooseFruit => 'Choose';
@@ -213,10 +213,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get creator => 'Creator';
 
   @override
-  String get defenseStrengthen => 'Defense index';
+  String get defenseStrengthen => 'Defense Bonus';
 
   @override
-  String get detailInformation => 'Detail Information';
+  String get detailInformation => 'Details';
 
   @override
   String get devilFruit => 'Devil Fruit';
@@ -246,16 +246,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get empty => 'Empty';
 
   @override
-  String get endOfList => 'end of list ...';
+  String get endOfList => 'End of list';
 
   @override
-  String get energyConsume => 'Energy Consume';
+  String get energyConsume => 'Energy Cost';
 
   @override
   String get english => 'English';
 
   @override
-  String get featureSuggestion => 'Feature Related Suggestion';
+  String get featureSuggestion => 'Feature Suggestion';
 
   @override
   String get feedback => 'Feedback';
@@ -264,16 +264,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get feedbackContent => 'Content';
 
   @override
-  String get feedbackContentHint => 'Describe in detail.';
+  String get feedbackContentHint =>
+      'Describe the issue or suggestion in detail.';
 
   @override
   String get feedbackTitle => 'Title';
 
   @override
-  String get feedbackTitleHint => 'General Description.';
+  String get feedbackTitleHint => 'Briefly describe your issue or suggestion.';
 
   @override
-  String get fieldMustBeInt => 'Number must be Integer.';
+  String get fieldMustBeInt => 'Please enter a whole number.';
 
   @override
   String get fist => 'Fist';
@@ -294,28 +295,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get group => 'Group';
 
   @override
-  String get groupBattle => 'Group Fight';
+  String get groupBattle => 'Group Battle';
 
   @override
   String get groupCategory => 'Group Category';
 
   @override
-  String get groupEmblemRequired => 'Please upload group emblem';
+  String get groupEmblemRequired => 'Please upload a group emblem.';
 
   @override
-  String get groupGain => 'Group Gain (%)';
+  String get groupGain => 'Teamwork Bonus (%)';
 
   @override
   String get groupName => 'Group Name';
 
   @override
-  String get groupStrengthen => 'Group gain index';
+  String get groupStrengthen => 'Teamwork Bonus';
 
   @override
-  String get hakis => 'Hakis';
+  String get hakis => 'Haki';
 
   @override
-  String get haoshoku => 'Haoshoku';
+  String get haoshoku => 'Conqueror’s Haki';
 
   @override
   String get height => 'Height (cm)';
@@ -333,11 +334,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get initiator => 'Initiator';
 
   @override
-  String get intelligenceStrengthen => 'Intelligence index';
+  String get intelligenceStrengthen => 'Intelligence Bonus';
 
   @override
   String get invalidName =>
-      'name should only contains alphabet letters (chinese characters) and digits';
+      'Use letters, Chinese characters, numbers, spaces, hyphens, middle dots, or periods.';
 
   @override
   String get issue => 'Issue';
@@ -355,51 +356,50 @@ class AppLocalizationsEn extends AppLocalizations {
   String get katana => 'Katana';
 
   @override
-  String get kenbunshoku => 'Kenbunshoku';
+  String get kenbunshoku => 'Observation Haki';
 
   @override
   String get language => 'Language';
 
   @override
-  String get leaved => 'leaved';
+  String get leaved => 'Left';
 
   @override
-  String get leg => 'leg';
+  String get leg => 'Leg';
 
   @override
-  String get listToEnd => 'END OF LIST';
+  String get listToEnd => 'End of list';
 
   @override
-  String get loading => 'Loading ...';
+  String get loading => 'Loading…';
 
   @override
   String get localizationDescription =>
-      'Customize language and region related settings';
+      'Customize your language and region settings.';
 
   @override
-  String get localizationHeader => 'Localization';
+  String get localizationHeader => 'Language and Region';
 
   @override
   String get logiaFruit => 'Logia';
 
   @override
-  String get loginRole => 'login role';
+  String get loginRole => 'Sign-in Role';
 
   @override
-  String get logout => 'Logout';
+  String get logout => 'Sign Out';
 
   @override
   String get marine => 'Marine';
 
   @override
-  String get maxFileSizeDescription =>
-      'The maximum file size allowed is 200 kb';
+  String get maxFileSizeDescription => 'Maximum file size: 200 KB.';
 
   @override
   String get modificationTime => 'Modification Time';
 
   @override
-  String get mythicalZoanFruit => 'Mythical (Zoan)';
+  String get mythicalZoanFruit => 'Mythical Zoan';
 
   @override
   String get name => 'Name';
@@ -408,7 +408,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nickname => 'Nickname';
 
   @override
-  String get no => 'NO';
+  String get no => 'No';
 
   @override
   String get noAccount => 'No account?';
@@ -417,7 +417,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noFileChosen => 'No file chosen';
 
   @override
-  String get noSystemResource => 'Exclude System Resource';
+  String get noSystemResource => 'Exclude System Resources';
 
   @override
   String get notVerified => 'Not Verified';
@@ -447,19 +447,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pirate => 'Pirate';
 
   @override
-  String get receiver => 'Receiver';
+  String get receiver => 'Opponent';
 
   @override
-  String get registerAccount => 'Register Now！';
+  String get registerAccount => 'Register Now';
 
   @override
   String get registerPasswordHint => 'Password';
 
   @override
-  String get registerPasswordHint2 => 'Confirmed password';
+  String get registerPasswordHint2 => 'Confirm Password';
 
   @override
-  String get registerUserNameHint => 'Please choose your nick name';
+  String get registerUserNameHint => 'Choose a nickname';
 
   @override
   String get relatedBattles => 'Related Battles';
@@ -474,35 +474,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get resetSort => 'Reset Sort';
 
   @override
-  String get roleAdmin => 'ADMIN';
+  String get roleAdmin => 'Administrator';
 
   @override
-  String get roleNika => 'NIKA';
+  String get roleNika => 'Nika';
 
   @override
-  String get roleNormal => 'NORMAL USER';
+  String get roleNormal => 'Standard User';
 
   @override
-  String get roleVisitor => 'VISITOR';
+  String get roleVisitor => 'Guest';
 
   @override
-  String get route => 'Nav';
+  String get route => 'Navigation';
 
   @override
   String get science => 'Science';
 
   @override
-  String get searchReceiver => 'search receiver ...';
+  String get searchReceiver => 'Search opponents…';
 
   @override
-  String get searchResource => 'Search resource';
+  String get searchResource => 'Search Resources';
 
   @override
-  String get searchResourceDetail =>
-      '[ character name| fruit name | group name ]';
+  String get searchResourceDetail => 'Character, Devil Fruit, or group name';
 
   @override
-  String get searchStarter => 'search starter ...';
+  String get searchStarter => 'Search initiators…';
 
   @override
   String get selectCharacter => 'Select Character';
@@ -511,22 +510,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings => 'Settings';
 
   @override
-  String get shoot => 'Gun';
+  String get shoot => 'Marksmanship';
 
   @override
   String get signIn => 'Sign In';
 
   @override
-  String get signUp => 'Sign up';
+  String get signUp => 'Sign Up';
 
   @override
-  String get signUpHeadLine => 'Create a free account right now!';
+  String get signUpHeadLine => 'Create a free account';
 
   @override
-  String get singleBattle => 'Single Battle';
+  String get singleBattle => 'One-on-One';
 
   @override
-  String get speedStrengthen => 'Speed Index';
+  String get speedStrengthen => 'Speed Bonus';
 
   @override
   String get startBattle => 'Start Battle';
@@ -559,7 +558,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get thisCharacter => 'This Character';
 
   @override
-  String get title => 'title';
+  String get title => 'Title';
 
   @override
   String get underworld => 'Underworld';
@@ -571,7 +570,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get updateUserSettings => 'Update User Settings';
 
   @override
-  String get uploadGroupEmblem => 'Update Group Emblem ';
+  String get uploadGroupEmblem => 'Upload Group Emblem';
 
   @override
   String get uploadNewAvatar => 'Upload Avatar';
@@ -589,10 +588,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get userNameLabel => 'Username';
 
   @override
-  String get valueExceedsLimit => 'Value Exceeds Limit';
+  String get valueExceedsLimit => 'Value exceeds the allowed range.';
 
   @override
-  String get valueRange => 'Value Range : ';
+  String get valueRange => 'Allowed range: ';
 
   @override
   String get verified => 'Verified';
@@ -607,16 +606,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get worldGovernment => 'World Government';
 
   @override
-  String get yes => 'YES';
+  String get yes => 'Yes';
 
   @override
   String get zoanFruit => 'Zoan';
 
   @override
-  String get onceBelongTo => 'ex-member';
+  String get onceBelongTo => 'Former Member';
 
   @override
-  String get userProfile => 'User Account';
+  String get userProfile => 'Profile';
 
   @override
   String get sendEmail => 'Send Verification Email';
@@ -625,7 +624,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emailVerification => 'Email Verification';
 
   @override
-  String get emailSent => 'Mail Sent';
+  String get emailSent => 'Verification email sent';
 
   @override
   String get myCharacters => 'My Characters';
@@ -637,16 +636,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get myBattles => 'My Battles';
 
   @override
-  String get homePage => 'Personal Home';
+  String get homePage => 'My Home';
 
   @override
-  String get selectTypeWarning => 'Please select type！';
+  String get selectTypeWarning => 'Please select a type.';
 
   @override
   String get notCreated => 'Not Created';
 
   @override
-  String get goToCreationPage => 'Go to creation page';
+  String get goToCreationPage => 'Create Now';
 
   @override
   String get characters => 'characters';
@@ -658,10 +657,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get day => 'DD';
 
   @override
-  String get historyGroups => 'History Group List';
+  String get historyGroups => 'Former Groups';
 
   @override
-  String get searchList => 'Search List';
+  String get searchList => 'Search Results';
 
   @override
   String get eaten => 'Eaten';
@@ -670,31 +669,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get verificationCode => 'Verification Code';
 
   @override
-  String get currentMember => 'Current member';
+  String get currentMember => 'Current Member';
 
   @override
-  String get exMember => 'Ex-member';
+  String get exMember => 'Former Member';
 
   @override
   String get groupMember => 'Group Member';
 
   @override
-  String get wakeUp => 'WakeUp';
+  String get wakeUp => 'Awakened';
 
   @override
-  String get sleep => 'Sleeping';
+  String get sleep => 'Not Awakened';
 
   @override
-  String get owner => 'Owners';
+  String get owner => 'Owner';
 
   @override
-  String get currentlyNone => 'Empty';
+  String get currentlyNone => 'None yet';
 
   @override
   String get human => 'Human';
 
   @override
-  String get fishman => 'Fish-Men';
+  String get fishman => 'Fish-Man';
 
   @override
   String get merfolk => 'Merfolk';
@@ -703,13 +702,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get giant => 'Giant';
 
   @override
-  String get longArm => 'Long Arm Tribe';
+  String get longArm => 'Longarm Tribe';
 
   @override
-  String get longLeg => 'Long Leg Tribe';
+  String get longLeg => 'Longleg Tribe';
 
   @override
-  String get snakeNeck => 'Snake Neck Tribe';
+  String get snakeNeck => 'Snakeneck Tribe';
 
   @override
   String get threeEye => 'Three-Eye Tribe';
@@ -721,10 +720,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mink => 'Mink Tribe';
 
   @override
-  String get worldNobel => 'World Nobel (Human)';
+  String get worldNobel => 'Celestial Dragon (Human)';
 
   @override
-  String get dwarves => 'Dwarves Tribe';
+  String get dwarves => 'Dwarf';
 
   @override
   String get race => 'Race';
@@ -733,10 +732,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get none => 'None';
 
   @override
-  String get starterName => 'starter';
+  String get starterName => 'Initiator';
 
   @override
-  String get receiverName => 'receiver';
+  String get receiverName => 'Opponent';
 
   @override
   String get accountStatus => 'Account Status';
@@ -757,10 +756,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get forgotPassword => 'Forgot password?';
 
   @override
-  String get retrievePassword => 'Retrieve Password';
+  String get retrievePassword => 'Reset Password';
 
   @override
-  String get member => 'Crew';
+  String get member => 'Crew Member';
 
   @override
   String get caption => 'Captain';
@@ -775,7 +774,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get doctor => 'Doctor';
 
   @override
-  String get firstMate => 'First mate';
+  String get firstMate => 'First Mate';
 
   @override
   String get helmsman => 'Helmsman';
@@ -796,16 +795,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shipwright => 'Shipwright';
 
   @override
-  String get positionList => 'Position List';
+  String get positionList => 'Positions';
 
   @override
   String get updatePassword => 'Update Password';
 
   @override
-  String get combatPower => 'Score';
+  String get combatPower => 'Battle Rating';
 
   @override
-  String get getByJoinCombat => 'Improve by joining combats';
+  String get getByJoinCombat =>
+      'Increase your rating by taking part in battles.';
 
   @override
   String get next => 'Next';
@@ -820,10 +820,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get position => 'Position';
 
   @override
-  String get loginInfo => 'Login Information';
+  String get loginInfo => 'Sign-in Information';
 
   @override
-  String get loginRoleOrLastLoginRole => 'Login role/Last login role';
+  String get loginRoleOrLastLoginRole => 'Current or Last Sign-in Role';
 
   @override
   String get permissionInfo => 'Permission Information';
@@ -832,13 +832,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get role => 'Role';
 
   @override
-  String get issueDetail => 'Issue Detail';
+  String get issueDetail => 'Feedback Details';
 
   @override
   String get viewReport => 'View Report';
 
   @override
-  String get imageSizeExceedsLimit => 'Image size exceeds limit!';
+  String get imageSizeExceedsLimit => 'The image exceeds the size limit.';
 
   @override
   String get alert => '⚠️';
@@ -847,7 +847,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get search => 'Search...';
 
   @override
-  String get fieldMustBeDigit => 'Field must be digit';
+  String get fieldMustBeDigit => 'Please enter a number.';
 
   @override
   String get basicValue => 'Base value';
@@ -862,7 +862,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statFormulaHint => 'Result = base value × multiplier + adjustment';
 
   @override
-  String get realValue => 'Fruit SNH';
+  String get realValue => 'With Fruit Bonuses';
 
   @override
   String get startSuccess => 'Started successfully';
@@ -880,30 +880,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get add => 'Add';
 
   @override
-  String get invalidPassword =>
-      'Password should only consists of digits, English letters and underline';
+  String get invalidPassword => 'Use only letters, numbers, and underscores.';
 
   @override
   String get invalidNickname =>
-      'Nickname should only consists of digits, English letters and chinese characters';
+      'Use only letters, numbers, and Chinese characters.';
 
   @override
-  String get passwordNotMatch => 'Password not match';
+  String get passwordNotMatch => 'Passwords do not match.';
 
   @override
-  String get lengthExceedsLimit => 'String length exceeds limit，maximum is 20';
+  String get lengthExceedsLimit => 'Use no more than 20 characters.';
 
   @override
   String get reselect => 'Reselect';
 
   @override
-  String get groupStructure => 'Team Structure';
+  String get groupStructure => 'Group Structure';
 
   @override
-  String get fatherGroups => 'Superior groups';
+  String get fatherGroups => 'Parent Groups';
 
   @override
-  String get thisGroup => 'Current group';
+  String get thisGroup => 'Current Group';
 
   @override
   String get selected => 'Selected';
@@ -912,13 +911,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectable => 'Selectable';
 
   @override
-  String get selectNewMembers => 'Add new members';
+  String get selectNewMembers => 'Add Members';
 
   @override
-  String get myAccount => 'My account';
+  String get myAccount => 'My Account';
 
   @override
-  String get maxFileSize500 => 'The maximum file size allowed is 500 kb.';
+  String get maxFileSize500 => 'Maximum file size: 500 KB.';
 
   @override
   String get animal => 'Animal';
@@ -927,37 +926,37 @@ class AppLocalizationsEn extends AppLocalizations {
   String get soul => 'Supernatural Object';
 
   @override
-  String get lifeless_object => 'Lifeless Object';
+  String get lifeless_object => 'Inanimate Object';
 
   @override
   String get sword => 'Sword';
 
   @override
-  String get stick => 'Stick';
+  String get stick => 'Staff';
 
   @override
-  String get rifle => 'Gun';
+  String get rifle => 'Rifle';
 
   @override
   String get fightAgain => 'Fight Again';
 
   @override
-  String get loginAsVisitor => 'Visitor Login';
+  String get loginAsVisitor => 'Continue as Guest';
 
   @override
-  String get allResources => 'All Resource';
+  String get allResources => 'All Resources';
 
   @override
-  String get myResource => 'My Resource';
+  String get myResource => 'My Resources';
 
   @override
-  String get excludeSystem => 'No System Resource';
+  String get excludeSystem => 'Exclude System Resources';
 
   @override
   String get message => 'Messages';
 
   @override
-  String get createChatting => 'New Chat';
+  String get createChatting => 'New Group Chat';
 
   @override
   String get addFriend => 'Add Friends';
@@ -966,16 +965,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get send => 'Send';
 
   @override
-  String get chatting => 'Chatting';
+  String get chatting => 'Chat';
 
   @override
   String get image => 'Image';
 
   @override
-  String get noChatting => 'Empty Chatting Room';
+  String get noChatting => 'No conversations yet';
 
   @override
-  String get yesterday => 'yesterday';
+  String get yesterday => 'Yesterday';
 
   @override
   String get monday => 'Monday';
@@ -1005,13 +1004,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noEarlierMessages => 'No earlier messages';
 
   @override
-  String get cancelSelection => 'Cancel';
+  String get cancelSelection => 'Cancel Selection';
 
   @override
   String get draft => 'Draft';
 
   @override
-  String get reference => 'Reference';
+  String get reference => 'Reply';
 
   @override
   String get copy => 'Copy';
@@ -1036,10 +1035,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get groupRenameApiNotConnected =>
-      'Group rename API is not connected yet';
+      'Renaming group chats is not available yet.';
 
   @override
-  String get addMemberApiNotConnected => 'Add member API is not connected yet';
+  String get addMemberApiNotConnected => 'Adding members is not available yet.';
 
   @override
   String get addCharactersToGroup => 'Add characters';
@@ -1060,4 +1059,109 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get messageNotSent =>
       'Message not sent — connection lost. Please try again.';
+
+  @override
+  String get previousPage => 'Previous Page';
+
+  @override
+  String get nextPage => 'Next Page';
+
+  @override
+  String get jumpToPageTooltip => 'Jump to Page';
+
+  @override
+  String get pageNumber => 'Page Number';
+
+  @override
+  String get pinMenu => 'Pin Menu';
+
+  @override
+  String get backToDrawer => 'Use Drawer Menu';
+
+  @override
+  String get collapseMenu => 'Collapse Menu';
+
+  @override
+  String get expandMenu => 'Expand Menu';
+
+  @override
+  String get error => 'Error';
+
+  @override
+  String get saveAvatarFailed =>
+      'Could not save your avatar. Please try again.';
+
+  @override
+  String get sendVerificationEmailFailed =>
+      'Could not send the verification email. Please try again.';
+
+  @override
+  String get saveNicknameFailed =>
+      'Could not save your nickname. Please try again.';
+
+  @override
+  String get newConversation => 'New';
+
+  @override
+  String get versus => 'VS';
+
+  @override
+  String characterCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count characters',
+      one: '1 character',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String fruitCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Devil Fruits',
+      one: '1 Devil Fruit',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String userCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count users',
+      one: '1 user',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String issueCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count feedback items',
+      one: '1 feedback item',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String relatedBattleCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count related battles',
+      one: '1 related battle',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String characterLimitCounter(int current, int max) {
+    return '$current/$max characters';
+  }
 }

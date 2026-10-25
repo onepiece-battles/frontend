@@ -4,6 +4,7 @@ import 'package:openapi/api.dart';
 
 import '../../../components/desktop_card_layout.dart';
 import '../../../components/image_lazy_loader.dart';
+import '../../../components/resource_detail_layout.dart';
 import '../../../constants/onepiece_colors.dart';
 import '../../../constants/onepiece_fonts.dart';
 import '../../../constants/onepiece_tag.dart';
@@ -55,7 +56,7 @@ class CharacterDesktopRoster extends StatelessWidget {
         Row(
           children: [
             Text(
-              '$totalItemCount ${AppLocalizations.of(context)!.character}',
+              AppLocalizations.of(context)!.characterCount(totalItemCount),
               style: OnepieceFonts.smallContentStyle.copyWith(fontSize: 12),
             ),
             const Spacer(),
@@ -87,7 +88,6 @@ class CharacterDesktopRoster extends StatelessWidget {
   }
 
   Widget _buildCard(BuildContext context, CharacterListView character) {
-    final isExpanded = expandedRowIds.contains(character.id);
     final race = raceMap[character.race] ?? '';
     final battleStyle = battleStyleMap[character.battleStyle] ?? '';
     final loc = AppLocalizations.of(context)!;
@@ -184,18 +184,27 @@ class CharacterDesktopRoster extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 4),
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       textStyle: const TextStyle(fontSize: 12)),
-                  onPressed: () => onToggleExpand(character.id),
-                  icon: Icon(isExpanded ? Icons.expand_less : Icons.expand_more,
-                      size: 16),
+                  onPressed: () => _openDetails(context, character),
+                  icon: const Icon(Icons.info_outline, size: 16),
                   label: Text(loc.detailInformation),
                 ),
               ]),
-              if (isExpanded) _buildStats(context, character),
             ],
           ),
         ),
       ),
     );
+  }
+
+  void _openDetails(BuildContext context, CharacterListView character) {
+    onToggleExpand(character.id);
+    showResourceDetails(
+            context,
+            I18nHelper.getDisplayNameFromI18n(character.name),
+            _buildStats(context, character))
+        .whenComplete(() {
+      if (context.mounted) onToggleExpand(character.id);
+    });
   }
 
   Widget _buildStats(BuildContext context, CharacterListView character) {
@@ -216,30 +225,8 @@ class CharacterDesktopRoster extends StatelessWidget {
       StatPair(loc.fruitLimit, character.maximumFruitCount.toString()),
     ];
 
-    return LayoutBuilder(builder: (context, constraints) {
-      final columns = constraints.maxWidth >= 260 ? 2 : 1;
-      final width = (constraints.maxWidth - 16 * (columns - 1)) / columns;
-      return Wrap(
-        spacing: 16,
-        runSpacing: 12,
-        children: stats
-            .map((stat) => SizedBox(
-                  width: width,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(stat.label, style: OnepieceFonts.smallContentStyle),
-                      const SizedBox(height: 3),
-                      Text(stat.value,
-                          style: const TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                              color: OnepieceColors.primaryLabel)),
-                    ],
-                  ),
-                ))
-            .toList(),
-      );
-    });
+    return DetailFieldGrid(
+        fields:
+            stats.map((stat) => DetailValue(stat.label, stat.value)).toList());
   }
 }

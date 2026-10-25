@@ -652,7 +652,7 @@ class _UserHomeState extends State<UserHome> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 6),
                       child: Column(children: [
-                        Text("VS",
+                        Text(AppLocalizations.of(context)!.versus,
                             style: OnepieceFonts.boldFancyBlueHintFont
                                 .copyWith(fontSize: 13)),
                         const SizedBox(height: 4),

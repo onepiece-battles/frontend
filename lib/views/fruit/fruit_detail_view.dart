@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../components/resource_detail_layout.dart';
+import '../../constants/onepiece_colors.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'fruit_detail_controller.dart';
@@ -9,7 +11,6 @@ import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
 import '../../constants/onepiece_fonts.dart';
 import '../../l10n/app_localizations.dart';
-import '../../utils/nested_scroll_helper.dart';
 import '../../utils/permission_check.dart';
 import '../../utils/responsive_breakpoints.dart';
 
@@ -118,6 +119,42 @@ class _FruitDetailViewState extends State<FruitDetailView> {
     );
   }
 
+  Widget _buildDesktopLayout(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+    return ResourceDetailPage(
+        controller: verticalController,
+        header: DetailHero(
+            kind: loc.devilFruit,
+            title: I18nHelper.getDisplayNameFromI18n(fruitFullView.name),
+            avatar: Container(
+                width: 88,
+                height: 88,
+                decoration: const BoxDecoration(
+                    color: OnepieceColors.surface, shape: BoxShape.circle),
+                child: const Icon(Icons.spa_outlined,
+                    color: OnepieceColors.fancyBlue, size: 38)),
+            metrics: [
+              DetailValue(
+                  loc.energyConsume, '${fruitFullView.energyConsume ?? '—'}'),
+              DetailValue(loc.owner, '${characters.length}')
+            ]),
+        sections: (context, width) => [
+              FruitBasicInfoSection(
+                  fruit: fruitFullView,
+                  editButtonVisible: _editButtonVisible,
+                  controller: _controller,
+                  isNarrow: false,
+                  sideWidth: 0),
+              FruitCombatInfoSection(
+                  fruit: fruitFullView,
+                  editButtonVisible: _editButtonVisible,
+                  controller: _controller,
+                  isNarrow: false,
+                  sideWidth: 0),
+              FruitCharactersSection(characters: characters, isNarrow: false),
+            ]);
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<FruitFullView?>(
@@ -138,61 +175,12 @@ class _FruitDetailViewState extends State<FruitDetailView> {
               builder: (context, constraints) {
                 final isNarrow =
                     ResponsiveBreakpoints.isMobileFromConstraints(constraints);
-                final divW = isNarrow ? constraints.maxWidth - 30 : 800.0;
-                final sideW = isNarrow ? 8.0 : 50.0;
                 return Stack(
                   children: [
                     if (isNarrow)
                       _buildMobileLayout(context)
                     else
-                      SingleChildScrollView(
-                        controller: verticalController,
-                        scrollDirection: Axis.vertical,
-                        child: Center(
-                          child: NestedHorizontalScrollView(
-                            controller: horizontalController,
-                            verticalParentController: verticalController,
-                            child: SizedBox(
-                              width: divW,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  FruitBasicInfoSection(
-                                    fruit: fruitFullView,
-                                    editButtonVisible: _editButtonVisible,
-                                    controller: _controller,
-                                    isNarrow: false,
-                                    sideWidth: sideW,
-                                  ),
-                                  const Padding(
-                                      padding:
-                                          EdgeInsets.symmetric(vertical: 8),
-                                      child: Divider(
-                                          color: Colors.grey, thickness: 1)),
-                                  FruitCombatInfoSection(
-                                    fruit: fruitFullView,
-                                    editButtonVisible: _editButtonVisible,
-                                    controller: _controller,
-                                    isNarrow: false,
-                                    sideWidth: sideW,
-                                  ),
-                                  const SizedBox(
-                                      height: 30,
-                                      child: Divider(
-                                          color: Colors.grey, thickness: 1)),
-                                  Padding(
-                                      padding: EdgeInsets.symmetric(
-                                          horizontal: sideW),
-                                      child: FruitCharactersSection(
-                                          characters: characters,
-                                          isNarrow: false)),
-                                  const SizedBox(height: 60),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
+                      Positioned.fill(child: _buildDesktopLayout(context)),
                     Positioned(
                         bottom: 0,
                         left: 0,
@@ -210,6 +198,11 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                                       : I18nHelper.getDisplayNameFromI18n(
                                           fruitFullView.previousFruit!.name),
                                   child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                        elevation: 0,
+                                        backgroundColor: OnepieceColors.surface,
+                                        foregroundColor:
+                                            OnepieceColors.fancyBlue),
                                     onPressed:
                                         fruitFullView.previousFruit == null
                                             ? null
@@ -234,6 +227,11 @@ class _FruitDetailViewState extends State<FruitDetailView> {
                                       : I18nHelper.getDisplayNameFromI18n(
                                           fruitFullView.nextFruit!.name),
                                   child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                        elevation: 0,
+                                        backgroundColor: OnepieceColors.surface,
+                                        foregroundColor:
+                                            OnepieceColors.fancyBlue),
                                     onPressed: fruitFullView.nextFruit == null
                                         ? null
                                         : () {

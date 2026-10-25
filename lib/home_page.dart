@@ -517,12 +517,12 @@ class _SideMenuState extends State<SideMenu> {
 
   Widget _buildNarrowToggle(bool isExpanded) {
     final tooltip = widget.isDrawer
-        ? 'Pin menu'
+        ? AppLocalizations.of(context)!.pinMenu
         : widget.isPinnedRail
-            ? 'Back to drawer'
+            ? AppLocalizations.of(context)!.backToDrawer
             : isExpanded
-                ? 'Collapse menu'
-                : 'Expand menu';
+                ? AppLocalizations.of(context)!.collapseMenu
+                : AppLocalizations.of(context)!.expandMenu;
     final icon = widget.isDrawer
         ? Icons.push_pin_outlined
         : widget.isPinnedRail
@@ -1070,8 +1070,7 @@ class _TopNavigationBarState extends State<TopNavigationBar> {
           crumbs.add(Padding(
             padding: EdgeInsets.symmetric(horizontal: isMobile ? 2 : 5),
             child: Icon(Icons.arrow_forward_ios,
-                size: isMobile ? 10 : 13,
-                color: OnepieceColors.secondaryLabel),
+                size: isMobile ? 10 : 13, color: OnepieceColors.secondaryLabel),
           ));
 
           if (!isLast) {

@@ -152,11 +152,11 @@ class _CharacterFruitsSectionState extends State<CharacterFruitsSection> {
                       contentPadding:
                           const EdgeInsets.symmetric(horizontal: 10),
                       disabledBorder: const OutlineInputBorder(
-                          borderSide: BorderSide(
-                              color: OnepieceColors.menuHoverColor)),
+                          borderSide:
+                              BorderSide(color: OnepieceColors.menuHoverColor)),
                       enabledBorder: const OutlineInputBorder(
-                          borderSide: BorderSide(
-                              color: OnepieceColors.menuHoverColor)),
+                          borderSide:
+                              BorderSide(color: OnepieceColors.menuHoverColor)),
                       focusedBorder: const OutlineInputBorder(
                           borderSide: BorderSide(
                               color: OnepieceColors.fancyGreen, width: 2.2)),
@@ -169,7 +169,7 @@ class _CharacterFruitsSectionState extends State<CharacterFruitsSection> {
                 Container(
                     constraints: const BoxConstraints(maxHeight: 200),
                     decoration: const BoxDecoration(
-                        color: OnepieceColors.menuBackgroundColor,
+                        color: OnepieceColors.surface,
                         borderRadius: BorderRadius.all(Radius.circular(8))),
                     child: ListView.builder(
                         shrinkWrap: true,
@@ -284,7 +284,8 @@ class _CharacterFruitsSectionState extends State<CharacterFruitsSection> {
                 width: 160,
                 child: Text(
                   AppLocalizations.of(context)!.devilFruit,
-                  style: OnepieceFonts.headerStyle,
+                  style: OnepieceFonts.headerStyle
+                      .copyWith(fontSize: 19, fontWeight: FontWeight.w600),
                 ),
               ),
             ],
@@ -327,7 +328,7 @@ class _CharacterFruitsSectionState extends State<CharacterFruitsSection> {
                   width: widget.dividerWidth - widget.sideWidth - 16,
                   constraints: const BoxConstraints(maxHeight: 300),
                   decoration: const BoxDecoration(
-                    color: OnepieceColors.menuBackgroundColor,
+                    color: OnepieceColors.surface,
                     borderRadius: BorderRadius.all(Radius.circular(8)),
                   ),
                   child: ListView.builder(
@@ -354,7 +355,7 @@ class _CharacterFruitsSectionState extends State<CharacterFruitsSection> {
     return Container(
       width: widget.dividerWidth - widget.sideWidth - 16,
       decoration: const BoxDecoration(
-        color: OnepieceColors.menuBackgroundColor,
+        color: OnepieceColors.surface,
         borderRadius: BorderRadius.all(Radius.circular(8)),
       ),
       child: ListView.builder(
@@ -383,7 +384,8 @@ class _CharacterFruitsSectionState extends State<CharacterFruitsSection> {
                     });
               },
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
                 child: Row(
                   children: [
                     Expanded(

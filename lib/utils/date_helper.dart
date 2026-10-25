@@ -1,4 +1,3 @@
-
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 
@@ -14,11 +13,8 @@ class DateHelper {
       int timestamp, BuildContext context) {
     var datetime =
         DateTime.fromMicrosecondsSinceEpoch(timestamp * 1000).toLocal();
-    Locale myLocale = Localizations.localeOf(context);
-    if (myLocale.languageCode == "zh") {
-      return DateFormat('yyyy/MM/dd h:mm a').format(datetime);
-    }
-    return DateFormat('MM/dd/yyyy h:mm a').format(datetime);
+    final locale = Localizations.localeOf(context).toString();
+    return DateFormat.yMd(locale).add_jm().format(datetime);
   }
 
   static DateTime getUtcDateTimeFromTimestamp(int timestamp) {

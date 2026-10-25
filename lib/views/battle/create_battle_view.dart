@@ -221,9 +221,9 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                                   color: OnepieceColors.deepFancyBlue,
                                   shape: BoxShape.circle,
                                 ),
-                                child: const Text(
-                                  'VS',
-                                  style: TextStyle(
+                                child: Text(
+                                  AppLocalizations.of(context)!.versus,
+                                  style: const TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.w800,
                                   ),
@@ -235,14 +235,14 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                           )
                         else ...[
                           starterCard,
-                          const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 12),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
                             child: CircleAvatar(
                               radius: 23,
                               backgroundColor: OnepieceColors.deepFancyBlue,
                               child: Text(
-                                'VS',
-                                style: TextStyle(
+                                AppLocalizations.of(context)!.versus,
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w800,
                                 ),

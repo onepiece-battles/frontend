@@ -121,7 +121,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('fruit details expand in place and show all six attributes',
+  testWidgets('fruit details open separately and show all six attributes',
       (tester) async {
     GetIt.instance.registerSingleton<Locale>(const Locale('en'));
     final controller = ScrollController();

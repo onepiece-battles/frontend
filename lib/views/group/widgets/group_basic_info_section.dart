@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import '../../../components/resource_detail_layout.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:openapi/api.dart';
@@ -54,6 +55,22 @@ class _GroupBasicInfoSectionState extends State<GroupBasicInfoSection> {
 
   GroupFullView get group => widget.group;
 
+  Locale? _nameLocale;
+  final Map<String, String> _nameDrafts = {};
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final locale = Localizations.localeOf(context);
+    if (_nameLocale?.languageCode == locale.languageCode) return;
+    if (_nameLocale != null) {
+      _nameDrafts[_nameLocale!.languageCode] = groupNameController.text;
+    }
+    _nameLocale = locale;
+    groupNameController.text = _nameDrafts[locale.languageCode] ??
+        I18nHelper.getEditableNameFromI18n(group.name, locale);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -64,6 +81,7 @@ class _GroupBasicInfoSectionState extends State<GroupBasicInfoSection> {
   void didUpdateWidget(covariant GroupBasicInfoSection oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.group.id != widget.group.id) {
+      _nameDrafts.clear();
       basicInfoEditable = false;
       selectedImage = null;
       _syncFromGroup();
@@ -71,7 +89,8 @@ class _GroupBasicInfoSectionState extends State<GroupBasicInfoSection> {
   }
 
   void _syncFromGroup() {
-    groupNameController.text = I18nHelper.getDisplayNameFromI18n(group.name!);
+    groupNameController.text = I18nHelper.getEditableNameFromI18n(
+        group.name, _nameLocale ?? const Locale('zh', 'CN'));
     selectedGroupCategory = group.groupCategory!;
   }
 
@@ -95,7 +114,8 @@ class _GroupBasicInfoSectionState extends State<GroupBasicInfoSection> {
 
   void _submit(BuildContext context) {
     final changed = group.groupCategory != selectedGroupCategory ||
-        I18nHelper.getDisplayNameFromI18n(group.name) !=
+        I18nHelper.getEditableNameFromI18n(
+                group.name, Localizations.localeOf(context)) !=
             groupNameController.text;
     if (changed) {
       // Full group: only name/category change; everything else preserved so
@@ -115,8 +135,7 @@ class _GroupBasicInfoSectionState extends State<GroupBasicInfoSection> {
       final showAlert = OnepieceAlert.createAlertShower(context);
       widget.controller.updateGroups(updated).then((value) {
         if (!mounted) return;
-        showAlert(
-            alertHint, I18nHelper.getDisplayNameFromI18n(value!.result));
+        showAlert(alertHint, I18nHelper.getDisplayNameFromI18n(value!.result));
         if (value.success) {
           router.goNamed('groupDetails', extra: group.id, pathParameters: {
             'name': I18nHelper.getDisplayNameFromI18n(updated.name)
@@ -135,8 +154,7 @@ class _GroupBasicInfoSectionState extends State<GroupBasicInfoSection> {
               image: selectedImage!))
           .then((value) {
         if (!mounted) return;
-        showAlert(
-            alertHint, I18nHelper.getDisplayNameFromI18n(value!.result));
+        showAlert(alertHint, I18nHelper.getDisplayNameFromI18n(value!.result));
         router.goNamed('groupDetails', extra: group.id, pathParameters: {
           'name': I18nHelper.getDisplayNameFromI18n(group.name)
         });
@@ -227,8 +245,8 @@ class _GroupBasicInfoSectionState extends State<GroupBasicInfoSection> {
                           child: TextFormField(
                             controller: groupNameController,
                             decoration: InputDecoration(
-                                contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 10),
+                                contentPadding:
+                                    const EdgeInsets.symmetric(horizontal: 10),
                                 floatingLabelBehavior:
                                     FloatingLabelBehavior.never,
                                 disabledBorder: const OutlineInputBorder(
@@ -253,6 +271,31 @@ class _GroupBasicInfoSectionState extends State<GroupBasicInfoSection> {
   // ── Desktop ────────────────────────────────────────────────────────
 
   Widget _buildDesktop(BuildContext context) {
+    if (basicInfoEditable) {
+      return DetailEditor(child: _buildDesktopEditor(context));
+    }
+    final loc = AppLocalizations.of(context)!;
+    return DetailSection(
+        title: loc.basicInfo,
+        action: widget.editButtonVisible
+            ? DetailEditButton(onPressed: _toggleEdit)
+            : null,
+        child: DetailFieldGrid(fields: [
+          DetailValue(loc.groupName, groupNameController.text),
+          Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(loc.groupCategory,
+                style: const TextStyle(
+                    fontSize: 12, color: OnepieceColors.secondaryLabel)),
+            const SizedBox(height: 7),
+            OnepieceTag.getGroupTag(selectedGroupCategory,
+                _categoryMap(context)[selectedGroupCategory] ?? ''),
+          ]),
+          DetailValue(loc.groupMember, '${group.characters.length}'),
+          DetailValue(loc.group, '${group.subGroups.length}'),
+        ]));
+  }
+
+  Widget _buildDesktopEditor(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -274,10 +317,16 @@ class _GroupBasicInfoSectionState extends State<GroupBasicInfoSection> {
                       width: 25,
                       height: 25,
                       child: !basicInfoEditable
-                          ? ImageHelper.getSvgIconWithColor('images/svgs/edit.svg',
-                              150, 150, OnepieceColors.fancyBlue)
-                          : ImageHelper.getSvgIconWithColor('images/svgs/check.svg',
-                              150, 150, OnepieceColors.fancyBlue)),
+                          ? ImageHelper.getSvgIconWithColor(
+                              'images/svgs/edit.svg',
+                              150,
+                              150,
+                              OnepieceColors.fancyBlue)
+                          : ImageHelper.getSvgIconWithColor(
+                              'images/svgs/check.svg',
+                              150,
+                              150,
+                              OnepieceColors.fancyBlue)),
                 ),
               ),
           ],
@@ -295,8 +344,12 @@ class _GroupBasicInfoSectionState extends State<GroupBasicInfoSection> {
                     borderWidth: 3,
                     borderRadios: 20,
                     fullImage: true)
-                : ImageHelper.getRoundImageFrame(200, 200, 3,
-                    OnepieceColors.liteFancyBlue, 20,
+                : ImageHelper.getRoundImageFrame(
+                    200,
+                    200,
+                    3,
+                    OnepieceColors.liteFancyBlue,
+                    20,
                     Base64Helper.decode(selectedImage!)),
           ),
         ),
@@ -354,8 +407,9 @@ class _GroupBasicInfoSectionState extends State<GroupBasicInfoSection> {
               )),
           menuItemStyleData: const MenuItemStyleData(height: 35),
           items: GroupCategory.values
-              .where((e) =>
-                  isGroupOfGroups ? e == GroupCategory.group : e != GroupCategory.group)
+              .where((e) => isGroupOfGroups
+                  ? e == GroupCategory.group
+                  : e != GroupCategory.group)
               .map((GroupCategory groupCategory) {
             return DropdownMenuItem<GroupCategory>(
               value: groupCategory,

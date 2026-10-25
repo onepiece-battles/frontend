@@ -1,5 +1,7 @@
-
 import 'package:flutter/material.dart';
+import '../../components/resource_detail_layout.dart';
+import '../../components/image_lazy_loader.dart';
+import '../../constants/onepiece_colors.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
@@ -7,7 +9,6 @@ import 'package:openapi/api.dart';
 import '../../l10n/app_localizations.dart';
 import '../../utils/i18n_helper.dart';
 import '../../utils/permission_check.dart';
-import '../../utils/nested_scroll_helper.dart';
 import '../../utils/responsive_breakpoints.dart';
 import 'character_detail_controller.dart';
 import 'widgets/character_battles_section.dart';
@@ -138,85 +139,72 @@ class _CharacterDetailState extends State<CharacterDetail> {
     );
   }
 
+  Widget _buildDesktopLayout(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+    return ResourceDetailPage(
+        controller: verticalController,
+        header: DetailHero(
+            kind: loc.character,
+            title: I18nHelper.getDisplayNameFromI18n(character.name),
+            avatar: ImageLazyLoader(
+                uriProvider: () => character.imageUri ?? '',
+                width: 88,
+                borderWidth: 0,
+                borderRadios: 88,
+                fullImage: true),
+            metrics: [
+              DetailValue(loc.combatPower, '${character.score}',
+                  valueStyle: const TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.w600,
+                      color: OnepieceColors.primaryLabel)),
+              DetailValue(loc.bounty, '${character.bounty ?? '—'}',
+                  valueStyle: OnepieceFonts.bountyStyle.copyWith(fontSize: 26)),
+              DetailValue(loc.devilFruit,
+                  '${fruits.length} / ${character.maximumFruitCount}'),
+            ]),
+        sections: (context, width) => [
+              CharacterBasicInfoSection(
+                  character: character,
+                  editButtonVisible: _editButtonVisible,
+                  controller: _controller,
+                  isNarrow: false,
+                  sideWidth: 0),
+              CharacterCombatInfoSection(
+                  character: character,
+                  editButtonVisible: _editButtonVisible,
+                  controller: _controller,
+                  isNarrow: false,
+                  sideWidth: 0),
+              DetailSection(
+                  child: CharacterFruitsSection(
+                      character: character,
+                      editButtonVisible: _editButtonVisible,
+                      controller: _controller,
+                      onFruitEaten: () => setState(_refreshCharacterData),
+                      isNarrow: true)),
+              DetailSection(
+                  child:
+                      CharacterGroupsSection(groups: groups, isNarrow: true)),
+              DetailSection(
+                  child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: SizedBox(
+                          width: width - 48 < 860 ? 860 : width - 48,
+                          child: CharacterBattlesSection(
+                              character: character,
+                              isNarrow: false,
+                              sideWidth: 0,
+                              dividerWidth:
+                                  width - 48 < 860 ? 860 : width - 48)))),
+            ]);
+  }
+
   List<Widget> _stackChildren(BuildContext context, bool isNarrow) {
-    final content = isNarrow
-        ? Positioned.fill(child: _buildMobileLayout(context))
-        : Positioned.fill(
-            child: SingleChildScrollView(
-              controller: verticalController,
-              scrollDirection: Axis.vertical,
-              child: Center(
-                child: NestedHorizontalScrollView(
-                  verticalParentController: verticalController,
-                  child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        CharacterBasicInfoSection(
-                            character: character,
-                            editButtonVisible: _editButtonVisible,
-                            controller: _controller,
-                            isNarrow: false,
-                            dividerWidth: dividerWidth,
-                            sideWidth: sideWidth),
-                        Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                            child: SizedBox(
-                                width: dividerWidth,
-                                child: const Divider(
-                                    color: Colors.grey, thickness: 1))),
-                        CharacterCombatInfoSection(
-                            character: character,
-                            editButtonVisible: _editButtonVisible,
-                            controller: _controller,
-                            isNarrow: false,
-                            dividerWidth: dividerWidth,
-                            sideWidth: sideWidth),
-                        Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                            child: SizedBox(
-                                width: dividerWidth,
-                                child: const Divider(
-                                    color: Colors.grey, thickness: 1))),
-                        CharacterFruitsSection(
-                            character: character,
-                            editButtonVisible: _editButtonVisible,
-                            controller: _controller,
-                            onFruitEaten: () {
-                              setState(() {
-                                _refreshCharacterData();
-                              });
-                            },
-                            isNarrow: false,
-                            dividerWidth: dividerWidth,
-                            sideWidth: sideWidth),
-                        Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                            child: SizedBox(
-                                width: dividerWidth,
-                                child: const Divider(
-                                    color: Colors.grey, thickness: 1))),
-                        CharacterGroupsSection(
-                            groups: groups,
-                            isNarrow: false,
-                            dividerWidth: dividerWidth,
-                            sideWidth: sideWidth),
-                        Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                            child: SizedBox(
-                                width: dividerWidth,
-                                child: const Divider(
-                                    color: Colors.grey, thickness: 1))),
-                        CharacterBattlesSection(
-                            character: character,
-                            isNarrow: false,
-                            dividerWidth: dividerWidth,
-                            sideWidth: sideWidth),
-                        const SizedBox(height: 60),
-                      ]),
-                ),
-              ),
-            ),
-          );
+    final content = Positioned.fill(
+        child: isNarrow
+            ? _buildMobileLayout(context)
+            : _buildDesktopLayout(context));
     return [
       content,
       Positioned(
@@ -236,6 +224,10 @@ class _CharacterDetailState extends State<CharacterDetail> {
                       : I18nHelper.getDisplayNameFromI18n(
                           character.previousCharacter!.name),
                   child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        elevation: 0,
+                        backgroundColor: OnepieceColors.surface,
+                        foregroundColor: OnepieceColors.fancyBlue),
                     onPressed: character.previousCharacter == null
                         ? null
                         : () => context.goNamed('characterDetails',
@@ -253,6 +245,10 @@ class _CharacterDetailState extends State<CharacterDetail> {
                       : I18nHelper.getDisplayNameFromI18n(
                           character.nextCharacter!.name),
                   child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        elevation: 0,
+                        backgroundColor: OnepieceColors.surface,
+                        foregroundColor: OnepieceColors.fancyBlue),
                     onPressed: character.nextCharacter == null
                         ? null
                         : () => context.goNamed('characterDetails',
@@ -303,5 +299,4 @@ class _CharacterDetailState extends State<CharacterDetail> {
           }
         });
   }
-
 }

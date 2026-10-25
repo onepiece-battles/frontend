@@ -135,7 +135,8 @@ class CharacterGroupsSection extends StatelessWidget {
                 width: 160,
                 child: Text(
                   AppLocalizations.of(context)!.group,
-                  style: OnepieceFonts.headerStyle,
+                  style: OnepieceFonts.headerStyle
+                      .copyWith(fontSize: 19, fontWeight: FontWeight.w600),
                 ),
               ),
             ],
@@ -157,7 +158,7 @@ class CharacterGroupsSection extends StatelessWidget {
       child: Container(
         width: dividerWidth - sideWidth - 16,
         decoration: const BoxDecoration(
-          color: OnepieceColors.menuBackgroundColor,
+          color: OnepieceColors.surface,
           borderRadius: BorderRadius.all(Radius.circular(8)),
         ),
         constraints: const BoxConstraints(maxHeight: 300),

@@ -18,7 +18,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get accountLoggedIn => '已登录';
 
   @override
-  String get accountLoggedOut => '已登出';
+  String get accountLoggedOut => '已退出登录';
 
   @override
   String get accountStopped => '已停用';
@@ -33,7 +33,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ancientZoanFruit => '古代种（动物系）';
 
   @override
-  String get artificialZoanFruit => '人造恶魔果实 （动物系）';
+  String get artificialZoanFruit => '人造种（动物系）';
 
   @override
   String get attackStrengthen => '攻击增益';
@@ -48,7 +48,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get back => '返回';
 
   @override
-  String get backToLoginPage => '返回登录页面。';
+  String get backToLoginPage => '返回登录';
 
   @override
   String get basicInfo => '基本信息';
@@ -171,7 +171,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get chinese => '中文';
 
   @override
-  String get chooseFile => '选择文件 ...';
+  String get chooseFile => '选择文件';
 
   @override
   String get chooseFruit => '选择';
@@ -189,7 +189,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get confirmHint => '确定';
 
   @override
-  String get create => ' 创建';
+  String get create => '创建';
 
   @override
   String get createBattle => '创建战斗';
@@ -246,34 +246,34 @@ class AppLocalizationsZh extends AppLocalizations {
   String get empty => '空';
 
   @override
-  String get endOfList => '列表尾部...';
+  String get endOfList => '已到列表末尾';
 
   @override
-  String get energyConsume => '能量消耗';
+  String get energyConsume => '精力消耗';
 
   @override
   String get english => '英文';
 
   @override
-  String get featureSuggestion => '功能相关建议';
+  String get featureSuggestion => '功能建议';
 
   @override
-  String get feedback => '建议';
+  String get feedback => '意见反馈';
 
   @override
   String get feedbackContent => '内容';
 
   @override
-  String get feedbackContentHint => '问题细节';
+  String get feedbackContentHint => '请详细描述问题或建议';
 
   @override
   String get feedbackTitle => '标题';
 
   @override
-  String get feedbackTitleHint => '简要描述问题';
+  String get feedbackTitleHint => '请简要描述问题或建议';
 
   @override
-  String get fieldMustBeInt => '数字必须为整数。';
+  String get fieldMustBeInt => '请输入整数';
 
   @override
   String get fist => '拳头';
@@ -318,7 +318,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get haoshoku => '霸王色';
 
   @override
-  String get height => '身高 （厘米）';
+  String get height => '身高（厘米）';
 
   @override
   String get helloWorld => '你好， 世界！';
@@ -336,10 +336,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get intelligenceStrengthen => '智力增益';
 
   @override
-  String get invalidName => '名字只能包含字母（汉字）和数字';
+  String get invalidName => '名称可包含字母、汉字、数字、空格、连字符、间隔号和句点';
 
   @override
-  String get issue => '用户建议';
+  String get issue => '用户反馈';
 
   @override
   String get issueType => '类型';
@@ -366,10 +366,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get leg => '腿';
 
   @override
-  String get listToEnd => '列表尾巴';
+  String get listToEnd => '已到列表末尾';
 
   @override
-  String get loading => '加载中 ...';
+  String get loading => '加载中…';
 
   @override
   String get localizationDescription => '自定义语言和区域相关设置。';
@@ -384,19 +384,19 @@ class AppLocalizationsZh extends AppLocalizations {
   String get loginRole => '登录身份';
 
   @override
-  String get logout => '登出';
+  String get logout => '退出登录';
 
   @override
   String get marine => '海军';
 
   @override
-  String get maxFileSizeDescription => '允许最大文件大小为200KB。';
+  String get maxFileSizeDescription => '文件大小上限：200 KB';
 
   @override
   String get modificationTime => '更新时间';
 
   @override
-  String get mythicalZoanFruit => '幻兽种 （动物系）';
+  String get mythicalZoanFruit => '幻兽种（动物系）';
 
   @override
   String get name => '名字';
@@ -411,7 +411,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get noAccount => '没有账户？';
 
   @override
-  String get noFileChosen => '未选择文件。';
+  String get noFileChosen => '未选择文件';
 
   @override
   String get noSystemResource => '不显示系统资源';
@@ -423,7 +423,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onButton => '确定';
 
   @override
-  String get optional => '可选填';
+  String get optional => '选填';
 
   @override
   String get organization => '您的企业';
@@ -435,7 +435,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get parameciaFruit => '超人系';
 
   @override
-  String get passWordHint => '请输入密码。';
+  String get passWordHint => '请输入密码';
 
   @override
   String get passwordLabel => '密码';
@@ -444,7 +444,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get pirate => '海贼团';
 
   @override
-  String get receiver => '接收者';
+  String get receiver => '对手';
 
   @override
   String get registerAccount => '现在注册！';
@@ -456,7 +456,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get registerPasswordHint2 => '确认密码';
 
   @override
-  String get registerUserNameHint => '请选择您的昵称。';
+  String get registerUserNameHint => '请输入昵称';
 
   @override
   String get relatedBattles => '相关战斗';
@@ -489,16 +489,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get science => '科技';
 
   @override
-  String get searchReceiver => '搜索接收者 ...';
+  String get searchReceiver => '搜索对手…';
 
   @override
   String get searchResource => '搜索资源';
 
   @override
-  String get searchResourceDetail => '[ 角色名 | 恶魔果实名 | 团体名 ]';
+  String get searchResourceDetail => '角色名、恶魔果实名或团体名';
 
   @override
-  String get searchStarter => '搜索发起者 ...';
+  String get searchStarter => '搜索发起者…';
 
   @override
   String get selectCharacter => '选择角色';
@@ -588,7 +588,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get valueExceedsLimit => '值超出范围';
 
   @override
-  String get valueRange => '取 值：';
+  String get valueRange => '允许范围：';
 
   @override
   String get verified => '已验证';
@@ -672,13 +672,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get exMember => '前成员';
 
   @override
-  String get groupMember => '团队成员';
+  String get groupMember => '团体成员';
 
   @override
   String get wakeUp => '已觉醒';
 
   @override
-  String get sleep => '沉睡中';
+  String get sleep => '未觉醒';
 
   @override
   String get owner => '拥有者';
@@ -732,13 +732,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get starterName => '发起者';
 
   @override
-  String get receiverName => '接收者';
+  String get receiverName => '对手';
 
   @override
   String get accountStatus => '账户状态';
 
   @override
-  String get showAllRoleResources => '显示用户所有角色资源';
+  String get showAllRoleResources => '显示所有用户身份创建的资源';
 
   @override
   String get creatorEmail => '创建人邮箱';
@@ -816,16 +816,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get position => '职位';
 
   @override
-  String get loginInfo => '登陆信息';
+  String get loginInfo => '登录信息';
 
   @override
-  String get loginRoleOrLastLoginRole => '登陆角色/上次登陆角色';
+  String get loginRoleOrLastLoginRole => '当前或上次登录身份';
 
   @override
   String get permissionInfo => '权限信息';
 
   @override
-  String get role => '角色';
+  String get role => '身份';
 
   @override
   String get issueDetail => '详情';
@@ -834,16 +834,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get viewReport => '查看战斗报告';
 
   @override
-  String get imageSizeExceedsLimit => '图片大小超出限制!';
+  String get imageSizeExceedsLimit => '图片大小超出限制';
 
   @override
   String get alert => '⚠️';
 
   @override
-  String get search => '搜索...';
+  String get search => '搜索…';
 
   @override
-  String get fieldMustBeDigit => '必须为数字';
+  String get fieldMustBeDigit => '请输入数字';
 
   @override
   String get basicValue => '基础值';
@@ -858,16 +858,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get statFormulaHint => '最终数值 = 基础值 × 倍率 + 增减值';
 
   @override
-  String get realValue => '果实加成';
+  String get realValue => '果实加成后';
 
   @override
   String get startSuccess => '成功开始';
 
   @override
-  String get searchResourceShortcut => '[ / ] ';
+  String get searchResourceShortcut => '[ / ]';
 
   @override
-  String get searchResourceShortcutShrink => '[/] ';
+  String get searchResourceShortcutShrink => '[/]';
 
   @override
   String get revolutionaryArmy => '革命军';
@@ -891,13 +891,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get reselect => '重选';
 
   @override
-  String get groupStructure => '团队结构';
+  String get groupStructure => '团体结构';
 
   @override
-  String get fatherGroups => '上级团队';
+  String get fatherGroups => '上级团体';
 
   @override
-  String get thisGroup => '当前团队';
+  String get thisGroup => '当前团体';
 
   @override
   String get selected => '已选择';
@@ -912,7 +912,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get myAccount => '我的账号';
 
   @override
-  String get maxFileSize500 => '允许最大文件大小为500KB。';
+  String get maxFileSize500 => '文件大小上限：500 KB';
 
   @override
   String get animal => '动物';
@@ -936,7 +936,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get fightAgain => '再战一轮';
 
   @override
-  String get loginAsVisitor => '游客登陆';
+  String get loginAsVisitor => '游客登录';
 
   @override
   String get allResources => '全部';
@@ -1029,10 +1029,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get leaveGroup => '退出群聊';
 
   @override
-  String get groupRenameApiNotConnected => '群聊改名接口暂未接入';
+  String get groupRenameApiNotConnected => '暂不支持修改群聊名称';
 
   @override
-  String get addMemberApiNotConnected => '添加成员接口暂未接入';
+  String get addMemberApiNotConnected => '暂不支持添加成员';
 
   @override
   String get addCharactersToGroup => '添加角色';
@@ -1051,4 +1051,76 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get messageNotSent => '消息未发送 — 连接已断开，请重试';
+
+  @override
+  String get previousPage => '上一页';
+
+  @override
+  String get nextPage => '下一页';
+
+  @override
+  String get jumpToPageTooltip => '跳转到指定页';
+
+  @override
+  String get pageNumber => '页码';
+
+  @override
+  String get pinMenu => '固定菜单';
+
+  @override
+  String get backToDrawer => '切换为抽屉菜单';
+
+  @override
+  String get collapseMenu => '收起菜单';
+
+  @override
+  String get expandMenu => '展开菜单';
+
+  @override
+  String get error => '错误';
+
+  @override
+  String get saveAvatarFailed => '头像保存失败，请重试';
+
+  @override
+  String get sendVerificationEmailFailed => '验证邮件发送失败，请重试';
+
+  @override
+  String get saveNicknameFailed => '昵称保存失败，请重试';
+
+  @override
+  String get newConversation => '新对话';
+
+  @override
+  String get versus => '对战';
+
+  @override
+  String characterCount(int count) {
+    return '$count 个角色';
+  }
+
+  @override
+  String fruitCount(int count) {
+    return '$count 个恶魔果实';
+  }
+
+  @override
+  String userCount(int count) {
+    return '$count 位用户';
+  }
+
+  @override
+  String issueCount(int count) {
+    return '$count 条反馈';
+  }
+
+  @override
+  String relatedBattleCount(int count) {
+    return '$count 场相关战斗';
+  }
+
+  @override
+  String characterLimitCounter(int current, int max) {
+    return '$current/$max 个字符';
+  }
 }
