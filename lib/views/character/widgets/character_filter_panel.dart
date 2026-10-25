@@ -101,10 +101,10 @@ class _CharacterFilterPanelState extends State<CharacterFilterPanel> {
                       floatingLabelBehavior: FloatingLabelBehavior.never,
                       disabledBorder: const OutlineInputBorder(
                           borderSide:
-                              BorderSide(color: OnepieceColors.separator)),
+                              BorderSide(color: OnepieceColors.menuHoverColor)),
                       enabledBorder: const OutlineInputBorder(
                           borderSide:
-                              BorderSide(color: OnepieceColors.separator)),
+                              BorderSide(color: OnepieceColors.menuHoverColor)),
                       focusedBorder: const OutlineInputBorder(
                         borderSide: BorderSide(
                             color: OnepieceColors.fancyGreen, width: 1.5),
@@ -141,7 +141,7 @@ class _CharacterFilterPanelState extends State<CharacterFilterPanel> {
                 fontSize: 12.0,
                 initialLabelIndex: initialLabelIndex,
                 activeBgColor: const [OnepieceColors.fancyBlue],
-                inactiveBgColor: OnepieceColors.surface,
+                inactiveBgColor: OnepieceColors.liteFancyGreen,
                 inactiveFgColor: Colors.grey[600],
                 totalSwitches: 4,
                 labels: [
@@ -238,8 +238,8 @@ class _CharacterFilterPanelState extends State<CharacterFilterPanel> {
           height: 35,
           width: width,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            color: OnepieceColors.surface,
+            borderRadius: BorderRadius.circular(3),
+            color: OnepieceColors.liteFancyGreen,
           ),
         ),
         menuItemStyleData: const MenuItemStyleData(height: 35),

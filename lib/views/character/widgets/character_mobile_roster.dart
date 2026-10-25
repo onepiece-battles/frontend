@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:openapi/api.dart';
 
 import '../../../components/image_lazy_loader.dart';
 import '../../../constants/onepiece_colors.dart';
 import '../../../constants/onepiece_fonts.dart';
-import '../../../components/desktop_card_layout.dart';
+import '../../../constants/onepiece_tag.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../utils/i18n_helper.dart';
 import '../../../utils/image_helper.dart';
@@ -51,8 +52,7 @@ class CharacterMobileRoster extends StatelessWidget {
         final isEven = index.isEven;
 
         return Card(
-          elevation: 0,
-          color: isEven ? OnepieceColors.surface : Colors.white,
+          color: isEven ? OnepieceColors.liteFancyGreen : Colors.white,
           margin: const EdgeInsets.only(bottom: 4),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -75,7 +75,7 @@ class CharacterMobileRoster extends StatelessWidget {
                         key: ValueKey(character.imageUri),
                         uriProvider: () => character.imageUri!,
                         width: 36,
-                        borderWidth: 1,
+                        borderWidth: 2,
                         lazy: true,
                         borderRadios: 36,
                       ),
@@ -111,7 +111,7 @@ class CharacterMobileRoster extends StatelessWidget {
                           if (character.bounty != null && character.bounty! > 0)
                             Text(
                               '₿${character.bounty}',
-                              style: TextStyle(
+                              style: GoogleFonts.lobster(
                                   fontSize: 12, color: Colors.orange[700]),
                             ),
                         ],
@@ -127,7 +127,7 @@ class CharacterMobileRoster extends StatelessWidget {
                             ..sort((first, second) =>
                                 first.toString().compareTo(second.toString())))
                           .map((haki) =>
-                              ResourceBadge(hakiMap[haki] ?? '', compact: true))
+                              OnepieceTag.getHakiTag(haki, hakiMap[haki] ?? ''))
                           .toList(),
                     )),
                     TextButton.icon(
@@ -177,7 +177,7 @@ class CharacterMobileRoster extends StatelessWidget {
       margin: const EdgeInsets.only(top: 4),
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: OnepieceColors.surface.withValues(alpha: 0.4),
+        color: OnepieceColors.liteFancyGreen.withValues(alpha: 0.4),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Wrap(

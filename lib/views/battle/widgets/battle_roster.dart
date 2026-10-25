@@ -59,8 +59,7 @@ class BattleRoster extends StatelessWidget {
         final isEven = index.isEven;
 
         return Card(
-          elevation: 0,
-          color: isEven ? OnepieceColors.surface : Colors.white,
+          color: isEven ? OnepieceColors.liteFancyGreen : Colors.white,
           margin: const EdgeInsets.only(bottom: 4),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -103,7 +102,7 @@ class BattleRoster extends StatelessWidget {
                                         ? battle.starter!.imageUri!
                                         : battle.receiver!.imageUri!,
                                 width: 30,
-                                borderWidth: 1,
+                                borderWidth: 2,
                                 lazy: true,
                                 borderRadios: 30,
                               )
@@ -187,7 +186,7 @@ class BattleRoster extends StatelessWidget {
       ImageLazyLoader(
         uriProvider: () => imageUri,
         width: 32,
-        borderWidth: 1,
+        borderWidth: 2,
         lazy: true,
         borderRadios: 32,
       ),
