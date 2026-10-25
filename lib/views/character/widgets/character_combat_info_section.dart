@@ -1,6 +1,7 @@
 import 'package:animated_toggle_switch/animated_toggle_switch.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import '../../../components/resource_detail_layout.dart';
 import 'package:go_router/go_router.dart';
 import 'package:openapi/api.dart';
 
@@ -288,8 +289,7 @@ class _CharacterCombatInfoSectionState
                   value: showBaseValue,
                   activeTrackColor:
                       OnepieceColors.fancyBlue.withValues(alpha: 0.4),
-                  thumbColor:
-                      WidgetStateProperty.all(OnepieceColors.fancyBlue),
+                  thumbColor: WidgetStateProperty.all(OnepieceColors.fancyBlue),
                   onChanged: (v) => setState(() {
                     showBaseValue = v;
                     changeValue();
@@ -327,7 +327,8 @@ class _CharacterCombatInfoSectionState
         Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: Row(children: [
-              ImageHelper.getTextFormFieldIcon('images/svgs/user.svg', true, 20),
+              ImageHelper.getTextFormFieldIcon(
+                  'images/svgs/user.svg', true, 20),
               const SizedBox(width: 8),
               Text(AppLocalizations.of(context)!.combatPower,
                   style: OnepieceFonts.contentStyleBold),
@@ -400,6 +401,54 @@ class _CharacterCombatInfoSectionState
   // ── Desktop ────────────────────────────────────────────────────────
 
   Widget _buildDesktop(BuildContext context) {
+    if (combatInfoEditable) {
+      return DetailEditor(child: _buildDesktopEditor(context));
+    }
+    final loc = AppLocalizations.of(context)!;
+    return DetailSection(
+        title: loc.battleInfo,
+        action: Wrap(spacing: 8, children: [
+          if (character.fruits.isNotEmpty)
+            TextButton(
+                onPressed: () => setState(() {
+                      showBaseValue = !showBaseValue;
+                      changeValue();
+                    }),
+                child: Text(showBaseValue ? loc.realValue : loc.basicValue)),
+          if (widget.editButtonVisible)
+            DetailEditButton(
+                onPressed: () => setState(() {
+                      combatInfoEditable = true;
+                      showBaseValue = true;
+                      changeValue();
+                    })),
+        ]),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          DetailFieldGrid(fields: [
+            DetailValue(loc.characterAttack, characterAttackController.text),
+            DetailValue(loc.characterDefense, characterDefenseController.text),
+            DetailValue(loc.characterBlood, characterBloodController.text),
+            DetailValue(loc.characterSpeed, characterSpeedController.text),
+            DetailValue(loc.characterIntelligence,
+                characterIntelligenceController.text),
+            DetailValue(loc.characterEnergy, characterEnergyController.text),
+            DetailValue(loc.groupGain, characterGroupGainController.text),
+            DetailValue(loc.fruitLimit, characterFruitLimitController.text),
+          ]),
+          if (selectedHakis.isNotEmpty) ...[
+            const SizedBox(height: 24),
+            Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: selectedHakis
+                    .map((haki) => OnepieceTag.getHakiTag(
+                        haki, _hakiMap(context)[haki] ?? ''))
+                    .toList())
+          ],
+        ]));
+  }
+
+  Widget _buildDesktopEditor(BuildContext context) {
     final hakiEnumValueToDisplayValue = _hakiMap(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -472,8 +521,7 @@ class _CharacterCombatInfoSectionState
                         spacing: 1.0,
                         style: const ToggleStyle(
                           borderColor: Colors.transparent,
-                          backgroundColor:
-                              OnepieceColors.menuSelectedTileColor,
+                          backgroundColor: OnepieceColors.menuSelectedTileColor,
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black26,
@@ -543,8 +591,7 @@ class _CharacterCombatInfoSectionState
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton2(
                       isExpanded: true,
-                      value:
-                          selectedHakis.isEmpty ? null : selectedHakis.last,
+                      value: selectedHakis.isEmpty ? null : selectedHakis.last,
                       hint: Text(
                         AppLocalizations.of(context)!.hakis,
                         style: OnepieceFonts.dropDownItemStyle,
@@ -636,8 +683,8 @@ class _CharacterCombatInfoSectionState
                   ),
                 ),
               Padding(
-                padding:
-                    EdgeInsets.fromLTRB(widget.sideWidth, 0, widget.sideWidth, 0),
+                padding: EdgeInsets.fromLTRB(
+                    widget.sideWidth, 0, widget.sideWidth, 0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,

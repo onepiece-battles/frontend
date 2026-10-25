@@ -44,7 +44,6 @@ class _UserViewState extends State<UserView> {
   int itemCountPerPage = 10;
   int totalItemCount = 0;
 
-
   @override
   void initState() {
     super.initState();
@@ -459,7 +458,7 @@ class _UserViewState extends State<UserView> {
   Widget _buildUserSortControls(BuildContext context) {
     final order = sortableEnumToSortOrderMap[UserSortableFieldsEnum.username];
     return Row(children: [
-      Text('$totalItemCount ${AppLocalizations.of(context)!.user}',
+      Text(AppLocalizations.of(context)!.userCount(totalItemCount),
           style: OnepieceFonts.smallContentStyle),
       const Spacer(),
       DesktopSortChip(

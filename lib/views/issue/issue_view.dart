@@ -687,7 +687,7 @@ class _IssueViewState extends State<IssueView> {
 
   Widget _buildIssueSortControls(BuildContext context) {
     return Row(children: [
-      Text('$totalItemCount ${AppLocalizations.of(context)!.issue}',
+      Text(AppLocalizations.of(context)!.issueCount(totalItemCount),
           style: OnepieceFonts.smallContentStyle),
       const Spacer(),
       Wrap(spacing: 6, children: [

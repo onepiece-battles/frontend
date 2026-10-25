@@ -393,8 +393,7 @@ class _FruitViewState extends State<FruitView> {
     final order = sortableEnumToSortOrderMap[FruitSortableFieldsEnum.fruitType];
     return Row(children: [
       Expanded(
-          child: Text(
-              '$totalItemCount ${AppLocalizations.of(context)!.devilFruit}',
+          child: Text(AppLocalizations.of(context)!.fruitCount(totalItemCount),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: OnepieceFonts.smallContentStyle)),

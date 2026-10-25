@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../constants/onepiece_colors.dart';
+import '../l10n/app_localizations.dart';
 
 /// A compact pagination footer for data tables.
 ///
@@ -14,14 +15,14 @@ class PageFoot extends StatefulWidget {
   final ValueChanged<int> onPageChanged;
 
   /// Label for the jump button (e.g. "Go" / "跳转").
-  final String jumpLabel;
+  final String? jumpLabel;
 
   const PageFoot({
     super.key,
     required this.currentPage,
     required this.totalPages,
     required this.onPageChanged,
-    this.jumpLabel = 'Go',
+    this.jumpLabel,
   });
 
   @override
@@ -124,7 +125,7 @@ class _PageFootState extends State<PageFoot> {
           enabled: canGoBack,
           onTap: canGoBack ? _goPrevious : null,
           icon: Icons.arrow_back_rounded,
-          tooltip: 'Previous page',
+          tooltip: AppLocalizations.of(context)!.previousPage,
         ),
         const SizedBox(width: 8),
         _buildPageInput(),
@@ -134,15 +135,15 @@ class _PageFootState extends State<PageFoot> {
         _textBtn(
           enabled: _jumpEnabled,
           onTap: _jumpEnabled ? _jump : null,
-          label: widget.jumpLabel,
-          tooltip: 'Jump to page',
+          label: widget.jumpLabel ?? AppLocalizations.of(context)!.jumpToPage,
+          tooltip: AppLocalizations.of(context)!.jumpToPageTooltip,
         ),
         const SizedBox(width: 8),
         _iconBtn(
           enabled: canGoForward,
           onTap: canGoForward ? _goNext : null,
           icon: Icons.arrow_forward_rounded,
-          tooltip: 'Next page',
+          tooltip: AppLocalizations.of(context)!.nextPage,
         ),
       ],
     );
@@ -170,8 +171,10 @@ class _PageFootState extends State<PageFoot> {
         textAlign: TextAlign.center,
         keyboardType: TextInputType.number,
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        decoration: const InputDecoration(
-          contentPadding: EdgeInsets.only(top: 7, bottom: 0),
+        decoration: InputDecoration(
+          labelText: AppLocalizations.of(context)!.pageNumber,
+          floatingLabelBehavior: FloatingLabelBehavior.never,
+          contentPadding: const EdgeInsets.only(top: 7, bottom: 0),
           isDense: true,
           border: InputBorder.none,
           enabledBorder: InputBorder.none,

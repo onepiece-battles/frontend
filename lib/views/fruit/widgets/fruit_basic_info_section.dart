@@ -1,5 +1,6 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import '../../../components/resource_detail_layout.dart';
 import 'package:go_router/go_router.dart';
 import 'package:openapi/api.dart';
 
@@ -49,6 +50,22 @@ class _FruitBasicInfoSectionState extends State<FruitBasicInfoSection> {
 
   FruitFullView get fruit => widget.fruit;
 
+  Locale? _nameLocale;
+  final Map<String, String> _nameDrafts = {};
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final locale = Localizations.localeOf(context);
+    if (_nameLocale?.languageCode == locale.languageCode) return;
+    if (_nameLocale != null) {
+      _nameDrafts[_nameLocale!.languageCode] = nameController.text;
+    }
+    _nameLocale = locale;
+    nameController.text = _nameDrafts[locale.languageCode] ??
+        I18nHelper.getEditableNameFromI18n(fruit.name, locale);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -59,13 +76,15 @@ class _FruitBasicInfoSectionState extends State<FruitBasicInfoSection> {
   void didUpdateWidget(covariant FruitBasicInfoSection oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.fruit.id != widget.fruit.id) {
+      _nameDrafts.clear();
       basicInfoEditable = false;
       _syncFromFruit();
     }
   }
 
   void _syncFromFruit() {
-    nameController.text = I18nHelper.getDisplayNameFromI18n(fruit.name!);
+    nameController.text = I18nHelper.getEditableNameFromI18n(
+        fruit.name, _nameLocale ?? const Locale('zh', 'CN'));
     selectedFruitType = fruit.fruitType!;
   }
 
@@ -191,6 +210,29 @@ class _FruitBasicInfoSectionState extends State<FruitBasicInfoSection> {
   // ── Desktop ────────────────────────────────────────────────────────
 
   Widget _buildDesktop(BuildContext context) {
+    if (basicInfoEditable) {
+      return DetailEditor(child: _buildDesktopEditor(context));
+    }
+    final loc = AppLocalizations.of(context)!;
+    return DetailSection(
+        title: loc.basicInfo,
+        action: widget.editButtonVisible
+            ? DetailEditButton(onPressed: _toggleEdit)
+            : null,
+        child: DetailFieldGrid(fields: [
+          DetailValue(loc.name, nameController.text),
+          Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(loc.fruitType,
+                style: const TextStyle(
+                    fontSize: 12, color: OnepieceColors.secondaryLabel)),
+            const SizedBox(height: 7),
+            OnepieceTag.getFruitTag(
+                selectedFruitType, _typeMap(context)[selectedFruitType] ?? ''),
+          ]),
+        ]));
+  }
+
+  Widget _buildDesktopEditor(BuildContext context) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: widget.sideWidth),
       child: Column(

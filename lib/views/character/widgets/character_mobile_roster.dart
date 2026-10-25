@@ -3,12 +3,12 @@ import 'package:go_router/go_router.dart';
 import 'package:openapi/api.dart';
 
 import '../../../components/image_lazy_loader.dart';
+import '../../../components/resource_detail_layout.dart';
 import '../../../constants/onepiece_colors.dart';
 import '../../../constants/onepiece_fonts.dart';
 import '../../../constants/onepiece_tag.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../utils/i18n_helper.dart';
-import '../../../utils/image_helper.dart';
 import 'character_stat_pair.dart';
 
 /// Mobile character roster: a scrollable list of compact character cards, each
@@ -47,7 +47,6 @@ class CharacterMobileRoster extends StatelessWidget {
       itemCount: characters.length,
       itemBuilder: (context, index) {
         final character = characters[index];
-        final isExpanded = expandedRowIds.contains(character.id);
         final isEven = index.isEven;
 
         return Card(
@@ -134,16 +133,13 @@ class CharacterMobileRoster extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(horizontal: 4),
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           textStyle: const TextStyle(fontSize: 12)),
-                      onPressed: () => onToggleExpand(character.id),
-                      icon: Icon(
-                          isExpanded ? Icons.expand_less : Icons.expand_more,
-                          size: 16),
+                      onPressed: () => _openDetails(context, character),
+                      icon: const Icon(Icons.info_outline, size: 16),
                       label:
                           Text(AppLocalizations.of(context)!.detailInformation),
                     ),
                   ]),
                   // Expanded stats
-                  if (isExpanded) _buildStatRows(context, character),
                 ],
               ),
             ),
@@ -151,6 +147,17 @@ class CharacterMobileRoster extends StatelessWidget {
         );
       },
     );
+  }
+
+  void _openDetails(BuildContext context, CharacterListView character) {
+    onToggleExpand(character.id);
+    showResourceDetails(
+            context,
+            I18nHelper.getDisplayNameFromI18n(character.name),
+            _buildStatRows(context, character))
+        .whenComplete(() {
+      if (context.mounted) onToggleExpand(character.id);
+    });
   }
 
   Widget _buildStatRows(BuildContext context, CharacterListView character) {
@@ -171,40 +178,8 @@ class CharacterMobileRoster extends StatelessWidget {
       StatPair(loc.fruitLimit, character.maximumFruitCount.toString()),
     ];
 
-    return Container(
-      margin: const EdgeInsets.only(top: 4),
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: OnepieceColors.liteFancyGreen.withValues(alpha: 0.4),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Wrap(
-        spacing: 16,
-        runSpacing: 6,
-        children: stats.map((stat) {
-          return SizedBox(
-            width: (MediaQuery.of(context).size.width - 80) / 2,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (stat.icon != null)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 4),
-                    child:
-                        ImageHelper.getTextFormFieldIcon(stat.icon!, false, 14),
-                  ),
-                Text(stat.label,
-                    style:
-                        OnepieceFonts.smallContentStyle.copyWith(fontSize: 12)),
-                const SizedBox(width: 4),
-                Text(stat.value,
-                    style: OnepieceFonts.boldFancySmallFont
-                        .copyWith(fontSize: 13)),
-              ],
-            ),
-          );
-        }).toList(),
-      ),
-    );
+    return DetailFieldGrid(
+        fields:
+            stats.map((stat) => DetailValue(stat.label, stat.value)).toList());
   }
 }

@@ -88,7 +88,7 @@ class BattleRoster extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         child: Column(
                           children: [
-                            Text('VS',
+                            Text(AppLocalizations.of(context)!.versus,
                                 style: OnepieceFonts.boldFancySmallFont
                                     .copyWith(
                                         color: OnepieceColors.fancyBlue,
@@ -253,7 +253,7 @@ class BattleRoster extends StatelessWidget {
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Text('VS',
+                    child: Text(AppLocalizations.of(context)!.versus,
                         style: OnepieceFonts.contentStyleBoldFancyBlue),
                   ),
                   Expanded(

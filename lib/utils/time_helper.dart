@@ -2,9 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import '../../l10n/app_localizations.dart';
 
-
 class TimeHelper {
-  static String humanDateFromTimestamp(int timestampMillis, BuildContext context) {
+  static String humanDateFromTimestamp(
+      int timestampMillis, BuildContext context) {
+    final locale = Localizations.localeOf(context).toString();
     final now = DateTime.now();
     final target = DateTime.fromMillisecondsSinceEpoch(timestampMillis);
     final today = DateTime(now.year, now.month, now.day);
@@ -14,9 +15,9 @@ class TimeHelper {
     final diffDays = today.difference(tDay).inDays;
 
     if (diffDays == 0) {
-      return DateFormat.Hm().format(dt);
+      return DateFormat.jm(locale).format(dt);
     } else if (diffDays == 1) {
-      return '${AppLocalizations.of(context)!.yesterday} ${DateFormat.Hm().format(dt)}';
+      return '${AppLocalizations.of(context)!.yesterday} ${DateFormat.jm(locale).format(dt)}';
     }
 
     // Start of this week (assuming week starts on Monday)
@@ -26,12 +27,11 @@ class TimeHelper {
 
     if (!tDay.isBefore(startOfWeek) && !tDay.isAfter(endOfWeek)) {
       // within current week, and not today/yesterday (already handled)
-      final weekdayName = DateFormat.E().format(target); // Mon, Tue...
+      final weekdayName = DateFormat.E(locale).format(target); // Mon, Tue...
       return weekdayName; // or e.g. 'Mon' or 'Monday'
     }
 
     // If older than this week, show formatted date
-    return DateFormat.yMMMd().format(target); // e.g. Jan 5, 2024
+    return DateFormat.yMMMd(locale).format(target); // e.g. Jan 5, 2024
   }
-
 }

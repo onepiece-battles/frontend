@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import '../../../components/resource_detail_layout.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:openapi/api.dart';
@@ -50,8 +51,7 @@ class CharacterBasicInfoSection extends StatefulWidget {
       _CharacterBasicInfoSectionState();
 }
 
-class _CharacterBasicInfoSectionState
-    extends State<CharacterBasicInfoSection> {
+class _CharacterBasicInfoSectionState extends State<CharacterBasicInfoSection> {
   final characterNameController = TextEditingController();
   final characterAge = TextEditingController();
   final characterHeight = TextEditingController();
@@ -68,6 +68,22 @@ class _CharacterBasicInfoSectionState
 
   CharacterFullView get character => widget.character;
 
+  Locale? _nameLocale;
+  final Map<String, String> _nameDrafts = {};
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final locale = Localizations.localeOf(context);
+    if (_nameLocale?.languageCode == locale.languageCode) return;
+    if (_nameLocale != null) {
+      _nameDrafts[_nameLocale!.languageCode] = characterNameController.text;
+    }
+    _nameLocale = locale;
+    characterNameController.text = _nameDrafts[locale.languageCode] ??
+        I18nHelper.getEditableNameFromI18n(character.name, locale);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -78,6 +94,7 @@ class _CharacterBasicInfoSectionState
   void didUpdateWidget(covariant CharacterBasicInfoSection oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.character.id != widget.character.id) {
+      _nameDrafts.clear();
       basicInfoEditable = false;
       selectedImage = null;
       _syncFromCharacter();
@@ -85,8 +102,8 @@ class _CharacterBasicInfoSectionState
   }
 
   void _syncFromCharacter() {
-    characterNameController.text =
-        I18nHelper.getDisplayNameFromI18n(character.name);
+    characterNameController.text = I18nHelper.getEditableNameFromI18n(
+        character.name, _nameLocale ?? const Locale('zh', 'CN'));
     characterAge.text = character.age == null ? "" : character.age.toString();
     characterHeight.text =
         character.height == null ? "" : character.height.toString();
@@ -182,7 +199,8 @@ class _CharacterBasicInfoSectionState
   bool _basicInfoUpdated() {
     return character.race.toString() != selectedRace.toString() ||
         character.battleStyle.toString() != selectedBattleStyle.toString() ||
-        I18nHelper.getDisplayNameFromI18n(character.name) !=
+        I18nHelper.getEditableNameFromI18n(
+                character.name, Localizations.localeOf(context)) !=
             characterNameController.text.toString() ||
         character.birthPlace.toString() !=
             characterBirthPlace.text.toString() ||
@@ -512,6 +530,31 @@ class _CharacterBasicInfoSectionState
   // ── Desktop ────────────────────────────────────────────────────────
 
   Widget _buildDesktop(BuildContext context) {
+    if (basicInfoEditable) {
+      return DetailEditor(child: _buildDesktopEditor(context));
+    }
+    final loc = AppLocalizations.of(context)!;
+    return DetailSection(
+        title: loc.basicInfo,
+        action: widget.editButtonVisible
+            ? DetailEditButton(
+                onPressed: () => setState(() => basicInfoEditable = true))
+            : null,
+        child: DetailFieldGrid(fields: [
+          DetailValue(loc.name, characterNameController.text),
+          DetailValue(loc.age, characterAge.text),
+          DetailValue(loc.height, characterHeight.text),
+          DetailValue(loc.birthPlace, characterBirthPlace.text),
+          DetailValue(loc.birthDay, character.dateOfBirth ?? ''),
+          DetailValue(loc.race, _raceMap(context)[selectedRace] ?? ''),
+          DetailValue(
+              loc.battleStyle, _bsMap(context)[selectedBattleStyle] ?? ''),
+          DetailValue(loc.bounty, characterBounty.text,
+              valueStyle: OnepieceFonts.bountyStyle.copyWith(fontSize: 20)),
+        ]));
+  }
+
+  Widget _buildDesktopEditor(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -550,8 +593,11 @@ class _CharacterBasicInfoSectionState
                         width: 25,
                         height: 25,
                         child: !basicInfoEditable
-                            ? ImageHelper.getSvgIconWithColor('images/svgs/edit.svg',
-                                150, 150, OnepieceColors.fancyBlue)
+                            ? ImageHelper.getSvgIconWithColor(
+                                'images/svgs/edit.svg',
+                                150,
+                                150,
+                                OnepieceColors.fancyBlue)
                             : ImageHelper.getSvgIconWithColor(
                                 'images/svgs/check.svg',
                                 150,
@@ -693,7 +739,9 @@ class _CharacterBasicInfoSectionState
                             children: [
                               SizedBox(
                                 width: widget.dividerWidth < 700
-                                    ? widget.dividerWidth - widget.sideWidth - 20
+                                    ? widget.dividerWidth -
+                                        widget.sideWidth -
+                                        20
                                     : 300,
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.start,
@@ -713,7 +761,9 @@ class _CharacterBasicInfoSectionState
                               const SizedBox(height: 3),
                               SizedBox(
                                 width: widget.dividerWidth < 700
-                                    ? widget.dividerWidth - widget.sideWidth - 20
+                                    ? widget.dividerWidth -
+                                        widget.sideWidth -
+                                        20
                                     : 300,
                                 height: 35,
                                 child: Row(

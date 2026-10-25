@@ -59,8 +59,8 @@ class StringTextFormField extends StatelessWidget {
               if (!isFocused) {
                 return const Text("");
               } else {
-                return Text(
-                    "$currentLength/$maxLength ${AppLocalizations.of(context)!.characters}");
+                return Text(AppLocalizations.of(context)!
+                    .characterLimitCounter(currentLength, maxLength ?? length));
               }
             },
             validator: (value) {

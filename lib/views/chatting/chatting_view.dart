@@ -33,7 +33,8 @@ GetIt getIt = GetIt.instance;
 // (OnepieceColors) is untouched; these are the system-gray neutrals that make
 // the chat read like Messages: hairline separators, soft fills, muted labels.
 const Color _kSeparator = Color(0xFFE5E5EA); // systemGray5 hairline
-const Color _kSurface = Color(0xFFF2F2F7); // systemGray6 fill (selected / input)
+const Color _kSurface =
+    Color(0xFFF2F2F7); // systemGray6 fill (selected / input)
 const Color _kSecondaryText = Color(0xFF8E8E93); // systemGray secondary label
 const Color _kPrimaryText = Color(0xFF1C1C1E); // primary label
 
@@ -267,8 +268,7 @@ class _ChattingViewState extends State<ChattingView> {
       // applyContentDimensions re-snap us whenever an image finishes and grows
       // the content (it only re-pins while we're still at the bottom, so it
       // won't fight a user who has started scrolling up to read history).
-      final deadline =
-          DateTime.now().add(const Duration(milliseconds: 2500));
+      final deadline = DateTime.now().add(const Duration(milliseconds: 2500));
       var frame = 0;
       while (DateTime.now().isBefore(deadline)) {
         await WidgetsBinding.instance.endOfFrame;
@@ -513,8 +513,8 @@ class _ChattingViewState extends State<ChattingView> {
               if ((msg.id ?? '').startsWith('opt_')) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(
-                        AppLocalizations.of(context)!.messageStillSending),
+                    content:
+                        Text(AppLocalizations.of(context)!.messageStillSending),
                   ),
                 );
                 return;
@@ -540,7 +540,8 @@ class _ChattingViewState extends State<ChattingView> {
     final today = DateTime(now.year, now.month, now.day);
     final targetDay = DateTime(target.year, target.month, target.day);
     final dayDiff = today.difference(targetDay).inDays;
-    final time = DateFormat.jm().format(target);
+    final locale = Localizations.localeOf(context).toString();
+    final time = DateFormat.jm(locale).format(target);
 
     if (dayDiff == 0) return time;
     if (dayDiff == 1) {
@@ -549,7 +550,7 @@ class _ChattingViewState extends State<ChattingView> {
     if (dayDiff > 1 && dayDiff < 7) {
       return '${_localizedWeekday(context, target.weekday)} $time';
     }
-    return '${DateFormat.yMMMd().format(target)} $time';
+    return '${DateFormat.yMMMd(locale).format(target)} $time';
   }
 
   String _localizedWeekday(BuildContext context, int weekday) {
@@ -622,8 +623,8 @@ class _ChattingViewState extends State<ChattingView> {
             if (didPop) return;
             _clearActiveChat();
           },
-          child: _buildChatView(context, activeChat, activeChatId,
-              isMobile: true),
+          child:
+              _buildChatView(context, activeChat, activeChatId, isMobile: true),
         );
       },
     );
@@ -724,8 +725,8 @@ class _ChattingViewState extends State<ChattingView> {
                       contentPadding: EdgeInsets.zero,
                       floatingLabelBehavior: FloatingLabelBehavior.never,
                       hintText: AppLocalizations.of(context)!.name,
-                      hintStyle: const TextStyle(
-                          fontSize: 15, color: _kSecondaryText),
+                      hintStyle:
+                          const TextStyle(fontSize: 15, color: _kSecondaryText),
                       prefixIcon: const Icon(Icons.search,
                           size: 19, color: _kSecondaryText),
                       border: OutlineInputBorder(
@@ -830,8 +831,7 @@ class _ChattingViewState extends State<ChattingView> {
                               Expanded(
                                 child: Column(
                                   mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Row(
                                       crossAxisAlignment:
@@ -862,9 +862,10 @@ class _ChattingViewState extends State<ChattingView> {
                                                 fontSize: 12),
                                           )
                                         else
-                                          const Text(
-                                            "New",
-                                            style: TextStyle(
+                                          Text(
+                                            AppLocalizations.of(context)!
+                                                .newConversation,
+                                            style: const TextStyle(
                                                 fontSize: 12,
                                                 color:
                                                     OnepieceColors.fancyGreen),
@@ -931,8 +932,8 @@ class _ChattingViewState extends State<ChattingView> {
   // ---------------------------------------------------------------------------
   // RIGHT SIDE: Active Chat View
   // ---------------------------------------------------------------------------
-  Widget _buildChatView(BuildContext context, Chat activeChat,
-      String activeChatId,
+  Widget _buildChatView(
+      BuildContext context, Chat activeChat, String activeChatId,
       {required bool isMobile}) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
@@ -1039,57 +1040,58 @@ class _ChattingViewState extends State<ChattingView> {
                     builder: (context, messages, _) {
                       _autoScrollOnNewMessages(messages, activeChatId);
                       return Builder(builder: (context) {
-                    final visibleStart = _chatNotifier
-                        .viewVisibleStart(activeChatId)
-                        .clamp(0, messages.length)
-                        .toInt();
-                    final centerKey = ValueKey('chat_center_$activeChatId');
+                        final visibleStart = _chatNotifier
+                            .viewVisibleStart(activeChatId)
+                            .clamp(0, messages.length)
+                            .toInt();
+                        final centerKey = ValueKey('chat_center_$activeChatId');
 
-                    return CustomScrollView(
-                      key: ValueKey('chat_scroll_$activeChatId'),
-                      controller: scrollController,
-                      center: centerKey,
-                      cacheExtent: 5000,
-                      slivers: [
-                        SliverPadding(
-                          padding: const EdgeInsets.fromLTRB(15, 0, 20, 0),
-                          sliver: SliverList(
-                            delegate: SliverChildBuilderDelegate(
-                              (context, index) {
-                                if (index == visibleStart) {
-                                  return _buildHistoryControl(activeChatId);
-                                }
+                        return CustomScrollView(
+                          key: ValueKey('chat_scroll_$activeChatId'),
+                          controller: scrollController,
+                          center: centerKey,
+                          cacheExtent: 5000,
+                          slivers: [
+                            SliverPadding(
+                              padding: const EdgeInsets.fromLTRB(15, 0, 20, 0),
+                              sliver: SliverList(
+                                delegate: SliverChildBuilderDelegate(
+                                  (context, index) {
+                                    if (index == visibleStart) {
+                                      return _buildHistoryControl(activeChatId);
+                                    }
 
-                                final messageIndex = visibleStart - index - 1;
-                                return _buildMessageListItem(
-                                  activeChat,
-                                  messages,
-                                  messageIndex,
-                                );
-                              },
-                              childCount: visibleStart + 1,
+                                    final messageIndex =
+                                        visibleStart - index - 1;
+                                    return _buildMessageListItem(
+                                      activeChat,
+                                      messages,
+                                      messageIndex,
+                                    );
+                                  },
+                                  childCount: visibleStart + 1,
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                        SliverPadding(
-                          key: centerKey,
-                          padding: const EdgeInsets.fromLTRB(15, 0, 20, 0),
-                          sliver: SliverList(
-                            delegate: SliverChildBuilderDelegate(
-                              (context, index) {
-                                final messageIndex = visibleStart + index;
-                                return _buildMessageListItem(
-                                  activeChat,
-                                  messages,
-                                  messageIndex,
-                                );
-                              },
-                              childCount: messages.length - visibleStart,
+                            SliverPadding(
+                              key: centerKey,
+                              padding: const EdgeInsets.fromLTRB(15, 0, 20, 0),
+                              sliver: SliverList(
+                                delegate: SliverChildBuilderDelegate(
+                                  (context, index) {
+                                    final messageIndex = visibleStart + index;
+                                    return _buildMessageListItem(
+                                      activeChat,
+                                      messages,
+                                      messageIndex,
+                                    );
+                                  },
+                                  childCount: messages.length - visibleStart,
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                      ],
-                    );
+                          ],
+                        );
                       });
                     },
                   ),
@@ -1190,8 +1192,7 @@ class _ChattingViewState extends State<ChattingView> {
                                           listen: false)
                                       .sendChatMessage(jsonMessage);
                                   if (!sent) {
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(
+                                    ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                         content: Text(
                                             AppLocalizations.of(context)!
@@ -1238,7 +1239,8 @@ class _ChattingViewState extends State<ChattingView> {
                                   isCollapsed: true,
                                   contentPadding:
                                       const EdgeInsets.symmetric(vertical: 9),
-                                  hintText: AppLocalizations.of(context)!.message,
+                                  hintText:
+                                      AppLocalizations.of(context)!.message,
                                   hintStyle: const TextStyle(
                                       color: _kSecondaryText, fontSize: 15),
                                   floatingLabelBehavior:
@@ -1283,9 +1285,8 @@ class _ChattingViewState extends State<ChattingView> {
                                     ValueListenableBuilder<Message?>(
                                       valueListenable: inputPreMessageNotifier,
                                       builder: (context, value, _) {
-                                        final replied =
-                                            chatIdToRepliedMessage[
-                                                activeChatId];
+                                        final replied = chatIdToRepliedMessage[
+                                            activeChatId];
                                         if (replied == null) {
                                           return const SizedBox.shrink();
                                         }
@@ -1374,8 +1375,8 @@ class _ChattingViewState extends State<ChattingView> {
                                                       activeChatId] = null;
                                                   inputPreMessageNotifier
                                                       .value = null;
-                                                  Future.delayed(
-                                                      Duration.zero, () {
+                                                  Future.delayed(Duration.zero,
+                                                      () {
                                                     if (focusNode
                                                         .canRequestFocus) {
                                                       focusNode.requestFocus();
