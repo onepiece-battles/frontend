@@ -259,7 +259,10 @@ class FruitRoster extends StatelessWidget {
                       ),
                     ),
                     Flexible(
-                        child: ResourceBadge(typeMap[fruit.fruitType] ?? '')),
+                        child: fruit.fruitType == null
+                            ? const SizedBox.shrink()
+                            : OnepieceTag.getFruitTag(fruit.fruitType!,
+                                typeMap[fruit.fruitType] ?? '')),
                   ]),
                   const SizedBox(height: 6),
                   if (fruit.characters.isNotEmpty)

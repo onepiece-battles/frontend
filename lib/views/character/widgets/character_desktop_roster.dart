@@ -6,6 +6,7 @@ import '../../../components/desktop_card_layout.dart';
 import '../../../components/image_lazy_loader.dart';
 import '../../../constants/onepiece_colors.dart';
 import '../../../constants/onepiece_fonts.dart';
+import '../../../constants/onepiece_tag.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../utils/i18n_helper.dart';
 import 'character_stat_pair.dart';
@@ -160,9 +161,7 @@ class CharacterDesktopRoster extends StatelessWidget {
                     TextSpan(text: '${loc.bounty} '),
                     TextSpan(
                         text: '${character.bounty ?? '—'}',
-                        style: const TextStyle(
-                            color: OnepieceColors.primaryLabel,
-                            fontWeight: FontWeight.w500)),
+                        style: OnepieceFonts.bountyStyle),
                   ],
                 )),
               ]),
@@ -176,7 +175,7 @@ class CharacterDesktopRoster extends StatelessWidget {
                         ..sort((first, second) =>
                             first.toString().compareTo(second.toString())))
                       .map((haki) =>
-                          ResourceBadge(hakiMap[haki] ?? '', compact: true))
+                          OnepieceTag.getHakiTag(haki, hakiMap[haki] ?? ''))
                       .toList(),
                 )),
                 TextButton.icon(

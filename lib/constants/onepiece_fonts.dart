@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 
 class OnepieceFonts {
+  static const TextStyle bountyStyle = TextStyle(
+    fontFamily: 'Lobster',
+    fontSize: 12,
+    color: Color(0xFFF57C00),
+  );
+
   // ===========================================================================
   // 1. Dimensions & Weights
   // ===========================================================================

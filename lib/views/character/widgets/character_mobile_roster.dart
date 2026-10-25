@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:openapi/api.dart';
 
 import '../../../components/image_lazy_loader.dart';
@@ -111,8 +110,7 @@ class CharacterMobileRoster extends StatelessWidget {
                           if (character.bounty != null && character.bounty! > 0)
                             Text(
                               '₿${character.bounty}',
-                              style: GoogleFonts.lobster(
-                                  fontSize: 12, color: Colors.orange[700]),
+                              style: OnepieceFonts.bountyStyle,
                             ),
                         ],
                       ),
