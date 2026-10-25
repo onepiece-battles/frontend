@@ -504,7 +504,7 @@ class _GroupMembersPanelState extends State<GroupMembersPanel> {
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
         decoration: BoxDecoration(
-          color: OnepieceColors.liteFancyGreen.withValues(alpha: 0.35),
+          color: OnepieceColors.surface,
           borderRadius: BorderRadius.circular(8),
         ),
         child: const LinearProgressIndicator(minHeight: 3),
@@ -539,7 +539,7 @@ class _GroupMembersPanelState extends State<GroupMembersPanel> {
       width: double.infinity,
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: OnepieceColors.liteFancyGreen.withValues(alpha: 0.35),
+        color: OnepieceColors.surface,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Wrap(
