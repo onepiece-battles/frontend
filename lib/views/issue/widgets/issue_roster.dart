@@ -35,8 +35,7 @@ class IssueRoster extends StatelessWidget {
 
   Map<IssueStatus, String> _statusMap(BuildContext context) => {
         IssueStatus.CREATED: AppLocalizations.of(context)!.statusCreated,
-        IssueStatus.IN_PROGRESS:
-            AppLocalizations.of(context)!.statusInProgress,
+        IssueStatus.IN_PROGRESS: AppLocalizations.of(context)!.statusInProgress,
         IssueStatus.RESOLVED: AppLocalizations.of(context)!.statusResolved,
         IssueStatus.REVOKED: AppLocalizations.of(context)!.statusRevoked,
         IssueStatus.BACKLOGGED: AppLocalizations.of(context)!.statusBackLogged,
@@ -153,20 +152,19 @@ class IssueRoster extends StatelessWidget {
           onTap: () => context.goNamed('issueDetails',
               extra: issue.id, pathParameters: {'id': issue.id!}),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(issue.issueHeader ?? '',
                     style: OnepieceFonts.contentStyleBold.copyWith(
-                        color: OnepieceColors.deepFancyBlue, fontSize: 17),
+                        color: OnepieceColors.primaryLabel, fontSize: 17),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis),
                 const SizedBox(height: 12),
-                Row(children: [
+                Wrap(spacing: 6, runSpacing: 6, children: [
                   _issuePill(
                       typeMap[issue.issueType] ?? '', OnepieceColors.fancyBlue),
-                  const SizedBox(width: 7),
                   _issuePill(statusMap[issue.issueStatus] ?? '',
                       OnepieceColors.iconGreen),
                 ]),
@@ -196,14 +194,6 @@ class IssueRoster extends StatelessWidget {
   }
 
   Widget _issuePill(String label, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(label,
-          style: OnepieceFonts.boldFancySmallFont.copyWith(color: color)),
-    );
+    return ResourceBadge(label);
   }
 }

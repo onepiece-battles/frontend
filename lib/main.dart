@@ -134,6 +134,12 @@ class _MyAppState extends State<MyApp> {
       locale: _locale,
       scrollBehavior: MyCustomScrollBehavior(),
       theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: OnepieceColors.fancyBlue,
+          primary: OnepieceColors.fancyBlue,
+          surface: Colors.white,
+        ),
+        scaffoldBackgroundColor: Colors.white,
         // Use system fonts that are guaranteed to be available instantly —
         // no network-dependent Google Fonts CDN loading.
         fontFamily: _locale.languageCode == "en"

@@ -241,7 +241,7 @@ class FruitRoster extends StatelessWidget {
                   'name': I18nHelper.getDisplayNameFromI18n(fruit.name!)
                 }),
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -250,22 +250,21 @@ class FruitRoster extends StatelessWidget {
                       child: Text(
                         I18nHelper.getDisplayNameFromI18n(fruit.name),
                         style: OnepieceFonts.contentStyleBold.copyWith(
-                            color: OnepieceColors.deepFancyBlue, fontSize: 17),
+                            color: OnepieceColors.primaryLabel, fontSize: 17),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    OnepieceTag.getFruitTag(
-                        fruit.fruitType!, typeMap[fruit.fruitType]!),
+                    Flexible(
+                        child: ResourceBadge(typeMap[fruit.fruitType] ?? '')),
                   ]),
                   const SizedBox(height: 12),
                   if (fruit.characters.isNotEmpty)
                     SizedBox(
                         height: 44,
-                        child: _createCharacterList(context, fruit.characters))
-                  else
-                    const SizedBox(height: 44),
-                  const SizedBox(height: 8),
+                        child: _createCharacterList(context, fruit.characters)),
+                  const SizedBox(height: 12),
+                  const Divider(height: 1, color: OnepieceColors.separator),
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton.icon(
@@ -297,11 +296,27 @@ class FruitRoster extends StatelessWidget {
                             fruit.bloodSlope!,
                             fruit.bloodIntercept!,
                             'images/character_digits_icon/blood.svg'),
+                        _FruitStat(
+                            AppLocalizations.of(context)!
+                                .intelligenceStrengthen,
+                            fruit.intelligenceSlope!,
+                            fruit.intelligenceIntercept!,
+                            'images/character_digits_icon/intelligence.svg'),
+                        _FruitStat(
+                            AppLocalizations.of(context)!.speedStrengthen,
+                            fruit.speedSlope!,
+                            fruit.speedIntercept!,
+                            'images/character_digits_icon/speed.svg'),
+                        _FruitStat(
+                            AppLocalizations.of(context)!.groupStrengthen,
+                            fruit.groupGainSlope!,
+                            fruit.groupGainIntercept!,
+                            'images/character_digits_icon/group_gain.svg'),
                       ]
                           .map((stat) => Container(
                                 padding: const EdgeInsets.all(7),
                                 decoration: BoxDecoration(
-                                  color: OnepieceColors.liteFancyGreen,
+                                  color: OnepieceColors.surface,
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
@@ -336,8 +351,8 @@ class FruitRoster extends StatelessWidget {
                     context.goNamed('characterDetails',
                         extra: character.id,
                         pathParameters: {
-                          'name': I18nHelper.getDisplayNameFromI18n(
-                              character.name)
+                          'name':
+                              I18nHelper.getDisplayNameFromI18n(character.name)
                         });
                   },
                   child: Tooltip(

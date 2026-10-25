@@ -232,7 +232,7 @@ class BattleRoster extends StatelessWidget {
             onTap: () => context.goNamed('battleDetails',
                 extra: battle.id, pathParameters: {'id': battle.id}),
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(20),
               child: Column(children: [
                 Row(children: [
                   Expanded(
@@ -274,8 +274,11 @@ class BattleRoster extends StatelessWidget {
                   const Icon(Icons.person_outline,
                       size: 15, color: Colors.black45),
                   const SizedBox(width: 4),
-                  Text(battle.creationRecord?.nickname ?? '',
-                      style: OnepieceFonts.smallContentStyle),
+                  Flexible(
+                      child: Text(battle.creationRecord?.nickname ?? '',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: OnepieceFonts.smallContentStyle)),
                 ]),
               ]),
             ),

@@ -176,7 +176,7 @@ class UserRoster extends StatelessWidget {
           onTap: () => context.goNamed('userDetails',
               extra: user.id, pathParameters: {'name': user.nickname}),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -184,9 +184,10 @@ class UserRoster extends StatelessWidget {
                   ImageLazyLoader(
                     key: ValueKey(user.imageUri),
                     uriProvider: () => user.imageUri ?? '',
-                    width: 54,
-                    borderWidth: 1.5,
-                    borderRadios: 54,
+                    width: 48,
+                    borderWidth: 0,
+                    lazy: true,
+                    borderRadios: 48,
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -195,7 +196,7 @@ class UserRoster extends StatelessWidget {
                       children: [
                         Text(user.nickname,
                             style: OnepieceFonts.contentStyleBold.copyWith(
-                                color: OnepieceColors.deepFancyBlue,
+                                color: OnepieceColors.primaryLabel,
                                 fontSize: 17),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis),
@@ -207,8 +208,8 @@ class UserRoster extends StatelessWidget {
                     ),
                   ),
                   if (user.loginRole != null)
-                    OnepieceTag.getUserRoleTag(
-                        user.loginRole!, roleMap[user.loginRole]!),
+                    Flexible(
+                        child: ResourceBadge(roleMap[user.loginRole] ?? '')),
                 ]),
                 const SizedBox(height: 12),
                 Row(children: [
@@ -221,12 +222,14 @@ class UserRoster extends StatelessWidget {
                           ? Colors.green
                           : Colors.red),
                   const SizedBox(width: 5),
-                  Text(
+                  Flexible(
+                      child: Text(
                     user.emailVerified == true
                         ? AppLocalizations.of(context)!.verified
                         : AppLocalizations.of(context)!.notVerified,
                     style: OnepieceFonts.smallContentStyle,
-                  ),
+                    overflow: TextOverflow.ellipsis,
+                  )),
                   const Spacer(),
                   Text(accountMap[user.accountStatus] ?? '',
                       style: OnepieceFonts.boldFancySmallFont),
@@ -237,8 +240,7 @@ class UserRoster extends StatelessWidget {
                     spacing: 5,
                     runSpacing: 5,
                     children: user.userRoles
-                        .map((role) =>
-                            OnepieceTag.getUserRoleTag(role, roleMap[role]!))
+                        .map((role) => ResourceBadge(roleMap[role] ?? ''))
                         .toList(),
                   ),
                 ],

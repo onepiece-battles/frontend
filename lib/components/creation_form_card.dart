@@ -2,6 +2,53 @@ import 'package:flutter/material.dart';
 
 import '../constants/onepiece_colors.dart';
 
+bool validateCreationForm(GlobalKey<FormState> formKey) {
+  final invalidFields = formKey.currentState!.validateGranularly();
+  if (invalidFields.isEmpty) return true;
+  final firstField = invalidFields.first;
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (firstField.mounted) {
+      Scrollable.ensureVisible(firstField.context,
+          alignment: 0.15, duration: const Duration(milliseconds: 250));
+    }
+  });
+  return false;
+}
+
+InputDecoration creationFieldDecoration(String label, {String? hint}) {
+  final border = OutlineInputBorder(
+    borderRadius: BorderRadius.circular(10),
+    borderSide: const BorderSide(color: OnepieceColors.separator),
+  );
+  return InputDecoration(
+    labelText: label,
+    helperText: hint,
+    floatingLabelBehavior: FloatingLabelBehavior.always,
+    labelStyle:
+        const TextStyle(color: OnepieceColors.primaryLabel, fontSize: 14),
+    floatingLabelStyle: const TextStyle(
+        color: OnepieceColors.primaryLabel,
+        fontSize: 14,
+        fontWeight: FontWeight.w500),
+    helperStyle:
+        const TextStyle(color: OnepieceColors.secondaryLabel, fontSize: 12),
+    filled: true,
+    fillColor: Colors.white,
+    isDense: true,
+    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+    border: border,
+    enabledBorder: border,
+    focusedBorder: border.copyWith(
+      borderSide: const BorderSide(color: OnepieceColors.fancyBlue, width: 1.5),
+    ),
+    errorBorder:
+        border.copyWith(borderSide: const BorderSide(color: Colors.red)),
+    focusedErrorBorder: border.copyWith(
+        borderSide: const BorderSide(color: Colors.red, width: 1.5)),
+    errorMaxLines: 2,
+  );
+}
+
 class CreationFormCard extends StatelessWidget {
   const CreationFormCard({
     super.key,
@@ -21,15 +68,8 @@ class CreationFormCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE3EAF2)),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x0D16324F),
-            blurRadius: 24,
-            offset: Offset(0, 8),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: OnepieceColors.separator),
       ),
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -39,21 +79,22 @@ class CreationFormCard extends StatelessWidget {
             Row(
               children: [
                 Container(
-                  width: 38,
-                  height: 38,
+                  width: 28,
+                  height: 28,
                   decoration: BoxDecoration(
-                    color: OnepieceColors.liteFancyGreen,
-                    borderRadius: BorderRadius.circular(11),
+                    color: OnepieceColors.surface,
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(icon, color: OnepieceColors.fancyBlue, size: 21),
+                  child: Icon(icon,
+                      color: OnepieceColors.secondaryLabel, size: 17),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     title,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: OnepieceColors.deepFancyBlue,
-                          fontWeight: FontWeight.w700,
+                          color: OnepieceColors.primaryLabel,
+                          fontWeight: FontWeight.w600,
                         ),
                   ),
                 ),
@@ -62,7 +103,7 @@ class CreationFormCard extends StatelessWidget {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF2F5F8),
+                      color: OnepieceColors.surface,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
@@ -75,7 +116,7 @@ class CreationFormCard extends StatelessWidget {
                   ),
               ],
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: 24),
             child,
           ],
         ),
@@ -98,38 +139,15 @@ class CreationPageHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 18),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF0F5596), Color(0xFF3C7EC8)],
-        ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x263C7EC8),
-            blurRadius: 20,
-            offset: Offset(0, 8),
-          ),
-        ],
-      ),
+      padding: const EdgeInsets.symmetric(vertical: 12),
       child: Row(
         children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: .16),
-              borderRadius: BorderRadius.circular(13),
-            ),
-            child: Icon(icon, color: Colors.white),
-          ),
-          const SizedBox(width: 14),
           Expanded(
             child: Text(
               title,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w800,
+                    color: OnepieceColors.primaryLabel,
+                    fontWeight: FontWeight.w600,
                   ),
             ),
           ),

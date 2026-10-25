@@ -122,29 +122,7 @@ class _CreateGroupViewState extends State<CreateGroupView> {
         autovalidateMode: AutovalidateMode.onUserInteraction,
         maxLength: 30,
         maxLengthEnforcement: MaxLengthEnforcement.enforced,
-        decoration: InputDecoration(
-          labelText: hint,
-          counterText: '',
-          prefixIcon: icon != null ? Icon(icon, size: 20) : null,
-          filled: true,
-          fillColor: Colors.white,
-          isDense: true,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 13, vertical: 13),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFFDCE4EC)),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFFDCE4EC)),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide:
-                const BorderSide(color: OnepieceColors.fancyGreen, width: 1.6),
-          ),
-        ),
+        decoration: creationFieldDecoration(hint).copyWith(counterText: ''),
       ),
     );
   }
@@ -156,7 +134,7 @@ class _CreateGroupViewState extends State<CreateGroupView> {
         return Stack(
           children: [
             ColoredBox(
-              color: const Color(0xFFF5F7FB),
+              color: OnepieceColors.surface,
               child: SingleChildScrollView(
                 scrollDirection: Axis.vertical,
                 padding: EdgeInsets.fromLTRB(
@@ -185,9 +163,8 @@ class _CreateGroupViewState extends State<CreateGroupView> {
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFFF7F9FC),
+        color: OnepieceColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE7ECF2)),
       ),
       child: Row(
         children: [
@@ -198,7 +175,7 @@ class _CreateGroupViewState extends State<CreateGroupView> {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: Colors.white,
-              border: Border.all(color: OnepieceColors.fancyGreen, width: 2),
+              border: Border.all(color: OnepieceColors.separator),
             ),
             child: ClipOval(
               child: _pickedImage.isEmpty
@@ -322,8 +299,8 @@ class _CreateGroupViewState extends State<CreateGroupView> {
               width: double.infinity,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
-                color: const Color(0xFFF7F9FC),
-                border: Border.all(color: const Color(0xFFDCE4EC)),
+                color: OnepieceColors.surface,
+                border: Border.all(color: OnepieceColors.separator),
               )),
           menuItemStyleData: const MenuItemStyleData(
             height: 35,
@@ -352,20 +329,17 @@ class _CreateGroupViewState extends State<CreateGroupView> {
         child: Container(
           decoration: const BoxDecoration(
             color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Color(0x1A16324F),
-                blurRadius: 18,
-                offset: Offset(0, -4),
-              ),
-            ],
+            border: Border(top: BorderSide(color: OnepieceColors.separator)),
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: Wrap(
+              alignment: WrapAlignment.end,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 12,
+              runSpacing: 8,
               children: [
-                OutlinedButton.icon(
+                TextButton.icon(
                   icon: const Icon(Icons.refresh_rounded, size: 18),
                   label: Text(AppLocalizations.of(context)!.clearForm),
                   onPressed: () {
@@ -382,6 +356,9 @@ class _CreateGroupViewState extends State<CreateGroupView> {
                 ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size(132, 46),
+                    backgroundColor: OnepieceColors.fancyBlue,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -395,7 +372,7 @@ class _CreateGroupViewState extends State<CreateGroupView> {
                           AppLocalizations.of(context)!.groupEmblemRequired);
                       return;
                     }
-                    if (!_formKey.currentState!.validate()) {
+                    if (!validateCreationForm(_formKey)) {
                       return;
                     }
                     CreateGroupRequest createGroupRequest = CreateGroupRequest(
@@ -415,9 +392,7 @@ class _CreateGroupViewState extends State<CreateGroupView> {
                               resourceId: createGroupResponse!.id.toString(),
                               image: encodedImage,
                               type: ResourceType.GROUP);
-                      _controller
-                          .addImage(uploadImageRequest)
-                          .then((value) {
+                      _controller.addImage(uploadImageRequest).then((value) {
                         if (!mounted) return;
                         router.goNamed('groupDetails',
                             extra: createGroupResponse.id,

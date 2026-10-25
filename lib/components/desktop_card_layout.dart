@@ -2,6 +2,28 @@ import 'package:flutter/material.dart';
 
 import '../constants/onepiece_colors.dart';
 
+class ResourceBadge extends StatelessWidget {
+  const ResourceBadge(this.label, {super.key});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+      decoration: BoxDecoration(
+        color: OnepieceColors.surface,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+              fontSize: 12, color: OnepieceColors.primaryLabel)),
+    );
+  }
+}
+
 class DesktopFilterPanel extends StatelessWidget {
   final Widget child;
 
@@ -83,18 +105,8 @@ class _ControlSurface extends StatelessWidget {
       width: double.infinity,
       padding: padding,
       decoration: BoxDecoration(
-        color: const Color(0xFFFBFCFE),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: OnepieceColors.deepFancyBlue.withValues(alpha: 0.12),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: OnepieceColors.deepFancyBlue.withValues(alpha: 0.06),
-            blurRadius: 14,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: OnepieceColors.surface,
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Theme(
         data: Theme.of(context).copyWith(
@@ -104,10 +116,8 @@ class _ControlSurface extends StatelessWidget {
             isDense: true,
             prefixIconColor: OnepieceColors.fancyBlue,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(7),
-              borderSide: BorderSide(
-                color: OnepieceColors.deepFancyBlue.withValues(alpha: 0.16),
-              ),
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide.none,
             ),
           ),
         ),
@@ -139,12 +149,10 @@ class DesktopSortChip extends StatelessWidget {
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 8),
         decoration: BoxDecoration(
-          color: active ? OnepieceColors.fancyBlue : Colors.white,
-          borderRadius: BorderRadius.circular(7),
+          color: active ? OnepieceColors.surface : Colors.white,
+          borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: active
-                ? OnepieceColors.fancyBlue
-                : OnepieceColors.deepFancyBlue.withValues(alpha: 0.14),
+            color: active ? OnepieceColors.fancyBlue : OnepieceColors.separator,
           ),
         ),
         child: Row(
@@ -155,7 +163,9 @@ class DesktopSortChip extends StatelessWidget {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: active ? Colors.white : Colors.grey[700],
+                color: active
+                    ? OnepieceColors.fancyBlue
+                    : OnepieceColors.primaryLabel,
               ),
             ),
             const SizedBox(width: 4),
@@ -166,7 +176,9 @@ class DesktopSortChip extends StatelessWidget {
                       ? Icons.arrow_downward
                       : Icons.unfold_more,
               size: 14,
-              color: active ? Colors.white : OnepieceColors.fancyBlue,
+              color: active
+                  ? OnepieceColors.fancyBlue
+                  : OnepieceColors.secondaryLabel,
             ),
           ],
         ),
@@ -193,35 +205,29 @@ class _DesktopSpotlightCardState extends State<DesktopSpotlightCard> {
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
-      child: AnimatedScale(
-        scale: _hovered ? 1.065 : 1,
-        duration: const Duration(milliseconds: 320),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
         curve: Curves.easeOutQuart,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 320),
-          curve: Curves.easeOutQuart,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            boxShadow: [
-              BoxShadow(
-                color: OnepieceColors.deepFancyBlue
-                    .withValues(alpha: _hovered ? 0.18 : 0.07),
-                blurRadius: _hovered ? 28 : 16,
-                spreadRadius: _hovered ? 1 : 0,
-                offset: Offset(0, _hovered ? 9 : 5),
-              ),
-            ],
-          ),
-          foregroundDecoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: _hovered
-                  ? OnepieceColors.fancyBlue.withValues(alpha: 0.35)
-                  : Colors.black.withValues(alpha: 0.07),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(14),
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: _hovered ? 0.05 : 0),
+              blurRadius: 12,
+              offset: const Offset(0, 3),
             ),
-          ),
-          child: widget.child,
+          ],
         ),
+        foregroundDecoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: _hovered
+                ? OnepieceColors.secondaryLabel
+                : OnepieceColors.separator,
+          ),
+        ),
+        child: widget.child,
       ),
     );
   }
@@ -263,9 +269,10 @@ class _DesktopSpotlightGridState<T> extends State<DesktopSpotlightGrid<T>> {
         padding: const EdgeInsets.fromLTRB(8, 12, 12, 24),
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final columnCount = (constraints.maxWidth / widget.minCardWidth)
+            final columnCount = ((constraints.maxWidth + widget.gap) /
+                    (widget.minCardWidth + widget.gap))
                 .floor()
-                .clamp(2, widget.maxColumns);
+                .clamp(1, widget.maxColumns);
             final cardWidth =
                 (constraints.maxWidth - widget.gap * (columnCount - 1)) /
                     columnCount;
