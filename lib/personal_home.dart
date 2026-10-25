@@ -579,7 +579,10 @@ class _UserHomeState extends State<UserHome> {
                   uriProvider: () => imageUri,
                   width: imgSize,
                   borderWidth: 2,
-                  borderRadios: borderRadius),
+                  borderRadios: borderRadius,
+                  // Defer the fetch until the card scrolls into view, so the
+                  // image-heavy home grids don't fire every request at once.
+                  lazy: true),
               const SizedBox(height: 8),
               Text(name,
                   style: const TextStyle(
@@ -634,7 +637,8 @@ class _UserHomeState extends State<UserHome> {
                                 uriProvider: () => starter.imageUri ?? '',
                                 width: 44,
                                 borderWidth: 2,
-                                borderRadios: 44),
+                                borderRadios: 44,
+                                lazy: true),
                             const SizedBox(height: 4),
                             Text(
                                 I18nHelper.getDisplayNameFromI18n(starter.name),
@@ -660,7 +664,8 @@ class _UserHomeState extends State<UserHome> {
                                       : receiver.imageUri!,
                               width: 28,
                               borderWidth: 1.5,
-                              borderRadios: 28)
+                              borderRadios: 28,
+                              lazy: true)
                         else
                           Icon(Icons.help_outline,
                               size: 28, color: Colors.grey[400]),
@@ -674,7 +679,8 @@ class _UserHomeState extends State<UserHome> {
                                 uriProvider: () => receiver.imageUri ?? '',
                                 width: 44,
                                 borderWidth: 2,
-                                borderRadios: 44),
+                                borderRadios: 44,
+                                lazy: true),
                             const SizedBox(height: 4),
                             Text(
                                 I18nHelper.getDisplayNameFromI18n(
