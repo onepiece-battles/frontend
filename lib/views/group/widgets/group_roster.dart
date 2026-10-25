@@ -59,8 +59,9 @@ class GroupRoster extends StatelessWidget {
         final isEven = index.isEven;
 
         return Card(
-          color: isEven ? OnepieceColors.liteFancyGreen : Colors.white,
-          margin: const EdgeInsets.only(bottom: 8),
+          elevation: 0,
+          color: isEven ? OnepieceColors.surface : Colors.white,
+          margin: const EdgeInsets.only(bottom: 4),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           child: InkWell(
@@ -71,7 +72,7 @@ class GroupRoster extends StatelessWidget {
                   'name': I18nHelper.getDisplayNameFromI18n(group.name)
                 }),
             child: Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -82,7 +83,7 @@ class GroupRoster extends StatelessWidget {
                         child: ImageLazyLoader(
                           key: ValueKey(group.imageUri),
                           uriProvider: () => group.imageUri!,
-                          width: 44,
+                          width: 32,
                           borderWidth: 1.5,
                           borderRadios: 5,
                           lazy: true,
@@ -96,14 +97,15 @@ class GroupRoster extends StatelessWidget {
                             Text(
                               I18nHelper.getDisplayNameFromI18n(group.name),
                               style: OnepieceFonts.headerStyle
-                                  .copyWith(fontSize: 15),
+                                  .copyWith(fontSize: 13),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
                             const SizedBox(height: 2),
                             Text(
                               group.creationRecord?.nickname ?? '',
-                              style: OnepieceFonts.smallContentStyle,
+                              style: OnepieceFonts.smallContentStyle
+                                  .copyWith(fontSize: 12),
                             ),
                           ],
                         ),
@@ -129,7 +131,7 @@ class GroupRoster extends StatelessWidget {
                       group.subGroups.isNotEmpty) ...[
                     const SizedBox(height: 8),
                     SizedBox(
-                      height: 46,
+                      height: 34,
                       child: group.groupCategory == GroupCategory.group
                           ? _createGroupList(context, group.subGroups)
                           : _createCharacterList(
@@ -160,6 +162,9 @@ class GroupRoster extends StatelessWidget {
       items: groups,
       idOf: (group) => group.id,
       controller: controller,
+      minCardWidth: 280,
+      maxColumns: 6,
+      gap: 10,
       cardBuilder: (context, group) => Material(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
@@ -171,7 +176,7 @@ class GroupRoster extends StatelessWidget {
                 'name': I18nHelper.getDisplayNameFromI18n(group.name)
               }),
           child: Padding(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -179,12 +184,12 @@ class GroupRoster extends StatelessWidget {
                   ImageLazyLoader(
                     key: ValueKey(group.imageUri),
                     uriProvider: () => group.imageUri!,
-                    width: 48,
+                    width: 36,
                     borderWidth: 0,
                     lazy: true,
                     borderRadios: 10,
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -192,7 +197,7 @@ class GroupRoster extends StatelessWidget {
                         Text(
                           I18nHelper.getDisplayNameFromI18n(group.name),
                           style: OnepieceFonts.contentStyleBold.copyWith(
-                              color: OnepieceColors.primaryLabel, fontSize: 17),
+                              color: OnepieceColors.primaryLabel, fontSize: 14),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -212,13 +217,16 @@ class GroupRoster extends StatelessWidget {
                         style: OnepieceFonts.boldFancySmallFont),
                   ),
                 ]),
-                const SizedBox(height: 12),
-                SizedBox(
-                  height: 48,
-                  child: group.groupCategory == GroupCategory.group
-                      ? _createGroupList(context, group.subGroups)
-                      : _createCharacterList(context, group.characterInGroup),
-                ),
+                if (group.subGroups.isNotEmpty ||
+                    group.characterInGroup.isNotEmpty) ...[
+                  const SizedBox(height: 6),
+                  SizedBox(
+                    height: 34,
+                    child: group.groupCategory == GroupCategory.group
+                        ? _createGroupList(context, group.subGroups)
+                        : _createCharacterList(context, group.characterInGroup),
+                  ),
+                ],
               ],
             ),
           ),
@@ -258,7 +266,7 @@ class GroupRoster extends StatelessWidget {
                 child: ImageLazyLoader(
                     key: ValueKey(character.imageUri),
                     uriProvider: () => character.imageUri!,
-                    width: 40,
+                    width: 24,
                     borderWidth: 1.5,
                     borderRadios: 40,
                     lazy: true),
@@ -298,7 +306,7 @@ class GroupRoster extends StatelessWidget {
                   child: ImageLazyLoader(
                       key: ValueKey(group.imageUri),
                       uriProvider: () => group.imageUri!,
-                      width: 40,
+                      width: 24,
                       borderWidth: 1.5,
                       borderRadios: 3,
                       lazy: true),

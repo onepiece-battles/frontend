@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:openapi/api.dart';
 
 import '../../../components/image_lazy_loader.dart';
 import '../../../constants/onepiece_colors.dart';
 import '../../../constants/onepiece_fonts.dart';
-import '../../../constants/onepiece_tag.dart';
+import '../../../components/desktop_card_layout.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../utils/i18n_helper.dart';
 import '../../../utils/image_helper.dart';
@@ -52,8 +51,9 @@ class CharacterMobileRoster extends StatelessWidget {
         final isEven = index.isEven;
 
         return Card(
-          color: isEven ? OnepieceColors.liteFancyGreen : Colors.white,
-          margin: const EdgeInsets.only(bottom: 8),
+          elevation: 0,
+          color: isEven ? OnepieceColors.surface : Colors.white,
+          margin: const EdgeInsets.only(bottom: 4),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           child: InkWell(
@@ -64,7 +64,7 @@ class CharacterMobileRoster extends StatelessWidget {
                   'name': I18nHelper.getDisplayNameFromI18n(character.name)
                 }),
             child: Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -74,11 +74,12 @@ class CharacterMobileRoster extends StatelessWidget {
                       ImageLazyLoader(
                         key: ValueKey(character.imageUri),
                         uriProvider: () => character.imageUri!,
-                        width: 48,
-                        borderWidth: 2,
-                        borderRadios: 48,
+                        width: 36,
+                        borderWidth: 1,
+                        lazy: true,
+                        borderRadios: 36,
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -86,14 +87,15 @@ class CharacterMobileRoster extends StatelessWidget {
                             Text(
                               I18nHelper.getDisplayNameFromI18n(character.name),
                               style: OnepieceFonts.headerStyle
-                                  .copyWith(fontSize: 16),
+                                  .copyWith(fontSize: 14),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
                             const SizedBox(height: 2),
                             Text(
                               '${raceMap[character.race] ?? ""}  ·  ${battleStyleMap[character.battleStyle] ?? ""}',
-                              style: OnepieceFonts.smallContentStyle,
+                              style: OnepieceFonts.smallContentStyle
+                                  .copyWith(fontSize: 12),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -105,58 +107,43 @@ class CharacterMobileRoster extends StatelessWidget {
                         children: [
                           Text(character.score.toString(),
                               style: OnepieceFonts.boldFancySmallFont
-                                  .copyWith(fontSize: 18)),
+                                  .copyWith(fontSize: 16)),
                           if (character.bounty != null && character.bounty! > 0)
                             Text(
                               '₿${character.bounty}',
-                              style: GoogleFonts.lobster(
-                                  fontSize: 13, color: Colors.orange[700]),
+                              style: TextStyle(
+                                  fontSize: 12, color: Colors.orange[700]),
                             ),
                         ],
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  // Haki tags
-                  if (character.hakis.isNotEmpty)
-                    Wrap(
+                  Row(children: [
+                    Expanded(
+                        child: Wrap(
                       spacing: 4,
-                      runSpacing: 2,
+                      runSpacing: 3,
                       children: (character.hakis.toList()
-                            ..sort(
-                                (a, b) => a.toString().compareTo(b.toString())))
-                          .map((e) => OnepieceTag.getHakiTag(e, hakiMap[e]!))
+                            ..sort((first, second) =>
+                                first.toString().compareTo(second.toString())))
+                          .map((haki) =>
+                              ResourceBadge(hakiMap[haki] ?? '', compact: true))
                           .toList(),
+                    )),
+                    TextButton.icon(
+                      style: TextButton.styleFrom(
+                          minimumSize: const Size(0, 32),
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          textStyle: const TextStyle(fontSize: 12)),
+                      onPressed: () => onToggleExpand(character.id),
+                      icon: Icon(
+                          isExpanded ? Icons.expand_less : Icons.expand_more,
+                          size: 16),
+                      label:
+                          Text(AppLocalizations.of(context)!.detailInformation),
                     ),
-                  // Expand toggle
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: InkWell(
-                      onTap: () => onToggleExpand(character.id),
-                      borderRadius: BorderRadius.circular(4),
-                      child: Padding(
-                        padding: const EdgeInsets.all(4),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              AppLocalizations.of(context)!.detailInformation,
-                              style: const TextStyle(
-                                  fontSize: 12,
-                                  color: OnepieceColors.fancyBlue),
-                            ),
-                            Icon(
-                              isExpanded
-                                  ? Icons.expand_less
-                                  : Icons.expand_more,
-                              size: 18,
-                              color: OnepieceColors.fancyBlue,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
+                  ]),
                   // Expanded stats
                   if (isExpanded) _buildStatRows(context, character),
                 ],
@@ -190,7 +177,7 @@ class CharacterMobileRoster extends StatelessWidget {
       margin: const EdgeInsets.only(top: 4),
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: OnepieceColors.liteFancyGreen.withValues(alpha: 0.4),
+        color: OnepieceColors.surface.withValues(alpha: 0.4),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Wrap(

@@ -4,6 +4,7 @@ import 'package:openapi/api.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 
 import '../../../constants/button_style.dart';
+import '../../../components/desktop_card_layout.dart';
 import '../../../constants/onepiece_colors.dart';
 import '../../../constants/onepiece_fonts.dart';
 import '../../../l10n/app_localizations.dart';
@@ -100,41 +101,29 @@ class _CharacterFilterPanelState extends State<CharacterFilterPanel> {
                       floatingLabelBehavior: FloatingLabelBehavior.never,
                       disabledBorder: const OutlineInputBorder(
                           borderSide:
-                              BorderSide(color: OnepieceColors.menuHoverColor)),
+                              BorderSide(color: OnepieceColors.separator)),
                       enabledBorder: const OutlineInputBorder(
                           borderSide:
-                              BorderSide(color: OnepieceColors.menuHoverColor)),
+                              BorderSide(color: OnepieceColors.separator)),
                       focusedBorder: const OutlineInputBorder(
                         borderSide: BorderSide(
                             color: OnepieceColors.fancyGreen, width: 1.5),
                       ),
                       prefixIcon: const Icon(Icons.search, size: 20),
-                      labelText: AppLocalizations.of(context)!.starterName,
-                      labelStyle: OnepieceFonts.dropDownItemStyle),
+                      labelText: AppLocalizations.of(context)!.characterName,
+                      labelStyle: OnepieceFonts.dropDownItemStyle
+                          .copyWith(fontSize: 13)),
                 ),
               ),
             ),
             const SizedBox(width: 6),
-            InkWell(
-              onTap: () => setState(() => _showFilters = !_showFilters),
-              borderRadius: BorderRadius.circular(4),
-              child: Container(
-                height: 35,
-                width: 35,
-                decoration: BoxDecoration(
-                  border: Border.all(color: OnepieceColors.menuHoverColor),
-                  borderRadius: BorderRadius.circular(4),
-                  color: _showFilters
-                      ? OnepieceColors.fancyBlue.withValues(alpha: 0.1)
-                      : null,
-                ),
-                child: Icon(
-                  Icons.filter_list,
-                  size: 20,
-                  color:
-                      _showFilters ? OnepieceColors.fancyBlue : Colors.grey[700],
-                ),
-              ),
+            ListFilterButton(
+              active: _showFilters ||
+                  initialLabelIndex != 0 ||
+                  widget.selectedBattleStyles.isNotEmpty ||
+                  widget.selectedRaces.isNotEmpty ||
+                  widget.selectedHakis.isNotEmpty,
+              onPressed: () => setState(() => _showFilters = !_showFilters),
             ),
           ],
         ),
@@ -152,7 +141,7 @@ class _CharacterFilterPanelState extends State<CharacterFilterPanel> {
                 fontSize: 12.0,
                 initialLabelIndex: initialLabelIndex,
                 activeBgColor: const [OnepieceColors.fancyBlue],
-                inactiveBgColor: OnepieceColors.liteFancyGreen,
+                inactiveBgColor: OnepieceColors.surface,
                 inactiveFgColor: Colors.grey[600],
                 totalSwitches: 4,
                 labels: [
@@ -173,41 +162,41 @@ class _CharacterFilterPanelState extends State<CharacterFilterPanel> {
             ),
           ),
           const SizedBox(height: 6),
-          _buildDropdown<BattleStyle>(
-            items: BattleStyle.values,
-            selectedItems: widget.selectedBattleStyles,
-            displayMap: widget.battleStyleMap,
-            hint: AppLocalizations.of(context)!.battleStyle,
-            width: double.infinity,
-            onChanged: (list) {
-              characterFilter.battleStyles = list;
-              widget.onSearch(true);
-            },
-          ),
-          const SizedBox(height: 6),
-          _buildDropdown<Haki>(
-            items: Haki.values,
-            selectedItems: widget.selectedHakis,
-            displayMap: widget.hakiMap,
-            hint: AppLocalizations.of(context)!.hakis,
-            width: double.infinity,
-            onChanged: (list) {
-              characterFilter.hakis = list;
-              widget.onSearch(true);
-            },
-          ),
-          const SizedBox(height: 6),
-          _buildDropdown<Race>(
-            items: Race.values,
-            selectedItems: widget.selectedRaces,
-            displayMap: widget.raceMap,
-            hint: AppLocalizations.of(context)!.race,
-            width: double.infinity,
-            onChanged: (list) {
-              characterFilter.races = list;
-              widget.onSearch(true);
-            },
-          ),
+          Wrap(spacing: 6, runSpacing: 6, children: [
+            _buildDropdown<BattleStyle>(
+              items: BattleStyle.values,
+              selectedItems: widget.selectedBattleStyles,
+              displayMap: widget.battleStyleMap,
+              hint: AppLocalizations.of(context)!.battleStyle,
+              width: widget.isNarrow ? double.infinity : 180,
+              onChanged: (list) {
+                characterFilter.battleStyles = list;
+                widget.onSearch(true);
+              },
+            ),
+            _buildDropdown<Haki>(
+              items: Haki.values,
+              selectedItems: widget.selectedHakis,
+              displayMap: widget.hakiMap,
+              hint: AppLocalizations.of(context)!.hakis,
+              width: widget.isNarrow ? double.infinity : 180,
+              onChanged: (list) {
+                characterFilter.hakis = list;
+                widget.onSearch(true);
+              },
+            ),
+            _buildDropdown<Race>(
+              items: Race.values,
+              selectedItems: widget.selectedRaces,
+              displayMap: widget.raceMap,
+              hint: AppLocalizations.of(context)!.race,
+              width: widget.isNarrow ? double.infinity : 180,
+              onChanged: (list) {
+                characterFilter.races = list;
+                widget.onSearch(true);
+              },
+            ),
+          ]),
         ],
       ],
     );
@@ -215,198 +204,8 @@ class _CharacterFilterPanelState extends State<CharacterFilterPanel> {
 
   // ── Desktop: card-style search and filters ────────────────────────────
 
-  Widget _buildDesktop(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.black.withValues(alpha: 0.07)),
-        boxShadow: [
-          BoxShadow(
-            color: OnepieceColors.deepFancyBlue.withValues(alpha: 0.07),
-            blurRadius: 18,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: OnepieceColors.fancyBlue.withValues(alpha: 0.10),
-                  borderRadius: BorderRadius.circular(11),
-                ),
-                child: const Icon(Icons.tune,
-                    size: 21, color: OnepieceColors.fancyBlue),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: SizedBox(
-                  height: 42,
-                  child: TextFormField(
-                    controller: searchNameController,
-                    onChanged: (value) {
-                      characterFilter.name = value.trim();
-                      widget.onSearch(true);
-                    },
-                    decoration: InputDecoration(
-                      contentPadding:
-                          const EdgeInsets.symmetric(horizontal: 14),
-                      floatingLabelBehavior: FloatingLabelBehavior.never,
-                      filled: true,
-                      fillColor: Colors.grey.withValues(alpha: 0.06),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(11),
-                        borderSide: BorderSide.none,
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(11),
-                        borderSide: BorderSide(
-                            color: Colors.black.withValues(alpha: 0.07)),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(11),
-                        borderSide: const BorderSide(
-                            color: OnepieceColors.fancyBlue, width: 1.5),
-                      ),
-                      prefixIcon: const Icon(Icons.search, size: 20),
-                      suffixIcon: searchNameController.text.isEmpty
-                          ? null
-                          : IconButton(
-                              tooltip: MaterialLocalizations.of(context)
-                                  .deleteButtonTooltip,
-                              onPressed: () {
-                                searchNameController.clear();
-                                characterFilter.name = '';
-                                widget.onSearch(true);
-                                setState(() {});
-                              },
-                              icon: const Icon(Icons.close, size: 18),
-                            ),
-                      labelText: AppLocalizations.of(context)!.starterName,
-                      labelStyle: OnepieceFonts.dropDownItemStyle,
-                    ),
-                  ),
-                ),
-              ),
-              if (widget.hasCreate) ...[
-                const SizedBox(width: 12),
-                SizedBox(
-                  height: 42,
-                  child: ElevatedButton.icon(
-                    onPressed: widget.onCreate,
-                    style: ElevatedButton.styleFrom(
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(horizontal: 18),
-                      backgroundColor: OnepieceColors.fancyBlue,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(11)),
-                    ),
-                    icon: const Icon(Icons.add, size: 18),
-                    label: Text(AppLocalizations.of(context)!.create),
-                  ),
-                ),
-              ],
-            ],
-          ),
-          const SizedBox(height: 14),
-          const Divider(height: 1),
-          const SizedBox(height: 14),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: SizedBox(
-              height: 38,
-              child: ToggleSwitch(
-                customWidths: const [150, 150, 150, 180],
-                cornerRadius: 10,
-                minHeight: 38,
-                fontSize: 13,
-                initialLabelIndex: initialLabelIndex,
-                activeBgColor: const [OnepieceColors.fancyBlue],
-                inactiveBgColor:
-                    OnepieceColors.fancyBlue.withValues(alpha: 0.07),
-                inactiveFgColor: Colors.grey[700],
-                totalSwitches: 4,
-                labels: [
-                  AppLocalizations.of(context)!.allResources,
-                  AppLocalizations.of(context)!.myResource,
-                  AppLocalizations.of(context)!.systemResource,
-                  AppLocalizations.of(context)!.excludeSystem
-                ],
-                onToggle: (index) {
-                  initialLabelIndex = index!;
-                  characterFilter.systemResource =
-                      (index == 2) ? true : (index == 3 ? false : null);
-                  characterFilter.userId =
-                      (index == 1) ? widget.myUserId : null;
-                  widget.onSearch(true);
-                },
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              const gap = 10.0;
-              final fieldWidth = (constraints.maxWidth - gap * 2) / 3;
-              return Wrap(
-                spacing: gap,
-                runSpacing: gap,
-                children: [
-                  _buildDropdown<BattleStyle>(
-                    items: BattleStyle.values,
-                    selectedItems: widget.selectedBattleStyles,
-                    displayMap: widget.battleStyleMap,
-                    hint: AppLocalizations.of(context)!.battleStyle,
-                    width: fieldWidth,
-                    cardStyle: true,
-                    onChanged: (list) {
-                      characterFilter.battleStyles = list;
-                      widget.onSearch(true);
-                    },
-                  ),
-                  _buildDropdown<Haki>(
-                    items: Haki.values,
-                    selectedItems: widget.selectedHakis,
-                    displayMap: widget.hakiMap,
-                    hint: AppLocalizations.of(context)!.hakis,
-                    width: fieldWidth,
-                    cardStyle: true,
-                    onChanged: (list) {
-                      characterFilter.hakis = list;
-                      widget.onSearch(true);
-                    },
-                  ),
-                  _buildDropdown<Race>(
-                    items: Race.values,
-                    selectedItems: widget.selectedRaces,
-                    displayMap: widget.raceMap,
-                    hint: AppLocalizations.of(context)!.race,
-                    width: fieldWidth,
-                    cardStyle: true,
-                    onChanged: (list) {
-                      characterFilter.races = list;
-                      widget.onSearch(true);
-                    },
-                  ),
-                ],
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
+  Widget _buildDesktop(BuildContext context) => _buildMobile(context);
 
-  // Generic multi-select dropdown builder to reduce repetition.
   Widget _buildDropdown<T>({
     required List<T> items,
     required List<T> selectedItems,
@@ -414,7 +213,6 @@ class _CharacterFilterPanelState extends State<CharacterFilterPanel> {
     required String hint,
     required Function(List<T>) onChanged,
     double width = 200,
-    bool cardStyle = false,
   }) {
     return DropdownButtonHideUnderline(
       child: DropdownButton2(
@@ -437,16 +235,11 @@ class _CharacterFilterPanelState extends State<CharacterFilterPanel> {
         },
         buttonStyleData: ButtonStyleData(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          height: cardStyle ? 42 : 35,
+          height: 35,
           width: width,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(cardStyle ? 11 : 3),
-            color: cardStyle
-                ? OnepieceColors.fancyBlue.withValues(alpha: 0.06)
-                : OnepieceColors.liteFancyGreen,
-            border: cardStyle
-                ? Border.all(color: Colors.black.withValues(alpha: 0.07))
-                : null,
+            borderRadius: BorderRadius.circular(8),
+            color: OnepieceColors.surface,
           ),
         ),
         menuItemStyleData: const MenuItemStyleData(height: 35),

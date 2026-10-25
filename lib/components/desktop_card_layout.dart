@@ -3,14 +3,16 @@ import 'package:flutter/material.dart';
 import '../constants/onepiece_colors.dart';
 
 class ResourceBadge extends StatelessWidget {
-  const ResourceBadge(this.label, {super.key});
+  const ResourceBadge(this.label, {super.key, this.compact = false});
 
   final String label;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+      padding: EdgeInsets.symmetric(
+          horizontal: compact ? 6 : 9, vertical: compact ? 3 : 5),
       decoration: BoxDecoration(
         color: OnepieceColors.surface,
         borderRadius: BorderRadius.circular(8),
@@ -18,8 +20,8 @@ class ResourceBadge extends StatelessWidget {
       child: Text(label,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-              fontSize: 12, color: OnepieceColors.primaryLabel)),
+          style: TextStyle(
+              fontSize: compact ? 11 : 12, color: OnepieceColors.primaryLabel)),
     );
   }
 }
@@ -46,7 +48,7 @@ class CompactFilterPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _ControlSurface(
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(6),
       child: child,
     );
   }

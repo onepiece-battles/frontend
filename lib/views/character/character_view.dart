@@ -48,7 +48,7 @@ class _CharacterViewState extends State<CharacterView>
   // Pagination State
   int selectedPageNum = 1;
   int totalPageNum = 0;
-  int itemCountPerPage = 10;
+  int itemCountPerPage = 24;
   int totalItemCount = 0;
 
   // Constants / Maps
@@ -192,7 +192,7 @@ class _CharacterViewState extends State<CharacterView>
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: double.infinity),
             child: Padding(
-              padding: EdgeInsets.all(isNarrow ? 15 : 24),
+              padding: EdgeInsets.all(isNarrow ? 8 : 12),
               child: SizedBox(
                 width: double.infinity,
                 child: Column(
@@ -217,7 +217,7 @@ class _CharacterViewState extends State<CharacterView>
                       onCreate: () => context.goNamed("createCharacter"),
                       onSearch: _search,
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 6),
                     // Compact cards on mobile, a richer roster on desktop.
                     Expanded(
                       child: isNarrow
@@ -229,12 +229,12 @@ class _CharacterViewState extends State<CharacterView>
                               hakiMap: hakiEnumValueToDisplayValue,
                               expandedRowIds: _expandedRowIds,
                               onToggleExpand: (id) => setState(() {
-                                    if (_expandedRowIds.contains(id)) {
-                                      _expandedRowIds.remove(id);
-                                    } else {
-                                      _expandedRowIds.add(id);
-                                    }
-                                  }),
+                                if (_expandedRowIds.contains(id)) {
+                                  _expandedRowIds.remove(id);
+                                } else {
+                                  _expandedRowIds.add(id);
+                                }
+                              }),
                             )
                           : CharacterDesktopRoster(
                               characters: currentCharacterList,
@@ -245,21 +245,21 @@ class _CharacterViewState extends State<CharacterView>
                               hakiMap: hakiEnumValueToDisplayValue,
                               expandedRowIds: _expandedRowIds,
                               onToggleExpand: (id) => setState(() {
-                                    if (_expandedRowIds.contains(id)) {
-                                      _expandedRowIds.remove(id);
-                                    } else {
-                                      _expandedRowIds.add(id);
-                                    }
-                                  }),
+                                if (_expandedRowIds.contains(id)) {
+                                  _expandedRowIds.remove(id);
+                                } else {
+                                  _expandedRowIds.add(id);
+                                }
+                              }),
                               scoreOrder: sortableEnumToSortOrderMap[
                                   CharacterSortableFieldsEnum.score],
                               onScoreSortTap: _onScoreSortTap,
                             ),
                     ),
-                    const SizedBox(height: 15),
+                    const SizedBox(height: 4),
                     if (totalPageNum > 1)
                       Padding(
-                        padding: const EdgeInsets.only(top: 15.0),
+                        padding: const EdgeInsets.only(top: 4),
                         child: PageFoot(
                           currentPage: selectedPageNum,
                           totalPages: totalPageNum,
@@ -283,10 +283,10 @@ class _CharacterViewState extends State<CharacterView>
 
   Widget _createHeader() {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.only(bottom: 6),
       child: Text(
         AppLocalizations.of(context)!.character,
-        style: OnepieceFonts.headerStyle,
+        style: OnepieceFonts.headerStyle.copyWith(fontSize: 20),
       ),
     );
   }
