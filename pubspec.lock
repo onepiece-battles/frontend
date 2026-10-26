@@ -461,14 +461,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  font_awesome_flutter:
-    dependency: "direct main"
-    description:
-      name: font_awesome_flutter
-      sha256: b9011df3a1fa02993630b8fb83526368cf2206a711259830325bab2f1d2a4eb0
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "10.12.0"
   frontend_server_client:
     dependency: transitive
     description:
@@ -501,14 +493,6 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "13.2.5"
-  google_fonts:
-    dependency: "direct main"
-    description:
-      name: google_fonts
-      sha256: ba03d03bcaa2f6cb7bd920e3b5027181db75ab524f8891c8bc3aa603885b8055
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "6.3.3"
   graphs:
     dependency: transitive
     description:
@@ -741,14 +725,6 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "0.11.1"
-  material_design_icons_flutter:
-    dependency: "direct main"
-    description:
-      name: material_design_icons_flutter
-      sha256: "8c54c21cf336052193559abc64715e4885d6c9220a6dbdfc561a087266cc5385"
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "5.0.6996"
   meta:
     dependency: transitive
     description:

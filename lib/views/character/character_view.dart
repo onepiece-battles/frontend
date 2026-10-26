@@ -4,7 +4,7 @@ import '../../l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
-import 'package:one_piece_battles_flutter/components/page_foot.dart';
+import 'package:one_piece_battles_flutter/components/resource_list_pagination.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:one_piece_battles_flutter/utils/permission_check.dart';
 import 'package:openapi/api.dart';
@@ -280,22 +280,18 @@ class _CharacterViewState extends State<CharacterView>
                               ),
                       ),
                     ),
-                    const SizedBox(height: 4),
                     if (totalPageNum > 1)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 4),
-                        child: PageFoot(
-                          currentPage: selectedPageNum,
-                          totalPages: totalPageNum,
-                          jumpLabel: AppLocalizations.of(context)!.jumpToPage,
-                          onPageChanged: (page) {
-                            selectedPageNum = page;
-                              if (scrollController.hasClients) {
-                              scrollController.jumpTo(0);
-                              }
-                            _search(false);
-                          },
-                        ),
+                      ResourceListPagination(
+                        currentPage: selectedPageNum,
+                        totalPages: totalPageNum,
+                        jumpLabel: AppLocalizations.of(context)!.jumpToPage,
+                        onPageChanged: (page) {
+                          selectedPageNum = page;
+                          if (scrollController.hasClients) {
+                            scrollController.jumpTo(0);
+                          }
+                          _search(false);
+                        },
                       ),
                   ],
                 ),

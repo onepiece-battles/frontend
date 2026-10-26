@@ -5,7 +5,7 @@ import '../../l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/components/desktop_card_layout.dart';
-import 'package:one_piece_battles_flutter/components/page_foot.dart';
+import 'package:one_piece_battles_flutter/components/resource_list_pagination.dart';
 import 'package:one_piece_battles_flutter/constants/button_style.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
@@ -143,25 +143,18 @@ class _BattleViewState extends State<BattleView> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 4),
                     if (totalPageNum > 1)
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Center(
-                              child: PageFoot(
-                            currentPage: selectedPageNum,
-                            totalPages: totalPageNum,
-                            jumpLabel: AppLocalizations.of(context)!.jumpToPage,
-                            onPageChanged: (page) {
-                              selectedPageNum = page;
-                              if (mainController.hasClients) {
-                                mainController.jumpTo(0);
-                              }
-                              _search(false);
-                            },
-                          )),
-                        ],
+                      ResourceListPagination(
+                        currentPage: selectedPageNum,
+                        totalPages: totalPageNum,
+                        jumpLabel: AppLocalizations.of(context)!.jumpToPage,
+                        onPageChanged: (page) {
+                          selectedPageNum = page;
+                          if (mainController.hasClients) {
+                            mainController.jumpTo(0);
+                          }
+                          _search(false);
+                        },
                       )
                   ],
                 ),
