@@ -411,5 +411,9 @@
         "type": "int"
       }
     }
-  }
+  },
+  "resourceLoadFailed": "资源加载失败，请重试",
+  "noResourcesFound": "暂无符合条件的资源",
+  "retryLoading": "重新加载",
+  "resourceNoHolders": "暂无持有者"
 }

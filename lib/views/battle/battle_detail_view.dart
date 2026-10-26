@@ -1,3 +1,4 @@
+import '../../components/resource_loading.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
@@ -139,6 +140,9 @@ class _BattleDetailViewState extends State<BattleDetailView> {
         future: _loadData(),
         builder: (context, AsyncSnapshot snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
+            if (snapshot.hasError || snapshot.data == null) {
+              return ResourceEmptyState(failed: snapshot.hasError);
+            }
             _updateData(snapshot.data);
             _getBattleExecution();
             return ChangeNotifierProvider.value(
@@ -276,12 +280,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
               ),
             );
           } else {
-            return Center(
-              child: Text(
-                AppLocalizations.of(context)!.loading,
-                style: OnepieceFonts.loadingFont,
-              ),
-            );
+            return const ResourceLoading();
           }
         });
   }

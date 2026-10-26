@@ -1123,4 +1123,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String characterLimitCounter(int current, int max) {
     return '$current/$max 个字符';
   }
+
+  @override
+  String get resourceLoadFailed => '资源加载失败，请重试';
+
+  @override
+  String get noResourcesFound => '暂无符合条件的资源';
+
+  @override
+  String get retryLoading => '重新加载';
+
+  @override
+  String get resourceNoHolders => '暂无持有者';
 }

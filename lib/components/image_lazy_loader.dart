@@ -71,16 +71,24 @@ class _ImageLazyLoaderState extends State<ImageLazyLoader> {
   // ── Loading indicator ────────────────────────────────────────────
 
   Widget _buildLoading() {
-    return Center(
-      child: SizedBox(
-        width: widget.width,
-        height: widget.width,
-        child: CircularProgressIndicator(
-          valueColor:
-              const AlwaysStoppedAnimation<Color>(OnepieceColors.liteFancyBlue),
-          strokeWidth: widget.borderWidth,
-        ),
+    return Container(
+      width: widget.width,
+      height: widget.width,
+      decoration: BoxDecoration(
+        color: OnepieceColors.surface,
+        borderRadius: BorderRadius.circular(widget.borderRadios),
       ),
+      child: _triggered && widget.width >= 24
+          ? Center(
+              child: SizedBox(
+                  width: 12,
+                  height: 12,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 1.5,
+                    color: OnepieceColors.secondaryLabel,
+                    value: MediaQuery.disableAnimationsOf(context) ? .5 : null,
+                  )))
+          : null,
     );
   }
 

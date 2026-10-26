@@ -186,7 +186,7 @@ void main() {
           : find.byType(DesktopSpotlightCard).first;
       final rect = tester.getRect(card);
       final loc = AppLocalizations.of(tester.element(card))!;
-      await tester.tap(find.text(loc.detailInformation).first);
+      await tester.tap(find.byTooltip(loc.detailInformation).first);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
       expect(find.byType(width < 600 ? BottomSheet : Dialog), findsOneWidget);

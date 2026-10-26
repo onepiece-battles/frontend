@@ -56,19 +56,21 @@ class BattleRoster extends StatelessWidget {
       itemBuilder: (context, index) {
         final battle = battles[index];
         final exec = battle.battleExecution;
-        final isEven = index.isEven;
 
         return Card(
-          color: isEven ? OnepieceColors.liteFancyGreen : Colors.white,
-          margin: const EdgeInsets.only(bottom: 4),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          color: Colors.white,
+          elevation: 0,
+          surfaceTintColor: Colors.transparent,
+          margin: const EdgeInsets.only(bottom: 8),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: const BorderSide(color: OnepieceColors.separator)),
           child: InkWell(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(12),
             onTap: () => context.goNamed('battleDetails',
                 extra: battle.id, pathParameters: {'id': battle.id}),
             child: Padding(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(10),
               child: Column(
                 children: [
                   // Starter vs Receiver row
@@ -138,7 +140,7 @@ class BattleRoster extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 10),
                   // Status + Creator row
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -229,7 +231,7 @@ class BattleRoster extends StatelessWidget {
       controller: controller,
       minCardWidth: 280,
       maxColumns: 6,
-      gap: 10,
+      gap: 12,
       cardBuilder: (context, battle) {
         final execution = battle.battleExecution;
         return Material(
@@ -240,7 +242,7 @@ class BattleRoster extends StatelessWidget {
             onTap: () => context.goNamed('battleDetails',
                 extra: battle.id, pathParameters: {'id': battle.id}),
             child: Padding(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.all(12),
               child: Column(children: [
                 Row(children: [
                   Expanded(
@@ -266,7 +268,7 @@ class BattleRoster extends StatelessWidget {
                     ),
                   ),
                 ]),
-                const SizedBox(height: 6),
+                const SizedBox(height: 10),
                 Row(children: [
                   Container(
                     padding:

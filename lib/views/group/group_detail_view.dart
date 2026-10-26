@@ -1,3 +1,4 @@
+import '../../components/resource_loading.dart';
 import 'package:flutter/material.dart';
 import '../../components/resource_detail_layout.dart';
 import '../../components/image_lazy_loader.dart';
@@ -7,7 +8,6 @@ import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
 import '../../l10n/app_localizations.dart';
-import '../../constants/onepiece_fonts.dart';
 import '../../utils/responsive_breakpoints.dart';
 import '../../utils/permission_check.dart';
 import 'group_detail_controller.dart';
@@ -145,7 +145,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
       builder: (context, AsyncSnapshot snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           if (snapshot.data == null) {
-            return const SizedBox.shrink();
+            return ResourceEmptyState(failed: snapshot.hasError);
           }
           _prepareData(snapshot.data);
           return LayoutBuilder(
@@ -230,12 +230,7 @@ class _GroupDetailViewState extends State<GroupDetailView> {
             },
           );
         } else {
-          return Center(
-            child: Text(
-              AppLocalizations.of(context)!.loading,
-              style: OnepieceFonts.loadingFont,
-            ),
-          );
+          return const ResourceLoading();
         }
       },
     );

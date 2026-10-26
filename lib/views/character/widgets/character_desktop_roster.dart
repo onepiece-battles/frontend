@@ -71,7 +71,7 @@ class CharacterDesktopRoster extends StatelessWidget {
             controller: scrollController,
             minCardWidth: 280,
             maxColumns: 6,
-            gap: 10,
+            gap: 12,
             cardBuilder: _buildCard,
           ),
         ),
@@ -102,7 +102,7 @@ class CharacterDesktopRoster extends StatelessWidget {
               'name': I18nHelper.getDisplayNameFromI18n(character.name)
             }),
         child: Padding(
-          padding: const EdgeInsets.all(10),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -142,7 +142,7 @@ class CharacterDesktopRoster extends StatelessWidget {
                 const Icon(Icons.chevron_right,
                     size: 18, color: OnepieceColors.secondaryLabel),
               ]),
-              const SizedBox(height: 8),
+              const SizedBox(height: 6),
               Wrap(spacing: 14, runSpacing: 4, children: [
                 Text.rich(TextSpan(
                   style: OnepieceFonts.smallContentStyle.copyWith(fontSize: 12),
@@ -165,30 +165,33 @@ class CharacterDesktopRoster extends StatelessWidget {
                   ],
                 )),
               ]),
-              const Divider(height: 1, color: OnepieceColors.separator),
-              Row(children: [
-                Expanded(
-                    child: Wrap(
-                  spacing: 4,
+              const Divider(height: 9, color: OnepieceColors.separator),
+              Wrap(
+                  spacing: 6,
                   runSpacing: 4,
-                  children: (character.hakis.toList()
-                        ..sort((first, second) =>
-                            first.toString().compareTo(second.toString())))
-                      .map((haki) =>
-                          OnepieceTag.getHakiTag(haki, hakiMap[haki] ?? ''))
-                      .toList(),
-                )),
-                TextButton.icon(
-                  style: TextButton.styleFrom(
-                      minimumSize: const Size(0, 32),
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      textStyle: const TextStyle(fontSize: 12)),
-                  onPressed: () => _openDetails(context, character),
-                  icon: const Icon(Icons.info_outline, size: 16),
-                  label: Text(loc.detailInformation),
-                ),
-              ]),
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    ...(character.hakis.toList()
+                          ..sort((first, second) =>
+                              first.toString().compareTo(second.toString())))
+                        .map((haki) =>
+                            OnepieceTag.getHakiTag(haki, hakiMap[haki] ?? ''))
+                        .toList(),
+                    IconButton(
+                      tooltip: loc.detailInformation,
+                      onPressed: () => _openDetails(context, character),
+                      style: IconButton.styleFrom(
+                        minimumSize: const Size(32, 32),
+                        maximumSize: const Size(32, 32),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      constraints:
+                          const BoxConstraints(minWidth: 32, minHeight: 32),
+                      padding: const EdgeInsets.all(8),
+                      icon: const Icon(Icons.info_outline,
+                          size: 18, color: OnepieceColors.fancyBlue),
+                    ),
+                  ]),
             ],
           ),
         ),

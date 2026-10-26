@@ -111,7 +111,9 @@ void main() {
             final rect = tester.getRect(find.byWidget(element.widget));
             return rect.top >= viewport.top && rect.bottom <= viewport.bottom;
           }).length;
-          expect(fullyVisible, greaterThanOrEqualTo(width < 1000 ? 4 : 12));
+          expect(fullyVisible, greaterThanOrEqualTo(width < 1000 ? 4 : 12),
+              reason:
+                  'Viewport: $viewport; first card: ${tester.getSize(cards.first)}');
           expect(tester.takeException(), isNull);
           expect(
               (GetIt.instance<CharacterDao>() as ListCharacterFake).pageSize ??

@@ -411,5 +411,9 @@
         "type": "int"
       }
     }
-  }
+  },
+  "resourceLoadFailed": "Couldn’t load resources. Please try again.",
+  "noResourcesFound": "No resources found",
+  "retryLoading": "Try again",
+  "resourceNoHolders": "No holders yet"
 }

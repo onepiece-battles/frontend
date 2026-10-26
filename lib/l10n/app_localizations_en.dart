@@ -1164,4 +1164,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String characterLimitCounter(int current, int max) {
     return '$current/$max characters';
   }
+
+  @override
+  String get resourceLoadFailed => 'Couldn’t load resources. Please try again.';
+
+  @override
+  String get noResourcesFound => 'No resources found';
+
+  @override
+  String get retryLoading => 'Try again';
+
+  @override
+  String get resourceNoHolders => 'No holders yet';
 }

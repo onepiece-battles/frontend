@@ -6,6 +6,7 @@ import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 import '../../components/desktop_card_layout.dart';
+import '../../components/resource_loading.dart';
 import '../../components/page_foot.dart';
 import '../../constants/button_style.dart';
 import '../../constants/onepiece_colors.dart';
@@ -75,29 +76,42 @@ class _FruitViewState extends State<FruitView> {
     }
   }
 
-  void _search(bool filterChange) {
+  bool _loading = true;
+  bool _loadFailed = false;
+  int _requestId = 0;
+
+  Future<void> _search(bool filterChange) async {
+    final requestId = ++_requestId;
+    setState(() {
+      _loading = true;
+      _loadFailed = false;
+      if (filterChange) selectedPageNum = 1;
+    });
     fruitFilter.languageCode = I18nHelper.getLanguageCode();
-    if (filterChange) {
-      selectedPageNum = 1;
-    }
-    ListFruitRequest request = ListFruitRequest(
+    final request = ListFruitRequest(
         pageSize: itemCountPerPage,
         pageIndex: selectedPageNum,
         sortKeys: sortKeys,
         fruitFilter: fruitFilter);
-    Future<ListFruitResponse?> response = _controller.list(request);
-    response.then(
-      (value) {
-        if (!mounted) return;
-        setState(
-          () {
-            currentFruitList = value!.fruits;
-            totalItemCount = value.totalSize!;
-            totalPageNum = (totalItemCount / itemCountPerPage).ceil();
-          },
-        );
-      },
-    );
+    try {
+      final value = await _controller.list(request);
+      if (!mounted || requestId != _requestId) return;
+      if (value == null) {
+        throw StateError('Resource request returned no response');
+      }
+      setState(() {
+        currentFruitList = value.fruits;
+        totalItemCount = value.totalSize ?? 0;
+        totalPageNum = (totalItemCount / itemCountPerPage).ceil();
+        _loading = false;
+      });
+    } catch (_) {
+      if (!mounted || requestId != _requestId) return;
+      setState(() {
+        _loading = false;
+        _loadFailed = true;
+      });
+    }
   }
 
   @override
@@ -120,16 +134,22 @@ class _FruitViewState extends State<FruitView> {
                     CompactFilterPanel(child: _getControlRow(context)),
                     const SizedBox(height: 6),
                     Expanded(
-                      child: FruitRoster(
-                        fruits: currentFruitList,
-                        controller: mainController,
-                        expandedRowIds: _expandedRowIds,
-                        onToggleExpand: (id) => setState(() {
-                          if (!_expandedRowIds.remove(id)) {
-                            _expandedRowIds.add(id);
-                          }
-                        }),
-                        isNarrow: isNarrow,
+                      child: ResourceListBody(
+                        loading: _loading,
+                        failed: _loadFailed,
+                        hasItems: currentFruitList.isNotEmpty,
+                        onRetry: () => _search(false),
+                        child: FruitRoster(
+                          fruits: currentFruitList,
+                          controller: mainController,
+                          expandedRowIds: _expandedRowIds,
+                          onToggleExpand: (id) => setState(() {
+                            if (!_expandedRowIds.remove(id)) {
+                              _expandedRowIds.add(id);
+                            }
+                          }),
+                          isNarrow: isNarrow,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -144,7 +164,9 @@ class _FruitViewState extends State<FruitView> {
                             jumpLabel: AppLocalizations.of(context)!.jumpToPage,
                             onPageChanged: (page) {
                               selectedPageNum = page;
-                              mainController.jumpTo(0);
+                              if (mainController.hasClients) {
+                                mainController.jumpTo(0);
+                              }
                               _search(false);
                             },
                           )),

@@ -57,11 +57,13 @@ class FruitRoster extends StatelessWidget {
         controller: controller,
         itemCount: fruits.length,
         itemBuilder: (context, index) => Card(
-              color:
-                  index.isEven ? OnepieceColors.liteFancyGreen : Colors.white,
-              margin: const EdgeInsets.only(bottom: 4),
+              color: Colors.white,
+              elevation: 0,
+              surfaceTintColor: Colors.transparent,
+              margin: const EdgeInsets.only(bottom: 8),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
+                  borderRadius: BorderRadius.circular(12),
+                  side: const BorderSide(color: OnepieceColors.separator)),
               child: _buildCard(context, fruits[index], true),
             ));
   }
@@ -78,7 +80,7 @@ class FruitRoster extends StatelessWidget {
         controller: controller,
         minCardWidth: 280,
         maxColumns: 6,
-        gap: 10,
+        gap: 12,
         cardBuilder: (context, fruit) => _buildCard(context, fruit, false));
   }
 
@@ -97,7 +99,7 @@ class FruitRoster extends StatelessWidget {
               'name': I18nHelper.getDisplayNameFromI18n(fruit.name)
             }),
         child: Padding(
-          padding: EdgeInsets.all(mobile ? 8 : 10),
+          padding: EdgeInsets.all(mobile ? 10 : 12),
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             SizedBox(
@@ -113,19 +115,21 @@ class FruitRoster extends StatelessWidget {
                   const SizedBox(width: 8),
                   if (fruit.fruitType != null)
                     Flexible(
-                        child: OnepieceTag.getFruitTag(
-                            fruit.fruitType!, typeMap[fruit.fruitType] ?? '')),
+                        child: Align(
+                            alignment: Alignment.centerRight,
+                            child: OnepieceTag.getFruitTag(fruit.fruitType!,
+                                typeMap[fruit.fruitType] ?? ''))),
                 ])),
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
             SizedBox(
-                height: 34,
+                height: 36,
                 child: fruit.characters.isEmpty
                     ? Align(
                         alignment: Alignment.centerLeft,
-                        child: Text(loc.empty,
+                        child: Text(loc.resourceNoHolders,
                             style: OnepieceFonts.superSmallContentStyle))
                     : _createCharacterList(context, fruit.characters)),
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
             const Divider(height: 1, color: OnepieceColors.separator),
             Align(
                 alignment: Alignment.centerRight,
