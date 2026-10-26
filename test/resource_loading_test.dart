@@ -90,7 +90,9 @@ void main() {
     testWidgets(
         '${entry.key}: loading, refresh, latest search, failure, retry and disposal',
         (tester) async {
-      tester.view.physicalSize = const Size(1280, 900);
+      // Keep enough scroll extent that infinite-scroll prefetch does not
+      // consume the queued responses used to exercise refresh behavior.
+      tester.view.physicalSize = const Size(1280, 420);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);

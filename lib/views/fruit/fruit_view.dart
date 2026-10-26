@@ -7,7 +7,7 @@ import 'package:openapi/api.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 import '../../components/desktop_card_layout.dart';
 import '../../components/resource_loading.dart';
-import '../../components/resource_list_pagination.dart';
+import '../../components/resource_list_load_more.dart';
 import '../../constants/button_style.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
@@ -56,6 +56,7 @@ class _FruitViewState extends State<FruitView> {
   @override
   void initState() {
     super.initState();
+    mainController.addListener(_maybeLoadMore);
     routeNotifier.addListener(_refreshWhenListRouteIsActive);
     _search(false);
   }
@@ -78,6 +79,8 @@ class _FruitViewState extends State<FruitView> {
 
   bool _loading = true;
   bool _loadFailed = false;
+  bool _loadingMore = false;
+  bool _loadMoreFailed = false;
   int _requestId = 0;
 
   Future<void> _search(bool filterChange) async {
@@ -85,8 +88,11 @@ class _FruitViewState extends State<FruitView> {
     setState(() {
       _loading = true;
       _loadFailed = false;
-      if (filterChange) selectedPageNum = 1;
+      _loadingMore = false;
+      _loadMoreFailed = false;
+      selectedPageNum = 1;
     });
+    if (mainController.hasClients) mainController.jumpTo(0);
     fruitFilter.languageCode = I18nHelper.getLanguageCode();
     final request = ListFruitRequest(
         pageSize: itemCountPerPage,
@@ -105,11 +111,83 @@ class _FruitViewState extends State<FruitView> {
         totalPageNum = (totalItemCount / itemCountPerPage).ceil();
         _loading = false;
       });
+      _checkForShortViewport();
     } catch (_) {
       if (!mounted || requestId != _requestId) return;
       setState(() {
         _loading = false;
         _loadFailed = true;
+      });
+    }
+  }
+
+  void _maybeLoadMore() {
+    if (!mainController.hasClients ||
+        _loading ||
+        _loadingMore ||
+        _loadMoreFailed ||
+        selectedPageNum >= totalPageNum) {
+      return;
+    }
+    final position = mainController.position;
+    final threshold = (position.viewportDimension * 0.5).clamp(120.0, 400.0);
+    if (position.extentAfter < threshold) {
+      _loadMore();
+    }
+  }
+
+  void _checkForShortViewport() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted ||
+          !mainController.hasClients ||
+          _loading ||
+          _loadingMore ||
+          _loadMoreFailed ||
+          selectedPageNum >= totalPageNum) {
+        return;
+      }
+      // Fill a viewport that has no scroll range. Otherwise wait for scrolling.
+      if (mainController.position.maxScrollExtent <= 0) {
+        _loadMore();
+      }
+    });
+  }
+
+  Future<void> _loadMore() async {
+    final requestId = _requestId;
+    final nextPage = selectedPageNum + 1;
+    setState(() {
+      _loadingMore = true;
+      _loadMoreFailed = false;
+    });
+    final request = ListFruitRequest(
+        pageSize: itemCountPerPage,
+        pageIndex: nextPage,
+        sortKeys: sortKeys,
+        fruitFilter: fruitFilter);
+    try {
+      final value = await _controller.list(request);
+      if (!mounted || requestId != _requestId) return;
+      if (value == null) {
+        throw StateError('Resource request returned no response');
+      }
+      setState(() {
+        final seen = currentFruitList.map((item) => item.id).toSet();
+        currentFruitList
+            .addAll(value.fruits.where((item) => seen.add(item.id)));
+        selectedPageNum = nextPage;
+        totalItemCount = value.totalSize ?? totalItemCount;
+        totalPageNum = value.fruits.isEmpty
+            ? nextPage
+            : (totalItemCount / itemCountPerPage).ceil();
+        _loadingMore = false;
+      });
+      _checkForShortViewport();
+    } catch (_) {
+      if (!mounted || requestId != _requestId) return;
+      setState(() {
+        _loadingMore = false;
+        _loadMoreFailed = true;
       });
     }
   }
@@ -149,22 +227,15 @@ class _FruitViewState extends State<FruitView> {
                             }
                           }),
                           isNarrow: isNarrow,
+                          footer: selectedPageNum < totalPageNum
+                              ? ResourceListLoadMore(
+                                  loading: _loadingMore,
+                                  failed: _loadMoreFailed,
+                                  onRetry: _loadMore)
+                              : null,
                         ),
                       ),
                     ),
-                    if (totalPageNum > 1)
-                      ResourceListPagination(
-                        currentPage: selectedPageNum,
-                        totalPages: totalPageNum,
-                        jumpLabel: AppLocalizations.of(context)!.jumpToPage,
-                        onPageChanged: (page) {
-                          selectedPageNum = page;
-                          if (mainController.hasClients) {
-                            mainController.jumpTo(0);
-                          }
-                          _search(false);
-                        },
-                      ),
                   ],
                 ),
               ),

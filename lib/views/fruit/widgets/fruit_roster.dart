@@ -21,6 +21,7 @@ class FruitRoster extends StatelessWidget {
   final Set<String> expandedRowIds;
   final void Function(String id) onToggleExpand;
   final bool isNarrow;
+  final Widget? footer;
 
   const FruitRoster({
     super.key,
@@ -29,6 +30,7 @@ class FruitRoster extends StatelessWidget {
     required this.expandedRowIds,
     required this.onToggleExpand,
     required this.isNarrow,
+    this.footer,
   });
 
   @override
@@ -55,17 +57,19 @@ class FruitRoster extends StatelessWidget {
     }
     return ListView.builder(
         controller: controller,
-        itemCount: fruits.length,
-        itemBuilder: (context, index) => Card(
-              color: Colors.white,
-              elevation: 0,
-              surfaceTintColor: Colors.transparent,
-              margin: const EdgeInsets.only(bottom: 8),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  side: const BorderSide(color: OnepieceColors.separator)),
-              child: _buildCard(context, fruits[index], true),
-            ));
+        itemCount: fruits.length + (footer == null ? 0 : 1),
+        itemBuilder: (context, index) => index == fruits.length
+            ? footer!
+            : Card(
+                color: Colors.white,
+                elevation: 0,
+                surfaceTintColor: Colors.transparent,
+                margin: const EdgeInsets.only(bottom: 8),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: const BorderSide(color: OnepieceColors.separator)),
+                child: _buildCard(context, fruits[index], true),
+              ));
   }
 
   Widget _buildDesktop(BuildContext context) {
@@ -81,6 +85,7 @@ class FruitRoster extends StatelessWidget {
         minCardWidth: 280,
         maxColumns: 6,
         gap: 12,
+        footer: footer,
         cardBuilder: (context, fruit) => _buildCard(context, fruit, false));
   }
 

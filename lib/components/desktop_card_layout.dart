@@ -243,6 +243,7 @@ class DesktopSpotlightGrid<T> extends StatefulWidget {
   final double minCardWidth;
   final int maxColumns;
   final double gap;
+  final Widget? footer;
 
   const DesktopSpotlightGrid({
     super.key,
@@ -253,6 +254,7 @@ class DesktopSpotlightGrid<T> extends StatefulWidget {
     this.minCardWidth = 340,
     this.maxColumns = 5,
     this.gap = 18,
+    this.footer,
   });
 
   @override
@@ -263,40 +265,47 @@ class DesktopSpotlightGrid<T> extends StatefulWidget {
 class _DesktopSpotlightGridState<T> extends State<DesktopSpotlightGrid<T>> {
   @override
   Widget build(BuildContext context) {
-    return Scrollbar(
-      controller: widget.controller,
-      thumbVisibility: true,
-      child: SingleChildScrollView(
+    return LayoutBuilder(builder: (context, constraints) {
+      final availableWidth = constraints.maxWidth - 12;
+      final columnCount =
+          ((availableWidth + widget.gap) / (widget.minCardWidth + widget.gap))
+              .floor()
+              .clamp(1, widget.maxColumns);
+      final cardWidth =
+          (availableWidth - widget.gap * (columnCount - 1)) / columnCount;
+      final rowCount = (widget.items.length / columnCount).ceil();
+      return Scrollbar(
         controller: widget.controller,
-        padding: const EdgeInsets.fromLTRB(4, 10, 8, 24),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final columnCount = ((constraints.maxWidth + widget.gap) /
-                    (widget.minCardWidth + widget.gap))
-                .floor()
-                .clamp(1, widget.maxColumns);
-            final cardWidth =
-                (constraints.maxWidth - widget.gap * (columnCount - 1)) /
-                    columnCount;
-
-            return Wrap(
-              spacing: widget.gap,
-              runSpacing: widget.gap,
-              children: widget.items.map((item) {
-                final id = widget.idOf(item);
-
-                return SizedBox(
-                  width: cardWidth,
-                  child: DesktopSpotlightCard(
-                    key: ValueKey(id),
-                    child: widget.cardBuilder(context, item),
-                  ),
-                );
-              }).toList(),
+        thumbVisibility: true,
+        child: ListView.builder(
+          controller: widget.controller,
+          padding: const EdgeInsets.fromLTRB(4, 10, 8, 24),
+          itemCount: rowCount + (widget.footer == null ? 0 : 1),
+          itemBuilder: (context, row) {
+            if (row == rowCount) return widget.footer!;
+            final start = row * columnCount;
+            final end = (start + columnCount).clamp(0, widget.items.length);
+            return Padding(
+              padding: EdgeInsets.only(bottom: widget.gap),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (var index = start; index < end; index++) ...[
+                    if (index > start) SizedBox(width: widget.gap),
+                    SizedBox(
+                      width: cardWidth,
+                      child: DesktopSpotlightCard(
+                        key: ValueKey(widget.idOf(widget.items[index])),
+                        child: widget.cardBuilder(context, widget.items[index]),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
             );
           },
         ),
-      ),
-    );
+      );
+    });
   }
 }
