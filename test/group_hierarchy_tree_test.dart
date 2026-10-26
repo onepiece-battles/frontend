@@ -8,6 +8,7 @@ import 'package:one_piece_battles_flutter/repository/image_dao.dart';
 import 'package:one_piece_battles_flutter/views/group/group_detail_controller.dart';
 import 'package:one_piece_battles_flutter/views/group/widgets/group_members_panel.dart';
 import 'package:openapi/api.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 class _HierarchyDao extends GroupDao {
   _HierarchyDao() : super.empty();
@@ -29,6 +30,11 @@ class _HierarchyDao extends GroupDao {
 void main() {
   testWidgets('expanding a nested branch reveals its lazy loaded child',
       (tester) async {
+    VisibilityDetectorController.instance.updateInterval = Duration.zero;
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
     GetIt.I.registerSingleton<Locale>(const Locale('en'));
     addTearDown(() => GetIt.I.reset());
     final scroll = ScrollController();
@@ -70,11 +76,13 @@ void main() {
       ),
     ));
     await tester.pump();
+    expect(find.byType(InteractiveViewer), findsNothing);
     expect(find.text('Branch'), findsOneWidget);
     expect(find.text('Grandchild'), findsNothing);
 
     await tester.tap(find.byTooltip('Expand branch'));
     await tester.pumpAndSettle();
     expect(find.text('Grandchild'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 }

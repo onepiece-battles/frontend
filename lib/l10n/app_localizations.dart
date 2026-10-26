@@ -2024,24 +2024,6 @@ abstract class AppLocalizations {
   /// **'Group Structure'**
   String get groupStructure;
 
-  /// No description provided for @groupZoomIn.
-  ///
-  /// In en, this message translates to:
-  /// **'Zoom in'**
-  String get groupZoomIn;
-
-  /// No description provided for @groupZoomOut.
-  ///
-  /// In en, this message translates to:
-  /// **'Zoom out'**
-  String get groupZoomOut;
-
-  /// No description provided for @groupFitView.
-  ///
-  /// In en, this message translates to:
-  /// **'Fit hierarchy'**
-  String get groupFitView;
-
   /// No description provided for @groupExpand.
   ///
   /// In en, this message translates to:
