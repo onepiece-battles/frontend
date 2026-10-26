@@ -1,20 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import '../constants/onepiece_colors.dart';
 import '../l10n/app_localizations.dart';
 
-/// A compact pagination footer for data tables.
-///
-/// Layout:
-/// ```
-///   [<]   [__] / 42   [Go]   [>]
-/// ```
+/// Symmetrically aligned pagination controls shared by list views.
 class PageFoot extends StatefulWidget {
   final int currentPage;
   final int totalPages;
   final ValueChanged<int> onPageChanged;
-
-  /// Label for the jump button (e.g. "Go" / "跳转").
   final String? jumpLabel;
 
   const PageFoot({
@@ -30,231 +24,151 @@ class PageFoot extends StatefulWidget {
 }
 
 class _PageFootState extends State<PageFoot> {
-  final TextEditingController _pageController = TextEditingController();
-  final FocusNode _focusNode = FocusNode();
-  bool _jumpEnabled = false;
-
-  // ── Shared constants for input + total alignment ──────────────────
-  static const double _rowHeight = 30;
-  static const _inputTextStyle = TextStyle(
-    fontSize: 14,
-    color: Colors.black87,
-    fontWeight: FontWeight.w500,
-  );
-  static const _totalTextStyle = TextStyle(
-    fontSize: 14,
-    color: Colors.black54,
-    fontWeight: FontWeight.w500,
-  );
+  final _controller = TextEditingController();
+  int? _targetPage;
 
   @override
   void initState() {
     super.initState();
-    _pageController.text = '${widget.currentPage}';
-    _focusNode.addListener(_onFocusChanged);
+    _controller.text = '${widget.currentPage}';
   }
-
-  @override
-  void dispose() {
-    _focusNode.removeListener(_onFocusChanged);
-    _pageController.dispose();
-    _focusNode.dispose();
-    super.dispose();
-  }
-
-  void _onFocusChanged() => setState(() {});
 
   @override
   void didUpdateWidget(covariant PageFoot oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.currentPage != oldWidget.currentPage) {
-      _pageController.text = '${widget.currentPage}';
-      _jumpEnabled = false;
+    if (widget.currentPage != oldWidget.currentPage ||
+        widget.totalPages != oldWidget.totalPages) {
+      _controller.text = '${widget.currentPage}';
+      _targetPage = null;
     }
   }
 
-  void _onInputChanged(String value) {
-    final page = int.tryParse(value.trim());
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _updateTarget(String value) {
+    final page = int.tryParse(value);
     setState(() {
-      _jumpEnabled = page != null &&
-          page >= 1 &&
-          page <= widget.totalPages &&
-          page != widget.currentPage;
+      _targetPage = page != null &&
+              page >= 1 &&
+              page <= widget.totalPages &&
+              page != widget.currentPage
+          ? page
+          : null;
     });
   }
 
   void _jump() {
-    final page = int.tryParse(_pageController.text.trim());
-    if (page != null && _jumpEnabled) {
-      widget.onPageChanged(page);
-    }
+    if (_targetPage != null) widget.onPageChanged(_targetPage!);
   }
-
-  void _goPrevious() {
-    if (widget.currentPage > 1) {
-      widget.onPageChanged(widget.currentPage - 1);
-    }
-  }
-
-  void _goNext() {
-    if (widget.currentPage < widget.totalPages) {
-      widget.onPageChanged(widget.currentPage + 1);
-    }
-  }
-
-  // ── Shared button colors ──────────────────────────────────────
-
-  Color _bg(bool enabled) =>
-      enabled ? OnepieceColors.fancyBlue : Colors.grey[200]!;
-
-  Color _fg(bool enabled) =>
-      enabled ? Colors.white : OnepieceColors.fancyBlue.withValues(alpha: 0.5);
-
-  // ── Build ─────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
-    final canGoBack = widget.currentPage > 1;
-    final canGoForward = widget.currentPage < widget.totalPages;
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        _iconBtn(
-          enabled: canGoBack,
-          onTap: canGoBack ? _goPrevious : null,
-          icon: Icons.arrow_back_rounded,
-          tooltip: AppLocalizations.of(context)!.previousPage,
-        ),
-        const SizedBox(width: 8),
-        _buildPageInput(),
-        const SizedBox(width: 2),
-        _buildTotalCount(),
-        const SizedBox(width: 8),
-        _textBtn(
-          enabled: _jumpEnabled,
-          onTap: _jumpEnabled ? _jump : null,
-          label: widget.jumpLabel ?? AppLocalizations.of(context)!.jumpToPage,
-          tooltip: AppLocalizations.of(context)!.jumpToPageTooltip,
-        ),
-        const SizedBox(width: 8),
-        _iconBtn(
-          enabled: canGoForward,
-          onTap: canGoForward ? _goNext : null,
-          icon: Icons.arrow_forward_rounded,
-          tooltip: AppLocalizations.of(context)!.nextPage,
-        ),
-      ],
-    );
-  }
-
-  // ── Child widgets ──────────────────────────────────────────────
-
-  Widget _buildPageInput() {
-    return Container(
-      width: _rowHeight,
-      height: _rowHeight,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(3),
-        border: Border.all(
-          color: _focusNode.hasFocus
-              ? OnepieceColors.fancyBlue
-              : Colors.transparent,
-          width: _focusNode.hasFocus ? 1.5 : 1.0,
-        ),
-      ),
-      child: TextFormField(
-        controller: _pageController,
-        focusNode: _focusNode,
-        style: _inputTextStyle,
-        textAlign: TextAlign.center,
-        keyboardType: TextInputType.number,
-        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        decoration: InputDecoration(
-          labelText: AppLocalizations.of(context)!.pageNumber,
-          floatingLabelBehavior: FloatingLabelBehavior.never,
-          contentPadding: const EdgeInsets.only(top: 7, bottom: 0),
-          isDense: true,
-          border: InputBorder.none,
-          enabledBorder: InputBorder.none,
-          focusedBorder: InputBorder.none,
-        ),
-        onChanged: _onInputChanged,
-        onFieldSubmitted: (_) => _jump(),
-      ),
-    );
-  }
-
-  Widget _buildTotalCount() {
-    return Container(
-      height: _rowHeight,
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: OnepieceColors.menuBackgroundColor,
-        borderRadius: BorderRadius.circular(3),
-      ),
-      child: Text('/ ${widget.totalPages}', style: _totalTextStyle),
-    );
-  }
-
-  // ── Button builders (Material + InkWell — pixel-perfect sizing) ─
-
-  Widget _iconBtn({
-    required bool enabled,
-    required VoidCallback? onTap,
-    required IconData icon,
-    required String tooltip,
-  }) {
-    final btn = SizedBox(
-      width: 50,
-      height: _rowHeight,
-      child: Material(
-        color: _bg(enabled),
-        borderRadius: BorderRadius.circular(3),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(3),
-          onTap: onTap,
-          child: Center(
-            child: Icon(icon, size: 18, color: _fg(enabled)),
-          ),
-        ),
-      ),
-    );
-    return enabled ? Tooltip(message: tooltip, child: btn) : btn;
-  }
-
-  Widget _textBtn({
-    required bool enabled,
-    required VoidCallback? onTap,
-    required String label,
-    required String tooltip,
-  }) {
-    final btn = SizedBox(
-      height: _rowHeight,
-      child: Material(
-        color: _bg(enabled),
-        borderRadius: BorderRadius.circular(3),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(3),
-          onTap: onTap,
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: Text(
-                label,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: _fg(enabled),
+    final l10n = AppLocalizations.of(context)!;
+    return LayoutBuilder(builder: (context, constraints) {
+      final narrow = constraints.maxWidth < 340;
+      final actionWidth = narrow ? 36.0 : 72.0;
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(width: actionWidth),
+          const SizedBox(width: 8),
+          _arrow(
+              Icons.chevron_left_rounded,
+              l10n.previousPage,
+              widget.currentPage > 1
+                  ? () => widget.onPageChanged(widget.currentPage - 1)
+                  : null),
+          const SizedBox(width: 8),
+          Container(
+            height: 34,
+            width: 100,
+            decoration: BoxDecoration(
+              color: OnepieceColors.surface,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 36,
+                  child: TextField(
+                    controller: _controller,
+                    textAlign: TextAlign.center,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    style: const TextStyle(
+                        color: OnepieceColors.primaryLabel,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600),
+                    decoration: InputDecoration(
+                      hintText: l10n.pageNumber,
+                      hintStyle: const TextStyle(fontSize: 11),
+                      border: InputBorder.none,
+                      isDense: true,
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                    onChanged: _updateTarget,
+                    onSubmitted: (_) => _jump(),
+                  ),
                 ),
-              ),
+                Text('/ ${widget.totalPages}',
+                    style: const TextStyle(
+                        color: OnepieceColors.secondaryLabel, fontSize: 13)),
+              ],
             ),
           ),
+          const SizedBox(width: 8),
+          _arrow(
+              Icons.chevron_right_rounded,
+              l10n.nextPage,
+              widget.currentPage < widget.totalPages
+                  ? () => widget.onPageChanged(widget.currentPage + 1)
+                  : null),
+          const SizedBox(width: 8),
+          SizedBox(
+            width: actionWidth,
+            height: 34,
+            child: TextButton(
+              onPressed: _targetPage == null ? null : _jump,
+              style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10))),
+              child: narrow
+                  ? Tooltip(
+                      message: l10n.jumpToPageTooltip,
+                      child:
+                          const Icon(Icons.keyboard_return_rounded, size: 18))
+                  : Text(widget.jumpLabel ?? l10n.jumpToPage,
+                      style: const TextStyle(fontSize: 12)),
+            ),
+          ),
+        ],
+      );
+    });
+  }
+
+  Widget _arrow(IconData icon, String tooltip, VoidCallback? onPressed) {
+    return SizedBox(
+      width: 36,
+      height: 34,
+      child: IconButton(
+        tooltip: tooltip,
+        onPressed: onPressed,
+        icon: Icon(icon, size: 20),
+        padding: EdgeInsets.zero,
+        style: IconButton.styleFrom(
+          foregroundColor: OnepieceColors.fancyBlue,
+          disabledForegroundColor: OnepieceColors.secondaryLabel,
+          backgroundColor: OnepieceColors.surface,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
       ),
     );
-    return enabled ? Tooltip(message: tooltip, child: btn) : btn;
   }
 }

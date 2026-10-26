@@ -61,7 +61,7 @@
 | 网络 / 实时 | `http`、`web_socket_channel`（实时聊天） |
 | 鉴权存储 | `flutter_secure_storage`、`shared_preferences`（JWT 令牌持久化） |
 | 国际化 | `flutter_localizations` + `intl` + ARB（`flutter gen-l10n`） |
-| UI / 组件 | `google_fonts`、`flutter_svg`、`material_design_icons_flutter`、`font_awesome_flutter`、`cached_network_image`、`fl_chart`、`data_table_2`、`dropdown_search`、`emoji_picker_flutter`、`popover`、`flutter_native_splash` |
+| UI / 组件 | `flutter_svg`、`cached_network_image`、`fl_chart`、`data_table_2`、`dropdown_search`、`emoji_picker_flutter`、`popover`、`flutter_native_splash` |
 | 图片 | `image_picker` / `image_picker_for_web`、`cached_network_image` |
 | 部署 | Docker（多阶段构建）+ Nginx（反向代理 + TLS/HTTP2） |
 
@@ -231,7 +231,7 @@ The frontend talks to the [backend service](https://onepiece-battles.com) throug
 | Networking / Realtime | `http`, `web_socket_channel` (real-time chat) |
 | Auth Storage | `flutter_secure_storage`, `shared_preferences` (JWT persistence) |
 | Internationalization | `flutter_localizations` + `intl` + ARB (`flutter gen-l10n`) |
-| UI / Widgets | `google_fonts`, `flutter_svg`, `material_design_icons_flutter`, `font_awesome_flutter`, `cached_network_image`, `fl_chart`, `data_table_2`, `dropdown_search`, `emoji_picker_flutter`, `popover`, `flutter_native_splash` |
+| UI / Widgets | `flutter_svg`, `cached_network_image`, `fl_chart`, `data_table_2`, `dropdown_search`, `emoji_picker_flutter`, `popover`, `flutter_native_splash` |
 | Images | `image_picker` / `image_picker_for_web`, `cached_network_image` |
 | Deployment | Docker (multi-stage build) + Nginx (reverse proxy + TLS/HTTP2) |
 

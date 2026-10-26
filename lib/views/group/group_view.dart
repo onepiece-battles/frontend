@@ -8,7 +8,7 @@ import 'package:toggle_switch/toggle_switch.dart';
 
 import '../../components/desktop_card_layout.dart';
 import '../../components/resource_loading.dart';
-import '../../components/page_foot.dart';
+import '../../components/resource_list_pagination.dart';
 import '../../constants/button_style.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
@@ -139,25 +139,18 @@ class _GroupViewState extends State<GroupView> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 4),
                     if (totalPageNum > 1)
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Center(
-                              child: PageFoot(
-                            currentPage: selectedPageNum,
-                            totalPages: totalPageNum,
-                            jumpLabel: AppLocalizations.of(context)!.jumpToPage,
-                            onPageChanged: (page) {
-                              selectedPageNum = page;
-                              if (mainController.hasClients) {
-                                mainController.jumpTo(0);
-                              }
-                              _search(false);
-                            },
-                          )),
-                        ],
+                      ResourceListPagination(
+                        currentPage: selectedPageNum,
+                        totalPages: totalPageNum,
+                        jumpLabel: AppLocalizations.of(context)!.jumpToPage,
+                        onPageChanged: (page) {
+                          selectedPageNum = page;
+                          if (mainController.hasClients) {
+                            mainController.jumpTo(0);
+                          }
+                          _search(false);
+                        },
                       ),
                   ],
                 ),

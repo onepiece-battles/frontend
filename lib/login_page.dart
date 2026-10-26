@@ -1,7 +1,6 @@
 import 'package:animated_toggle_switch/animated_toggle_switch.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:one_piece_battles_flutter/components/web_socket_service.dart';
 import '../../l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
@@ -189,7 +188,8 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     Text(
                       AppLocalizations.of(context)!.welcome,
-                      style: GoogleFonts.lobster(fontSize: 24),
+                      style:
+                          const TextStyle(fontFamily: 'Lobster', fontSize: 24),
                     ),
                     const SizedBox(height: 90),
                     SizedBox(
