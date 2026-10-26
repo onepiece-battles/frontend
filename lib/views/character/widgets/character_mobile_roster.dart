@@ -22,6 +22,7 @@ class CharacterMobileRoster extends StatelessWidget {
   final Map<Haki, String> hakiMap;
   final Set<String> expandedRowIds;
   final void Function(String id) onToggleExpand;
+  final Widget? footer;
 
   const CharacterMobileRoster({
     super.key,
@@ -32,6 +33,7 @@ class CharacterMobileRoster extends StatelessWidget {
     required this.hakiMap,
     required this.expandedRowIds,
     required this.onToggleExpand,
+    this.footer,
   });
 
   @override
@@ -44,8 +46,9 @@ class CharacterMobileRoster extends StatelessWidget {
     }
     return ListView.builder(
       controller: scrollController,
-      itemCount: characters.length,
+      itemCount: characters.length + (footer == null ? 0 : 1),
       itemBuilder: (context, index) {
+        if (index == characters.length) return footer!;
         final character = characters[index];
 
         return Card(

@@ -26,6 +26,7 @@ class CharacterDesktopRoster extends StatelessWidget {
   final void Function(String id) onToggleExpand;
   final SortOrder? scoreOrder;
   final VoidCallback onScoreSortTap;
+  final Widget? footer;
 
   const CharacterDesktopRoster({
     super.key,
@@ -39,6 +40,7 @@ class CharacterDesktopRoster extends StatelessWidget {
     required this.onToggleExpand,
     required this.scoreOrder,
     required this.onScoreSortTap,
+    this.footer,
   });
 
   @override
@@ -72,6 +74,7 @@ class CharacterDesktopRoster extends StatelessWidget {
             minCardWidth: 280,
             maxColumns: 6,
             gap: 12,
+            footer: footer,
             cardBuilder: _buildCard,
           ),
         ),

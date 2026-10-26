@@ -4,7 +4,7 @@ import '../../l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
-import 'package:one_piece_battles_flutter/components/resource_list_pagination.dart';
+import 'package:one_piece_battles_flutter/components/resource_list_load_more.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
 import 'package:one_piece_battles_flutter/utils/permission_check.dart';
 import 'package:openapi/api.dart';
@@ -113,6 +113,7 @@ class _CharacterViewState extends State<CharacterView>
   @override
   void initState() {
     super.initState();
+    scrollController.addListener(_maybeLoadMore);
     routeNotifier.addListener(_refreshWhenListRouteIsActive);
     _search(false);
   }
@@ -135,14 +136,20 @@ class _CharacterViewState extends State<CharacterView>
 
   bool _loading = true;
   bool _loadFailed = false;
+  bool _loadingMore = false;
+  bool _loadMoreFailed = false;
   int _requestId = 0;
 
   Future<void> _search(bool filterChange) async {
     final requestId = ++_requestId;
+    if (scrollController.hasClients) scrollController.jumpTo(0);
     setState(() {
       _loading = true;
       _loadFailed = false;
-      if (filterChange) selectedPageNum = 1;
+      _loadingMore = false;
+      _loadMoreFailed = false;
+      selectedPageNum = 1;
+      currentCharacterList = [];
     });
     characterFilter.languageCode = I18nHelper.getLanguageCode();
     final request = ListCharacterRequest(
@@ -162,11 +169,70 @@ class _CharacterViewState extends State<CharacterView>
         totalPageNum = (totalItemCount / itemCountPerPage).ceil();
         _loading = false;
       });
+      _checkForShortViewport();
     } catch (_) {
       if (!mounted || requestId != _requestId) return;
       setState(() {
         _loading = false;
         _loadFailed = true;
+      });
+    }
+  }
+
+  void _maybeLoadMore() {
+    if (!scrollController.hasClients ||
+        _loading ||
+        _loadingMore ||
+        _loadMoreFailed ||
+        selectedPageNum >= totalPageNum) {
+      return;
+    }
+    if (scrollController.position.extentAfter < 500) {
+      _loadMore();
+    }
+  }
+
+  void _checkForShortViewport() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _maybeLoadMore();
+    });
+  }
+
+  Future<void> _loadMore() async {
+    final requestId = _requestId;
+    final nextPage = selectedPageNum + 1;
+    setState(() {
+      _loadingMore = true;
+      _loadMoreFailed = false;
+    });
+    final request = ListCharacterRequest(
+        pageSize: itemCountPerPage,
+        pageIndex: nextPage,
+        sortKeys: sortKeys,
+        characterFilter: characterFilter);
+    try {
+      final value = await _controller.listCharacter(request);
+      if (!mounted || requestId != _requestId) return;
+      if (value == null) {
+        throw StateError('Resource request returned no response');
+      }
+      setState(() {
+        final seen = currentCharacterList.map((item) => item.id).toSet();
+        currentCharacterList
+            .addAll(value.characters.where((item) => seen.add(item.id)));
+        selectedPageNum = nextPage;
+        totalItemCount = value.totalSize ?? totalItemCount;
+        totalPageNum = value.characters.isEmpty
+            ? nextPage
+            : (totalItemCount / itemCountPerPage).ceil();
+        _loadingMore = false;
+      });
+      _checkForShortViewport();
+    } catch (_) {
+      if (!mounted || requestId != _requestId) return;
+      setState(() {
+        _loadingMore = false;
+        _loadMoreFailed = true;
       });
     }
   }
@@ -258,6 +324,12 @@ class _CharacterViewState extends State<CharacterView>
                                     _expandedRowIds.add(id);
                                   }
                                 }),
+                                footer: selectedPageNum < totalPageNum
+                                    ? ResourceListLoadMore(
+                                        loading: _loadingMore,
+                                        failed: _loadMoreFailed,
+                                        onRetry: _loadMore)
+                                    : null,
                               )
                             : CharacterDesktopRoster(
                                 characters: currentCharacterList,
@@ -277,22 +349,15 @@ class _CharacterViewState extends State<CharacterView>
                                 scoreOrder: sortableEnumToSortOrderMap[
                                     CharacterSortableFieldsEnum.score],
                                 onScoreSortTap: _onScoreSortTap,
+                                footer: selectedPageNum < totalPageNum
+                                    ? ResourceListLoadMore(
+                                        loading: _loadingMore,
+                                        failed: _loadMoreFailed,
+                                        onRetry: _loadMore)
+                                    : null,
                               ),
                       ),
                     ),
-                    if (totalPageNum > 1)
-                      ResourceListPagination(
-                        currentPage: selectedPageNum,
-                        totalPages: totalPageNum,
-                        jumpLabel: AppLocalizations.of(context)!.jumpToPage,
-                        onPageChanged: (page) {
-                          selectedPageNum = page;
-                          if (scrollController.hasClients) {
-                            scrollController.jumpTo(0);
-                          }
-                          _search(false);
-                        },
-                      ),
                   ],
                 ),
               ),

@@ -5,7 +5,7 @@ import '../../l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/components/desktop_card_layout.dart';
-import 'package:one_piece_battles_flutter/components/resource_list_pagination.dart';
+import 'package:one_piece_battles_flutter/components/resource_list_load_more.dart';
 import 'package:one_piece_battles_flutter/constants/button_style.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
@@ -53,6 +53,7 @@ class _BattleViewState extends State<BattleView> {
   @override
   void initState() {
     super.initState();
+    mainController.addListener(_maybeLoadMore);
     routeNotifier.addListener(_refreshWhenListRouteIsActive);
     _search(false);
   }
@@ -74,14 +75,20 @@ class _BattleViewState extends State<BattleView> {
 
   bool _loading = true;
   bool _loadFailed = false;
+  bool _loadingMore = false;
+  bool _loadMoreFailed = false;
   int _requestId = 0;
 
   Future<void> _search(bool filterChange) async {
     final requestId = ++_requestId;
+    if (mainController.hasClients) mainController.jumpTo(0);
     setState(() {
       _loading = true;
       _loadFailed = false;
-      if (filterChange) selectedPageNum = 1;
+      _loadingMore = false;
+      _loadMoreFailed = false;
+      selectedPageNum = 1;
+      currentBattleList = [];
     });
     battleFilter.languageCode = I18nHelper.getLanguageCode();
     battleFilter.starterName = starterNameController.text;
@@ -103,11 +110,70 @@ class _BattleViewState extends State<BattleView> {
         totalPageNum = (totalItemCount / itemCountPerPage).ceil();
         _loading = false;
       });
+      _checkForShortViewport();
     } catch (_) {
       if (!mounted || requestId != _requestId) return;
       setState(() {
         _loading = false;
         _loadFailed = true;
+      });
+    }
+  }
+
+  void _maybeLoadMore() {
+    if (!mainController.hasClients ||
+        _loading ||
+        _loadingMore ||
+        _loadMoreFailed ||
+        selectedPageNum >= totalPageNum) {
+      return;
+    }
+    if (mainController.position.extentAfter < 500) {
+      _loadMore();
+    }
+  }
+
+  void _checkForShortViewport() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _maybeLoadMore();
+    });
+  }
+
+  Future<void> _loadMore() async {
+    final requestId = _requestId;
+    final nextPage = selectedPageNum + 1;
+    setState(() {
+      _loadingMore = true;
+      _loadMoreFailed = false;
+    });
+    final request = ListBattleRequest(
+        pageSize: itemCountPerPage,
+        pageIndex: nextPage,
+        sortKeys: sortKeys,
+        battleFilter: battleFilter);
+    try {
+      final value = await _controller.listBattles(request);
+      if (!mounted || requestId != _requestId) return;
+      if (value == null) {
+        throw StateError('Resource request returned no response');
+      }
+      setState(() {
+        final seen = currentBattleList.map((item) => item.id).toSet();
+        currentBattleList
+            .addAll(value.battles.where((item) => seen.add(item.id)));
+        selectedPageNum = nextPage;
+        totalItemCount = value.totalSize ?? totalItemCount;
+        totalPageNum = value.battles.isEmpty
+            ? nextPage
+            : (totalItemCount / itemCountPerPage).ceil();
+        _loadingMore = false;
+      });
+      _checkForShortViewport();
+    } catch (_) {
+      if (!mounted || requestId != _requestId) return;
+      setState(() {
+        _loadingMore = false;
+        _loadMoreFailed = true;
       });
     }
   }
@@ -140,22 +206,15 @@ class _BattleViewState extends State<BattleView> {
                           battles: currentBattleList,
                           controller: mainController,
                           isNarrow: isNarrow,
+                          footer: selectedPageNum < totalPageNum
+                              ? ResourceListLoadMore(
+                                  loading: _loadingMore,
+                                  failed: _loadMoreFailed,
+                                  onRetry: _loadMore)
+                              : null,
                         ),
                       ),
                     ),
-                    if (totalPageNum > 1)
-                      ResourceListPagination(
-                        currentPage: selectedPageNum,
-                        totalPages: totalPageNum,
-                        jumpLabel: AppLocalizations.of(context)!.jumpToPage,
-                        onPageChanged: (page) {
-                          selectedPageNum = page;
-                          if (mainController.hasClients) {
-                            mainController.jumpTo(0);
-                          }
-                          _search(false);
-                        },
-                      )
                   ],
                 ),
               ),

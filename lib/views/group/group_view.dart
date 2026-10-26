@@ -8,7 +8,7 @@ import 'package:toggle_switch/toggle_switch.dart';
 
 import '../../components/desktop_card_layout.dart';
 import '../../components/resource_loading.dart';
-import '../../components/resource_list_pagination.dart';
+import '../../components/resource_list_load_more.dart';
 import '../../constants/button_style.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../constants/onepiece_fonts.dart';
@@ -50,6 +50,7 @@ class _GroupViewState extends State<GroupView> {
   @override
   void initState() {
     super.initState();
+    mainController.addListener(_maybeLoadMore);
     routeNotifier.addListener(_refreshWhenListRouteIsActive);
     _search(false);
   }
@@ -72,14 +73,20 @@ class _GroupViewState extends State<GroupView> {
 
   bool _loading = true;
   bool _loadFailed = false;
+  bool _loadingMore = false;
+  bool _loadMoreFailed = false;
   int _requestId = 0;
 
   Future<void> _search(bool filterChange) async {
     final requestId = ++_requestId;
+    if (mainController.hasClients) mainController.jumpTo(0);
     setState(() {
       _loading = true;
       _loadFailed = false;
-      if (filterChange) selectedPageNum = 1;
+      _loadingMore = false;
+      _loadMoreFailed = false;
+      selectedPageNum = 1;
+      currentGroupList = [];
     });
     groupFilter.languageCode = I18nHelper.getLanguageCode();
     final request = ListGroupRequest(
@@ -99,11 +106,70 @@ class _GroupViewState extends State<GroupView> {
         totalPageNum = (totalItemCount / itemCountPerPage).ceil();
         _loading = false;
       });
+      _checkForShortViewport();
     } catch (_) {
       if (!mounted || requestId != _requestId) return;
       setState(() {
         _loading = false;
         _loadFailed = true;
+      });
+    }
+  }
+
+  void _maybeLoadMore() {
+    if (!mainController.hasClients ||
+        _loading ||
+        _loadingMore ||
+        _loadMoreFailed ||
+        selectedPageNum >= totalPageNum) {
+      return;
+    }
+    if (mainController.position.extentAfter < 500) {
+      _loadMore();
+    }
+  }
+
+  void _checkForShortViewport() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _maybeLoadMore();
+    });
+  }
+
+  Future<void> _loadMore() async {
+    final requestId = _requestId;
+    final nextPage = selectedPageNum + 1;
+    setState(() {
+      _loadingMore = true;
+      _loadMoreFailed = false;
+    });
+    final request = ListGroupRequest(
+        pageSize: itemCountPerPage,
+        pageIndex: nextPage,
+        sortKeys: sortKeys,
+        groupFilter: groupFilter);
+    try {
+      final value = await _controller.listGroups(request);
+      if (!mounted || requestId != _requestId) return;
+      if (value == null) {
+        throw StateError('Resource request returned no response');
+      }
+      setState(() {
+        final seen = currentGroupList.map((item) => item.id).toSet();
+        currentGroupList
+            .addAll(value.groups.where((item) => seen.add(item.id)));
+        selectedPageNum = nextPage;
+        totalItemCount = value.totalSize ?? totalItemCount;
+        totalPageNum = value.groups.isEmpty
+            ? nextPage
+            : (totalItemCount / itemCountPerPage).ceil();
+        _loadingMore = false;
+      });
+      _checkForShortViewport();
+    } catch (_) {
+      if (!mounted || requestId != _requestId) return;
+      setState(() {
+        _loadingMore = false;
+        _loadMoreFailed = true;
       });
     }
   }
@@ -136,22 +202,15 @@ class _GroupViewState extends State<GroupView> {
                           groups: currentGroupList,
                           controller: mainController,
                           isNarrow: isNarrow,
+                          footer: selectedPageNum < totalPageNum
+                              ? ResourceListLoadMore(
+                                  loading: _loadingMore,
+                                  failed: _loadMoreFailed,
+                                  onRetry: _loadMore)
+                              : null,
                         ),
                       ),
                     ),
-                    if (totalPageNum > 1)
-                      ResourceListPagination(
-                        currentPage: selectedPageNum,
-                        totalPages: totalPageNum,
-                        jumpLabel: AppLocalizations.of(context)!.jumpToPage,
-                        onPageChanged: (page) {
-                          selectedPageNum = page;
-                          if (mainController.hasClients) {
-                            mainController.jumpTo(0);
-                          }
-                          _search(false);
-                        },
-                      ),
                   ],
                 ),
               ),

@@ -17,12 +17,14 @@ class BattleRoster extends StatelessWidget {
   final List<BattleListView> battles;
   final ScrollController controller;
   final bool isNarrow;
+  final Widget? footer;
 
   const BattleRoster({
     super.key,
     required this.battles,
     required this.controller,
     required this.isNarrow,
+    this.footer,
   });
 
   @override
@@ -52,8 +54,9 @@ class BattleRoster extends StatelessWidget {
 
     return ListView.builder(
       controller: controller,
-      itemCount: battles.length,
+      itemCount: battles.length + (footer == null ? 0 : 1),
       itemBuilder: (context, index) {
+        if (index == battles.length) return footer!;
         final battle = battles[index];
         final exec = battle.battleExecution;
 
@@ -232,6 +235,7 @@ class BattleRoster extends StatelessWidget {
       minCardWidth: 280,
       maxColumns: 6,
       gap: 12,
+      footer: footer,
       cardBuilder: (context, battle) {
         final execution = battle.battleExecution;
         return Material(

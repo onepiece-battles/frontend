@@ -16,12 +16,14 @@ class GroupRoster extends StatelessWidget {
   final List<GroupListView> groups;
   final ScrollController controller;
   final bool isNarrow;
+  final Widget? footer;
 
   const GroupRoster({
     super.key,
     required this.groups,
     required this.controller,
     required this.isNarrow,
+    this.footer,
   });
 
   @override
@@ -53,8 +55,9 @@ class GroupRoster extends StatelessWidget {
 
     return ListView.builder(
       controller: controller,
-      itemCount: groups.length,
+      itemCount: groups.length + (footer == null ? 0 : 1),
       itemBuilder: (context, index) {
+        if (index == groups.length) return footer!;
         final group = groups[index];
 
         return Card(
@@ -166,6 +169,7 @@ class GroupRoster extends StatelessWidget {
       minCardWidth: 280,
       maxColumns: 6,
       gap: 12,
+      footer: footer,
       cardBuilder: (context, group) => Material(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
