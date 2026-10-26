@@ -171,8 +171,10 @@ class _BattleViewState extends State<BattleView> {
       }
       setState(() {
         final seen = currentBattleList.map((item) => item.id).toSet();
-        currentBattleList
-            .addAll(value.battles.where((item) => seen.add(item.id)));
+        currentBattleList = [
+          ...currentBattleList,
+          ...value.battles.where((item) => seen.add(item.id)),
+        ];
         selectedPageNum = nextPage;
         totalItemCount = value.totalSize ?? totalItemCount;
         totalPageNum = value.battles.isEmpty
