@@ -25,6 +25,7 @@ import 'app_router.dart';
 import 'components/chat_notifier.dart';
 import 'components/web_socket_service.dart';
 import 'config/configure_web.dart';
+import 'config/api_initializer.dart';
 import 'config/my_input_theme.dart';
 import 'constants/onepiece_colors.dart';
 
@@ -63,14 +64,27 @@ void main() {
   web.document.head?.appendChild(styleElement);
   configureApp();
   getItSetUp();
+  ApiInitializer.onSessionExpired = () {
+    ApiInitializer.clearAuth();
+    getIt<WebSocketService>().disconnect();
+    if (getIt.isRegistered<ChatNotifier>()) {
+      getIt<ChatNotifier>().clearChatViewState();
+    }
+    if (getIt.isRegistered<User>()) getIt.unregister<User>();
+    getIt.registerLazySingleton<User>(
+        () => User(id: '', username: '', nickname: ''));
+    AppRouter.router.go(AppRouter.loginPath);
+  };
   final webSocketService = getIt<WebSocketService>();
   runApp(
     MultiProvider(providers: [
       Provider<WebSocketService>.value(value: webSocketService),
       ChangeNotifierProvider<ChatNotifier>(
-        create: (context) => ChatNotifier(
-          context.read<WebSocketService>(),
-        ),
+        create: (context) {
+          final notifier = ChatNotifier(context.read<WebSocketService>());
+          getIt.registerSingleton<ChatNotifier>(notifier);
+          return notifier;
+        },
         lazy:
             false, // Ensures ChatNotifier is created immediately and starts listening
       ),
@@ -142,9 +156,8 @@ class _MyAppState extends State<MyApp> {
         scaffoldBackgroundColor: Colors.white,
         // Use system fonts that are guaranteed to be available instantly —
         // no network-dependent Google Fonts CDN loading.
-        fontFamily: _locale.languageCode == "en"
-            ? '.AppleSystemUIFont'
-            : 'PingFang SC',
+        fontFamily:
+            _locale.languageCode == "en" ? '.AppleSystemUIFont' : 'PingFang SC',
         fontFamilyFallback: const [
           'PingFang SC', // macOS / iOS Chinese
           'Microsoft YaHei', // Windows Chinese

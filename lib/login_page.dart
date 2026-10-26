@@ -55,6 +55,7 @@ class _LoginPageState extends State<LoginPage> {
 
   fetchUserCredentials() async {
     String savedUsername = await getUserCredentials();
+    if (!mounted) return;
     setState(() {
       emailController.text = savedUsername;
     });
@@ -188,8 +189,8 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     Text(
                       AppLocalizations.of(context)!.welcome,
-                      style:
-                          const TextStyle(fontFamily: 'Lobster', fontSize: 24),
+                      style: const TextStyle(
+                          fontSize: 24, fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(height: 90),
                     SizedBox(

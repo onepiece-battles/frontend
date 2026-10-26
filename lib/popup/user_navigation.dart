@@ -12,6 +12,7 @@ import 'package:one_piece_battles_flutter/repository/user_dao.dart';
 import 'package:openapi/api.dart';
 import 'package:popover/popover.dart';
 import '../app_router.dart';
+import '../config/api_initializer.dart';
 import '../constants/button_style.dart';
 import '../utils/image_helper.dart';
 
@@ -91,6 +92,7 @@ class _UserNavigationState extends State<UserNavigation> {
                         .logout(LogoutRequest(userId: getIt<User>().id));
                   } catch (_) {}
                   getIt<WebSocketService>().disconnect();
+                  ApiInitializer.clearAuth();
                   // Drop the remembered chat/scroll so the next login starts
                   // fresh on the first chat and nothing leaks across users.
                   chatNotifier.clearChatViewState();

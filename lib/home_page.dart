@@ -8,6 +8,8 @@ import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/app_router.dart';
+import 'package:one_piece_battles_flutter/components/chat_notifier.dart';
+import 'package:one_piece_battles_flutter/config/api_initializer.dart';
 import 'package:one_piece_battles_flutter/config/resource_permission_manager.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
@@ -670,6 +672,10 @@ class _SideMenuState extends State<SideMenu> {
                       .logout(LogoutRequest(userId: getIt<User>().id));
                 } catch (_) {}
                 getIt<WebSocketService>().disconnect();
+                ApiInitializer.clearAuth();
+                if (getIt.isRegistered<ChatNotifier>()) {
+                  getIt<ChatNotifier>().clearChatViewState();
+                }
                 if (getIt.isRegistered<User>()) {
                   getIt.unregister<User>();
                 }
