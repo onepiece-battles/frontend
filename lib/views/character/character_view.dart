@@ -142,15 +142,14 @@ class _CharacterViewState extends State<CharacterView>
 
   Future<void> _search(bool filterChange) async {
     final requestId = ++_requestId;
-    if (scrollController.hasClients) scrollController.jumpTo(0);
     setState(() {
       _loading = true;
       _loadFailed = false;
       _loadingMore = false;
       _loadMoreFailed = false;
       selectedPageNum = 1;
-      currentCharacterList = [];
     });
+    if (scrollController.hasClients) scrollController.jumpTo(0);
     characterFilter.languageCode = I18nHelper.getLanguageCode();
     final request = ListCharacterRequest(
         pageSize: itemCountPerPage,
@@ -187,14 +186,27 @@ class _CharacterViewState extends State<CharacterView>
         selectedPageNum >= totalPageNum) {
       return;
     }
-    if (scrollController.position.extentAfter < 500) {
+    final position = scrollController.position;
+    final threshold = (position.viewportDimension * 0.5).clamp(120.0, 400.0);
+    if (position.extentAfter < threshold) {
       _loadMore();
     }
   }
 
   void _checkForShortViewport() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _maybeLoadMore();
+      if (!mounted ||
+          !scrollController.hasClients ||
+          _loading ||
+          _loadingMore ||
+          _loadMoreFailed ||
+          selectedPageNum >= totalPageNum) {
+        return;
+      }
+      // Fill a viewport that has no scroll range. Otherwise wait for scrolling.
+      if (scrollController.position.maxScrollExtent <= 0) {
+        _loadMore();
+      }
     });
   }
 

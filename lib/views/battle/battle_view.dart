@@ -81,15 +81,14 @@ class _BattleViewState extends State<BattleView> {
 
   Future<void> _search(bool filterChange) async {
     final requestId = ++_requestId;
-    if (mainController.hasClients) mainController.jumpTo(0);
     setState(() {
       _loading = true;
       _loadFailed = false;
       _loadingMore = false;
       _loadMoreFailed = false;
       selectedPageNum = 1;
-      currentBattleList = [];
     });
+    if (mainController.hasClients) mainController.jumpTo(0);
     battleFilter.languageCode = I18nHelper.getLanguageCode();
     battleFilter.starterName = starterNameController.text;
     battleFilter.receiverName = receiverNameController.text;
@@ -128,14 +127,27 @@ class _BattleViewState extends State<BattleView> {
         selectedPageNum >= totalPageNum) {
       return;
     }
-    if (mainController.position.extentAfter < 500) {
+    final position = mainController.position;
+    final threshold = (position.viewportDimension * 0.5).clamp(120.0, 400.0);
+    if (position.extentAfter < threshold) {
       _loadMore();
     }
   }
 
   void _checkForShortViewport() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _maybeLoadMore();
+      if (!mounted ||
+          !mainController.hasClients ||
+          _loading ||
+          _loadingMore ||
+          _loadMoreFailed ||
+          selectedPageNum >= totalPageNum) {
+        return;
+      }
+      // Fill a viewport that has no scroll range. Otherwise wait for scrolling.
+      if (mainController.position.maxScrollExtent <= 0) {
+        _loadMore();
+      }
     });
   }
 
