@@ -974,6 +974,21 @@ class AppLocalizationsZh extends AppLocalizations {
   String get groupStructure => '团体结构';
 
   @override
+  String get groupZoomIn => '放大';
+
+  @override
+  String get groupZoomOut => '缩小';
+
+  @override
+  String get groupFitView => '适应视图';
+
+  @override
+  String get groupExpand => '展开分支';
+
+  @override
+  String get groupCollapse => '收起分支';
+
+  @override
   String get fatherGroups => '上级团体';
 
   @override

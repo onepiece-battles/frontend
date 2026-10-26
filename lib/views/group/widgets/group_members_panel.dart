@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:openapi/api.dart';
 
 import '../../../components/image_lazy_loader.dart';
-import '../../../constants/button_style.dart';
 import '../../../constants/onepiece_colors.dart';
 import '../../../constants/onepiece_fonts.dart';
 import '../../../l10n/app_localizations.dart';
@@ -15,6 +14,7 @@ import '../../../utils/image_helper.dart';
 import '../../../utils/nested_scroll_helper.dart';
 import '../../../utils/responsive_breakpoints.dart';
 import '../group_detail_controller.dart';
+import 'group_hierarchy_canvas.dart';
 
 /// The "members" panel of the group detail screen: the father-group trail, the
 /// member tree (groups expand to lazily-loaded child groups / characters) or a
@@ -76,6 +76,7 @@ class _GroupMembersPanelState extends State<GroupMembersPanel> {
             groupCategory: groupFullView.groupCategory,
             name: groupFullView.name,
             imageUri: groupFullView.imageUri));
+    root.expanded = true;
   }
 
   @override
@@ -115,17 +116,18 @@ class _GroupMembersPanelState extends State<GroupMembersPanel> {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      if (isNarrow) Container(
-                        width: 34,
-                        height: 34,
-                        decoration: BoxDecoration(
-                          color: OnepieceColors.liteFancyGreen
-                              .withValues(alpha: 0.65),
-                          borderRadius: BorderRadius.circular(8),
+                      if (isNarrow)
+                        Container(
+                          width: 34,
+                          height: 34,
+                          decoration: BoxDecoration(
+                            color: OnepieceColors.liteFancyGreen
+                                .withValues(alpha: 0.65),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(Icons.account_tree_outlined,
+                              size: 20, color: OnepieceColors.fancyGreen),
                         ),
-                        child: const Icon(Icons.account_tree_outlined,
-                            size: 20, color: OnepieceColors.fancyGreen),
-                      ),
                       if (isNarrow) const SizedBox(width: 10),
                       Expanded(
                         child: Text(
@@ -186,21 +188,29 @@ class _GroupMembersPanelState extends State<GroupMembersPanel> {
                     ),
                   ],
                   const SizedBox(height: 12),
-                  if (groupFullView.characters.isEmpty && groupFullView.subGroups.isEmpty)
+                  if (groupFullView.characters.isEmpty &&
+                      groupFullView.subGroups.isEmpty)
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       child: Text(AppLocalizations.of(context)!.empty,
-                        style: const TextStyle(color: OnepieceColors.secondaryLabel, fontSize: 14)),
+                          style: const TextStyle(
+                              color: OnepieceColors.secondaryLabel,
+                              fontSize: 14)),
                     ),
-                  NestedHorizontalScrollView(
-                    verticalParentController: _pageScrollController,
-                    child: SizedBox(
-                      width: contentWidth,
-                      child: root.group.groupCategory == GroupCategory.group
-                          ? buildTreeNode(root, false, 1)
-                          : buildCharacterList(context),
+                  if (root.group.groupCategory == GroupCategory.group)
+                    GroupHierarchyCanvas(
+                      key: ValueKey(groupFullView.id),
+                      mobile: isNarrow,
+                      child: buildTreeNode(root, false, 1),
+                    )
+                  else
+                    NestedHorizontalScrollView(
+                      verticalParentController: _pageScrollController,
+                      child: SizedBox(
+                        width: contentWidth,
+                        child: buildCharacterList(context),
+                      ),
                     ),
-                  ),
                 ],
               ),
             ),
@@ -216,47 +226,56 @@ class _GroupMembersPanelState extends State<GroupMembersPanel> {
       children: [
         Text(
           AppLocalizations.of(context)!.fatherGroups,
-          style: OnepieceFonts.navigationTopBarStyleClickable,
+          style: const TextStyle(
+              fontSize: 12, color: OnepieceColors.secondaryLabel),
         ),
-        const SizedBox(
-          height: 10,
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: groupFullView.fatherGroups.reversed.toList().map((e) {
-            return Row(
-              children: [
-                ElevatedButton(
-                    style: OnepieceButtonStyle.getFatherGroupButtonStyle(),
-                    onPressed: () {
-                      context.goNamed('groupDetails',
-                          extra: e.id,
-                          pathParameters: {
-                            'name': I18nHelper.getDisplayNameFromI18n(e.name!)
-                          });
-                    },
-                    child: Row(
-                      children: [
-                        ImageLazyLoader(
-                            uriProvider: () => e.imageUri!,
-                            width: 40,
-                            borderWidth: 1.5,
-                            borderRadios: 3),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 8.0),
-                          child: Text(
-                            I18nHelper.getDisplayNameFromI18n(e.name!),
-                          ),
-                        )
-                      ],
-                    )),
-                const Icon(
-                  Icons.chevron_right,
-                  size: 20,
-                )
-              ],
-            );
-          }).toList(),
+        const SizedBox(height: 10),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              ...groupFullView.fatherGroups.reversed.toList().map((e) {
+                return Row(children: [
+                  ActionChip(
+                    backgroundColor: OnepieceColors.surface,
+                    side: BorderSide.none,
+                    shape: const StadiumBorder(),
+                    avatar: ImageLazyLoader(
+                      uriProvider: () => e.imageUri ?? '',
+                      width: 26,
+                      borderWidth: 0,
+                      borderRadios: 26,
+                    ),
+                    label: Text(I18nHelper.getDisplayNameFromI18n(e.name!),
+                        style: const TextStyle(
+                            fontSize: 12, color: OnepieceColors.primaryLabel)),
+                    onPressed: () => context.goNamed('groupDetails',
+                        extra: e.id,
+                        pathParameters: {
+                          'name': I18nHelper.getDisplayNameFromI18n(e.name!)
+                        }),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 4),
+                    child: Icon(Icons.chevron_right,
+                        size: 16, color: OnepieceColors.secondaryLabel),
+                  ),
+                ]);
+              }),
+              Chip(
+                backgroundColor: Colors.white,
+                side: const BorderSide(color: OnepieceColors.separator),
+                shape: const StadiumBorder(),
+                label: Text(
+                  I18nHelper.getDisplayNameFromI18n(groupFullView.name),
+                  style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: OnepieceColors.primaryLabel),
+                ),
+              ),
+            ],
+          ),
         )
       ],
     );
@@ -295,110 +314,220 @@ class _GroupMembersPanelState extends State<GroupMembersPanel> {
     );
   }
 
-  void handleExpansionChanged(
-      bool isExpanded, GroupNode node, StateSetter nodeState) {
-    if (isExpanded && !node.childrenFetched) {
-      // Simulate fetching children from the backend
-      List<TreeNode> fetchedChildren = [];
+  Future<void> _fetchChildren(
+      GroupNode node, StateSetter nodeState, BuildContext nodeContext) async {
+    if (node.childrenFetched || node.isLoading) return;
+    nodeState(() {
+      node.isLoading = true;
+      node.loadFailed = false;
+    });
+    try {
+      final List<TreeNode> children;
       if (node.group.groupCategory == GroupCategory.group) {
-        _controller
-            .listChildGroups(ListChildGroupsRequest(groupId: node.group.id))
-            .then((value) {
-          fetchedChildren = value!.childGroups.map((e) {
-            return GroupNode([], false, e);
-          }).toList();
-          if (!mounted) return;
-          nodeState(() {
-            node.children = fetchedChildren;
-            node.childrenFetched = true;
-          });
-        });
+        final response = await _controller
+            .listChildGroups(ListChildGroupsRequest(groupId: node.group.id));
+        if (response == null) throw StateError('Group children unavailable');
+        children = response.childGroups
+            .map<TreeNode>((group) => GroupNode([], false, group))
+            .toList();
       } else {
-        _controller
-            .listChildCharacters(
-                ListChildCharactersRequest(groupId: node.group.id))
-            .then((value) {
-          fetchedChildren = value!.childCharacters.map((e) {
-            return CharacterNode([], true, e);
-          }).toList();
-          if (!mounted) return;
-          nodeState(() {
-            node.children = fetchedChildren;
-            node.childrenFetched = true;
-          });
-        });
+        final response = await _controller.listChildCharacters(
+            ListChildCharactersRequest(groupId: node.group.id));
+        if (response == null) throw StateError('Group members unavailable');
+        children = response.childCharacters
+            .map<TreeNode>((character) => CharacterNode([], true, character))
+            .toList();
       }
+      if (!mounted || !nodeContext.mounted) return;
+      nodeState(() {
+        node.children = children;
+        node.childrenFetched = true;
+        node.isLoading = false;
+      });
+    } catch (_) {
+      if (!mounted || !nodeContext.mounted) return;
+      nodeState(() {
+        node.isLoading = false;
+        node.loadFailed = true;
+      });
     }
   }
 
   Widget buildTreeNode(TreeNode node, bool isChildCharacter, int level) {
-    if (!isChildCharacter) {
-      GroupNode actualNode = node as GroupNode;
-      return StatefulBuilder(
-        builder: (context, nodeState) {
-          return Container(
-            margin: EdgeInsets.only(top: level == 1 ? 0 : 6),
-            decoration: BoxDecoration(
-              color: level == 1
-                  ? OnepieceColors.liteFancyBlue.withValues(alpha: 0.20)
-                  : Colors.white,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: level == 1
-                    ? OnepieceColors.fancyBlue.withValues(alpha: 0.18)
-                    : OnepieceColors.menuHoverColor.withValues(alpha: 0.55),
-              ),
-            ),
-            child: Theme(
-              data:
-                  Theme.of(context).copyWith(dividerColor: Colors.transparent),
-              child: ExpansionTile(
-                tilePadding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-                childrenPadding: const EdgeInsets.fromLTRB(16, 0, 8, 10),
-                expandedAlignment: Alignment.centerLeft,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
-                collapsedShape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
-                leading: Icon(
-                  actualNode.group.groupCategory == GroupCategory.group
-                      ? Icons.account_tree_outlined
-                      : Icons.groups_2_outlined,
-                  size: 18,
-                  color: OnepieceColors.fancyBlue,
-                ),
-                title: _buildTreeTitle(
-                  imageUri: node.group.imageUri!,
-                  title:
-                      I18nHelper.getDisplayNameFromI18n(actualNode.group.name!),
-                  onTap: () {
-                    context.goNamed('groupDetails',
-                        extra: node.group.id,
-                        pathParameters: {
-                          'name':
-                              I18nHelper.getDisplayNameFromI18n(node.group.name)
-                        });
-                  },
-                ),
-                onExpansionChanged: (isExpanded) =>
-                    handleExpansionChanged(isExpanded, actualNode, nodeState),
-                children: actualNode.children
-                    .map((child) => buildTreeNode(
-                        child,
-                        actualNode.group.groupCategory != GroupCategory.group,
-                        level + 1))
-                    .toList(),
-              ),
-            ),
-          );
-        },
-      );
-    } else {
-      CharacterNode actualNode = node as CharacterNode;
+    if (isChildCharacter) {
+      final character = (node as CharacterNode).characterInGroupView;
       return _buildCharacterExpansionCard(
-          character: actualNode.characterInGroupView, isTreeLeaf: true);
+          character: character, isTreeLeaf: true);
     }
+    final groupNode = node as GroupNode;
+    final group = groupNode.group;
+    final isRoot = level == 1;
+    return StatefulBuilder(
+      key: ValueKey('group-node-${group.id}'),
+      builder: (nodeContext, nodeState) {
+        final loc = AppLocalizations.of(nodeContext)!;
+        void toggle() {
+          nodeState(() => groupNode.expanded = !groupNode.expanded);
+          if (groupNode.expanded) {
+            _fetchChildren(groupNode, nodeState, nodeContext);
+          }
+        }
+
+        return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Material(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isRoot
+                          ? OnepieceColors.fancyBlue.withValues(alpha: 0.35)
+                          : OnepieceColors.separator,
+                    ),
+                  ),
+                  child: Row(children: [
+                    IconButton(
+                      tooltip: groupNode.expanded
+                          ? loc.groupCollapse
+                          : loc.groupExpand,
+                      onPressed: toggle,
+                      icon: AnimatedRotation(
+                        turns: groupNode.expanded ? 0.25 : 0,
+                        duration: const Duration(milliseconds: 180),
+                        child: const Icon(Icons.chevron_right,
+                            size: 22, color: OnepieceColors.fancyBlue),
+                      ),
+                    ),
+                    Expanded(
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(8),
+                        onTap: () => context.goNamed('groupDetails',
+                            extra: group.id,
+                            pathParameters: {
+                              'name':
+                                  I18nHelper.getDisplayNameFromI18n(group.name)
+                            }),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: _buildTreeTitle(
+                            imageUri: group.imageUri ?? '',
+                            title:
+                                I18nHelper.getDisplayNameFromI18n(group.name),
+                            onTap: () => context.goNamed('groupDetails',
+                                extra: group.id,
+                                pathParameters: {
+                                  'name': I18nHelper.getDisplayNameFromI18n(
+                                      group.name)
+                                }),
+                          ),
+                        ),
+                      ),
+                    ),
+                    if (isRoot)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 12),
+                        child: Text(loc.thisGroup,
+                            style: const TextStyle(
+                                fontSize: 11,
+                                color: OnepieceColors.secondaryLabel)),
+                      )
+                    else
+                      Padding(
+                        padding: const EdgeInsets.only(right: 12),
+                        child: Icon(
+                          group.groupCategory == GroupCategory.group
+                              ? Icons.account_tree_outlined
+                              : Icons.groups_2_outlined,
+                          size: 18,
+                          color: OnepieceColors.secondaryLabel,
+                        ),
+                      ),
+                  ]),
+                ),
+              ),
+              AnimatedSize(
+                duration: const Duration(milliseconds: 220),
+                curve: Curves.easeInOut,
+                alignment: Alignment.topCenter,
+                child: !groupNode.expanded
+                    ? const SizedBox.shrink()
+                    : Padding(
+                        padding: const EdgeInsets.only(left: 24),
+                        child: Container(
+                          decoration: const BoxDecoration(
+                            border: Border(
+                              left: BorderSide(
+                                  color: OnepieceColors.separator, width: 1.5),
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              if (groupNode.isLoading)
+                                const Padding(
+                                  padding: EdgeInsets.fromLTRB(18, 16, 12, 8),
+                                  child: LinearProgressIndicator(minHeight: 2),
+                                ),
+                              if (groupNode.loadFailed)
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 16),
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: TextButton.icon(
+                                      onPressed: () => _fetchChildren(
+                                          groupNode, nodeState, nodeContext),
+                                      icon: const Icon(Icons.refresh, size: 18),
+                                      label: Text(loc.retryLoading),
+                                    ),
+                                  ),
+                                ),
+                              for (final child in groupNode.children)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 10),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 24),
+                                        child: Container(
+                                          width: 18,
+                                          height: 1.5,
+                                          color: OnepieceColors.separator,
+                                        ),
+                                      ),
+                                      Expanded(
+                                          child: buildTreeNode(
+                                        child,
+                                        group.groupCategory !=
+                                            GroupCategory.group,
+                                        level + 1,
+                                      )),
+                                    ],
+                                  ),
+                                ),
+                              if (groupNode.childrenFetched &&
+                                  groupNode.children.isEmpty)
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(18, 12, 0, 4),
+                                  child: Text(loc.noResourcesFound,
+                                      style: const TextStyle(
+                                          fontSize: 12,
+                                          color:
+                                              OnepieceColors.secondaryLabel)),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+              ),
+            ]);
+      },
+    );
   }
 
   Widget _buildCharacterExpansionCard({
@@ -620,6 +749,9 @@ class TreeNode {
 
 class GroupNode extends TreeNode {
   Group group;
+  bool expanded = false;
+  bool isLoading = false;
+  bool loadFailed = false;
 
   GroupNode(super.children, super.childrenFetched, this.group);
 

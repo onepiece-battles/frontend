@@ -985,6 +985,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get groupStructure => 'Group Structure';
 
   @override
+  String get groupZoomIn => 'Zoom in';
+
+  @override
+  String get groupZoomOut => 'Zoom out';
+
+  @override
+  String get groupFitView => 'Fit hierarchy';
+
+  @override
+  String get groupExpand => 'Expand branch';
+
+  @override
+  String get groupCollapse => 'Collapse branch';
+
+  @override
   String get fatherGroups => 'Parent Groups';
 
   @override
