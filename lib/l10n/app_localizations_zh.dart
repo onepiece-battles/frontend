@@ -105,6 +105,86 @@ class AppLocalizationsZh extends AppLocalizations {
   String get battleProcess => '战斗流程';
 
   @override
+  String get battleDetailTitle => '战斗详情';
+
+  @override
+  String get battleReportTitle => '战斗报告';
+
+  @override
+  String get battleJourneyTitle => '战斗进程';
+
+  @override
+  String get battleStageFighting => '战斗进行中';
+
+  @override
+  String get battleResultConfirmed => '结果已确认';
+
+  @override
+  String get battleRoundTitle => '战斗回合';
+
+  @override
+  String battleRoundNumber(int number) {
+    return '第$number回合';
+  }
+
+  @override
+  String get battleRoundNoData => '这场战斗暂无回合记录。';
+
+  @override
+  String get showAllRounds => '查看全部回合';
+
+  @override
+  String get collapseRounds => '收起回合记录';
+
+  @override
+  String get battleRoundsAfterFinish => '战斗结束后将在这里显示回合记录。';
+
+  @override
+  String get battleSkill => '技能';
+
+  @override
+  String get battleAttackHit => '命中';
+
+  @override
+  String get battleAttackMissed => '未命中';
+
+  @override
+  String get battleDamage => '伤害';
+
+  @override
+  String get battleEnergySpent => '消耗精力';
+
+  @override
+  String get battleDefenderEnergyLost => '目标损失精力';
+
+  @override
+  String get battleReportGeneratingDescription => '战斗已结束，报告正在生成。你可以继续浏览其他页面。';
+
+  @override
+  String get battleReportWaitingDescription => '战斗报告正在等待生成。';
+
+  @override
+  String get battleReportReadyDescription => '战斗报告已经可以下载。';
+
+  @override
+  String get battleReportVisitorDescription => '登录后可下载这份报告。';
+
+  @override
+  String get battleReportPreparing => '正在准备下载文件…';
+
+  @override
+  String get battleFailedDescription => '这场战斗未能完成。';
+
+  @override
+  String get battleAbilities => '角色能力对比';
+
+  @override
+  String get previousBattle => '上一场战斗';
+
+  @override
+  String get nextBattle => '下一场战斗';
+
+  @override
   String get birthDay => '生日';
 
   @override

@@ -290,6 +290,162 @@ abstract class AppLocalizations {
   /// **'Battle Process'**
   String get battleProcess;
 
+  /// No description provided for @battleDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Battle Details'**
+  String get battleDetailTitle;
+
+  /// No description provided for @battleReportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Battle Report'**
+  String get battleReportTitle;
+
+  /// No description provided for @battleJourneyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Battle Progress'**
+  String get battleJourneyTitle;
+
+  /// No description provided for @battleStageFighting.
+  ///
+  /// In en, this message translates to:
+  /// **'Battle Underway'**
+  String get battleStageFighting;
+
+  /// No description provided for @battleResultConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Result Confirmed'**
+  String get battleResultConfirmed;
+
+  /// No description provided for @battleRoundTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Battle Rounds'**
+  String get battleRoundTitle;
+
+  /// No description provided for @battleRoundNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {number}'**
+  String battleRoundNumber(int number);
+
+  /// No description provided for @battleRoundNoData.
+  ///
+  /// In en, this message translates to:
+  /// **'No round details are available for this battle.'**
+  String get battleRoundNoData;
+
+  /// No description provided for @showAllRounds.
+  ///
+  /// In en, this message translates to:
+  /// **'Show all rounds'**
+  String get showAllRounds;
+
+  /// No description provided for @collapseRounds.
+  ///
+  /// In en, this message translates to:
+  /// **'Show fewer rounds'**
+  String get collapseRounds;
+
+  /// No description provided for @battleRoundsAfterFinish.
+  ///
+  /// In en, this message translates to:
+  /// **'Round details will appear when the battle finishes.'**
+  String get battleRoundsAfterFinish;
+
+  /// No description provided for @battleSkill.
+  ///
+  /// In en, this message translates to:
+  /// **'Skill'**
+  String get battleSkill;
+
+  /// No description provided for @battleAttackHit.
+  ///
+  /// In en, this message translates to:
+  /// **'Hit'**
+  String get battleAttackHit;
+
+  /// No description provided for @battleAttackMissed.
+  ///
+  /// In en, this message translates to:
+  /// **'Missed'**
+  String get battleAttackMissed;
+
+  /// No description provided for @battleDamage.
+  ///
+  /// In en, this message translates to:
+  /// **'Damage'**
+  String get battleDamage;
+
+  /// No description provided for @battleEnergySpent.
+  ///
+  /// In en, this message translates to:
+  /// **'Energy spent'**
+  String get battleEnergySpent;
+
+  /// No description provided for @battleDefenderEnergyLost.
+  ///
+  /// In en, this message translates to:
+  /// **'Defender energy lost'**
+  String get battleDefenderEnergyLost;
+
+  /// No description provided for @battleReportGeneratingDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'The battle is finished. The report is being prepared; you can keep browsing while it completes.'**
+  String get battleReportGeneratingDescription;
+
+  /// No description provided for @battleReportWaitingDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'The battle report is waiting to be generated.'**
+  String get battleReportWaitingDescription;
+
+  /// No description provided for @battleReportReadyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'The battle report is ready to download.'**
+  String get battleReportReadyDescription;
+
+  /// No description provided for @battleReportVisitorDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to download this report.'**
+  String get battleReportVisitorDescription;
+
+  /// No description provided for @battleReportPreparing.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing the download…'**
+  String get battleReportPreparing;
+
+  /// No description provided for @battleFailedDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'This battle could not be completed.'**
+  String get battleFailedDescription;
+
+  /// No description provided for @battleAbilities.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare Abilities'**
+  String get battleAbilities;
+
+  /// No description provided for @previousBattle.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous battle'**
+  String get previousBattle;
+
+  /// No description provided for @nextBattle.
+  ///
+  /// In en, this message translates to:
+  /// **'Next battle'**
+  String get nextBattle;
+
   /// No description provided for @birthDay.
   ///
   /// In en, this message translates to:
