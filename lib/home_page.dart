@@ -99,11 +99,31 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
+  static Future<void>? _brandFontLoad;
   // Using a GlobalKey to access SideMenu state for refreshing resources if needed
   final GlobalKey<_SideMenuState> _sideMenuKey = GlobalKey();
   final GlobalKey<_SideMenuState> _drawerSideMenuKey = GlobalKey();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool _isMobileDrawerPinned = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // The decorative bounty font is only needed after login. Keeping it out
+    // of FontManifest prevents Flutter from fetching it on the login screen.
+    _brandFontLoad ??= _loadBrandFont();
+    _brandFontLoad!.then((_) {
+      if (mounted) setState(() {});
+    }).catchError((Object _) {
+      _brandFontLoad = null;
+    });
+  }
+
+  static Future<void> _loadBrandFont() async {
+    final loader = FontLoader('Lobster')
+      ..addFont(rootBundle.load('asset/fonts/Lobster-Regular.ttf'));
+    await loader.load();
+  }
 
   @override
   Widget build(BuildContext context) {

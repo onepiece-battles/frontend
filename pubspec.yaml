@@ -95,13 +95,9 @@ flutter:
   uses-material-design: true
   generate: true
 
-  fonts:
-    - family: Lobster
-      fonts:
-        - asset: asset/fonts/Lobster-Regular.ttf
-
   # To add assets to your application, add an assets section, like this:
   assets:
+    - asset/fonts/Lobster-Regular.ttf
     - asset/fonts/OFL-Lobster.txt
     - asset/images/
     - asset/images/common/
