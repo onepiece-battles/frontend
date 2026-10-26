@@ -69,13 +69,19 @@ void main() {
           await tester.pump();
           await tester.pump(const Duration(milliseconds: 400));
           await tester.pump();
-          expect(find.byType(DetailHero), findsOneWidget);
+          if (page.key == 'battle') {
+            expect(find.byKey(const Key('battle-story')), findsOneWidget);
+          } else {
+            expect(find.byType(DetailHero), findsOneWidget);
+          }
           expect(tester.takeException(), isNull);
-          final scrollable = find
-              .descendant(
-                  of: find.byType(ResourceDetailPage),
-                  matching: find.byType(SingleChildScrollView))
-              .first;
+          final scrollable = page.key == 'battle'
+              ? find.byType(SingleChildScrollView).first
+              : find
+                  .descendant(
+                      of: find.byType(ResourceDetailPage),
+                      matching: find.byType(SingleChildScrollView))
+                  .first;
           await tester.drag(scrollable, const Offset(0, -2400));
           await tester.pump(const Duration(milliseconds: 400));
           expect(tester.takeException(), isNull);

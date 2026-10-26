@@ -105,6 +105,92 @@ class AppLocalizationsEn extends AppLocalizations {
   String get battleProcess => 'Battle Process';
 
   @override
+  String get battleDetailTitle => 'Battle Details';
+
+  @override
+  String get battleReportTitle => 'Battle Report';
+
+  @override
+  String get battleJourneyTitle => 'Battle Progress';
+
+  @override
+  String get battleStageFighting => 'Battle Underway';
+
+  @override
+  String get battleResultConfirmed => 'Result Confirmed';
+
+  @override
+  String get battleRoundTitle => 'Battle Rounds';
+
+  @override
+  String battleRoundNumber(int number) {
+    return 'Round $number';
+  }
+
+  @override
+  String get battleRoundNoData =>
+      'No round details are available for this battle.';
+
+  @override
+  String get showAllRounds => 'Show all rounds';
+
+  @override
+  String get collapseRounds => 'Show fewer rounds';
+
+  @override
+  String get battleRoundsAfterFinish =>
+      'Round details will appear when the battle finishes.';
+
+  @override
+  String get battleSkill => 'Skill';
+
+  @override
+  String get battleAttackHit => 'Hit';
+
+  @override
+  String get battleAttackMissed => 'Missed';
+
+  @override
+  String get battleDamage => 'Damage';
+
+  @override
+  String get battleEnergySpent => 'Energy spent';
+
+  @override
+  String get battleDefenderEnergyLost => 'Defender energy lost';
+
+  @override
+  String get battleReportGeneratingDescription =>
+      'The battle is finished. The report is being prepared; you can keep browsing while it completes.';
+
+  @override
+  String get battleReportWaitingDescription =>
+      'The battle report is waiting to be generated.';
+
+  @override
+  String get battleReportReadyDescription =>
+      'The battle report is ready to download.';
+
+  @override
+  String get battleReportVisitorDescription =>
+      'Sign in to download this report.';
+
+  @override
+  String get battleReportPreparing => 'Preparing the download…';
+
+  @override
+  String get battleFailedDescription => 'This battle could not be completed.';
+
+  @override
+  String get battleAbilities => 'Compare Abilities';
+
+  @override
+  String get previousBattle => 'Previous battle';
+
+  @override
+  String get nextBattle => 'Next battle';
+
+  @override
   String get birthDay => 'Birthday';
 
   @override
