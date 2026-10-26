@@ -268,7 +268,7 @@ class _DesktopSpotlightGridState<T> extends State<DesktopSpotlightGrid<T>> {
       thumbVisibility: true,
       child: SingleChildScrollView(
         controller: widget.controller,
-        padding: const EdgeInsets.fromLTRB(8, 12, 12, 24),
+        padding: const EdgeInsets.fromLTRB(4, 10, 8, 24),
         child: LayoutBuilder(
           builder: (context, constraints) {
             final columnCount = ((constraints.maxWidth + widget.gap) /

@@ -56,22 +56,24 @@ class GroupRoster extends StatelessWidget {
       itemCount: groups.length,
       itemBuilder: (context, index) {
         final group = groups[index];
-        final isEven = index.isEven;
 
         return Card(
-          color: isEven ? OnepieceColors.liteFancyGreen : Colors.white,
-          margin: const EdgeInsets.only(bottom: 4),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          color: Colors.white,
+          elevation: 0,
+          surfaceTintColor: Colors.transparent,
+          margin: const EdgeInsets.only(bottom: 8),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: const BorderSide(color: OnepieceColors.separator)),
           child: InkWell(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(12),
             onTap: () => context.goNamed('groupDetails',
                 extra: group.id,
                 pathParameters: {
                   'name': I18nHelper.getDisplayNameFromI18n(group.name)
                 }),
             child: Padding(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -163,7 +165,7 @@ class GroupRoster extends StatelessWidget {
       controller: controller,
       minCardWidth: 280,
       maxColumns: 6,
-      gap: 10,
+      gap: 12,
       cardBuilder: (context, group) => Material(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
@@ -175,7 +177,7 @@ class GroupRoster extends StatelessWidget {
                 'name': I18nHelper.getDisplayNameFromI18n(group.name)
               }),
           child: Padding(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

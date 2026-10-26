@@ -47,22 +47,24 @@ class CharacterMobileRoster extends StatelessWidget {
       itemCount: characters.length,
       itemBuilder: (context, index) {
         final character = characters[index];
-        final isEven = index.isEven;
 
         return Card(
-          color: isEven ? OnepieceColors.liteFancyGreen : Colors.white,
-          margin: const EdgeInsets.only(bottom: 4),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          color: Colors.white,
+          elevation: 0,
+          surfaceTintColor: Colors.transparent,
+          margin: const EdgeInsets.only(bottom: 8),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: const BorderSide(color: OnepieceColors.separator)),
           child: InkWell(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(12),
             onTap: () => context.goNamed('characterDetails',
                 extra: character.id,
                 pathParameters: {
                   'name': I18nHelper.getDisplayNameFromI18n(character.name)
                 }),
             child: Padding(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -115,30 +117,35 @@ class CharacterMobileRoster extends StatelessWidget {
                       ),
                     ],
                   ),
-                  Row(children: [
-                    Expanded(
-                        child: Wrap(
-                      spacing: 4,
-                      runSpacing: 3,
-                      children: (character.hakis.toList()
-                            ..sort((first, second) =>
-                                first.toString().compareTo(second.toString())))
-                          .map((haki) =>
-                              OnepieceTag.getHakiTag(haki, hakiMap[haki] ?? ''))
-                          .toList(),
-                    )),
-                    TextButton.icon(
-                      style: TextButton.styleFrom(
-                          minimumSize: const Size(0, 32),
-                          padding: const EdgeInsets.symmetric(horizontal: 4),
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          textStyle: const TextStyle(fontSize: 12)),
-                      onPressed: () => _openDetails(context, character),
-                      icon: const Icon(Icons.info_outline, size: 16),
-                      label:
-                          Text(AppLocalizations.of(context)!.detailInformation),
-                    ),
-                  ]),
+                  const SizedBox(height: 8),
+                  Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        ...(character.hakis.toList()
+                              ..sort((first, second) => first
+                                  .toString()
+                                  .compareTo(second.toString())))
+                            .map((haki) => OnepieceTag.getHakiTag(
+                                haki, hakiMap[haki] ?? ''))
+                            .toList(),
+                        IconButton(
+                          tooltip:
+                              AppLocalizations.of(context)!.detailInformation,
+                          onPressed: () => _openDetails(context, character),
+                          style: IconButton.styleFrom(
+                            minimumSize: const Size(32, 32),
+                            maximumSize: const Size(32, 32),
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          constraints:
+                              const BoxConstraints(minWidth: 36, minHeight: 36),
+                          padding: const EdgeInsets.all(8),
+                          icon: const Icon(Icons.info_outline,
+                              size: 18, color: OnepieceColors.fancyBlue),
+                        ),
+                      ]),
                   // Expanded stats
                 ],
               ),

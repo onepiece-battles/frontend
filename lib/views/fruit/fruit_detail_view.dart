@@ -1,3 +1,4 @@
+import '../../components/resource_loading.dart';
 import 'package:flutter/material.dart';
 import '../../components/resource_detail_layout.dart';
 import '../../constants/onepiece_colors.dart';
@@ -9,7 +10,6 @@ import 'widgets/fruit_basic_info_section.dart';
 import 'widgets/fruit_characters_section.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
-import '../../constants/onepiece_fonts.dart';
 import '../../l10n/app_localizations.dart';
 import '../../utils/permission_check.dart';
 import '../../utils/responsive_breakpoints.dart';
@@ -163,12 +163,7 @@ class _FruitDetailViewState extends State<FruitDetailView> {
           if (snapshot.connectionState == ConnectionState.done) {
             final fruit = snapshot.data;
             if (fruit == null) {
-              return Center(
-                child: Text(
-                  AppLocalizations.of(context)!.loading,
-                  style: OnepieceFonts.loadingFont,
-                ),
-              );
+              return ResourceEmptyState(failed: snapshot.hasError);
             }
             _updateData(fruit);
             return LayoutBuilder(
@@ -257,12 +252,7 @@ class _FruitDetailViewState extends State<FruitDetailView> {
               },
             );
           } else {
-            return Center(
-              child: Text(
-                AppLocalizations.of(context)!.loading,
-                style: OnepieceFonts.loadingFont,
-              ),
-            );
+            return const ResourceLoading();
           }
         });
   }

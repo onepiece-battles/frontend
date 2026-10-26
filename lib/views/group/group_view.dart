@@ -7,6 +7,7 @@ import '../../l10n/app_localizations.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 
 import '../../components/desktop_card_layout.dart';
+import '../../components/resource_loading.dart';
 import '../../components/page_foot.dart';
 import '../../constants/button_style.dart';
 import '../../constants/onepiece_colors.dart';
@@ -69,27 +70,42 @@ class _GroupViewState extends State<GroupView> {
     }
   }
 
-  void _search(bool filterChange) {
+  bool _loading = true;
+  bool _loadFailed = false;
+  int _requestId = 0;
+
+  Future<void> _search(bool filterChange) async {
+    final requestId = ++_requestId;
+    setState(() {
+      _loading = true;
+      _loadFailed = false;
+      if (filterChange) selectedPageNum = 1;
+    });
     groupFilter.languageCode = I18nHelper.getLanguageCode();
-    if (filterChange) {
-      selectedPageNum = 1;
-    }
-    ListGroupRequest listGroupRequest = ListGroupRequest(
+    final request = ListGroupRequest(
         pageSize: itemCountPerPage,
         pageIndex: selectedPageNum,
         sortKeys: sortKeys,
         groupFilter: groupFilter);
-    Future<ListGroupResponse?> listGroupResponse =
-        _controller.listGroups(listGroupRequest);
-
-    listGroupResponse.then((value) {
-      if (!mounted) return;
+    try {
+      final value = await _controller.listGroups(request);
+      if (!mounted || requestId != _requestId) return;
+      if (value == null) {
+        throw StateError('Resource request returned no response');
+      }
       setState(() {
-        currentGroupList = value!.groups;
-        totalItemCount = value.totalSize!;
+        currentGroupList = value.groups;
+        totalItemCount = value.totalSize ?? 0;
         totalPageNum = (totalItemCount / itemCountPerPage).ceil();
+        _loading = false;
       });
-    });
+    } catch (_) {
+      if (!mounted || requestId != _requestId) return;
+      setState(() {
+        _loading = false;
+        _loadFailed = true;
+      });
+    }
   }
 
   @override
@@ -111,10 +127,16 @@ class _GroupViewState extends State<GroupView> {
                     CompactFilterPanel(child: _createControlPanel(context)),
                     const SizedBox(height: 6),
                     Expanded(
-                      child: GroupRoster(
-                        groups: currentGroupList,
-                        controller: mainController,
-                        isNarrow: isNarrow,
+                      child: ResourceListBody(
+                        loading: _loading,
+                        failed: _loadFailed,
+                        hasItems: currentGroupList.isNotEmpty,
+                        onRetry: () => _search(false),
+                        child: GroupRoster(
+                          groups: currentGroupList,
+                          controller: mainController,
+                          isNarrow: isNarrow,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -129,7 +151,9 @@ class _GroupViewState extends State<GroupView> {
                             jumpLabel: AppLocalizations.of(context)!.jumpToPage,
                             onPageChanged: (page) {
                               selectedPageNum = page;
-                              mainController.jumpTo(0);
+                              if (mainController.hasClients) {
+                                mainController.jumpTo(0);
+                              }
                               _search(false);
                             },
                           )),

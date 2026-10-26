@@ -1,5 +1,6 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import '../../components/resource_loading.dart';
 import '../../l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
@@ -71,27 +72,44 @@ class _BattleViewState extends State<BattleView> {
     }
   }
 
-  void _search(bool filterChange) {
+  bool _loading = true;
+  bool _loadFailed = false;
+  int _requestId = 0;
+
+  Future<void> _search(bool filterChange) async {
+    final requestId = ++_requestId;
+    setState(() {
+      _loading = true;
+      _loadFailed = false;
+      if (filterChange) selectedPageNum = 1;
+    });
     battleFilter.languageCode = I18nHelper.getLanguageCode();
     battleFilter.starterName = starterNameController.text;
     battleFilter.receiverName = receiverNameController.text;
-    if (filterChange) {
-      selectedPageNum = 1;
-    }
-    ListBattleRequest request = ListBattleRequest(
+    final request = ListBattleRequest(
         pageSize: itemCountPerPage,
         pageIndex: selectedPageNum,
         sortKeys: sortKeys,
         battleFilter: battleFilter);
-    Future<ListBattleResponse?> response = _controller.listBattles(request);
-    response.then((value) {
-      if (!mounted) return;
+    try {
+      final value = await _controller.listBattles(request);
+      if (!mounted || requestId != _requestId) return;
+      if (value == null) {
+        throw StateError('Resource request returned no response');
+      }
       setState(() {
-        currentBattleList = value!.battles;
-        totalItemCount = value.totalSize!;
+        currentBattleList = value.battles;
+        totalItemCount = value.totalSize ?? 0;
         totalPageNum = (totalItemCount / itemCountPerPage).ceil();
+        _loading = false;
       });
-    });
+    } catch (_) {
+      if (!mounted || requestId != _requestId) return;
+      setState(() {
+        _loading = false;
+        _loadFailed = true;
+      });
+    }
   }
 
   @override
@@ -113,10 +131,16 @@ class _BattleViewState extends State<BattleView> {
                     CompactFilterPanel(child: _getControlRow(context)),
                     const SizedBox(height: 6),
                     Expanded(
-                      child: BattleRoster(
-                        battles: currentBattleList,
-                        controller: mainController,
-                        isNarrow: isNarrow,
+                      child: ResourceListBody(
+                        loading: _loading,
+                        failed: _loadFailed,
+                        hasItems: currentBattleList.isNotEmpty,
+                        onRetry: () => _search(false),
+                        child: BattleRoster(
+                          battles: currentBattleList,
+                          controller: mainController,
+                          isNarrow: isNarrow,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -131,7 +155,9 @@ class _BattleViewState extends State<BattleView> {
                             jumpLabel: AppLocalizations.of(context)!.jumpToPage,
                             onPageChanged: (page) {
                               selectedPageNum = page;
-                              mainController.jumpTo(0);
+                              if (mainController.hasClients) {
+                                mainController.jumpTo(0);
+                              }
                               _search(false);
                             },
                           )),

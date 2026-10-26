@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../components/resource_loading.dart';
 import '../../l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
@@ -132,25 +133,42 @@ class _CharacterViewState extends State<CharacterView>
     }
   }
 
-  void _search(bool filterChange) {
+  bool _loading = true;
+  bool _loadFailed = false;
+  int _requestId = 0;
+
+  Future<void> _search(bool filterChange) async {
+    final requestId = ++_requestId;
+    setState(() {
+      _loading = true;
+      _loadFailed = false;
+      if (filterChange) selectedPageNum = 1;
+    });
     characterFilter.languageCode = I18nHelper.getLanguageCode();
-    if (filterChange) {
-      selectedPageNum = 1;
-    }
-    ListCharacterRequest listCharacterRequest = ListCharacterRequest(
+    final request = ListCharacterRequest(
         pageSize: itemCountPerPage,
         pageIndex: selectedPageNum,
         sortKeys: sortKeys,
         characterFilter: characterFilter);
-
-    _controller.listCharacter(listCharacterRequest).then((value) {
-      if (!mounted) return;
+    try {
+      final value = await _controller.listCharacter(request);
+      if (!mounted || requestId != _requestId) return;
+      if (value == null) {
+        throw StateError('Resource request returned no response');
+      }
       setState(() {
-        currentCharacterList = value!.characters;
-        totalItemCount = value.totalSize!;
+        currentCharacterList = value.characters;
+        totalItemCount = value.totalSize ?? 0;
         totalPageNum = (totalItemCount / itemCountPerPage).ceil();
+        _loading = false;
       });
-    });
+    } catch (_) {
+      if (!mounted || requestId != _requestId) return;
+      setState(() {
+        _loading = false;
+        _loadFailed = true;
+      });
+    }
   }
 
   void _onScoreSortTap() {
@@ -220,41 +238,47 @@ class _CharacterViewState extends State<CharacterView>
                     const SizedBox(height: 6),
                     // Compact cards on mobile, a richer roster on desktop.
                     Expanded(
-                      child: isNarrow
-                          ? CharacterMobileRoster(
-                              characters: currentCharacterList,
-                              scrollController: scrollController,
-                              battleStyleMap: battleStyleToDisplayValue,
-                              raceMap: raceEnumToDisplayName,
-                              hakiMap: hakiEnumValueToDisplayValue,
-                              expandedRowIds: _expandedRowIds,
-                              onToggleExpand: (id) => setState(() {
-                                if (_expandedRowIds.contains(id)) {
-                                  _expandedRowIds.remove(id);
-                                } else {
-                                  _expandedRowIds.add(id);
-                                }
-                              }),
-                            )
-                          : CharacterDesktopRoster(
-                              characters: currentCharacterList,
-                              totalItemCount: totalItemCount,
-                              scrollController: scrollController,
-                              battleStyleMap: battleStyleToDisplayValue,
-                              raceMap: raceEnumToDisplayName,
-                              hakiMap: hakiEnumValueToDisplayValue,
-                              expandedRowIds: _expandedRowIds,
-                              onToggleExpand: (id) => setState(() {
-                                if (_expandedRowIds.contains(id)) {
-                                  _expandedRowIds.remove(id);
-                                } else {
-                                  _expandedRowIds.add(id);
-                                }
-                              }),
-                              scoreOrder: sortableEnumToSortOrderMap[
-                                  CharacterSortableFieldsEnum.score],
-                              onScoreSortTap: _onScoreSortTap,
-                            ),
+                      child: ResourceListBody(
+                        loading: _loading,
+                        failed: _loadFailed,
+                        hasItems: currentCharacterList.isNotEmpty,
+                        onRetry: () => _search(false),
+                        child: isNarrow
+                            ? CharacterMobileRoster(
+                                characters: currentCharacterList,
+                                scrollController: scrollController,
+                                battleStyleMap: battleStyleToDisplayValue,
+                                raceMap: raceEnumToDisplayName,
+                                hakiMap: hakiEnumValueToDisplayValue,
+                                expandedRowIds: _expandedRowIds,
+                                onToggleExpand: (id) => setState(() {
+                                  if (_expandedRowIds.contains(id)) {
+                                    _expandedRowIds.remove(id);
+                                  } else {
+                                    _expandedRowIds.add(id);
+                                  }
+                                }),
+                              )
+                            : CharacterDesktopRoster(
+                                characters: currentCharacterList,
+                                totalItemCount: totalItemCount,
+                                scrollController: scrollController,
+                                battleStyleMap: battleStyleToDisplayValue,
+                                raceMap: raceEnumToDisplayName,
+                                hakiMap: hakiEnumValueToDisplayValue,
+                                expandedRowIds: _expandedRowIds,
+                                onToggleExpand: (id) => setState(() {
+                                  if (_expandedRowIds.contains(id)) {
+                                    _expandedRowIds.remove(id);
+                                  } else {
+                                    _expandedRowIds.add(id);
+                                  }
+                                }),
+                                scoreOrder: sortableEnumToSortOrderMap[
+                                    CharacterSortableFieldsEnum.score],
+                                onScoreSortTap: _onScoreSortTap,
+                              ),
+                      ),
                     ),
                     const SizedBox(height: 4),
                     if (totalPageNum > 1)
@@ -266,7 +290,9 @@ class _CharacterViewState extends State<CharacterView>
                           jumpLabel: AppLocalizations.of(context)!.jumpToPage,
                           onPageChanged: (page) {
                             selectedPageNum = page;
-                            scrollController.jumpTo(0);
+                              if (scrollController.hasClients) {
+                              scrollController.jumpTo(0);
+                              }
                             _search(false);
                           },
                         ),

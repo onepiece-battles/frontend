@@ -2305,6 +2305,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{current}/{max} characters'**
   String characterLimitCounter(int current, int max);
+
+  /// No description provided for @resourceLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t load resources. Please try again.'**
+  String get resourceLoadFailed;
+
+  /// No description provided for @noResourcesFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No resources found'**
+  String get noResourcesFound;
+
+  /// No description provided for @retryLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get retryLoading;
+
+  /// No description provided for @resourceNoHolders.
+  ///
+  /// In en, this message translates to:
+  /// **'No holders yet'**
+  String get resourceNoHolders;
 }
 
 class _AppLocalizationsDelegate

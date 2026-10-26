@@ -1,3 +1,4 @@
+import '../../components/resource_loading.dart';
 import 'package:flutter/material.dart';
 import '../../components/resource_detail_layout.dart';
 import '../../components/image_lazy_loader.dart';
@@ -275,7 +276,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
         builder: (context, AsyncSnapshot snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
             if (snapshot.data == null) {
-              return const SizedBox.shrink();
+              return ResourceEmptyState(failed: snapshot.hasError);
             }
             _updateData(snapshot.data);
             return LayoutBuilder(
@@ -290,12 +291,7 @@ class _CharacterDetailState extends State<CharacterDetail> {
               },
             );
           } else {
-            return Center(
-              child: Text(
-                AppLocalizations.of(context)!.loading,
-                style: OnepieceFonts.loadingFont,
-              ),
-            );
+            return const ResourceLoading();
           }
         });
   }
