@@ -1,27 +1,50 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'components/resource_loading.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
-import 'package:one_piece_battles_flutter/personal_home.dart';
-import 'package:one_piece_battles_flutter/retrieve_password.dart';
-import 'package:one_piece_battles_flutter/views/battle/battle_detail_view.dart';
-import 'package:one_piece_battles_flutter/views/battle/battle_view.dart';
-import 'package:one_piece_battles_flutter/views/character/character_detail_view.dart';
-import 'package:one_piece_battles_flutter/views/character/character_view.dart';
-import 'package:one_piece_battles_flutter/views/battle/create_battle_view.dart';
-import 'package:one_piece_battles_flutter/views/character/create_character_view.dart';
-import 'package:one_piece_battles_flutter/views/chatting/chatting_view.dart';
-import 'package:one_piece_battles_flutter/views/fruit/create_fruit_view.dart';
-import 'package:one_piece_battles_flutter/views/fruit/fruit_detail_view.dart';
-import 'package:one_piece_battles_flutter/views/fruit/fruit_view.dart';
-import 'package:one_piece_battles_flutter/views/group/create_group_view.dart';
-import 'package:one_piece_battles_flutter/views/group/group_detail_view.dart';
-import 'package:one_piece_battles_flutter/views/group/group_view.dart';
-import 'package:one_piece_battles_flutter/views/issue/issue_detail_view.dart';
-import 'package:one_piece_battles_flutter/views/issue/issue_view.dart';
-import 'package:one_piece_battles_flutter/views/user/user_detail_view.dart';
-import 'package:one_piece_battles_flutter/views/user/user_profile.dart';
-import 'package:one_piece_battles_flutter/views/user/user_view.dart';
-import 'package:one_piece_battles_flutter/register_page.dart';
+import 'package:one_piece_battles_flutter/personal_home.dart'
+    deferred as personal_home;
+import 'package:one_piece_battles_flutter/retrieve_password.dart'
+    deferred as retrieve_password_view;
+import 'package:one_piece_battles_flutter/views/battle/battle_detail_view.dart'
+    deferred as battle_detail;
+import 'package:one_piece_battles_flutter/views/battle/battle_view.dart'
+    deferred as battle_list;
+import 'package:one_piece_battles_flutter/views/character/character_detail_view.dart'
+    deferred as character_detail;
+import 'package:one_piece_battles_flutter/views/character/character_view.dart'
+    deferred as character_list;
+import 'package:one_piece_battles_flutter/views/battle/create_battle_view.dart'
+    deferred as create_battle;
+import 'package:one_piece_battles_flutter/views/character/create_character_view.dart'
+    deferred as create_character;
+import 'package:one_piece_battles_flutter/views/chatting/chatting_view.dart'
+    deferred as chatting_view;
+import 'package:one_piece_battles_flutter/views/fruit/create_fruit_view.dart'
+    deferred as create_fruit;
+import 'package:one_piece_battles_flutter/views/fruit/fruit_detail_view.dart'
+    deferred as fruit_detail;
+import 'package:one_piece_battles_flutter/views/fruit/fruit_view.dart'
+    deferred as fruit_list;
+import 'package:one_piece_battles_flutter/views/group/create_group_view.dart'
+    deferred as create_group;
+import 'package:one_piece_battles_flutter/views/group/group_detail_view.dart'
+    deferred as group_detail;
+import 'package:one_piece_battles_flutter/views/group/group_view.dart'
+    deferred as group_list;
+import 'package:one_piece_battles_flutter/views/issue/issue_detail_view.dart'
+    deferred as issue_detail;
+import 'package:one_piece_battles_flutter/views/issue/issue_view.dart'
+    deferred as issue_list;
+import 'package:one_piece_battles_flutter/views/user/user_detail_view.dart'
+    deferred as user_detail;
+import 'package:one_piece_battles_flutter/views/user/user_profile.dart'
+    deferred as user_profile;
+import 'package:one_piece_battles_flutter/views/user/user_view.dart'
+    deferred as user_list;
+import 'package:one_piece_battles_flutter/register_page.dart'
+    deferred as register_view;
 import 'package:one_piece_battles_flutter/login_page.dart';
 import 'package:one_piece_battles_flutter/home_page.dart';
 import 'package:one_piece_battles_flutter/utils/route_notifier.dart';
@@ -81,17 +104,22 @@ class AppRouter {
             pageBuilder: (context, state) {
               updateRoutingState(state.matchedLocation);
               return NoTransitionPage(
-                  child: const CharacterView(), key: state.pageKey);
+                  child: _DeferredPage(
+                      load: character_list.loadLibrary,
+                      page: () => character_list.CharacterView()),
+                  key: state.pageKey);
             },
             routes: [
               GoRoute(
                 path: 'create',
-                name: 'createCharacter',
+                name: 'create_character',
                 parentNavigatorKey: _homeNavigatorState,
                 pageBuilder: (context, state) {
                   updateRoutingState(state.matchedLocation);
-                  return const NoTransitionPage(
-                    child: CreateCharacterView(),
+                  return NoTransitionPage(
+                    child: _DeferredPage(
+                        load: create_character.loadLibrary,
+                        page: () => create_character.CreateCharacterView()),
                   );
                 },
               ),
@@ -103,9 +131,11 @@ class AppRouter {
                   updateRoutingState(state.matchedLocation);
                   String characterId = state.extra as String;
                   return NoTransitionPage(
-                    child: CharacterDetail(
-                      characterId: characterId,
-                    ),
+                    child: _DeferredPage(
+                        load: character_detail.loadLibrary,
+                        page: () => character_detail.CharacterDetail(
+                              characterId: characterId,
+                            )),
                   );
                 },
               ),
@@ -118,17 +148,22 @@ class AppRouter {
             pageBuilder: (context, state) {
               updateRoutingState(state.matchedLocation);
               return NoTransitionPage(
-                  child: const GroupView(), key: state.pageKey);
+                  child: _DeferredPage(
+                      load: group_list.loadLibrary,
+                      page: () => group_list.GroupView()),
+                  key: state.pageKey);
             },
             routes: [
               GoRoute(
                 path: 'create',
-                name: 'createGroup',
+                name: 'create_group',
                 parentNavigatorKey: _homeNavigatorState,
                 pageBuilder: (context, state) {
                   updateRoutingState(state.matchedLocation);
-                  return const NoTransitionPage(
-                    child: CreateGroupView(),
+                  return NoTransitionPage(
+                    child: _DeferredPage(
+                        load: create_group.loadLibrary,
+                        page: () => create_group.CreateGroupView()),
                   );
                 },
               ),
@@ -140,9 +175,11 @@ class AppRouter {
                   updateRoutingState(state.matchedLocation);
                   String groupId = state.extra as String;
                   return NoTransitionPage(
-                    child: GroupDetailView(
-                      groupId: groupId,
-                    ),
+                    child: _DeferredPage(
+                        load: group_detail.loadLibrary,
+                        page: () => group_detail.GroupDetailView(
+                              groupId: groupId,
+                            )),
                   );
                 },
               ),
@@ -155,17 +192,22 @@ class AppRouter {
               pageBuilder: (context, state) {
                 updateRoutingState(state.matchedLocation);
                 return NoTransitionPage(
-                    child: const FruitView(), key: state.pageKey);
+                    child: _DeferredPage(
+                        load: fruit_list.loadLibrary,
+                        page: () => fruit_list.FruitView()),
+                    key: state.pageKey);
               },
               routes: [
                 GoRoute(
                   path: 'create',
-                  name: 'createFruit',
+                  name: 'create_fruit',
                   parentNavigatorKey: _homeNavigatorState,
                   pageBuilder: (context, state) {
                     updateRoutingState(state.matchedLocation);
-                    return const NoTransitionPage(
-                      child: CreateFruitView(),
+                    return NoTransitionPage(
+                      child: _DeferredPage(
+                          load: create_fruit.loadLibrary,
+                          page: () => create_fruit.CreateFruitView()),
                     );
                   },
                 ),
@@ -177,9 +219,11 @@ class AppRouter {
                     updateRoutingState(state.matchedLocation);
                     String fruitId = state.extra as String;
                     return NoTransitionPage(
-                      child: FruitDetailView(
-                        fruitId: fruitId,
-                      ),
+                      child: _DeferredPage(
+                          load: fruit_detail.loadLibrary,
+                          page: () => fruit_detail.FruitDetailView(
+                                fruitId: fruitId,
+                              )),
                     );
                   },
                 ),
@@ -191,17 +235,22 @@ class AppRouter {
               pageBuilder: (context, state) {
                 updateRoutingState(state.matchedLocation);
                 return NoTransitionPage(
-                    child: const BattleView(), key: state.pageKey);
+                    child: _DeferredPage(
+                        load: battle_list.loadLibrary,
+                        page: () => battle_list.BattleView()),
+                    key: state.pageKey);
               },
               routes: [
                 GoRoute(
                   path: 'create',
-                  name: 'createBattle',
+                  name: 'create_battle',
                   parentNavigatorKey: _homeNavigatorState,
                   pageBuilder: (context, state) {
                     updateRoutingState(state.matchedLocation);
-                    return const NoTransitionPage(
-                      child: CreateBattleView(),
+                    return NoTransitionPage(
+                      child: _DeferredPage(
+                          load: create_battle.loadLibrary,
+                          page: () => create_battle.CreateBattleView()),
                     );
                   },
                 ),
@@ -213,9 +262,11 @@ class AppRouter {
                     updateRoutingState(state.matchedLocation);
                     String battleId = state.extra as String;
                     return NoTransitionPage(
-                      child: BattleDetailView(
-                        battleId: battleId,
-                      ),
+                      child: _DeferredPage(
+                          load: battle_detail.loadLibrary,
+                          page: () => battle_detail.BattleDetailView(
+                                battleId: battleId,
+                              )),
                     );
                   },
                 ),
@@ -227,7 +278,10 @@ class AppRouter {
             pageBuilder: (context, state) {
               updateRoutingState(state.matchedLocation);
               return NoTransitionPage(
-                  child: const ChattingView(), key: state.pageKey);
+                  child: _DeferredPage(
+                      load: chatting_view.loadLibrary,
+                      page: () => chatting_view.ChattingView()),
+                  key: state.pageKey);
             },
           ),
           GoRoute(
@@ -237,7 +291,10 @@ class AppRouter {
             pageBuilder: (context, state) {
               updateRoutingState(state.matchedLocation);
               return NoTransitionPage(
-                  child: const UserView(), key: state.pageKey);
+                  child: _DeferredPage(
+                      load: user_list.loadLibrary,
+                      page: () => user_list.UserView()),
+                  key: state.pageKey);
             },
             routes: [
               GoRoute(
@@ -248,9 +305,11 @@ class AppRouter {
                   updateRoutingState(state.matchedLocation);
                   String userId = state.extra as String;
                   return NoTransitionPage(
-                    child: UserDetailView(
-                      userId: userId,
-                    ),
+                    child: _DeferredPage(
+                        load: user_detail.loadLibrary,
+                        page: () => user_detail.UserDetailView(
+                              userId: userId,
+                            )),
                   );
                 },
               ),
@@ -263,7 +322,10 @@ class AppRouter {
               pageBuilder: (context, state) {
                 updateRoutingState(state.matchedLocation);
                 return NoTransitionPage(
-                    child: const IssueView(), key: state.pageKey);
+                    child: _DeferredPage(
+                        load: issue_list.loadLibrary,
+                        page: () => issue_list.IssueView()),
+                    key: state.pageKey);
               },
               routes: [
                 GoRoute(
@@ -274,9 +336,11 @@ class AppRouter {
                     updateRoutingState(state.matchedLocation);
                     String issueId = state.extra as String;
                     return NoTransitionPage(
-                      child: IssueDetailView(
-                        issueId: issueId,
-                      ),
+                      child: _DeferredPage(
+                          load: issue_detail.loadLibrary,
+                          page: () => issue_detail.IssueDetailView(
+                                issueId: issueId,
+                              )),
                     );
                   },
                 ),
@@ -288,21 +352,26 @@ class AppRouter {
               pageBuilder: (context, state) {
                 updateRoutingState(state.matchedLocation);
                 return NoTransitionPage(
-                    child: UserHome(userId: getIt<User>().id),
+                    child: _DeferredPage(
+                        load: personal_home.loadLibrary,
+                        page: () =>
+                            personal_home.UserHome(userId: getIt<User>().id)),
                     key: state.pageKey);
               },
               routes: [
                 GoRoute(
                   path: 'profile',
-                  name: 'userProfile',
+                  name: 'user_profile',
                   parentNavigatorKey: _homeNavigatorState,
                   pageBuilder: (context, state) {
                     updateRoutingState(state.matchedLocation);
                     String userId = state.extra as String;
                     return NoTransitionPage(
-                        child: UserProfile(
-                          userId: userId,
-                        ),
+                        child: _DeferredPage(
+                            load: user_profile.loadLibrary,
+                            page: () => user_profile.UserProfile(
+                                  userId: userId,
+                                )),
                         key: state.pageKey);
                   },
                 ),
@@ -314,9 +383,11 @@ class AppRouter {
                     updateRoutingState(state.matchedLocation);
                     String userId = state.extra as String;
                     return NoTransitionPage(
-                      child: UserDetailView(
-                        userId: userId,
-                      ),
+                      child: _DeferredPage(
+                          load: user_detail.loadLibrary,
+                          page: () => user_detail.UserDetailView(
+                                userId: userId,
+                              )),
                     );
                   },
                 ),
@@ -329,11 +400,15 @@ class AppRouter {
       ),
       GoRoute(
         path: registerPath,
-        builder: (context, state) => const RegisterPage(),
+        builder: (context, state) => _DeferredPage(
+            load: register_view.loadLibrary,
+            page: () => register_view.RegisterPage()),
       ),
       GoRoute(
         path: retrievePassword,
-        builder: (context, state) => const RetrievePassword(),
+        builder: (context, state) => _DeferredPage(
+            load: retrieve_password_view.loadLibrary,
+            page: () => retrieve_password_view.RetrievePassword()),
       ),
     ],
     // debugLogDiagnostics: true,
@@ -365,4 +440,46 @@ class AppRouter {
       return null;
     },
   );
+}
+
+/// Downloads a route's code only when the route is first opened. The login
+/// screen stays in the initial bundle, so it can become interactive sooner.
+class _DeferredPage extends StatefulWidget {
+  const _DeferredPage({required this.load, required this.page});
+
+  final Future<void> Function() load;
+  final Widget Function() page;
+
+  @override
+  State<_DeferredPage> createState() => _DeferredPageState();
+}
+
+class _DeferredPageState extends State<_DeferredPage> {
+  late Future<void> _ready;
+
+  @override
+  void initState() {
+    super.initState();
+    _ready = widget.load();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<void>(
+      future: _ready,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return ResourceEmptyState(
+              failed: true,
+              onRetry: () => setState(() {
+                    _ready = widget.load();
+                  }));
+        }
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const ResourceLoading();
+        }
+        return widget.page();
+      },
+    );
+  }
 }

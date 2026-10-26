@@ -8,6 +8,8 @@ import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/app_router.dart';
+import 'package:one_piece_battles_flutter/components/chat_notifier.dart';
+import 'package:one_piece_battles_flutter/config/api_initializer.dart';
 import 'package:one_piece_battles_flutter/config/resource_permission_manager.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
 import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
@@ -97,11 +99,31 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
+  static Future<void>? _brandFontLoad;
   // Using a GlobalKey to access SideMenu state for refreshing resources if needed
   final GlobalKey<_SideMenuState> _sideMenuKey = GlobalKey();
   final GlobalKey<_SideMenuState> _drawerSideMenuKey = GlobalKey();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool _isMobileDrawerPinned = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // The decorative bounty font is only needed after login. Keeping it out
+    // of FontManifest prevents Flutter from fetching it on the login screen.
+    _brandFontLoad ??= _loadBrandFont();
+    _brandFontLoad!.then((_) {
+      if (mounted) setState(() {});
+    }).catchError((Object _) {
+      _brandFontLoad = null;
+    });
+  }
+
+  static Future<void> _loadBrandFont() async {
+    final loader = FontLoader('Lobster')
+      ..addFont(rootBundle.load('asset/fonts/Lobster-Regular.ttf'));
+    await loader.load();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -670,6 +692,10 @@ class _SideMenuState extends State<SideMenu> {
                       .logout(LogoutRequest(userId: getIt<User>().id));
                 } catch (_) {}
                 getIt<WebSocketService>().disconnect();
+                ApiInitializer.clearAuth();
+                if (getIt.isRegistered<ChatNotifier>()) {
+                  getIt<ChatNotifier>().clearChatViewState();
+                }
                 if (getIt.isRegistered<User>()) {
                   getIt.unregister<User>();
                 }
