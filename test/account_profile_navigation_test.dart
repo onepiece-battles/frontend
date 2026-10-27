@@ -43,6 +43,19 @@ class _ProfileDao extends UserDao {
   }
 }
 
+class _OtherProfileDao extends UserDao {
+  _OtherProfileDao() : super.empty();
+
+  @override
+  Future<User?> get(GetUserRequest request) async => User(
+        id: 'other',
+        username: 'other@example.com',
+        nickname: '娜美',
+        profileImage: '',
+        emailVerified: false,
+      );
+}
+
 Widget _profileApp() => const MaterialApp(
       locale: Locale('zh'),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -92,6 +105,24 @@ void main() {
     expect(find.text('me@example.com'), findsWidgets);
     expect(find.text('基本信息'), findsOneWidget);
     expect(find.byTooltip('编辑昵称'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('another member profile is visible without account actions',
+      (tester) async {
+    GetIt.I.registerSingleton<UserDao>(_OtherProfileDao());
+    await tester.pumpWidget(const MaterialApp(
+      locale: Locale('zh'),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: Scaffold(body: UserProfile(userId: 'other')),
+    ));
+    await tester.pumpAndSettle();
+    expect(find.text('个人资料'), findsOneWidget);
+    expect(find.text('娜美'), findsWidgets);
+    expect(find.byTooltip('编辑昵称'), findsNothing);
+    expect(find.text('上传头像'), findsNothing);
+    expect(find.text('发送验证邮件'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 

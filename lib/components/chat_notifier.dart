@@ -233,9 +233,8 @@ class ChatNotifier with ChangeNotifier {
           currentImageUri != null &&
           currentImageUri.startsWith('data:image') &&
           contentMatches;
-      final isTextReplacement = incomingImageUri == null &&
-          currentImageUri == null &&
-          contentMatches;
+      final isTextReplacement =
+          incomingImageUri == null && currentImageUri == null && contentMatches;
 
       if (isImageReplacement || isTextReplacement) {
         final updated = List<Message>.from(existing);
@@ -254,6 +253,33 @@ class ChatNotifier with ChangeNotifier {
     return false;
   }
 
+  /// A chat update can arrive after a newer message (including an optimistic
+  /// emoji-only send) and still contain the previous preview. Keep the newer
+  /// message for the sidebar while the server catches up.
+  Message? _latestPreviewMessage(String? chatId, Message? fromChat) {
+    if (chatId == null) return fromChat;
+    final messages = _messagesByChatId[chatId];
+    if (messages == null || messages.isEmpty) return fromChat;
+    final local = messages.last;
+    if (fromChat == null) return local;
+    final localTime = local.creationRecord?.actionTimestamp;
+    final chatTime = fromChat.creationRecord?.actionTimestamp;
+    if (localTime != null && chatTime != null) {
+      return localTime >= chatTime ? local : fromChat;
+    }
+    if ((local.id ?? '').startsWith('opt_')) return local;
+    return fromChat;
+  }
+
+  bool _isOlderThanLocal(String? chatId, Message incoming) {
+    if (chatId == null) return false;
+    final messages = _messagesByChatId[chatId];
+    if (messages == null || messages.isEmpty) return false;
+    final local = messages.last;
+    return local.id != incoming.id &&
+        identical(_latestPreviewMessage(chatId, incoming), local);
+  }
+
   void _handleChatUpdate(Chat update) {
     final latestMessage = update.message;
     if (latestMessage != null) {
@@ -266,9 +292,12 @@ class ChatNotifier with ChangeNotifier {
           notify: false,
           promoteChat: false,
         ) &&
-        !_updateMessageInPlace(latestMessage, notify: false)) {
+        !_updateMessageInPlace(latestMessage, notify: false) &&
+        !_isOlderThanLocal(update.id, latestMessage)) {
       _insertMessageWithoutNotify(latestMessage);
     }
+
+    update.message = _latestPreviewMessage(update.id, update.message);
 
     // Old duplicate removed, then the chat is placed in its correct
     // recency-sorted position (most recent first) rather than blindly at the
@@ -299,7 +328,11 @@ class ChatNotifier with ChangeNotifier {
       );
       if (response == null) return;
 
-      _chats = response.chats.toList()..sort(_compareChatsByLatestMessage);
+      _chats = response.chats.map((chat) {
+        chat.message = _latestPreviewMessage(chat.id, chat.message);
+        return chat;
+      }).toList()
+        ..sort(_compareChatsByLatestMessage);
       if (_activeChatId != null) {
         _activeChat = _chats.cast<Chat?>().firstWhere(
               (chat) => chat?.id == _activeChatId,

@@ -220,59 +220,62 @@ class MessageItem extends StatelessWidget {
       );
     }
 
-    final bool hasText = message.content != null;
-    final bool hasImage = message.imageContentUri != null;
+    final hasText = message.content?.trim().isNotEmpty == true;
+    final hasImage = message.imageContentUri?.isNotEmpty == true;
 
     return MouseRegion(
       onEnter: (_) => BrowserContextMenu.disableContextMenu(),
       onExit: (_) => BrowserContextMenu.enableContextMenu(),
-      child: CustomPaint(
-        painter: _ChatBubblePainter(
-            color: isMe ? OnepieceColors.fancyBlue : const Color(0xFFE9E9EB),
-            isMe: isMe),
-        child: Padding(
-            padding: EdgeInsets.fromLTRB(isMe ? 12 : 17, 9, isMe ? 17 : 12, 9),
-            child: Builder(builder: (innerContext) {
-              return GestureDetector(
-                onSecondaryTap: () => showMessageMenu(innerContext),
-                onLongPress: () => showMessageMenu(innerContext),
-                child: SelectionContainer.disabled(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (hasText)
-                        Text(
-                          message.content!,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment:
+            isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        children: [
+          if (hasText)
+            CustomPaint(
+              key: const Key('chat-text-bubble'),
+              painter: _ChatBubblePainter(
+                  color:
+                      isMe ? OnepieceColors.fancyBlue : const Color(0xFFE9E9EB),
+                  isMe: isMe),
+              child: Padding(
+                padding:
+                    EdgeInsets.fromLTRB(isMe ? 12 : 17, 9, isMe ? 17 : 12, 9),
+                child: Builder(builder: (innerContext) {
+                  return GestureDetector(
+                    onSecondaryTap: () => showMessageMenu(innerContext),
+                    onLongPress: () => showMessageMenu(innerContext),
+                    child: SelectionContainer.disabled(
+                      child: Text(message.content!,
+                          softWrap: true,
+                          textAlign: TextAlign.start,
                           style: TextStyle(
                             color:
                                 isMe ? Colors.white : const Color(0xFF1C1C1E),
                             fontSize: 16,
                             height: 1.3,
-                          ),
-                          softWrap: true,
-                          textAlign: TextAlign.start,
-                        ),
-                      // Gap between text and image
-                      if (hasText && hasImage) const SizedBox(height: 6),
-                      if (hasImage)
-                        GestureDetector(
-                          // Tap to open the full-screen zoomable viewer; the
-                          // long-press menu still comes from the bubble's outer
-                          // GestureDetector.
-                          onTap: () => showChatImageViewer(
-                              context, message.imageContentUri!),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(5),
-                            child: _buildMessageImage(
-                                message.imageContentUri!, 200),
-                          ),
-                        ),
-                    ],
-                  ),
+                          )),
+                    ),
+                  );
+                }),
+              ),
+            ),
+          if (hasText && hasImage) const SizedBox(height: 6),
+          if (hasImage)
+            Builder(builder: (innerContext) {
+              return GestureDetector(
+                onTap: () =>
+                    showChatImageViewer(context, message.imageContentUri!),
+                onSecondaryTap: () => showMessageMenu(innerContext),
+                onLongPress: () => showMessageMenu(innerContext),
+                child: ClipRRect(
+                  key: const Key('chat-message-image'),
+                  borderRadius: BorderRadius.circular(7),
+                  child: _buildMessageImage(message.imageContentUri!, 200),
                 ),
               );
-            })),
+            }),
+        ],
       ),
     );
   }

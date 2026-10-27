@@ -9,6 +9,7 @@ import 'package:openapi/api.dart';
 import '../../l10n/app_localizations.dart';
 import '../../config/resource_permission_manager.dart';
 import '../../constants/onepiece_colors.dart';
+import '../../components/image_lazy_loader.dart';
 import '../../popup/email_verification.dart';
 import '../../popup/onepiece_alert.dart';
 import '../../repository/image_dao.dart';
@@ -115,7 +116,9 @@ class UserProfileController extends ChangeNotifier {
 
       final imageSource = response.profileImage?.isNotEmpty == true
           ? response.profileImage!
-          : (GetIt.I<User>().profileImage ?? '');
+          : userId == GetIt.I<User>().id
+              ? (GetIt.I<User>().profileImage ?? '')
+              : '';
       final imageBytes = Base64Helper.decode(imageSource);
 
       _originalData = UserProfileFormData(
@@ -351,6 +354,7 @@ class _UserProfileState extends State<UserProfile> {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
+    final canEdit = widget.userId == GetIt.I<User>().id;
     return ListenableBuilder(
       listenable: _controller,
       builder: (context, _) {
@@ -380,7 +384,8 @@ class _UserProfileState extends State<UserProfile> {
                           : Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(loc.myAccount,
+                                Text(
+                                    canEdit ? loc.myAccount : loc.memberProfile,
                                     style: TextStyle(
                                         fontSize: narrow ? 25 : 30,
                                         fontWeight: FontWeight.w700,
@@ -388,7 +393,9 @@ class _UserProfileState extends State<UserProfile> {
                                         color: OnepieceColors.primaryLabel)),
                                 const SizedBox(height: 22),
                                 _ProfileHero(
-                                    controller: _controller, narrow: narrow),
+                                    controller: _controller,
+                                    narrow: narrow,
+                                    canEdit: canEdit),
                                 const SizedBox(height: 28),
                                 Padding(
                                   padding: const EdgeInsets.only(
@@ -399,7 +406,8 @@ class _UserProfileState extends State<UserProfile> {
                                           fontWeight: FontWeight.w600,
                                           color: OnepieceColors.primaryLabel)),
                                 ),
-                                _ProfileInfoCard(controller: _controller),
+                                _ProfileInfoCard(
+                                    controller: _controller, canEdit: canEdit),
                               ],
                             ),
                 ),
@@ -458,7 +466,9 @@ class _ProfileSurface extends StatelessWidget {
 class _ProfileHero extends StatelessWidget {
   final UserProfileController controller;
   final bool narrow;
-  const _ProfileHero({required this.controller, required this.narrow});
+  final bool canEdit;
+  const _ProfileHero(
+      {required this.controller, required this.narrow, required this.canEdit});
 
   @override
   Widget build(BuildContext context) {
@@ -469,11 +479,18 @@ class _ProfileHero extends StatelessWidget {
         width: 86,
         height: 86,
         child: bytes == null || bytes.isEmpty
-            ? const ColoredBox(
-                color: OnepieceColors.surface,
-                child: Icon(Icons.person_outline,
-                    size: 42, color: OnepieceColors.secondaryLabel),
-              )
+            ? !canEdit && controller.user.imageUri?.isNotEmpty == true
+                ? ImageLazyLoader(
+                    uriProvider: () => controller.user.imageUri ?? '',
+                    width: 86,
+                    borderWidth: 0,
+                    borderRadios: 43,
+                  )
+                : const ColoredBox(
+                    color: OnepieceColors.surface,
+                    child: Icon(Icons.person_outline,
+                        size: 42, color: OnepieceColors.secondaryLabel),
+                  )
             : ImageHelper.rasterImage(bytes, fit: BoxFit.cover),
       ),
     );
@@ -526,16 +543,18 @@ class _ProfileHero extends StatelessWidget {
               avatar,
               const SizedBox(width: 18),
               Expanded(child: identity),
-              if (!narrow) ...[const SizedBox(width: 18), upload],
+              if (canEdit && !narrow) ...[const SizedBox(width: 18), upload],
             ]),
-            if (narrow) ...[
+            if (canEdit && narrow) ...[
               const SizedBox(height: 18),
               upload,
             ],
-            const SizedBox(height: 11),
-            Text(loc.maxFileSize500,
-                style: const TextStyle(
-                    fontSize: 12, color: OnepieceColors.secondaryLabel)),
+            if (canEdit) ...[
+              const SizedBox(height: 11),
+              Text(loc.maxFileSize500,
+                  style: const TextStyle(
+                      fontSize: 12, color: OnepieceColors.secondaryLabel)),
+            ],
           ],
         ),
       ),
@@ -574,25 +593,27 @@ class _VerificationBadge extends StatelessWidget {
 
 class _ProfileInfoCard extends StatelessWidget {
   final UserProfileController controller;
-  const _ProfileInfoCard({required this.controller});
+  final bool canEdit;
+  const _ProfileInfoCard({required this.controller, required this.canEdit});
 
   @override
   Widget build(BuildContext context) => _ProfileSurface(
         child: Column(children: [
-          _NicknameRow(controller: controller),
+          _NicknameRow(controller: controller, canEdit: canEdit),
           const Divider(
               height: 1,
               indent: 20,
               endIndent: 20,
               color: OnepieceColors.separator),
-          _EmailRow(controller: controller),
+          _EmailRow(controller: controller, canEdit: canEdit),
         ]),
       );
 }
 
 class _NicknameRow extends StatefulWidget {
   final UserProfileController controller;
-  const _NicknameRow({required this.controller});
+  final bool canEdit;
+  const _NicknameRow({required this.controller, required this.canEdit});
 
   @override
   State<_NicknameRow> createState() => _NicknameRowState();
@@ -641,7 +662,7 @@ class _NicknameRowState extends State<_NicknameRow> {
                 style: const TextStyle(
                     fontSize: 12, color: OnepieceColors.secondaryLabel)),
           ),
-          if (!_editing)
+          if (widget.canEdit && !_editing)
             IconButton(
               tooltip: loc.profileEditNickname,
               visualDensity: VisualDensity.compact,
@@ -714,7 +735,8 @@ class _NicknameRowState extends State<_NicknameRow> {
 
 class _EmailRow extends StatelessWidget {
   final UserProfileController controller;
-  const _EmailRow({required this.controller});
+  final bool canEdit;
+  const _EmailRow({required this.controller, required this.canEdit});
 
   @override
   Widget build(BuildContext context) {
@@ -736,7 +758,7 @@ class _EmailRow extends StatelessWidget {
                     fontWeight: FontWeight.w500,
                     color: OnepieceColors.primaryLabel)),
           ),
-          if (!controller.isEmailVerified) ...[
+          if (canEdit && !controller.isEmailVerified) ...[
             const SizedBox(width: 12),
             TextButton(
               onPressed: controller.isSendingVerificationEmail

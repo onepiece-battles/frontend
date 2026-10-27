@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
@@ -1012,7 +1013,7 @@ class _ChattingViewState extends State<ChattingView> {
                   currentUserId: getIt<User>().id,
                   onOpenProfile: (user) {
                     Navigator.of(drawerContext).pop();
-                    context.goNamed('userDetails',
+                    context.goNamed('user_profile',
                         extra: user.id,
                         pathParameters: {'name': user.nickname});
                   },
@@ -1442,7 +1443,9 @@ class _ChattingViewState extends State<ChattingView> {
                                           CrossAxisAlignment.end,
                                       children: [
                                         _buildComposerIcon(
-                                          icon: Icons.photo_outlined,
+                                          context: context,
+                                          icon:
+                                              CupertinoIcons.photo_on_rectangle,
                                           onTap: pickImage,
                                         ),
                                         const SizedBox(width: 2),
@@ -1605,9 +1608,16 @@ class _ChattingViewState extends State<ChattingView> {
     }
     if (chat.message != null) {
       final nickname = _memberNicknameOrFallback(chat, chat.message!.userId);
-      final preview = chat.message!.content != null
-          ? chat.message!.content!.split('\n').first
-          : AppLocalizations.of(context)!.image;
+      final message = chat.message!;
+      final content = message.content?.trim();
+      final preview = content?.isNotEmpty == true
+          ? content!.split('\n').first
+          : message.imageContentUri?.isNotEmpty == true
+              ? AppLocalizations.of(context)!.image
+              : message.retracted == true
+                  ? AppLocalizations.of(context)!.messageRetracted
+                  : '';
+      if (preview.isEmpty) return const SizedBox.shrink();
       return Text(
         "$nickname: $preview",
         maxLines: 1,
@@ -1648,19 +1658,27 @@ class _ChattingViewState extends State<ChattingView> {
 
   /// A flat, feedback-free composer affordance (e.g. the photo picker).
   Widget _buildComposerIcon(
-      {required IconData icon, required VoidCallback onTap}) {
-    return IconButton(
-      onPressed: onTap,
-      padding: EdgeInsets.zero,
-      constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
-      splashColor: Colors.transparent,
-      highlightColor: Colors.transparent,
-      hoverColor: Colors.transparent,
-      focusColor: Colors.transparent,
-      splashRadius: 0.1,
-      visualDensity: VisualDensity.compact,
-      enableFeedback: false,
-      icon: Icon(icon, size: 24, color: OnepieceColors.fancyBlue),
+      {required BuildContext context,
+      required IconData icon,
+      required VoidCallback onTap}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 1),
+      child: Tooltip(
+        message: AppLocalizations.of(context)!.image,
+        child: Material(
+          color: OnepieceColors.surface,
+          borderRadius: BorderRadius.circular(8),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(8),
+            onTap: onTap,
+            child: SizedBox(
+                width: 34,
+                height: 34,
+                child:
+                    Icon(icon, size: 20, color: OnepieceColors.primaryLabel)),
+          ),
+        ),
+      ),
     );
   }
 
