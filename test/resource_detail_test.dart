@@ -128,21 +128,19 @@ void main() {
           const Locale('en')));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
-      final buttons = find.byWidgetPredicate((widget) => widget is TextButton);
       final first = find.byKey(ValueKey('fruit-card-${fruits.first.id}'),
           skipOffstage: false);
       final second = find.byKey(ValueKey('fruit-card-${fruits.last.id}'));
       final firstCard = tester.getRect(first);
       expect(tester.getSize(second).height, firstCard.height);
-      await tester.tap(buttons.first);
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 400));
-      expect(find.byType(narrow ? BottomSheet : Dialog), findsOneWidget);
+      // Flipping a card to its detail side does not resize or move it.
+      await tester.tap(find.byIcon(Icons.flip_to_back_outlined).first);
+      await tester.pumpAndSettle();
+      expect(selected, isNotEmpty);
       expect(tester.getRect(first), firstCard);
       expect(tester.takeException(), isNull);
-      await tester.tap(find.byIcon(Icons.close).first);
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 400));
+      await tester.tap(find.byIcon(Icons.flip_to_front_outlined).first);
+      await tester.pumpAndSettle();
       expect(selected, isEmpty);
     });
   }
@@ -177,7 +175,7 @@ void main() {
   }
 
   for (final width in [375.0, 1280.0]) {
-    testWidgets('character details do not resize the list card at $width',
+    testWidgets('character list card keeps its size when flipped at $width',
         (tester) async {
       tester.view.physicalSize = Size(width, 900);
       tester.view.devicePixelRatio = 1;
@@ -191,16 +189,14 @@ void main() {
           ? find.byType(Card).first
           : find.byType(DesktopSpotlightCard).first;
       final rect = tester.getRect(card);
-      final loc = AppLocalizations.of(tester.element(card))!;
-      await tester.tap(find.byTooltip(loc.detailInformation).first);
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 400));
-      expect(find.byType(width < 600 ? BottomSheet : Dialog), findsOneWidget);
+      // The flip button turns the card in place without resizing or moving it.
+      await tester.tap(find.byIcon(Icons.flip_to_back_outlined).first);
+      await tester.pumpAndSettle();
       expect(tester.getRect(card), rect);
       expect(tester.takeException(), isNull);
-      await tester.tap(find.byIcon(Icons.close).first);
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 400));
+      await tester.tap(find.byIcon(Icons.flip_to_front_outlined).first);
+      await tester.pumpAndSettle();
+      expect(tester.getRect(card), rect);
     });
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 import 'package:one_piece_battles_flutter/components/resource_flip_card.dart';
 import 'package:one_piece_battles_flutter/l10n/app_localizations.dart';
 import 'package:one_piece_battles_flutter/views/character/widgets/character_desktop_roster.dart';
@@ -87,6 +88,7 @@ Widget _host(Widget Function(BuildContext) content) {
 
 void main() {
   setUp(() {
+    VisibilityDetectorController.instance.updateInterval = Duration.zero;
     if (GetIt.instance.isRegistered<Locale>()) {
       GetIt.instance.unregister<Locale>();
     }
@@ -121,20 +123,26 @@ void main() {
     await tester.pump();
     final card = find.byType(ResourceFlipCard);
     final before = tester.getSize(card);
-    // ignore: avoid_print
-    print('first face: ${tester.widgetList<Text>(find.byType(Text)).map((text) => text.data).toList()}');
+    expect(before.height, 225);
     expect(find.text('武装色'), findsOneWidget);
-    await tester.tap(find.text('详细信息'));
-    await tester.pump(const Duration(milliseconds: 210));
+    expect(find.text('霸气'), findsOneWidget);
+    expect(find.text('悬赏额'), findsOneWidget);
+    expect(find.text('3,000,000,000'), findsOneWidget);
+    expect(tester.getRect(find.text('武装色')).bottom,
+        lessThanOrEqualTo(tester.getRect(card).bottom));
+    await tester.tap(find.byIcon(Icons.flip_to_back_outlined));
+    await tester.pumpAndSettle();
     expect(tester.getSize(card), before);
-    await tester.pump(const Duration(milliseconds: 250));
     expect(find.text('攻击力'), findsOneWidget);
     expect(find.text('400'), findsOneWidget);
     expect(find.text('精力值'), findsOneWidget);
+    expect(find.textContaining('悬赏额'), findsOneWidget);
+    expect(tester.getSize(find.byKey(const ValueKey('character-avatar-luffy'))),
+        const Size(40, 40));
     expect(find.byType(Dialog), findsNothing);
     expect(tester.getSize(card), before);
-    await tester.tap(find.byTooltip('翻回正面'));
-    await tester.pump(const Duration(milliseconds: 450));
+    await tester.tap(find.byIcon(Icons.flip_to_front_outlined));
+    await tester.pumpAndSettle();
     expect(find.text('武装色'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -164,8 +172,9 @@ void main() {
         )));
     await tester.pump();
     expect(find.text('霸王色'), findsOneWidget);
-    await tester.tap(find.text('详细信息'));
-    await tester.pump(const Duration(milliseconds: 450));
+    expect(find.text('悬赏额'), findsOneWidget);
+    await tester.tap(find.byIcon(Icons.flip_to_back_outlined));
+    await tester.pumpAndSettle();
     expect(find.text('果实数上限'), findsOneWidget);
     expect(find.text('团体增益 (%)'), findsOneWidget);
     expect(tester.takeException(), isNull);
@@ -192,15 +201,20 @@ void main() {
     await tester.pump();
     expect(find.text('暂无持有者'), findsOneWidget);
     final before = tester.getSize(find.byType(ResourceFlipCard));
-    await tester.tap(find.text('详细信息'));
-    await tester.pump(const Duration(milliseconds: 450));
+    expect(before.height, 225);
+    expect(tester.getSize(find.byKey(const ValueKey('fruit-avatar-fruit-1'))),
+        const Size(48, 48));
+    await tester.tap(find.byIcon(Icons.flip_to_back_outlined));
+    await tester.pumpAndSettle();
     expect(find.text('1.2× + 30'), findsOneWidget);
     expect(find.text('1.4× − 10'), findsOneWidget);
     expect(find.text('1×'), findsOneWidget);
+    expect(tester.getSize(find.byKey(const ValueKey('fruit-avatar-fruit-1'))),
+        const Size(40, 40));
     expect(tester.getSize(find.byType(ResourceFlipCard)), before);
     expect(tester.takeException(), isNull);
-    await tester.tap(find.text('查看完整详情'));
-    await tester.pump();
+    await tester.tap(find.text('1.2× + 30'));
+    await tester.pumpAndSettle();
     expect(find.text('fruit page'), findsOneWidget);
   });
 
@@ -222,9 +236,51 @@ void main() {
           ),
         )));
     await tester.pump();
-    await tester.tap(find.text('详细信息'));
-    await tester.pump(const Duration(milliseconds: 450));
+    await tester.tap(find.byIcon(Icons.flip_to_back_outlined));
+    await tester.pumpAndSettle();
     expect(find.text('精力消耗'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('desktop character and fruit cards use the larger grid width',
+      (tester) async {
+    tester.view.physicalSize = const Size(1280, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final characterScroll = ScrollController();
+    final fruitScroll = ScrollController();
+    addTearDown(characterScroll.dispose);
+    addTearDown(fruitScroll.dispose);
+
+    await tester.pumpWidget(_host((context) => CharacterDesktopRoster(
+          characters: [_character()],
+          totalItemCount: 1,
+          scrollController: characterScroll,
+          battleStyleMap: _styleMap,
+          raceMap: _raceMap,
+          hakiMap: _hakiMap,
+          expandedRowIds: const <String>{},
+          onToggleExpand: (_) {},
+          scoreOrder: null,
+          onScoreSortTap: () {},
+        )));
+    await tester.pump();
+    final characterSize = tester.getSize(find.byType(ResourceFlipCard));
+    expect(characterSize.width, greaterThanOrEqualTo(315));
+    expect(characterSize.height, 225);
+
+    await tester.pumpWidget(_host((context) => FruitRoster(
+          fruits: [_fruit()],
+          controller: fruitScroll,
+          expandedRowIds: const <String>{},
+          onToggleExpand: (_) {},
+          isNarrow: false,
+        )));
+    await tester.pump();
+    final fruitSize = tester.getSize(find.byType(ResourceFlipCard));
+    expect(fruitSize.width, greaterThanOrEqualTo(315));
+    expect(fruitSize.height, 225);
     expect(tester.takeException(), isNull);
   });
 }

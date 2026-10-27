@@ -121,7 +121,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('fruit details open separately and show all six attributes',
+  testWidgets('fruit card flip shows all six attribute formulas',
       (tester) async {
     GetIt.instance.registerSingleton<Locale>(const Locale('en'));
     final controller = ScrollController();
@@ -162,11 +162,11 @@ void main() {
             })),
         const Locale('en')));
     await tester.pumpAndSettle();
-    await tester.tap(find.byWidgetPredicate((widget) => widget is TextButton));
+    await tester.tap(find.byIcon(Icons.flip_to_back_outlined));
     await tester.pumpAndSettle();
     expect(expandedIds, contains('fruit'));
     for (final intercept in [10, 20, 30, 40, 50, 60]) {
-      expect(find.textContaining('x + $intercept'), findsOneWidget);
+      expect(find.textContaining('× + $intercept'), findsOneWidget);
     }
     expect(tester.takeException(), isNull);
   });

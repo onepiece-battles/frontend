@@ -69,9 +69,9 @@ class CharacterDesktopRoster extends StatelessWidget {
             items: characters,
             idOf: (character) => character.id,
             controller: scrollController,
-            minCardWidth: 280,
-            maxColumns: 6,
-            gap: 12,
+            minCardWidth: 315,
+            maxColumns: 8,
+            gap: 10,
             footer: footer,
             cardBuilder: (context, character) => CharacterRosterCard(
               key: ValueKey('character-card-${character.id}'),
