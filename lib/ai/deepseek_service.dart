@@ -1,11 +1,12 @@
 import 'dart:convert';
 
-import 'package:http/http.dart' as http;
+import 'package:get_it/get_it.dart';
 
-import 'ai_config.dart';
+import 'assistant_api.dart';
 import 'resource_tools.dart';
 
-class AiKeyMissing implements Exception {}
+/// Thrown when the super-admin has not configured a DeepSeek key yet.
+class AiNotConfigured implements Exception {}
 
 class AiError implements Exception {
   AiError(this.message);
@@ -32,33 +33,52 @@ answer. Never invent combat stats, devil-fruit holders or battle outcomes; if a
 lookup returns nothing, say you could not find it.
 
 Answer in the SAME language the user used (Chinese or English). Be concise and
-direct. When comparing who is stronger, use combat power and the stats/battle
-history the tools return. You do NOT need to write links: the app automatically
-shows clickable chips for every character, fruit and battle the tools surfaced.
+well formatted: use short paragraphs, **bold** for key figures, and "- " bullet
+lists when comparing or listing. When comparing who is stronger, reason from the
+combat power and the stats / battle history the tools return.
+
+IMPORTANT — make resources clickable inline: whenever you mention a character,
+devil fruit, battle or crew that appears in a tool result, write its name as a
+Markdown link of the form [Name](onepiece://TYPE/ID), where TYPE is one of
+character, fruit, battle or group, and ID is the exact id from that tool result
+(use battle_id for battles). Do not list the links separately at the end — weave
+them into the sentence where you name the resource. Only link resources that
+actually came from a tool result.
 ''';
 
 /// Holds one assistant conversation and runs the DeepSeek tool-calling loop.
+/// The DeepSeek call itself is proxied through the backend, which holds the
+/// key — this client never sees it.
 class DeepSeekAssistant {
   final List<Map<String, dynamic>> _api = [
     {'role': 'system', 'content': _systemPrompt}
   ];
 
+  AssistantApi get _assistantApi => GetIt.instance<AssistantApi>();
+
+  /// Seed the in-memory transcript from persisted history so the model keeps
+  /// context across reloads. Only user/assistant turns are replayed.
+  void seedHistory(Iterable<AiStoredMessage> history) {
+    for (final m in history) {
+      if (m.role == 'user' || m.role == 'assistant') {
+        _api.add({'role': m.role, 'content': m.content});
+      }
+    }
+  }
+
   Future<AiChatMessage> ask(String userText) async {
-    final key = await AiConfig.getKey();
-    if (key == null) throw AiKeyMissing();
     _api.add({'role': 'user', 'content': userText});
 
     final resources = <ResourceRef>{};
     for (var i = 0; i < 5; i++) {
-      final message = await _complete(key);
+      final message = await _complete();
       final toolCalls = message['tool_calls'];
       if (toolCalls is List && toolCalls.isNotEmpty) {
         _api.add(message);
         for (final call in toolCalls) {
           final fn = (call as Map)['function'] as Map;
           final args = _decodeArgs(fn['arguments']);
-          final result =
-              await ResourceTools.execute('${fn['name']}', args);
+          final result = await ResourceTools.execute('${fn['name']}', args);
           resources.addAll(result.resources);
           _api.add({
             'role': 'tool',
@@ -88,35 +108,35 @@ class DeepSeekAssistant {
     return {};
   }
 
-  Future<Map<String, dynamic>> _complete(String key) async {
-    final http.Response resp;
+  Future<Map<String, dynamic>> _complete() async {
+    final payload = jsonEncode({
+      'model': 'deepseek-chat', // the server overrides this with the configured model
+      'messages': _api,
+      'tools': ResourceTools.definitions(),
+      'tool_choice': 'auto',
+      'temperature': 0.3,
+    });
+
+    final AiChatResult result;
     try {
-      resp = await http.post(
-        Uri.parse(AiConfig.baseUrl),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $key',
-        },
-        body: jsonEncode({
-          'model': AiConfig.model,
-          'messages': _api,
-          'tools': ResourceTools.definitions(),
-          'tool_choice': 'auto',
-          'temperature': 0.3,
-        }),
-      );
+      result = await _assistantApi.chat(payload);
     } catch (e) {
-      throw AiError('Network error reaching DeepSeek: $e');
+      throw AiError('Could not reach the assistant service: $e');
     }
-    if (resp.statusCode != 200) {
-      throw AiError('DeepSeek error ${resp.statusCode}: ${utf8.decode(resp.bodyBytes)}');
+    if (result.error == 'not_configured') {
+      throw AiNotConfigured();
     }
-    final body = jsonDecode(utf8.decode(resp.bodyBytes)) as Map<String, dynamic>;
+    if (result.error != null) {
+      throw AiError('Assistant service error: ${result.error}');
+    }
+    if (result.status != 200 || result.responseBody == null) {
+      throw AiError('DeepSeek error ${result.status}: ${result.responseBody ?? ''}');
+    }
+    final body = jsonDecode(result.responseBody!) as Map<String, dynamic>;
     final choices = body['choices'] as List?;
     if (choices == null || choices.isEmpty) {
       throw AiError('DeepSeek returned no choices.');
     }
-    return Map<String, dynamic>.from(
-        (choices.first as Map)['message'] as Map);
+    return Map<String, dynamic>.from((choices.first as Map)['message'] as Map);
   }
 }

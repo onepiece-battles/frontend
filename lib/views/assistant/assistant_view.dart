@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:openapi/api.dart';
 
-import '../../ai/ai_config.dart';
+import '../../ai/assistant_api.dart';
 import '../../ai/deepseek_service.dart';
 import '../../ai/resource_tools.dart';
+import '../../ai/rich_message.dart';
 import '../../ai/speech_input.dart';
 import '../../constants/onepiece_colors.dart';
 
 /// The post-login landing: an AI control room. The user asks in natural
 /// language (typed, spoken, or via a preset) and the assistant answers using
-/// the app's own data, surfacing clickable chips that jump to each resource.
+/// the app's own data, with inline links that jump to each resource. The
+/// DeepSeek key lives on the server; only the NIKA super-admin can set it.
 class AssistantView extends StatefulWidget {
   const AssistantView({super.key});
 
@@ -18,6 +22,7 @@ class AssistantView extends StatefulWidget {
 }
 
 class _AssistantViewState extends State<AssistantView> {
+  final GetIt _getIt = GetIt.instance;
   final DeepSeekAssistant _assistant = DeepSeekAssistant();
   final List<AiChatMessage> _messages = [];
   final TextEditingController _input = TextEditingController();
@@ -26,16 +31,50 @@ class _AssistantViewState extends State<AssistantView> {
 
   bool _busy = false;
   bool _listening = false;
-  bool _hasKey = false;
+  bool _loadingHistory = true;
+  bool _configured = true; // assume ok until told otherwise (non-admins can't check)
+
+  AssistantApi get _api => _getIt<AssistantApi>();
 
   bool get _zh => Localizations.localeOf(context).languageCode == 'zh';
+
+  bool get _isAdmin {
+    try {
+      return _getIt<User>().loginRole == UserRole.NIKA;
+    } catch (_) {
+      return false;
+    }
+  }
 
   @override
   void initState() {
     super.initState();
-    AiConfig.getKey().then((k) {
-      if (mounted) setState(() => _hasKey = k != null);
-    });
+    _bootstrap();
+  }
+
+  Future<void> _bootstrap() async {
+    try {
+      final history = await _api.listMessages();
+      _assistant.seedHistory(history);
+      if (mounted) {
+        setState(() {
+          _messages.addAll(history.map((m) =>
+              AiChatMessage(m.role, m.content, resources: const [])));
+        });
+      }
+    } catch (_) {
+      // History is best-effort; an empty start is fine.
+    }
+    if (_isAdmin) {
+      try {
+        final setting = await _api.getSetting();
+        if (mounted) setState(() => _configured = setting.configured);
+      } catch (_) {}
+    }
+    if (mounted) {
+      setState(() => _loadingHistory = false);
+      _scrollToEnd();
+    }
   }
 
   @override
@@ -68,6 +107,20 @@ class _AssistantViewState extends State<AssistantView> {
     });
   }
 
+  Future<void> _persist(String role, String text, List<ResourceRef> resources) async {
+    try {
+      await _api.saveMessage(
+        role,
+        text,
+        resources
+            .map((r) => AiResourceLink(r.type, r.id, r.name))
+            .toList(),
+      );
+    } catch (_) {
+      // Persistence is best-effort; the chat still works in memory.
+    }
+  }
+
   Future<void> _send(String raw) async {
     final text = raw.trim();
     if (text.isEmpty || _busy) return;
@@ -78,17 +131,25 @@ class _AssistantViewState extends State<AssistantView> {
       _busy = true;
     });
     _scrollToEnd();
+    await _persist('user', text, const []);
     try {
       final reply = await _assistant.ask(text);
       if (!mounted) return;
       setState(() => _messages[_messages.length - 1] = reply);
-    } on AiKeyMissing {
+      await _persist('assistant', reply.text, reply.resources);
+    } on AiNotConfigured {
       if (!mounted) return;
       setState(() {
         _messages.removeLast();
-        _hasKey = false;
+        _configured = false;
       });
-      _promptForKey();
+      if (_isAdmin) {
+        _promptForKey();
+      } else {
+        _snack(_zh
+            ? 'AI 助手尚未配置，请联系管理员'
+            : 'The assistant is not set up yet — please contact an admin');
+      }
     } on AiError catch (e) {
       if (!mounted) return;
       setState(() => _messages[_messages.length - 1] =
@@ -134,16 +195,33 @@ class _AssistantViewState extends State<AssistantView> {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(m)));
 
   Future<void> _promptForKey() async {
-    final controller = TextEditingController();
+    final keyController = TextEditingController();
+    final modelController = TextEditingController();
     final saved = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(_zh ? '配置 DeepSeek API Key' : 'Set DeepSeek API key'),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          obscureText: true,
-          decoration: const InputDecoration(hintText: 'sk-...'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: keyController,
+              autofocus: true,
+              obscureText: true,
+              decoration: InputDecoration(
+                labelText: 'API Key',
+                hintText: _zh ? 'sk-…（留空则保留现有密钥）' : 'sk-… (blank keeps current)',
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: modelController,
+              decoration: const InputDecoration(
+                labelText: 'Model',
+                hintText: 'deepseek-chat',
+              ),
+            ),
+          ],
         ),
         actions: [
           TextButton(
@@ -155,29 +233,41 @@ class _AssistantViewState extends State<AssistantView> {
         ],
       ),
     );
-    if (saved == true && controller.text.trim().isNotEmpty) {
-      await AiConfig.setKey(controller.text);
-      if (mounted) setState(() => _hasKey = true);
+    if (saved == true) {
+      try {
+        await _api.setSetting(
+          apiKey: keyController.text.trim(),
+          model: modelController.text.trim().isEmpty
+              ? null
+              : modelController.text.trim(),
+        );
+        final setting = await _api.getSetting();
+        if (mounted) {
+          setState(() => _configured = setting.configured);
+          _snack(_zh ? '已保存' : 'Saved');
+        }
+      } catch (e) {
+        if (mounted) _snack(_zh ? '保存失败：$e' : 'Could not save: $e');
+      }
     }
   }
 
-  void _openResource(ResourceRef r) {
-    switch (r.type) {
+  void _openResource(String type, String id, String name) {
+    switch (type) {
       case 'character':
         context.goNamed('characterDetails',
-            extra: r.id, pathParameters: {'name': r.name});
+            extra: id, pathParameters: {'name': name});
         break;
       case 'fruit':
         context.goNamed('fruitDetails',
-            extra: r.id, pathParameters: {'name': r.name});
+            extra: id, pathParameters: {'name': name});
         break;
       case 'battle':
-        context.goNamed('battleDetails',
-            extra: r.id, pathParameters: {'id': r.id});
+        context.goNamed('battleDetails', extra: id, pathParameters: {'id': id});
         break;
       case 'group':
         context.goNamed('groupDetails',
-            extra: r.id, pathParameters: {'name': r.name});
+            extra: id, pathParameters: {'name': name});
         break;
     }
   }
@@ -189,9 +279,11 @@ class _AssistantViewState extends State<AssistantView> {
       child: Column(
         children: [
           _header(),
-          if (!_hasKey) _keyBanner(),
+          if (_isAdmin && !_configured) _keyBanner(),
           Expanded(
-            child: _messages.isEmpty ? _emptyState() : _messageList(),
+            child: _loadingHistory
+                ? const Center(child: CircularProgressIndicator())
+                : (_messages.isEmpty ? _emptyState() : _messageList()),
           ),
           _presetRow(),
           _composer(),
@@ -235,21 +327,29 @@ class _AssistantViewState extends State<AssistantView> {
             ],
           ),
         ),
-        IconButton(
-          tooltip: _zh ? 'API Key' : 'API key',
-          onPressed: _promptForKey,
-          icon: const Icon(Icons.key_outlined,
-              size: 20, color: OnepieceColors.secondaryLabel),
-        ),
+        if (_isAdmin)
+          IconButton(
+            tooltip: _zh ? 'API Key' : 'API key',
+            onPressed: _promptForKey,
+            icon: const Icon(Icons.key_outlined,
+                size: 20, color: OnepieceColors.secondaryLabel),
+          ),
         if (_messages.isNotEmpty)
           IconButton(
             tooltip: _zh ? '清空' : 'Clear',
-            onPressed: () => setState(() => _messages.clear()),
+            onPressed: _busy ? null : _clear,
             icon: const Icon(Icons.delete_outline,
                 size: 20, color: OnepieceColors.secondaryLabel),
           ),
       ]),
     );
+  }
+
+  Future<void> _clear() async {
+    setState(() => _messages.clear());
+    try {
+      await _api.clearMessages();
+    } catch (_) {}
   }
 
   Widget _keyBanner() {
@@ -325,79 +425,29 @@ class _AssistantViewState extends State<AssistantView> {
     final isUser = m.role == 'user';
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: Column(
-        crossAxisAlignment:
-            isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-        children: [
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 560),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
-              decoration: BoxDecoration(
-                color: isUser ? OnepieceColors.fancyBlue : OnepieceColors.surface,
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: m.pending
-                  ? const _TypingDots()
-                  : SelectableText(
-                      m.text,
-                      style: TextStyle(
-                          fontSize: 14,
-                          height: 1.35,
-                          color: isUser
-                              ? Colors.white
-                              : OnepieceColors.primaryLabel),
-                    ),
+      child: Align(
+        alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 560),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 10),
+            decoration: BoxDecoration(
+              color: isUser ? OnepieceColors.fancyBlue : OnepieceColors.surface,
+              borderRadius: BorderRadius.circular(14),
             ),
+            child: m.pending
+                ? const _TypingDots()
+                : (isUser
+                    ? SelectableText(
+                        m.text,
+                        style: const TextStyle(
+                            fontSize: 14, height: 1.35, color: Colors.white),
+                      )
+                    : RichMessage(
+                        data: m.text,
+                        onResource: _openResource,
+                      )),
           ),
-          if (m.resources.isNotEmpty) ...[
-            const SizedBox(height: 6),
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 560),
-              child: Wrap(
-                spacing: 6,
-                runSpacing: 6,
-                children: m.resources.map(_chip).toList(),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _chip(ResourceRef r) {
-    final icon = switch (r.type) {
-      'character' => Icons.person_outline,
-      'fruit' => Icons.spa_outlined,
-      'battle' => Icons.bolt_outlined,
-      'group' => Icons.groups_outlined,
-      _ => Icons.link,
-    };
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(20),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(20),
-        onTap: () => _openResource(r),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: OnepieceColors.separator),
-          ),
-          child: Row(mainAxisSize: MainAxisSize.min, children: [
-            Icon(icon, size: 14, color: OnepieceColors.fancyBlue),
-            const SizedBox(width: 5),
-            Text(r.name.isEmpty ? r.type : r.name,
-                style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: OnepieceColors.fancyBlue)),
-            const SizedBox(width: 2),
-            const Icon(Icons.north_east,
-                size: 11, color: OnepieceColors.secondaryLabel),
-          ]),
         ),
       ),
     );
