@@ -33,8 +33,10 @@ class _AssistantViewState extends State<AssistantView> {
   bool _busy = false;
   bool _listening = false;
   bool _loadingHistory = true;
-  bool _configured = true; // assume ok until told otherwise (non-admins can't check)
+  bool _configured =
+      true; // assume ok until told otherwise (non-admins can't check)
   bool _creatingBattle = false;
+  OverlayEntry? _copyToast;
 
   late final AssistantSession _session = _getIt<AssistantSession>();
   DeepSeekAssistant get _assistant => _session.assistant;
@@ -66,8 +68,18 @@ class _AssistantViewState extends State<AssistantView> {
       try {
         final history = await _api.listMessages();
         _assistant.seedHistory(history);
-        _messages.addAll(history
-            .map((m) => AiChatMessage(m.role, m.content, resources: const [])));
+        _messages.addAll(history.map((m) {
+          final resources = m.resources
+              .map((r) => ResourceRef(r.type, r.id, r.name))
+              .toList();
+          return AiChatMessage(
+            m.role,
+            m.role == 'assistant'
+                ? normalizeResourceLinks(m.content, resources)
+                : m.content,
+            resources: resources,
+          );
+        }));
       } catch (_) {
         // History is best-effort; an empty start is fine.
       }
@@ -87,6 +99,8 @@ class _AssistantViewState extends State<AssistantView> {
 
   @override
   void dispose() {
+    _copyToast?.remove();
+    _copyToast?.dispose();
     _input.dispose();
     _scroll.dispose();
     _speech.stop();
@@ -115,14 +129,13 @@ class _AssistantViewState extends State<AssistantView> {
     });
   }
 
-  Future<void> _persist(String role, String text, List<ResourceRef> resources) async {
+  Future<void> _persist(
+      String role, String text, List<ResourceRef> resources) async {
     try {
       await _api.saveMessage(
         role,
         text,
-        resources
-            .map((r) => AiResourceLink(r.type, r.id, r.name))
-            .toList(),
+        resources.map((r) => AiResourceLink(r.type, r.id, r.name)).toList(),
       );
     } catch (_) {
       // Persistence is best-effort; the chat still works in memory.
@@ -187,8 +200,7 @@ class _AssistantViewState extends State<AssistantView> {
       lang: _zh ? 'zh-CN' : 'en-US',
       onResult: (t) {
         _input.text = t;
-        _input.selection =
-            TextSelection.collapsed(offset: _input.text.length);
+        _input.selection = TextSelection.collapsed(offset: _input.text.length);
       },
       onEnd: () {
         if (mounted) setState(() => _listening = false);
@@ -218,7 +230,8 @@ class _AssistantViewState extends State<AssistantView> {
               obscureText: true,
               decoration: InputDecoration(
                 labelText: 'API Key',
-                hintText: _zh ? 'sk-…（留空则保留现有密钥）' : 'sk-… (blank keeps current)',
+                hintText:
+                    _zh ? 'sk-…（留空则保留现有密钥）' : 'sk-… (blank keeps current)',
               ),
             ),
             const SizedBox(height: 8),
@@ -267,15 +280,15 @@ class _AssistantViewState extends State<AssistantView> {
             extra: id, pathParameters: {'name': name});
         break;
       case 'fruit':
-        context.goNamed('fruitDetails',
-            extra: id, pathParameters: {'name': name});
+        context
+            .goNamed('fruitDetails', extra: id, pathParameters: {'name': name});
         break;
       case 'battle':
         context.goNamed('battleDetails', extra: id, pathParameters: {'id': id});
         break;
       case 'group':
-        context.goNamed('groupDetails',
-            extra: id, pathParameters: {'name': name});
+        context
+            .goNamed('groupDetails', extra: id, pathParameters: {'name': name});
         break;
     }
   }
@@ -397,10 +410,7 @@ class _AssistantViewState extends State<AssistantView> {
             const Icon(Icons.auto_awesome,
                 size: 44, color: OnepieceColors.fancyBlue),
             const SizedBox(height: 14),
-            Text(
-                _zh
-                    ? '问我任何关于这个世界的问题'
-                    : 'Ask me anything about this world',
+            Text(_zh ? '问我任何关于这个世界的问题' : 'Ask me anything about this world',
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                     fontSize: 17,
@@ -492,7 +502,34 @@ class _AssistantViewState extends State<AssistantView> {
   void _copy(AiChatMessage m) {
     final text = m.role == 'user' ? m.text : _plainText(m.text);
     Clipboard.setData(ClipboardData(text: text));
-    _snack(_zh ? '已复制' : 'Copied');
+    _copyToast?.remove();
+    _copyToast?.dispose();
+    final entry = OverlayEntry(
+      builder: (_) => Positioned.fill(
+        child: IgnorePointer(
+          child: Center(
+            child: Material(
+              color: OnepieceColors.primaryLabel,
+              borderRadius: BorderRadius.circular(20),
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                child: Text(_zh ? '已复制' : 'Copied',
+                    style: const TextStyle(color: Colors.white, fontSize: 13)),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    _copyToast = entry;
+    Overlay.of(context, rootOverlay: true).insert(entry);
+    Future.delayed(const Duration(seconds: 1), () {
+      if (_copyToast != entry) return;
+      entry.remove();
+      entry.dispose();
+      _copyToast = null;
+    });
   }
 
   /// Strip the Markdown/link syntax so the clipboard gets clean prose.
@@ -547,8 +584,9 @@ class _AssistantViewState extends State<AssistantView> {
         Row(children: [
           Expanded(
             child: OutlinedButton(
-              onPressed:
-                  _creatingBattle ? null : () => setState(() => _handledProposals.add(m)),
+              onPressed: _creatingBattle
+                  ? null
+                  : () => setState(() => _handledProposals.add(m)),
               child: Text(_zh ? '取消' : 'Cancel'),
             ),
           ),
@@ -691,9 +729,9 @@ class _TypingDots extends StatefulWidget {
 
 class _TypingDotsState extends State<_TypingDots>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _c =
-      AnimationController(vsync: this, duration: const Duration(milliseconds: 1000))
-        ..repeat();
+  late final AnimationController _c = AnimationController(
+      vsync: this, duration: const Duration(milliseconds: 1000))
+    ..repeat();
 
   @override
   void dispose() {

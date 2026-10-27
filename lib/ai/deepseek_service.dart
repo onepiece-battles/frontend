@@ -36,6 +36,45 @@ class AiChatMessage {
   final BattleProposal? battleProposal;
 }
 
+/// Repair resource references before saving or displaying an assistant reply.
+/// Old replies can also pass through here when restored from history.
+String normalizeResourceLinks(String content, Iterable<ResourceRef> resources) {
+  final byKey = <String, String>{
+    for (final r in resources) '${r.type.toLowerCase()}/${r.id}': r.name,
+  };
+
+  String labelFor(String type, String id, String? existing) {
+    if (existing != null &&
+        existing.trim().isNotEmpty &&
+        !existing.contains('://') &&
+        !existing.toLowerCase().contains('onepiece')) {
+      return existing.trim();
+    }
+    final name = byKey['${type.toLowerCase()}/$id'];
+    if (name != null && name.isNotEmpty) return name;
+    return type.toLowerCase();
+  }
+
+  final mdLink = RegExp(
+      r'\[([^\]]*)\]\(\s*onepiece://([A-Za-z_]+)/([^\s)]+)\s*\)',
+      caseSensitive: false);
+  var out = content.replaceAllMapped(mdLink, (m) {
+    final type = m.group(2)!.toLowerCase();
+    final id = m.group(3)!;
+    return '[${labelFor(type, id, m.group(1))}](onepiece://$type/$id)';
+  });
+
+  final bare = RegExp(
+      r'(?<![(\[])onepiece://([A-Za-z_]+)/([^\s)\]，。！？；：,.;!?`*]+)',
+      caseSensitive: false);
+  out = out.replaceAllMapped(bare, (m) {
+    final type = m.group(1)!.toLowerCase();
+    final id = m.group(2)!;
+    return '[${labelFor(type, id, null)}](onepiece://$type/$id)';
+  });
+  return out;
+}
+
 const _systemPrompt = '''
 You are the control room assistant for "One Piece Battles" — an app of One Piece
 characters, devil fruits, crews and battle records.
@@ -89,7 +128,13 @@ class DeepSeekAssistant {
   void seedHistory(Iterable<AiStoredMessage> history) {
     for (final m in history) {
       if (m.role == 'user' || m.role == 'assistant') {
-        _api.add({'role': m.role, 'content': m.content});
+        _api.add({
+          'role': m.role,
+          'content': m.role == 'assistant'
+              ? normalizeResourceLinks(m.content,
+                  m.resources.map((r) => ResourceRef(r.type, r.id, r.name)))
+              : m.content,
+        });
       }
     }
   }
@@ -105,7 +150,10 @@ class DeepSeekAssistant {
     _api.add({'role': 'user', 'content': userText});
 
     final resources = <ResourceRef>{};
-    for (var i = 0; i < 5; i++) {
+    // Let the assistant gather several resources, then require a final answer
+    // from the results already in the transcript instead of returning a
+    // hard-coded English failure after the fifth tool round.
+    for (var i = 0; i < 8; i++) {
       final message = await _complete();
       final toolCalls = message['tool_calls'];
       if (toolCalls is List && toolCalls.isNotEmpty) {
@@ -125,54 +173,21 @@ class DeepSeekAssistant {
       }
       final content = (message['content'] ?? '').toString();
       _api.add({'role': 'assistant', 'content': content});
-      return AiChatMessage('assistant', _normalizeLinks(content, resources),
-          resources: resources.toList(), battleProposal: _extractProposal(resources));
+      return AiChatMessage(
+          'assistant', normalizeResourceLinks(content, resources),
+          resources: resources.toList(),
+          battleProposal: _extractProposal(resources));
     }
-    return AiChatMessage('assistant',
-        'I looked a few things up but could not finish. Try rephrasing?',
-        resources: resources.toList());
-  }
-
-  /// Guarantee that no raw `onepiece://` ever reaches the chat: fix the label
-  /// of any onepiece markdown link (the model sometimes uses the URL itself as
-  /// the label) and wrap any remaining bare URL into a proper
-  /// `[name](onepiece://type/id)` link, resolving names from the tool results.
-  String _normalizeLinks(String content, Set<ResourceRef> resources) {
-    final byKey = <String, String>{};
-    for (final r in resources) {
-      byKey['${r.type.toLowerCase()}/${r.id}'] = r.name;
+    final message = await _complete(allowTools: false);
+    final content = (message['content'] ?? '').toString();
+    if (content.trim().isEmpty) {
+      throw AiError('DeepSeek returned an empty answer.');
     }
-
-    String labelFor(String type, String id, String? existing) {
-      if (existing != null &&
-          existing.trim().isNotEmpty &&
-          !existing.contains('://') &&
-          !existing.toLowerCase().contains('onepiece')) {
-        return existing.trim();
-      }
-      final name = byKey['${type.toLowerCase()}/$id'];
-      if (name != null && name.isNotEmpty) return name;
-      return type.toLowerCase();
-    }
-
-    // 1) Clean the label of onepiece markdown links.
-    final mdLink =
-        RegExp(r'\[([^\]]*)\]\(\s*onepiece://([A-Za-z_]+)/([^)\s]+)\s*\)');
-    var out = content.replaceAllMapped(mdLink, (m) {
-      final type = m.group(2)!.toLowerCase();
-      final id = m.group(3)!;
-      return '[${labelFor(type, id, m.group(1))}](onepiece://$type/$id)';
-    });
-
-    // 2) Wrap any remaining bare onepiece URL (not already inside a link).
-    final bare = RegExp(r'(?<![(\[])onepiece://([A-Za-z_]+)/([^)\s\]]+)');
-    out = out.replaceAllMapped(bare, (m) {
-      final type = m.group(1)!.toLowerCase();
-      final id = m.group(2)!;
-      return '[${labelFor(type, id, null)}](onepiece://$type/$id)';
-    });
-
-    return out;
+    _api.add({'role': 'assistant', 'content': content});
+    return AiChatMessage(
+        'assistant', normalizeResourceLinks(content, resources),
+        resources: resources.toList(),
+        battleProposal: _extractProposal(resources));
   }
 
   BattleProposal? _extractProposal(Set<ResourceRef> resources) {
@@ -198,12 +213,13 @@ class DeepSeekAssistant {
     return {};
   }
 
-  Future<Map<String, dynamic>> _complete() async {
+  Future<Map<String, dynamic>> _complete({bool allowTools = true}) async {
     final payload = jsonEncode({
-      'model': 'deepseek-chat', // the server overrides this with the configured model
+      'model':
+          'deepseek-chat', // the server overrides this with the configured model
       'messages': _api,
-      'tools': ResourceTools.definitions(),
-      'tool_choice': 'auto',
+      if (allowTools) 'tools': ResourceTools.definitions(),
+      if (allowTools) 'tool_choice': 'auto',
       'temperature': 0.3,
     });
 
@@ -220,7 +236,8 @@ class DeepSeekAssistant {
       throw AiError('Assistant service error: ${result.error}');
     }
     if (result.status != 200 || result.responseBody == null) {
-      throw AiError('DeepSeek error ${result.status}: ${result.responseBody ?? ''}');
+      throw AiError(
+          'DeepSeek error ${result.status}: ${result.responseBody ?? ''}');
     }
     final body = jsonDecode(result.responseBody!) as Map<String, dynamic>;
     final choices = body['choices'] as List?;

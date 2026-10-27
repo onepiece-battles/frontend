@@ -45,7 +45,8 @@ class _RichMessageState extends State<RichMessage> {
   @override
   void didUpdateWidget(covariant RichMessage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.data != widget.data || oldWidget.textStyle != widget.textStyle) {
+    if (oldWidget.data != widget.data ||
+        oldWidget.textStyle != widget.textStyle) {
       _parse();
     }
   }
@@ -115,8 +116,8 @@ class _RichMessageState extends State<RichMessage> {
             children: [
               Text('•  ', style: _base),
               Expanded(
-                child: Text.rich(
-                    TextSpan(children: _inlineSpans(text)), style: _base),
+                child: Text.rich(TextSpan(children: _inlineSpans(text)),
+                    style: _base),
               ),
             ],
           ),
@@ -152,7 +153,8 @@ class _RichMessageState extends State<RichMessage> {
       }
       if (m.group(1) != null) {
         spans.add(TextSpan(
-            text: m.group(1), style: const TextStyle(fontWeight: FontWeight.w700)));
+            children: _inlineSpans(m.group(1)!),
+            style: const TextStyle(fontWeight: FontWeight.w700)));
       } else if (m.group(2) != null) {
         spans.add(_linkSpan(m.group(2)!, m.group(3) ?? ''));
       } else {
@@ -193,7 +195,8 @@ class _RichMessageState extends State<RichMessage> {
     }
     // Non-resource link: show the label (scrubbed of any raw URL), styled inert.
     return TextSpan(
-        text: _scrub(label), style: const TextStyle(color: OnepieceColors.fancyBlue));
+        text: _scrub(label),
+        style: const TextStyle(color: OnepieceColors.fancyBlue));
   }
 
   @override
