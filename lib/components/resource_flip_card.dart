@@ -22,7 +22,7 @@ class ResourceFlipCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textScale = MediaQuery.textScalerOf(context).scale(1);
-    final height = 204.0 + (textScale - 1).clamp(0.0, 1.0) * 100;
+    final height = 226.0 + (textScale - 1).clamp(0.0, 1.0) * 120;
     return SizedBox(
       height: height,
       child: TweenAnimationBuilder<double>(
@@ -46,19 +46,23 @@ class ResourceFlipCard extends StatelessWidget {
   }
 }
 
+/// The "dossier" back of a flip card: a titled shell with a flip-back control,
+/// a caller-supplied [child] body (stat bars, effect rows, …) and a trailing
+/// link into the full detail page. The body is where the detail lives — a
+/// readable breakdown, not a bare grid of numbers.
 class ResourceFlipDetail extends StatelessWidget {
   const ResourceFlipDetail({
     super.key,
     required this.title,
-    required this.fields,
     required this.onFlipBack,
     required this.onOpen,
+    required this.child,
   });
 
   final String title;
-  final List<ResourceFlipField> fields;
   final VoidCallback onFlipBack;
   final VoidCallback onOpen;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
@@ -67,19 +71,19 @@ class ResourceFlipDetail extends StatelessWidget {
       color: Colors.white,
       borderRadius: BorderRadius.circular(14),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+        padding: const EdgeInsets.fromLTRB(12, 9, 12, 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             SizedBox(
-              height: 30,
+              height: 26,
               child: Row(children: [
                 Expanded(
                   child: Text(title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                          fontSize: 13,
+                          fontSize: 14,
                           fontWeight: FontWeight.w600,
                           color: OnepieceColors.primaryLabel)),
                 ),
@@ -88,30 +92,31 @@ class ResourceFlipDetail extends StatelessWidget {
                   onPressed: onFlipBack,
                   padding: EdgeInsets.zero,
                   constraints:
-                      const BoxConstraints.tightFor(width: 30, height: 30),
+                      const BoxConstraints.tightFor(width: 26, height: 26),
                   icon: const Icon(Icons.flip_to_front_outlined,
-                      size: 18, color: OnepieceColors.secondaryLabel),
+                      size: 17, color: OnepieceColors.secondaryLabel),
                 ),
               ]),
             ),
-            const SizedBox(height: 5),
-            Expanded(child: _ResourceFlipFieldGrid(fields: fields)),
-            const SizedBox(height: 3),
+            Expanded(child: child),
             SizedBox(
-              height: 27,
+              height: 24,
               child: Align(
                 alignment: Alignment.centerRight,
-                child: TextButton.icon(
+                child: TextButton(
                   onPressed: onOpen,
                   style: TextButton.styleFrom(
-                    minimumSize: const Size(0, 27),
+                    minimumSize: const Size(0, 24),
                     padding: const EdgeInsets.symmetric(horizontal: 3),
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    textStyle: const TextStyle(fontSize: 11),
+                    foregroundColor: OnepieceColors.fancyBlue,
                   ),
-                  label: Text(loc.openResourceDetails),
-                  iconAlignment: IconAlignment.end,
-                  icon: const Icon(Icons.arrow_forward_ios, size: 11),
+                  child: Row(mainAxisSize: MainAxisSize.min, children: [
+                    Text(loc.openResourceDetails,
+                        style: const TextStyle(fontSize: 11)),
+                    const SizedBox(width: 2),
+                    const Icon(Icons.chevron_right, size: 15),
+                  ]),
                 ),
               ),
             ),
@@ -122,68 +127,186 @@ class ResourceFlipDetail extends StatelessWidget {
   }
 }
 
-class ResourceFlipField {
-  const ResourceFlipField(this.label, this.value);
+/// One labelled stat bar: a value shown both as a filled track (relative
+/// magnitude across the stat's own range) and as its exact number.
+class ResourceStatBar {
+  const ResourceStatBar(this.label, this.value, this.fraction);
+
+  final String label;
+  final String value;
+
+  /// 0‥1 fill, already normalised by the caller against the stat's range.
+  final double fraction;
+}
+
+class ResourceStatBars extends StatelessWidget {
+  const ResourceStatBars({
+    super.key,
+    required this.bars,
+    this.labelWidth = 62,
+    this.gap = 7,
+  });
+
+  final List<ResourceStatBar> bars;
+  final double labelWidth;
+  final double gap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        for (var i = 0; i < bars.length; i++) ...[
+          if (i > 0) SizedBox(height: gap),
+          _row(bars[i]),
+        ],
+      ],
+    );
+  }
+
+  Widget _row(ResourceStatBar bar) {
+    return Row(children: [
+      SizedBox(
+        width: labelWidth,
+        child: Text(bar.label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+                fontSize: 12, color: OnepieceColors.secondaryLabel)),
+      ),
+      const SizedBox(width: 8),
+      Expanded(
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(3),
+          child: Stack(children: [
+            Container(height: 6, color: OnepieceColors.surface),
+            FractionallySizedBox(
+              widthFactor: bar.fraction.clamp(0.0, 1.0),
+              child: Container(height: 6, color: OnepieceColors.fancyBlue),
+            ),
+          ]),
+        ),
+      ),
+      const SizedBox(width: 10),
+      SizedBox(
+        width: 40,
+        child: Text(bar.value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.right,
+            style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                fontFeatures: [FontFeature.tabularFigures()],
+                color: OnepieceColors.primaryLabel)),
+      ),
+    ]);
+  }
+}
+
+/// A small label + value pill used for the secondary stats that don't warrant
+/// a bar (crew gain, fruit limit, energy, …).
+class ResourceMetaChip {
+  const ResourceMetaChip(this.label, this.value);
 
   final String label;
   final String value;
 }
 
-class _ResourceFlipFieldGrid extends StatelessWidget {
-  const _ResourceFlipFieldGrid({required this.fields});
+class ResourceMetaChips extends StatelessWidget {
+  const ResourceMetaChips({super.key, required this.chips});
 
-  final List<ResourceFlipField> fields;
+  final List<ResourceMetaChip> chips;
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, constraints) {
-      const gap = 6.0;
-      final cellWidth = (constraints.maxWidth - 12 - gap) / 2;
-      return DecoratedBox(
-        decoration: BoxDecoration(
-          color: OnepieceColors.surface,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(6),
-          child: Wrap(
-            spacing: gap,
-            runSpacing: 3,
-            children: [
-              for (final field in fields)
-                SizedBox(
-                  width: cellWidth,
-                  child: Tooltip(
-                    message: '${field.label}: ${field.value}',
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(field.label,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                                fontSize: 10,
-                                height: 1.05,
-                                color: OnepieceColors.secondaryLabel)),
-                        const SizedBox(height: 1),
-                        Text(field.value,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                                fontSize: 13,
-                                height: 1.05,
-                                fontWeight: FontWeight.w600,
-                                fontFeatures: [FontFeature.tabularFigures()],
-                                color: OnepieceColors.primaryLabel)),
-                      ],
-                    ),
-                  ),
-                ),
-            ],
+    return Wrap(
+      spacing: 6,
+      runSpacing: 6,
+      children: [
+        for (final chip in chips)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: OnepieceColors.surface,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: RichText(
+              text: TextSpan(children: [
+                TextSpan(
+                    text: '${chip.label}  ',
+                    style: const TextStyle(
+                        fontSize: 11, color: OnepieceColors.secondaryLabel)),
+                TextSpan(
+                    text: chip.value,
+                    style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        fontFeatures: [FontFeature.tabularFigures()],
+                        color: OnepieceColors.primaryLabel)),
+              ]),
+            ),
           ),
-        ),
-      );
-    });
+      ],
+    );
   }
+}
+
+/// One effect row for a devil fruit: an icon, the stat it strengthens, and the
+/// formatted multiplier/offset it applies.
+class ResourceEffect {
+  const ResourceEffect(this.icon, this.label, this.value);
+
+  final IconData icon;
+  final String label;
+  final String value;
+}
+
+class ResourceEffectList extends StatelessWidget {
+  const ResourceEffectList({super.key, required this.effects, this.gap = 6});
+
+  final List<ResourceEffect> effects;
+  final double gap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        for (var i = 0; i < effects.length; i++) ...[
+          if (i > 0) SizedBox(height: gap),
+          _row(effects[i]),
+        ],
+      ],
+    );
+  }
+
+  Widget _row(ResourceEffect effect) {
+    return Row(children: [
+      Icon(effect.icon, size: 16, color: OnepieceColors.secondaryLabel),
+      const SizedBox(width: 8),
+      Expanded(
+        child: Text(effect.label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+                fontSize: 13, color: OnepieceColors.secondaryLabel)),
+      ),
+      const SizedBox(width: 8),
+      Text(effect.value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              fontFeatures: [FontFeature.tabularFigures()],
+              color: OnepieceColors.primaryLabel)),
+    ]);
+  }
+}
+
+/// Maps a raw stat [value] to a 0‥1 bar fill across its own [min]‥[max] range.
+double statFraction(num value, num min, num max) {
+  if (max <= min) return 0;
+  return ((value - min) / (max - min)).clamp(0.0, 1.0).toDouble();
 }

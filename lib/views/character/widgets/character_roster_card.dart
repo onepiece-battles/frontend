@@ -44,17 +44,31 @@ class CharacterRosterCard extends StatelessWidget {
         title: name,
         onFlipBack: onFlip,
         onOpen: () => _open(context),
-        fields: [
-          ResourceFlipField(loc.characterAttack, '${character.attack}'),
-          ResourceFlipField(loc.characterDefense, '${character.defense}'),
-          ResourceFlipField(
-              loc.characterIntelligence, '${character.intelligence}'),
-          ResourceFlipField(loc.characterBlood, '${character.blood}'),
-          ResourceFlipField(loc.characterSpeed, '${character.speed}'),
-          ResourceFlipField(loc.groupGain, '${character.groupGain}'),
-          ResourceFlipField(loc.fruitLimit, '${character.maximumFruitCount}'),
-          ResourceFlipField(loc.characterEnergy, '${character.energy}'),
-        ],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            ResourceStatBars(bars: [
+              ResourceStatBar(loc.characterAttack, '${character.attack}',
+                  statFraction(character.attack, 10, 1500)),
+              ResourceStatBar(loc.characterDefense, '${character.defense}',
+                  statFraction(character.defense, 10, 1400)),
+              ResourceStatBar(
+                  loc.characterIntelligence,
+                  '${character.intelligence}',
+                  statFraction(character.intelligence, 70, 260)),
+              ResourceStatBar(loc.characterBlood, '${character.blood}',
+                  statFraction(character.blood, 100, 10000)),
+              ResourceStatBar(loc.characterSpeed, '${character.speed}',
+                  statFraction(character.speed, 10, 200)),
+            ]),
+            const Spacer(),
+            ResourceMetaChips(chips: [
+              ResourceMetaChip(loc.groupGain, '${character.groupGain}'),
+              ResourceMetaChip(loc.fruitLimit, '${character.maximumFruitCount}'),
+              ResourceMetaChip(loc.characterEnergy, '${character.energy}'),
+            ]),
+          ],
+        ),
       ),
     );
   }

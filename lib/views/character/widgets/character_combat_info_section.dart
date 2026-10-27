@@ -2,6 +2,7 @@ import 'package:animated_toggle_switch/animated_toggle_switch.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import '../../../components/resource_detail_layout.dart';
+import '../../../components/resource_flip_card.dart';
 import 'package:go_router/go_router.dart';
 import 'package:openapi/api.dart';
 
@@ -109,6 +110,34 @@ class _CharacterCombatInfoSectionState
         Haki.haoshoku: AppLocalizations.of(context)!.haoshoku,
         Haki.kenbunshoku: AppLocalizations.of(context)!.kenbunshoku,
       };
+
+  ResourceStatBar _bar(
+      String label, TextEditingController c, num min, num max) {
+    final v = int.tryParse(c.text) ?? 0;
+    return ResourceStatBar(label, c.text, statFraction(v, min, max));
+  }
+
+  /// The five core combat stats as bars (reads the controllers, so it honours
+  /// the base/real toggle), and the three remaining stats as meta chips.
+  List<Widget> _statViews(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+    return [
+      ResourceStatBars(labelWidth: 96, gap: 12, bars: [
+        _bar(loc.characterAttack, characterAttackController, 10, 1500),
+        _bar(loc.characterDefense, characterDefenseController, 10, 1400),
+        _bar(loc.characterIntelligence, characterIntelligenceController, 70,
+            260),
+        _bar(loc.characterBlood, characterBloodController, 100, 10000),
+        _bar(loc.characterSpeed, characterSpeedController, 10, 200),
+      ]),
+      const SizedBox(height: 16),
+      ResourceMetaChips(chips: [
+        ResourceMetaChip(loc.groupGain, characterGroupGainController.text),
+        ResourceMetaChip(loc.fruitLimit, characterFruitLimitController.text),
+        ResourceMetaChip(loc.characterEnergy, characterEnergyController.text),
+      ]),
+    ];
+  }
 
   /// Switch the editable stat fields between the character's base values and
   /// their real (buffed) values.
@@ -337,62 +366,66 @@ class _CharacterCombatInfoSectionState
                   style: OnepieceFonts.contentStyleBoldFancyBlue
                       .copyWith(fontSize: 18)),
             ])),
-        mobileField(
-            context,
-            combatInfoEditable,
-            characterAttackController,
-            AppLocalizations.of(context)!.characterAttack,
-            'images/character_digits_icon/attack.svg',
-            isNum: true),
-        mobileField(
-            context,
-            combatInfoEditable,
-            characterDefenseController,
-            AppLocalizations.of(context)!.characterDefense,
-            'images/character_digits_icon/defense.svg',
-            isNum: true),
-        mobileField(
-            context,
-            combatInfoEditable,
-            characterBloodController,
-            AppLocalizations.of(context)!.characterBlood,
-            'images/character_digits_icon/blood.svg',
-            isNum: true),
-        mobileField(
-            context,
-            combatInfoEditable,
-            characterEnergyController,
-            AppLocalizations.of(context)!.characterEnergy,
-            'images/character_digits_icon/energy.svg',
-            isNum: true),
-        mobileField(
-            context,
-            combatInfoEditable,
-            characterSpeedController,
-            AppLocalizations.of(context)!.characterSpeed,
-            'images/character_digits_icon/speed.svg',
-            isNum: true),
-        mobileField(
-            context,
-            combatInfoEditable,
-            characterIntelligenceController,
-            AppLocalizations.of(context)!.characterIntelligence,
-            'images/character_digits_icon/intelligence.svg',
-            isNum: true),
-        mobileField(
-            context,
-            combatInfoEditable,
-            characterGroupGainController,
-            AppLocalizations.of(context)!.groupGain,
-            'images/character_digits_icon/group_gain.svg',
-            isNum: true),
-        mobileField(
-            context,
-            combatInfoEditable,
-            characterFruitLimitController,
-            AppLocalizations.of(context)!.fruitLimit,
-            'images/character_digits_icon/fruit_limit.svg',
-            isNum: true),
+        if (combatInfoEditable) ...[
+          mobileField(
+              context,
+              combatInfoEditable,
+              characterAttackController,
+              AppLocalizations.of(context)!.characterAttack,
+              'images/character_digits_icon/attack.svg',
+              isNum: true),
+          mobileField(
+              context,
+              combatInfoEditable,
+              characterDefenseController,
+              AppLocalizations.of(context)!.characterDefense,
+              'images/character_digits_icon/defense.svg',
+              isNum: true),
+          mobileField(
+              context,
+              combatInfoEditable,
+              characterBloodController,
+              AppLocalizations.of(context)!.characterBlood,
+              'images/character_digits_icon/blood.svg',
+              isNum: true),
+          mobileField(
+              context,
+              combatInfoEditable,
+              characterEnergyController,
+              AppLocalizations.of(context)!.characterEnergy,
+              'images/character_digits_icon/energy.svg',
+              isNum: true),
+          mobileField(
+              context,
+              combatInfoEditable,
+              characterSpeedController,
+              AppLocalizations.of(context)!.characterSpeed,
+              'images/character_digits_icon/speed.svg',
+              isNum: true),
+          mobileField(
+              context,
+              combatInfoEditable,
+              characterIntelligenceController,
+              AppLocalizations.of(context)!.characterIntelligence,
+              'images/character_digits_icon/intelligence.svg',
+              isNum: true),
+          mobileField(
+              context,
+              combatInfoEditable,
+              characterGroupGainController,
+              AppLocalizations.of(context)!.groupGain,
+              'images/character_digits_icon/group_gain.svg',
+              isNum: true),
+          mobileField(
+              context,
+              combatInfoEditable,
+              characterFruitLimitController,
+              AppLocalizations.of(context)!.fruitLimit,
+              'images/character_digits_icon/fruit_limit.svg',
+              isNum: true),
+        ] else
+          ..._statViews(context),
+        const SizedBox(height: 8),
         const Divider(),
       ]),
     );
@@ -424,17 +457,7 @@ class _CharacterCombatInfoSectionState
                     })),
         ]),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          DetailFieldGrid(fields: [
-            DetailValue(loc.characterAttack, characterAttackController.text),
-            DetailValue(loc.characterDefense, characterDefenseController.text),
-            DetailValue(loc.characterBlood, characterBloodController.text),
-            DetailValue(loc.characterSpeed, characterSpeedController.text),
-            DetailValue(loc.characterIntelligence,
-                characterIntelligenceController.text),
-            DetailValue(loc.characterEnergy, characterEnergyController.text),
-            DetailValue(loc.groupGain, characterGroupGainController.text),
-            DetailValue(loc.fruitLimit, characterFruitLimitController.text),
-          ]),
+          ..._statViews(context),
           if (selectedHakis.isNotEmpty) ...[
             const SizedBox(height: 24),
             Wrap(

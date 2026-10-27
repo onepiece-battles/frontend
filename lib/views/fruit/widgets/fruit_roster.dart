@@ -108,22 +108,33 @@ class FruitRoster extends StatelessWidget {
         title: name,
         onFlipBack: onFlip,
         onOpen: () => _open(context, fruit),
-        fields: [
-          ResourceFlipField(loc.attackStrengthen,
-              _formula(fruit.attackSlope, fruit.attackIntercept)),
-          ResourceFlipField(loc.defenseStrengthen,
-              _formula(fruit.defenseSlope, fruit.defenseIntercept)),
-          ResourceFlipField(loc.bloodStrengthen,
-              _formula(fruit.bloodSlope, fruit.bloodIntercept)),
-          ResourceFlipField(loc.intelligenceStrengthen,
-              _formula(fruit.intelligenceSlope, fruit.intelligenceIntercept)),
-          ResourceFlipField(loc.speedStrengthen,
-              _formula(fruit.speedSlope, fruit.speedIntercept)),
-          ResourceFlipField(loc.groupStrengthen,
-              _formula(fruit.groupGainSlope, fruit.groupGainIntercept)),
-          ResourceFlipField(
-              loc.energyConsume, fruit.energyConsume?.toString() ?? '—'),
-        ],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            ResourceEffectList(gap: 5, effects: [
+              ResourceEffect(Icons.bolt, loc.characterAttack,
+                  _formula(fruit.attackSlope, fruit.attackIntercept)),
+              ResourceEffect(Icons.shield_outlined, loc.characterDefense,
+                  _formula(fruit.defenseSlope, fruit.defenseIntercept)),
+              ResourceEffect(Icons.water_drop_outlined, loc.characterBlood,
+                  _formula(fruit.bloodSlope, fruit.bloodIntercept)),
+              ResourceEffect(
+                  Icons.psychology_outlined,
+                  loc.characterIntelligence,
+                  _formula(
+                      fruit.intelligenceSlope, fruit.intelligenceIntercept)),
+              ResourceEffect(Icons.speed, loc.characterSpeed,
+                  _formula(fruit.speedSlope, fruit.speedIntercept)),
+              ResourceEffect(Icons.groups_outlined, loc.groupGain,
+                  _formula(fruit.groupGainSlope, fruit.groupGainIntercept)),
+            ]),
+            const Spacer(),
+            ResourceMetaChips(chips: [
+              ResourceMetaChip(
+                  loc.energyConsume, fruit.energyConsume?.toString() ?? '—'),
+            ]),
+          ],
+        ),
       ),
     );
   }
