@@ -3,7 +3,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../constants/onepiece_colors.dart';
-import '../l10n/app_localizations.dart';
 
 /// Keeps the front and back in the same list slot while rotating the card.
 /// The face swaps edge-on, so neither side is ever mirrored to the reader.
@@ -13,16 +12,18 @@ class ResourceFlipCard extends StatelessWidget {
     required this.flipped,
     required this.front,
     required this.back,
+    this.baseHeight = 225,
   });
 
   final bool flipped;
   final Widget front;
   final Widget back;
+  final double baseHeight;
 
   @override
   Widget build(BuildContext context) {
     final textScale = MediaQuery.textScalerOf(context).scale(1);
-    final height = 226.0 + (textScale - 1).clamp(0.0, 1.0) * 120;
+    final height = baseHeight + (textScale - 1).clamp(0.0, 1.0) * 130;
     return SizedBox(
       height: height,
       child: TweenAnimationBuilder<double>(
@@ -46,84 +47,75 @@ class ResourceFlipCard extends StatelessWidget {
   }
 }
 
-/// The "dossier" back of a flip card: a titled shell with a flip-back control,
-/// a caller-supplied [child] body (stat bars, effect rows, …) and a trailing
-/// link into the full detail page. The body is where the detail lives — a
-/// readable breakdown, not a bare grid of numbers.
-class ResourceFlipDetail extends StatelessWidget {
-  const ResourceFlipDetail({
+/// One label→value pair for the compact number grid on a card's detailed side.
+class ResourceNumber {
+  const ResourceNumber(this.label, this.value);
+
+  final String label;
+  final String value;
+}
+
+/// A tight label→value grid for the flipped (detailed) side of a card. Lays
+/// [items] out across [columns] columns; labels ellipsize and values use
+/// tabular figures, so the grid stays aligned in both Chinese and English.
+class ResourceNumberGrid extends StatelessWidget {
+  const ResourceNumberGrid({
     super.key,
-    required this.title,
-    required this.onFlipBack,
-    required this.onOpen,
-    required this.child,
+    required this.items,
+    this.columns = 2,
+    this.rowGap = 3,
+    this.columnGap = 14,
+    this.fontSize = 11,
   });
 
-  final String title;
-  final VoidCallback onFlipBack;
-  final VoidCallback onOpen;
-  final Widget child;
+  final List<ResourceNumber> items;
+  final int columns;
+  final double rowGap;
+  final double columnGap;
+  final double fontSize;
 
   @override
   Widget build(BuildContext context) {
-    final loc = AppLocalizations.of(context)!;
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(14),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 9, 12, 8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SizedBox(
-              height: 26,
-              child: Row(children: [
-                Expanded(
-                  child: Text(title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: OnepieceColors.primaryLabel)),
-                ),
-                IconButton(
-                  tooltip: loc.flipCardBack,
-                  onPressed: onFlipBack,
-                  padding: EdgeInsets.zero,
-                  constraints:
-                      const BoxConstraints.tightFor(width: 26, height: 26),
-                  icon: const Icon(Icons.flip_to_front_outlined,
-                      size: 17, color: OnepieceColors.secondaryLabel),
-                ),
-              ]),
-            ),
-            Expanded(child: child),
-            SizedBox(
-              height: 24,
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: onOpen,
-                  style: TextButton.styleFrom(
-                    minimumSize: const Size(0, 24),
-                    padding: const EdgeInsets.symmetric(horizontal: 3),
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    foregroundColor: OnepieceColors.fancyBlue,
-                  ),
-                  child: Row(mainAxisSize: MainAxisSize.min, children: [
-                    Text(loc.openResourceDetails,
-                        style: const TextStyle(fontSize: 11)),
-                    const SizedBox(width: 2),
-                    const Icon(Icons.chevron_right, size: 15),
-                  ]),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+    final rows = <Widget>[];
+    for (var i = 0; i < items.length; i += columns) {
+      final cells = <Widget>[];
+      for (var c = 0; c < columns; c++) {
+        if (c > 0) cells.add(SizedBox(width: columnGap));
+        final index = i + c;
+        cells.add(Expanded(
+          child: index < items.length
+              ? _cell(items[index])
+              : const SizedBox.shrink(),
+        ));
+      }
+      if (rows.isNotEmpty) rows.add(SizedBox(height: rowGap));
+      rows.add(Row(children: cells));
+    }
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: rows,
     );
+  }
+
+  Widget _cell(ResourceNumber item) {
+    return Row(children: [
+      Expanded(
+        child: Text(item.label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+                fontSize: fontSize, color: OnepieceColors.secondaryLabel)),
+      ),
+      const SizedBox(width: 6),
+      Text(item.value,
+          maxLines: 1,
+          style: TextStyle(
+              fontSize: fontSize,
+              fontWeight: FontWeight.w600,
+              fontFeatures: const [FontFeature.tabularFigures()],
+              color: OnepieceColors.primaryLabel)),
+    ]);
   }
 }
 
