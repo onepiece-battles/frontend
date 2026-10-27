@@ -496,7 +496,7 @@ class _AssistantViewState extends State<AssistantView> {
     var s = markdown;
     s = s.replaceAllMapped(
         RegExp(r'\[([^\]]+)\]\((?:[^)]+)\)'), (m) => m.group(1)!);
-    s = s.replaceAll(RegExp(r'onepiece://[a-z_]+/[^\s)\]]+'), '');
+    s = s.replaceAll(RegExp(r'onepiece://[A-Za-z_]+/[^\s)\]]+'), '');
     s = s.replaceAll('**', '');
     s = s.replaceAll(RegExp(r'^#{1,3}\s+', multiLine: true), '');
     return s.trim();

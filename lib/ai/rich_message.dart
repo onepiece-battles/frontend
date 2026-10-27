@@ -115,14 +115,19 @@ class _RichMessageState extends State<RichMessage> {
   // Matches **bold**, [label](target), or a bare onepiece:// URL (safety net so
   // a raw link never renders as text); everything else is plain text.
   static final RegExp _inline = RegExp(
-      r'\*\*(.+?)\*\*|\[([^\]]+)\]\(([^)]+)\)|(onepiece://[a-z_]+/[^\s)\]]+)');
+      r'\*\*(.+?)\*\*|\[([^\]]+)\]\(([^)]+)\)|(onepiece://[A-Za-z_]+/[^\s)\]]+)');
+
+  // Any onepiece URL that escaped tokenizing is stripped from plain text, so a
+  // raw link can never be shown as literal text.
+  static final RegExp _rawUrl =
+      RegExp(r'\(?onepiece://[A-Za-z_]+/[^\s)\]]+\)?');
 
   List<InlineSpan> _inlineSpans(String text) {
     final spans = <InlineSpan>[];
     var last = 0;
     for (final m in _inline.allMatches(text)) {
       if (m.start > last) {
-        spans.add(TextSpan(text: text.substring(last, m.start)));
+        spans.add(TextSpan(text: _scrub(text.substring(last, m.start))));
       }
       if (m.group(1) != null) {
         spans.add(TextSpan(
@@ -137,31 +142,37 @@ class _RichMessageState extends State<RichMessage> {
       last = m.end;
     }
     if (last < text.length) {
-      spans.add(TextSpan(text: text.substring(last)));
+      spans.add(TextSpan(text: _scrub(text.substring(last))));
     }
     return spans;
   }
+
+  String _scrub(String s) => s.replaceAll(_rawUrl, '');
 
   InlineSpan _linkSpan(String label, String target) {
     if (target.startsWith('onepiece://')) {
       final rest = target.substring('onepiece://'.length);
       final slash = rest.indexOf('/');
       if (slash > 0) {
-        final type = rest.substring(0, slash);
+        final type = rest.substring(0, slash).toLowerCase();
         final id = rest.substring(slash + 1);
+        // Never show a raw URL / empty label as the visible text.
+        final display =
+            (label.contains('://') || label.trim().isEmpty) ? type : label;
         final recognizer = TapGestureRecognizer()
-          ..onTap = () => widget.onResource(type, id, label);
+          ..onTap = () => widget.onResource(type, id, display);
         _recognizers.add(recognizer);
         return TextSpan(
-          text: label,
+          text: display,
           recognizer: recognizer,
           style: const TextStyle(
               color: OnepieceColors.fancyBlue, fontWeight: FontWeight.w600),
         );
       }
     }
-    // Non-resource link: show the label, styled but inert.
-    return TextSpan(text: label, style: const TextStyle(color: OnepieceColors.fancyBlue));
+    // Non-resource link: show the label (scrubbed of any raw URL), styled inert.
+    return TextSpan(
+        text: _scrub(label), style: const TextStyle(color: OnepieceColors.fancyBlue));
   }
 
   @override

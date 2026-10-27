@@ -5,6 +5,7 @@ import 'package:openapi/api.dart';
 
 import '../repository/character_dao.dart';
 import '../repository/fruit_dao.dart';
+import '../repository/group_dao.dart';
 import '../utils/i18n_helper.dart';
 
 final GetIt _getIt = GetIt.instance;
@@ -94,6 +95,18 @@ class ResourceTools {
               'receiver_name': {'type': 'string'},
             },
             ['starter_name', 'receiver_name']),
+        _fn('search_groups', 'Search crews / groups by (partial) name.', {
+          'name': {'type': 'string'}
+        }, [
+          'name'
+        ]),
+        _fn('get_group_detail',
+            'A crew / group by name: its members (characters + their position), '
+                'its child groups and its parent group.',
+            {
+              'name': {'type': 'string'}
+            },
+            ['name']),
       ];
 
   static Map<String, dynamic> _fn(String name, String desc,
@@ -129,6 +142,10 @@ class ResourceTools {
         case 'propose_battle':
           return _proposeBattle(
               '${args['starter_name'] ?? ''}', '${args['receiver_name'] ?? ''}');
+        case 'search_groups':
+          return _searchGroups('${args['name'] ?? ''}');
+        case 'get_group_detail':
+          return _groupDetail('${args['name'] ?? ''}');
       }
       return const ToolResult('{"error":"unknown tool"}', []);
     } catch (e) {
@@ -353,5 +370,74 @@ class ResourceTools {
               'Do not output a onepiece:// link for this; just briefly say you prepared it.',
         }),
         refs);
+  }
+
+  static Future<ToolResult> _searchGroups(String name) async {
+    final resp = await _getIt<GroupDao>().listGroups(ListGroupRequest(
+        pageSize: 8,
+        pageIndex: 1,
+        sortKeys: [],
+        groupFilter: GroupFilter(name: name, languageCode: _lang)));
+    final groups = resp?.groups ?? [];
+    final refs = groups.map((g) => ResourceRef('group', g.id, _name(g.name)));
+    final data =
+        groups.map((g) => {'id': g.id, 'name': _name(g.name)}).toList();
+    return ToolResult(jsonEncode({'groups': data}), refs.toList());
+  }
+
+  static Future<ToolResult> _groupDetail(String name) async {
+    final list = await _getIt<GroupDao>().listGroups(ListGroupRequest(
+        pageSize: 1,
+        pageIndex: 1,
+        sortKeys: [],
+        groupFilter: GroupFilter(name: name, languageCode: _lang)));
+    final groups = list?.groups ?? [];
+    if (groups.isEmpty) {
+      return ToolResult(jsonEncode({'found': false, 'query': name}), const []);
+    }
+    final g = groups.first;
+    final groupId = g.id;
+    final refs = <ResourceRef>[ResourceRef('group', groupId, _name(g.name))];
+
+    final membersResp = await _getIt<GroupDao>()
+        .listChildCharacters(ListChildCharactersRequest(groupId: groupId));
+    final members = (membersResp?.childCharacters ?? []).map((c) {
+      if (c.characterId != null && c.characterId!.isNotEmpty) {
+        refs.add(ResourceRef('character', c.characterId!, _name(c.name)));
+      }
+      return {
+        'id': c.characterId,
+        'name': _name(c.name),
+        'position': c.position?.toString(),
+      };
+    }).toList();
+
+    final childResp = await _getIt<GroupDao>()
+        .listChildGroups(ListChildGroupsRequest(groupId: groupId));
+    final childGroups = (childResp?.childGroups ?? []).map((cg) {
+      refs.add(ResourceRef('group', cg.id, _name(cg.name)));
+      return {'id': cg.id, 'name': _name(cg.name)};
+    }).toList();
+
+    Map<String, dynamic>? parent;
+    if (g.fatherGroupId != null && g.fatherGroupId!.isNotEmpty) {
+      try {
+        final parentView = await _getIt<GroupDao>()
+            .getGroupFullView(GetGroupRequest(id: g.fatherGroupId));
+        if (parentView != null) {
+          refs.add(ResourceRef('group', parentView.id, _name(parentView.name)));
+          parent = {'id': parentView.id, 'name': _name(parentView.name)};
+        }
+      } catch (_) {}
+    }
+
+    final data = {
+      'id': groupId,
+      'name': _name(g.name),
+      'members': members,
+      'child_groups': childGroups,
+      'parent_group': parent,
+    };
+    return ToolResult(jsonEncode(data), refs);
   }
 }
