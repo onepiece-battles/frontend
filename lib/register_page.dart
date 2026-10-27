@@ -443,7 +443,7 @@ class _RegisterPageState extends State<RegisterPage> {
       await saveUserCredentials(
           usernameController.text, passwordController.text);
       if (!mounted) return; // ensure widget still in tree before using context
-      router.goNamed('characters');
+      router.goNamed('assistant');
       context
           .read<WebSocketService>()
           .connect(value.user!.id, value.accessToken!);

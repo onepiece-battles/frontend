@@ -410,7 +410,7 @@ class _LoginPageState extends State<LoginPage> {
         if (!mounted) return;
         ApiInitializer.initAuthInfo(response.accessToken!);
         ResourcePermissionManager.updateUserCache(response.user!);
-        router.goNamed('characters');
+        router.goNamed('assistant');
         context
             .read<WebSocketService>()
             .connect(response.user!.id, response.accessToken!);
@@ -456,7 +456,7 @@ class _LoginPageState extends State<LoginPage> {
         if (!mounted) return;
         ApiInitializer.initAuthInfo(loginResponse.accessToken!);
         ResourcePermissionManager.updateUserCache(loginResponse.user!);
-        router.goNamed('characters');
+        router.goNamed('assistant');
         context
             .read<WebSocketService>()
             .connect(loginResponse.user!.id, loginResponse.accessToken!);
