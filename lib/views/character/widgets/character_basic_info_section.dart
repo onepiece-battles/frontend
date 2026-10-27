@@ -314,8 +314,7 @@ class _CharacterBasicInfoSectionState extends State<CharacterBasicInfoSection> {
   }
 
   Widget _buildMobileHeader(BuildContext context) {
-    return Center(
-        child: Column(children: [
+    return Row(children: [
       GestureDetector(
         onTap: basicInfoEditable
             ? () async {
@@ -336,26 +335,29 @@ class _CharacterBasicInfoSectionState extends State<CharacterBasicInfoSection> {
             : null,
         child: selectedImage != null
             ? ImageHelper.getRoundImageFrame(
-                150,
-                150,
-                3,
+                72,
+                72,
+                1,
                 OnepieceColors.liteFancyBlue,
-                150,
+                72,
                 Base64Helper.decode(selectedImage!))
             : ImageLazyLoader(
                 key: ValueKey(character.imageUri),
-                uriProvider: () => character.imageUri!,
-                width: 150,
-                borderWidth: 3,
-                borderRadios: 150,
+                uriProvider: () => character.imageUri ?? '',
+                width: 72,
+                borderWidth: 1,
+                borderRadios: 72,
                 fullImage: true),
       ),
-      const SizedBox(height: 8),
-      Text(I18nHelper.getDisplayNameFromI18n(character.name),
-          style: OnepieceFonts.headerStyle.copyWith(fontSize: 20)),
-      if (widget.editButtonVisible) ...[
-        const SizedBox(height: 4),
-        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+      const SizedBox(width: 14),
+      Expanded(
+          child:
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(I18nHelper.getDisplayNameFromI18n(character.name),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: OnepieceFonts.headerStyle.copyWith(fontSize: 20)),
+        if (widget.editButtonVisible) ...[
           TextButton.icon(
             onPressed: () => setState(() {
               basicInfoEditable = !basicInfoEditable;
@@ -375,12 +377,39 @@ class _CharacterBasicInfoSectionState extends State<CharacterBasicInfoSection> {
                 style: const TextStyle(
                     fontSize: 13, color: OnepieceColors.fancyBlue)),
           ),
-        ]),
-      ],
-    ]));
+        ],
+      ])),
+    ]);
   }
 
   Widget _buildMobileBasicInfo(BuildContext context) {
+    if (!basicInfoEditable) {
+      final loc = AppLocalizations.of(context)!;
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(loc.basicInfo,
+              style: OnepieceFonts.headerStyle.copyWith(fontSize: 16)),
+          const SizedBox(height: 12),
+          DetailFieldGrid(compact: true, fields: [
+            DetailValue(loc.bounty, characterBounty.text,
+                compact: true,
+                valueStyle: OnepieceFonts.bountyStyle.copyWith(fontSize: 15)),
+            DetailValue(loc.birthPlace, characterBirthPlace.text,
+                compact: true),
+            DetailValue(loc.age, characterAge.text, compact: true),
+            DetailValue(loc.height, characterHeight.text, compact: true),
+            DetailValue(loc.birthDay, character.dateOfBirth ?? '',
+                compact: true),
+            DetailValue(loc.race, _raceMap(context)[selectedRace] ?? '',
+                compact: true),
+            DetailValue(
+                loc.battleStyle, _bsMap(context)[selectedBattleStyle] ?? '',
+                compact: true),
+          ]),
+        ]),
+      );
+    }
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -454,7 +483,6 @@ class _CharacterBasicInfoSectionState extends State<CharacterBasicInfoSection> {
             AppLocalizations.of(context)!.race,
             'images/svgs/earth.svg',
             (v) => setState(() => selectedRace = v)),
-        const Divider(),
       ]),
     );
   }
@@ -535,22 +563,26 @@ class _CharacterBasicInfoSectionState extends State<CharacterBasicInfoSection> {
     }
     final loc = AppLocalizations.of(context)!;
     return DetailSection(
+        compact: true,
         title: loc.basicInfo,
         action: widget.editButtonVisible
             ? DetailEditButton(
                 onPressed: () => setState(() => basicInfoEditable = true))
             : null,
-        child: DetailFieldGrid(fields: [
-          DetailValue(loc.name, characterNameController.text),
-          DetailValue(loc.age, characterAge.text),
-          DetailValue(loc.height, characterHeight.text),
-          DetailValue(loc.birthPlace, characterBirthPlace.text),
-          DetailValue(loc.birthDay, character.dateOfBirth ?? ''),
-          DetailValue(loc.race, _raceMap(context)[selectedRace] ?? ''),
+        child: DetailFieldGrid(compact: true, fields: [
+          DetailValue(loc.name, characterNameController.text, compact: true),
+          DetailValue(loc.age, characterAge.text, compact: true),
+          DetailValue(loc.height, characterHeight.text, compact: true),
+          DetailValue(loc.birthPlace, characterBirthPlace.text, compact: true),
+          DetailValue(loc.birthDay, character.dateOfBirth ?? '', compact: true),
+          DetailValue(loc.race, _raceMap(context)[selectedRace] ?? '',
+              compact: true),
           DetailValue(
-              loc.battleStyle, _bsMap(context)[selectedBattleStyle] ?? ''),
+              loc.battleStyle, _bsMap(context)[selectedBattleStyle] ?? '',
+              compact: true),
           DetailValue(loc.bounty, characterBounty.text,
-              valueStyle: OnepieceFonts.bountyStyle.copyWith(fontSize: 20)),
+              compact: true,
+              valueStyle: OnepieceFonts.bountyStyle.copyWith(fontSize: 16)),
         ]));
   }
 

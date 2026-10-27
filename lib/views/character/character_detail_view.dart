@@ -104,23 +104,37 @@ class _CharacterDetailState extends State<CharacterDetail> {
 
   Widget _buildMobileLayout(BuildContext context) {
     return Container(
-      color: Colors.white,
+      color: const Color(0xFFF7F7F9),
       child: SingleChildScrollView(
         controller: verticalController,
         padding: const EdgeInsets.fromLTRB(12, 12, 12, 80),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          CharacterBasicInfoSection(
-              character: character,
-              editButtonVisible: _editButtonVisible,
-              controller: _controller,
-              isNarrow: true),
-          const SizedBox(height: 12),
-          CharacterCombatInfoSection(
-              character: character,
-              editButtonVisible: _editButtonVisible,
-              controller: _controller,
-              isNarrow: true),
-          const SizedBox(height: 12),
+          Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: OnepieceColors.separator)),
+              child: CharacterBasicInfoSection(
+                  character: character,
+                  editButtonVisible: _editButtonVisible,
+                  controller: _controller,
+                  isNarrow: true)),
+          const SizedBox(height: 8),
+          Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: OnepieceColors.separator)),
+              child: CharacterCombatInfoSection(
+                  character: character,
+                  editButtonVisible: _editButtonVisible,
+                  controller: _controller,
+                  isNarrow: true)),
+          const SizedBox(height: 8),
+          CharacterBattlesSection(character: character, isNarrow: true),
+          const SizedBox(height: 8),
           CharacterFruitsSection(
               character: character,
               editButtonVisible: _editButtonVisible,
@@ -131,10 +145,8 @@ class _CharacterDetailState extends State<CharacterDetail> {
                 });
               },
               isNarrow: true),
-          if (fruits.isNotEmpty) const SizedBox(height: 12),
+          if (fruits.isNotEmpty) const SizedBox(height: 8),
           CharacterGroupsSection(groups: groups, isNarrow: true),
-          const SizedBox(height: 12),
-          CharacterBattlesSection(character: character, isNarrow: true),
         ]),
       ),
     );
@@ -143,26 +155,31 @@ class _CharacterDetailState extends State<CharacterDetail> {
   Widget _buildDesktopLayout(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
     return ResourceDetailPage(
+        compact: true,
         controller: verticalController,
         header: DetailHero(
+            compact: true,
             kind: loc.character,
             title: I18nHelper.getDisplayNameFromI18n(character.name),
             avatar: ImageLazyLoader(
                 uriProvider: () => character.imageUri ?? '',
-                width: 88,
+                width: 72,
                 borderWidth: 0,
-                borderRadios: 88,
+                borderRadios: 72,
                 fullImage: true),
             metrics: [
               DetailValue(loc.combatPower, '${character.score}',
+                  compact: true,
                   valueStyle: const TextStyle(
-                      fontSize: 28,
+                      fontSize: 21,
                       fontWeight: FontWeight.w600,
                       color: OnepieceColors.primaryLabel)),
               DetailValue(loc.bounty, '${character.bounty ?? '—'}',
-                  valueStyle: OnepieceFonts.bountyStyle.copyWith(fontSize: 26)),
+                  compact: true,
+                  valueStyle: OnepieceFonts.bountyStyle.copyWith(fontSize: 20)),
               DetailValue(loc.devilFruit,
-                  '${fruits.length} / ${character.maximumFruitCount}'),
+                  '${fruits.length} / ${character.maximumFruitCount}',
+                  compact: true),
             ]),
         sections: (context, width) => [
               CharacterBasicInfoSection(
@@ -177,27 +194,14 @@ class _CharacterDetailState extends State<CharacterDetail> {
                   controller: _controller,
                   isNarrow: false,
                   sideWidth: 0),
-              DetailSection(
-                  child: CharacterFruitsSection(
-                      character: character,
-                      editButtonVisible: _editButtonVisible,
-                      controller: _controller,
-                      onFruitEaten: () => setState(_refreshCharacterData),
-                      isNarrow: true)),
-              DetailSection(
-                  child:
-                      CharacterGroupsSection(groups: groups, isNarrow: true)),
-              DetailSection(
-                  child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: SizedBox(
-                          width: width - 48 < 860 ? 860 : width - 48,
-                          child: CharacterBattlesSection(
-                              character: character,
-                              isNarrow: false,
-                              sideWidth: 0,
-                              dividerWidth:
-                                  width - 48 < 860 ? 860 : width - 48)))),
+              CharacterBattlesSection(character: character, isNarrow: false),
+              CharacterFruitsSection(
+                  character: character,
+                  editButtonVisible: _editButtonVisible,
+                  controller: _controller,
+                  onFruitEaten: () => setState(_refreshCharacterData),
+                  isNarrow: true),
+              CharacterGroupsSection(groups: groups, isNarrow: true),
             ]);
   }
 

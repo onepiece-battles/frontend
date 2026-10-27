@@ -2587,6 +2587,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open full details'**
   String get openResourceDetails;
+
+  /// No description provided for @characterBattleWin.
+  ///
+  /// In en, this message translates to:
+  /// **'Won'**
+  String get characterBattleWin;
+
+  /// No description provided for @characterBattleLoss.
+  ///
+  /// In en, this message translates to:
+  /// **'Lost'**
+  String get characterBattleLoss;
+
+  /// No description provided for @characterBattleEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No battles yet'**
+  String get characterBattleEmpty;
+
+  /// No description provided for @characterBattleShowMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Show more battles'**
+  String get characterBattleShowMore;
+
+  /// No description provided for @characterBattleShowLess.
+  ///
+  /// In en, this message translates to:
+  /// **'Show fewer'**
+  String get characterBattleShowLess;
 }
 
 class _AppLocalizationsDelegate

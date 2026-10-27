@@ -91,6 +91,24 @@ void main() {
     }
   }
 
+  testWidgets('character detail stays compact at phone width', (tester) async {
+    tester.view.physicalSize = const Size(375, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    GetIt.instance.registerSingleton<Locale>(const Locale('en'));
+    await tester.pumpWidget(
+        _app(const CharacterDetail(characterId: '0'), const Locale('en')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text('No battles yet'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await tester.drag(
+        find.byType(SingleChildScrollView).first, const Offset(0, -2000));
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(tester.takeException(), isNull);
+  });
+
   for (final narrow in [false, true]) {
     testWidgets(
         'fruit card heights stay equal with and without holders ($narrow)',

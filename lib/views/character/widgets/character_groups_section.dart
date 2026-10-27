@@ -62,7 +62,12 @@ class CharacterGroupsSection extends StatelessWidget {
     final catMap = _categoryMap(context);
     final posMap = _positionMap(context);
     return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      margin: EdgeInsets.zero,
+      elevation: 0,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: OnepieceColors.separator)),
       child: Padding(
           padding: const EdgeInsets.all(12),
           child:
@@ -73,6 +78,8 @@ class CharacterGroupsSection extends StatelessWidget {
               const SizedBox(height: 6),
               ...groups.map((g) => Card(
                     margin: const EdgeInsets.only(bottom: 6),
+                    elevation: 0,
+                    color: OnepieceColors.surface,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8)),
                     child: InkWell(

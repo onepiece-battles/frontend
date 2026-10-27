@@ -1314,4 +1314,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get openResourceDetails => 'Open full details';
+
+  @override
+  String get characterBattleWin => 'Won';
+
+  @override
+  String get characterBattleLoss => 'Lost';
+
+  @override
+  String get characterBattleEmpty => 'No battles yet';
+
+  @override
+  String get characterBattleShowMore => 'Show more battles';
+
+  @override
+  String get characterBattleShowLess => 'Show fewer';
 }

@@ -281,8 +281,11 @@ class _CharacterCombatInfoSectionState
       padding: const EdgeInsets.symmetric(horizontal: 4),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
-          Text(AppLocalizations.of(context)!.battleInfo,
-              style: OnepieceFonts.headerStyle.copyWith(fontSize: 16)),
+          Expanded(
+              child: Text(AppLocalizations.of(context)!.battleInfo,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: OnepieceFonts.headerStyle.copyWith(fontSize: 16))),
           if (widget.editButtonVisible) ...[
             const SizedBox(width: 4),
             InkWell(
@@ -306,30 +309,16 @@ class _CharacterCombatInfoSectionState
               ),
             ),
           ],
-          const Spacer(),
           if (character.fruits.isNotEmpty)
-            Row(mainAxisSize: MainAxisSize.min, children: [
-              Text(AppLocalizations.of(context)!.realValue,
-                  style: const TextStyle(
-                      fontSize: 13, fontWeight: FontWeight.w500)),
-              Transform.scale(
-                scale: 0.7,
-                child: Switch(
-                  value: showBaseValue,
-                  activeTrackColor:
-                      OnepieceColors.fancyBlue.withValues(alpha: 0.4),
-                  thumbColor: WidgetStateProperty.all(OnepieceColors.fancyBlue),
-                  onChanged: (v) => setState(() {
-                    showBaseValue = v;
-                    changeValue();
-                  }),
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-              ),
-              Text(AppLocalizations.of(context)!.basicValue,
-                  style: const TextStyle(
-                      fontSize: 13, fontWeight: FontWeight.w500)),
-            ]),
+            TextButton.icon(
+                onPressed: () => setState(() {
+                      showBaseValue = !showBaseValue;
+                      changeValue();
+                    }),
+                icon: const Icon(Icons.swap_horiz, size: 16),
+                label: Text(showBaseValue
+                    ? AppLocalizations.of(context)!.realValue
+                    : AppLocalizations.of(context)!.basicValue)),
         ]),
         const SizedBox(height: 10),
         if (combatInfoEditable)
@@ -425,8 +414,7 @@ class _CharacterCombatInfoSectionState
               isNum: true),
         ] else
           ..._statViews(context),
-        const SizedBox(height: 8),
-        const Divider(),
+        const SizedBox(height: 4),
       ]),
     );
   }
@@ -439,6 +427,7 @@ class _CharacterCombatInfoSectionState
     }
     final loc = AppLocalizations.of(context)!;
     return DetailSection(
+        compact: true,
         title: loc.battleInfo,
         action: Wrap(spacing: 8, children: [
           if (character.fruits.isNotEmpty)
@@ -459,7 +448,7 @@ class _CharacterCombatInfoSectionState
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           ..._statViews(context),
           if (selectedHakis.isNotEmpty) ...[
-            const SizedBox(height: 24),
+            const SizedBox(height: 12),
             Wrap(
                 spacing: 6,
                 runSpacing: 6,
