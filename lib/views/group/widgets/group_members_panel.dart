@@ -14,7 +14,6 @@ import '../../../utils/image_helper.dart';
 import '../../../utils/nested_scroll_helper.dart';
 import '../../../utils/responsive_breakpoints.dart';
 import '../group_detail_controller.dart';
-import 'group_hierarchy_canvas.dart';
 
 /// The "members" panel of the group detail screen: the father-group trail, the
 /// member tree (groups expand to lazily-loaded child groups / characters) or a
@@ -91,9 +90,7 @@ class _GroupMembersPanelState extends State<GroupMembersPanel> {
             ? constraints.maxWidth
             : MediaQuery.of(context).size.width;
         final panelWidth = availableWidth;
-        final contentWidth = isNarrow
-            ? (panelWidth - 32 > 280 ? panelWidth - 32 : 280.0)
-            : panelWidth - 48;
+        final contentWidth = isNarrow ? panelWidth - 24 : panelWidth - 48;
 
         return SizedBox(
           width: panelWidth,
@@ -198,9 +195,8 @@ class _GroupMembersPanelState extends State<GroupMembersPanel> {
                               fontSize: 14)),
                     ),
                   if (root.group.groupCategory == GroupCategory.group)
-                    GroupHierarchyCanvas(
-                      key: ValueKey(groupFullView.id),
-                      mobile: isNarrow,
+                    SizedBox(
+                      width: contentWidth,
                       child: buildTreeNode(root, false, 1),
                     )
                   else
@@ -426,15 +422,7 @@ class _GroupMembersPanelState extends State<GroupMembersPanel> {
                         ),
                       ),
                     ),
-                    if (isRoot)
-                      Padding(
-                        padding: const EdgeInsets.only(right: 12),
-                        child: Text(loc.thisGroup,
-                            style: const TextStyle(
-                                fontSize: 11,
-                                color: OnepieceColors.secondaryLabel)),
-                      )
-                    else
+                    if (!isRoot)
                       Padding(
                         padding: const EdgeInsets.only(right: 12),
                         child: Icon(
@@ -448,83 +436,73 @@ class _GroupMembersPanelState extends State<GroupMembersPanel> {
                   ]),
                 ),
               ),
-              AnimatedSize(
-                duration: const Duration(milliseconds: 220),
-                curve: Curves.easeInOut,
-                alignment: Alignment.topCenter,
-                child: !groupNode.expanded
-                    ? const SizedBox.shrink()
-                    : Padding(
-                        padding: const EdgeInsets.only(left: 24),
-                        child: Container(
-                          decoration: const BoxDecoration(
-                            border: Border(
-                              left: BorderSide(
-                                  color: OnepieceColors.separator, width: 1.5),
+              if (groupNode.expanded)
+                Padding(
+                  padding: const EdgeInsets.only(left: 18),
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      border: Border(
+                        left: BorderSide(
+                            color: OnepieceColors.separator, width: 1.5),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        if (groupNode.isLoading)
+                          const Padding(
+                            padding: EdgeInsets.fromLTRB(18, 16, 12, 8),
+                            child: LinearProgressIndicator(minHeight: 2),
+                          ),
+                        if (groupNode.loadFailed)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 16),
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: TextButton.icon(
+                                onPressed: () => _fetchChildren(
+                                    groupNode, nodeState, nodeContext),
+                                icon: const Icon(Icons.refresh, size: 18),
+                                label: Text(loc.retryLoading),
+                              ),
                             ),
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              if (groupNode.isLoading)
-                                const Padding(
-                                  padding: EdgeInsets.fromLTRB(18, 16, 12, 8),
-                                  child: LinearProgressIndicator(minHeight: 2),
-                                ),
-                              if (groupNode.loadFailed)
+                        for (final child in groupNode.children)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 10),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
                                 Padding(
-                                  padding: const EdgeInsets.only(left: 16),
-                                  child: Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: TextButton.icon(
-                                      onPressed: () => _fetchChildren(
-                                          groupNode, nodeState, nodeContext),
-                                      icon: const Icon(Icons.refresh, size: 18),
-                                      label: Text(loc.retryLoading),
-                                    ),
+                                  padding: const EdgeInsets.only(top: 24),
+                                  child: Container(
+                                    width: 12,
+                                    height: 1.5,
+                                    color: OnepieceColors.separator,
                                   ),
                                 ),
-                              for (final child in groupNode.children)
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 10),
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.only(top: 24),
-                                        child: Container(
-                                          width: 18,
-                                          height: 1.5,
-                                          color: OnepieceColors.separator,
-                                        ),
-                                      ),
-                                      Expanded(
-                                          child: buildTreeNode(
-                                        child,
-                                        group.groupCategory !=
-                                            GroupCategory.group,
-                                        level + 1,
-                                      )),
-                                    ],
-                                  ),
-                                ),
-                              if (groupNode.childrenFetched &&
-                                  groupNode.children.isEmpty)
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.fromLTRB(18, 12, 0, 4),
-                                  child: Text(loc.noResourcesFound,
-                                      style: const TextStyle(
-                                          fontSize: 12,
-                                          color:
-                                              OnepieceColors.secondaryLabel)),
-                                ),
-                            ],
+                                Expanded(
+                                    child: buildTreeNode(
+                                  child,
+                                  group.groupCategory != GroupCategory.group,
+                                  level + 1,
+                                )),
+                              ],
+                            ),
                           ),
-                        ),
-                      ),
-              ),
+                        if (groupNode.childrenFetched &&
+                            groupNode.children.isEmpty)
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(18, 12, 0, 4),
+                            child: Text(loc.noResourcesFound,
+                                style: const TextStyle(
+                                    fontSize: 12,
+                                    color: OnepieceColors.secondaryLabel)),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
             ]);
       },
     );
@@ -722,13 +700,14 @@ class _GroupMembersPanelState extends State<GroupMembersPanel> {
               uriProvider: () => imageUri,
               width: 38,
               borderWidth: 1.4,
-              borderRadios: 6),
+              borderRadios: 6,
+              lazy: true),
         ),
         const SizedBox(width: 10),
         Expanded(
           child: Text(
             title,
-            maxLines: 1,
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: OnepieceFonts.contentStyle.copyWith(
               fontWeight: FontWeight.w600,
