@@ -63,20 +63,39 @@ class _RichMessageState extends State<RichMessage> {
     _recognizers.clear();
   }
 
+  // A Markdown table separator row, e.g. "| --- | :--: |".
+  static final RegExp _tableSeparator = RegExp(r'^\|?[\s:\-|]+\|?$');
+
   void _parse() {
     _disposeRecognizers();
     final lines = widget.data.replaceAll('\r\n', '\n').split('\n');
     final blocks = <Widget>[];
     for (final line in lines) {
       final trimmed = line.trimRight();
-      if (trimmed.trim().isEmpty) {
+      final t = trimmed.trim();
+      if (t.isEmpty) {
         blocks.add(const SizedBox(height: 7));
         continue;
       }
-      if (trimmed.startsWith('### ') ||
-          trimmed.startsWith('## ') ||
-          trimmed.startsWith('# ')) {
-        final text = trimmed.replaceFirst(RegExp(r'^#{1,3}\s+'), '');
+      // Drop table separator rows outright.
+      if (t.contains('-') && _tableSeparator.hasMatch(t)) {
+        continue;
+      }
+      // Any pipe-separated row (Markdown table) → a readable dot-joined line
+      // instead of showing raw "|" separators.
+      if (t.contains('|')) {
+        final cells = t
+            .split('|')
+            .map((c) => c.trim())
+            .where((c) => c.isNotEmpty)
+            .toList();
+        if (cells.isNotEmpty) {
+          blocks.add(_paragraph(cells.join('   ·   ')));
+        }
+        continue;
+      }
+      if (t.startsWith('### ') || t.startsWith('## ') || t.startsWith('# ')) {
+        final text = t.replaceFirst(RegExp(r'^#{1,3}\s+'), '');
         blocks.add(Padding(
           padding: const EdgeInsets.only(top: 2, bottom: 2),
           child: Text.rich(
@@ -104,23 +123,25 @@ class _RichMessageState extends State<RichMessage> {
         ));
         continue;
       }
-      blocks.add(Padding(
-        padding: const EdgeInsets.only(bottom: 2),
-        child: Text.rich(TextSpan(children: _inlineSpans(trimmed)), style: _base),
-      ));
+      blocks.add(_paragraph(trimmed));
     }
     _blocks = blocks;
   }
+
+  Widget _paragraph(String text) => Padding(
+        padding: const EdgeInsets.only(bottom: 2),
+        child: Text.rich(TextSpan(children: _inlineSpans(text)), style: _base),
+      );
 
   // Matches **bold**, [label](target), or a bare onepiece:// URL (safety net so
   // a raw link never renders as text); everything else is plain text.
   static final RegExp _inline = RegExp(
       r'\*\*(.+?)\*\*|\[([^\]]+)\]\(([^)]+)\)|(onepiece://[A-Za-z_]+/[^\s)\]]+)');
 
-  // Any onepiece URL that escaped tokenizing is stripped from plain text, so a
-  // raw link can never be shown as literal text.
-  static final RegExp _rawUrl =
-      RegExp(r'\(?onepiece://[A-Za-z_]+/[^\s)\]]+\)?');
+  // Any onepiece token that escaped tokenizing is stripped from plain text, so
+  // a raw link can never be shown as literal text. Deliberately loose: it eats
+  // an optional opening bracket/paren plus everything up to the next space.
+  static final RegExp _rawUrl = RegExp(r'[\(\[]?onepiece:[^\s]*');
 
   List<InlineSpan> _inlineSpans(String text) {
     final spans = <InlineSpan>[];

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:openapi/api.dart';
 
 import '../../ai/assistant_api.dart';
+import '../../ai/assistant_session.dart';
 import '../../ai/deepseek_service.dart';
 import '../../ai/resource_tools.dart';
 import '../../ai/rich_message.dart';
@@ -25,8 +26,6 @@ class AssistantView extends StatefulWidget {
 
 class _AssistantViewState extends State<AssistantView> {
   final GetIt _getIt = GetIt.instance;
-  final DeepSeekAssistant _assistant = DeepSeekAssistant();
-  final List<AiChatMessage> _messages = [];
   final TextEditingController _input = TextEditingController();
   final ScrollController _scroll = ScrollController();
   final SpeechInput _speech = SpeechInput();
@@ -36,7 +35,11 @@ class _AssistantViewState extends State<AssistantView> {
   bool _loadingHistory = true;
   bool _configured = true; // assume ok until told otherwise (non-admins can't check)
   bool _creatingBattle = false;
-  final Set<AiChatMessage> _handledProposals = {};
+
+  late final AssistantSession _session = _getIt<AssistantSession>();
+  DeepSeekAssistant get _assistant => _session.assistant;
+  List<AiChatMessage> get _messages => _session.messages;
+  Set<AiChatMessage> get _handledProposals => _session.handledProposals;
 
   AssistantApi get _api => _getIt<AssistantApi>();
 
@@ -57,17 +60,18 @@ class _AssistantViewState extends State<AssistantView> {
   }
 
   Future<void> _bootstrap() async {
-    try {
-      final history = await _api.listMessages();
-      _assistant.seedHistory(history);
-      if (mounted) {
-        setState(() {
-          _messages.addAll(history.map((m) =>
-              AiChatMessage(m.role, m.content, resources: const [])));
-        });
+    // Load persisted history only once per app session; on later entries the
+    // live transcript and messages are already in the session singleton.
+    if (!_session.loaded) {
+      try {
+        final history = await _api.listMessages();
+        _assistant.seedHistory(history);
+        _messages.addAll(history
+            .map((m) => AiChatMessage(m.role, m.content, resources: const [])));
+      } catch (_) {
+        // History is best-effort; an empty start is fine.
       }
-    } catch (_) {
-      // History is best-effort; an empty start is fine.
+      _session.loaded = true;
     }
     if (_isAdmin) {
       try {
@@ -350,7 +354,7 @@ class _AssistantViewState extends State<AssistantView> {
   }
 
   Future<void> _clear() async {
-    setState(() => _messages.clear());
+    setState(() => _session.reset());
     try {
       await _api.clearMessages();
     } catch (_) {}
