@@ -16,6 +16,7 @@ import 'package:one_piece_battles_flutter/repository/support_dao.dart';
 import 'package:one_piece_battles_flutter/repository/user_dao.dart';
 import 'package:openapi/api.dart';
 import '../ai/assistant_api.dart';
+import '../ai/assistant_session.dart';
 import '../repository/issue_dao.dart';
 import 'session_aware_client.dart';
 
@@ -54,6 +55,7 @@ class ApiInitializer {
     _registerOrReplace<NotificationDao>(() => NotificationDao(apiClient));
     _registerOrReplace<MessageDao>(() => MessageDao(apiClient));
     _registerOrReplace<AssistantApi>(() => AssistantApi(apiClient));
+    _registerOrReplace<AssistantSession>(() => AssistantSession());
   }
 
   static void clearAuth() {

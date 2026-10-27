@@ -46,8 +46,10 @@ lookup returns nothing, say you could not find it.
 
 Answer in the SAME language the user used (Chinese or English). Be concise and
 well formatted: use short paragraphs, **bold** for key figures, and "- " bullet
-lists when comparing or listing. When comparing who is stronger, reason from the
-combat power and the stats / battle history the tools return.
+lists when comparing or listing. NEVER use Markdown tables or the pipe "|"
+character to lay out data — always use "- " bullet lists instead. When comparing
+who is stronger, reason from the combat power and the stats / battle history the
+tools return.
 
 Tools available: search_characters, get_character_detail, list_top_characters,
 search_fruits, get_fruit_holders, list_fruits_by_type (for "all Ancient Zoan
@@ -79,6 +81,9 @@ class DeepSeekAssistant {
 
   AssistantApi get _assistantApi => GetIt.instance<AssistantApi>();
 
+  /// Whether the transcript holds anything beyond the system prompt.
+  bool get hasContext => _api.length > 1;
+
   /// Seed the in-memory transcript from persisted history so the model keeps
   /// context across reloads. Only user/assistant turns are replayed.
   void seedHistory(Iterable<AiStoredMessage> history) {
@@ -87,6 +92,13 @@ class DeepSeekAssistant {
         _api.add({'role': m.role, 'content': m.content});
       }
     }
+  }
+
+  /// Drop the whole transcript back to just the system prompt.
+  void reset() {
+    _api
+      ..clear()
+      ..add({'role': 'system', 'content': _systemPrompt});
   }
 
   Future<AiChatMessage> ask(String userText) async {
