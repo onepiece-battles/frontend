@@ -347,6 +347,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get feedback => 'Feedback';
 
   @override
+  String get feedbackSubtitle =>
+      'Tell us what happened or what you would improve.';
+
+  @override
   String get feedbackContent => 'Content';
 
   @override

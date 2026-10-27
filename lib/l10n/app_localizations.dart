@@ -758,6 +758,12 @@ abstract class AppLocalizations {
   /// **'Feedback'**
   String get feedback;
 
+  /// No description provided for @feedbackSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us what happened or what you would improve.'**
+  String get feedbackSubtitle;
+
   /// No description provided for @feedbackContent.
   ///
   /// In en, this message translates to:

@@ -110,6 +110,7 @@
   "english": "English",
   "featureSuggestion": "Feature Suggestion",
   "feedback": "Feedback",
+  "feedbackSubtitle": "Tell us what happened or what you would improve.",
   "feedbackContent": "Content",
   "feedbackContentHint": "Describe the issue or suggestion in detail.",
   "feedbackTitle": "Title",

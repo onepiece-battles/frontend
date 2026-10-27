@@ -1451,7 +1451,7 @@ class _ChattingViewState extends State<ChattingView> {
                                             decoration: BoxDecoration(
                                               color: Colors.white,
                                               borderRadius:
-                                                  BorderRadius.circular(20),
+                                                  BorderRadius.circular(14),
                                               border: Border.all(
                                                   color: _kSeparator),
                                             ),

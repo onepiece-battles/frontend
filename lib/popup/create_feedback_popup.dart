@@ -1,15 +1,13 @@
-import 'package:flutter/services.dart';
-import '../../l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
-import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
-import 'package:one_piece_battles_flutter/constants/onepiece_colors.dart';
-import 'package:one_piece_battles_flutter/constants/onepiece_fonts.dart';
-import 'package:one_piece_battles_flutter/popup/onepiece_alert.dart';
 import 'package:openapi/api.dart';
 
+import '../constants/onepiece_colors.dart';
+import '../l10n/app_localizations.dart';
 import '../repository/issue_dao.dart';
 import '../utils/i18n_helper.dart';
+import 'onepiece_alert.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -26,9 +24,18 @@ class _CreateFeedbackPopupState extends State<CreateFeedbackPopup> {
   IssueType? selectedIssueType;
   final TextEditingController headerController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
-  bool _submitButtonEnabled = false;
-  bool _clearButtonEnabled = false;
   bool _isSubmitting = false;
+
+  bool get _hasContent =>
+      selectedIssueType != null ||
+      headerController.text.isNotEmpty ||
+      descriptionController.text.isNotEmpty;
+
+  bool get _canSubmit =>
+      !_isSubmitting &&
+      selectedIssueType != null &&
+      headerController.text.trim().isNotEmpty &&
+      descriptionController.text.trim().isNotEmpty;
 
   @override
   void dispose() {
@@ -39,332 +46,243 @@ class _CreateFeedbackPopupState extends State<CreateFeedbackPopup> {
 
   @override
   Widget build(BuildContext context) {
-    final Map<IssueType, String> issueToDisplayNameMap = {
-      IssueType.BUG_REPORT: AppLocalizations.of(context)!.bugReport,
-      IssueType.FEATURE_SUGGESTION:
-          AppLocalizations.of(context)!.featureSuggestion,
-      IssueType.OTHER: AppLocalizations.of(context)!.otherType
+    final loc = AppLocalizations.of(context)!;
+    final typeNames = <IssueType, String>{
+      IssueType.BUG_REPORT: loc.bugReport,
+      IssueType.FEATURE_SUGGESTION: loc.featureSuggestion,
+      IssueType.OTHER: loc.otherType,
     };
-    final mediaSize = MediaQuery.sizeOf(context);
-    final dialogWidth = mediaSize.width < 520 ? mediaSize.width - 32 : 480.0;
-    final maxDialogHeight = mediaSize.height - 64;
+    final size = MediaQuery.sizeOf(context);
 
     return ConstrainedBox(
       constraints: BoxConstraints(
-        maxWidth: dialogWidth,
-        maxHeight: maxDialogHeight,
+        maxWidth: size.width < 520 ? size.width - 32 : 460,
+        maxHeight: size.height - 48,
       ),
       child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(22, 20, 22, 18),
+        padding: EdgeInsets.fromLTRB(
+            size.width < 400 ? 20 : 26, 24, size.width < 400 ? 20 : 26, 22),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 38,
-                  height: 38,
-                  decoration: BoxDecoration(
-                    color: OnepieceColors.surface,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(
-                    Icons.feedback_outlined,
-                    color: OnepieceColors.fancyBlue,
-                    size: 22,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 3),
-                    child: Text(
-                      AppLocalizations.of(context)!.feedback,
-                      style: OnepieceFonts.fancyBlueSmallTitle.copyWith(
-                        fontSize: 20,
-                        color: OnepieceColors.primaryLabel,
-                      ),
-                    ),
-                  ),
-                ),
-                IconButton(
+            Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: const BoxDecoration(
+                    color: OnepieceColors.surface, shape: BoxShape.circle),
+                child: const Icon(Icons.rate_review_outlined,
+                    color: OnepieceColors.fancyBlue, size: 21),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(loc.feedback,
+                          style: const TextStyle(
+                              fontSize: 22,
+                              height: 1.2,
+                              fontWeight: FontWeight.w600,
+                              color: OnepieceColors.primaryLabel)),
+                      const SizedBox(height: 4),
+                      Text(loc.feedbackSubtitle,
+                          style: const TextStyle(
+                              fontSize: 13,
+                              height: 1.35,
+                              color: OnepieceColors.secondaryLabel)),
+                    ]),
+              ),
+              IconButton(
+                  tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
                   visualDensity: VisualDensity.compact,
-                  padding: EdgeInsets.zero,
-                  constraints:
-                      const BoxConstraints.tightFor(width: 32, height: 32),
                   onPressed:
-                      _isSubmitting ? null : () => Navigator.pop(context),
-                  icon: const Icon(Icons.close, size: 20),
-                ),
-              ],
-            ),
-            const SizedBox(height: 18),
-            _fieldLabel(AppLocalizations.of(context)!.issueType),
-            const SizedBox(height: 6),
-            _issueTypeDropdown(context, issueToDisplayNameMap),
-            const SizedBox(height: 14),
-            _fieldLabel(AppLocalizations.of(context)!.feedbackTitle),
-            const SizedBox(height: 6),
-            TextFormField(
-              enabled: !_isSubmitting,
-              maxLines: 1,
-              controller: headerController,
-              style: OnepieceFonts.smallContentStyle.copyWith(fontSize: 14),
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-              maxLength: 30,
-              maxLengthEnforcement: MaxLengthEnforcement.enforced,
-              onChanged: (value) {
-                _calculateButtonCondition();
-              },
-              decoration: _inputDecoration(
-                context,
-                hintText: AppLocalizations.of(context)!.feedbackTitleHint,
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                constraints: const BoxConstraints(maxHeight: 54),
-              ),
-            ),
-            const SizedBox(height: 8),
-            _fieldLabel(AppLocalizations.of(context)!.feedbackContent),
-            const SizedBox(height: 6),
-            TextFormField(
-              enabled: !_isSubmitting,
-              minLines: 9,
-              maxLines: 12,
-              controller: descriptionController,
-              onChanged: (value) {
-                _calculateButtonCondition();
-              },
-              cursorHeight: 18,
-              decoration: _inputDecoration(
-                context,
-                hintText: AppLocalizations.of(context)!.feedbackContentHint,
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-              ),
-            ),
-            const SizedBox(height: 20),
+                      _isSubmitting ? null : () => Navigator.of(context).pop(),
+                  icon: const Icon(Icons.close,
+                      size: 19, color: OnepieceColors.secondaryLabel)),
+            ]),
+            const SizedBox(height: 24),
+            _label(loc.issueType),
+            const SizedBox(height: 9),
             Wrap(
-              alignment: WrapAlignment.end,
               spacing: 8,
               runSpacing: 8,
               children: [
-                TextButton(
-                  onPressed: _isSubmitting
-                      ? null
-                      : () {
-                          Navigator.pop(context);
-                        },
-                  child: Text(AppLocalizations.of(context)!.cancelPopUp),
-                ),
-                const SizedBox(width: 8),
-                OutlinedButton(
-                  onPressed: !_clearButtonEnabled || _isSubmitting
-                      ? null
-                      : () {
-                          headerController.text = '';
-                          descriptionController.text = '';
-                          selectedIssueType = null;
-                          _calculateButtonCondition();
-                        },
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: OnepieceColors.fancyBlue,
-                    side: const BorderSide(color: OnepieceColors.fancyBlue),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  child: Text(AppLocalizations.of(context)!.clearAll),
-                ),
-                const SizedBox(width: 8),
-                ElevatedButton(
-                  onPressed: !_submitButtonEnabled || _isSubmitting
-                      ? null
-                      : _submitIssue,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: OnepieceColors.fancyBlue,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 18,
-                      vertical: 12,
-                    ),
-                  ),
-                  child: _isSubmitting
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : Text(AppLocalizations.of(context)!.submitForm),
-                )
+                for (final type in [
+                  IssueType.BUG_REPORT,
+                  IssueType.FEATURE_SUGGESTION,
+                  IssueType.OTHER
+                ])
+                  _typeChoice(type, typeNames[type]!),
               ],
-            )
+            ),
+            const SizedBox(height: 22),
+            _label(loc.feedbackTitle),
+            const SizedBox(height: 8),
+            TextField(
+              key: const Key('feedback-title'),
+              controller: headerController,
+              enabled: !_isSubmitting,
+              maxLength: 30,
+              maxLengthEnforcement: MaxLengthEnforcement.enforced,
+              onChanged: (_) => setState(() {}),
+              style: const TextStyle(
+                  fontSize: 15, color: OnepieceColors.primaryLabel),
+              decoration: _decoration(loc.feedbackTitleHint),
+            ),
+            const SizedBox(height: 8),
+            _label(loc.feedbackContent),
+            const SizedBox(height: 8),
+            TextField(
+              key: const Key('feedback-content'),
+              controller: descriptionController,
+              enabled: !_isSubmitting,
+              minLines: 5,
+              maxLines: 8,
+              onChanged: (_) => setState(() {}),
+              style: const TextStyle(
+                  fontSize: 15,
+                  height: 1.4,
+                  color: OnepieceColors.primaryLabel),
+              decoration: _decoration(loc.feedbackContentHint),
+            ),
+            const SizedBox(height: 24),
+            LayoutBuilder(builder: (context, constraints) {
+              final clear = TextButton(
+                onPressed: !_hasContent || _isSubmitting
+                    ? null
+                    : () {
+                        headerController.clear();
+                        descriptionController.clear();
+                        setState(() => selectedIssueType = null);
+                      },
+                child: Text(loc.clearAll),
+              );
+              final submit = FilledButton(
+                onPressed: _canSubmit ? _submitIssue : null,
+                style: FilledButton.styleFrom(
+                  backgroundColor: OnepieceColors.fancyBlue,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(112, 44),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(11)),
+                ),
+                child: _isSubmitting
+                    ? const SizedBox(
+                        width: 17,
+                        height: 17,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2, color: Colors.white))
+                    : Text(loc.submitForm),
+              );
+              if (constraints.maxWidth < 280) {
+                return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      SizedBox(width: double.infinity, child: submit),
+                      Align(alignment: Alignment.centerRight, child: clear),
+                    ]);
+              }
+              return Row(children: [clear, const Spacer(), submit]);
+            }),
           ],
         ),
       ),
     );
   }
 
-  Widget _fieldLabel(String label) {
-    return Text(
-      label,
-      style: OnepieceFonts.smallContentFancyBlueStyle.copyWith(
-        fontWeight: FontWeight.w600,
-        color: OnepieceColors.primaryLabel,
-      ),
-    );
-  }
+  Widget _label(String text) => Text(text,
+      style: const TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          color: OnepieceColors.primaryLabel));
 
-  Widget _issueTypeDropdown(
-    BuildContext context,
-    Map<IssueType, String> issueToDisplayNameMap,
-  ) {
-    return DropdownButtonHideUnderline(
-      child: DropdownButton2<IssueType>(
-        hint: Text(
-          AppLocalizations.of(context)!.issueType,
-          style: OnepieceFonts.smallContentStyle,
-        ),
-        isExpanded: true,
-        value: selectedIssueType,
-        onChanged: _isSubmitting
+  Widget _typeChoice(IssueType type, String label) {
+    final selected = selectedIssueType == type;
+    return Material(
+      color: selected
+          ? OnepieceColors.fancyBlue.withValues(alpha: .09)
+          : Colors.white,
+      shape: StadiumBorder(
+        side: BorderSide(
+            color:
+                selected ? OnepieceColors.fancyBlue : OnepieceColors.separator),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(24),
+        onTap: _isSubmitting
             ? null
-            : (IssueType? value) {
-                selectedIssueType = value;
-                _calculateButtonCondition();
-              },
-        buttonStyleData: ButtonStyleData(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: OnepieceColors.separator),
-            color: Colors.transparent,
-          ),
-          height: 36,
-          width: double.infinity,
+            : () => setState(() => selectedIssueType = type),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+          child: Row(mainAxisSize: MainAxisSize.min, children: [
+            if (selected) ...[
+              const Icon(Icons.check,
+                  size: 15, color: OnepieceColors.fancyBlue),
+              const SizedBox(width: 5),
+            ],
+            Flexible(
+                child: Text(label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                        fontSize: 13,
+                        fontWeight:
+                            selected ? FontWeight.w600 : FontWeight.w500,
+                        color: selected
+                            ? OnepieceColors.fancyBlue
+                            : OnepieceColors.primaryLabel))),
+          ]),
         ),
-        iconStyleData: const IconStyleData(
-          iconEnabledColor: OnepieceColors.fancyBlue,
-        ),
-        dropdownStyleData: DropdownStyleData(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: Colors.white,
-          ),
-        ),
-        menuItemStyleData: const MenuItemStyleData(height: 40),
-        items: IssueType.values
-            .map((IssueType issueType) => DropdownMenuItem<IssueType>(
-                  value: issueType,
-                  child: Text(
-                    issueToDisplayNameMap[issueType]!,
-                    style: OnepieceFonts.dropDownItemStyle,
-                  ),
-                ))
-            .toList(),
       ),
     );
   }
 
-  InputDecoration _inputDecoration(
-    BuildContext context, {
-    required String hintText,
-    Widget? suffixIcon,
-    BoxConstraints? constraints,
-    EdgeInsetsGeometry contentPadding =
-        const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-  }) {
-    return InputDecoration(
-      filled: true,
-      fillColor: Colors.white,
-      contentPadding: contentPadding,
-      constraints: constraints,
-      floatingLabelBehavior: FloatingLabelBehavior.always,
-      hintText: hintText,
-      hintStyle: OnepieceFonts.smallContentStyle.copyWith(
-        color: Colors.black38,
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10.0),
-        borderSide: const BorderSide(
-          color: OnepieceColors.separator,
-          width: 1.0,
-        ),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10.0),
-        borderSide: const BorderSide(
-          color: Colors.red,
-          width: 1.5,
-        ),
-      ),
-      focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10.0),
-        borderSide: const BorderSide(
-          color: Colors.red,
-          width: 1.5,
-        ),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10.0),
-        borderSide: const BorderSide(
-          color: OnepieceColors.fancyBlue,
-          width: 1.5,
-        ),
-      ),
-      disabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10.0),
-        borderSide: const BorderSide(
-          color: OnepieceColors.separator,
-          width: 1.0,
-        ),
-      ),
-      suffixIcon: suffixIcon,
-    );
-  }
+  InputDecoration _decoration(String hint) => InputDecoration(
+        hintText: hint,
+        hintStyle:
+            const TextStyle(fontSize: 14, color: OnepieceColors.secondaryLabel),
+        filled: true,
+        fillColor: OnepieceColors.surface,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+        counterStyle:
+            const TextStyle(fontSize: 11, color: OnepieceColors.secondaryLabel),
+        border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none),
+        enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none),
+        focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide:
+                const BorderSide(color: OnepieceColors.fancyBlue, width: 1)),
+      );
 
   Future<void> _submitIssue() async {
-    final alertHint = AppLocalizations.of(context)!.hint;
+    if (!_canSubmit) return;
+    final loc = AppLocalizations.of(context)!;
     final showAlert = OnepieceAlert.createAlertShower(context);
     setState(() => _isSubmitting = true);
 
     try {
-      final createIssueRequest = CreateIssueRequest(
+      final response = await getIt<IssueDao>().createIssue(CreateIssueRequest(
         issueHeader: headerController.text.trim(),
         issueDescription: descriptionController.text.trim(),
         issueStatus: IssueStatus.CREATED,
         issueType: selectedIssueType,
-      );
-      final value = await getIt<IssueDao>().createIssue(createIssueRequest);
+      ));
       if (!mounted) return;
-      Navigator.pop(context);
+      if (response == null) throw StateError('Feedback submission failed');
+      Navigator.of(context).pop();
       widget.onIssueCreated?.call(
-        I18nHelper.getDisplayNameFromI18n(value!.issueCreationResult),
-      );
+          I18nHelper.getDisplayNameFromI18n(response.issueCreationResult));
     } catch (_) {
       if (!mounted) return;
-      showAlert(alertHint, AppLocalizations.of(context)!.battleStatusFailed);
+      showAlert(loc.hint, loc.battleStatusFailed);
       setState(() => _isSubmitting = false);
-    }
-  }
-
-  void _calculateButtonCondition() {
-    _submitButtonEnabled = headerController.text.trim().isNotEmpty &&
-        descriptionController.text.trim().isNotEmpty &&
-        selectedIssueType != null;
-    _clearButtonEnabled = headerController.text.isNotEmpty ||
-        descriptionController.text.isNotEmpty ||
-        selectedIssueType != null;
-    if (mounted) {
-      setState(() {});
     }
   }
 }
