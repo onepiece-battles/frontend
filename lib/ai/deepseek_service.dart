@@ -51,7 +51,8 @@ combat power and the stats / battle history the tools return.
 
 Tools available: search_characters, get_character_detail, list_top_characters,
 search_fruits, get_fruit_holders, list_fruits_by_type (for "all Ancient Zoan
-users" etc.), and propose_battle.
+users" etc.), search_groups and get_group_detail (a crew's members, its child
+groups and its parent group), and propose_battle.
 
 IMPORTANT — make resources clickable inline: whenever you mention a character,
 devil fruit or crew that appears in a tool result, write its name as a Markdown
@@ -112,7 +113,7 @@ class DeepSeekAssistant {
       }
       final content = (message['content'] ?? '').toString();
       _api.add({'role': 'assistant', 'content': content});
-      return AiChatMessage('assistant', _sanitizeLinks(content, resources),
+      return AiChatMessage('assistant', _normalizeLinks(content, resources),
           resources: resources.toList(), battleProposal: _extractProposal(resources));
     }
     return AiChatMessage('assistant',
@@ -120,21 +121,46 @@ class DeepSeekAssistant {
         resources: resources.toList());
   }
 
-  /// Wrap any bare `onepiece://type/id` the model left loose into a proper
-  /// `[name](onepiece://type/id)` link so raw URLs never show in the chat.
-  String _sanitizeLinks(String content, Set<ResourceRef> resources) {
+  /// Guarantee that no raw `onepiece://` ever reaches the chat: fix the label
+  /// of any onepiece markdown link (the model sometimes uses the URL itself as
+  /// the label) and wrap any remaining bare URL into a proper
+  /// `[name](onepiece://type/id)` link, resolving names from the tool results.
+  String _normalizeLinks(String content, Set<ResourceRef> resources) {
     final byKey = <String, String>{};
     for (final r in resources) {
-      byKey['${r.type}/${r.id}'] = r.name;
+      byKey['${r.type.toLowerCase()}/${r.id}'] = r.name;
     }
-    final bare = RegExp(r'(?<!\()onepiece://([a-z_]+)/([^\s)\]]+)');
-    return content.replaceAllMapped(bare, (m) {
-      final type = m.group(1)!;
-      final id = m.group(2)!;
-      final name = byKey['$type/$id'];
-      final label = (name != null && name.isNotEmpty) ? name : type;
-      return '[$label](onepiece://$type/$id)';
+
+    String labelFor(String type, String id, String? existing) {
+      if (existing != null &&
+          existing.trim().isNotEmpty &&
+          !existing.contains('://') &&
+          !existing.toLowerCase().contains('onepiece')) {
+        return existing.trim();
+      }
+      final name = byKey['${type.toLowerCase()}/$id'];
+      if (name != null && name.isNotEmpty) return name;
+      return type.toLowerCase();
+    }
+
+    // 1) Clean the label of onepiece markdown links.
+    final mdLink =
+        RegExp(r'\[([^\]]*)\]\(\s*onepiece://([A-Za-z_]+)/([^)\s]+)\s*\)');
+    var out = content.replaceAllMapped(mdLink, (m) {
+      final type = m.group(2)!.toLowerCase();
+      final id = m.group(3)!;
+      return '[${labelFor(type, id, m.group(1))}](onepiece://$type/$id)';
     });
+
+    // 2) Wrap any remaining bare onepiece URL (not already inside a link).
+    final bare = RegExp(r'(?<![(\[])onepiece://([A-Za-z_]+)/([^)\s\]]+)');
+    out = out.replaceAllMapped(bare, (m) {
+      final type = m.group(1)!.toLowerCase();
+      final id = m.group(2)!;
+      return '[${labelFor(type, id, null)}](onepiece://$type/$id)';
+    });
+
+    return out;
   }
 
   BattleProposal? _extractProposal(Set<ResourceRef> resources) {
