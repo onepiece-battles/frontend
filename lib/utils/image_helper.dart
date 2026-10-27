@@ -11,20 +11,23 @@ import '../constants/onepiece_colors.dart';
 
 class ImageHelper {
   static Widget getSquareImageFrame(double width, double height,
-      double? borderWidth, Color? borderColor, Uint8List imageData) {
+      double? borderWidth, Color? borderColor, Uint8List imageData,
+      {double borderRadius = 2}) {
     return Container(
       width: width,
       height: height,
       decoration: borderWidth == null || borderColor == null
           ? null
           : BoxDecoration(
-              borderRadius: const BorderRadius.all(Radius.circular(2.0)),
+              borderRadius: BorderRadius.circular(borderRadius),
               border: Border.all(
                   color: borderColor,
                   width: borderWidth,
                   style: BorderStyle.solid),
             ),
-      child: ClipRect(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(
+            (borderRadius - (borderWidth ?? 0)).clamp(0, borderRadius)),
         child: AspectRatio(
           aspectRatio: 1,
           child: FittedBox(

@@ -716,29 +716,55 @@ class _SideMenuState extends State<SideMenu> {
   }
 
   Widget _buildFeedbackAction(BuildContext context, bool isExpanded) {
+    final label = AppLocalizations.of(context)!.feedback;
     return SafeArea(
       top: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(8, 6, 8, 8),
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: Tooltip(
-            message: AppLocalizations.of(context)!.feedback,
-            child: Material(
-              color: Colors.transparent,
-              borderRadius: BorderRadius.circular(8),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(8),
-                hoverColor: OnepieceColors.surface,
-                onTap: () => _showFeedbackDialog(context),
-                child: const SizedBox(
-                  width: 42,
-                  height: 42,
-                  child: Icon(
-                    Icons.feedback_outlined,
-                    color: OnepieceColors.fancyBlue,
-                    size: 21,
-                  ),
+      child: Container(
+        decoration: const BoxDecoration(
+          border: Border(
+              top: BorderSide(color: OnepieceColors.separator, width: .5)),
+        ),
+        padding: const EdgeInsets.fromLTRB(8, 8, 8, 10),
+        child: Tooltip(
+          message: isExpanded ? '' : label,
+          child: Material(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              hoverColor: OnepieceColors.surface,
+              onTap: () => _showFeedbackDialog(context),
+              child: SizedBox(
+                height: 44,
+                child: Row(
+                  mainAxisAlignment: isExpanded
+                      ? MainAxisAlignment.start
+                      : MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 32,
+                      height: 32,
+                      margin: EdgeInsets.only(left: isExpanded ? 8 : 0),
+                      decoration: const BoxDecoration(
+                        color: OnepieceColors.surface,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.rate_review_outlined,
+                          color: OnepieceColors.fancyBlue, size: 18),
+                    ),
+                    if (isExpanded) ...[
+                      const SizedBox(width: 12),
+                      Flexible(
+                        child: Text(label,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: OnepieceColors.primaryLabel)),
+                      ),
+                    ],
+                  ],
                 ),
               ),
             ),
@@ -757,7 +783,7 @@ class _SideMenuState extends State<SideMenu> {
               const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
           backgroundColor: Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(20),
           ),
           child: CreateFeedbackPopup(
             onIssueCreated: (message) {

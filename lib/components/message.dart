@@ -62,7 +62,10 @@ class MessageItem extends StatelessWidget {
                   key: ValueKey(user.imageUri),
                   uriProvider: () => user.imageUri ?? '',
                   width: 40,
-                  borderWidth: 2),
+                  borderWidth: 1,
+                  borderRadius: 13,
+                  borderColor: OnepieceColors.separator,
+                  fallbackIcon: Icons.person_outline),
             ],
           )
         : Row(
@@ -77,9 +80,12 @@ class MessageItem extends StatelessWidget {
                   ),
                   SquareImageLoader(
                       key: ValueKey(user.imageUri),
-                      uriProvider: () => user.imageUri!,
+                      uriProvider: () => user.imageUri ?? '',
                       width: 40,
-                      borderWidth: 2),
+                      borderWidth: 1,
+                      borderRadius: 13,
+                      borderColor: OnepieceColors.separator,
+                      fallbackIcon: Icons.person_outline),
                 ],
               ),
               const SizedBox(
@@ -228,7 +234,7 @@ class MessageItem extends StatelessWidget {
         decoration: BoxDecoration(
           // iMessage-style rounded bubble: brand blue for me, light neutral
           // grey (not near-black) for received, with legible text on each.
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(12),
           color: isMe ? OnepieceColors.fancyBlue : const Color(0xFFE9E9EB),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
@@ -245,8 +251,7 @@ class MessageItem extends StatelessWidget {
                     Text(
                       message.content!,
                       style: TextStyle(
-                        color:
-                            isMe ? Colors.white : const Color(0xFF1C1C1E),
+                        color: isMe ? Colors.white : const Color(0xFF1C1C1E),
                         fontSize: 16,
                         height: 1.3,
                       ),
@@ -329,8 +334,8 @@ class MessageItem extends StatelessWidget {
               ),
             if (preMessage!.imageContentUri != null)
               GestureDetector(
-                onTap: () => showChatImageViewer(
-                    context, preMessage!.imageContentUri!),
+                onTap: () =>
+                    showChatImageViewer(context, preMessage!.imageContentUri!),
                 child: _buildMessageImage(preMessage!.imageContentUri!, 100,
                     fullImage: false),
               )

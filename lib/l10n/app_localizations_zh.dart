@@ -341,6 +341,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get feedback => '意见反馈';
 
   @override
+  String get feedbackSubtitle => '告诉我们遇到的问题，或你希望改进的地方。';
+
+  @override
   String get feedbackContent => '内容';
 
   @override
