@@ -2276,6 +2276,54 @@ abstract class AppLocalizations {
   /// **'Chat information'**
   String get chatInformation;
 
+  /// No description provided for @chatGroupDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Group details'**
+  String get chatGroupDetails;
+
+  /// No description provided for @chatContactDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact details'**
+  String get chatContactDetails;
+
+  /// No description provided for @chatMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Members'**
+  String get chatMembers;
+
+  /// No description provided for @chatAddMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Add members'**
+  String get chatAddMembers;
+
+  /// No description provided for @chatViewProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'View profile'**
+  String get chatViewProfile;
+
+  /// No description provided for @chatSearchFriends.
+  ///
+  /// In en, this message translates to:
+  /// **'Search friends'**
+  String get chatSearchFriends;
+
+  /// No description provided for @chatNoFriendsToAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'No friends available to add'**
+  String get chatNoFriendsToAdd;
+
+  /// No description provided for @chatAddMembersFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not add members. Please try again.'**
+  String get chatAddMembersFailed;
+
   /// No description provided for @chatPrivate.
   ///
   /// In en, this message translates to:

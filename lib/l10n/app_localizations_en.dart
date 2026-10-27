@@ -1111,6 +1111,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chatInformation => 'Chat information';
 
   @override
+  String get chatGroupDetails => 'Group details';
+
+  @override
+  String get chatContactDetails => 'Contact details';
+
+  @override
+  String get chatMembers => 'Members';
+
+  @override
+  String get chatAddMembers => 'Add members';
+
+  @override
+  String get chatViewProfile => 'View profile';
+
+  @override
+  String get chatSearchFriends => 'Search friends';
+
+  @override
+  String get chatNoFriendsToAdd => 'No friends available to add';
+
+  @override
+  String get chatAddMembersFailed => 'Could not add members. Please try again.';
+
+  @override
   String get chatPrivate => 'Private';
 
   @override
