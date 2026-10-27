@@ -55,15 +55,13 @@ class MessageItem extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(
-                width: 10,
-              ),
+              const SizedBox(width: 7),
               SquareImageLoader(
                   key: ValueKey(user.imageUri),
                   uriProvider: () => user.imageUri ?? '',
                   width: 40,
-                  borderWidth: 1,
-                  borderRadius: 13,
+                  borderWidth: .5,
+                  borderRadius: 5,
                   borderColor: OnepieceColors.separator,
                   fallbackIcon: Icons.person_outline),
             ],
@@ -82,15 +80,13 @@ class MessageItem extends StatelessWidget {
                       key: ValueKey(user.imageUri),
                       uriProvider: () => user.imageUri ?? '',
                       width: 40,
-                      borderWidth: 1,
-                      borderRadius: 13,
+                      borderWidth: .5,
+                      borderRadius: 5,
                       borderColor: OnepieceColors.separator,
                       fallbackIcon: Icons.person_outline),
                 ],
               ),
-              const SizedBox(
-                width: 10,
-              ),
+              const SizedBox(width: 7),
               // 2. WRAP THE RECEIVER COLUMN IN FLEXIBLE
               Flexible(
                 child: Column(
@@ -138,7 +134,7 @@ class MessageItem extends StatelessWidget {
     if (message.retracted == true) {
       return Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(6),
           color: Colors.grey[300],
         ),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -230,54 +226,53 @@ class MessageItem extends StatelessWidget {
     return MouseRegion(
       onEnter: (_) => BrowserContextMenu.disableContextMenu(),
       onExit: (_) => BrowserContextMenu.enableContextMenu(),
-      child: Container(
-        decoration: BoxDecoration(
-          // iMessage-style rounded bubble: brand blue for me, light neutral
-          // grey (not near-black) for received, with legible text on each.
-          borderRadius: BorderRadius.circular(12),
-          color: isMe ? OnepieceColors.fancyBlue : const Color(0xFFE9E9EB),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
-        child: Builder(builder: (innerContext) {
-          return GestureDetector(
-            onSecondaryTap: () => showMessageMenu(innerContext),
-            onLongPress: () => showMessageMenu(innerContext),
-            child: SelectionContainer.disabled(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (hasText)
-                    Text(
-                      message.content!,
-                      style: TextStyle(
-                        color: isMe ? Colors.white : const Color(0xFF1C1C1E),
-                        fontSize: 16,
-                        height: 1.3,
-                      ),
-                      softWrap: true,
-                      textAlign: TextAlign.start,
-                    ),
-                  // Gap between text and image
-                  if (hasText && hasImage) const SizedBox(height: 6),
-                  if (hasImage)
-                    GestureDetector(
-                      // Tap to open the full-screen zoomable viewer; the
-                      // long-press menu still comes from the bubble's outer
-                      // GestureDetector.
-                      onTap: () => showChatImageViewer(
-                          context, message.imageContentUri!),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child:
-                            _buildMessageImage(message.imageContentUri!, 200),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          );
-        }),
+      child: CustomPaint(
+        painter: _ChatBubblePainter(
+            color: isMe ? OnepieceColors.fancyBlue : const Color(0xFFE9E9EB),
+            isMe: isMe),
+        child: Padding(
+            padding: EdgeInsets.fromLTRB(isMe ? 12 : 17, 9, isMe ? 17 : 12, 9),
+            child: Builder(builder: (innerContext) {
+              return GestureDetector(
+                onSecondaryTap: () => showMessageMenu(innerContext),
+                onLongPress: () => showMessageMenu(innerContext),
+                child: SelectionContainer.disabled(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (hasText)
+                        Text(
+                          message.content!,
+                          style: TextStyle(
+                            color:
+                                isMe ? Colors.white : const Color(0xFF1C1C1E),
+                            fontSize: 16,
+                            height: 1.3,
+                          ),
+                          softWrap: true,
+                          textAlign: TextAlign.start,
+                        ),
+                      // Gap between text and image
+                      if (hasText && hasImage) const SizedBox(height: 6),
+                      if (hasImage)
+                        GestureDetector(
+                          // Tap to open the full-screen zoomable viewer; the
+                          // long-press menu still comes from the bubble's outer
+                          // GestureDetector.
+                          onTap: () => showChatImageViewer(
+                              context, message.imageContentUri!),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(5),
+                            child: _buildMessageImage(
+                                message.imageContentUri!, 200),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              );
+            })),
       ),
     );
   }
@@ -317,7 +312,7 @@ class MessageItem extends StatelessWidget {
           vertical: 5,
         ),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(6),
           color: Colors.grey[600],
         ),
         padding: const EdgeInsets.all(6),
@@ -342,4 +337,43 @@ class MessageItem extends StatelessWidget {
           ],
         ));
   }
+}
+
+/// A small pointer and restrained corner radius keep text bubbles visually
+/// attached to the avatar, like the familiar WeChat conversation layout.
+class _ChatBubblePainter extends CustomPainter {
+  const _ChatBubblePainter({required this.color, required this.isMe});
+
+  final Color color;
+  final bool isMe;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const tailWidth = 5.0;
+    final bodyEdge = isMe ? size.width - tailWidth : tailWidth;
+    final body = Path()
+      ..addRRect(RRect.fromRectAndRadius(
+          Rect.fromLTRB(isMe ? 0 : tailWidth, 0,
+              isMe ? size.width - tailWidth : size.width, size.height),
+          const Radius.circular(6)));
+    final tail = Path()
+      ..moveTo(bodyEdge, 9)
+      ..lineTo(isMe ? size.width : 0, 14)
+      ..lineTo(bodyEdge, 19)
+      ..close();
+    final outline = Path.combine(PathOperation.union, body, tail);
+    canvas.drawPath(outline, Paint()..color = color);
+    canvas.drawPath(
+        outline,
+        Paint()
+          ..color = isMe
+              ? OnepieceColors.deepFancyBlue.withValues(alpha: .22)
+              : OnepieceColors.separator.withValues(alpha: .8)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = .5);
+  }
+
+  @override
+  bool shouldRepaint(covariant _ChatBubblePainter oldDelegate) =>
+      oldDelegate.color != color || oldDelegate.isMe != isMe;
 }

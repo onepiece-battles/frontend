@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
@@ -72,7 +73,7 @@ class _CreateFeedbackPopupState extends State<CreateFeedbackPopup> {
                 height: 40,
                 decoration: const BoxDecoration(
                     color: OnepieceColors.surface, shape: BoxShape.circle),
-                child: const Icon(Icons.rate_review_outlined,
+                child: const Icon(CupertinoIcons.square_pencil,
                     color: OnepieceColors.fancyBlue, size: 21),
               ),
               const SizedBox(width: 12),
