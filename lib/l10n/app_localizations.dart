@@ -1466,6 +1466,30 @@ abstract class AppLocalizations {
   /// **'Profile'**
   String get userProfile;
 
+  /// No description provided for @profileLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load your account. Please try again.'**
+  String get profileLoadFailed;
+
+  /// No description provided for @profileEditNickname.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit nickname'**
+  String get profileEditNickname;
+
+  /// No description provided for @profileSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get profileSave;
+
+  /// No description provided for @profileCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get profileCancel;
+
   /// No description provided for @sendEmail.
   ///
   /// In en, this message translates to:

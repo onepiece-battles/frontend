@@ -74,6 +74,9 @@ void main() {
     expect(find.text('草帽一伙'), findsOneWidget);
     expect(find.text('群成员'), findsOneWidget);
     expect(find.text('对方资料'), findsNothing);
+    final titleTop = tester.getTopLeft(find.text('群聊信息')).dy;
+    final membersTop = tester.getTopLeft(find.text('群成员')).dy;
+    expect(membersTop - titleTop, lessThan(180));
     await tester.tap(find.text('添加成员'));
     expect(addCount, 1);
     await tester.tap(find.text('娜美'));

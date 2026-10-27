@@ -8,9 +8,7 @@ import 'package:openapi/api.dart';
 // Assuming these imports exist based on your original code
 import '../../l10n/app_localizations.dart';
 import '../../config/resource_permission_manager.dart';
-import '../../constants/button_style.dart';
 import '../../constants/onepiece_colors.dart';
-import '../../constants/onepiece_fonts.dart';
 import '../../popup/email_verification.dart';
 import '../../popup/onepiece_alert.dart';
 import '../../repository/image_dao.dart';
@@ -20,7 +18,6 @@ import '../../utils/base64_helper.dart';
 import '../../utils/i18n_helper.dart';
 import '../../utils/image_helper.dart';
 import '../../utils/onepiece_image_picker.dart';
-import '../../utils/responsive_breakpoints.dart';
 
 // --- 1. STATE MODEL ---
 // Holds the data for the screen. Immutable style preferred for safety.
@@ -75,9 +72,22 @@ class UserProfileController extends ChangeNotifier {
   final EmailDao _emailDao = GetIt.I<EmailDao>();
 
   bool isLoading = true;
+  bool hasLoadError = false;
   bool isSavingAvatar = false;
   bool isSavingNickname = false;
   bool isSendingVerificationEmail = false;
+  bool _disposed = false;
+
+  @override
+  void notifyListeners() {
+    if (!_disposed) super.notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
 
   late User _currentUser;
   late UserProfileFormData _originalData;
@@ -90,19 +100,23 @@ class UserProfileController extends ChangeNotifier {
   bool get isEmailVerified => _currentUser.emailVerified ?? false;
 
   UserProfileController(this.userId) {
-    _loadData();
+    reload();
   }
 
-  Future<void> _loadData() async {
+  Future<void> reload() async {
     isLoading = true;
+    hasLoadError = false;
     notifyListeners();
 
     try {
       final response = await _userDao.get(GetUserRequest(userId: userId));
-      _currentUser = response!;
+      if (response == null) throw StateError('Profile unavailable');
+      _currentUser = response;
 
-      final imageBytes =
-          Base64Helper.decode(GetIt.I<User>().profileImage ?? "");
+      final imageSource = response.profileImage?.isNotEmpty == true
+          ? response.profileImage!
+          : (GetIt.I<User>().profileImage ?? '');
+      final imageBytes = Base64Helper.decode(imageSource);
 
       _originalData = UserProfileFormData(
         profileImage: imageBytes,
@@ -112,7 +126,7 @@ class UserProfileController extends ChangeNotifier {
 
       _currentData = _originalData.copyWith();
     } catch (e) {
-      // Handle Error (Log it or show toast)
+      hasLoadError = true;
       debugPrint("Error loading profile: $e");
     } finally {
       isLoading = false;
@@ -279,7 +293,7 @@ class UserProfileController extends ChangeNotifier {
       _originalData = _currentData.copyWith();
 
       if (context.mounted) {
-        router.goNamed('userProfile',
+        router.goNamed('user_profile',
             extra: GetIt.I<User>().id,
             pathParameters: {'name': GetIt.I<User>().nickname});
       }
@@ -301,7 +315,7 @@ class UserProfileController extends ChangeNotifier {
   }
 }
 
-// --- 3. MAIN WIDGET ---
+// --- Account page ---
 class UserProfile extends StatefulWidget {
   final String userId;
   const UserProfile({super.key, required this.userId});
@@ -320,6 +334,15 @@ class _UserProfileState extends State<UserProfile> {
   }
 
   @override
+  void didUpdateWidget(covariant UserProfile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.userId != widget.userId) {
+      _controller.dispose();
+      _controller = UserProfileController(widget.userId);
+    }
+  }
+
+  @override
   void dispose() {
     _controller.dispose();
     super.dispose();
@@ -327,132 +350,257 @@ class _UserProfileState extends State<UserProfile> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return ListenableBuilder(
       listenable: _controller,
       builder: (context, _) {
-        if (_controller.isLoading) {
-          return Center(
-            child: Text(
-              AppLocalizations.of(context)!.loading,
-              style: OnepieceFonts.loadingFont,
-            ),
-          );
-        }
-
-        return LayoutBuilder(
-          builder: (context, constraints) {
-            final isNarrow =
-                ResponsiveBreakpoints.isMobileFromConstraints(constraints);
+        return ColoredBox(
+          color: OnepieceColors.surface,
+          child: LayoutBuilder(builder: (context, constraints) {
+            final narrow = constraints.maxWidth < 640;
             return SingleChildScrollView(
-              padding:
-                  isNarrow ? const EdgeInsets.fromLTRB(12, 12, 12, 20) : null,
-              child: Column(
-                children: [
-                  _AvatarSection(controller: _controller),
-                  const SizedBox(height: 12),
-                  _NicknameSection(controller: _controller),
-                  const SizedBox(height: 12),
-                  _EmailSection(controller: _controller),
-                ],
+              padding: EdgeInsets.fromLTRB(
+                  narrow ? 16 : 32, narrow ? 22 : 36, narrow ? 16 : 32, 48),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 760),
+                  child: _controller.isLoading
+                      ? const Padding(
+                          padding: EdgeInsets.only(top: 80),
+                          child: Center(
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        )
+                      : _controller.hasLoadError
+                          ? _ProfileError(
+                              message: loc.profileLoadFailed,
+                              retryLabel: loc.retryLoading,
+                              onRetry: _controller.reload,
+                            )
+                          : Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(loc.myAccount,
+                                    style: TextStyle(
+                                        fontSize: narrow ? 25 : 30,
+                                        fontWeight: FontWeight.w700,
+                                        letterSpacing: -.6,
+                                        color: OnepieceColors.primaryLabel)),
+                                const SizedBox(height: 22),
+                                _ProfileHero(
+                                    controller: _controller, narrow: narrow),
+                                const SizedBox(height: 28),
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 4, bottom: 10),
+                                  child: Text(loc.basicInfo,
+                                      style: const TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w600,
+                                          color: OnepieceColors.primaryLabel)),
+                                ),
+                                _ProfileInfoCard(controller: _controller),
+                              ],
+                            ),
+                ),
               ),
             );
-          },
+          }),
         );
       },
     );
   }
 }
 
-// --- 4. SUB-COMPONENTS (Clean UI) ---
+class _ProfileError extends StatelessWidget {
+  final String message;
+  final String retryLabel;
+  final VoidCallback onRetry;
+  const _ProfileError(
+      {required this.message, required this.retryLabel, required this.onRetry});
 
-class _AvatarSection extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.only(top: 80),
+        child: Center(
+          child: Column(children: [
+            const Icon(Icons.person_off_outlined,
+                size: 40, color: OnepieceColors.secondaryLabel),
+            const SizedBox(height: 14),
+            Text(message,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                    fontSize: 14, color: OnepieceColors.secondaryLabel)),
+            const SizedBox(height: 14),
+            TextButton(onPressed: onRetry, child: Text(retryLabel)),
+          ]),
+        ),
+      );
+}
+
+class _ProfileSurface extends StatelessWidget {
+  final Widget child;
+  const _ProfileSurface({required this.child});
+
+  @override
+  Widget build(BuildContext context) => Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: OnepieceColors.separator, width: .8),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: child,
+      );
+}
+
+class _ProfileHero extends StatelessWidget {
   final UserProfileController controller;
-  const _AvatarSection({required this.controller});
+  final bool narrow;
+  const _ProfileHero({required this.controller, required this.narrow});
 
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+    final bytes = controller.data.profileImage;
+    final avatar = ClipOval(
+      child: SizedBox(
+        width: 86,
+        height: 86,
+        child: bytes == null || bytes.isEmpty
+            ? const ColoredBox(
+                color: OnepieceColors.surface,
+                child: Icon(Icons.person_outline,
+                    size: 42, color: OnepieceColors.secondaryLabel),
+              )
+            : ImageHelper.rasterImage(bytes, fit: BoxFit.cover),
+      ),
+    );
+    final identity = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(controller.data.nickname,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+                fontSize: 23,
+                fontWeight: FontWeight.w600,
+                height: 1.2,
+                color: OnepieceColors.primaryLabel)),
+        const SizedBox(height: 5),
+        Text(controller.data.username,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+                fontSize: 13, color: OnepieceColors.secondaryLabel)),
+        const SizedBox(height: 10),
+        _VerificationBadge(verified: controller.isEmailVerified),
+      ],
+    );
+    final upload = OutlinedButton.icon(
+      onPressed: controller.isSavingAvatar
+          ? null
+          : () => controller.pickImage(context),
+      icon: controller.isSavingAvatar
+          ? const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2))
+          : const Icon(Icons.camera_alt_outlined, size: 17),
+      label: Text(loc.uploadNewAvatar),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: OnepieceColors.fancyBlue,
+        side: const BorderSide(color: OnepieceColors.separator),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(11)),
+      ),
+    );
+    return _ProfileSurface(
       child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(loc.avatarHeader,
-                  style: OnepieceFonts.headerStyle.copyWith(fontSize: 16)),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  ImageHelper.getRoundImageFrame(
-                      80,
-                      80,
-                      3,
-                      OnepieceColors.liteFancyBlue,
-                      80,
-                      controller.data.profileImage!),
-                  const SizedBox(width: 12),
-                  Expanded(
-                      child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(loc.uploadNewAvatar,
-                          style: OnepieceFonts.contentStyle),
-                      const SizedBox(height: 8),
-                      SizedBox(
-                          height: 32,
-                          child: ElevatedButton(
-                              style: OnepieceButtonStyle.getDefaultStyle(),
-                              onPressed: controller.isSavingAvatar
-                                  ? null
-                                  : () => controller.pickImage(context),
-                              child: controller.isSavingAvatar
-                                  ? const SizedBox(
-                                      width: 18,
-                                      height: 18,
-                                      child: CircularProgressIndicator(
-                                          strokeWidth: 2))
-                                  : Text(loc.chooseFile,
-                                      style: const TextStyle(fontSize: 13)))),
-                      const SizedBox(height: 4),
-                      Text(controller.data.imageName ?? loc.noFileChosen,
-                          style: OnepieceFonts.smallContentStyle),
-                      const SizedBox(height: 4),
-                      Text(loc.maxFileSize500,
-                          style: OnepieceFonts.smallContentStyle),
-                    ],
-                  ))
-                ],
-              ),
+        padding: EdgeInsets.all(narrow ? 18 : 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
+              avatar,
+              const SizedBox(width: 18),
+              Expanded(child: identity),
+              if (!narrow) ...[const SizedBox(width: 18), upload],
+            ]),
+            if (narrow) ...[
+              const SizedBox(height: 18),
+              upload,
             ],
-          )),
+            const SizedBox(height: 11),
+            Text(loc.maxFileSize500,
+                style: const TextStyle(
+                    fontSize: 12, color: OnepieceColors.secondaryLabel)),
+          ],
+        ),
+      ),
     );
   }
 }
 
-class _NicknameSection extends StatefulWidget {
-  final UserProfileController controller;
-  const _NicknameSection({required this.controller});
+class _VerificationBadge extends StatelessWidget {
+  final bool verified;
+  const _VerificationBadge({required this.verified});
 
   @override
-  State<_NicknameSection> createState() => _NicknameSectionState();
+  Widget build(BuildContext context) {
+    final label = verified
+        ? AppLocalizations.of(context)!.verified
+        : AppLocalizations.of(context)!.notVerified;
+    final color = verified ? const Color(0xFF287D57) : const Color(0xFF9A6830);
+    final fill = verified ? const Color(0xFFE9F5EF) : const Color(0xFFFFF4E7);
+    return DecoratedBox(
+      decoration:
+          BoxDecoration(color: fill, borderRadius: BorderRadius.circular(20)),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          Icon(verified ? Icons.check_circle_outline : Icons.info_outline,
+              size: 14, color: color),
+          const SizedBox(width: 5),
+          Text(label,
+              style: TextStyle(
+                  fontSize: 11, fontWeight: FontWeight.w600, color: color)),
+        ]),
+      ),
+    );
+  }
 }
 
-class _NicknameSectionState extends State<_NicknameSection> {
-  final TextEditingController _textController = TextEditingController();
-  bool _isEditable = false;
+class _ProfileInfoCard extends StatelessWidget {
+  final UserProfileController controller;
+  const _ProfileInfoCard({required this.controller});
 
-  Future<void> _confirmNickname() async {
-    final saved =
-        await widget.controller.saveNickname(context, _textController.text);
-    if (mounted && saved) {
-      setState(() {
-        _isEditable = false;
-        _textController.text = widget.controller.data.nickname;
-      });
-    }
-  }
+  @override
+  Widget build(BuildContext context) => _ProfileSurface(
+        child: Column(children: [
+          _NicknameRow(controller: controller),
+          const Divider(
+              height: 1,
+              indent: 20,
+              endIndent: 20,
+              color: OnepieceColors.separator),
+          _EmailRow(controller: controller),
+        ]),
+      );
+}
+
+class _NicknameRow extends StatefulWidget {
+  final UserProfileController controller;
+  const _NicknameRow({required this.controller});
+
+  @override
+  State<_NicknameRow> createState() => _NicknameRowState();
+}
+
+class _NicknameRowState extends State<_NicknameRow> {
+  final _textController = TextEditingController();
+  bool _editing = false;
 
   @override
   void initState() {
@@ -461,155 +609,149 @@ class _NicknameSectionState extends State<_NicknameSection> {
   }
 
   @override
-  void didUpdateWidget(covariant _NicknameSection oldWidget) {
+  void didUpdateWidget(covariant _NicknameRow oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Sync text field if external change happened (e.g. reset)
-    if (_textController.text != widget.controller.data.nickname &&
-        !_isEditable) {
+    if (!_editing && _textController.text != widget.controller.data.nickname) {
       _textController.text = widget.controller.data.nickname;
     }
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      child: Padding(
-          padding: const EdgeInsets.all(12),
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Row(children: [
-              Text(AppLocalizations.of(context)!.nickname,
-                  style: OnepieceFonts.headerStyle.copyWith(fontSize: 16)),
-              const Spacer(),
-              InkWell(
-                onTap: widget.controller.isSavingNickname
-                    ? null
-                    : () {
-                        if (_isEditable) {
-                          _confirmNickname();
-                          return;
-                        }
-
-                        setState(() {
-                          _isEditable = true;
-                        });
-                      },
-                child: SizedBox(
-                    width: 22,
-                    height: 22,
-                    child: widget.controller.isSavingNickname
-                        ? const CircularProgressIndicator(strokeWidth: 2)
-                        : ImageHelper.getSvgIconWithColor(
-                            _isEditable
-                                ? 'images/svgs/check.svg'
-                                : 'images/svgs/edit.svg',
-                            150,
-                            150,
-                            OnepieceColors.fancyBlue)),
-              ),
-            ]),
-            const SizedBox(height: 10),
-            _isEditable
-                ? SizedBox(
-                    height: 35,
-                    child: TextFormField(
-                      controller: _textController,
-                      onChanged: (val) => widget.controller.updateNickname(val),
-                      decoration: const InputDecoration(
-                          contentPadding:
-                              EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                          floatingLabelBehavior: FloatingLabelBehavior.never,
-                          disabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                  color: OnepieceColors.menuHoverColor)),
-                          enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                  color: OnepieceColors.menuHoverColor)),
-                          focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                  color: OnepieceColors.fancyGreen,
-                                  width: 1.5)),
-                          labelStyle: OnepieceFonts.dropDownItemStyle),
-                    ))
-                : Text(widget.controller.data.nickname,
-                    style: OnepieceFonts.contentStyle
-                        .copyWith(fontSize: 16, fontWeight: FontWeight.w600)),
-          ])),
-    );
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
   }
-}
 
-class _EmailSection extends StatelessWidget {
-  final UserProfileController controller;
-  const _EmailSection({required this.controller});
+  Future<void> _save() async {
+    if (_textController.text.trim().isEmpty) return;
+    final saved = await widget.controller
+        .saveNickname(context, _textController.text.trim());
+    if (mounted && saved) setState(() => _editing = false);
+  }
 
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
-    final isVerified = controller.isEmailVerified;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          Expanded(
+            child: Text(loc.nickname,
+                style: const TextStyle(
+                    fontSize: 12, color: OnepieceColors.secondaryLabel)),
+          ),
+          if (!_editing)
+            IconButton(
+              tooltip: loc.profileEditNickname,
+              visualDensity: VisualDensity.compact,
+              onPressed: () => setState(() => _editing = true),
+              icon: const Icon(Icons.edit_outlined,
+                  size: 18, color: OnepieceColors.fancyBlue),
+            ),
+        ]),
+        if (_editing) ...[
+          const SizedBox(height: 7),
+          TextField(
+            controller: _textController,
+            autofocus: true,
+            onChanged: (_) => setState(() {}),
+            onSubmitted: (_) => _save(),
+            decoration: InputDecoration(
+              isDense: true,
+              filled: true,
+              fillColor: OnepieceColors.surface,
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide.none),
+            ),
+          ),
+          const SizedBox(height: 11),
+          Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+            TextButton(
+              onPressed: widget.controller.isSavingNickname
+                  ? null
+                  : () => setState(() {
+                        _editing = false;
+                        _textController.text = widget.controller.data.nickname;
+                      }),
+              child: Text(loc.profileCancel),
+            ),
+            const SizedBox(width: 6),
+            FilledButton(
+              onPressed: widget.controller.isSavingNickname ||
+                      _textController.text.trim().isEmpty
+                  ? null
+                  : _save,
+              style: FilledButton.styleFrom(
+                backgroundColor: OnepieceColors.fancyBlue,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+              ),
+              child: widget.controller.isSavingNickname
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: Colors.white))
+                  : Text(loc.profileSave),
+            ),
+          ]),
+        ] else ...[
+          const SizedBox(height: 4),
+          Text(widget.controller.data.nickname,
+              style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: OnepieceColors.primaryLabel)),
+        ],
+      ]),
+    );
+  }
+}
 
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      child: Padding(
-          padding: const EdgeInsets.all(12),
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Row(children: [
-              Text(loc.email,
-                  style: OnepieceFonts.headerStyle.copyWith(fontSize: 16)),
-              const SizedBox(width: 8),
-              Tooltip(
-                message: isVerified ? loc.verified : loc.notVerified,
-                child: SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: ImageHelper.getSvgIconWithColor(
-                      isVerified
-                          ? 'images/svgs/check-circle.svg'
-                          : 'images/svgs/alert.svg',
-                      150,
-                      150,
-                      isVerified ? Colors.green : Colors.red),
-                ),
-              ),
-            ]),
-            const SizedBox(height: 10),
-            Row(children: [
-              Expanded(
-                child: Text(
-                  controller.data.username,
-                  style: OnepieceFonts.contentStyle
-                      .copyWith(fontWeight: FontWeight.w600),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              if (!isVerified) ...[
-                const SizedBox(width: 10),
-                SizedBox(
-                  height: 32,
-                  child: ElevatedButton.icon(
-                    style: OnepieceButtonStyle.getDefaultStyle(),
-                    onPressed: controller.isSendingVerificationEmail
-                        ? null
-                        : () => controller.sendVerificationEmail(context),
-                    icon: controller.isSendingVerificationEmail
-                        ? const SizedBox(
-                            width: 14,
-                            height: 14,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.mark_email_unread_outlined,
-                            size: 16),
-                    label: Text(loc.sendEmail,
-                        style: const TextStyle(fontSize: 13)),
-                  ),
-                ),
-              ],
-            ]),
-          ])),
+class _EmailRow extends StatelessWidget {
+  final UserProfileController controller;
+  const _EmailRow({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 19),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(loc.email,
+            style: const TextStyle(
+                fontSize: 12, color: OnepieceColors.secondaryLabel)),
+        const SizedBox(height: 7),
+        Row(children: [
+          Expanded(
+            child: Text(controller.data.username,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: OnepieceColors.primaryLabel)),
+          ),
+          if (!controller.isEmailVerified) ...[
+            const SizedBox(width: 12),
+            TextButton(
+              onPressed: controller.isSendingVerificationEmail
+                  ? null
+                  : () => controller.sendVerificationEmail(context),
+              child: controller.isSendingVerificationEmail
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2))
+                  : Text(loc.sendEmail),
+            ),
+          ],
+        ]),
+      ]),
     );
   }
 }

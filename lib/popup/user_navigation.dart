@@ -52,13 +52,14 @@ class _UserNavigationState extends State<UserNavigation> {
               height: 35,
               child: ElevatedButton(
                 onPressed: () {
+                  final router = GoRouter.of(context);
+                  Navigator.of(context).pop();
                   if (getIt<User>().loginRole == UserRole.VISITOR) {
-                    context.go(AppRouter.registerPath);
+                    router.go(AppRouter.registerPath);
                   } else {
-                    context.goNamed('userProfile',
+                    router.goNamed('user_profile',
                         extra: getIt<User>().id,
                         pathParameters: {'name': getIt<User>().nickname});
-                    Navigator.pop(context);
                   }
                 },
                 style: OnepieceButtonStyle.getDefaultStyle(),

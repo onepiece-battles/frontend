@@ -17,9 +17,12 @@ class ResourcePermissionManager {
 
   static void updateUserCache(User user) {
     // sort resource type value, the display order is dependent on this order map
-    user.loginRoleResourcesPermissionMap.sort((a, b) =>
-        resourceOrderMap[a.resourceType]!
-            .compareTo(resourceOrderMap[b.resourceType]!));
+    // Generated OpenAPI lists are fixed-length; sort a growable copy before
+    // caching the refreshed user (for example after a nickname change).
+    user.loginRoleResourcesPermissionMap = [
+      ...user.loginRoleResourcesPermissionMap
+    ]..sort((a, b) => resourceOrderMap[a.resourceType]!
+        .compareTo(resourceOrderMap[b.resourceType]!));
 
     // Unregister before re-registering to avoid "already registered" errors
     // on subsequent logins / role switches.

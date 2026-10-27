@@ -365,7 +365,7 @@ class AppRouter {
                   parentNavigatorKey: _homeNavigatorState,
                   pageBuilder: (context, state) {
                     updateRoutingState(state.matchedLocation);
-                    String userId = state.extra as String;
+                    final userId = state.extra as String? ?? getIt<User>().id;
                     return NoTransitionPage(
                         child: _DeferredPage(
                             load: user_profile.loadLibrary,

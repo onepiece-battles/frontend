@@ -704,6 +704,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get userProfile => 'Profile';
 
   @override
+  String get profileLoadFailed =>
+      'Could not load your account. Please try again.';
+
+  @override
+  String get profileEditNickname => 'Edit nickname';
+
+  @override
+  String get profileSave => 'Save';
+
+  @override
+  String get profileCancel => 'Cancel';
+
+  @override
   String get sendEmail => 'Send Verification Email';
 
   @override
