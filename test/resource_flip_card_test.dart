@@ -125,12 +125,18 @@ void main() {
     final before = tester.getSize(card);
     expect(before.height, 225);
     expect(find.text('武装色'), findsOneWidget);
+    expect(find.text('霸气'), findsOneWidget);
+    expect(find.text('悬赏额'), findsOneWidget);
+    expect(find.text('3,000,000,000'), findsOneWidget);
+    expect(tester.getRect(find.text('武装色')).bottom,
+        lessThanOrEqualTo(tester.getRect(card).bottom));
     await tester.tap(find.byIcon(Icons.flip_to_back_outlined));
     await tester.pumpAndSettle();
     expect(tester.getSize(card), before);
     expect(find.text('攻击力'), findsOneWidget);
     expect(find.text('400'), findsOneWidget);
     expect(find.text('精力值'), findsOneWidget);
+    expect(find.textContaining('悬赏额'), findsOneWidget);
     expect(tester.getSize(find.byKey(const ValueKey('character-avatar-luffy'))),
         const Size(40, 40));
     expect(find.byType(Dialog), findsNothing);
@@ -166,6 +172,7 @@ void main() {
         )));
     await tester.pump();
     expect(find.text('霸王色'), findsOneWidget);
+    expect(find.text('悬赏额'), findsOneWidget);
     await tester.tap(find.byIcon(Icons.flip_to_back_outlined));
     await tester.pumpAndSettle();
     expect(find.text('果实数上限'), findsOneWidget);

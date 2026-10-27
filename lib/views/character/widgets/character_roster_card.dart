@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:openapi/api.dart';
 
 import '../../../components/image_lazy_loader.dart';
@@ -40,25 +41,25 @@ class CharacterRosterCard extends StatelessWidget {
   List<Haki> get _hakis => character.hakis.toList()
     ..sort((a, b) => a.toString().compareTo(b.toString()));
 
-  Widget _avatar({required bool lazy}) {
+  Widget _avatar({required bool lazy, double size = 40}) {
     final uri = character.imageUri;
     if (uri == null || uri.isEmpty) {
       return Container(
         key: ValueKey('character-avatar-${character.id}'),
-        width: 40,
-        height: 40,
+        width: size,
+        height: size,
         decoration: const BoxDecoration(
             color: OnepieceColors.surface, shape: BoxShape.circle),
-        child: const Icon(Icons.person_outline,
-            size: 22, color: OnepieceColors.secondaryLabel),
+        child: Icon(Icons.person_outline,
+            size: size * 0.55, color: OnepieceColors.secondaryLabel),
       );
     }
     return ImageLazyLoader(
       key: ValueKey('character-avatar-${character.id}'),
       uriProvider: () => uri,
-      width: 40,
+      width: size,
       borderWidth: 0,
-      borderRadios: 40,
+      borderRadios: size,
       lazy: lazy,
     );
   }
@@ -112,16 +113,18 @@ class CharacterRosterCard extends StatelessWidget {
     final race = raceMap[character.race] ?? '';
     final battleStyle = battleStyleMap[character.battleStyle] ?? '';
     final subtitle = [race, battleStyle].where((e) => e.isNotEmpty).join(' · ');
+    final bounty = character.bounty == null
+        ? '—'
+        : NumberFormat.decimalPattern().format(character.bounty);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(11, 10, 11, 10),
+      padding: const EdgeInsets.fromLTRB(11, 8, 11, 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Row(children: [
             Hero(
               tag: 'character-roster-${character.id}',
-              child: _avatar(lazy: true),
+              child: _avatar(lazy: true, size: 44),
             ),
             const SizedBox(width: 9),
             Expanded(
@@ -149,52 +152,103 @@ class CharacterRosterCard extends StatelessWidget {
             ),
             const SizedBox(width: 36),
           ]),
-          Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(loc.combatPower,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                          fontSize: 10, color: OnepieceColors.secondaryLabel)),
-                  Text('${character.score}',
-                      maxLines: 1,
-                      style: const TextStyle(
-                          fontSize: 22,
-                          height: 1.1,
-                          fontWeight: FontWeight.w600,
-                          fontFeatures: [FontFeature.tabularFigures()],
-                          color: OnepieceColors.primaryLabel)),
-                ],
-              ),
+          const SizedBox(height: 7),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
+            decoration: BoxDecoration(
+              color: OnepieceColors.surface,
+              borderRadius: BorderRadius.circular(10),
             ),
-            Text(character.bounty == null ? '—' : '${character.bounty}',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: OnepieceFonts.bountyStyle.copyWith(fontSize: 15)),
-          ]),
-          if (_hakis.isNotEmpty)
-            SizedBox(
-              height: 22,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(children: [
-                  for (final haki in _hakis)
-                    Padding(
-                      padding: const EdgeInsets.only(right: 4),
-                      child: OnepieceTag.getHakiTag(haki, hakiMap[haki] ?? ''),
-                    ),
-                ]),
+            child: Row(children: [
+              Expanded(
+                child: _frontMetric(
+                  loc.combatPower,
+                  NumberFormat.decimalPattern().format(character.score),
+                  const TextStyle(
+                      fontSize: 21,
+                      height: 1.05,
+                      fontWeight: FontWeight.w600,
+                      fontFeatures: [FontFeature.tabularFigures()],
+                      color: OnepieceColors.primaryLabel),
+                ),
               ),
-            )
-          else
-            const SizedBox(height: 2),
+              const SizedBox(
+                height: 39,
+                child: VerticalDivider(
+                    width: 15, thickness: 1, color: OnepieceColors.separator),
+              ),
+              Expanded(
+                child: _frontMetric(loc.bounty, bounty,
+                    OnepieceFonts.bountyStyle.copyWith(fontSize: 17)),
+              ),
+            ]),
+          ),
+          const SizedBox(height: 6),
+          Wrap(spacing: 18, runSpacing: 4, children: [
+            _frontFact(loc.characterEnergy, '${character.energy}'),
+            _frontFact(loc.fruitLimit, '${character.maximumFruitCount}'),
+          ]),
+          const Spacer(),
+          const Divider(height: 1, color: OnepieceColors.separator),
+          const SizedBox(height: 5),
+          Text(loc.hakis,
+              style: const TextStyle(
+                  fontSize: 11, color: OnepieceColors.secondaryLabel)),
+          const SizedBox(height: 4),
+          _hakis.isEmpty
+              ? const Text('—',
+                  style: TextStyle(
+                      fontSize: 12, color: OnepieceColors.secondaryLabel))
+              : Wrap(
+                  spacing: 5,
+                  runSpacing: 4,
+                  children: [
+                    for (final haki in _hakis)
+                      OnepieceTag.getHakiTag(haki, hakiMap[haki] ?? ''),
+                  ],
+                ),
         ],
       ),
     );
   }
+
+  Widget _frontMetric(String label, String value, TextStyle valueStyle) {
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Text(label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+              fontSize: 11, color: OnepieceColors.secondaryLabel)),
+      const SizedBox(height: 3),
+      Tooltip(
+        message: '$label $value',
+        child: SizedBox(
+          width: double.infinity,
+          height: 22,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(value, maxLines: 1, softWrap: false, style: valueStyle),
+          ),
+        ),
+      ),
+    ]);
+  }
+
+  Widget _frontFact(String label, String value) => Text.rich(TextSpan(
+        style: const TextStyle(fontSize: 11),
+        children: [
+          TextSpan(
+              text: '$label  ',
+              style: const TextStyle(color: OnepieceColors.secondaryLabel)),
+          TextSpan(
+              text: value,
+              style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: OnepieceColors.primaryLabel)),
+        ],
+      ));
 
   // ── Back: the whole front, shrunk, plus the full stat numbers ─────────
   Widget _backContent(BuildContext context, AppLocalizations loc, String name) {
@@ -228,16 +282,31 @@ class CharacterRosterCard extends StatelessWidget {
           const SizedBox(height: 4),
           Row(children: [
             Flexible(
-              child: Text(
-                  character.bounty == null ? '—' : '${character.bounty}',
+              child: Text.rich(
+                  TextSpan(children: [
+                    TextSpan(
+                        text: '${loc.bounty}  ',
+                        style: const TextStyle(
+                            color: OnepieceColors.secondaryLabel)),
+                    TextSpan(
+                        text: character.bounty == null
+                            ? '—'
+                            : NumberFormat.decimalPattern()
+                                .format(character.bounty),
+                        style:
+                            OnepieceFonts.bountyStyle.copyWith(fontSize: 11)),
+                  ]),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFFF57C00))),
+                  style: const TextStyle(fontSize: 11)),
             ),
-            const SizedBox(width: 8),
+            if (_hakis.isNotEmpty) ...[
+              const SizedBox(width: 8),
+              Text(loc.hakis,
+                  style: const TextStyle(
+                      fontSize: 10, color: OnepieceColors.secondaryLabel)),
+              const SizedBox(width: 4),
+            ],
             for (final haki in _hakis)
               Padding(
                 padding: const EdgeInsets.only(right: 4),
