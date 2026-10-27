@@ -1305,4 +1305,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get resourceNoHolders => 'No holders yet';
+
+  @override
+  String get fruitHolders => 'Holders';
+
+  @override
+  String get flipCardBack => 'Flip back';
+
+  @override
+  String get openResourceDetails => 'Open full details';
 }

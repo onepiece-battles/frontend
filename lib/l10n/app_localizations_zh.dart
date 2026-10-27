@@ -1257,4 +1257,13 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get resourceNoHolders => '暂无持有者';
+
+  @override
+  String get fruitHolders => '持有者';
+
+  @override
+  String get flipCardBack => '翻回正面';
+
+  @override
+  String get openResourceDetails => '查看完整详情';
 }

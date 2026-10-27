@@ -456,5 +456,8 @@
   "resourceLoadFailed": "Couldn’t load resources. Please try again.",
   "noResourcesFound": "No resources found",
   "retryLoading": "Try again",
-  "resourceNoHolders": "No holders yet"
+  "resourceNoHolders": "No holders yet",
+  "fruitHolders": "Holders",
+  "flipCardBack": "Flip back",
+  "openResourceDetails": "Open full details"
 }

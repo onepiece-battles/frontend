@@ -456,5 +456,8 @@
   "resourceLoadFailed": "资源加载失败，请重试",
   "noResourcesFound": "暂无符合条件的资源",
   "retryLoading": "重新加载",
-  "resourceNoHolders": "暂无持有者"
+  "resourceNoHolders": "暂无持有者",
+  "fruitHolders": "持有者",
+  "flipCardBack": "翻回正面",
+  "openResourceDetails": "查看完整详情"
 }
