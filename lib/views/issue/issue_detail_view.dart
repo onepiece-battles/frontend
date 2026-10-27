@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -171,7 +172,7 @@ class _IssueDetailViewState extends State<IssueDetailView> {
                 borderRadius: BorderRadius.circular(10),
               ),
               child: const Icon(
-                Icons.feedback_outlined,
+                CupertinoIcons.square_pencil,
                 color: OnepieceColors.fancyBlue,
                 size: 22,
               ),

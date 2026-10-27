@@ -55,8 +55,8 @@ class MenuConfig {
           ImageHelper.getSvgIcon('images/svgs/hat.svg', 20, 20),
       ResourceType.CHATTING.toString():
           ImageHelper.getSvgIcon('images/svgs/message1.svg', 20, 20),
-      ResourceType.ISSUE.toString():
-          ImageHelper.getSvgIcon('images/svgs/feedback.svg', 20, 20),
+      ResourceType.ISSUE.toString(): const Icon(CupertinoIcons.square_pencil,
+          size: 20, color: OnepieceColors.fancyBlue),
     };
   }
 
@@ -749,7 +749,7 @@ class _SideMenuState extends State<SideMenu> {
                         color: OnepieceColors.surface,
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.rate_review_outlined,
+                      child: const Icon(CupertinoIcons.square_pencil,
                           color: OnepieceColors.fancyBlue, size: 18),
                     ),
                     if (isExpanded) ...[

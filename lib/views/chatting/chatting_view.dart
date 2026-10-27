@@ -1451,9 +1451,10 @@ class _ChattingViewState extends State<ChattingView> {
                                             decoration: BoxDecoration(
                                               color: Colors.white,
                                               borderRadius:
-                                                  BorderRadius.circular(14),
+                                                  BorderRadius.circular(6),
                                               border: Border.all(
-                                                  color: _kSeparator),
+                                                  color: _kSeparator,
+                                                  width: .7),
                                             ),
                                             padding: const EdgeInsets.fromLTRB(
                                                 14, 2, 6, 2),
@@ -1732,11 +1733,11 @@ class _ChattingViewState extends State<ChattingView> {
       width: 48,
       height: 48,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(6),
         color: OnepieceColors.liteFancyBlue,
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(6),
         child: GridView.builder(
           shrinkWrap: true,
           padding: const EdgeInsets.all(2),
@@ -1768,8 +1769,8 @@ class _ChattingViewState extends State<ChattingView> {
         key: ValueKey(uri),
         uriProvider: () => uri,
         width: 46,
-        borderWidth: 1,
-        borderRadios: 23,
+        borderWidth: .5,
+        borderRadios: 6,
       ),
     );
   }
