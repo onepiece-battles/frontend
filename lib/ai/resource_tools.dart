@@ -74,6 +74,26 @@ class ResourceTools {
         }, [
           'name'
         ]),
+        _fn('list_fruits_by_type',
+            'List devil fruits of a given type and their holders. Use this for '
+                'questions like "all Ancient Zoan users".',
+            {
+              'type': {
+                'type': 'string',
+                'description':
+                    'One of: Paramecia, Logia, Zoan, Ancient_Zoan, Mythical_Zoan, Artificial_Zoan',
+              }
+            },
+            ['type']),
+        _fn('propose_battle',
+            'Propose a battle between two characters so the user can create it. '
+                'Call this when the user wants to simulate or create a fight (e.g. '
+                '"who would win, A vs B", "create a battle between A and B").',
+            {
+              'starter_name': {'type': 'string'},
+              'receiver_name': {'type': 'string'},
+            },
+            ['starter_name', 'receiver_name']),
       ];
 
   static Map<String, dynamic> _fn(String name, String desc,
@@ -104,6 +124,11 @@ class ResourceTools {
           return _searchFruits('${args['name'] ?? ''}');
         case 'get_fruit_holders':
           return _fruitHolders('${args['name'] ?? ''}');
+        case 'list_fruits_by_type':
+          return _fruitsByType('${args['type'] ?? ''}');
+        case 'propose_battle':
+          return _proposeBattle(
+              '${args['starter_name'] ?? ''}', '${args['receiver_name'] ?? ''}');
       }
       return const ToolResult('{"error":"unknown tool"}', []);
     } catch (e) {
@@ -228,5 +253,105 @@ class ResourceTools {
   static Future<ToolResult> _fruitHolders(String name) async {
     final result = await _searchFruits(name);
     return result; // same data; holders are included.
+  }
+
+  static FruitType? _parseFruitType(String raw) {
+    final t = raw.trim().toLowerCase().replaceAll(' ', '_');
+    switch (t) {
+      case 'paramecia':
+      case '超人系':
+        return FruitType.paramecia;
+      case 'logia':
+      case '自然系':
+        return FruitType.logia;
+      case 'zoan':
+      case '动物系':
+        return FruitType.zoan;
+      case 'ancient_zoan':
+      case 'ancientzoan':
+      case '古代种':
+        return FruitType.ancientZoan;
+      case 'mythical_zoan':
+      case 'mythicalzoan':
+      case '幻兽种':
+      case '神话种':
+        return FruitType.mythicalZoan;
+      case 'artificial_zoan':
+      case 'artificialzoan':
+      case '人造':
+      case '人造恶魔果实':
+        return FruitType.artificialZoan;
+    }
+    return null;
+  }
+
+  static Future<ToolResult> _fruitsByType(String rawType) async {
+    final type = _parseFruitType(rawType);
+    if (type == null) {
+      return ToolResult(
+          jsonEncode({'error': 'unknown fruit type', 'query': rawType}), const []);
+    }
+    final resp = await _getIt<FruitDao>().list(ListFruitRequest(
+        pageSize: 30,
+        pageIndex: 1,
+        sortKeys: [],
+        fruitFilter: FruitFilter(types: [type], languageCode: _lang)));
+    final fruits = resp?.fruits ?? [];
+    final refs = <ResourceRef>[];
+    final data = fruits.map((f) {
+      refs.add(ResourceRef('fruit', f.id!, _name(f.name)));
+      final holders = f.characters.map((h) {
+        refs.add(ResourceRef('character', h.id, _name(h.name)));
+        return {'id': h.id, 'name': _name(h.name)};
+      }).toList();
+      return {
+        'id': f.id,
+        'name': _name(f.name),
+        'type': f.fruitType?.toString(),
+        'holders': holders,
+      };
+    }).toList();
+    return ToolResult(
+        jsonEncode({'type': type.toString(), 'count': data.length, 'fruits': data}),
+        refs);
+  }
+
+  static Future<CharacterListView?> _findOneCharacter(String name) async {
+    final resp =
+        await _listChars(CharacterFilter(name: name, languageCode: _lang), size: 1);
+    final chars = resp?.characters ?? [];
+    return chars.isEmpty ? null : chars.first;
+  }
+
+  static Future<ToolResult> _proposeBattle(
+      String starterName, String receiverName) async {
+    final starter = await _findOneCharacter(starterName);
+    final receiver = await _findOneCharacter(receiverName);
+    if (starter == null || receiver == null) {
+      return ToolResult(
+          jsonEncode({
+            'proposed': false,
+            'starter_found': starter != null,
+            'receiver_found': receiver != null,
+          }),
+          const []);
+    }
+    final sName = _name(starter.name);
+    final rName = _name(receiver.name);
+    final refs = <ResourceRef>[
+      ResourceRef('character', starter.id, sName),
+      ResourceRef('character', receiver.id, rName),
+      // Consumed by the UI to show a Confirm/Cancel battle card (id = "starter|receiver").
+      ResourceRef('battle_proposal', '${starter.id}|${receiver.id}', '$sName vs $rName'),
+    ];
+    return ToolResult(
+        jsonEncode({
+          'proposed': true,
+          'starter': {'id': starter.id, 'name': sName},
+          'receiver': {'id': receiver.id, 'name': rName},
+          'note': 'A battle proposal card with Confirm/Cancel is shown to the user. '
+              'Do not output a onepiece:// link for this; just briefly say you prepared it.',
+        }),
+        refs);
   }
 }

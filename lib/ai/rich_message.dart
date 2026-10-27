@@ -112,9 +112,10 @@ class _RichMessageState extends State<RichMessage> {
     _blocks = blocks;
   }
 
-  // Matches **bold** or [label](target); everything else is plain text.
-  static final RegExp _inline =
-      RegExp(r'\*\*(.+?)\*\*|\[([^\]]+)\]\(([^)]+)\)');
+  // Matches **bold**, [label](target), or a bare onepiece:// URL (safety net so
+  // a raw link never renders as text); everything else is plain text.
+  static final RegExp _inline = RegExp(
+      r'\*\*(.+?)\*\*|\[([^\]]+)\]\(([^)]+)\)|(onepiece://[a-z_]+/[^\s)\]]+)');
 
   List<InlineSpan> _inlineSpans(String text) {
     final spans = <InlineSpan>[];
@@ -126,10 +127,12 @@ class _RichMessageState extends State<RichMessage> {
       if (m.group(1) != null) {
         spans.add(TextSpan(
             text: m.group(1), style: const TextStyle(fontWeight: FontWeight.w700)));
+      } else if (m.group(2) != null) {
+        spans.add(_linkSpan(m.group(2)!, m.group(3) ?? ''));
       } else {
-        final label = m.group(2) ?? '';
-        final target = m.group(3) ?? '';
-        spans.add(_linkSpan(label, target));
+        final url = m.group(4)!; // bare onepiece://type/id
+        final type = url.substring('onepiece://'.length).split('/').first;
+        spans.add(_linkSpan(type, url));
       }
       last = m.end;
     }

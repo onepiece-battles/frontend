@@ -15,13 +15,25 @@ class AiError implements Exception {
   String toString() => message;
 }
 
+/// A battle the assistant prepared for the user to confirm and create.
+class BattleProposal {
+  const BattleProposal(this.starterId, this.receiverId, this.label);
+  final String starterId;
+  final String receiverId;
+  final String label; // e.g. "Luffy vs Law"
+}
+
 /// One message shown in the assistant chat.
 class AiChatMessage {
-  AiChatMessage(this.role, this.text, {this.resources = const [], this.pending = false});
+  AiChatMessage(this.role, this.text,
+      {this.resources = const [], this.pending = false, this.battleProposal});
   final String role; // 'user' | 'assistant'
   final String text;
   final List<ResourceRef> resources;
   final bool pending;
+
+  /// Non-null when the reply offers to create a battle (fresh replies only).
+  final BattleProposal? battleProposal;
 }
 
 const _systemPrompt = '''
@@ -37,13 +49,23 @@ well formatted: use short paragraphs, **bold** for key figures, and "- " bullet
 lists when comparing or listing. When comparing who is stronger, reason from the
 combat power and the stats / battle history the tools return.
 
+Tools available: search_characters, get_character_detail, list_top_characters,
+search_fruits, get_fruit_holders, list_fruits_by_type (for "all Ancient Zoan
+users" etc.), and propose_battle.
+
 IMPORTANT — make resources clickable inline: whenever you mention a character,
-devil fruit, battle or crew that appears in a tool result, write its name as a
-Markdown link of the form [Name](onepiece://TYPE/ID), where TYPE is one of
-character, fruit, battle or group, and ID is the exact id from that tool result
-(use battle_id for battles). Do not list the links separately at the end — weave
-them into the sentence where you name the resource. Only link resources that
+devil fruit or crew that appears in a tool result, write its name as a Markdown
+link of the form [Name](onepiece://TYPE/ID), where TYPE is one of character,
+fruit or group, and ID is the exact id from that tool result. NEVER write a bare
+onepiece:// URL on its own and NEVER paste raw ids into the prose — always use
+the [Name](...) form. Do not list the links separately at the end; weave each
+one into the sentence where you name the resource. Only link resources that
 actually came from a tool result.
+
+When the user wants to simulate or create a fight ("who would win A vs B",
+"create a battle between A and B"), call propose_battle with the two names.
+The app then shows the user a Confirm/Cancel card, so do NOT create a link for
+it — just give your short analysis and say you've prepared the battle below.
 ''';
 
 /// Holds one assistant conversation and runs the DeepSeek tool-calling loop.
@@ -90,11 +112,41 @@ class DeepSeekAssistant {
       }
       final content = (message['content'] ?? '').toString();
       _api.add({'role': 'assistant', 'content': content});
-      return AiChatMessage('assistant', content, resources: resources.toList());
+      return AiChatMessage('assistant', _sanitizeLinks(content, resources),
+          resources: resources.toList(), battleProposal: _extractProposal(resources));
     }
     return AiChatMessage('assistant',
         'I looked a few things up but could not finish. Try rephrasing?',
         resources: resources.toList());
+  }
+
+  /// Wrap any bare `onepiece://type/id` the model left loose into a proper
+  /// `[name](onepiece://type/id)` link so raw URLs never show in the chat.
+  String _sanitizeLinks(String content, Set<ResourceRef> resources) {
+    final byKey = <String, String>{};
+    for (final r in resources) {
+      byKey['${r.type}/${r.id}'] = r.name;
+    }
+    final bare = RegExp(r'(?<!\()onepiece://([a-z_]+)/([^\s)\]]+)');
+    return content.replaceAllMapped(bare, (m) {
+      final type = m.group(1)!;
+      final id = m.group(2)!;
+      final name = byKey['$type/$id'];
+      final label = (name != null && name.isNotEmpty) ? name : type;
+      return '[$label](onepiece://$type/$id)';
+    });
+  }
+
+  BattleProposal? _extractProposal(Set<ResourceRef> resources) {
+    for (final r in resources) {
+      if (r.type == 'battle_proposal') {
+        final parts = r.id.split('|');
+        if (parts.length == 2) {
+          return BattleProposal(parts[0], parts[1], r.name);
+        }
+      }
+    }
+    return null;
   }
 
   Map<String, dynamic> _decodeArgs(dynamic raw) {
