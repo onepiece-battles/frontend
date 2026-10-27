@@ -1,19 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:openapi/api.dart';
 
-import '../../../components/image_lazy_loader.dart';
-import '../../../components/resource_detail_layout.dart';
 import '../../../constants/onepiece_colors.dart';
 import '../../../constants/onepiece_fonts.dart';
-import '../../../constants/onepiece_tag.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../../utils/i18n_helper.dart';
-import 'character_stat_pair.dart';
+import 'character_roster_card.dart';
 
-/// Mobile character roster: a scrollable list of compact character cards, each
-/// expandable to show the full stat grid. The expand state is owned by the
-/// parent and passed in via [expandedRowIds] / [onToggleExpand].
+/// Mobile character list using the same two-sided card as the desktop grid.
 class CharacterMobileRoster extends StatelessWidget {
   final List<CharacterListView> characters;
   final ScrollController scrollController;
@@ -50,146 +43,26 @@ class CharacterMobileRoster extends StatelessWidget {
       itemBuilder: (context, index) {
         if (index == characters.length) return footer!;
         final character = characters[index];
-
         return Card(
+          key: ValueKey('character-card-${character.id}'),
           color: Colors.white,
           elevation: 0,
           surfaceTintColor: Colors.transparent,
           margin: const EdgeInsets.only(bottom: 8),
           shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-              side: const BorderSide(color: OnepieceColors.separator)),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(12),
-            onTap: () => context.goNamed('characterDetails',
-                extra: character.id,
-                pathParameters: {
-                  'name': I18nHelper.getDisplayNameFromI18n(character.name)
-                }),
-            child: Padding(
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Top row: image + name + score
-                  Row(
-                    children: [
-                      ImageLazyLoader(
-                        key: ValueKey(character.imageUri),
-                        uriProvider: () => character.imageUri!,
-                        width: 36,
-                        borderWidth: 2,
-                        lazy: true,
-                        borderRadios: 36,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              I18nHelper.getDisplayNameFromI18n(character.name),
-                              style: OnepieceFonts.headerStyle
-                                  .copyWith(fontSize: 14),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              '${raceMap[character.race] ?? ""}  ·  ${battleStyleMap[character.battleStyle] ?? ""}',
-                              style: OnepieceFonts.smallContentStyle
-                                  .copyWith(fontSize: 12),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(character.score.toString(),
-                              style: OnepieceFonts.boldFancySmallFont
-                                  .copyWith(fontSize: 16)),
-                          if (character.bounty != null && character.bounty! > 0)
-                            Text(
-                              '₿${character.bounty}',
-                              style: OnepieceFonts.bountyStyle,
-                            ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                      spacing: 6,
-                      runSpacing: 6,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        ...(character.hakis.toList()
-                              ..sort((first, second) => first
-                                  .toString()
-                                  .compareTo(second.toString())))
-                            .map((haki) => OnepieceTag.getHakiTag(
-                                haki, hakiMap[haki] ?? ''))
-                            .toList(),
-                        IconButton(
-                          tooltip:
-                              AppLocalizations.of(context)!.detailInformation,
-                          onPressed: () => _openDetails(context, character),
-                          style: IconButton.styleFrom(
-                            minimumSize: const Size(32, 32),
-                            maximumSize: const Size(32, 32),
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          constraints:
-                              const BoxConstraints(minWidth: 36, minHeight: 36),
-                          padding: const EdgeInsets.all(8),
-                          icon: const Icon(Icons.info_outline,
-                              size: 18, color: OnepieceColors.fancyBlue),
-                        ),
-                      ]),
-                  // Expanded stats
-                ],
-              ),
-            ),
+            borderRadius: BorderRadius.circular(14),
+            side: const BorderSide(color: OnepieceColors.separator),
+          ),
+          child: CharacterRosterCard(
+            character: character,
+            battleStyleMap: battleStyleMap,
+            raceMap: raceMap,
+            hakiMap: hakiMap,
+            flipped: expandedRowIds.contains(character.id),
+            onFlip: () => onToggleExpand(character.id),
           ),
         );
       },
     );
-  }
-
-  void _openDetails(BuildContext context, CharacterListView character) {
-    onToggleExpand(character.id);
-    showResourceDetails(
-            context,
-            I18nHelper.getDisplayNameFromI18n(character.name),
-            _buildStatRows(context, character))
-        .whenComplete(() {
-      if (context.mounted) onToggleExpand(character.id);
-    });
-  }
-
-  Widget _buildStatRows(BuildContext context, CharacterListView character) {
-    final loc = AppLocalizations.of(context)!;
-    final stats = <StatPair>[
-      StatPair(loc.characterAttack, character.attack.toString(),
-          icon: 'images/character_digits_icon/attack.svg'),
-      StatPair(loc.characterDefense, character.defense.toString(),
-          icon: 'images/character_digits_icon/defense.svg'),
-      StatPair(loc.characterIntelligence, character.intelligence.toString(),
-          icon: 'images/character_digits_icon/intelligence.svg'),
-      StatPair(loc.characterBlood, character.blood.toString(),
-          icon: 'images/character_digits_icon/blood.svg'),
-      StatPair(loc.characterSpeed, character.speed.toString(),
-          icon: 'images/character_digits_icon/speed.svg'),
-      StatPair(loc.groupGain, character.groupGain.toString(),
-          icon: 'images/character_digits_icon/group_gain.svg'),
-      StatPair(loc.fruitLimit, character.maximumFruitCount.toString()),
-    ];
-
-    return DetailFieldGrid(
-        fields:
-            stats.map((stat) => DetailValue(stat.label, stat.value)).toList());
   }
 }

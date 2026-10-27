@@ -2569,6 +2569,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No holders yet'**
   String get resourceNoHolders;
+
+  /// No description provided for @fruitHolders.
+  ///
+  /// In en, this message translates to:
+  /// **'Holders'**
+  String get fruitHolders;
+
+  /// No description provided for @flipCardBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Flip back'**
+  String get flipCardBack;
+
+  /// No description provided for @openResourceDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Open full details'**
+  String get openResourceDetails;
 }
 
 class _AppLocalizationsDelegate

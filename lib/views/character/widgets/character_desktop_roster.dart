@@ -1,20 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:openapi/api.dart';
 
 import '../../../components/desktop_card_layout.dart';
-import '../../../components/image_lazy_loader.dart';
-import '../../../components/resource_detail_layout.dart';
-import '../../../constants/onepiece_colors.dart';
 import '../../../constants/onepiece_fonts.dart';
-import '../../../constants/onepiece_tag.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../../utils/i18n_helper.dart';
-import 'character_stat_pair.dart';
+import 'character_roster_card.dart';
 
-/// Desktop character roster: a responsive grid of spotlight cards, each
-/// expandable to show the full stat grid, with a combat-power sort toggle.
-/// Expand state and the score-sort action are owned by the parent and passed in.
+/// Desktop character grid. The parent owns each card's flipped state so it
+/// remains stable while rows enter or leave the viewport.
 class CharacterDesktopRoster extends StatelessWidget {
   final List<CharacterListView> characters;
   final int totalItemCount;
@@ -62,7 +55,12 @@ class CharacterDesktopRoster extends StatelessWidget {
               style: OnepieceFonts.smallContentStyle.copyWith(fontSize: 12),
             ),
             const Spacer(),
-            _buildScoreSortButton(context),
+            DesktopSortChip(
+              label: AppLocalizations.of(context)!.combatPower,
+              ascending:
+                  scoreOrder == null ? null : scoreOrder == SortOrder.ASC,
+              onTap: onScoreSortTap,
+            ),
           ],
         ),
         const SizedBox(height: 6),
@@ -75,164 +73,18 @@ class CharacterDesktopRoster extends StatelessWidget {
             maxColumns: 6,
             gap: 12,
             footer: footer,
-            cardBuilder: _buildCard,
+            cardBuilder: (context, character) => CharacterRosterCard(
+              key: ValueKey('character-card-${character.id}'),
+              character: character,
+              battleStyleMap: battleStyleMap,
+              raceMap: raceMap,
+              hakiMap: hakiMap,
+              flipped: expandedRowIds.contains(character.id),
+              onFlip: () => onToggleExpand(character.id),
+            ),
           ),
         ),
       ],
     );
-  }
-
-  Widget _buildScoreSortButton(BuildContext context) {
-    return DesktopSortChip(
-      label: AppLocalizations.of(context)!.combatPower,
-      ascending: scoreOrder == null ? null : scoreOrder == SortOrder.ASC,
-      onTap: onScoreSortTap,
-    );
-  }
-
-  Widget _buildCard(BuildContext context, CharacterListView character) {
-    final race = raceMap[character.race] ?? '';
-    final battleStyle = battleStyleMap[character.battleStyle] ?? '';
-    final loc = AppLocalizations.of(context)!;
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(14),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(14),
-        onTap: () => context.goNamed('characterDetails',
-            extra: character.id,
-            pathParameters: {
-              'name': I18nHelper.getDisplayNameFromI18n(character.name)
-            }),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(children: [
-                Hero(
-                  tag: 'character-roster-${character.id}',
-                  child: ImageLazyLoader(
-                    key: ValueKey(character.imageUri),
-                    uriProvider: () => character.imageUri ?? '',
-                    width: 36,
-                    borderWidth: 0,
-                    borderRadios: 36,
-                    lazy: true,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(I18nHelper.getDisplayNameFromI18n(character.name),
-                          style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: OnepieceColors.primaryLabel),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis),
-                      const SizedBox(height: 4),
-                      Text('$race · $battleStyle',
-                          style: OnepieceFonts.smallContentStyle
-                              .copyWith(fontSize: 12),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis),
-                    ],
-                  ),
-                ),
-                const Icon(Icons.chevron_right,
-                    size: 18, color: OnepieceColors.secondaryLabel),
-              ]),
-              const SizedBox(height: 6),
-              Wrap(spacing: 14, runSpacing: 4, children: [
-                Text.rich(TextSpan(
-                  style: OnepieceFonts.smallContentStyle.copyWith(fontSize: 12),
-                  children: [
-                    TextSpan(text: '${loc.combatPower} '),
-                    TextSpan(
-                        text: '${character.score}',
-                        style: const TextStyle(
-                            color: OnepieceColors.primaryLabel,
-                            fontWeight: FontWeight.w600)),
-                  ],
-                )),
-                Text.rich(TextSpan(
-                  style: OnepieceFonts.smallContentStyle.copyWith(fontSize: 12),
-                  children: [
-                    TextSpan(text: '${loc.bounty} '),
-                    TextSpan(
-                        text: '${character.bounty ?? '—'}',
-                        style: OnepieceFonts.bountyStyle),
-                  ],
-                )),
-              ]),
-              const Divider(height: 9, color: OnepieceColors.separator),
-              Wrap(
-                  spacing: 6,
-                  runSpacing: 4,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    ...(character.hakis.toList()
-                          ..sort((first, second) =>
-                              first.toString().compareTo(second.toString())))
-                        .map((haki) =>
-                            OnepieceTag.getHakiTag(haki, hakiMap[haki] ?? ''))
-                        .toList(),
-                    IconButton(
-                      tooltip: loc.detailInformation,
-                      onPressed: () => _openDetails(context, character),
-                      style: IconButton.styleFrom(
-                        minimumSize: const Size(32, 32),
-                        maximumSize: const Size(32, 32),
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      constraints:
-                          const BoxConstraints(minWidth: 32, minHeight: 32),
-                      padding: const EdgeInsets.all(8),
-                      icon: const Icon(Icons.info_outline,
-                          size: 18, color: OnepieceColors.fancyBlue),
-                    ),
-                  ]),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _openDetails(BuildContext context, CharacterListView character) {
-    onToggleExpand(character.id);
-    showResourceDetails(
-            context,
-            I18nHelper.getDisplayNameFromI18n(character.name),
-            _buildStats(context, character))
-        .whenComplete(() {
-      if (context.mounted) onToggleExpand(character.id);
-    });
-  }
-
-  Widget _buildStats(BuildContext context, CharacterListView character) {
-    final loc = AppLocalizations.of(context)!;
-    final stats = <StatPair>[
-      StatPair(loc.characterAttack, character.attack.toString(),
-          icon: 'images/character_digits_icon/attack.svg'),
-      StatPair(loc.characterDefense, character.defense.toString(),
-          icon: 'images/character_digits_icon/defense.svg'),
-      StatPair(loc.characterIntelligence, character.intelligence.toString(),
-          icon: 'images/character_digits_icon/intelligence.svg'),
-      StatPair(loc.characterBlood, character.blood.toString(),
-          icon: 'images/character_digits_icon/blood.svg'),
-      StatPair(loc.characterSpeed, character.speed.toString(),
-          icon: 'images/character_digits_icon/speed.svg'),
-      StatPair(loc.groupGain, character.groupGain.toString(),
-          icon: 'images/character_digits_icon/group_gain.svg'),
-      StatPair(loc.fruitLimit, character.maximumFruitCount.toString()),
-    ];
-
-    return DetailFieldGrid(
-        fields:
-            stats.map((stat) => DetailValue(stat.label, stat.value)).toList());
   }
 }
