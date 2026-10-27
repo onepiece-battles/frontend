@@ -669,15 +669,19 @@ class _SideMenuState extends State<SideMenu> {
               text: AppLocalizations.of(context)!.myAccount,
               isSelected: resource == "profile",
               isExpanded: isExpanded,
-              onTap: () => _onDrawerItemTap(() {
-                if (getIt<User>().loginRole == UserRole.VISITOR) {
-                  context.go(AppRouter.registerPath);
-                } else {
-                  context.goNamed('userProfile',
-                      extra: getIt<User>().id,
-                      pathParameters: {'name': getIt<User>().nickname});
-                }
-              }),
+              onTap: () {
+                final router = GoRouter.of(context);
+                final user = getIt<User>();
+                _onDrawerItemTap(() {
+                  if (user.loginRole == UserRole.VISITOR) {
+                    router.go(AppRouter.registerPath);
+                  } else {
+                    router.goNamed('user_profile',
+                        extra: user.id,
+                        pathParameters: {'name': user.nickname});
+                  }
+                });
+              },
             ),
             _buildMenuItem(
               context: context,

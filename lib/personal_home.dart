@@ -130,133 +130,120 @@ class _UserHomeState extends State<UserHome> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
+    return FutureBuilder<List<dynamic>>(
       future: myFuture,
-      builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
-          if (snapshot.hasError || !snapshot.hasData) {
-            return Center(
-              child: Text(
-                AppLocalizations.of(context)!.loading,
-                style: OnepieceFonts.loadingFont,
-              ),
-            );
-          }
-          _updateData(snapshot.data!);
-          final hasMyResources = myCharacters.isNotEmpty ||
-              myGroups.isNotEmpty ||
-              myBattles.isNotEmpty;
-
-          // REFACTORED: Use CustomScrollView with Slivers
-          return CustomScrollView(
-            physics: const BouncingScrollPhysics(),
-            slivers: [
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate([
-                    _getHeader(context),
-                    // Show only if this user has more than one role
-                    if (getIt<User>().userRoles.length > 1) _getRoleToggle(),
-                    _getSectionHeader(
-                      AppLocalizations.of(context)!.myResource,
-                      initiallyExpanded: hasMyResources,
-                      child: _buildResourceBundle(
-                        context,
-                        characterChild: _buildCharacterGrid(
-                          context,
-                          myCharacters,
-                          showPlaceholderWhenEmpty: true,
-                        ),
-                        groupChild: _buildGroupGrid(
-                          context,
-                          myGroups,
-                          showPlaceholderWhenEmpty: true,
-                        ),
-                        battleChild: _buildBattleGrid(
-                          context,
-                          myBattles,
-                          showPlaceholderWhenEmpty: true,
-                        ),
-                      ),
-                    ),
-                    if (!_isNika)
-                      _getSectionHeader(
-                        AppLocalizations.of(context)!.systemResource,
-                        initiallyExpanded: true,
-                        child: _buildResourceBundle(
-                          context,
-                          characterChild: _buildCharacterGrid(
-                            context,
-                            systemCharacters,
-                            showPlaceholderWhenEmpty: false,
-                          ),
-                          groupChild: _buildGroupGrid(
-                            context,
-                            systemGroups,
-                            showPlaceholderWhenEmpty: false,
-                          ),
-                          battleChild: _buildBattleGrid(
-                            context,
-                            systemBattles,
-                            showPlaceholderWhenEmpty: false,
-                          ),
-                        ),
-                      ),
-                  ]),
-                ),
-              ),
-
-              // Bottom spacing
-              const SliverToBoxAdapter(
-                child: SizedBox(height: 100),
-              ),
-            ],
-          );
-        } else {
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const Center(child: CircularProgressIndicator(strokeWidth: 2));
+        }
+        if (snapshot.hasError || !snapshot.hasData) {
           return Center(
-            child: Text(
-              AppLocalizations.of(context)!.loading,
-              style: OnepieceFonts.loadingFont,
+            child: TextButton.icon(
+              onPressed: () => setState(() => myFuture = _loadHomeData()),
+              icon: const Icon(Icons.refresh),
+              label: Text(AppLocalizations.of(context)!.retryLoading),
             ),
           );
         }
+        _updateData(snapshot.data!);
+        return ColoredBox(
+          color: OnepieceColors.surface,
+          child: LayoutBuilder(builder: (context, constraints) {
+            final narrow = constraints.maxWidth < 650;
+            return CustomScrollView(
+              physics: const BouncingScrollPhysics(),
+              slivers: [
+                SliverToBoxAdapter(
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 1120),
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(
+                            narrow ? 14 : 28, 24, narrow ? 14 : 28, 48),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _getHeader(context),
+                            if (getIt<User>().userRoles.length > 1)
+                              _getRoleToggle(),
+                            const SizedBox(height: 20),
+                            _getSectionHeader(
+                              AppLocalizations.of(context)!.myResource,
+                              initiallyExpanded: true,
+                              icon: Icons.person_outline,
+                              child: _buildResourceBundle(
+                                context,
+                                characterChild: _buildCharacterGrid(
+                                    context, myCharacters,
+                                    showPlaceholderWhenEmpty: true),
+                                groupChild: _buildGroupGrid(context, myGroups,
+                                    showPlaceholderWhenEmpty: true),
+                                battleChild: _buildBattleGrid(
+                                    context, myBattles,
+                                    showPlaceholderWhenEmpty: true),
+                              ),
+                            ),
+                            if (!_isNika) ...[
+                              const SizedBox(height: 16),
+                              _getSectionHeader(
+                                AppLocalizations.of(context)!.systemResource,
+                                initiallyExpanded: true,
+                                icon: Icons.auto_awesome_outlined,
+                                child: _buildResourceBundle(
+                                  context,
+                                  characterChild: _buildCharacterGrid(
+                                      context, systemCharacters,
+                                      showPlaceholderWhenEmpty: false),
+                                  groupChild: _buildGroupGrid(
+                                      context, systemGroups,
+                                      showPlaceholderWhenEmpty: false),
+                                  battleChild: _buildBattleGrid(
+                                      context, systemBattles,
+                                      showPlaceholderWhenEmpty: false),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          }),
+        );
       },
     );
   }
 
   Widget _getRoleToggle() {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: SizedBox(
-        height: 35,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(
-              AppLocalizations.of(context)!.showAllRoleResources,
-              style: OnepieceFonts.smallContentStyle,
-            ),
-            IconButton(
-              onPressed: () {
-                setState(() {
-                  currentRoleOnly = !currentRoleOnly;
-                  myFuture = _loadHomeData();
-                });
-              },
-              hoverColor: Colors.transparent,
-              splashRadius: 1,
-              icon: Icon(
-                !currentRoleOnly
-                    ? Icons.check_box
-                    : Icons.check_box_outline_blank,
-                color: OnepieceColors.fancyBlue,
-                size: 20,
-              ),
-            ),
-          ],
+      padding: const EdgeInsets.only(top: 14),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(16, 5, 10, 5),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: OnepieceColors.separator),
         ),
+        child: Row(children: [
+          Expanded(
+            child: Text(
+              AppLocalizations.of(context)!.showAllRoleResources,
+              style: const TextStyle(
+                  fontSize: 13, color: OnepieceColors.primaryLabel),
+            ),
+          ),
+          Switch.adaptive(
+            value: !currentRoleOnly,
+            activeTrackColor: OnepieceColors.fancyBlue,
+            onChanged: (value) => setState(() {
+              currentRoleOnly = !value;
+              myFuture = _loadHomeData();
+            }),
+          ),
+        ]),
       ),
     );
   }
@@ -265,27 +252,34 @@ class _UserHomeState extends State<UserHome> {
     String title, {
     required Widget child,
     bool initiallyExpanded = false,
+    required IconData icon,
   }) {
-    return Card(
-      elevation: 0,
-      margin: const EdgeInsets.fromLTRB(0, 10, 0, 8),
-      color: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
-        side: const BorderSide(color: OnepieceColors.separator),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: OnepieceColors.separator, width: .8),
       ),
       clipBehavior: Clip.antiAlias,
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
           initiallyExpanded: initiallyExpanded,
-          tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 14),
+          tilePadding: const EdgeInsets.fromLTRB(18, 8, 18, 8),
+          childrenPadding: const EdgeInsets.fromLTRB(18, 0, 18, 22),
+          leading: Container(
+            width: 35,
+            height: 35,
+            decoration: BoxDecoration(
+                color: OnepieceColors.surface,
+                borderRadius: BorderRadius.circular(10)),
+            child: Icon(icon, color: OnepieceColors.fancyBlue, size: 20),
+          ),
           title: Text(
             title,
             style: const TextStyle(
               color: OnepieceColors.primaryLabel,
-              fontSize: 17,
+              fontSize: 16,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -308,10 +302,10 @@ class _UserHomeState extends State<UserHome> {
       children: [
         _buildResourceTypeTitle(AppLocalizations.of(context)!.character),
         characterChild,
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         _buildResourceTypeTitle(AppLocalizations.of(context)!.group),
         groupChild,
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         _buildResourceTypeTitle(AppLocalizations.of(context)!.battle),
         battleChild,
       ],
@@ -320,31 +314,81 @@ class _UserHomeState extends State<UserHome> {
 
   Widget _buildResourceTypeTitle(String title) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(4, 10, 4, 8),
+      padding: const EdgeInsets.fromLTRB(2, 16, 2, 10),
       child: Text(
-        title.toUpperCase(),
+        title,
         style: const TextStyle(
-          color: OnepieceColors.secondaryLabel,
-          fontSize: 12,
+          color: OnepieceColors.primaryLabel,
+          fontSize: 13,
           fontWeight: FontWeight.w600,
-          letterSpacing: 0.6,
         ),
       ),
     );
   }
 
   Widget _getHeader(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(4, 20, 4, 10),
-      child: Text(
-        AppLocalizations.of(context)!.homePage,
-        style: const TextStyle(
-          color: OnepieceColors.primaryLabel,
-          fontSize: 28,
-          fontWeight: FontWeight.w700,
-          letterSpacing: -0.5,
-        ),
+    final user = getIt<User>();
+    final imageUri = user.imageUri ?? '';
+    final loc = AppLocalizations.of(context)!;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(22),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: OnepieceColors.separator, width: .8),
       ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          imageUri.isEmpty
+              ? const CircleAvatar(
+                  radius: 35,
+                  backgroundColor: OnepieceColors.surface,
+                  child: Icon(Icons.person_outline,
+                      size: 36, color: OnepieceColors.secondaryLabel))
+              : ImageLazyLoader(
+                  uriProvider: () => imageUri,
+                  width: 70,
+                  borderWidth: 0,
+                  borderRadios: 70),
+          const SizedBox(width: 17),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(loc.homePage,
+                    style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: OnepieceColors.secondaryLabel)),
+                const SizedBox(height: 4),
+                Text(user.nickname,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -.4,
+                        color: OnepieceColors.primaryLabel)),
+                const SizedBox(height: 3),
+                Text(user.username,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                        fontSize: 13, color: OnepieceColors.secondaryLabel)),
+              ],
+            ),
+          ),
+        ]),
+        const SizedBox(height: 20),
+        const Divider(height: 1, color: OnepieceColors.separator),
+        const SizedBox(height: 16),
+        Wrap(spacing: 8, runSpacing: 8, children: [
+          _HomeStat(label: loc.character, count: myCharacters.length),
+          _HomeStat(label: loc.group, count: myGroups.length),
+          _HomeStat(label: loc.battle, count: myBattles.length),
+        ]),
+      ]),
     );
   }
 
@@ -374,7 +418,8 @@ class _UserHomeState extends State<UserHome> {
         if (items.isEmpty) {
           return _buildPlaceholderCard(
             context,
-            routeName: "createCharacter",
+            routeName: 'create_character',
+            label: AppLocalizations.of(context)!.character,
             imgSize: imgSize,
             borderRadius: 100,
           );
@@ -422,7 +467,8 @@ class _UserHomeState extends State<UserHome> {
         if (items.isEmpty) {
           return _buildPlaceholderCard(
             context,
-            routeName: "createGroup",
+            routeName: 'create_group',
+            label: AppLocalizations.of(context)!.group,
             imgSize: imgSize,
             borderRadius: 10,
           );
@@ -465,7 +511,7 @@ class _UserHomeState extends State<UserHome> {
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
         maxCrossAxisExtent: 350,
-        mainAxisExtent: 250,
+        mainAxisExtent: 205,
         mainAxisSpacing: 10,
         crossAxisSpacing: 10,
       ),
@@ -474,7 +520,8 @@ class _UserHomeState extends State<UserHome> {
         if (items.isEmpty) {
           return _buildPlaceholderCard(
             context,
-            routeName: "createBattle",
+            routeName: 'create_battle',
+            label: AppLocalizations.of(context)!.battle,
             imgSize: 88,
             borderRadius: 10,
           );
@@ -506,12 +553,13 @@ class _UserHomeState extends State<UserHome> {
   Widget _buildPlaceholderCard(
     BuildContext context, {
     required String routeName,
+    required String label,
     required double imgSize,
     required double borderRadius,
   }) {
     return Material(
       color: OnepieceColors.surface,
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(16),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () => context.goNamed(routeName),
@@ -526,10 +574,7 @@ class _UserHomeState extends State<UserHome> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(borderRadius),
-                  border: Border.all(
-                    color: OnepieceColors.separator,
-                    width: 1.5,
-                  ),
+                  border: Border.all(color: OnepieceColors.separator),
                 ),
                 child: const Icon(
                   Icons.add,
@@ -538,7 +583,9 @@ class _UserHomeState extends State<UserHome> {
               ),
               const SizedBox(height: 8),
               Text(
-                AppLocalizations.of(context)!.notCreated,
+                '${AppLocalizations.of(context)!.create}'
+                '${Localizations.localeOf(context).languageCode == 'zh' ? '' : ' '}'
+                '$label',
                 style: const TextStyle(
                   color: OnepieceColors.secondaryLabel,
                   fontSize: 13,
@@ -561,15 +608,14 @@ class _UserHomeState extends State<UserHome> {
       required double imgSize,
       required VoidCallback onTap}) {
     return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(14),
+      color: OnepieceColors.surface,
+      borderRadius: BorderRadius.circular(16),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
         child: Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: OnepieceColors.separator),
+            borderRadius: BorderRadius.circular(16),
           ),
           padding: const EdgeInsets.all(10),
           child: Column(
@@ -578,7 +624,7 @@ class _UserHomeState extends State<UserHome> {
               ImageLazyLoader(
                   uriProvider: () => imageUri,
                   width: imgSize,
-                  borderWidth: 2,
+                  borderWidth: 0,
                   borderRadios: borderRadius,
                   // Defer the fetch until the card scrolls into view, so the
                   // image-heavy home grids don't fire every request at once.
@@ -587,7 +633,7 @@ class _UserHomeState extends State<UserHome> {
               Text(name,
                   style: const TextStyle(
                     color: OnepieceColors.primaryLabel,
-                    fontSize: 13,
+                    fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
                   maxLines: 1,
@@ -610,17 +656,14 @@ class _UserHomeState extends State<UserHome> {
     }
 
     return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(14),
+      color: OnepieceColors.surface,
+      borderRadius: BorderRadius.circular(16),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () => context.goNamed('battleDetails',
             extra: battle.id, pathParameters: {'id': battle.id}),
         child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: OnepieceColors.separator),
-          ),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
           padding: const EdgeInsets.all(12),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -636,7 +679,7 @@ class _UserHomeState extends State<UserHome> {
                             ImageLazyLoader(
                                 uriProvider: () => starter.imageUri ?? '',
                                 width: 44,
-                                borderWidth: 2,
+                                borderWidth: 0,
                                 borderRadios: 44,
                                 lazy: true),
                             const SizedBox(height: 4),
@@ -660,10 +703,10 @@ class _UserHomeState extends State<UserHome> {
                           ImageLazyLoader(
                               uriProvider: () =>
                                   execution.winnerId == battle.starterId
-                                      ? starter.imageUri!
-                                      : receiver.imageUri!,
+                                      ? (starter.imageUri ?? '')
+                                      : (receiver.imageUri ?? ''),
                               width: 28,
-                              borderWidth: 1.5,
+                              borderWidth: 0,
                               borderRadios: 28,
                               lazy: true)
                         else
@@ -678,7 +721,7 @@ class _UserHomeState extends State<UserHome> {
                             ImageLazyLoader(
                                 uriProvider: () => receiver.imageUri ?? '',
                                 width: 44,
-                                borderWidth: 2,
+                                borderWidth: 0,
                                 borderRadios: 44,
                                 lazy: true),
                             const SizedBox(height: 4),
@@ -694,20 +737,23 @@ class _UserHomeState extends State<UserHome> {
                           ]),
                     ),
                   ]),
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
               Container(
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
-                    color: OnepieceColors.fancyBlue),
+                    color: Colors.white),
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
                 child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Flexible(
                           child: Text(statusMap[execution.battleStatus] ?? '',
                               overflow: TextOverflow.ellipsis,
-                              style: OnepieceFonts.boldFancyWhiteSmallFont)),
+                              style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: OnepieceColors.fancyBlue))),
                       if (execution.battleReportStage ==
                           BattleReportStage.FINISHED)
                         _buildPdfButton(battle),
@@ -717,7 +763,8 @@ class _UserHomeState extends State<UserHome> {
                             width: 18,
                             height: 18,
                             colorFilter: const ColorFilter.mode(
-                                Colors.white70, BlendMode.srcIn)),
+                                OnepieceColors.secondaryLabel,
+                                BlendMode.srcIn)),
                     ]),
               ),
             ],
@@ -753,4 +800,30 @@ class _UserHomeState extends State<UserHome> {
       ),
     );
   }
+}
+
+class _HomeStat extends StatelessWidget {
+  final String label;
+  final int count;
+  const _HomeStat({required this.label, required this.count});
+
+  @override
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: OnepieceColors.surface,
+          borderRadius: BorderRadius.circular(11),
+        ),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          Text('$count',
+              style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: OnepieceColors.primaryLabel)),
+          const SizedBox(width: 5),
+          Text(label,
+              style: const TextStyle(
+                  fontSize: 12, color: OnepieceColors.secondaryLabel)),
+        ]),
+      );
 }

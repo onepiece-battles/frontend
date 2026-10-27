@@ -181,7 +181,10 @@ class ImageHelper {
       dataUri,
       fit: fit,
       errorBuilder: errorBuilder,
-      webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
+      // HTML platform-view images sit outside Flutter's scene, so the global
+      // search BackdropFilter cannot blur them. Data URIs can be decoded into
+      // the canvas without an HTML element.
+      webHtmlElementStrategy: WebHtmlElementStrategy.never,
     );
   }
 

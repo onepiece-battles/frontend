@@ -695,6 +695,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get userProfile => '个人账号';
 
   @override
+  String get profileLoadFailed => '账号资料加载失败，请重试';
+
+  @override
+  String get profileEditNickname => '编辑昵称';
+
+  @override
+  String get profileSave => '保存';
+
+  @override
+  String get profileCancel => '取消';
+
+  @override
   String get sendEmail => '发送验证邮件';
 
   @override
