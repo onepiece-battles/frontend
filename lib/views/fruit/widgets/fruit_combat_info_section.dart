@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../components/resource_detail_layout.dart';
+import '../../../components/resource_flip_card.dart';
 import 'package:go_router/go_router.dart';
 import 'package:openapi/api.dart';
 
@@ -164,6 +165,40 @@ class _FruitCombatInfoSectionState extends State<FruitCombatInfoSection> {
     });
   }
 
+  /// Formats a strengthen coefficient (slope × base ± intercept) into a
+  /// compact "1.5× + 20" string from the live controllers.
+  String _effect(TextEditingController slope, TextEditingController intercept) {
+    final s = slope.text.isEmpty ? '—' : slope.text;
+    final i = int.tryParse(intercept.text) ?? 0;
+    if (i == 0) return '$s×';
+    return '$s× ${i < 0 ? '−' : '+'} ${i.abs()}';
+  }
+
+  /// The six strengthen effects as icon rows, plus the energy-cost chip.
+  List<Widget> _effectViews(BuildContext context, {double gap = 6}) {
+    final loc = AppLocalizations.of(context)!;
+    return [
+      ResourceEffectList(gap: gap, effects: [
+        ResourceEffect(Icons.bolt, loc.characterAttack,
+            _effect(attackSlopeController, attackInterceptController)),
+        ResourceEffect(Icons.shield_outlined, loc.characterDefense,
+            _effect(defenseSlopeController, defenseInterceptController)),
+        ResourceEffect(Icons.water_drop_outlined, loc.characterBlood,
+            _effect(bloodSlopeController, bloodInterceptController)),
+        ResourceEffect(Icons.psychology_outlined, loc.characterIntelligence,
+            _effect(intelligenceSlopeController, intelligenceInterceptController)),
+        ResourceEffect(Icons.speed, loc.characterSpeed,
+            _effect(speedSlopeController, speedInterceptController)),
+        ResourceEffect(Icons.groups_outlined, loc.groupGain,
+            _effect(groupGainSlopeController, groupGainInterceptController)),
+      ]),
+      const SizedBox(height: 14),
+      ResourceMetaChips(chips: [
+        ResourceMetaChip(loc.energyConsume, energyConsumeController.text),
+      ]),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) =>
       widget.isNarrow ? _buildMobile(context) : _buildDesktop(context);
@@ -192,51 +227,55 @@ class _FruitCombatInfoSectionState extends State<FruitCombatInfoSection> {
               ),
           ]),
           const SizedBox(height: 10),
-          mobileField(context, combatInfoEditable, energyConsumeController,
-              AppLocalizations.of(context)!.energyConsume, null,
-              isNum: true),
-          mobileStatPair(
-              context,
-              combatInfoEditable,
-              attackSlopeController,
-              attackInterceptController,
-              AppLocalizations.of(context)!.characterAttack,
-              'images/character_digits_icon/attack.svg'),
-          mobileStatPair(
-              context,
-              combatInfoEditable,
-              defenseSlopeController,
-              defenseInterceptController,
-              AppLocalizations.of(context)!.characterDefense,
-              'images/character_digits_icon/defense.svg'),
-          mobileStatPair(
-              context,
-              combatInfoEditable,
-              bloodSlopeController,
-              bloodInterceptController,
-              AppLocalizations.of(context)!.characterBlood,
-              'images/character_digits_icon/blood.svg'),
-          mobileStatPair(
-              context,
-              combatInfoEditable,
-              intelligenceSlopeController,
-              intelligenceInterceptController,
-              AppLocalizations.of(context)!.characterIntelligence,
-              'images/character_digits_icon/intelligence.svg'),
-          mobileStatPair(
-              context,
-              combatInfoEditable,
-              speedSlopeController,
-              speedInterceptController,
-              AppLocalizations.of(context)!.characterSpeed,
-              'images/character_digits_icon/speed.svg'),
-          mobileStatPair(
-              context,
-              combatInfoEditable,
-              groupGainSlopeController,
-              groupGainInterceptController,
-              AppLocalizations.of(context)!.groupGain,
-              'images/character_digits_icon/group_gain.svg'),
+          if (combatInfoEditable) ...[
+            mobileField(context, combatInfoEditable, energyConsumeController,
+                AppLocalizations.of(context)!.energyConsume, null,
+                isNum: true),
+            mobileStatPair(
+                context,
+                combatInfoEditable,
+                attackSlopeController,
+                attackInterceptController,
+                AppLocalizations.of(context)!.characterAttack,
+                'images/character_digits_icon/attack.svg'),
+            mobileStatPair(
+                context,
+                combatInfoEditable,
+                defenseSlopeController,
+                defenseInterceptController,
+                AppLocalizations.of(context)!.characterDefense,
+                'images/character_digits_icon/defense.svg'),
+            mobileStatPair(
+                context,
+                combatInfoEditable,
+                bloodSlopeController,
+                bloodInterceptController,
+                AppLocalizations.of(context)!.characterBlood,
+                'images/character_digits_icon/blood.svg'),
+            mobileStatPair(
+                context,
+                combatInfoEditable,
+                intelligenceSlopeController,
+                intelligenceInterceptController,
+                AppLocalizations.of(context)!.characterIntelligence,
+                'images/character_digits_icon/intelligence.svg'),
+            mobileStatPair(
+                context,
+                combatInfoEditable,
+                speedSlopeController,
+                speedInterceptController,
+                AppLocalizations.of(context)!.characterSpeed,
+                'images/character_digits_icon/speed.svg'),
+            mobileStatPair(
+                context,
+                combatInfoEditable,
+                groupGainSlopeController,
+                groupGainInterceptController,
+                AppLocalizations.of(context)!.groupGain,
+                'images/character_digits_icon/group_gain.svg'),
+          ] else
+            ..._effectViews(context, gap: 10),
+          const SizedBox(height: 8),
           const Divider(),
         ]));
   }
@@ -248,34 +287,14 @@ class _FruitCombatInfoSectionState extends State<FruitCombatInfoSection> {
       return DetailEditor(width: 960, child: _buildDesktopEditor(context));
     }
     final loc = AppLocalizations.of(context)!;
-    String formula(
-        TextEditingController slope, TextEditingController intercept) {
-      final addition = num.tryParse(intercept.text) ?? 0;
-      return '${slope.text} × ${loc.basicValue} ${addition < 0 ? '−' : '+'} ${addition.abs()}';
-    }
-
     return DetailSection(
         title: loc.battleInfo,
         action: widget.editButtonVisible
             ? DetailEditButton(onPressed: _toggleEdit)
             : null,
-        child: DetailFieldGrid(fields: [
-          DetailValue(loc.energyConsume, energyConsumeController.text),
-          DetailValue(loc.attackStrengthen,
-              formula(attackSlopeController, attackInterceptController)),
-          DetailValue(loc.defenseStrengthen,
-              formula(defenseSlopeController, defenseInterceptController)),
-          DetailValue(loc.bloodStrengthen,
-              formula(bloodSlopeController, bloodInterceptController)),
-          DetailValue(
-              loc.intelligenceStrengthen,
-              formula(intelligenceSlopeController,
-                  intelligenceInterceptController)),
-          DetailValue(loc.speedStrengthen,
-              formula(speedSlopeController, speedInterceptController)),
-          DetailValue(loc.groupStrengthen,
-              formula(groupGainSlopeController, groupGainInterceptController)),
-        ]));
+        child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: _effectViews(context, gap: 12)));
   }
 
   Widget _buildDesktopEditor(BuildContext context) {
