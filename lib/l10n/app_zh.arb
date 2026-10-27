@@ -459,5 +459,10 @@
   "resourceNoHolders": "暂无持有者",
   "fruitHolders": "持有者",
   "flipCardBack": "翻回正面",
-  "openResourceDetails": "查看完整详情"
+  "openResourceDetails": "查看完整详情",
+  "characterBattleWin": "获胜",
+  "characterBattleLoss": "落败",
+  "characterBattleEmpty": "暂无战斗记录",
+  "characterBattleShowMore": "查看更多战斗",
+  "characterBattleShowLess": "收起"
 }

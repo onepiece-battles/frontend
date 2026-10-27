@@ -459,5 +459,10 @@
   "resourceNoHolders": "No holders yet",
   "fruitHolders": "Holders",
   "flipCardBack": "Flip back",
-  "openResourceDetails": "Open full details"
+  "openResourceDetails": "Open full details",
+  "characterBattleWin": "Won",
+  "characterBattleLoss": "Lost",
+  "characterBattleEmpty": "No battles yet",
+  "characterBattleShowMore": "Show more battles",
+  "characterBattleShowLess": "Show fewer"
 }

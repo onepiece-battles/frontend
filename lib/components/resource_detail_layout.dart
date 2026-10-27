@@ -4,24 +4,27 @@ import '../constants/onepiece_colors.dart';
 import '../l10n/app_localizations.dart';
 
 class DetailValue extends StatelessWidget {
-  const DetailValue(this.label, this.value, {super.key, this.valueStyle});
+  const DetailValue(this.label, this.value,
+      {super.key, this.valueStyle, this.compact = false});
 
   final String label;
   final String value;
   final TextStyle? valueStyle;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(label,
-              style: const TextStyle(
-                  fontSize: 12, color: OnepieceColors.secondaryLabel)),
-          const SizedBox(height: 7),
+              style: TextStyle(
+                  fontSize: compact ? 11 : 12,
+                  color: OnepieceColors.secondaryLabel)),
+          SizedBox(height: compact ? 3 : 7),
           SelectableText(value.isEmpty ? '—' : value,
               style: valueStyle ??
-                  const TextStyle(
-                      fontSize: 17,
+                  TextStyle(
+                      fontSize: compact ? 15 : 17,
                       fontWeight: FontWeight.w500,
                       color: OnepieceColors.primaryLabel)),
         ],
@@ -29,17 +32,22 @@ class DetailValue extends StatelessWidget {
 }
 
 class DetailFieldGrid extends StatelessWidget {
-  const DetailFieldGrid({super.key, required this.fields});
+  const DetailFieldGrid(
+      {super.key, required this.fields, this.compact = false});
   final List<Widget> fields;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) =>
       LayoutBuilder(builder: (context, constraints) {
-        final columns = (constraints.maxWidth / 220).floor().clamp(1, 3);
-        final width = (constraints.maxWidth - 24 * (columns - 1)) / columns;
+        final gap = compact ? 16.0 : 24.0;
+        final columns = (constraints.maxWidth / (compact ? 150 : 220))
+            .floor()
+            .clamp(1, compact ? 4 : 3);
+        final width = (constraints.maxWidth - gap * (columns - 1)) / columns;
         return Wrap(
-            spacing: 24,
-            runSpacing: 24,
+            spacing: gap,
+            runSpacing: compact ? 14 : 24,
             children: fields
                 .map((field) => SizedBox(width: width, child: field))
                 .toList());
@@ -48,36 +56,43 @@ class DetailFieldGrid extends StatelessWidget {
 
 class DetailSection extends StatelessWidget {
   const DetailSection(
-      {super.key, required this.child, this.title, this.action});
+      {super.key,
+      required this.child,
+      this.title,
+      this.action,
+      this.compact = false});
   final String? title;
   final Widget? action;
   final Widget child;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) => Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(24),
+        padding: EdgeInsets.all(compact ? 16 : 24),
         decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(compact ? 16 : 20),
             border: Border.all(
                 color: OnepieceColors.separator.withValues(alpha: .7))),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           if (title != null) ...[
-            SizedBox(width: double.infinity, child: Wrap(
-                alignment: WrapAlignment.spaceBetween,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: 16,
-                runSpacing: 8,
-                children: [
-                  Text(title!,
-                      style: const TextStyle(
-                          fontSize: 19,
-                          fontWeight: FontWeight.w600,
-                          color: OnepieceColors.primaryLabel)),
-                  if (action != null) action!,
-                ])),
-            const SizedBox(height: 24),
+            SizedBox(
+                width: double.infinity,
+                child: Wrap(
+                    alignment: WrapAlignment.spaceBetween,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 16,
+                    runSpacing: 8,
+                    children: [
+                      Text(title!,
+                          style: TextStyle(
+                              fontSize: compact ? 17 : 19,
+                              fontWeight: FontWeight.w600,
+                              color: OnepieceColors.primaryLabel)),
+                      if (action != null) action!,
+                    ])),
+            SizedBox(height: compact ? 14 : 24),
           ],
           child,
         ]),
@@ -102,18 +117,23 @@ class DetailHero extends StatelessWidget {
       required this.title,
       this.avatar,
       this.tags = const [],
-      this.metrics = const []});
+      this.metrics = const [],
+      this.compact = false});
   final String kind;
   final String title;
   final Widget? avatar;
   final List<Widget> tags;
   final List<Widget> metrics;
+  final bool compact;
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        padding: EdgeInsets.symmetric(vertical: compact ? 2 : 8),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
-            if (avatar != null) ...[avatar!, const SizedBox(width: 24)],
+            if (avatar != null) ...[
+              avatar!,
+              SizedBox(width: compact ? 16 : 24)
+            ],
             Expanded(
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -123,23 +143,23 @@ class DetailHero extends StatelessWidget {
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
                           color: OnepieceColors.secondaryLabel)),
-                  const SizedBox(height: 8),
+                  SizedBox(height: compact ? 3 : 8),
                   Text(title,
-                      style: const TextStyle(
-                          fontSize: 34,
+                      style: TextStyle(
+                          fontSize: compact ? 27 : 34,
                           height: 1.2,
                           fontWeight: FontWeight.w600,
                           letterSpacing: -.7,
                           color: OnepieceColors.primaryLabel)),
                   if (tags.isNotEmpty) ...[
-                    const SizedBox(height: 14),
+                    SizedBox(height: compact ? 8 : 14),
                     Wrap(spacing: 6, runSpacing: 6, children: tags)
                   ],
                 ])),
           ]),
           if (metrics.isNotEmpty) ...[
-            const SizedBox(height: 28),
-            DetailFieldGrid(fields: metrics),
+            SizedBox(height: compact ? 14 : 28),
+            DetailFieldGrid(fields: metrics, compact: compact),
           ],
         ]),
       );
@@ -150,10 +170,12 @@ class ResourceDetailPage extends StatelessWidget {
       {super.key,
       required this.controller,
       required this.header,
-      required this.sections});
+      required this.sections,
+      this.compact = false});
   final ScrollController controller;
   final Widget header;
   final List<Widget> Function(BuildContext context, double width) sections;
+  final bool compact;
   @override
   Widget build(BuildContext context) => Theme(
       data: Theme.of(context).copyWith(
@@ -167,19 +189,22 @@ class ResourceDetailPage extends StatelessWidget {
             controller: controller,
             child: SingleChildScrollView(
               controller: controller,
-              padding: const EdgeInsets.fromLTRB(28, 32, 28, 96),
+              padding: EdgeInsets.fromLTRB(
+                  compact ? 20 : 28, compact ? 20 : 32, compact ? 20 : 28, 96),
               child: Center(
                   child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 1080),
+                constraints: BoxConstraints(maxWidth: compact ? 1120 : 1080),
                 child: LayoutBuilder(
                     builder: (context, constraints) => Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             header,
-                            const SizedBox(height: 28),
+                            SizedBox(height: compact ? 16 : 28),
                             ...sections(context, constraints.maxWidth).expand(
-                                (section) =>
-                                    [section, const SizedBox(height: 20)]),
+                                (section) => [
+                                      section,
+                                      SizedBox(height: compact ? 12 : 20)
+                                    ]),
                           ],
                         )),
               )),

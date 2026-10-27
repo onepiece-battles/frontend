@@ -107,7 +107,12 @@ class _CharacterFruitsSectionState extends State<CharacterFruitsSection> {
   Widget _buildMobile(BuildContext context) {
     final fruitMap = _fruitTypeMap(context);
     return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      margin: EdgeInsets.zero,
+      elevation: 0,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: OnepieceColors.separator)),
       child: Padding(
           padding: const EdgeInsets.all(12),
           child:
@@ -118,6 +123,8 @@ class _CharacterFruitsSectionState extends State<CharacterFruitsSection> {
             if (fruits.isNotEmpty)
               ...fruits.map((f) => Card(
                     margin: const EdgeInsets.only(bottom: 6),
+                    elevation: 0,
+                    color: OnepieceColors.surface,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8)),
                     child: InkWell(

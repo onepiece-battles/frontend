@@ -1266,4 +1266,19 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get openResourceDetails => '查看完整详情';
+
+  @override
+  String get characterBattleWin => '获胜';
+
+  @override
+  String get characterBattleLoss => '落败';
+
+  @override
+  String get characterBattleEmpty => '暂无战斗记录';
+
+  @override
+  String get characterBattleShowMore => '查看更多战斗';
+
+  @override
+  String get characterBattleShowLess => '收起';
 }
