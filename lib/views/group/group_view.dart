@@ -167,8 +167,10 @@ class _GroupViewState extends State<GroupView> {
       }
       setState(() {
         final seen = currentGroupList.map((item) => item.id).toSet();
-        currentGroupList
-            .addAll(value.groups.where((item) => seen.add(item.id)));
+        currentGroupList = [
+          ...currentGroupList,
+          ...value.groups.where((item) => seen.add(item.id)),
+        ];
         selectedPageNum = nextPage;
         totalItemCount = value.totalSize ?? totalItemCount;
         totalPageNum = value.groups.isEmpty

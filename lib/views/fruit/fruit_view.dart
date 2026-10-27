@@ -173,8 +173,10 @@ class _FruitViewState extends State<FruitView> {
       }
       setState(() {
         final seen = currentFruitList.map((item) => item.id).toSet();
-        currentFruitList
-            .addAll(value.fruits.where((item) => seen.add(item.id)));
+        currentFruitList = [
+          ...currentFruitList,
+          ...value.fruits.where((item) => seen.add(item.id)),
+        ];
         selectedPageNum = nextPage;
         totalItemCount = value.totalSize ?? totalItemCount;
         totalPageNum = value.fruits.isEmpty

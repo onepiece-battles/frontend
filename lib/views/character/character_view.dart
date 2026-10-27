@@ -230,8 +230,10 @@ class _CharacterViewState extends State<CharacterView>
       }
       setState(() {
         final seen = currentCharacterList.map((item) => item.id).toSet();
-        currentCharacterList
-            .addAll(value.characters.where((item) => seen.add(item.id)));
+        currentCharacterList = [
+          ...currentCharacterList,
+          ...value.characters.where((item) => seen.add(item.id)),
+        ];
         selectedPageNum = nextPage;
         totalItemCount = value.totalSize ?? totalItemCount;
         totalPageNum = value.characters.isEmpty
