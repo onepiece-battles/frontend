@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:openapi/api.dart';
@@ -9,6 +10,7 @@ import '../../ai/resource_tools.dart';
 import '../../ai/rich_message.dart';
 import '../../ai/speech_input.dart';
 import '../../constants/onepiece_colors.dart';
+import '../../repository/battle_dao.dart';
 
 /// The post-login landing: an AI control room. The user asks in natural
 /// language (typed, spoken, or via a preset) and the assistant answers using
@@ -33,6 +35,8 @@ class _AssistantViewState extends State<AssistantView> {
   bool _listening = false;
   bool _loadingHistory = true;
   bool _configured = true; // assume ok until told otherwise (non-admins can't check)
+  bool _creatingBattle = false;
+  final Set<AiChatMessage> _handledProposals = {};
 
   AssistantApi get _api => _getIt<AssistantApi>();
 
@@ -425,32 +429,172 @@ class _AssistantViewState extends State<AssistantView> {
     final isUser = m.role == 'user';
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: Align(
-        alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 560),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 10),
-            decoration: BoxDecoration(
-              color: isUser ? OnepieceColors.fancyBlue : OnepieceColors.surface,
-              borderRadius: BorderRadius.circular(14),
+      child: Column(
+        crossAxisAlignment:
+            isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        children: [
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 560),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 10),
+              decoration: BoxDecoration(
+                color:
+                    isUser ? OnepieceColors.fancyBlue : OnepieceColors.surface,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: m.pending
+                  ? const _TypingDots()
+                  : (isUser
+                      ? SelectableText(
+                          m.text,
+                          style: const TextStyle(
+                              fontSize: 14, height: 1.35, color: Colors.white),
+                        )
+                      : RichMessage(
+                          data: m.text,
+                          onResource: _openResource,
+                        )),
             ),
-            child: m.pending
-                ? const _TypingDots()
-                : (isUser
-                    ? SelectableText(
-                        m.text,
-                        style: const TextStyle(
-                            fontSize: 14, height: 1.35, color: Colors.white),
-                      )
-                    : RichMessage(
-                        data: m.text,
-                        onResource: _openResource,
-                      )),
           ),
+          if (!m.pending && m.text.trim().isNotEmpty) _copyButton(m, isUser),
+          if (m.battleProposal != null && !_handledProposals.contains(m))
+            _proposalCard(m),
+        ],
+      ),
+    );
+  }
+
+  Widget _copyButton(AiChatMessage m, bool isUser) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 1),
+      child: InkWell(
+        onTap: () => _copy(m),
+        borderRadius: BorderRadius.circular(6),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+          child: Row(mainAxisSize: MainAxisSize.min, children: [
+            const Icon(Icons.copy_rounded,
+                size: 13, color: OnepieceColors.secondaryLabel),
+            const SizedBox(width: 3),
+            Text(_zh ? '复制' : 'Copy',
+                style: const TextStyle(
+                    fontSize: 11, color: OnepieceColors.secondaryLabel)),
+          ]),
         ),
       ),
     );
+  }
+
+  void _copy(AiChatMessage m) {
+    final text = m.role == 'user' ? m.text : _plainText(m.text);
+    Clipboard.setData(ClipboardData(text: text));
+    _snack(_zh ? '已复制' : 'Copied');
+  }
+
+  /// Strip the Markdown/link syntax so the clipboard gets clean prose.
+  static String _plainText(String markdown) {
+    var s = markdown;
+    s = s.replaceAllMapped(
+        RegExp(r'\[([^\]]+)\]\((?:[^)]+)\)'), (m) => m.group(1)!);
+    s = s.replaceAll(RegExp(r'onepiece://[a-z_]+/[^\s)\]]+'), '');
+    s = s.replaceAll('**', '');
+    s = s.replaceAll(RegExp(r'^#{1,3}\s+', multiLine: true), '');
+    return s.trim();
+  }
+
+  Widget _proposalCard(AiChatMessage m) {
+    final p = m.battleProposal!;
+    return Container(
+      margin: const EdgeInsets.only(top: 8),
+      constraints: const BoxConstraints(maxWidth: 560),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: OnepieceColors.separator),
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+                color: OnepieceColors.surface,
+                borderRadius: BorderRadius.circular(8)),
+            child: const Icon(Icons.sports_martial_arts_rounded,
+                size: 16, color: OnepieceColors.fancyBlue),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(_zh ? '创建战斗' : 'Create battle',
+                style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: OnepieceColors.primaryLabel)),
+          ),
+        ]),
+        const SizedBox(height: 8),
+        Text(p.label,
+            style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: OnepieceColors.primaryLabel)),
+        const SizedBox(height: 12),
+        Row(children: [
+          Expanded(
+            child: OutlinedButton(
+              onPressed:
+                  _creatingBattle ? null : () => setState(() => _handledProposals.add(m)),
+              child: Text(_zh ? '取消' : 'Cancel'),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: OnepieceColors.fancyBlue,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: _creatingBattle ? null : () => _confirmBattle(m, p),
+              child: _creatingBattle
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: Colors.white))
+                  : Text(_zh ? '确认创建' : 'Create'),
+            ),
+          ),
+        ]),
+      ]),
+    );
+  }
+
+  Future<void> _confirmBattle(AiChatMessage m, BattleProposal p) async {
+    setState(() => _creatingBattle = true);
+    try {
+      final resp = await _getIt<BattleDao>().createBattle(CreateBattleRequest(
+        userId: _getIt<User>().id,
+        starterId: p.starterId,
+        receiverId: p.receiverId,
+      ));
+      if (!mounted) return;
+      setState(() {
+        _creatingBattle = false;
+        _handledProposals.add(m);
+      });
+      final battleId = resp?.battleId;
+      if (battleId != null) {
+        context.goNamed('battleDetails',
+            extra: battleId, pathParameters: {'id': battleId});
+      } else {
+        _snack(_zh ? '创建战斗失败' : 'Could not create the battle');
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _creatingBattle = false);
+      _snack(_zh ? '创建战斗失败：$e' : 'Could not create the battle: $e');
+    }
   }
 
   Widget _presetRow() {
