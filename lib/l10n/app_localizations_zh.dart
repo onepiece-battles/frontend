@@ -1100,6 +1100,30 @@ class AppLocalizationsZh extends AppLocalizations {
   String get chatInformation => '聊天信息';
 
   @override
+  String get chatGroupDetails => '群聊信息';
+
+  @override
+  String get chatContactDetails => '对方资料';
+
+  @override
+  String get chatMembers => '群成员';
+
+  @override
+  String get chatAddMembers => '添加成员';
+
+  @override
+  String get chatViewProfile => '查看个人资料';
+
+  @override
+  String get chatSearchFriends => '搜索好友';
+
+  @override
+  String get chatNoFriendsToAdd => '没有可添加的好友';
+
+  @override
+  String get chatAddMembersFailed => '添加成员失败，请重试';
+
+  @override
   String get chatPrivate => '私密';
 
   @override

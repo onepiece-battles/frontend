@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -23,7 +24,7 @@ import '../../constants/onepiece_fonts.dart';
 import '../../l10n/app_localizations.dart';
 import '../../utils/base64_helper.dart';
 import '../../utils/image_helper.dart';
-import 'widgets/add_group_character_dialog.dart';
+import 'widgets/add_chat_member_dialog.dart';
 import 'widgets/chat_detail_drawer.dart';
 
 GetIt getIt = GetIt.instance;
@@ -1000,29 +1001,59 @@ class _ChattingViewState extends State<ChattingView> {
             key: _scaffoldKey,
             drawerEnableOpenDragGesture: true,
             drawerScrimColor: Colors.transparent,
-            endDrawer: ChatDetailDrawer(
-              chat: activeChat,
-              currentUserId: getIt<User>().id,
-              onRenameChat: (newName) {
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(AppLocalizations.of(context)!
-                        .groupRenameApiNotConnected),
-                  ),
-                );
-              },
-              onAddMember: () {
-                final groupId = activeChat.id;
-                if (groupId == null) return;
-                showDialog(
-                  context: context,
-                  builder: (dialogContext) => Dialog(
-                    backgroundColor: Colors.transparent,
-                    insetPadding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 24),
-                    child: AddGroupCharacterDialog(groupId: groupId),
-                  ),
+            endDrawer: Consumer<ChatNotifier>(
+              builder: (drawerContext, notifier, _) {
+                final currentChat = notifier.chats.cast<Chat?>().firstWhere(
+                      (chat) => chat?.id == activeChatId,
+                      orElse: () => activeChat,
+                    )!;
+                return ChatDetailDrawer(
+                  chat: currentChat,
+                  currentUserId: getIt<User>().id,
+                  onOpenProfile: (user) {
+                    Navigator.of(drawerContext).pop();
+                    context.goNamed('userDetails',
+                        extra: user.id,
+                        pathParameters: {'name': user.nickname});
+                  },
+                  onAddMember: currentChat.group == true &&
+                          currentChat.id != null
+                      ? () {
+                          Navigator.of(drawerContext).pop();
+                          showDialog<void>(
+                            context: context,
+                            builder: (dialogContext) => AddChatMemberDialog(
+                              chat: currentChat,
+                              currentUserId: getIt<User>().id,
+                              onMembersAdded: (updated) {
+                                // The HTTP API persists membership. Repeat the
+                                // idempotent join over the live socket so the
+                                // server registers connected invitees and
+                                // broadcasts the refreshed conversation.
+                                final existingIds = currentChat.members
+                                    .map((member) => member.id)
+                                    .toSet();
+                                final invitedIds = updated.members
+                                    .map((member) => member.id)
+                                    .where((id) => !existingIds.contains(id))
+                                    .toList();
+                                if (invitedIds.isNotEmpty) {
+                                  notifier.sendChatMessage(jsonEncode(
+                                    JoinChatRequest(
+                                      type: MessageType.JOIN_CHAT,
+                                      conversationId: currentChat.id,
+                                      ids: [getIt<User>().id, ...invitedIds],
+                                    ).toJson(),
+                                  ));
+                                }
+                                updated.message ??= currentChat.message;
+                                notifier.upsertChat(updated);
+                                unawaited(notifier.refreshChats());
+                              },
+                            ),
+                          );
+                        }
+                      : null,
                 );
               },
             ),

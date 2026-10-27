@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:openapi/api.dart';
 
-import '../../../components/square_image_loader.dart';
+import '../../../components/image_lazy_loader.dart';
 import '../../../constants/onepiece_colors.dart';
-import '../../../constants/onepiece_fonts.dart';
 import '../../../l10n/app_localizations.dart';
 
-class ChatDetailDrawer extends StatefulWidget {
+/// Group conversations show their members; direct conversations show the
+/// other person's details. Only working actions are presented.
+class ChatDetailDrawer extends StatelessWidget {
   final Chat chat;
   final String currentUserId;
-  final ValueChanged<String>? onRenameChat;
   final VoidCallback? onAddMember;
+  final ValueChanged<User>? onOpenProfile;
+
+  // Retained for source compatibility. These actions have no server endpoint.
+  final ValueChanged<String>? onRenameChat;
   final VoidCallback? onLeaveChat;
   final VoidCallback? onClearHistory;
 
@@ -18,554 +22,328 @@ class ChatDetailDrawer extends StatefulWidget {
     super.key,
     required this.chat,
     required this.currentUserId,
-    this.onRenameChat,
     this.onAddMember,
+    this.onOpenProfile,
+    this.onRenameChat,
     this.onLeaveChat,
     this.onClearHistory,
   });
 
-  @override
-  State<ChatDetailDrawer> createState() => _ChatDetailDrawerState();
-}
+  bool get _isGroup => chat.group == true;
 
-class _ChatDetailDrawerState extends State<ChatDetailDrawer> {
-  late final TextEditingController _nameController;
-
-  bool get _isGroup => widget.chat.group == true;
-  bool get _isCreator =>
-      widget.chat.creationRecord?.userId == widget.currentUserId;
-
-  @override
-  void initState() {
-    super.initState();
-    _nameController = TextEditingController(text: _displayName);
-  }
-
-  @override
-  void didUpdateWidget(covariant ChatDetailDrawer oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.chat.id != widget.chat.id ||
-        oldWidget.chat.name != widget.chat.name) {
-      _nameController.text = _displayName;
+  User? get _otherUser {
+    for (final user in chat.members) {
+      if (user.id != currentUserId) return user;
     }
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    super.dispose();
-  }
-
-  String get _displayName {
-    if (_isGroup) {
-      return widget.chat.name ?? '';
-    }
-    final target = _targetMember;
-    return target?.nickname ?? widget.chat.name ?? '';
-  }
-
-  User? get _targetMember {
-    for (final member in widget.chat.members) {
-      if (member.id != widget.currentUserId) return member;
-    }
-    return widget.chat.members.isEmpty ? null : widget.chat.members.first;
-  }
-
-  List<User> get _visibleMembers {
-    if (_isGroup) return widget.chat.members;
-    return widget.chat.members
-        .where((member) => member.id != widget.currentUserId)
-        .toList();
+    return null;
   }
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.sizeOf(context).width;
-    final drawerWidth =
-        screenWidth < 430 ? (screenWidth * 0.86).clamp(280.0, 360.0) : 340.0;
-
+    final loc = AppLocalizations.of(context)!;
+    final width = MediaQuery.sizeOf(context).width;
+    final title = _isGroup
+        ? (chat.name?.trim().isNotEmpty == true
+            ? chat.name!.trim()
+            : loc.chatGroupDetails)
+        : (_otherUser?.nickname ?? loc.chatContactDetails);
     return Drawer(
-      width: drawerWidth,
+      width: width < 430 ? width * .9 : 360,
       elevation: 0,
-      backgroundColor: OnepieceColors.menuBackgroundColor,
+      backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.horizontal(left: Radius.circular(8)),
+        borderRadius: BorderRadius.horizontal(left: Radius.circular(18)),
       ),
       child: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(12, 12, 12, 16),
+        child: Column(
           children: [
-            _buildHeader(context),
-            const SizedBox(height: 10),
-            _buildMembersSection(context),
-            if (_isGroup && _isCreator) ...[
-              const SizedBox(height: 10),
-              _buildGroupSettings(context),
-            ],
-            const SizedBox(height: 10),
-            _buildMetadataSection(context),
-            const SizedBox(height: 10),
-            _buildActionsSection(context),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 14, 14, 14),
+              child: Row(children: [
+                Expanded(
+                  child: Text(
+                    _isGroup ? loc.chatGroupDetails : loc.chatContactDetails,
+                    style: const TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                        color: OnepieceColors.primaryLabel),
+                  ),
+                ),
+                IconButton(
+                  tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+                  onPressed: () => Navigator.of(context).pop(),
+                  icon: const Icon(Icons.close, size: 20),
+                  color: OnepieceColors.secondaryLabel,
+                ),
+              ]),
+            ),
+            const Divider(height: 1, color: OnepieceColors.separator),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(24, 28, 24, 32),
+                children: [
+                  Center(
+                    child: _isGroup
+                        ? _GroupAvatar(members: chat.members)
+                        : _UserAvatar(user: _otherUser, size: 76),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                        fontSize: 21,
+                        fontWeight: FontWeight.w600,
+                        height: 1.25,
+                        color: OnepieceColors.primaryLabel),
+                  ),
+                  if (_isGroup) ...[
+                    const SizedBox(height: 7),
+                    Text(
+                      loc.userCount(chat.members.length),
+                      style: const TextStyle(
+                          fontSize: 13, color: OnepieceColors.secondaryLabel),
+                    ),
+                  ],
+                  const SizedBox(height: 34),
+                  if (_isGroup) _groupMembers(loc) else _contactDetails(loc),
+                ],
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
-    return _DrawerCard(
-      child: Column(
+  Widget _groupMembers(AppLocalizations loc) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildAvatarCluster(),
-          const SizedBox(height: 10),
-          Text(
-            _displayName.isEmpty
-                ? AppLocalizations.of(context)!.chatting
-                : _displayName,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-            style: OnepieceFonts.smallHeaderStyle.copyWith(fontSize: 18),
-          ),
-          const SizedBox(height: 6),
+          _SectionHeading(loc.chatMembers),
+          const SizedBox(height: 18),
           Wrap(
-            alignment: WrapAlignment.center,
-            spacing: 6,
-            runSpacing: 6,
+            spacing: 10,
+            runSpacing: 20,
             children: [
-              _InfoPill(
-                icon: _isGroup ? Icons.groups_outlined : Icons.person_outline,
-                label: _isGroup
-                    ? AppLocalizations.of(context)!.group
-                    : AppLocalizations.of(context)!.chatting,
-              ),
-              _InfoPill(
-                icon: Icons.people_alt_outlined,
-                label: '${widget.chat.members.length}',
-              ),
+              for (final member in chat.members)
+                _MemberItem(
+                  user: member,
+                  onTap: onOpenProfile == null
+                      ? null
+                      : () => onOpenProfile!(member),
+                ),
+              if (onAddMember != null)
+                _AddMemberItem(label: loc.chatAddMembers, onTap: onAddMember!),
             ],
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildAvatarCluster() {
-    if (!_isGroup) {
-      final uri = _targetMember?.imageUri ?? '';
-      return SquareImageLoader(
-        key: ValueKey(uri),
-        uriProvider: () => uri,
-        width: 64,
-        borderWidth: 2,
       );
-    }
 
-    final members = widget.chat.members.take(4).toList();
-    return Container(
-      width: 72,
-      height: 72,
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: OnepieceColors.liteFancyBlue.withValues(alpha: 0.45),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: GridView.builder(
-        physics: const NeverScrollableScrollPhysics(),
-        padding: EdgeInsets.zero,
-        itemCount: members.length,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          mainAxisSpacing: 4,
-          crossAxisSpacing: 4,
-        ),
-        itemBuilder: (context, index) {
-          final uri = members[index].imageUri ?? '';
-          return SquareImageLoader(
-            key: ValueKey('${members[index].id}-$uri'),
-            uriProvider: () => uri,
-            width: 30,
-            borderWidth: 1,
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildMembersSection(BuildContext context) {
-    final members = _visibleMembers;
-    return _DrawerCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _SectionTitle(
-            icon: Icons.people_alt_outlined,
-            label:
-                '${AppLocalizations.of(context)!.member} (${members.length})',
-          ),
-          const SizedBox(height: 10),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: members.length + (_isGroup ? 1 : 0),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4,
-              mainAxisSpacing: 10,
-              crossAxisSpacing: 8,
-              childAspectRatio: 0.72,
-            ),
-            itemBuilder: (context, index) {
-              if (_isGroup && index == members.length) {
-                return _AddMemberTile(onTap: widget.onAddMember);
-              }
-              return _MemberTile(member: members[index]);
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildGroupSettings(BuildContext context) {
-    return _DrawerCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _SectionTitle(
-            icon: Icons.edit_note_outlined,
-            label: AppLocalizations.of(context)!.name,
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: SizedBox(
-                  height: 38,
-                  child: TextField(
-                    controller: _nameController,
-                    style: OnepieceFonts.smallContentStyle,
-                    decoration: InputDecoration(
-                      isDense: true,
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 10),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(
-                          color: OnepieceColors.menuHoverColor
-                              .withValues(alpha: 0.7),
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(
-                          color: OnepieceColors.fancyGreen,
-                          width: 2,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              InkWell(
-                borderRadius: BorderRadius.circular(8),
-                onTap: () {
-                  final newName = _nameController.text.trim();
-                  if (newName.isEmpty || newName == widget.chat.name) return;
-                  widget.onRenameChat?.call(newName);
-                },
-                child: Container(
-                  width: 38,
-                  height: 38,
-                  decoration: BoxDecoration(
-                    color: OnepieceColors.fancyGreen.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: OnepieceColors.fancyGreen.withValues(alpha: 0.32),
-                    ),
-                  ),
-                  child: const Icon(Icons.check,
-                      color: OnepieceColors.fancyGreen, size: 20),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMetadataSection(BuildContext context) {
-    return _DrawerCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _SectionTitle(
-            icon: Icons.info_outline,
-            label: AppLocalizations.of(context)!.chatInformation,
-          ),
-          const SizedBox(height: 10),
-          _MetaRow(
-            icon: Icons.lock_outline,
-            label: AppLocalizations.of(context)!.chatPrivate,
-            value: widget.chat.privateGroup == true
-                ? AppLocalizations.of(context)!.yes
-                : AppLocalizations.of(context)!.no,
-          ),
-          const SizedBox(height: 8),
-          _MetaRow(
-            icon: Icons.mark_chat_unread_outlined,
-            label: AppLocalizations.of(context)!.chatUnread,
-            value: '${widget.chat.unreadCount ?? 0}',
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildActionsSection(BuildContext context) {
-    return _DrawerCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _SectionTitle(
-            icon: Icons.tune_outlined,
-            label: AppLocalizations.of(context)!.chatActions,
-          ),
-          const SizedBox(height: 8),
-          _ActionTile(
-            icon: Icons.cleaning_services_outlined,
-            label: AppLocalizations.of(context)!.clearHistory,
-            onTap: widget.onClearHistory,
-          ),
-          if (_isGroup)
-            _ActionTile(
-              icon: Icons.logout_outlined,
-              label: AppLocalizations.of(context)!.leaveGroup,
-              danger: true,
-              onTap: widget.onLeaveChat,
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class _DrawerCard extends StatelessWidget {
-  final Widget child;
-
-  const _DrawerCard({required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 0,
-      margin: EdgeInsets.zero,
-      color: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-        side: BorderSide(
-          color: OnepieceColors.menuHoverColor.withValues(alpha: 0.45),
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: child,
-      ),
-    );
-  }
-}
-
-class _SectionTitle extends StatelessWidget {
-  final IconData icon;
-  final String label;
-
-  const _SectionTitle({required this.icon, required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
+  Widget _contactDetails(AppLocalizations loc) {
+    final user = _otherUser;
+    if (user == null) return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, color: OnepieceColors.fancyBlue, size: 18),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: OnepieceFonts.smallContentFancyBlueStyle,
+        _SectionHeading(loc.basicInfo),
+        const SizedBox(height: 12),
+        Container(
+          decoration: BoxDecoration(
+            color: OnepieceColors.surface,
+            borderRadius: BorderRadius.circular(16),
           ),
+          child: Column(children: [
+            _DetailRow(label: loc.nickname, value: user.nickname),
+            const Divider(
+                height: 1,
+                indent: 16,
+                endIndent: 16,
+                color: OnepieceColors.separator),
+            _DetailRow(label: loc.userNameLabel, value: user.username),
+          ]),
         ),
+        if (onOpenProfile != null) ...[
+          const SizedBox(height: 20),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: () => onOpenProfile!(user),
+              icon: const Icon(Icons.person_outline, size: 19),
+              label: Text(loc.chatViewProfile),
+              style: FilledButton.styleFrom(
+                backgroundColor: OnepieceColors.fancyBlue,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 13),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }
 }
 
-class _InfoPill extends StatelessWidget {
-  final IconData icon;
-  final String label;
-
-  const _InfoPill({required this.icon, required this.label});
+class _SectionHeading extends StatelessWidget {
+  final String title;
+  const _SectionHeading(this.title);
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-      decoration: BoxDecoration(
-        color: OnepieceColors.liteFancyBlue.withValues(alpha: 0.35),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: OnepieceColors.fancyBlue, size: 15),
-          const SizedBox(width: 4),
-          Text(label, style: OnepieceFonts.superSmallContentStyle),
-        ],
-      ),
-    );
-  }
-}
-
-class _MemberTile extends StatelessWidget {
-  final User member;
-
-  const _MemberTile({required this.member});
-
-  @override
-  Widget build(BuildContext context) {
-    final uri = member.imageUri ?? '';
-    return Column(
-      children: [
-        SquareImageLoader(
-          key: ValueKey('${member.id}-$uri'),
-          uriProvider: () => uri,
-          width: 44,
-          borderWidth: 1.5,
-        ),
-        const SizedBox(height: 4),
-        Text(
-          member.nickname,
-          textAlign: TextAlign.center,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: OnepieceFonts.superSmallContentStyle.copyWith(
-            color: OnepieceColors.fancyBlue,
+  Widget build(BuildContext context) => Text(
+        title,
+        style: const TextStyle(
+            fontSize: 14,
             fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
-    );
-  }
+            color: OnepieceColors.primaryLabel),
+      );
 }
 
-class _AddMemberTile extends StatelessWidget {
-  final VoidCallback? onTap;
-
-  const _AddMemberTile({this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        InkWell(
-          borderRadius: BorderRadius.circular(8),
-          onTap: onTap,
-          child: Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: OnepieceColors.liteFancyBlue.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: OnepieceColors.liteFancyBlue,
-                width: 1.5,
-              ),
-            ),
-            child: const Icon(Icons.add,
-                color: OnepieceColors.fancyBlue, size: 22),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _MetaRow extends StatelessWidget {
-  final IconData icon;
+class _DetailRow extends StatelessWidget {
   final String label;
   final String value;
+  const _DetailRow({required this.label, required this.value});
 
-  const _MetaRow({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+        child: Row(children: [
+          Text(label,
+              style: const TextStyle(
+                  fontSize: 13, color: OnepieceColors.secondaryLabel)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(value,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.end,
+                style: const TextStyle(
+                    fontSize: 13, color: OnepieceColors.primaryLabel)),
+          ),
+        ]),
+      );
+}
+
+class _UserAvatar extends StatelessWidget {
+  final User? user;
+  final double size;
+  const _UserAvatar({required this.user, required this.size});
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, color: OnepieceColors.menuIconColor, size: 17),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            label,
-            style: OnepieceFonts.superSmallContentStyle,
-          ),
-        ),
-        Text(
-          value,
-          style: OnepieceFonts.superSmallContentStyle.copyWith(
-            fontWeight: FontWeight.w700,
-            color: OnepieceColors.fancyBlue,
-          ),
-        ),
-      ],
+    final uri = user?.imageUri ?? '';
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: OnepieceColors.surface,
+        shape: BoxShape.circle,
+        border: Border.all(color: OnepieceColors.separator),
+      ),
+      child: uri.isEmpty
+          ? Icon(Icons.person_outline,
+              size: size * .48, color: OnepieceColors.secondaryLabel)
+          : ClipOval(
+              child: ImageLazyLoader(
+                key: ValueKey('${user?.id}-$uri'),
+                uriProvider: () => uri,
+                width: size,
+                borderWidth: 0,
+                borderRadios: size,
+              ),
+            ),
     );
   }
 }
 
-class _ActionTile extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool danger;
-  final VoidCallback? onTap;
-
-  const _ActionTile({
-    required this.icon,
-    required this.label,
-    this.danger = false,
-    this.onTap,
-  });
+class _GroupAvatar extends StatelessWidget {
+  final List<User> members;
+  const _GroupAvatar({required this.members});
 
   @override
   Widget build(BuildContext context) {
-    final color = danger ? Colors.red : OnepieceColors.fancyBlue;
-    return InkWell(
-      borderRadius: BorderRadius.circular(8),
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Row(
-          children: [
-            Icon(icon, color: color, size: 18),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                label,
-                style: OnepieceFonts.smallContentStyle.copyWith(
-                  color: onTap == null ? OnepieceColors.menuIconColor : color,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+    final visible = members.take(4).toList();
+    return Container(
+      width: 76,
+      height: 76,
+      padding: const EdgeInsets.all(6),
+      decoration: BoxDecoration(
+          color: OnepieceColors.surface,
+          borderRadius: BorderRadius.circular(18)),
+      child: visible.isEmpty
+          ? const Icon(Icons.group_outlined,
+              size: 34, color: OnepieceColors.secondaryLabel)
+          : GridView.count(
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: 2,
+              mainAxisSpacing: 3,
+              crossAxisSpacing: 3,
+              children: [
+                for (final user in visible) _UserAvatar(user: user, size: 30),
+              ],
             ),
-            if (onTap == null)
-              const Icon(Icons.lock_outline,
-                  color: OnepieceColors.menuIconColor, size: 15),
-          ],
-        ),
-      ),
     );
   }
+}
+
+class _MemberItem extends StatelessWidget {
+  final User user;
+  final VoidCallback? onTap;
+  const _MemberItem({required this.user, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+        width: 68,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Column(children: [
+            _UserAvatar(user: user, size: 52),
+            const SizedBox(height: 6),
+            Text(user.nickname,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                    fontSize: 12, color: OnepieceColors.primaryLabel)),
+          ]),
+        ),
+      );
+}
+
+class _AddMemberItem extends StatelessWidget {
+  final String label;
+  final VoidCallback onTap;
+  const _AddMemberItem({required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+        width: 68,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Column(children: [
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                color: OnepieceColors.surface,
+                shape: BoxShape.circle,
+                border: Border.all(color: OnepieceColors.separator),
+              ),
+              child: const Icon(Icons.add,
+                  color: OnepieceColors.fancyBlue, size: 25),
+            ),
+            const SizedBox(height: 6),
+            Text(label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                    fontSize: 12, color: OnepieceColors.fancyBlue)),
+          ]),
+        ),
+      );
 }
