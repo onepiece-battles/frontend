@@ -377,6 +377,7 @@ class _SideMenuState extends State<SideMenu> {
                 child: ListView(
                   padding: EdgeInsets.zero,
                   children: [
+                    _buildAssistantItem(context, isExpanded),
                     _buildSectionLabel(AppLocalizations.of(context)!.route),
                     _buildResourceList(context, isExpanded),
                     _buildSectionLabel(AppLocalizations.of(context)!.user,
@@ -411,6 +412,7 @@ class _SideMenuState extends State<SideMenu> {
                 child: ListView(
                   padding: EdgeInsets.zero,
                   children: [
+                    _buildAssistantItem(context, isExpanded),
                     if (isExpanded)
                       _buildSectionLabel(AppLocalizations.of(context)!.route),
                     _buildResourceList(context, isExpanded),
@@ -605,6 +607,23 @@ class _SideMenuState extends State<SideMenu> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildAssistantItem(BuildContext context, bool isExpanded) {
+    final isZh = Localizations.localeOf(context).languageCode == 'zh';
+    return ValueListenableBuilder<String>(
+      valueListenable: routeNotifier,
+      builder: (context, route, _) => _buildMenuItem(
+        context: context,
+        icon: const Icon(Icons.auto_awesome,
+            size: 20, color: OnepieceColors.fancyBlue),
+        text: isZh ? 'AI 控制室' : 'AI assistant',
+        isSelected: route == AppRouter.assistantPath,
+        isExpanded: isExpanded,
+        onTap: () =>
+            _onDrawerItemTap(() => context.go(AppRouter.assistantPath)),
       ),
     );
   }
