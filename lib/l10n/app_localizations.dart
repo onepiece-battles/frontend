@@ -764,6 +764,12 @@ abstract class AppLocalizations {
   /// **'Tell us what happened or what you would improve.'**
   String get feedbackSubtitle;
 
+  /// No description provided for @memberProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get memberProfile;
+
   /// No description provided for @feedbackContent.
   ///
   /// In en, this message translates to:

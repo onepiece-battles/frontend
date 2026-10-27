@@ -351,6 +351,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Tell us what happened or what you would improve.';
 
   @override
+  String get memberProfile => 'Profile';
+
+  @override
   String get feedbackContent => 'Content';
 
   @override

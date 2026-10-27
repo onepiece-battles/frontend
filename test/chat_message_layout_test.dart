@@ -29,4 +29,26 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   }
+
+  testWidgets('picture-only message has no surrounding text bubble',
+      (tester) async {
+    const image =
+        'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/0x8AAAAASUVORK5CYII=';
+    await tester.pumpWidget(MaterialApp(
+        locale: const Locale('zh'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+            body: MessageItem(
+                message: Message(imageContentUri: image),
+                preMessage: null,
+                isMe: true,
+                user:
+                    User(id: '1', username: 'user@example.com', nickname: '路飞'),
+                replyMessage: (_) {}))));
+    await tester.pump();
+    expect(find.byKey(const Key('chat-message-image')), findsOneWidget);
+    expect(find.byKey(const Key('chat-text-bubble')), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
 }
