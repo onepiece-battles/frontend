@@ -142,6 +142,7 @@ flutter run -d web-server --web-port 1234 --web-hostname local.onepiece-battles.
 
 ```bash
 flutter build web
+dart tool/version_web_assets.dart
 # 产物位于 build/web/
 ```
 
@@ -312,6 +313,7 @@ Open `http://local.onepiece-battles.com:1234`. Local development needs a running
 
 ```bash
 flutter build web
+dart tool/version_web_assets.dart
 # Output in build/web/
 ```
 

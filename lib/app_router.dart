@@ -1,6 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'components/resource_loading.dart';
+import 'components/deferred_page.dart';
+import 'components/resource_detail_route.dart';
+import 'utils/resource_routes.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:one_piece_battles_flutter/personal_home.dart'
@@ -107,7 +110,7 @@ class AppRouter {
             pageBuilder: (context, state) {
               updateRoutingState(state.matchedLocation);
               return NoTransitionPage(
-                  child: _DeferredPage(
+                  child: DeferredPage(
                       load: assistant_view.loadLibrary,
                       page: () => assistant_view.AssistantView()),
                   key: state.pageKey);
@@ -120,7 +123,7 @@ class AppRouter {
             pageBuilder: (context, state) {
               updateRoutingState(state.matchedLocation);
               return NoTransitionPage(
-                  child: _DeferredPage(
+                  child: DeferredPage(
                       load: character_list.loadLibrary,
                       page: () => character_list.CharacterView()),
                   key: state.pageKey);
@@ -133,7 +136,7 @@ class AppRouter {
                 pageBuilder: (context, state) {
                   updateRoutingState(state.matchedLocation);
                   return NoTransitionPage(
-                    child: _DeferredPage(
+                    child: DeferredPage(
                         load: create_character.loadLibrary,
                         page: () => create_character.CreateCharacterView()),
                   );
@@ -145,13 +148,16 @@ class AppRouter {
                 parentNavigatorKey: _homeNavigatorState,
                 pageBuilder: (context, state) {
                   updateRoutingState(state.matchedLocation);
-                  String characterId = state.extra as String;
+                  final characterId = ResourceRoutes.id(state);
                   return NoTransitionPage(
-                    child: _DeferredPage(
+                    child: DeferredPage(
                         load: character_detail.loadLibrary,
-                        page: () => character_detail.CharacterDetail(
-                              characterId: characterId,
-                            )),
+                        page: () => ResourceDetailRoute(
+                            id: characterId,
+                            type: 'character',
+                            name: state.pathParameters['name'] ?? '',
+                            page: (id) => character_detail.CharacterDetail(
+                                characterId: id))),
                   );
                 },
               ),
@@ -164,7 +170,7 @@ class AppRouter {
             pageBuilder: (context, state) {
               updateRoutingState(state.matchedLocation);
               return NoTransitionPage(
-                  child: _DeferredPage(
+                  child: DeferredPage(
                       load: group_list.loadLibrary,
                       page: () => group_list.GroupView()),
                   key: state.pageKey);
@@ -177,7 +183,7 @@ class AppRouter {
                 pageBuilder: (context, state) {
                   updateRoutingState(state.matchedLocation);
                   return NoTransitionPage(
-                    child: _DeferredPage(
+                    child: DeferredPage(
                         load: create_group.loadLibrary,
                         page: () => create_group.CreateGroupView()),
                   );
@@ -189,13 +195,16 @@ class AppRouter {
                 parentNavigatorKey: _homeNavigatorState,
                 pageBuilder: (context, state) {
                   updateRoutingState(state.matchedLocation);
-                  String groupId = state.extra as String;
+                  final groupId = ResourceRoutes.id(state);
                   return NoTransitionPage(
-                    child: _DeferredPage(
+                    child: DeferredPage(
                         load: group_detail.loadLibrary,
-                        page: () => group_detail.GroupDetailView(
-                              groupId: groupId,
-                            )),
+                        page: () => ResourceDetailRoute(
+                            id: groupId,
+                            type: 'group',
+                            name: state.pathParameters['name'] ?? '',
+                            page: (id) =>
+                                group_detail.GroupDetailView(groupId: id))),
                   );
                 },
               ),
@@ -208,7 +217,7 @@ class AppRouter {
               pageBuilder: (context, state) {
                 updateRoutingState(state.matchedLocation);
                 return NoTransitionPage(
-                    child: _DeferredPage(
+                    child: DeferredPage(
                         load: fruit_list.loadLibrary,
                         page: () => fruit_list.FruitView()),
                     key: state.pageKey);
@@ -221,7 +230,7 @@ class AppRouter {
                   pageBuilder: (context, state) {
                     updateRoutingState(state.matchedLocation);
                     return NoTransitionPage(
-                      child: _DeferredPage(
+                      child: DeferredPage(
                           load: create_fruit.loadLibrary,
                           page: () => create_fruit.CreateFruitView()),
                     );
@@ -233,13 +242,16 @@ class AppRouter {
                   parentNavigatorKey: _homeNavigatorState,
                   pageBuilder: (context, state) {
                     updateRoutingState(state.matchedLocation);
-                    String fruitId = state.extra as String;
+                    final fruitId = ResourceRoutes.id(state);
                     return NoTransitionPage(
-                      child: _DeferredPage(
+                      child: DeferredPage(
                           load: fruit_detail.loadLibrary,
-                          page: () => fruit_detail.FruitDetailView(
-                                fruitId: fruitId,
-                              )),
+                          page: () => ResourceDetailRoute(
+                              id: fruitId,
+                              type: 'fruit',
+                              name: state.pathParameters['name'] ?? '',
+                              page: (id) =>
+                                  fruit_detail.FruitDetailView(fruitId: id))),
                     );
                   },
                 ),
@@ -251,7 +263,7 @@ class AppRouter {
               pageBuilder: (context, state) {
                 updateRoutingState(state.matchedLocation);
                 return NoTransitionPage(
-                    child: _DeferredPage(
+                    child: DeferredPage(
                         load: battle_list.loadLibrary,
                         page: () => battle_list.BattleView()),
                     key: state.pageKey);
@@ -264,7 +276,7 @@ class AppRouter {
                   pageBuilder: (context, state) {
                     updateRoutingState(state.matchedLocation);
                     return NoTransitionPage(
-                      child: _DeferredPage(
+                      child: DeferredPage(
                           load: create_battle.loadLibrary,
                           page: () => create_battle.CreateBattleView()),
                     );
@@ -276,13 +288,15 @@ class AppRouter {
                   parentNavigatorKey: _homeNavigatorState,
                   pageBuilder: (context, state) {
                     updateRoutingState(state.matchedLocation);
-                    String battleId = state.extra as String;
+                    final battleId = ResourceRoutes.id(state);
                     return NoTransitionPage(
-                      child: _DeferredPage(
+                      child: DeferredPage(
                           load: battle_detail.loadLibrary,
-                          page: () => battle_detail.BattleDetailView(
-                                battleId: battleId,
-                              )),
+                          page: () => battleId == null
+                              ? const ResourceEmptyState()
+                              : battle_detail.BattleDetailView(
+                                  battleId: battleId,
+                                )),
                     );
                   },
                 ),
@@ -294,7 +308,7 @@ class AppRouter {
             pageBuilder: (context, state) {
               updateRoutingState(state.matchedLocation);
               return NoTransitionPage(
-                  child: _DeferredPage(
+                  child: DeferredPage(
                       load: chatting_view.loadLibrary,
                       page: () => chatting_view.ChattingView()),
                   key: state.pageKey);
@@ -307,7 +321,7 @@ class AppRouter {
             pageBuilder: (context, state) {
               updateRoutingState(state.matchedLocation);
               return NoTransitionPage(
-                  child: _DeferredPage(
+                  child: DeferredPage(
                       load: user_list.loadLibrary,
                       page: () => user_list.UserView()),
                   key: state.pageKey);
@@ -319,13 +333,15 @@ class AppRouter {
                 parentNavigatorKey: _homeNavigatorState,
                 pageBuilder: (context, state) {
                   updateRoutingState(state.matchedLocation);
-                  String userId = state.extra as String;
+                  final userId = ResourceRoutes.id(state);
                   return NoTransitionPage(
-                    child: _DeferredPage(
+                    child: DeferredPage(
                         load: user_detail.loadLibrary,
-                        page: () => user_detail.UserDetailView(
-                              userId: userId,
-                            )),
+                        page: () => userId == null
+                            ? const ResourceEmptyState()
+                            : user_detail.UserDetailView(
+                                userId: userId,
+                              )),
                   );
                 },
               ),
@@ -338,7 +354,7 @@ class AppRouter {
               pageBuilder: (context, state) {
                 updateRoutingState(state.matchedLocation);
                 return NoTransitionPage(
-                    child: _DeferredPage(
+                    child: DeferredPage(
                         load: issue_list.loadLibrary,
                         page: () => issue_list.IssueView()),
                     key: state.pageKey);
@@ -350,13 +366,15 @@ class AppRouter {
                   parentNavigatorKey: _homeNavigatorState,
                   pageBuilder: (context, state) {
                     updateRoutingState(state.matchedLocation);
-                    String issueId = state.extra as String;
+                    final issueId = ResourceRoutes.id(state);
                     return NoTransitionPage(
-                      child: _DeferredPage(
+                      child: DeferredPage(
                           load: issue_detail.loadLibrary,
-                          page: () => issue_detail.IssueDetailView(
-                                issueId: issueId,
-                              )),
+                          page: () => issueId == null
+                              ? const ResourceEmptyState()
+                              : issue_detail.IssueDetailView(
+                                  issueId: issueId,
+                                )),
                     );
                   },
                 ),
@@ -368,7 +386,7 @@ class AppRouter {
               pageBuilder: (context, state) {
                 updateRoutingState(state.matchedLocation);
                 return NoTransitionPage(
-                    child: _DeferredPage(
+                    child: DeferredPage(
                         load: personal_home.loadLibrary,
                         page: () =>
                             personal_home.UserHome(userId: getIt<User>().id)),
@@ -381,9 +399,9 @@ class AppRouter {
                   parentNavigatorKey: _homeNavigatorState,
                   pageBuilder: (context, state) {
                     updateRoutingState(state.matchedLocation);
-                    final userId = state.extra as String? ?? getIt<User>().id;
+                    final userId = ResourceRoutes.id(state) ?? getIt<User>().id;
                     return NoTransitionPage(
-                        child: _DeferredPage(
+                        child: DeferredPage(
                             load: user_profile.loadLibrary,
                             page: () => user_profile.UserProfile(
                                   userId: userId,
@@ -397,13 +415,15 @@ class AppRouter {
                   parentNavigatorKey: _homeNavigatorState,
                   pageBuilder: (context, state) {
                     updateRoutingState(state.matchedLocation);
-                    String userId = state.extra as String;
+                    final userId = ResourceRoutes.id(state);
                     return NoTransitionPage(
-                      child: _DeferredPage(
+                      child: DeferredPage(
                           load: user_detail.loadLibrary,
-                          page: () => user_detail.UserDetailView(
-                                userId: userId,
-                              )),
+                          page: () => userId == null
+                              ? const ResourceEmptyState()
+                              : user_detail.UserDetailView(
+                                  userId: userId,
+                                )),
                     );
                   },
                 ),
@@ -416,86 +436,34 @@ class AppRouter {
       ),
       GoRoute(
         path: registerPath,
-        builder: (context, state) => _DeferredPage(
+        builder: (context, state) => DeferredPage(
             load: register_view.loadLibrary,
             page: () => register_view.RegisterPage()),
       ),
       GoRoute(
         path: retrievePassword,
-        builder: (context, state) => _DeferredPage(
+        builder: (context, state) => DeferredPage(
             load: retrieve_password_view.loadLibrary,
             page: () => retrieve_password_view.RetrievePassword()),
       ),
     ],
     // debugLogDiagnostics: true,
     redirect: (BuildContext context, GoRouterState state) {
-      // if the user is not logged in, they need to login
-      final loggedIn = getIt<User>().username != '';
-      final loggingIn = state.matchedLocation == AppRouter.loginPath;
-      final registering = state.matchedLocation == AppRouter.registerPath;
-      final retrievePassword =
-          state.matchedLocation == AppRouter.retrievePassword;
-      List<String> homePaths = [AppRouter.homePath, "", "/"];
-      final goingHome = homePaths.contains(state.matchedLocation);
-      if (registering) {
-        return AppRouter.registerPath;
+      final loggedIn = getIt<User>().username.isNotEmpty;
+      final uri = ResourceRoutes.canonicalUri(state);
+      final publicPaths = [loginPath, registerPath, retrievePassword];
+      if (!loggedIn && !publicPaths.contains(uri.path)) {
+        return ResourceRoutes.loginLocation(uri);
       }
-      if (retrievePassword) {
-        return AppRouter.retrievePassword;
+      if (loggedIn && uri.path == loginPath) {
+        return ResourceRoutes.afterLogin(uri);
       }
-      if (!loggedIn && !loggingIn) {
-        return AppRouter.loginPath;
+      if (loggedIn && [homePath, '', '/'].contains(uri.path)) {
+        return state.namedLocation('userHome',
+            pathParameters: {'name': getIt<User>().nickname});
       }
-      if (goingHome) {
-        return state.namedLocation("userHome",
-            pathParameters: {"name": getIt<User>().nickname});
-      }
-      if (loggedIn) {
-        return state.matchedLocation;
-      }
+      if (uri.toString() != state.uri.toString()) return uri.toString();
       return null;
     },
   );
-}
-
-/// Downloads a route's code only when the route is first opened. The login
-/// screen stays in the initial bundle, so it can become interactive sooner.
-class _DeferredPage extends StatefulWidget {
-  const _DeferredPage({required this.load, required this.page});
-
-  final Future<void> Function() load;
-  final Widget Function() page;
-
-  @override
-  State<_DeferredPage> createState() => _DeferredPageState();
-}
-
-class _DeferredPageState extends State<_DeferredPage> {
-  late Future<void> _ready;
-
-  @override
-  void initState() {
-    super.initState();
-    _ready = widget.load();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<void>(
-      future: _ready,
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return ResourceEmptyState(
-              failed: true,
-              onRetry: () => setState(() {
-                    _ready = widget.load();
-                  }));
-        }
-        if (snapshot.connectionState != ConnectionState.done) {
-          return const ResourceLoading();
-        }
-        return widget.page();
-      },
-    );
-  }
 }

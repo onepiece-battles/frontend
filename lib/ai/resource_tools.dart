@@ -45,37 +45,48 @@ class ResourceTools {
 
   /// OpenAI / DeepSeek function-tool definitions.
   static List<Map<String, dynamic>> definitions() => [
-        _fn('search_characters',
+        _fn(
+            'search_characters',
             'Search characters by (partial) name. Returns id, name, combat power, bounty and haki.',
             {
-              'name': {'type': 'string', 'description': 'Character name or part of it'}
+              'name': {
+                'type': 'string',
+                'description': 'Character name or part of it'
+              }
             },
-            ['name']),
-        _fn('get_character_detail',
+            [
+              'name'
+            ]),
+        _fn(
+            'get_character_detail',
             'Full profile of a character by name: all combat stats, devil fruits, crews and battle history (opponent + win/lose).',
             {
               'name': {'type': 'string'}
             },
-            ['name']),
+            [
+              'name'
+            ]),
         _fn('list_top_characters',
-            'List the strongest characters by combat power, highest first.',
-            {
-              'limit': {'type': 'integer', 'description': 'How many, 1-10'}
-            },
-            []),
-        _fn('search_fruits',
+            'List the strongest characters by combat power, highest first.', {
+          'limit': {'type': 'integer', 'description': 'How many, 1-10'}
+        }, []),
+        _fn(
+            'search_fruits',
             'Search devil fruits by (partial) name. Returns id, name, type and current holders.',
             {
               'name': {'type': 'string'}
             },
-            ['name']),
+            [
+              'name'
+            ]),
         _fn('get_fruit_holders',
             'Who ate / currently holds a devil fruit, by fruit name.', {
           'name': {'type': 'string'}
         }, [
           'name'
         ]),
-        _fn('list_fruits_by_type',
+        _fn(
+            'list_fruits_by_type',
             'List devil fruits of a given type and their holders. Use this for '
                 'questions like "all Ancient Zoan users".',
             {
@@ -85,8 +96,11 @@ class ResourceTools {
                     'One of: Paramecia, Logia, Zoan, Ancient_Zoan, Mythical_Zoan, Artificial_Zoan',
               }
             },
-            ['type']),
-        _fn('propose_battle',
+            [
+              'type'
+            ]),
+        _fn(
+            'propose_battle',
             'Propose a battle between two characters so the user can create it. '
                 'Call this when the user wants to simulate or create a fight (e.g. '
                 '"who would win, A vs B", "create a battle between A and B").',
@@ -94,19 +108,25 @@ class ResourceTools {
               'starter_name': {'type': 'string'},
               'receiver_name': {'type': 'string'},
             },
-            ['starter_name', 'receiver_name']),
+            [
+              'starter_name',
+              'receiver_name'
+            ]),
         _fn('search_groups', 'Search crews / groups by (partial) name.', {
           'name': {'type': 'string'}
         }, [
           'name'
         ]),
-        _fn('get_group_detail',
+        _fn(
+            'get_group_detail',
             'A crew / group by name: its members (characters + their position), '
                 'its child groups and its parent group.',
             {
               'name': {'type': 'string'}
             },
-            ['name']),
+            [
+              'name'
+            ]),
       ];
 
   static Map<String, dynamic> _fn(String name, String desc,
@@ -124,28 +144,29 @@ class ResourceTools {
         },
       };
 
-  static Future<ToolResult> execute(String name, Map<String, dynamic> args) async {
+  static Future<ToolResult> execute(
+      String name, Map<String, dynamic> args) async {
     try {
       switch (name) {
         case 'search_characters':
-          return _searchCharacters('${args['name'] ?? ''}');
+          return await _searchCharacters('${args['name'] ?? ''}');
         case 'get_character_detail':
-          return _characterDetail('${args['name'] ?? ''}');
+          return await _characterDetail('${args['name'] ?? ''}');
         case 'list_top_characters':
-          return _topCharacters((args['limit'] as num?)?.toInt() ?? 5);
+          return await _topCharacters((args['limit'] as num?)?.toInt() ?? 5);
         case 'search_fruits':
-          return _searchFruits('${args['name'] ?? ''}');
+          return await _searchFruits('${args['name'] ?? ''}');
         case 'get_fruit_holders':
-          return _fruitHolders('${args['name'] ?? ''}');
+          return await _fruitHolders('${args['name'] ?? ''}');
         case 'list_fruits_by_type':
-          return _fruitsByType('${args['type'] ?? ''}');
+          return await _fruitsByType('${args['type'] ?? ''}');
         case 'propose_battle':
-          return _proposeBattle(
-              '${args['starter_name'] ?? ''}', '${args['receiver_name'] ?? ''}');
+          return await _proposeBattle('${args['starter_name'] ?? ''}',
+              '${args['receiver_name'] ?? ''}');
         case 'search_groups':
-          return _searchGroups('${args['name'] ?? ''}');
+          return await _searchGroups('${args['name'] ?? ''}');
         case 'get_group_detail':
-          return _groupDetail('${args['name'] ?? ''}');
+          return await _groupDetail('${args['name'] ?? ''}');
       }
       return const ToolResult('{"error":"unknown tool"}', []);
     } catch (e) {
@@ -159,9 +180,11 @@ class ResourceTools {
           pageSize: size, pageIndex: 1, sortKeys: sort, characterFilter: f));
 
   static Future<ToolResult> _searchCharacters(String name) async {
-    final resp = await _listChars(CharacterFilter(name: name, languageCode: _lang));
+    final resp =
+        await _listChars(CharacterFilter(name: name, languageCode: _lang));
     final chars = resp?.characters ?? [];
-    final refs = chars.map((c) => ResourceRef('character', c.id, _name(c.name)));
+    final refs =
+        chars.map((c) => ResourceRef('character', c.id, _name(c.name)));
     final data = chars
         .map((c) => {
               'id': c.id,
@@ -176,25 +199,31 @@ class ResourceTools {
 
   static Future<ToolResult> _topCharacters(int limit) async {
     final n = limit.clamp(1, 10);
-    final resp = await _listChars(CharacterFilter(languageCode: _lang),
-        size: n,
-        sort: [
-          CharacterSortableField(
-              sortKey: CharacterSortableFieldsEnum.score,
-              sortOrder: SortOrder.DESC)
-        ]);
+    final resp =
+        await _listChars(CharacterFilter(languageCode: _lang), size: n, sort: [
+      CharacterSortableField(
+          sortKey: CharacterSortableFieldsEnum.score, sortOrder: SortOrder.DESC)
+    ]);
     final chars = resp?.characters ?? [];
-    final refs = chars.map((c) => ResourceRef('character', c.id, _name(c.name)));
+    final refs =
+        chars.map((c) => ResourceRef('character', c.id, _name(c.name)));
     final data = chars
-        .map((c) => {'id': c.id, 'name': _name(c.name), 'combat_power': c.score, 'bounty': c.bounty})
+        .map((c) => {
+              'id': c.id,
+              'name': _name(c.name),
+              'combat_power': c.score,
+              'bounty': c.bounty
+            })
         .toList();
     return ToolResult(jsonEncode({'top_characters': data}), refs.toList());
   }
 
   static Future<ToolResult> _characterDetail(String name) async {
-    final list = await _listChars(CharacterFilter(name: name, languageCode: _lang),
+    final list = await _listChars(
+        CharacterFilter(name: name, languageCode: _lang),
         size: 1);
-    final match = (list?.characters ?? []).isEmpty ? null : list!.characters.first;
+    final match =
+        (list?.characters ?? []).isEmpty ? null : list!.characters.first;
     if (match == null) {
       return ToolResult(jsonEncode({'found': false, 'query': name}), const []);
     }
@@ -203,7 +232,9 @@ class ResourceTools {
     if (full == null) {
       return ToolResult(jsonEncode({'found': false}), const []);
     }
-    final refs = <ResourceRef>[ResourceRef('character', full.id, _name(full.name))];
+    final refs = <ResourceRef>[
+      ResourceRef('character', full.id, _name(full.name))
+    ];
     for (final f in full.fruits) {
       refs.add(ResourceRef('fruit', f.id!, _name(f.name)));
     }
@@ -215,11 +246,25 @@ class ResourceTools {
           ? 'undecided'
           : (winnerId == full.id ? 'win' : 'lose');
       final oppName = _name(opp?.name);
-      if (b.id.isNotEmpty) {
-        refs.add(ResourceRef(
-            'battle', b.id, oppName.isEmpty ? _name(full.name) : 'vs $oppName'));
+      if (opp != null && opp.id.isNotEmpty) {
+        refs.add(ResourceRef('character', opp.id, oppName));
       }
-      return {'battle_id': b.id, 'opponent': oppName, 'result': result};
+      if (b.id.isNotEmpty) {
+        refs.add(ResourceRef('battle', b.id,
+            oppName.isEmpty ? _name(full.name) : 'vs $oppName'));
+      }
+      return {
+        'id': b.id,
+        'battle_id': b.id,
+        'opponent': {'id': opp?.id, 'name': oppName},
+        'result': result
+      };
+    }).toList();
+    final crews = full.groups.map((g) {
+      if (g.groupId != null && g.groupId!.isNotEmpty) {
+        refs.add(ResourceRef('group', g.groupId!, _name(g.name)));
+      }
+      return {'id': g.groupId, 'name': _name(g.name)};
     }).toList();
     final data = {
       'id': full.id,
@@ -236,8 +281,9 @@ class ResourceTools {
         'energy': full.energy,
       },
       'haki': full.hakis.map((h) => h.toString()).toList(),
-      'devil_fruits': full.fruits.map((f) => _name(f.name)).toList(),
-      'crews': full.groups.map((g) => _name(g.name)).toList(),
+      'devil_fruits':
+          full.fruits.map((f) => {'id': f.id, 'name': _name(f.name)}).toList(),
+      'crews': crews,
       'battles': battles,
     };
     return ToolResult(jsonEncode(data), refs);
@@ -306,7 +352,8 @@ class ResourceTools {
     final type = _parseFruitType(rawType);
     if (type == null) {
       return ToolResult(
-          jsonEncode({'error': 'unknown fruit type', 'query': rawType}), const []);
+          jsonEncode({'error': 'unknown fruit type', 'query': rawType}),
+          const []);
     }
     final resp = await _getIt<FruitDao>().list(ListFruitRequest(
         pageSize: 30,
@@ -329,13 +376,15 @@ class ResourceTools {
       };
     }).toList();
     return ToolResult(
-        jsonEncode({'type': type.toString(), 'count': data.length, 'fruits': data}),
+        jsonEncode(
+            {'type': type.toString(), 'count': data.length, 'fruits': data}),
         refs);
   }
 
   static Future<CharacterListView?> _findOneCharacter(String name) async {
-    final resp =
-        await _listChars(CharacterFilter(name: name, languageCode: _lang), size: 1);
+    final resp = await _listChars(
+        CharacterFilter(name: name, languageCode: _lang),
+        size: 1);
     final chars = resp?.characters ?? [];
     return chars.isEmpty ? null : chars.first;
   }
@@ -359,7 +408,8 @@ class ResourceTools {
       ResourceRef('character', starter.id, sName),
       ResourceRef('character', receiver.id, rName),
       // Consumed by the UI to show a Confirm/Cancel battle card (id = "starter|receiver").
-      ResourceRef('battle_proposal', '${starter.id}|${receiver.id}', '$sName vs $rName'),
+      ResourceRef('battle_proposal', '${starter.id}|${receiver.id}',
+          '$sName vs $rName'),
     ];
     return ToolResult(
         jsonEncode({

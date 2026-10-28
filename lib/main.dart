@@ -28,6 +28,7 @@ import 'config/configure_web.dart';
 import 'config/api_initializer.dart';
 import 'config/my_input_theme.dart';
 import 'constants/onepiece_colors.dart';
+import 'utils/resource_routes.dart';
 
 final getIt = GetIt.instance;
 
@@ -65,6 +66,7 @@ void main() {
   configureApp();
   getItSetUp();
   ApiInitializer.onSessionExpired = () {
+    final destination = AppRouter.router.routeInformationProvider.value.uri;
     ApiInitializer.clearAuth();
     getIt<WebSocketService>().disconnect();
     if (getIt.isRegistered<ChatNotifier>()) {
@@ -73,7 +75,7 @@ void main() {
     if (getIt.isRegistered<User>()) getIt.unregister<User>();
     getIt.registerLazySingleton<User>(
         () => User(id: '', username: '', nickname: ''));
-    AppRouter.router.go(AppRouter.loginPath);
+    AppRouter.router.go(ResourceRoutes.loginLocation(destination));
   };
   final webSocketService = getIt<WebSocketService>();
   runApp(

@@ -11,6 +11,16 @@ import 'package:one_piece_battles_flutter/ai/rich_message.dart';
 import 'package:one_piece_battles_flutter/ai/assistant_session.dart';
 import 'package:one_piece_battles_flutter/l10n/app_localizations.dart';
 import 'package:one_piece_battles_flutter/views/assistant/assistant_view.dart';
+import 'package:one_piece_battles_flutter/repository/character_dao.dart';
+
+class _FailingCharacterDao extends CharacterDao {
+  _FailingCharacterDao() : super.empty();
+  @override
+  Future<ListCharacterResponse?> listCharacter(
+      ListCharacterRequest request) async {
+    throw StateError('temporary lookup failure');
+  }
+}
 
 class _AssistantApiFake extends AssistantApi {
   _AssistantApiFake() : super(ApiClient());
@@ -47,6 +57,27 @@ class _AssistantApiFake extends AssistantApi {
 }
 
 void main() {
+  test('unknown resource IDs are repaired by a known name or stay plain text',
+      () {
+    final result = normalizeResourceLinks(
+      '[艾斯](onepiece://character/wrong-id) [不存在](onepiece://battle/invented)',
+      const [ResourceRef('character', 'ace', '艾斯')],
+    );
+    expect(result, '[艾斯](onepiece://character/ace) 不存在');
+  });
+
+  test('resource lookup failures become tool results instead of escaping',
+      () async {
+    GetIt.I.registerSingleton<Locale>(const Locale('zh'));
+    GetIt.I.registerSingleton<CharacterDao>(_FailingCharacterDao());
+    addTearDown(() => GetIt.I.reset());
+    final result =
+        await ResourceTools.execute('search_characters', {'name': '艾斯'});
+    expect(jsonDecode(result.content)['error'],
+        contains('temporary lookup failure'));
+    expect(result.resources, isEmpty);
+  });
+
   test('normalizes bare and malformed resource links using tool names', () {
     final result = normalizeResourceLinks(
       '看看 onepiece://character/ace，或 [onepiece://fruit/mera](onepiece://fruit/mera)。',

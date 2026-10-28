@@ -39,40 +39,45 @@ class AiChatMessage {
 /// Repair resource references before saving or displaying an assistant reply.
 /// Old replies can also pass through here when restored from history.
 String normalizeResourceLinks(String content, Iterable<ResourceRef> resources) {
-  final byKey = <String, String>{
-    for (final r in resources) '${r.type.toLowerCase()}/${r.id}': r.name,
-  };
-
-  String labelFor(String type, String id, String? existing) {
-    if (existing != null &&
-        existing.trim().isNotEmpty &&
-        !existing.contains('://') &&
-        !existing.toLowerCase().contains('onepiece')) {
-      return existing.trim();
+  final known = resources
+      .where((r) =>
+          const {'character', 'fruit', 'group', 'battle'}.contains(r.type) &&
+          r.id.isNotEmpty)
+      .toList();
+  String link(String type, String id, String? label) {
+    ResourceRef? reference;
+    for (final r in known) {
+      if (r.type == type && r.id == id) reference = r;
     }
-    final name = byKey['${type.toLowerCase()}/$id'];
-    if (name != null && name.isNotEmpty) return name;
-    return type.toLowerCase();
+    // Repair a mistaken ID only when the visible name identifies one known
+    // resource unambiguously. Never make an invented ID navigable.
+    if (reference == null && label != null) {
+      final matches = known
+          .where((r) =>
+              r.type == type &&
+              r.name.trim().toLowerCase() == label.trim().toLowerCase())
+          .toList();
+      if (matches.length == 1) reference = matches.single;
+    }
+    final display = label != null &&
+            label.trim().isNotEmpty &&
+            !label.toLowerCase().contains('onepiece:')
+        ? label.trim()
+        : reference?.name ?? type;
+    if (reference == null) return display;
+    return '[$display](onepiece://${reference.type}/${reference.id})';
   }
 
-  final mdLink = RegExp(
-      r'\[([^\]]*)\]\(\s*onepiece://([A-Za-z_]+)/([^\s)]+)\s*\)',
+  // Process Markdown links and bare references in one pass so a URL inside
+  // a repaired Markdown link cannot be wrapped a second time.
+  final tokens = RegExp(
+      r'\[([^\]]*)\]\(\s*onepiece://([A-Za-z_]+)/([^\s)]+)\s*\)|onepiece://([A-Za-z_]+)/([^\s)\]，。！？；：,.;!?`*]+)',
       caseSensitive: false);
-  var out = content.replaceAllMapped(mdLink, (m) {
-    final type = m.group(2)!.toLowerCase();
-    final id = m.group(3)!;
-    return '[${labelFor(type, id, m.group(1))}](onepiece://$type/$id)';
+  return content.replaceAllMapped(tokens, (m) {
+    final type = (m.group(2) ?? m.group(4))!.toLowerCase();
+    final id = (m.group(3) ?? m.group(5))!;
+    return link(type, id, m.group(1));
   });
-
-  final bare = RegExp(
-      r'(?<![(\[])onepiece://([A-Za-z_]+)/([^\s)\]，。！？；：,.;!?`*]+)',
-      caseSensitive: false);
-  out = out.replaceAllMapped(bare, (m) {
-    final type = m.group(1)!.toLowerCase();
-    final id = m.group(2)!;
-    return '[${labelFor(type, id, null)}](onepiece://$type/$id)';
-  });
-  return out;
 }
 
 const _systemPrompt = '''
@@ -98,7 +103,7 @@ groups and its parent group), and propose_battle.
 IMPORTANT — make resources clickable inline: whenever you mention a character,
 devil fruit or crew that appears in a tool result, write its name as a Markdown
 link of the form [Name](onepiece://TYPE/ID), where TYPE is one of character,
-fruit or group, and ID is the exact id from that tool result. NEVER write a bare
+fruit, group or battle, and ID is the exact id from that tool result. NEVER write a bare
 onepiece:// URL on its own and NEVER paste raw ids into the prose — always use
 the [Name](...) form. Do not list the links separately at the end; weave each
 one into the sentence where you name the resource. Only link resources that
@@ -118,6 +123,8 @@ class DeepSeekAssistant {
     {'role': 'system', 'content': _systemPrompt}
   ];
 
+  final Set<ResourceRef> _knownResources = {};
+
   AssistantApi get _assistantApi => GetIt.instance<AssistantApi>();
 
   /// Whether the transcript holds anything beyond the system prompt.
@@ -127,12 +134,13 @@ class DeepSeekAssistant {
   /// context across reloads. Only user/assistant turns are replayed.
   void seedHistory(Iterable<AiStoredMessage> history) {
     for (final m in history) {
+      _knownResources
+          .addAll(m.resources.map((r) => ResourceRef(r.type, r.id, r.name)));
       if (m.role == 'user' || m.role == 'assistant') {
         _api.add({
           'role': m.role,
           'content': m.role == 'assistant'
-              ? normalizeResourceLinks(m.content,
-                  m.resources.map((r) => ResourceRef(r.type, r.id, r.name)))
+              ? normalizeResourceLinks(m.content, _knownResources)
               : m.content,
         });
       }
@@ -141,6 +149,7 @@ class DeepSeekAssistant {
 
   /// Drop the whole transcript back to just the system prompt.
   void reset() {
+    _knownResources.clear();
     _api
       ..clear()
       ..add({'role': 'system', 'content': _systemPrompt});
@@ -163,6 +172,7 @@ class DeepSeekAssistant {
           final args = _decodeArgs(fn['arguments']);
           final result = await ResourceTools.execute('${fn['name']}', args);
           resources.addAll(result.resources);
+          _knownResources.addAll(result.resources);
           _api.add({
             'role': 'tool',
             'tool_call_id': call['id'],
@@ -174,7 +184,7 @@ class DeepSeekAssistant {
       final content = (message['content'] ?? '').toString();
       _api.add({'role': 'assistant', 'content': content});
       return AiChatMessage(
-          'assistant', normalizeResourceLinks(content, resources),
+          'assistant', normalizeResourceLinks(content, _knownResources),
           resources: resources.toList(),
           battleProposal: _extractProposal(resources));
     }
@@ -185,7 +195,7 @@ class DeepSeekAssistant {
     }
     _api.add({'role': 'assistant', 'content': content});
     return AiChatMessage(
-        'assistant', normalizeResourceLinks(content, resources),
+        'assistant', normalizeResourceLinks(content, _knownResources),
         resources: resources.toList(),
         battleProposal: _extractProposal(resources));
   }

@@ -1,6 +1,7 @@
 import 'package:animated_toggle_switch/animated_toggle_switch.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'utils/resource_routes.dart';
 import 'package:one_piece_battles_flutter/components/web_socket_service.dart';
 import '../../l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
@@ -355,7 +356,11 @@ class _LoginPageState extends State<LoginPage> {
 
                           return Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [signUp, forgotPassword],
+                            children: [
+                              Expanded(child: signUp),
+                              const SizedBox(width: 8),
+                              forgotPassword,
+                            ],
                           );
                         },
                       ),
@@ -396,6 +401,8 @@ class _LoginPageState extends State<LoginPage> {
     // read context-only values synchronously BEFORE async gap
     final locale = Localizations.localeOf(context);
     final router = GoRouter.of(context);
+    final destination =
+        ResourceRoutes.afterLogin(GoRouterState.of(context).uri);
 
     final request = LoginRequest(email: email, password: password);
 
@@ -410,7 +417,7 @@ class _LoginPageState extends State<LoginPage> {
         if (!mounted) return;
         ApiInitializer.initAuthInfo(response.accessToken!);
         ResourcePermissionManager.updateUserCache(response.user!);
-        router.goNamed('assistant');
+        router.go(destination);
         context
             .read<WebSocketService>()
             .connect(response.user!.id, response.accessToken!);
@@ -432,6 +439,8 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _visitorLogin() async {
     final router = GoRouter.of(context);
+    final destination =
+        ResourceRoutes.afterLogin(GoRouterState.of(context).uri);
     String nickname = RandomStringGenerator.generateRandomUserName(10);
     String username = RandomStringGenerator.generateRandomUserName(10);
     String fullUsername = "$username@163.com";
@@ -456,7 +465,7 @@ class _LoginPageState extends State<LoginPage> {
         if (!mounted) return;
         ApiInitializer.initAuthInfo(loginResponse.accessToken!);
         ResourcePermissionManager.updateUserCache(loginResponse.user!);
-        router.goNamed('assistant');
+        router.go(destination);
         context
             .read<WebSocketService>()
             .connect(loginResponse.user!.id, loginResponse.accessToken!);

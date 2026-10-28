@@ -270,7 +270,7 @@ class _GroupViewState extends State<GroupView> {
             child: SizedBox(
               height: 35,
               child: ElevatedButton(
-                  onPressed: () => context.goNamed("createGroup"),
+                  onPressed: () => context.goNamed("create_group"),
                   style: OnepieceButtonStyle.getDefaultStyle(),
                   child: Text(AppLocalizations.of(context)!.create,
                       style: const TextStyle(fontSize: 13))),

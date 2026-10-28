@@ -274,7 +274,7 @@ class _FruitViewState extends State<FruitView> {
               child: SizedBox(
                 height: 35,
                 child: ElevatedButton(
-                    onPressed: () => context.goNamed("createFruit"),
+                    onPressed: () => context.goNamed("create_fruit"),
                     style: OnepieceButtonStyle.getDefaultStyle(),
                     child: Text(AppLocalizations.of(context)!.create,
                         style: const TextStyle(fontSize: 13))),
