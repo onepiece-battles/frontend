@@ -114,15 +114,7 @@ class UserProfileController extends ChangeNotifier {
       if (response == null) throw StateError('Profile unavailable');
       _currentUser = response;
 
-      final imageSource = response.profileImage?.isNotEmpty == true
-          ? response.profileImage!
-          : userId == GetIt.I<User>().id
-              ? (GetIt.I<User>().profileImage ?? '')
-              : '';
-      final imageBytes = Base64Helper.decode(imageSource);
-
       _originalData = UserProfileFormData(
-        profileImage: imageBytes,
         nickname: _currentUser.nickname,
         username: _currentUser.username,
       );
@@ -177,7 +169,6 @@ class UserProfileController extends ChangeNotifier {
       final refreshedUser =
           await _userDao.get(GetUserRequest(userId: GetIt.I<User>().id));
       if (refreshedUser != null) {
-        refreshedUser.profileImage ??= encodedImage;
         _currentUser = refreshedUser;
         ResourcePermissionManager.updateUserCache(refreshedUser);
       }
@@ -259,7 +250,6 @@ class UserProfileController extends ChangeNotifier {
     }
 
     final previousData = _currentData;
-    final previousProfileImage = _currentUser.profileImage;
     final previousImageUri = _currentUser.imageUri;
     _currentData = _currentData.copyWith(nickname: trimmedNickname);
     isSavingNickname = true;
@@ -277,9 +267,6 @@ class UserProfileController extends ChangeNotifier {
       ));
 
       final updatedUser = response!.user!;
-      if (updatedUser.profileImage == null || updatedUser.profileImage == "") {
-        updatedUser.profileImage = previousProfileImage;
-      }
       if (updatedUser.imageUri == null || updatedUser.imageUri == "") {
         updatedUser.imageUri = previousImageUri;
       }
@@ -287,9 +274,7 @@ class UserProfileController extends ChangeNotifier {
       ResourcePermissionManager.updateUserCache(updatedUser);
       _currentUser = updatedUser;
       _currentData = UserProfileFormData(
-        profileImage: _currentUser.profileImage == null
-            ? previousData.profileImage
-            : Base64Helper.decode(_currentUser.profileImage!),
+        profileImage: previousData.profileImage,
         nickname: _currentUser.nickname,
         username: _currentUser.username,
       );
