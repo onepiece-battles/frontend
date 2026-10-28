@@ -5,9 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:openapi/api.dart';
 
 import '../../ai/assistant_api.dart';
+import '../../ai/assistant_message.dart';
 import '../../ai/assistant_session.dart';
-import '../../ai/deepseek_service.dart';
-import '../../ai/resource_tools.dart';
 import '../../ai/rich_message.dart';
 import '../../ai/speech_input.dart';
 import '../../constants/onepiece_colors.dart';
@@ -30,7 +29,6 @@ class _AssistantViewState extends State<AssistantView> {
   final ScrollController _scroll = ScrollController();
   final SpeechInput _speech = SpeechInput();
 
-  bool _busy = false;
   bool _listening = false;
   bool _loadingHistory = true;
   bool _configured =
@@ -39,9 +37,9 @@ class _AssistantViewState extends State<AssistantView> {
   OverlayEntry? _copyToast;
 
   late final AssistantSession _session = _getIt<AssistantSession>();
-  DeepSeekAssistant get _assistant => _session.assistant;
   List<AiChatMessage> get _messages => _session.messages;
   Set<AiChatMessage> get _handledProposals => _session.handledProposals;
+  bool get _busy => _session.busy;
 
   AssistantApi get _api => _getIt<AssistantApi>();
 
@@ -58,16 +56,21 @@ class _AssistantViewState extends State<AssistantView> {
   @override
   void initState() {
     super.initState();
+    _session.addListener(_onSessionChanged);
     _bootstrap();
+  }
+
+  void _onSessionChanged() {
+    if (mounted) setState(() {});
   }
 
   Future<void> _bootstrap() async {
     // Load persisted history only once per app session; on later entries the
-    // live transcript and messages are already in the session singleton.
+    // messages are already in the session singleton. The model's own context
+    // (including earlier lookups) is replayed by the server.
     if (!_session.loaded) {
       try {
         final history = await _api.listMessages();
-        _assistant.seedHistory(history);
         final knownResources = history
             .expand((m) => m.resources)
             .map((r) => ResourceRef(r.type, r.id, r.name))
@@ -103,6 +106,7 @@ class _AssistantViewState extends State<AssistantView> {
 
   @override
   void dispose() {
+    _session.removeListener(_onSessionChanged);
     _copyToast?.remove();
     _copyToast?.dispose();
     _input.dispose();
@@ -133,59 +137,88 @@ class _AssistantViewState extends State<AssistantView> {
     });
   }
 
-  Future<void> _persist(
-      String role, String text, List<ResourceRef> resources) async {
-    try {
-      await _api.saveMessage(
-        role,
-        text,
-        resources.map((r) => AiResourceLink(r.type, r.id, r.name)).toList(),
-      );
-    } catch (_) {
-      // Persistence is best-effort; the chat still works in memory.
-    }
-  }
-
+  /// Asks the server-side assistant and streams its answer into a pending
+  /// bubble. The server stores both the question and the answer.
   Future<void> _send(String raw) async {
     final text = raw.trim();
     if (text.isEmpty || _busy) return;
     _input.clear();
-    setState(() {
-      _messages.add(AiChatMessage('user', text));
-      _messages.add(AiChatMessage('assistant', '', pending: true));
-      _busy = true;
-    });
+    // Read the locale now: the view may be gone before the answer finishes.
+    final zh = _zh;
+    var reply = AiChatMessage('assistant', '', pending: true);
+    _messages
+      ..add(AiChatMessage('user', text))
+      ..add(reply);
+    _session.busy = true;
+    _session.changed();
     _scrollToEnd();
-    await _persist('user', text, const []);
+
+    // All state lives in the session, which notifies whichever view is
+    // showing it, so the answer keeps arriving if the user opens a resource.
+    void show(AiChatMessage next) {
+      final index = _messages.indexOf(reply);
+      if (index < 0) return; // the thread was cleared meanwhile
+      _messages[index] = next;
+      reply = next;
+      _session.changed();
+      if (mounted) _scrollToEnd();
+    }
+
+    var answer = '';
+    var ended = false;
     try {
-      final reply = await _assistant.ask(text);
-      if (!mounted) return;
-      setState(() => _messages[_messages.length - 1] = reply);
-      await _persist('assistant', reply.text, reply.resources);
-    } on AiNotConfigured {
-      if (!mounted) return;
-      setState(() {
-        _messages.removeLast();
-        _configured = false;
-      });
-      if (_isAdmin) {
-        _promptForKey();
-      } else {
-        _snack(_zh
-            ? 'AI 助手尚未配置，请联系管理员'
-            : 'The assistant is not set up yet — please contact an admin');
+      await for (final event
+          in _api.ask(text, language: zh ? 'zh_CN' : 'en_US')) {
+        switch (event) {
+          case AssistantStatus(:final label):
+            // A tool is about to run: text streamed so far was a preamble.
+            answer = '';
+            show(AiChatMessage('assistant', '', pending: true, status: label));
+          case AssistantDelta(text: final fragment):
+            answer += fragment;
+            show(AiChatMessage('assistant', answer, pending: true));
+          case AssistantDone done:
+            ended = true;
+            show(AiChatMessage(
+              'assistant',
+              done.content,
+              resources: done.resources
+                  .map((r) => ResourceRef(r.type, r.id, r.name))
+                  .toList(),
+              battleProposal: done.battleProposal,
+            ));
+          case AssistantFailure(:final code, :final message):
+            ended = true;
+            if (code == AssistantFailure.notConfigured) {
+              _messages.remove(reply);
+              _session.changed();
+              _showNotConfigured(zh);
+            } else {
+              show(AiChatMessage('assistant', '⚠️ $message'));
+            }
+        }
       }
-    } on AiError catch (e) {
-      if (!mounted) return;
-      setState(() => _messages[_messages.length - 1] =
-          AiChatMessage('assistant', '⚠️ ${e.message}'));
+      if (!ended) {
+        show(AiChatMessage('assistant',
+            zh ? '⚠️ 连接中断了，请重试' : '⚠️ The connection dropped. Please try again.'));
+      }
     } catch (e) {
-      if (!mounted) return;
-      setState(() => _messages[_messages.length - 1] =
-          AiChatMessage('assistant', '⚠️ $e'));
+      show(AiChatMessage('assistant', '⚠️ $e'));
     } finally {
-      if (mounted) setState(() => _busy = false);
-      _scrollToEnd();
+      _session.busy = false;
+      _session.changed();
+    }
+  }
+
+  void _showNotConfigured(bool zh) {
+    if (!mounted) return;
+    setState(() => _configured = false);
+    if (_isAdmin) {
+      _promptForKey();
+    } else {
+      _snack(zh
+          ? 'AI 助手尚未配置，请联系管理员'
+          : 'The assistant is not set up yet — please contact an admin');
     }
   }
 
@@ -371,7 +404,7 @@ class _AssistantViewState extends State<AssistantView> {
   }
 
   Future<void> _clear() async {
-    setState(() => _session.reset());
+    _session.reset();
     try {
       await _api.clearMessages();
     } catch (_) {}
@@ -460,8 +493,9 @@ class _AssistantViewState extends State<AssistantView> {
                     isUser ? OnepieceColors.fancyBlue : OnepieceColors.surface,
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: m.pending
-                  ? const _TypingDots()
+              // Streamed text renders as it arrives; dots only until the first fragment.
+              child: m.pending && m.text.isEmpty
+                  ? _pendingIndicator(m.status)
                   : (isUser
                       ? SelectableText(
                           m.text,
@@ -480,6 +514,20 @@ class _AssistantViewState extends State<AssistantView> {
         ],
       ),
     );
+  }
+
+  /// Typing dots, plus what the assistant is looking up while a tool runs.
+  Widget _pendingIndicator(String? status) {
+    if (status == null || status.isEmpty) return const _TypingDots();
+    return Row(mainAxisSize: MainAxisSize.min, children: [
+      const _TypingDots(),
+      const SizedBox(width: 8),
+      Flexible(
+        child: Text(status,
+            style: const TextStyle(
+                fontSize: 12, color: OnepieceColors.secondaryLabel)),
+      ),
+    ]);
   }
 
   Widget _copyButton(AiChatMessage m, bool isUser) {

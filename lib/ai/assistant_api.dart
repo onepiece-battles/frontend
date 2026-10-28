@@ -1,13 +1,19 @@
 import 'dart:convert';
 
+import 'package:http/http.dart' as http;
 import 'package:openapi/api.dart';
+
+import 'assistant_events.dart';
+
+export 'assistant_events.dart';
 
 /// Thin client for the backend AI endpoints (`/api/onepiece/assistant/**`).
 ///
 /// It reuses the generated [ApiClient] — so it inherits the configured base
 /// URL, the JWT bearer header and the session-expiry handling — but talks to
-/// endpoints that are deliberately kept out of the OpenAPI spec, so the chat
-/// proxy can stay schema-agnostic. The DeepSeek key lives only on the server.
+/// endpoints that are deliberately kept out of the OpenAPI spec. The agent
+/// itself (prompt, tools, DeepSeek key) runs on the server: this client only
+/// asks and renders the streamed answer.
 class AssistantApi {
   AssistantApi(this._client);
 
@@ -33,15 +39,32 @@ class AssistantApi {
     return jsonDecode(response.body) as Map<String, dynamic>;
   }
 
-  /// Proxy one DeepSeek chat-completion call. [requestBody] is the full
-  /// OpenAI-style payload already JSON-encoded; the server adds the key.
-  Future<AiChatResult> chat(String requestBody) async {
-    final json = await _post('/chat', {'requestBody': requestBody});
-    return AiChatResult(
-      (json['status'] as num?)?.toInt() ?? 0,
-      json['responseBody'] as String?,
-      json['error'] as String?,
-    );
+  /// Asks the server-side agent and streams its answer: [AssistantStatus]
+  /// while tools run, [AssistantDelta] fragments, then one [AssistantDone] or
+  /// [AssistantFailure]. The server stores the question and the answer.
+  ///
+  /// Sent through the session-aware client, so an expired token still
+  /// triggers the login flow; on the web `package:http` reads the body with
+  /// `fetch`, so the answer arrives incrementally there too.
+  Stream<AssistantEvent> ask(String message, {String? language}) async* {
+    final headers = <String, String>{
+      'Content-Type': 'application/json',
+      'Accept': 'text/event-stream',
+    };
+    await _client.authentication?.applyToParams(<QueryParam>[], headers);
+    final request =
+        http.Request('POST', Uri.parse('${_client.basePath}$_base/ask'))
+          ..headers.addAll(headers)
+          ..body = jsonEncode({
+            'message': message,
+            if (language != null) 'language': language,
+          });
+    final response = await _client.client.send(request);
+    if (response.statusCode >= 400) {
+      throw ApiException(
+          response.statusCode, await response.stream.bytesToString());
+    }
+    yield* parseAssistantEvents(response.stream);
   }
 
   Future<List<AiStoredMessage>> listMessages() async {
@@ -50,15 +73,6 @@ class AssistantApi {
     return messages
         .map((e) => AiStoredMessage.fromJson(e as Map<String, dynamic>))
         .toList();
-  }
-
-  Future<void> saveMessage(
-      String role, String content, List<AiResourceLink> resources) async {
-    await _post('/save_message', {
-      'role': role,
-      'content': content,
-      'resources': resources.map((e) => e.toJson()).toList(),
-    });
   }
 
   Future<void> clearMessages() => _post('/clear_messages');
@@ -84,23 +98,6 @@ class AssistantApi {
   }
 }
 
-/// A resource the answer links to, rendered as an inline tappable link.
-class AiResourceLink {
-  const AiResourceLink(this.type, this.id, this.name);
-
-  final String type; // character | fruit | battle | group
-  final String id;
-  final String name;
-
-  factory AiResourceLink.fromJson(Map<String, dynamic> json) => AiResourceLink(
-        (json['type'] ?? '').toString(),
-        (json['id'] ?? '').toString(),
-        (json['name'] ?? '').toString(),
-      );
-
-  Map<String, dynamic> toJson() => {'type': type, 'id': id, 'name': name};
-}
-
 /// A persisted AI turn loaded from history.
 class AiStoredMessage {
   const AiStoredMessage({
@@ -123,15 +120,6 @@ class AiStoredMessage {
             .map((e) => AiResourceLink.fromJson(e as Map<String, dynamic>))
             .toList()),
       );
-}
-
-/// Result of a proxied chat call. [error] is non-null when the server could
-/// not reach DeepSeek (e.g. `not_configured`, `upstream_error`).
-class AiChatResult {
-  const AiChatResult(this.status, this.responseBody, this.error);
-  final int status;
-  final String? responseBody;
-  final String? error;
 }
 
 /// The provider settings as seen by the super-admin UI (never the key).

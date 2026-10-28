@@ -1,61 +1,15 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
-import 'package:openapi/api.dart';
-import 'package:one_piece_battles_flutter/ai/assistant_api.dart';
-import 'package:one_piece_battles_flutter/ai/deepseek_service.dart';
-import 'package:one_piece_battles_flutter/ai/resource_tools.dart';
+import 'package:one_piece_battles_flutter/ai/assistant_message.dart';
 import 'package:one_piece_battles_flutter/ai/rich_message.dart';
 import 'package:one_piece_battles_flutter/ai/assistant_session.dart';
 import 'package:one_piece_battles_flutter/l10n/app_localizations.dart';
 import 'package:one_piece_battles_flutter/views/assistant/assistant_view.dart';
-import 'package:one_piece_battles_flutter/repository/character_dao.dart';
 
-class _FailingCharacterDao extends CharacterDao {
-  _FailingCharacterDao() : super.empty();
-  @override
-  Future<ListCharacterResponse?> listCharacter(
-      ListCharacterRequest request) async {
-    throw StateError('temporary lookup failure');
-  }
-}
-
-class _AssistantApiFake extends AssistantApi {
-  _AssistantApiFake() : super(ApiClient());
-
-  final requests = <Map<String, dynamic>>[];
-
-  @override
-  Future<AiChatResult> chat(String requestBody) async {
-    final request = jsonDecode(requestBody) as Map<String, dynamic>;
-    requests.add(request);
-    final round = requests.length;
-    final message = round <= 8
-        ? {
-            'role': 'assistant',
-            'content': null,
-            'tool_calls': [
-              {
-                'id': 'call_$round',
-                'type': 'function',
-                'function': {'name': 'unknown_tool', 'arguments': '{}'},
-              }
-            ],
-          }
-        : {'role': 'assistant', 'content': '没有找到相关资料，请换个关键词。'};
-    return AiChatResult(
-        200,
-        jsonEncode({
-          'choices': [
-            {'message': message}
-          ]
-        }),
-        null);
-  }
-}
-
+// The tool-calling loop and the tools themselves now run on the server
+// (backend AssistantAgentTests / AssistantToolsTests); the streaming client
+// is covered by assistant_stream_test.dart.
 void main() {
   test('unknown resource IDs are repaired by a known name or stay plain text',
       () {
@@ -64,18 +18,6 @@ void main() {
       const [ResourceRef('character', 'ace', '艾斯')],
     );
     expect(result, '[艾斯](onepiece://character/ace) 不存在');
-  });
-
-  test('resource lookup failures become tool results instead of escaping',
-      () async {
-    GetIt.I.registerSingleton<Locale>(const Locale('zh'));
-    GetIt.I.registerSingleton<CharacterDao>(_FailingCharacterDao());
-    addTearDown(() => GetIt.I.reset());
-    final result =
-        await ResourceTools.execute('search_characters', {'name': '艾斯'});
-    expect(jsonDecode(result.content)['error'],
-        contains('temporary lookup failure'));
-    expect(result.resources, isEmpty);
   });
 
   test('normalizes bare and malformed resource links using tool names', () {
@@ -88,20 +30,6 @@ void main() {
     );
     expect(result,
         '看看 [艾斯](onepiece://character/ace)，或 [烧烧果实](onepiece://fruit/mera)。');
-  });
-
-  test('after repeated tool calls, requests a final answer without tools',
-      () async {
-    final fake = _AssistantApiFake();
-    GetIt.instance.registerSingleton<AssistantApi>(fake);
-    addTearDown(() => GetIt.instance.reset());
-
-    final reply = await DeepSeekAssistant().ask('介绍一下艾斯');
-    expect(reply.text, '没有找到相关资料，请换个关键词。');
-    expect(fake.requests, hasLength(9));
-    expect(fake.requests.last.containsKey('tools'), isFalse);
-    expect(fake.requests.last.containsKey('tool_choice'), isFalse);
-    expect((fake.requests.last['messages'] as List).last['role'], 'tool');
   });
 
   testWidgets('links inside bold text stay tappable and hide raw URLs',
