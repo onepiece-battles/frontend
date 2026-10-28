@@ -479,7 +479,11 @@ class _ProfileHero extends StatelessWidget {
         width: 86,
         height: 86,
         child: bytes == null || bytes.isEmpty
-            ? !canEdit && controller.user.imageUri?.isNotEmpty == true
+            // No freshly-picked bytes: fall back to the OSS avatar (image_uri)
+            // in both view and edit modes. The backend no longer returns a
+            // base64 profileImage, so your own (editable) profile must resolve
+            // its avatar from image_uri just like every other view.
+            ? controller.user.imageUri?.isNotEmpty == true
                 ? ImageLazyLoader(
                     uriProvider: () => controller.user.imageUri ?? '',
                     width: 86,
