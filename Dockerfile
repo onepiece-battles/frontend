@@ -17,6 +17,7 @@ WORKDIR /app
 COPY . .
 RUN flutter pub get
 RUN flutter build web --no-wasm-dry-run
+RUN dart tool/version_web_assets.dart
 
 # Use the Nginx image to serve the app
 FROM nginx:alpine

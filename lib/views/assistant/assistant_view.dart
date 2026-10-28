@@ -68,6 +68,10 @@ class _AssistantViewState extends State<AssistantView> {
       try {
         final history = await _api.listMessages();
         _assistant.seedHistory(history);
+        final knownResources = history
+            .expand((m) => m.resources)
+            .map((r) => ResourceRef(r.type, r.id, r.name))
+            .toList();
         _messages.addAll(history.map((m) {
           final resources = m.resources
               .map((r) => ResourceRef(r.type, r.id, r.name))
@@ -75,7 +79,7 @@ class _AssistantViewState extends State<AssistantView> {
           return AiChatMessage(
             m.role,
             m.role == 'assistant'
-                ? normalizeResourceLinks(m.content, resources)
+                ? normalizeResourceLinks(m.content, knownResources)
                 : m.content,
             resources: resources,
           );

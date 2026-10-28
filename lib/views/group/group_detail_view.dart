@@ -70,10 +70,10 @@ class _GroupDetailViewState extends State<GroupDetailView> {
             ResourceType.GROUP,
             Permission.UPDATE) &&
         PermissionCheck.isMyResource(
-            groupFullView.creationRecord!.userId!,
-            groupFullView.creationRecord!.roleId!,
+            groupFullView.creationRecord?.userId,
+            groupFullView.creationRecord?.roleId,
             getIt<User>().id,
-            getIt<User>().loginRoleId!);
+            getIt<User>().loginRoleId);
     // nika role has the edit permission for all resources
     if (getIt<User>().loginRole == UserRole.NIKA) {
       _editButtonVisible = true;
@@ -145,7 +145,11 @@ class _GroupDetailViewState extends State<GroupDetailView> {
       builder: (context, AsyncSnapshot snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           if (snapshot.data == null) {
-            return ResourceEmptyState(failed: snapshot.hasError);
+            return ResourceEmptyState(
+                failed: true,
+                onRetry: () => setState(() {
+                      _groupFuture = _loadData();
+                    }));
           }
           _prepareData(snapshot.data);
           return LayoutBuilder(

@@ -81,10 +81,10 @@ class _FruitDetailViewState extends State<FruitDetailView> {
             ResourceType.FRUIT,
             Permission.UPDATE) &&
         PermissionCheck.isMyResource(
-            fruitFullView.creationRecord!.userId!,
-            fruitFullView.creationRecord!.roleId!,
+            fruitFullView.creationRecord?.userId,
+            fruitFullView.creationRecord?.roleId,
             getIt<User>().id,
-            getIt<User>().loginRoleId!);
+            getIt<User>().loginRoleId);
     // nika role has the edit permission for all resources
     if (getIt<User>().loginRole == UserRole.NIKA) {
       _editButtonVisible = true;
@@ -163,7 +163,11 @@ class _FruitDetailViewState extends State<FruitDetailView> {
           if (snapshot.connectionState == ConnectionState.done) {
             final fruit = snapshot.data;
             if (fruit == null) {
-              return ResourceEmptyState(failed: snapshot.hasError);
+              return ResourceEmptyState(
+                  failed: true,
+                  onRetry: () => setState(() {
+                        _fruitFuture = _loadData();
+                      }));
             }
             _updateData(fruit);
             return LayoutBuilder(

@@ -16,8 +16,11 @@ class PermissionCheck {
     return false;
   }
 
-  static bool isMyResource(String creatorUserId, String creatorRoleId,
-      String myUserId, String loginRoleId) {
-    return creatorUserId == myUserId && creatorRoleId == loginRoleId;
+  static bool isMyResource(String? creatorUserId, String? creatorRoleId,
+      String myUserId, String? loginRoleId) {
+    return myUserId.isNotEmpty &&
+        loginRoleId != null &&
+        creatorUserId == myUserId &&
+        creatorRoleId == loginRoleId;
   }
 }

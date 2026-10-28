@@ -312,7 +312,7 @@ class _CharacterViewState extends State<CharacterView>
                       battleStyleMap: battleStyleToDisplayValue,
                       raceMap: raceEnumToDisplayName,
                       hakiMap: hakiEnumValueToDisplayValue,
-                      onCreate: () => context.goNamed("createCharacter"),
+                      onCreate: () => context.goNamed("create_character"),
                       onSearch: _search,
                     ),
                     const SizedBox(height: 6),

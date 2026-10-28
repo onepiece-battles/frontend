@@ -139,7 +139,9 @@ class _UserHomeState extends State<UserHome> {
         if (snapshot.hasError || !snapshot.hasData) {
           return Center(
             child: TextButton.icon(
-              onPressed: () => setState(() => myFuture = _loadHomeData()),
+              onPressed: () => setState(() {
+                myFuture = _loadHomeData();
+              }),
               icon: const Icon(Icons.refresh),
               label: Text(AppLocalizations.of(context)!.retryLoading),
             ),

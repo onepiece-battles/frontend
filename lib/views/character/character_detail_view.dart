@@ -90,10 +90,10 @@ class _CharacterDetailState extends State<CharacterDetail> {
                 ResourceType.CHARACTER,
                 Permission.UPDATE) &&
             PermissionCheck.isMyResource(
-                character.creationRecord!.userId!,
-                character.creationRecord!.roleId!,
+                character.creationRecord?.userId,
+                character.creationRecord?.roleId,
                 getIt<User>().id,
-                getIt<User>().loginRoleId!)) ||
+                getIt<User>().loginRoleId)) ||
         getIt<User>().loginRole == UserRole.NIKA;
     // nika role has the edit permission for all resources
     if (getIt<User>().loginRole == UserRole.NIKA) {
@@ -280,7 +280,11 @@ class _CharacterDetailState extends State<CharacterDetail> {
         builder: (context, AsyncSnapshot snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
             if (snapshot.data == null) {
-              return ResourceEmptyState(failed: snapshot.hasError);
+              return ResourceEmptyState(
+                  failed: true,
+                  onRetry: () => setState(() {
+                        _characterFuture = _loadData();
+                      }));
             }
             _updateData(snapshot.data);
             return LayoutBuilder(
