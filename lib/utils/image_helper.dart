@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:one_piece_battles_flutter/repository/image_dao.dart';
-import 'package:openapi/api.dart';
 
 import '../app_router.dart';
 import '../constants/onepiece_colors.dart';
@@ -147,12 +146,11 @@ class ImageHelper {
   }
 
   static Future<String> loadImageByUri(String uri, {bool? fullImage}) async {
-    return await getIt<ImageDao>()
-        .getImage(GetImageRequest(uri: uri, fullImage: fullImage))
-        .then((value) {
-      return value!.image;
-    });
+    return base64Encode(await loadImageBytesByUri(uri, fullImage: fullImage));
   }
+
+  static Future<Uint8List> loadImageBytesByUri(String uri, {bool? fullImage}) =>
+      getIt<ImageDao>().loadImageBytes(uri, fullImage: fullImage);
 
   /// Public, web-safe raster image for already-decoded bytes, used by the
   /// full-screen chat image viewer so it shares the exact same decode path as

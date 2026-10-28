@@ -1,6 +1,5 @@
 import 'dart:collection';
 import 'dart:typed_data';
-import '../utils/base64_helper.dart';
 import '../utils/image_helper.dart';
 
 /// An LRU image cache that limits both the number of entries and total
@@ -25,6 +24,8 @@ class ImageCacheManager {
 
   /// Running total of bytes currently stored.
   static int _totalMemoryBytes = 0;
+  static final Map<String, Future<Uint8List>> _pending = {};
+  static int _generation = 0;
 
   // ── Public API ────────────────────────────────────────────────────────────
 
@@ -53,18 +54,25 @@ class ImageCacheManager {
       return data;
     }
 
-    // ── Cache miss: fetch, decode, insert ───────────────────────────────
-    final String image =
-        await ImageHelper.loadImageByUri(uri, fullImage: fullImage);
-    final Uint8List decodedImage = Base64Helper.decode(image);
+    return _pending.putIfAbsent(
+        cacheKey, () => _load(uri, fullImage, cacheKey, _generation));
+  }
 
-    _evictIfNeeded(decodedImage.length);
-
-    _cache[cacheKey] = decodedImage;
-    _entrySizes[cacheKey] = decodedImage.length;
-    _totalMemoryBytes += decodedImage.length;
-
-    return decodedImage;
+  static Future<Uint8List> _load(
+      String uri, bool? fullImage, String key, int generation) async {
+    try {
+      final bytes =
+          await ImageHelper.loadImageBytesByUri(uri, fullImage: fullImage);
+      if (generation == _generation) {
+        _evictIfNeeded(bytes.length);
+        _cache[key] = bytes;
+        _entrySizes[key] = bytes.length;
+        _totalMemoryBytes += bytes.length;
+      }
+      return bytes;
+    } finally {
+      if (generation == _generation) _pending.remove(key);
+    }
   }
 
   /// Remove a single entry from the cache.
@@ -79,6 +87,8 @@ class ImageCacheManager {
 
   /// Discard every cached entry and reset all counters.
   static void clear() {
+    _generation++;
+    _pending.clear();
     _cache.clear();
     _entrySizes.clear();
     _totalMemoryBytes = 0;
