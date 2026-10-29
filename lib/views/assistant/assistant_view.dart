@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:openapi/api.dart';
 
 import '../../ai/assistant_api.dart';
+import '../../ai/assistant_action_card.dart';
 import '../../ai/assistant_message.dart';
 import '../../ai/assistant_session.dart';
 import '../../ai/rich_message.dart';
@@ -85,6 +86,7 @@ class _AssistantViewState extends State<AssistantView> {
                 ? normalizeResourceLinks(m.content, knownResources)
                 : m.content,
             resources: resources,
+            actionProposals: m.actionProposals,
           );
         }));
       } catch (_) {
@@ -179,6 +181,7 @@ class _AssistantViewState extends State<AssistantView> {
             show(AiChatMessage('assistant', answer, pending: true));
           case AssistantDone done:
             ended = true;
+            final updated = _session.applyActionUpdates(done.actionProposals);
             show(AiChatMessage(
               'assistant',
               done.content,
@@ -186,6 +189,9 @@ class _AssistantViewState extends State<AssistantView> {
                   .map((r) => ResourceRef(r.type, r.id, r.name))
                   .toList(),
               battleProposal: done.battleProposal,
+              actionProposals: done.actionProposals
+                  .where((p) => !updated.contains(p.code))
+                  .toList(),
             ));
           case AssistantFailure(:final code, :final message):
             ended = true;
@@ -199,8 +205,11 @@ class _AssistantViewState extends State<AssistantView> {
         }
       }
       if (!ended) {
-        show(AiChatMessage('assistant',
-            zh ? '⚠️ 连接中断了，请重试' : '⚠️ The connection dropped. Please try again.'));
+        show(AiChatMessage(
+            'assistant',
+            zh
+                ? '⚠️ 连接中断了，请重试'
+                : '⚠️ The connection dropped. Please try again.'));
       }
     } catch (e) {
       show(AiChatMessage('assistant', '⚠️ $e'));
@@ -478,38 +487,58 @@ class _AssistantViewState extends State<AssistantView> {
 
   Widget _bubble(AiChatMessage m) {
     final isUser = m.role == 'user';
+    final text =
+        isUser ? _session.displayCommand(m.text, zh: _zh) : m.displayText;
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Column(
         crossAxisAlignment:
             isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 560),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 10),
-              decoration: BoxDecoration(
-                color:
-                    isUser ? OnepieceColors.fancyBlue : OnepieceColors.surface,
-                borderRadius: BorderRadius.circular(14),
+          if (m.pending || text.trim().isNotEmpty)
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 560),
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 13, vertical: 10),
+                decoration: BoxDecoration(
+                  color: isUser
+                      ? OnepieceColors.fancyBlue
+                      : OnepieceColors.surface,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                // Streamed text renders as it arrives; dots only until the first fragment.
+                child: m.pending && m.text.isEmpty
+                    ? _pendingIndicator(m.status)
+                    : (isUser
+                        ? SelectableText(
+                            text,
+                            style: const TextStyle(
+                                fontSize: 14,
+                                height: 1.35,
+                                color: Colors.white),
+                          )
+                        : RichMessage(
+                            data: text,
+                            onResource: _openResource,
+                          )),
               ),
-              // Streamed text renders as it arrives; dots only until the first fragment.
-              child: m.pending && m.text.isEmpty
-                  ? _pendingIndicator(m.status)
-                  : (isUser
-                      ? SelectableText(
-                          m.text,
-                          style: const TextStyle(
-                              fontSize: 14, height: 1.35, color: Colors.white),
-                        )
-                      : RichMessage(
-                          data: m.text,
-                          onResource: _openResource,
-                        )),
             ),
-          ),
           if (!m.pending && m.text.trim().isNotEmpty) _copyButton(m, isUser),
-          if (m.battleProposal != null && !_handledProposals.contains(m))
+          for (final proposal in m.actionProposals)
+            AssistantActionCard(
+              key: ValueKey(proposal.code),
+              proposal: proposal,
+              busy: _busy || _creatingBattle,
+              onConfirm: () =>
+                  _send('${_zh ? '确认' : 'confirm'} ${proposal.code}'),
+              onCancel: () =>
+                  _send('${_zh ? '取消' : 'cancel'} ${proposal.code}'),
+              onResource: _openResource,
+            ),
+          if (m.battleProposal != null &&
+              m.actionProposals.isEmpty &&
+              !_handledProposals.contains(m))
             _proposalCard(m),
         ],
       ),
@@ -636,7 +665,7 @@ class _AssistantViewState extends State<AssistantView> {
         Row(children: [
           Expanded(
             child: OutlinedButton(
-              onPressed: _creatingBattle
+              onPressed: _creatingBattle || _busy
                   ? null
                   : () => setState(() => _handledProposals.add(m)),
               child: Text(_zh ? '取消' : 'Cancel'),
@@ -649,7 +678,8 @@ class _AssistantViewState extends State<AssistantView> {
                 backgroundColor: OnepieceColors.fancyBlue,
                 foregroundColor: Colors.white,
               ),
-              onPressed: _creatingBattle ? null : () => _confirmBattle(m, p),
+              onPressed:
+                  _creatingBattle || _busy ? null : () => _confirmBattle(m, p),
               child: _creatingBattle
                   ? const SizedBox(
                       width: 16,
@@ -665,6 +695,7 @@ class _AssistantViewState extends State<AssistantView> {
   }
 
   Future<void> _confirmBattle(AiChatMessage m, BattleProposal p) async {
+    if (_busy || _creatingBattle) return;
     setState(() => _creatingBattle = true);
     try {
       final resp = await _getIt<BattleDao>().createBattle(CreateBattleRequest(

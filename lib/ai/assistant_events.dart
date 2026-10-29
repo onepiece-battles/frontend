@@ -35,6 +35,61 @@ class BattleProposal {
   }
 }
 
+/// A server-validated pending action or its durable result. Confirmation always
+/// returns to /ask; this client never performs the resource write itself.
+class AiActionProposal {
+  const AiActionProposal({
+    required this.code,
+    required this.operation,
+    required this.title,
+    required this.summary,
+    required this.status,
+    required this.expiresAt,
+    this.resources = const [],
+  });
+
+  final String code;
+  final String operation;
+  final String title;
+  final String summary;
+  final String status;
+  final DateTime expiresAt;
+  final List<AiResourceLink> resources;
+
+  bool get expired =>
+      status == 'expired' ||
+      (status == 'pending' && !expiresAt.isAfter(DateTime.now()));
+  bool get canConfirm => status == 'pending' && !expired;
+
+  static List<AiActionProposal> listFromJson(Object? value) => value is List
+      ? value
+          .whereType<Map<String, dynamic>>()
+          .map(fromJson)
+          .whereType<AiActionProposal>()
+          .toList()
+      : const [];
+
+  static AiActionProposal? fromJson(Map<String, dynamic> json) {
+    final code = (json['code'] ?? '').toString();
+    final expires = json['expiresAt'];
+    if (!RegExp(r'^[A-Fa-f0-9]{10}$').hasMatch(code) || expires is! num) {
+      return null;
+    }
+    return AiActionProposal(
+      code: code.toUpperCase(),
+      operation: (json['operation'] ?? '').toString(),
+      title: (json['title'] ?? '').toString(),
+      summary: (json['summary'] ?? '').toString(),
+      status: (json['status'] ?? '').toString(),
+      expiresAt: DateTime.fromMillisecondsSinceEpoch(expires.toInt()),
+      resources: ((json['resources'] as List?) ?? const [])
+          .whereType<Map<String, dynamic>>()
+          .map(AiResourceLink.fromJson)
+          .toList(),
+    );
+  }
+}
+
 /// One event of the server's `/assistant/ask` answer stream.
 sealed class AssistantEvent {
   const AssistantEvent();
@@ -53,6 +108,8 @@ sealed class AssistantEvent {
                 .map(AiResourceLink.fromJson)
                 .toList(),
             battleProposal: BattleProposal.fromJson(json['battleProposal']),
+            actionProposals:
+                AiActionProposal.listFromJson(json['actionProposals']),
           ),
         'error' =>
           AssistantFailure(_text(json['code']), _text(json['message'])),
@@ -85,12 +142,14 @@ class AssistantDone extends AssistantEvent {
     required this.content,
     this.resources = const [],
     this.battleProposal,
+    this.actionProposals = const [],
   });
 
   final String messageId;
   final String content;
   final List<AiResourceLink> resources;
   final BattleProposal? battleProposal;
+  final List<AiActionProposal> actionProposals;
 }
 
 /// The answer failed and the stream ends. [code] is stable; [message] is
