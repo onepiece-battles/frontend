@@ -339,7 +339,7 @@ class _GroupBasicInfoSectionState extends State<GroupBasicInfoSection> {
             padding: const EdgeInsets.symmetric(vertical: 5),
             child: selectedImage == null
                 ? ImageLazyLoader(
-                    uriProvider: () => group.imageUri!,
+                    uriProvider: () => group.imageUri ?? '',
                     width: 200,
                     borderWidth: 3,
                     borderRadios: 20,

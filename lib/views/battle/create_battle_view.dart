@@ -309,7 +309,8 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                                         : ImageLazyLoader(
                                             uriProvider: () =>
                                                 starterSelectedItem
-                                                    .value!.imageUri!,
+                                                    .value!.imageUri ??
+                                                '',
                                             width: 54,
                                             borderWidth: 1.5,
                                             borderRadios: 54),
@@ -338,7 +339,9 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                                                   child: ImageLazyLoader(
                                                       uriProvider: () =>
                                                           starterSelectedItem
-                                                              .value!.imageUri!,
+                                                              .value!
+                                                              .imageUri ??
+                                                          '',
                                                       width: 200,
                                                       borderWidth: 3,
                                                       borderRadios: 100)))),
@@ -512,7 +515,8 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                                     padding: EdgeInsets.fromLTRB(
                                         3, 3, isSmall ? 5 : 8, 3),
                                     child: ImageLazyLoader(
-                                        uriProvider: () => character.imageUri!,
+                                        uriProvider: () =>
+                                            character.imageUri ?? '',
                                         width: isSmall ? 34 : 50,
                                         borderWidth: isSmall ? 1.5 : 2,
                                         borderRadios: 6),
@@ -635,7 +639,8 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                                               : ImageLazyLoader(
                                                   uriProvider: () =>
                                                       receiverSelectedItem
-                                                          .value!.imageUri!,
+                                                          .value!.imageUri ??
+                                                      '',
                                                   width: 54,
                                                   borderWidth: 1.5,
                                                   borderRadios: 54)),
@@ -698,7 +703,8 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                                                           uriProvider: () =>
                                                               receiverSelectedItem
                                                                   .value!
-                                                                  .imageUri!,
+                                                                  .imageUri ??
+                                                              '',
                                                           width: 200,
                                                           borderWidth: 3,
                                                           borderRadios: 100)))),
@@ -845,7 +851,7 @@ class _CreateBattleViewState extends State<CreateBattleView> {
                                           3, 3, isSmall ? 5 : 8, 3),
                                       child: ImageLazyLoader(
                                           uriProvider: () =>
-                                              character.imageUri!,
+                                              character.imageUri ?? '',
                                           width: isSmall ? 34 : 50,
                                           borderWidth: isSmall ? 1.5 : 2,
                                           borderRadios: 6),

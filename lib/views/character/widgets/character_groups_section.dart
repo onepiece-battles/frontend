@@ -95,7 +95,7 @@ class CharacterGroupsSection extends StatelessWidget {
                           child: Row(children: [
                             ImageLazyLoader(
                                 key: ValueKey(g.imageUri),
-                                uriProvider: () => g.imageUri!,
+                                uriProvider: () => g.imageUri ?? '',
                                 width: 36,
                                 borderWidth: 1.5,
                                 borderRadios: 8),
@@ -205,7 +205,8 @@ class CharacterGroupsSection extends StatelessWidget {
                             Padding(
                                 padding: const EdgeInsets.only(right: 6),
                                 child: ImageLazyLoader(
-                                    uriProvider: () => currentGroup.imageUri!,
+                                    uriProvider: () =>
+                                        currentGroup.imageUri ?? '',
                                     width: 50,
                                     borderWidth: 2,
                                     borderRadios: 10)),

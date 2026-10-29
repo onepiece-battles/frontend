@@ -286,7 +286,7 @@ class _SearchPopupState extends State<SearchPopup> {
                               padding: const EdgeInsets.fromLTRB(3, 3, 6, 3),
                               child: ImageLazyLoader(
                                   key: ValueKey(character.imageUri),
-                                  uriProvider: () => character.imageUri!,
+                                  uriProvider: () => character.imageUri ?? '',
                                   width: 50,
                                   borderWidth: 2,
                                   borderRadios: 10),
@@ -450,7 +450,7 @@ class _SearchPopupState extends State<SearchPopup> {
                                 padding: const EdgeInsets.fromLTRB(3, 6, 3, 3),
                                 child: ImageLazyLoader(
                                     key: ValueKey(group.imageUri),
-                                    uriProvider: () => group.imageUri!,
+                                    uriProvider: () => group.imageUri ?? '',
                                     width: 50,
                                     borderWidth: 2,
                                     borderRadios: 10),

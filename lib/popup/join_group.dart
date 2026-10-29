@@ -541,7 +541,7 @@ class _JoinGroupState extends State<JoinGroup> {
       itemBuilder: (context, index) {
         final character = items[index];
         return _buildMemberTile(
-          imageUri: character.imageUri!,
+          imageUri: character.imageUri ?? '',
           name: I18nHelper.getDisplayNameFromI18n(character.name),
           selected: selected,
           onTap: () => onTap(index),
@@ -571,7 +571,7 @@ class _JoinGroupState extends State<JoinGroup> {
       itemBuilder: (context, index) {
         final group = items[index];
         return _buildMemberTile(
-          imageUri: group.imageUri!,
+          imageUri: group.imageUri ?? '',
           name: I18nHelper.getDisplayNameFromI18n(group.name),
           selected: selected,
           onTap: () => onTap(index),
