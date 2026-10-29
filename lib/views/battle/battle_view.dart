@@ -403,7 +403,7 @@ class _BattleViewState extends State<BattleView> {
       BattleStatus.IN_PROGRESS:
           AppLocalizations.of(context)!.battleStatusStarted,
       BattleStatus.FINISHED: AppLocalizations.of(context)!.battleStatusFinished,
-      BattleStatus.FAILED: AppLocalizations.of(context)!.battleStatusFailed,
+      BattleStatus.FAILED: AppLocalizations.of(context)!.battleStatusDraw,
     };
     return Padding(
       padding: const EdgeInsets.only(right: 6),

@@ -63,9 +63,29 @@ class _StoryBattleFake extends DetailBattleFake {
       );
 }
 
-class _TransitionBattleFake extends _StoryBattleFake {
-  _TransitionBattleFake() : super(BattleReportStage.IN_PROGRESS);
+/// A battle that reached the turn limit: stored as FAILED, no winner, no
+/// score change and no report, but its rounds are kept.
+class _DrawBattleFake extends _StoryBattleFake {
+  _DrawBattleFake()
+      : super(BattleReportStage.WAITING, battleStatus: BattleStatus.FAILED);
 
+  @override
+  Future<BattleFullView?> getBattleFullView(
+      GetBattleFullViewRequest request) async {
+    final battle = (await super.getBattleFullView(request))!;
+    battle.battleExecution!
+      ..winnerId = null
+      ..starterScoreAfter = 1840
+      ..receiverScoreAfter = 1770;
+    return battle;
+  }
+}
+
+class _TransitionBattleFake extends _StoryBattleFake {
+  _TransitionBattleFake({this.endStatus = BattleStatus.FINISHED})
+      : super(BattleReportStage.IN_PROGRESS, battleStatus: endStatus);
+
+  final BattleStatus endStatus;
   bool firstLoad = true;
 
   @override
@@ -87,9 +107,9 @@ class _TransitionBattleFake extends _StoryBattleFake {
   Future<BattleExecution?> getBattleExecution(
           GetBattleExecutionRequest request) async =>
       BattleExecution(
-        battleStatus: BattleStatus.FINISHED,
+        battleStatus: endStatus,
         battleReportStage: BattleReportStage.IN_PROGRESS,
-        winnerId: '0',
+        winnerId: endStatus == BattleStatus.FINISHED ? '0' : null,
         starterScoreBefore: 1840,
         starterScoreAfter: 1866,
         receiverScoreBefore: 1770,
@@ -219,6 +239,50 @@ void main() {
     expect(find.text('Start Battle'), findsNothing);
     expect(find.textContaining('Rubber Pistol'), findsOneWidget);
     expect(find.text('Download Battle Report'), findsNothing);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('a battle that reached the turn limit reads as a draw',
+      (tester) async {
+    GetIt.instance.registerSingleton<Locale>(const Locale('zh'));
+    GetIt.instance.registerSingleton<BattleDao>(_DrawBattleFake());
+    await tester.pumpWidget(const MaterialApp(
+      locale: Locale('zh'),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: Scaffold(body: BattleDetailView(battleId: '0')),
+    ));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text('平局'), findsWidgets);
+    expect(find.text('执行失败'), findsNothing);
+    expect(find.text('获胜者'), findsNothing);
+    expect(find.textContaining('判为平局'), findsOneWidget);
+    expect(find.textContaining('Rubber Pistol'), findsOneWidget);
+    expect(find.text('开始战斗'), findsNothing);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('polling reveals the rounds when the battle ends in a draw',
+      (tester) async {
+    GetIt.instance.registerSingleton<Locale>(const Locale('en'));
+    GetIt.instance.registerSingleton<BattleDao>(
+        _TransitionBattleFake(endStatus: BattleStatus.FAILED));
+    await tester.pumpWidget(const MaterialApp(
+      locale: Locale('en'),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: Scaffold(body: BattleDetailView(battleId: '0')),
+    ));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text('Start Battle'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump();
+    expect(find.text('Draw'), findsWidgets);
+    expect(find.textContaining('Rubber Pistol'), findsOneWidget);
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox.shrink());
   });

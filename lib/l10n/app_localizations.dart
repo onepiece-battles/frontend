@@ -224,6 +224,12 @@ abstract class AppLocalizations {
   /// **'Created'**
   String get battleStatusCreated;
 
+  /// No description provided for @battleStatusDraw.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw'**
+  String get battleStatusDraw;
+
   /// No description provided for @battleStatusFailed.
   ///
   /// In en, this message translates to:
@@ -422,11 +428,11 @@ abstract class AppLocalizations {
   /// **'Preparing the download…'**
   String get battleReportPreparing;
 
-  /// No description provided for @battleFailedDescription.
+  /// No description provided for @battleDrawDescription.
   ///
   /// In en, this message translates to:
-  /// **'This battle could not be completed.'**
-  String get battleFailedDescription;
+  /// **'Neither side fell within the turn limit, so this battle is a draw. Scores are unchanged and no report is generated.'**
+  String get battleDrawDescription;
 
   /// No description provided for @battleAbilities.
   ///

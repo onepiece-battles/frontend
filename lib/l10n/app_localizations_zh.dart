@@ -72,6 +72,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get battleStatusCreated => '已创建';
 
   @override
+  String get battleStatusDraw => '平局';
+
+  @override
   String get battleStatusFailed => '执行失败';
 
   @override
@@ -173,7 +176,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get battleReportPreparing => '正在准备下载文件…';
 
   @override
-  String get battleFailedDescription => '这场战斗未能完成。';
+  String get battleDrawDescription => '双方在回合上限内都没有倒下，判为平局。积分不变，不生成战斗报告。';
 
   @override
   String get battleAbilities => '角色能力对比';

@@ -37,7 +37,7 @@ class BattleRoster extends StatelessWidget {
             AppLocalizations.of(context)!.battleStatusStarted,
         BattleStatus.FINISHED:
             AppLocalizations.of(context)!.battleStatusFinished,
-        BattleStatus.FAILED: AppLocalizations.of(context)!.battleStatusFailed,
+        BattleStatus.FAILED: AppLocalizations.of(context)!.battleStatusDraw,
       };
 
   // ── Mobile: card-based battle list ────────────────────────────────────
