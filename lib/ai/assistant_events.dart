@@ -1,4 +1,4 @@
-import 'dart:convert';
+import 'json_events.dart';
 
 /// A resource an answer links to, rendered as an inline tappable link.
 class AiResourceLink {
@@ -163,44 +163,11 @@ class AssistantFailure extends AssistantEvent {
   final String message;
 }
 
-/// Parses a `text/event-stream` body into [AssistantEvent]s. The bytes may be
-/// split anywhere — mid-line or mid-character — so decoding is incremental.
+/// Parses a `text/event-stream` body into [AssistantEvent]s, skipping events
+/// this client does not know.
 Stream<AssistantEvent> parseAssistantEvents(Stream<List<int>> body) async* {
-  String? event;
-  final data = <String>[];
-  await for (final line
-      in body.transform(utf8.decoder).transform(const LineSplitter())) {
-    if (line.isEmpty) {
-      final parsed = _dispatch(event, data);
-      if (parsed != null) yield parsed;
-      event = null;
-      data.clear();
-    } else if (!line.startsWith(':')) {
-      // Lines starting with ":" are comments / keep-alives.
-      final colon = line.indexOf(':');
-      final field = colon < 0 ? line : line.substring(0, colon);
-      var value = colon < 0 ? '' : line.substring(colon + 1);
-      if (value.startsWith(' ')) value = value.substring(1);
-      if (field == 'event') {
-        event = value;
-      } else if (field == 'data') {
-        data.add(value);
-      }
-    }
-  }
-  // Tolerate a last event that is not followed by a blank line.
-  final parsed = _dispatch(event, data);
-  if (parsed != null) yield parsed;
-}
-
-AssistantEvent? _dispatch(String? event, List<String> data) {
-  if (data.isEmpty) return null;
-  try {
-    final json = jsonDecode(data.join('\n'));
-    return json is Map<String, dynamic>
-        ? AssistantEvent.fromJson(event ?? 'message', json)
-        : null;
-  } on FormatException {
-    return null;
+  await for (final event in parseJsonEvents(body)) {
+    final parsed = AssistantEvent.fromJson(event.name, event.data);
+    if (parsed != null) yield parsed;
   }
 }

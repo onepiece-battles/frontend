@@ -26,6 +26,8 @@ import 'package:one_piece_battles_flutter/views/chatting/chatting_view.dart'
     deferred as chatting_view;
 import 'package:one_piece_battles_flutter/views/assistant/assistant_view.dart'
     deferred as assistant_view;
+import 'package:one_piece_battles_flutter/views/assistant/import_view.dart'
+    deferred as import_view;
 import 'package:one_piece_battles_flutter/views/fruit/create_fruit_view.dart'
     deferred as create_fruit;
 import 'package:one_piece_battles_flutter/views/fruit/fruit_detail_view.dart'
@@ -82,6 +84,7 @@ class AppRouter {
   static final chattingPath =
       '/home/${ResourceType.CHATTING.toString().toLowerCase()}';
   static const assistantPath = '/home/assistant';
+  static const importPath = '/home/import';
 
   static void updateRoutingState(String matchedLocation) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -113,6 +116,19 @@ class AppRouter {
                   child: DeferredPage(
                       load: assistant_view.loadLibrary,
                       page: () => assistant_view.AssistantView()),
+                  key: state.pageKey);
+            },
+          ),
+          GoRoute(
+            path: importPath,
+            name: "ai_import",
+            parentNavigatorKey: _homeNavigatorState,
+            pageBuilder: (context, state) {
+              updateRoutingState(state.matchedLocation);
+              return NoTransitionPage(
+                  child: DeferredPage(
+                      load: import_view.loadLibrary,
+                      page: () => import_view.ImportView()),
                   key: state.pageKey);
             },
           ),
