@@ -378,6 +378,8 @@ class _SideMenuState extends State<SideMenu> {
                   padding: EdgeInsets.zero,
                   children: [
                     _buildAssistantItem(context, isExpanded),
+                    if (getIt<User>().loginRole == UserRole.NIKA)
+                      _buildImportItem(context, isExpanded),
                     _buildSectionLabel(AppLocalizations.of(context)!.route),
                     _buildResourceList(context, isExpanded),
                     _buildSectionLabel(AppLocalizations.of(context)!.user,
@@ -413,6 +415,8 @@ class _SideMenuState extends State<SideMenu> {
                   padding: EdgeInsets.zero,
                   children: [
                     _buildAssistantItem(context, isExpanded),
+                    if (getIt<User>().loginRole == UserRole.NIKA)
+                      _buildImportItem(context, isExpanded),
                     if (isExpanded)
                       _buildSectionLabel(AppLocalizations.of(context)!.route),
                     _buildResourceList(context, isExpanded),
@@ -624,6 +628,23 @@ class _SideMenuState extends State<SideMenu> {
         isExpanded: isExpanded,
         onTap: () =>
             _onDrawerItemTap(() => context.go(AppRouter.assistantPath)),
+      ),
+    );
+  }
+
+  /// NIKA only: the AI batch import.
+  Widget _buildImportItem(BuildContext context, bool isExpanded) {
+    final isZh = Localizations.localeOf(context).languageCode == 'zh';
+    return ValueListenableBuilder<String>(
+      valueListenable: routeNotifier,
+      builder: (context, route, _) => _buildMenuItem(
+        context: context,
+        icon: const Icon(Icons.playlist_add_check_rounded,
+            size: 20, color: OnepieceColors.fancyBlue),
+        text: isZh ? 'AI 批量录入' : 'AI batch import',
+        isSelected: route == AppRouter.importPath,
+        isExpanded: isExpanded,
+        onTap: () => _onDrawerItemTap(() => context.go(AppRouter.importPath)),
       ),
     );
   }
