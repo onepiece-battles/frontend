@@ -6,9 +6,12 @@ import 'package:go_router/go_router.dart';
 import 'package:openapi/api.dart';
 
 import '../../ai/import_api.dart';
+import '../../ai/import_avatars.dart';
 import '../../ai/import_fields.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../l10n/app_localizations.dart';
+import '../../repository/image_dao.dart';
+import '../../utils/base64_helper.dart';
 
 /// AI batch import (NIKA only): describe a scope, let DeepSeek draft the
 /// groups, fruits and characters in it, review and fix the draft, then import
@@ -30,7 +33,11 @@ class _ImportViewState extends State<ImportView> {
   ImportResult? _result;
   final List<String> _batchProblems = [];
 
+  /// The avatar lookup (while reviewing) or upload (after importing).
+  String? _avatarStatus;
+
   ImportApi get _api => GetIt.instance<ImportApi>();
+  ImportAvatars get _avatars => GetIt.instance<ImportAvatars>();
   bool get _zh => Localizations.localeOf(context).languageCode == 'zh';
   String _t(String zh, String en) => _zh ? zh : en;
 
@@ -56,6 +63,7 @@ class _ImportViewState extends State<ImportView> {
       _error = null;
       _draft = null;
       _result = null;
+      _avatarStatus = null;
       _batchProblems.clear();
     });
     _drafting = _api.draft(scope, language: _zh ? 'zh_CN' : 'en_US').listen(
@@ -73,6 +81,7 @@ class _ImportViewState extends State<ImportView> {
               _progress = null;
           }
         });
+        if (event is ImportDraftReady) unawaited(_findAvatars(event.draft));
       },
       onError: (Object e) {
         if (!mounted) return;
@@ -125,12 +134,86 @@ class _ImportViewState extends State<ImportView> {
     ];
   }
 
+  Future<void> _findAvatars(ImportDraft draft) async {
+    final wanted = draft.items
+        .where((i) => !i.exists && i.type == ImportType.character)
+        .length;
+    if (wanted == 0) return;
+    setState(() => _avatarStatus =
+        _t('正在从 Bangumi 查找角色头像…', 'Looking for character avatars on Bangumi…'));
+    String status;
+    try {
+      final found = await _avatars.find(draft.items);
+      for (final item in draft.items) {
+        item.avatarUrl = found[item.key];
+      }
+      status = _t(
+          '在 Bangumi 找到 ${found.length}/$wanted 个角色头像，导入后自动上传；点头像可以不用它。果实和团体的头像请导入后在详情页上传。',
+          'Found ${found.length} of $wanted character avatars on Bangumi. They are uploaded after the import; tap one to skip it. Upload fruit and group avatars on their detail pages.');
+    } catch (_) {
+      status = _t('无法访问 Bangumi，导入后请在详情页上传头像。',
+          'Could not reach Bangumi; upload avatars on the detail pages after importing.');
+    }
+    if (mounted && _draft == draft) setState(() => _avatarStatus = status);
+  }
+
+  /// Uploads the kept avatars of the created resources, three at a time. A
+  /// failed avatar only leaves that resource without one.
+  Future<void> _uploadAvatars(
+      ImportResult result, Map<String, String> avatars) async {
+    final jobs = [
+      for (final created in result.created)
+        if (avatars[created.key] case final url?) (created, url),
+    ];
+    if (jobs.isEmpty) {
+      if (mounted) setState(() => _avatarStatus = null);
+      return;
+    }
+    var done = 0, failed = 0;
+    void report() => _avatarStatus = done < jobs.length
+        ? _t('正在上传头像 $done/${jobs.length}…',
+            'Uploading avatars $done/${jobs.length}…')
+        : failed == 0
+            ? _t('已上传 ${jobs.length} 个头像。', 'Uploaded ${jobs.length} avatars.')
+            : _t('已上传 ${jobs.length - failed} 个头像，$failed 个失败，可在详情页手动上传。',
+                'Uploaded ${jobs.length - failed} avatars; $failed failed, upload those on the detail pages.');
+    setState(report);
+    final images = GetIt.instance<ImageDao>();
+    Future<void> upload((ImportCreated, String) job) async {
+      final (created, url) = job;
+      try {
+        final png = await _avatars.prepare(url);
+        await images.addImage(UploadImageRequest(
+            resourceId: created.id,
+            image: Base64Helper.encode(png),
+            type: switch (created.type) {
+              ImportType.character => ResourceType.CHARACTER,
+              ImportType.fruit => ResourceType.FRUIT,
+              _ => ResourceType.GROUP,
+            }));
+      } catch (_) {
+        failed++;
+      }
+      done++;
+      if (mounted) setState(report);
+    }
+
+    for (var i = 0; i < jobs.length; i += 3) {
+      await Future.wait(jobs.skip(i).take(3).map(upload));
+    }
+  }
+
   Future<void> _commit() async {
     if (_committing) return;
     setState(() {
       _committing = true;
       _batchProblems.clear();
     });
+    final avatars = {
+      for (final item in _included)
+        if (!item.exists && item.useAvatar && item.avatarUrl != null)
+          item.key: item.avatarUrl!,
+    };
     try {
       final result =
           await _api.commit(_toImport(), language: _zh ? 'zh_CN' : 'en_US');
@@ -139,6 +222,7 @@ class _ImportViewState extends State<ImportView> {
         _result = result;
         _draft = null;
       });
+      unawaited(_uploadAvatars(result, avatars));
     } on ImportRejected catch (e) {
       if (!mounted) return;
       setState(() {
@@ -357,6 +441,12 @@ class _ImportViewState extends State<ImportView> {
         _message(note),
         const SizedBox(height: 8),
       ],
+      if (_avatarStatus != null) ...[
+        KeyedSubtree(
+            key: const Key('import-avatar-status'),
+            child: _message(_avatarStatus!)),
+        const SizedBox(height: 8),
+      ],
       for (final (type, title) in sections)
         if (draft.items.any((i) => i.type == type)) ...[
           Padding(
@@ -377,6 +467,8 @@ class _ImportViewState extends State<ImportView> {
               l: l,
               needsFix: _needsFix(item),
               onToggle: (value) => setState(() => item.included = value),
+              onToggleAvatar: () =>
+                  setState(() => item.useAvatar = !item.useAvatar),
               onEdit: () => _edit(item),
             ),
             const SizedBox(height: 8),
@@ -455,6 +547,13 @@ class _ImportViewState extends State<ImportView> {
               ),
             ),
           ]),
+          if (_avatarStatus != null) ...[
+            const SizedBox(height: 6),
+            Text(_avatarStatus!,
+                key: const Key('import-avatar-status'),
+                style: const TextStyle(
+                    fontSize: 13, color: OnepieceColors.secondaryLabel)),
+          ],
           const SizedBox(height: 10),
           Wrap(spacing: 8, runSpacing: 8, children: [
             for (final created in result.created)
@@ -485,6 +584,7 @@ class _ItemCard extends StatelessWidget {
     required this.l,
     required this.needsFix,
     required this.onToggle,
+    required this.onToggleAvatar,
     required this.onEdit,
   });
 
@@ -494,6 +594,7 @@ class _ItemCard extends StatelessWidget {
   final AppLocalizations l;
   final bool needsFix;
   final ValueChanged<bool> onToggle;
+  final VoidCallback onToggleAvatar;
   final VoidCallback onEdit;
 
   String _t(String zh, String en) => this.zh ? zh : en;
@@ -552,6 +653,62 @@ class _ItemCard extends StatelessWidget {
                 fontSize: 11, fontWeight: FontWeight.w600, color: foreground)),
       );
 
+  /// The found portrait as it will be cropped (see
+  /// [ImportAvatars.avatarSource]), or the type icon. Tapping a found avatar
+  /// skips it or brings it back.
+  Widget _avatar() {
+    const side = 44.0;
+    final radius = item.type == ImportType.character ? side / 2 : 8.0;
+    final placeholder = Container(
+      width: side,
+      height: side,
+      decoration: BoxDecoration(
+          color: OnepieceColors.surface,
+          borderRadius: BorderRadius.circular(radius)),
+      child: Icon(_icon(item.type),
+          size: 20, color: OnepieceColors.secondaryLabel),
+    );
+    final url = item.avatarUrl;
+    if (url == null) return placeholder;
+    return Tooltip(
+      message: item.useAvatar
+          ? _t('不使用这个头像', 'Skip this avatar')
+          : _t('使用这个头像', 'Use this avatar'),
+      child: InkWell(
+        key: Key('import-avatar-${item.key}'),
+        customBorder:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius)),
+        onTap: onToggleAvatar,
+        child: Stack(clipBehavior: Clip.none, children: [
+          item.useAvatar
+              ? ClipRRect(
+                  borderRadius: BorderRadius.circular(radius),
+                  child: Image.network(url,
+                      width: side,
+                      height: side,
+                      fit: BoxFit.cover,
+                      alignment: Alignment.topCenter,
+                      errorBuilder: (_, __, ___) => placeholder),
+                )
+              : placeholder,
+          Positioned(
+            right: -4,
+            bottom: -4,
+            child: Container(
+              padding: const EdgeInsets.all(2),
+              decoration: const BoxDecoration(
+                  color: Colors.white, shape: BoxShape.circle),
+              child: Icon(
+                  item.useAvatar ? Icons.cancel_rounded : Icons.undo_rounded,
+                  size: 14,
+                  color: OnepieceColors.secondaryLabel),
+            ),
+          ),
+        ]),
+      ),
+    );
+  }
+
   Widget _relation(IconData icon, String text, bool dropped) => Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -592,6 +749,11 @@ class _ItemCard extends StatelessWidget {
                 value: item.included,
                 onChanged: (value) => onToggle(value ?? false),
               ),
+              if (!item.exists)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(2, 4, 12, 0),
+                  child: _avatar(),
+                ),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
