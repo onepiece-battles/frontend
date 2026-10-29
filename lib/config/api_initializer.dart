@@ -18,6 +18,7 @@ import 'package:openapi/api.dart';
 import '../ai/assistant_api.dart';
 import '../ai/assistant_session.dart';
 import '../ai/import_api.dart';
+import '../ai/import_avatars.dart';
 import '../repository/issue_dao.dart';
 import 'session_aware_client.dart';
 
@@ -57,6 +58,7 @@ class ApiInitializer {
     _registerOrReplace<MessageDao>(() => MessageDao(apiClient));
     _registerOrReplace<AssistantApi>(() => AssistantApi(apiClient));
     _registerOrReplace<ImportApi>(() => ImportApi(apiClient));
+    _registerOrReplace<ImportAvatars>(() => ImportAvatars());
     _registerOrReplace<AssistantSession>(() => AssistantSession());
   }
 

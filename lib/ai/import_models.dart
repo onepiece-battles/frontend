@@ -45,6 +45,11 @@ class ImportItem {
   /// Whether the reviewer keeps this item in the import.
   bool included;
 
+  /// A portrait found for a new character (see `ImportAvatars`), and whether
+  /// the reviewer keeps it. Uploaded after the import, never sent with it.
+  String? avatarUrl;
+  bool useAvatar = true;
+
   bool get exists => existingId != null;
 
   String name(bool zh) {

@@ -1,14 +1,17 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:openapi/api.dart';
 import 'package:one_piece_battles_flutter/ai/import_api.dart';
+import 'package:one_piece_battles_flutter/ai/import_avatars.dart';
 import 'package:one_piece_battles_flutter/ai/import_fields.dart';
 import 'package:one_piece_battles_flutter/ai/json_events.dart';
 import 'package:one_piece_battles_flutter/l10n/app_localizations.dart';
+import 'package:one_piece_battles_flutter/repository/image_dao.dart';
 import 'package:one_piece_battles_flutter/views/assistant/import_view.dart';
 
 /// Stands in for the server: [events] feeds the draft stream, [onCommit]
@@ -120,8 +123,38 @@ ImportDraft _strawHats() => ImportDraft.fromJson({
       'notes': ['只包含当前成员'],
     });
 
+/// Answers the wiki lookup with [found] and "crops" without decoding.
+class _FakeAvatars extends ImportAvatars {
+  Map<String, String> found = {};
+  final prepared = <String>[];
+
+  @override
+  Future<Map<String, String>> find(List<ImportItem> items) async => found;
+
+  @override
+  Future<Uint8List> prepare(String url) async {
+    prepared.add(url);
+    return Uint8List.fromList([137, 80, 78, 71]);
+  }
+}
+
+class _FakeImageDao extends ImageDao {
+  _FakeImageDao() : super.empty();
+
+  final uploads = <UploadImageRequest>[];
+
+  @override
+  Future<UploadImageResponse?> addImage(UploadImageRequest request) async {
+    uploads.add(request);
+    return null;
+  }
+}
+
 Future<_FakeImportApi> _pump(WidgetTester tester,
-    {String language = 'zh', UserRole role = UserRole.NIKA}) async {
+    {String language = 'zh',
+    UserRole role = UserRole.NIKA,
+    _FakeAvatars? avatars,
+    ImageDao? images}) async {
   tester.view.physicalSize = const Size(1100, 2400);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.resetPhysicalSize);
@@ -129,6 +162,8 @@ Future<_FakeImportApi> _pump(WidgetTester tester,
   final api = _FakeImportApi();
   GetIt.instance
     ..registerSingleton<ImportApi>(api)
+    ..registerSingleton<ImportAvatars>(avatars ?? _FakeAvatars())
+    ..registerSingleton<ImageDao>(images ?? _FakeImageDao())
     ..registerSingleton<User>(
         User(id: 'nika', username: 'nika', nickname: 'Nika', loginRole: role));
   addTearDown(() => GetIt.instance.reset());
@@ -222,6 +257,77 @@ void main() {
     expect(find.byKey(const Key('import-result')), findsOneWidget);
     expect(find.text('罗罗诺亚·索隆'), findsOneWidget);
     expect(find.byKey(const Key('import-commit-button')), findsNothing);
+  });
+
+  Future<(_FakeImportApi, _FakeAvatars, _FakeImageDao)> pumpWithAvatars(
+      WidgetTester tester) async {
+    final avatars = _FakeAvatars()
+      ..found = {
+        'c1': 'https://lain.bgm.test/zoro.jpg',
+        'c2': 'https://lain.bgm.test/robin.jpg',
+      };
+    final images = _FakeImageDao();
+    final api = await _pump(tester, avatars: avatars, images: images);
+    await _draftStrawHats(tester, api);
+    await tester.pump();
+    api.onCommit = (_) async => const ImportResult([
+          ImportCreated('g1', 'group', 'id-g1', '草帽一伙'),
+          ImportCreated('f2', 'fruit', 'id-f2', '花花果实'),
+          ImportCreated('c1', 'character', 'id-c1', '罗罗诺亚·索隆'),
+        ], 2, 1, 2);
+    // Leave Robin out so the import can go ahead.
+    await tester.tap(find.descendant(
+        of: find.byKey(const Key('import-item-c2')),
+        matching: find.byType(Checkbox)));
+    await tester.pump();
+    return (api, avatars, images);
+  }
+
+  Future<void> importNow(WidgetTester tester) async {
+    await tester.tap(find.byKey(const Key('import-commit-button')));
+    for (var i = 0; i < 3; i++) {
+      await tester.pump();
+    }
+  }
+
+  testWidgets('uploads the character avatars the reviewer kept after importing',
+      (tester) async {
+    final (api, avatars, images) = await pumpWithAvatars(tester);
+    // Two new characters; Luffy is reused, fruits and groups get none.
+    expect(
+        find.descendant(
+            of: find.byKey(const Key('import-avatar-status')),
+            matching: find.textContaining('找到 2/2 个角色头像')),
+        findsOneWidget);
+    expect(find.byKey(const Key('import-avatar-g1')), findsNothing);
+    expect(find.byKey(const Key('import-avatar-f2')), findsNothing);
+
+    // Skipping and bringing back an avatar keeps it.
+    await tester.tap(find.byKey(const Key('import-avatar-c1')));
+    await tester.pump();
+    expect(find.byTooltip('使用这个头像'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('import-avatar-c1')));
+    await tester.pump();
+    await importNow(tester);
+
+    // Robin was left out, so only Zoro's avatar is uploaded.
+    expect(avatars.prepared, ['https://lain.bgm.test/zoro.jpg']);
+    expect(images.uploads.map((u) => (u.resourceId, u.type, u.image)), [
+      ('id-c1', ResourceType.CHARACTER, 'iVBORw=='),
+    ]);
+    expect(api.committed!.every((i) => !i.toJson().containsKey('avatarUrl')),
+        isTrue);
+    expect(find.text('已上传 1 个头像。'), findsOneWidget);
+  });
+
+  testWidgets('a skipped avatar is not uploaded', (tester) async {
+    final (_, avatars, images) = await pumpWithAvatars(tester);
+    await tester.tap(find.byKey(const Key('import-avatar-c1')));
+    await tester.pump();
+    await importNow(tester);
+    expect(avatars.prepared, isEmpty);
+    expect(images.uploads, isEmpty);
+    expect(find.byKey(const Key('import-avatar-status')), findsNothing);
   });
 
   testWidgets('editing a drafted item fixes it', (tester) async {
