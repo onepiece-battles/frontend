@@ -142,7 +142,8 @@ class BattleJourney extends StatelessWidget {
     final loc = AppLocalizations.of(context)!;
     final status = execution.battleStatus;
     final finished = status == BattleStatus.FINISHED;
-    final failed = status == BattleStatus.FAILED;
+    // FAILED marks a draw: the battle reached the turn limit. It has no report.
+    final draw = status == BattleStatus.FAILED;
     final running = status == BattleStatus.IN_PROGRESS;
     final reportReady =
         execution.battleReportStage == BattleReportStage.FINISHED &&
@@ -158,27 +159,27 @@ class BattleJourney extends StatelessWidget {
               ? _StepState.current
               : _StepState.done),
       _JourneyStep(
-          failed ? loc.battleStatusFailed : loc.battleStageFighting,
-          failed
-              ? _StepState.failed
-              : running
-                  ? _StepState.current
-                  : finished
-                      ? _StepState.done
-                      : _StepState.future),
-      _JourneyStep(loc.battleResultConfirmed,
-          finished ? _StepState.done : _StepState.future),
-      _JourneyStep(
-          reportGenerating
-              ? loc.battleReportInProgress
-              : loc.battleReportWaiting,
-          finished
-              ? reportReady
+          draw ? loc.battleStatusDraw : loc.battleStageFighting,
+          running
+              ? _StepState.current
+              : finished || draw
                   ? _StepState.done
-                  : _StepState.current
-              : _StepState.future),
-      _JourneyStep(loc.battleReportGenerated,
-          reportReady ? _StepState.done : _StepState.future),
+                  : _StepState.future),
+      _JourneyStep(loc.battleResultConfirmed,
+          finished || draw ? _StepState.done : _StepState.future),
+      if (!draw) ...[
+        _JourneyStep(
+            reportGenerating
+                ? loc.battleReportInProgress
+                : loc.battleReportWaiting,
+            finished
+                ? reportReady
+                    ? _StepState.done
+                    : _StepState.current
+                : _StepState.future),
+        _JourneyStep(loc.battleReportGenerated,
+            reportReady ? _StepState.done : _StepState.future),
+      ],
     ];
     return LayoutBuilder(builder: (context, constraints) {
       final vertical = constraints.maxWidth < 700;
@@ -206,7 +207,6 @@ class BattleJourney extends StatelessWidget {
   Widget _marker(_JourneyStep step) {
     final isDone = step.state == _StepState.done;
     final isCurrent = step.state == _StepState.current;
-    final isFailed = step.state == _StepState.failed;
     return Container(
       width: 24,
       height: 24,
@@ -216,26 +216,20 @@ class BattleJourney extends StatelessWidget {
             ? OnepieceColors.fancyBlue
             : isCurrent
                 ? OnepieceColors.fancyBlue.withValues(alpha: .12)
-                : isFailed
-                    ? const Color(0xFFFFE9E7)
-                    : OnepieceColors.surface,
+                : OnepieceColors.surface,
       ),
       child: Icon(
         isDone
             ? Icons.check_rounded
-            : isFailed
-                ? Icons.close_rounded
-                : isCurrent
-                    ? Icons.more_horiz_rounded
-                    : Icons.circle_outlined,
+            : isCurrent
+                ? Icons.more_horiz_rounded
+                : Icons.circle_outlined,
         size: isDone ? 15 : 13,
         color: isDone
             ? Colors.white
-            : isFailed
-                ? const Color(0xFFC64138)
-                : isCurrent
-                    ? OnepieceColors.fancyBlue
-                    : OnepieceColors.secondaryLabel,
+            : isCurrent
+                ? OnepieceColors.fancyBlue
+                : OnepieceColors.secondaryLabel,
       ),
     );
   }
@@ -304,7 +298,7 @@ class BattleJourney extends StatelessWidget {
       );
 }
 
-enum _StepState { done, current, future, failed }
+enum _StepState { done, current, future }
 
 class _JourneyStep {
   const _JourneyStep(this.label, this.state);

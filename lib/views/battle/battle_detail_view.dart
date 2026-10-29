@@ -145,8 +145,11 @@ class _BattleDetailViewState extends State<BattleDetailView> {
           .getBattleExecution(GetBattleExecutionRequest(battleId: _battle!.id));
       if (!mounted || version != _loadVersion || value == null) return;
       final model = _execution!;
-      final justFinished = model.battleStatus != BattleStatus.FINISHED &&
-          value.battleStatus == BattleStatus.FINISHED;
+      // A draw (FAILED) ends the battle too, and its rounds are saved.
+      bool ended(BattleStatus? status) =>
+          status == BattleStatus.FINISHED || status == BattleStatus.FAILED;
+      final justFinished =
+          !ended(model.battleStatus) && ended(value.battleStatus);
       final reportJustArrived =
           model.reportFileId == null && value.reportFileId != null;
       if (value.battleStatus != null) model.battleStatus = value.battleStatus!;
@@ -419,7 +422,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
           decoration: BoxDecoration(
               color: model.battleStatus == BattleStatus.FAILED
-                  ? const Color(0xFFFFE9E7)
+                  ? OnepieceColors.surface
                   : OnepieceColors.fancyBlue.withValues(alpha: .09),
               borderRadius: BorderRadius.circular(999)),
           child: Text(status,
@@ -427,7 +430,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                   color: model.battleStatus == BattleStatus.FAILED
-                      ? const Color(0xFFC64138)
+                      ? OnepieceColors.secondaryLabel
                       : OnepieceColors.fancyBlue)),
         ),
         if (model.battleStatus == BattleStatus.CREATED)
@@ -448,8 +451,9 @@ class _BattleDetailViewState extends State<BattleDetailView> {
   }
 
   String _statusLabel(AppLocalizations loc, BattleExecutionData model) {
+    // FAILED marks a draw: the battle reached the turn limit.
     if (model.battleStatus == BattleStatus.FAILED) {
-      return loc.battleStatusFailed;
+      return loc.battleStatusDraw;
     }
     if (model.battleStatus == BattleStatus.CREATED) {
       return loc.battleStatusCreated;
@@ -475,9 +479,9 @@ class _BattleDetailViewState extends State<BattleDetailView> {
     final generating = model.battleReportStage ==
             BattleReportStage.IN_PROGRESS ||
         (model.battleReportStage == BattleReportStage.FINISHED && !reportReady);
-    final failed = model.battleStatus == BattleStatus.FAILED;
-    final description = failed
-        ? loc.battleFailedDescription
+    final draw = model.battleStatus == BattleStatus.FAILED;
+    final description = draw
+        ? loc.battleDrawDescription
         : reportReady
             ? visitor
                 ? loc.battleReportVisitorDescription
@@ -485,8 +489,8 @@ class _BattleDetailViewState extends State<BattleDetailView> {
             : generating
                 ? loc.battleReportGeneratingDescription
                 : loc.battleReportWaitingDescription;
-    final label = failed
-        ? loc.battleStatusFailed
+    final label = draw
+        ? loc.battleStatusDraw
         : reportReady
             ? loc.battleReportGenerated
             : generating
@@ -503,7 +507,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(children: [
-            if (generating && !failed)
+            if (generating && !draw)
               SizedBox(
                 width: 17,
                 height: 17,
@@ -515,8 +519,8 @@ class _BattleDetailViewState extends State<BattleDetailView> {
               )
             else
               Icon(
-                failed
-                    ? Icons.error_outline_rounded
+                draw
+                    ? Icons.handshake_outlined
                     : reportReady
                         ? Icons.description_outlined
                         : Icons.schedule_rounded,

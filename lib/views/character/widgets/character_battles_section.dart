@@ -238,14 +238,18 @@ class _CharacterBattlesSectionState extends State<CharacterBattlesSection> {
   ({String label, Color color}) _outcome(
       AppLocalizations loc, BattleStatus? status,
       {required bool won, required bool lost}) {
+    // FAILED marks a draw: the battle reached the turn limit.
+    if (status == BattleStatus.FAILED) {
+      return (
+        label: loc.battleStatusDraw,
+        color: OnepieceColors.secondaryLabel
+      );
+    }
     if (won) {
       return (label: loc.characterBattleWin, color: const Color(0xFF247A50));
     }
     if (lost) {
       return (label: loc.characterBattleLoss, color: const Color(0xFFB74B48));
-    }
-    if (status == BattleStatus.FAILED) {
-      return (label: loc.battleStatusFailed, color: const Color(0xFFB74B48));
     }
     if (status == BattleStatus.IN_PROGRESS) {
       return (label: loc.battleStatusStarted, color: OnepieceColors.fancyBlue);

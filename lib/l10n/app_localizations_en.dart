@@ -72,6 +72,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get battleStatusCreated => 'Created';
 
   @override
+  String get battleStatusDraw => 'Draw';
+
+  @override
   String get battleStatusFailed => 'Failed';
 
   @override
@@ -179,7 +182,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get battleReportPreparing => 'Preparing the download…';
 
   @override
-  String get battleFailedDescription => 'This battle could not be completed.';
+  String get battleDrawDescription =>
+      'Neither side fell within the turn limit, so this battle is a draw. Scores are unchanged and no report is generated.';
 
   @override
   String get battleAbilities => 'Compare Abilities';

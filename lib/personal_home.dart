@@ -501,7 +501,7 @@ class _UserHomeState extends State<UserHome> {
       BattleStatus.CREATED: AppLocalizations.of(context)!.battleStatusCreated,
       BattleStatus.IN_PROGRESS:
           AppLocalizations.of(context)!.battleStatusStarted,
-      BattleStatus.FAILED: AppLocalizations.of(context)!.battleStatusFailed,
+      BattleStatus.FAILED: AppLocalizations.of(context)!.battleStatusDraw,
       BattleStatus.FINISHED: AppLocalizations.of(context)!.battleStatusFinished
     };
     final itemCount =
