@@ -12,10 +12,12 @@ import '../../constants/onepiece_colors.dart';
 import '../../l10n/app_localizations.dart';
 import '../../repository/image_dao.dart';
 import '../../utils/base64_helper.dart';
+import 'import_item_editor.dart';
 
 /// AI batch import (NIKA only): describe a scope, let DeepSeek draft the
-/// groups, fruits and characters in it, review and fix the draft, then import
-/// it in one go. Nothing is written before "Import".
+/// groups, fruits and characters in it, refine the draft by talking to the AI
+/// and by editing items, then import it in one go. Nothing is written before
+/// "Import".
 class ImportView extends StatefulWidget {
   const ImportView({super.key});
 
@@ -36,6 +38,17 @@ class _ImportViewState extends State<ImportView> {
   /// The avatar lookup (while reviewing) or upload (after importing).
   String? _avatarStatus;
 
+  /// The review conversation: the scope, the AI's summary, then each request
+  /// and reply. [_revising] is the label of a revision in progress.
+  final List<ImportTurn> _conversation = [];
+  final _instruction = TextEditingController();
+  StreamSubscription<ImportEvent>? _revision;
+  String? _revising;
+  String? _revisionError;
+
+  /// The keys the last revision added or changed, highlighted in the list.
+  Set<String> _changed = {};
+
   ImportApi get _api => GetIt.instance<ImportApi>();
   ImportAvatars get _avatars => GetIt.instance<ImportAvatars>();
   bool get _zh => Localizations.localeOf(context).languageCode == 'zh';
@@ -50,7 +63,9 @@ class _ImportViewState extends State<ImportView> {
   @override
   void dispose() {
     _drafting?.cancel();
+    _revision?.cancel();
     _scope.dispose();
+    _instruction.dispose();
     super.dispose();
   }
 
@@ -58,6 +73,7 @@ class _ImportViewState extends State<ImportView> {
     final scope = _scope.text.trim();
     if (scope.isEmpty || _progress != null) return;
     _drafting?.cancel();
+    _revision?.cancel();
     setState(() {
       _progress = _t('正在连接 DeepSeek…', 'Connecting to DeepSeek…');
       _error = null;
@@ -65,6 +81,10 @@ class _ImportViewState extends State<ImportView> {
       _result = null;
       _avatarStatus = null;
       _batchProblems.clear();
+      _conversation.clear();
+      _changed = {};
+      _revising = null;
+      _revisionError = null;
     });
     _drafting = _api.draft(scope, language: _zh ? 'zh_CN' : 'en_US').listen(
       (event) {
@@ -76,6 +96,9 @@ class _ImportViewState extends State<ImportView> {
             case ImportDraftReady(:final draft):
               _draft = draft;
               _progress = null;
+              _conversation
+                ..add(ImportTurn(true, scope))
+                ..add(ImportTurn(false, _summary(draft)));
             case ImportFailure(:final message):
               _error = message;
               _progress = null;
@@ -114,7 +137,136 @@ class _ImportViewState extends State<ImportView> {
   }
 
   bool _needsFix(ImportItem item) =>
-      item.problems.isNotEmpty || importFieldErrors(item, _zh).isNotEmpty;
+      item.problems.isNotEmpty ||
+      importFieldErrors(item, _zh).isNotEmpty ||
+      _unheld(item);
+
+  /// The included characters that eat [fruit].
+  List<ImportItem> _holders(ImportItem fruit) => [
+        for (final item in _included)
+          if (item.type == ImportType.character &&
+              item.fruits.contains(fruit.key))
+            item,
+      ];
+
+  /// A new fruit to import that no included character eats. Every fruit
+  /// belongs to the character who ate it, so this blocks the import.
+  bool _unheld(ImportItem item) =>
+      item.type == ImportType.fruit &&
+      !item.exists &&
+      item.included &&
+      _holders(item).isEmpty;
+
+  /// Leaving a character out leaves out the fruits only it eats; taking it
+  /// back takes them back.
+  void _toggle(ImportItem item, bool included) => setState(() {
+        item.included = included;
+        if (item.type != ImportType.character) return;
+        for (final fruit in item.fruits.map(_item).whereType<ImportItem>()) {
+          if (fruit.exists) continue;
+          if (included) {
+            fruit.included = true;
+          } else if (_holders(fruit).isEmpty) {
+            fruit.included = false;
+          }
+        }
+      });
+
+  /// Gives [fruit] to [character]; a new character's capacity follows (up to
+  /// two fruits).
+  void _assign(ImportItem fruit, ImportItem character) => setState(() {
+        character.fruits = [...character.fruits, fruit.key];
+        final capacity = character.data['maximum_fruit_count'];
+        if (!character.exists &&
+            character.fruits.length <= 2 &&
+            (capacity is! num || capacity < character.fruits.length)) {
+          character.data['maximum_fruit_count'] = character.fruits.length;
+        }
+        fruit.problems = [];
+      });
+
+  String _summary(ImportDraft draft) {
+    int count(String type) => draft.items.where((i) => i.type == type).length;
+    final groups = count(ImportType.group),
+        fruits = count(ImportType.fruit),
+        characters = count(ImportType.character);
+    return _t(
+        '起草了 $groups 个团体、$fruits 个果实、$characters 个角色。哪里不满意直接告诉我，比如“加上佩罗娜”“去掉霍古巴克”“把影子果实给莫利亚”。',
+        'Drafted $groups groups, $fruits fruits and $characters characters. Tell me what to change, e.g. "add Perona", "remove Hogback" or "give the Kage Kage no Mi to Moria".');
+  }
+
+  /// Sends [text] (or the composer's text) to the AI with the conversation so
+  /// far, and applies the revised draft it streams back.
+  void _revise([String? text]) {
+    final instruction = (text ?? _instruction.text).trim();
+    final draft = _draft;
+    if (instruction.isEmpty || draft == null || _revising != null) return;
+    final history = List.of(_conversation);
+    setState(() {
+      _conversation.add(ImportTurn(true, instruction));
+      _instruction.clear();
+      _revising = _t('AI 正在修改草稿…', 'The AI is revising the draft…');
+      _revisionError = null;
+      _batchProblems.clear();
+    });
+    void fail(String message) {
+      if (!mounted) return;
+      setState(() {
+        _revisionError = message;
+        _revising = null;
+      });
+    }
+
+    _revision?.cancel();
+    _revision = _api
+        .revise(draft.items, history, instruction,
+            language: _zh ? 'zh_CN' : 'en_US')
+        .listen(
+          (event) {
+            if (!mounted) return;
+            switch (event) {
+              case ImportProgress(:final label):
+                setState(() => _revising = label);
+              case ImportDraftReady(draft: final revised):
+                _applyRevision(draft, revised);
+              case ImportFailure(:final message):
+                fail(message);
+            }
+          },
+          onError: (Object e) => fail(_t('修改失败：$e', 'Revising failed: $e')),
+          onDone: () {
+            if (_revising != null) {
+              fail(_t(
+                  '连接中断了，请重试。', 'The connection dropped. Please try again.'));
+            }
+          },
+        );
+  }
+
+  /// Takes the revised draft, keeping what the reviewer chose for items that
+  /// stayed: whether they are included, and their avatar if the name is the
+  /// same.
+  void _applyRevision(ImportDraft before, ImportDraft revised) {
+    final previous = {for (final item in before.items) item.key: item};
+    for (final item in revised.items) {
+      final old = previous[item.key];
+      if (old == null) continue;
+      item.included = old.included;
+      if (old.name(true) == item.name(true) &&
+          old.name(false) == item.name(false)) {
+        item.avatarUrl = old.avatarUrl;
+        item.useAvatar = old.useAvatar;
+      }
+    }
+    setState(() {
+      _draft = revised;
+      _changed = revised.changed.toSet();
+      _conversation.add(ImportTurn(
+          false, revised.reply ?? _t('草稿已更新。', 'The draft is updated.')));
+      _revising = null;
+    });
+    unawaited(_findAvatars(revised, only: _changed));
+  }
 
   /// The included items, with relations to left-out items dropped.
   List<ImportItem> _toImport() {
@@ -134,22 +286,28 @@ class _ImportViewState extends State<ImportView> {
     ];
   }
 
-  Future<void> _findAvatars(ImportDraft draft) async {
+  /// Looks up portraits for the new characters of [draft] that have none yet
+  /// ([only] limits it to those keys, after a revision).
+  Future<void> _findAvatars(ImportDraft draft, {Set<String>? only}) async {
     final wanted = draft.items
         .where((i) => !i.exists && i.type == ImportType.character)
-        .length;
-    if (wanted == 0) return;
+        .toList();
+    final missing = wanted
+        .where((i) => i.avatarUrl == null && (only?.contains(i.key) ?? true))
+        .toList();
+    if (missing.isEmpty) return;
     setState(() => _avatarStatus =
         _t('正在从 Bangumi 查找角色头像…', 'Looking for character avatars on Bangumi…'));
     String status;
     try {
-      final found = await _avatars.find(draft.items);
-      for (final item in draft.items) {
+      final found = await _avatars.find(missing);
+      for (final item in missing) {
         item.avatarUrl = found[item.key];
       }
+      final have = wanted.where((i) => i.avatarUrl != null).length;
       status = _t(
-          '在 Bangumi 找到 ${found.length}/$wanted 个角色头像，导入后自动上传；点头像可以不用它。果实和团体的头像请导入后在详情页上传。',
-          'Found ${found.length} of $wanted character avatars on Bangumi. They are uploaded after the import; tap one to skip it. Upload fruit and group avatars on their detail pages.');
+          '在 Bangumi 找到 $have/${wanted.length} 个角色头像，导入后自动上传；点头像可以不用它。果实和团体的头像请导入后在详情页上传。',
+          'Found $have of ${wanted.length} character avatars on Bangumi. They are uploaded after the import; tap one to skip it. Upload fruit and group avatars on their detail pages.');
     } catch (_) {
       status = _t('无法访问 Bangumi，导入后请在详情页上传头像。',
           'Could not reach Bangumi; upload avatars on the detail pages after importing.');
@@ -249,10 +407,7 @@ class _ImportViewState extends State<ImportView> {
   }
 
   Future<void> _edit(ImportItem item) async {
-    final saved = await showDialog<bool>(
-      context: context,
-      builder: (_) => _ItemEditor(item: item, draft: _items),
-    );
+    final saved = await ImportItemEditor.show(context, item, _items);
     if (saved == true && mounted) setState(() => item.problems = []);
   }
 
@@ -305,6 +460,8 @@ class _ImportViewState extends State<ImportView> {
                                 _resultPanel(_result!),
                               ],
                               if (_draft != null) ...[
+                                const SizedBox(height: 16),
+                                _conversationPanel(),
                                 const SizedBox(height: 16),
                                 ..._review(_draft!, narrow),
                               ],
@@ -415,6 +572,128 @@ class _ImportViewState extends State<ImportView> {
     );
   }
 
+  /// The conversation with the AI about the draft, and the composer for the
+  /// next request.
+  Widget _conversationPanel() {
+    final busy = _revising != null;
+    final unheld = _included.where(_unheld).toList();
+    return _panel(
+      key: const Key('import-conversation'),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Row(children: [
+          const Icon(Icons.forum_outlined,
+              size: 18, color: OnepieceColors.fancyBlue),
+          const SizedBox(width: 8),
+          Text(_t('和 AI 一起修改草稿', 'Refine the draft with the AI'),
+              style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: OnepieceColors.primaryLabel)),
+        ]),
+        const SizedBox(height: 12),
+        for (final turn in _conversation) _bubble(turn),
+        if (busy)
+          Padding(
+            padding: const EdgeInsets.only(top: 4, bottom: 8),
+            child: Row(children: [
+              const SizedBox(
+                  width: 14,
+                  height: 14,
+                  child: CircularProgressIndicator(strokeWidth: 2)),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(_revising!,
+                    key: const Key('import-revise-progress'),
+                    style: const TextStyle(
+                        fontSize: 13, color: OnepieceColors.secondaryLabel)),
+              ),
+            ]),
+          ),
+        if (_revisionError != null) ...[
+          _message(_revisionError!, error: true),
+          const SizedBox(height: 8),
+        ],
+        if (unheld.isNotEmpty && !busy) ...[
+          Align(
+            alignment: Alignment.centerLeft,
+            child: ActionChip(
+              key: const Key('import-revise-holders'),
+              avatar: const Icon(Icons.person_search_outlined, size: 18),
+              label: Text(_t('让 AI 给没有持有者的果实找到持有者',
+                  'Ask the AI who ate the fruits without a holder')),
+              onPressed: () => _revise(_t(
+                  '这些果实还没有持有者：${unheld.map((f) => f.name(true)).join('、')}。请把它们分给原作里吃下它们的角色，必要时加上这些角色。',
+                  'These fruits have no holder: ${unheld.map((f) => f.name(false)).join(', ')}. Give each to the canon character who ate it, adding them if needed.')),
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
+        Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
+          Expanded(
+            child: TextField(
+              key: const Key('import-revise-field'),
+              controller: _instruction,
+              enabled: !busy,
+              minLines: 1,
+              maxLines: 4,
+              maxLength: 500,
+              textInputAction: TextInputAction.send,
+              onSubmitted: (_) => _revise(),
+              decoration: InputDecoration(
+                hintText: _t('告诉 AI 要怎么改…', 'Tell the AI what to change…'),
+                counterText: '',
+                isDense: true,
+                filled: true,
+                fillColor: OnepieceColors.surface,
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide.none),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          IconButton.filled(
+            key: const Key('import-revise-send'),
+            tooltip: _t('发送', 'Send'),
+            onPressed: busy ? null : _revise,
+            style:
+                IconButton.styleFrom(backgroundColor: OnepieceColors.fancyBlue),
+            icon: const Icon(Icons.arrow_upward_rounded),
+          ),
+        ]),
+      ]),
+    );
+  }
+
+  Widget _bubble(ImportTurn turn) => Align(
+        alignment: turn.user ? Alignment.centerRight : Alignment.centerLeft,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 560),
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+            decoration: BoxDecoration(
+              color: turn.user
+                  ? OnepieceColors.fancyBlue.withValues(alpha: .1)
+                  : OnepieceColors.surface,
+              borderRadius: BorderRadius.only(
+                topLeft: const Radius.circular(14),
+                topRight: const Radius.circular(14),
+                bottomLeft: Radius.circular(turn.user ? 14 : 4),
+                bottomRight: Radius.circular(turn.user ? 4 : 14),
+              ),
+            ),
+            child: Text(turn.text,
+                style: const TextStyle(
+                    fontSize: 13.5,
+                    height: 1.45,
+                    color: OnepieceColors.primaryLabel)),
+          ),
+        ),
+      );
+
   Widget _message(String text, {bool error = false}) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
@@ -459,17 +738,26 @@ class _ImportViewState extends State<ImportView> {
                     color: OnepieceColors.primaryLabel)),
           ),
           for (final item in draft.items.where((i) => i.type == type)) ...[
-            _ItemCard(
-              key: Key('import-item-${item.key}'),
-              item: item,
-              draft: draft.items,
-              zh: _zh,
-              l: l,
-              needsFix: _needsFix(item),
-              onToggle: (value) => setState(() => item.included = value),
-              onToggleAvatar: () =>
-                  setState(() => item.useAvatar = !item.useAvatar),
-              onEdit: () => _edit(item),
+            // The list waits while the AI revises it, so no edit is lost.
+            IgnorePointer(
+              ignoring: _revising != null,
+              child: _ItemCard(
+                key: Key('import-item-${item.key}'),
+                item: item,
+                draft: draft.items,
+                zh: _zh,
+                l: l,
+                needsFix: _needsFix(item),
+                changed: _changed.contains(item.key),
+                holders:
+                    item.type == ImportType.fruit ? _holders(item) : const [],
+                unheld: _unheld(item),
+                onToggle: (value) => _toggle(item, value),
+                onToggleAvatar: () =>
+                    setState(() => item.useAvatar = !item.useAvatar),
+                onAssign: (character) => _assign(item, character),
+                onEdit: () => _edit(item),
+              ),
             ),
             const SizedBox(height: 8),
           ],
@@ -583,8 +871,12 @@ class _ItemCard extends StatelessWidget {
     required this.zh,
     required this.l,
     required this.needsFix,
+    required this.changed,
+    required this.holders,
+    required this.unheld,
     required this.onToggle,
     required this.onToggleAvatar,
+    required this.onAssign,
     required this.onEdit,
   });
 
@@ -593,8 +885,17 @@ class _ItemCard extends StatelessWidget {
   final bool zh;
   final AppLocalizations l;
   final bool needsFix;
+
+  /// Added or changed by the AI's last revision.
+  final bool changed;
+
+  /// For a fruit: the included characters that eat it; [unheld] when it is
+  /// new and nobody does, which blocks the import until [onAssign].
+  final List<ImportItem> holders;
+  final bool unheld;
   final ValueChanged<bool> onToggle;
   final VoidCallback onToggleAvatar;
+  final ValueChanged<ImportItem> onAssign;
   final VoidCallback onEdit;
 
   String _t(String zh, String en) => this.zh ? zh : en;
@@ -709,6 +1010,88 @@ class _ItemCard extends StatelessWidget {
     );
   }
 
+  /// A fruit on a character, or a holder on a fruit: the link between them.
+  Widget _pill(IconData icon, String text, {bool dropped = false}) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        decoration: BoxDecoration(
+            color: dropped ? OnepieceColors.surface : const Color(0xFFEAF6EE),
+            borderRadius: BorderRadius.circular(999)),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          Icon(icon,
+              size: 13,
+              color: dropped
+                  ? OnepieceColors.secondaryLabel
+                  : const Color(0xFF247A50)),
+          const SizedBox(width: 4),
+          Text(text,
+              style: TextStyle(
+                  fontSize: 12,
+                  color: dropped
+                      ? OnepieceColors.secondaryLabel
+                      : const Color(0xFF1F6B45),
+                  decoration: dropped ? TextDecoration.lineThrough : null)),
+        ]),
+      );
+
+  String _fruitLabel(ImportItem fruit) {
+    final type = fruit.data['fruit_type'];
+    return type == null
+        ? fruit.name(zh)
+        : '${fruit.name(zh)} · ${importOptionLabel(l, 'fruit_type', '$type')}';
+  }
+
+  /// Who eats this fruit, or a way to choose someone when nobody does.
+  Widget _holderRow() {
+    final candidates = [
+      for (final other in draft)
+        if (other.type == ImportType.character &&
+            other.included &&
+            other.fruits.length < 2)
+          other,
+    ];
+    return Wrap(
+      spacing: 6,
+      runSpacing: 6,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        Text(_t('持有者', 'Holder'),
+            style: const TextStyle(
+                fontSize: 12, color: OnepieceColors.secondaryLabel)),
+        for (final holder in holders)
+          _pill(Icons.person_outline_rounded, holder.name(zh)),
+        if (unheld) ...[
+          Text(_t('还没有', 'none yet'),
+              style: const TextStyle(fontSize: 12, color: Color(0xFFC64138))),
+          PopupMenuButton<ImportItem>(
+            key: Key('import-assign-${item.key}'),
+            tooltip: _t('选择吃下它的角色', 'Choose who ate it'),
+            onSelected: onAssign,
+            enabled: candidates.isNotEmpty,
+            itemBuilder: (_) => [
+              for (final character in candidates)
+                PopupMenuItem(
+                    value: character, child: Text(character.name(zh))),
+            ],
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+              decoration: BoxDecoration(
+                  border: Border.all(color: const Color(0xFFC64138)),
+                  borderRadius: BorderRadius.circular(999)),
+              child: Row(mainAxisSize: MainAxisSize.min, children: [
+                const Icon(Icons.person_add_alt_rounded,
+                    size: 13, color: Color(0xFFC64138)),
+                const SizedBox(width: 4),
+                Text(_t('选择持有者', 'Choose holder'),
+                    style: const TextStyle(
+                        fontSize: 12, color: Color(0xFFC64138))),
+              ]),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
   Widget _relation(IconData icon, String text, bool dropped) => Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -727,7 +1110,8 @@ class _ItemCard extends StatelessWidget {
     final errors = importFieldErrors(item, zh);
     final group = _find(item.group);
     final otherName = item.name(!zh);
-    final editable = !item.exists || item.type == ImportType.character;
+    // A reused group has nothing to edit; a reused fruit still has holders.
+    final editable = !item.exists || item.type != ImportType.group;
     return Opacity(
       opacity: item.included ? 1 : .55,
       child: Material(
@@ -735,9 +1119,12 @@ class _ItemCard extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14),
           side: BorderSide(
+              width: changed && !needsFix ? 1.4 : 1,
               color: item.included && needsFix
                   ? const Color(0xFFE8A39C)
-                  : OnepieceColors.separator),
+                  : changed
+                      ? OnepieceColors.fancyBlue.withValues(alpha: .55)
+                      : OnepieceColors.separator),
         ),
         child: InkWell(
           borderRadius: BorderRadius.circular(14),
@@ -789,6 +1176,11 @@ class _ItemCard extends StatelessWidget {
                                   '${item.uncertain.length} to double-check'),
                               const Color(0xFFFFF4E0),
                               const Color(0xFF8A5A00)),
+                        if (changed)
+                          _badge(
+                              _t('刚修改', 'Just changed'),
+                              OnepieceColors.fancyBlue.withValues(alpha: .1),
+                              OnepieceColors.fancyBlue),
                         if (needsFix)
                           _badge(_t('需修改', 'Needs fixing'),
                               const Color(0xFFFFE9E7), const Color(0xFFC64138)),
@@ -802,19 +1194,29 @@ class _ItemCard extends StatelessWidget {
                               height: 1.4,
                               color: OnepieceColors.secondaryLabel)),
                     ],
+                    if (item.type == ImportType.fruit &&
+                        (holders.isNotEmpty || unheld)) ...[
+                      const SizedBox(height: 8),
+                      _holderRow(),
+                    ],
                     if (item.fruits.isNotEmpty || group != null) ...[
-                      const SizedBox(height: 6),
-                      Wrap(spacing: 12, runSpacing: 4, children: [
-                        for (final fruit
-                            in item.fruits.map(_find).whereType<ImportItem>())
-                          _relation(Icons.spa_outlined, fruit.name(zh),
-                              !fruit.included),
-                        if (group != null)
-                          _relation(
-                              Icons.groups_outlined,
-                              '${group.name(zh)} · ${importOptionLabel(l, 'position', item.position ?? 'member')}',
-                              !group.included),
-                      ]),
+                      const SizedBox(height: 8),
+                      Wrap(
+                          spacing: 8,
+                          runSpacing: 6,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            for (final fruit in item.fruits
+                                .map(_find)
+                                .whereType<ImportItem>())
+                              _pill(Icons.spa_outlined, _fruitLabel(fruit),
+                                  dropped: !fruit.included),
+                            if (group != null)
+                              _relation(
+                                  Icons.groups_outlined,
+                                  '${group.name(zh)} · ${importOptionLabel(l, 'position', item.position ?? 'member')}',
+                                  !group.included),
+                          ]),
                     ],
                     if (item.uncertain.isNotEmpty && !item.exists) ...[
                       const SizedBox(height: 6),
@@ -846,268 +1248,6 @@ class _ItemCard extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-/// Edits a copy of an item's fields and relations; "Save" writes them back.
-class _ItemEditor extends StatefulWidget {
-  const _ItemEditor({required this.item, required this.draft});
-
-  final ImportItem item;
-  final List<ImportItem> draft;
-
-  @override
-  State<_ItemEditor> createState() => _ItemEditorState();
-}
-
-class _ItemEditorState extends State<_ItemEditor> {
-  late final Map<String, dynamic> _data =
-      Map<String, dynamic>.from(widget.item.data);
-  late final Map<String, dynamic> _name =
-      Map<String, dynamic>.from((widget.item.data['name'] as Map?) ?? {});
-  late final List<String> _fruits = List.of(widget.item.fruits);
-  late String? _group = widget.item.group;
-  late String _position = widget.item.position ?? 'member';
-  final Map<String, TextEditingController> _text = {};
-
-  bool get _zh => Localizations.localeOf(context).languageCode == 'zh';
-  String _t(String zh, String en) => _zh ? zh : en;
-
-  @override
-  void dispose() {
-    for (final controller in _text.values) {
-      controller.dispose();
-    }
-    super.dispose();
-  }
-
-  TextEditingController _controller(String key, Object? value) =>
-      _text.putIfAbsent(
-          key, () => TextEditingController(text: value?.toString() ?? ''));
-
-  ImportItem get _preview => ImportItem(
-        key: widget.item.key,
-        type: widget.item.type,
-        data: {..._data, 'name': _name},
-        existingId: widget.item.existingId,
-        fruits: _fruits,
-        group: _group,
-        position: _position,
-      );
-
-  void _save() {
-    final item = widget.item;
-    if (!item.exists) item.data = {..._data, 'name': _name};
-    if (item.type == ImportType.character) {
-      item.fruits = _fruits;
-      item.group = _group;
-      item.position = _group == null ? null : _position;
-    }
-    Navigator.of(context).pop(true);
-  }
-
-  Widget _field(ImportField field, String? error) {
-    final l = AppLocalizations.of(context)!;
-    final label = importFieldLabel(l, _zh, field.key);
-    final unsure = widget.item.uncertain.contains(field.key);
-    final decoration = InputDecoration(
-      labelText: field.required ? '$label *' : label,
-      helperText: unsure ? _t('AI 不确定，请核对', 'AI unsure — please check') : null,
-      helperStyle: const TextStyle(color: Color(0xFF8A5A00)),
-      errorText: error,
-      border: const OutlineInputBorder(),
-      isDense: true,
-    );
-    switch (field.kind) {
-      case ImportFieldKind.choice:
-        final value = _data[field.key]?.toString();
-        return DropdownButtonFormField<String>(
-          key: Key('import-field-${field.key}'),
-          initialValue: field.options.contains(value) ? value : null,
-          isExpanded: true,
-          decoration: decoration,
-          items: [
-            for (final option in field.options)
-              DropdownMenuItem(
-                  value: option,
-                  child: Text(importOptionLabel(l, field.key, option))),
-          ],
-          onChanged: (value) => setState(() => _data[field.key] = value),
-        );
-      case ImportFieldKind.choices:
-        final selected = ((_data[field.key] as List?) ?? const []).toSet();
-        return InputDecorator(
-          decoration: decoration,
-          child: Wrap(spacing: 6, children: [
-            for (final option in field.options)
-              FilterChip(
-                label: Text(importOptionLabel(l, field.key, option)),
-                selected: selected.contains(option),
-                onSelected: (on) => setState(() {
-                  on ? selected.add(option) : selected.remove(option);
-                  _data[field.key] =
-                      field.options.where(selected.contains).toList();
-                }),
-              ),
-          ]),
-        );
-      case ImportFieldKind.text:
-      case ImportFieldKind.integer:
-      case ImportFieldKind.decimal:
-        final numeric = field.kind != ImportFieldKind.text;
-        return TextField(
-          key: Key('import-field-${field.key}'),
-          controller: _controller(field.key, _data[field.key]),
-          keyboardType: numeric
-              ? TextInputType.numberWithOptions(
-                  decimal: field.kind == ImportFieldKind.decimal, signed: true)
-              : TextInputType.text,
-          decoration: decoration,
-          onChanged: (text) => setState(() {
-            final value = text.trim();
-            if (value.isEmpty) {
-              _data.remove(field.key);
-            } else if (!numeric) {
-              _data[field.key] = value;
-            } else {
-              final parsed = field.kind == ImportFieldKind.integer
-                  ? int.tryParse(value.replaceAll(',', ''))
-                  : double.tryParse(value);
-              _data[field.key] = parsed ?? value;
-            }
-          }),
-        );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l = AppLocalizations.of(context)!;
-    final item = widget.item;
-    final errors = importFieldErrors(_preview, _zh);
-    final fruits =
-        widget.draft.where((i) => i.type == ImportType.fruit).toList();
-    final groups =
-        widget.draft.where((i) => i.type == ImportType.group).toList();
-    return AlertDialog(
-      title: Text(item.name(_zh)),
-      content: SizedBox(
-        width: 560,
-        child: SingleChildScrollView(
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            if (!item.exists) ...[
-              for (final (key, zh, en) in [
-                ('zh_CN', '中文名', 'Chinese name'),
-                ('en_US', '英文名', 'English name'),
-              ]) ...[
-                TextField(
-                  key: Key('import-field-name-$key'),
-                  controller: _controller('name.$key', _name[key]),
-                  decoration: InputDecoration(
-                    labelText: _t(zh, en),
-                    errorText: key == 'zh_CN' ? errors['name'] : null,
-                    border: const OutlineInputBorder(),
-                    isDense: true,
-                  ),
-                  onChanged: (text) => setState(() => text.trim().isEmpty
-                      ? _name.remove(key)
-                      : _name[key] = text.trim()),
-                ),
-                const SizedBox(height: 12),
-              ],
-              for (final field in importFields(item.type)) ...[
-                _field(field, errors[field.key]),
-                const SizedBox(height: 12),
-              ],
-            ],
-            if (item.type == ImportType.character) ...[
-              if (fruits.isNotEmpty) ...[
-                InputDecorator(
-                  decoration: InputDecoration(
-                    labelText: importFieldLabel(l, _zh, 'fruits'),
-                    errorText: errors['fruits'],
-                    border: const OutlineInputBorder(),
-                    isDense: true,
-                  ),
-                  child: Wrap(spacing: 6, children: [
-                    for (final fruit in fruits)
-                      FilterChip(
-                        label: Text(fruit.name(_zh)),
-                        selected: _fruits.contains(fruit.key),
-                        onSelected: (on) => setState(() => on
-                            ? _fruits.add(fruit.key)
-                            : _fruits.remove(fruit.key)),
-                      ),
-                  ]),
-                ),
-                const SizedBox(height: 12),
-              ],
-              if (groups.isNotEmpty)
-                Row(children: [
-                  Expanded(
-                    child: DropdownButtonFormField<String?>(
-                      key: const Key('import-field-group'),
-                      initialValue: _group,
-                      isExpanded: true,
-                      decoration: InputDecoration(
-                        labelText: importFieldLabel(l, _zh, 'group'),
-                        border: const OutlineInputBorder(),
-                        isDense: true,
-                      ),
-                      items: [
-                        DropdownMenuItem(
-                            value: null, child: Text(_t('不加入', 'None'))),
-                        for (final group in groups)
-                          DropdownMenuItem(
-                              value: group.key, child: Text(group.name(_zh))),
-                      ],
-                      onChanged: (value) => setState(() => _group = value),
-                    ),
-                  ),
-                  if (_group != null) ...[
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: DropdownButtonFormField<String>(
-                        key: const Key('import-field-position'),
-                        initialValue: _position,
-                        isExpanded: true,
-                        decoration: InputDecoration(
-                          labelText: importFieldLabel(l, _zh, 'position'),
-                          border: const OutlineInputBorder(),
-                          isDense: true,
-                        ),
-                        items: [
-                          for (final position in GroupPosition.values)
-                            DropdownMenuItem(
-                                value: position.value,
-                                child: Text(importOptionLabel(
-                                    l, 'position', position.value))),
-                        ],
-                        onChanged: (value) =>
-                            setState(() => _position = value ?? 'member'),
-                      ),
-                    ),
-                  ],
-                ]),
-            ],
-          ]),
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(false),
-          child: Text(_t('取消', 'Cancel')),
-        ),
-        FilledButton(
-          key: const Key('import-editor-save'),
-          onPressed: _save,
-          style:
-              FilledButton.styleFrom(backgroundColor: OnepieceColors.fancyBlue),
-          child: Text(_t('保存', 'Save')),
-        ),
-      ],
     );
   }
 }

@@ -86,10 +86,15 @@ class ImportItem {
 }
 
 class ImportDraft {
-  ImportDraft(this.items, this.notes);
+  ImportDraft(this.items, this.notes, {this.reply, List<String>? changed})
+      : changed = changed ?? const [];
 
   final List<ImportItem> items;
   final List<String> notes;
+
+  /// After a revision: the AI's answer, and the keys it added or changed.
+  final String? reply;
+  final List<String> changed;
 
   factory ImportDraft.fromJson(Map<String, dynamic> json) => ImportDraft(
         ((json['items'] as List?) ?? const [])
@@ -97,7 +102,20 @@ class ImportDraft {
             .map(ImportItem.fromJson)
             .toList(),
         _strings(json['notes']),
+        reply: json['reply']?.toString(),
+        changed: _strings(json['changed']),
       );
+}
+
+/// One message of the review conversation; [user] is the reviewer.
+class ImportTurn {
+  const ImportTurn(this.user, this.text);
+
+  final bool user;
+  final String text;
+
+  Map<String, dynamic> toJson() =>
+      {'role': user ? 'user' : 'assistant', 'content': text};
 }
 
 class ImportCreated {
@@ -162,7 +180,7 @@ class ImportRejected implements Exception {
   String toString() => message;
 }
 
-/// One event of the `/import/draft` stream.
+/// One event of the `/import/draft` and `/import/revise` streams.
 sealed class ImportEvent {
   const ImportEvent();
 }
