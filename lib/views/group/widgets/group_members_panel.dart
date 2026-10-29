@@ -544,7 +544,7 @@ class _GroupMembersPanelState extends State<GroupMembersPanel> {
               leading: const Icon(Icons.person_outline,
                   size: 18, color: OnepieceColors.fancyGreen),
               title: _buildTreeTitle(
-                imageUri: character.imageUri!,
+                imageUri: character.imageUri ?? '',
                 title: I18nHelper.getDisplayNameFromI18n(character.name!),
                 onTap: () {
                   context.goNamed('characterDetails',

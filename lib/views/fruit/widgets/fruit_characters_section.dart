@@ -53,7 +53,7 @@ class FruitCharactersSection extends StatelessWidget {
                       child: Row(children: [
                         ImageLazyLoader(
                             key: ValueKey(c.imageUri),
-                            uriProvider: () => c.imageUri!,
+                            uriProvider: () => c.imageUri ?? '',
                             width: 36,
                             borderWidth: 1.5,
                             borderRadios: 36),

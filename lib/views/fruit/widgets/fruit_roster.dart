@@ -144,7 +144,7 @@ class FruitRoster extends StatelessWidget {
     if (fruit.imageUri?.isNotEmpty == true) {
       return ImageLazyLoader(
         key: ValueKey('fruit-avatar-${fruit.id}'),
-        uriProvider: () => fruit.imageUri!,
+        uriProvider: () => fruit.imageUri ?? '',
         width: size,
         borderWidth: 0,
         borderRadios: size * 0.2,

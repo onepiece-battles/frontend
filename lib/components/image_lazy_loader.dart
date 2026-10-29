@@ -42,11 +42,22 @@ class _ImageLazyLoaderState extends State<ImageLazyLoader> {
     }
   }
 
+  /// The provider's URI, or null when it throws. Lazy loads run inside one
+  /// shared VisibilityDetector batch, so a throwing provider would also stall
+  /// every other lazy image queued after it.
+  static String? _uriOf(ImageLazyLoader loader) {
+    try {
+      return loader.uriProvider?.call();
+    } catch (_) {
+      return null;
+    }
+  }
+
   @override
   void didUpdateWidget(covariant ImageLazyLoader oldWidget) {
     super.didUpdateWidget(oldWidget);
-    final newUri = widget.uriProvider?.call();
-    final oldUri = oldWidget.uriProvider?.call();
+    final newUri = _uriOf(widget);
+    final oldUri = _uriOf(oldWidget);
     if ((newUri != oldUri || widget.fullImage != oldWidget.fullImage) &&
         _triggered) {
       _imageFuture = (newUri != null && newUri.isNotEmpty)
@@ -58,7 +69,7 @@ class _ImageLazyLoaderState extends State<ImageLazyLoader> {
   void _triggerLoad() {
     if (_triggered) return;
     _triggered = true;
-    final uri = widget.uriProvider?.call();
+    final uri = _uriOf(widget);
     if (uri != null && uri.isNotEmpty) {
       _imageFuture = ImageCacheManager.getImage(
         uri,

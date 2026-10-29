@@ -86,7 +86,7 @@ class GroupRoster extends StatelessWidget {
                       RepaintBoundary(
                         child: ImageLazyLoader(
                           key: ValueKey(group.imageUri),
-                          uriProvider: () => group.imageUri!,
+                          uriProvider: () => group.imageUri ?? '',
                           width: 32,
                           borderWidth: 1.5,
                           borderRadios: 5,
@@ -188,7 +188,7 @@ class GroupRoster extends StatelessWidget {
                 Row(children: [
                   ImageLazyLoader(
                     key: ValueKey(group.imageUri),
-                    uriProvider: () => group.imageUri!,
+                    uriProvider: () => group.imageUri ?? '',
                     width: 36,
                     borderWidth: 0,
                     lazy: true,
@@ -270,7 +270,7 @@ class GroupRoster extends StatelessWidget {
               child: RepaintBoundary(
                 child: ImageLazyLoader(
                     key: ValueKey(character.imageUri),
-                    uriProvider: () => character.imageUri!,
+                    uriProvider: () => character.imageUri ?? '',
                     width: 24,
                     borderWidth: 1.5,
                     borderRadios: 40,
@@ -310,7 +310,7 @@ class GroupRoster extends StatelessWidget {
                 child: RepaintBoundary(
                   child: ImageLazyLoader(
                       key: ValueKey(group.imageUri),
-                      uriProvider: () => group.imageUri!,
+                      uriProvider: () => group.imageUri ?? '',
                       width: 24,
                       borderWidth: 1.5,
                       borderRadios: 3,

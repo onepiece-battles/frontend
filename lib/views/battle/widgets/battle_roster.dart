@@ -82,7 +82,7 @@ class BattleRoster extends StatelessWidget {
                       // Starter
                       Expanded(
                         child: _buildBattleCharCard(
-                          imageUri: battle.starter!.imageUri!,
+                          imageUri: battle.starter!.imageUri ?? '',
                           name: I18nHelper.getDisplayNameFromI18n(
                               battle.starter!.name),
                           score: exec?.starterScoreBefore?.toString() ?? '?',
@@ -104,8 +104,8 @@ class BattleRoster extends StatelessWidget {
                               ImageLazyLoader(
                                 uriProvider: () =>
                                     exec!.winnerId == battle.starterId
-                                        ? battle.starter!.imageUri!
-                                        : battle.receiver!.imageUri!,
+                                        ? battle.starter!.imageUri ?? ''
+                                        : battle.receiver!.imageUri ?? '',
                                 width: 30,
                                 borderWidth: 2,
                                 lazy: true,
@@ -134,7 +134,7 @@ class BattleRoster extends StatelessWidget {
                       // Receiver
                       Expanded(
                         child: _buildBattleCharCard(
-                          imageUri: battle.receiver!.imageUri!,
+                          imageUri: battle.receiver!.imageUri ?? '',
                           name: I18nHelper.getDisplayNameFromI18n(
                               battle.receiver!.name),
                           score: exec?.receiverScoreBefore?.toString() ?? '?',
@@ -251,7 +251,7 @@ class BattleRoster extends StatelessWidget {
                 Row(children: [
                   Expanded(
                     child: _buildBattleCharCard(
-                      imageUri: battle.starter!.imageUri!,
+                      imageUri: battle.starter!.imageUri ?? '',
                       name: I18nHelper.getDisplayNameFromI18n(
                           battle.starter!.name),
                       score: execution?.starterScoreBefore?.toString() ?? '?',
@@ -264,7 +264,7 @@ class BattleRoster extends StatelessWidget {
                   ),
                   Expanded(
                     child: _buildBattleCharCard(
-                      imageUri: battle.receiver!.imageUri!,
+                      imageUri: battle.receiver!.imageUri ?? '',
                       name: I18nHelper.getDisplayNameFromI18n(
                           battle.receiver!.name),
                       score: execution?.receiverScoreBefore?.toString() ?? '?',

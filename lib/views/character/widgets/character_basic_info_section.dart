@@ -667,7 +667,7 @@ class _CharacterBasicInfoSectionState extends State<CharacterBasicInfoSection> {
                   : null,
               child: selectedImage == null
                   ? ImageLazyLoader(
-                      uriProvider: () => character.imageUri!,
+                      uriProvider: () => character.imageUri ?? '',
                       width: 200,
                       borderWidth: 3,
                       borderRadios: 200,
