@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import 'assistant_message.dart';
+import 'assistant_events.dart';
 
 /// Holds the AI conversation for the whole app session (one per login), so
 /// navigating to a resource and back — which rebuilds the assistant view —
@@ -19,6 +20,45 @@ class AssistantSession extends ChangeNotifier {
 
   /// An answer is streaming in; the next question waits for it.
   bool busy = false;
+
+  /// Keep every displayed copy in sync with the server's result, including
+  /// earlier messages reached by scrolling back after confirming/cancelling.
+  Set<String> applyActionUpdates(List<AiActionProposal> proposals) {
+    final byCode = {for (final p in proposals) p.code: p};
+    final updated = <String>{};
+    for (var i = 0; i < messages.length; i++) {
+      final message = messages[i];
+      if (!message.actionProposals.any((p) => byCode.containsKey(p.code))) {
+        continue;
+      }
+      final next = message.withActionProposals(message.actionProposals.map((p) {
+        final replacement = byCode[p.code];
+        if (replacement != null) updated.add(p.code);
+        return replacement ?? p;
+      }).toList());
+      messages[i] = next;
+      if (handledProposals.remove(message)) handledProposals.add(next);
+    }
+    return updated;
+  }
+
+  /// Keep the stored/wire command exact while presenting a readable user action.
+  String displayCommand(String text, {required bool zh}) {
+    final command = RegExp(
+            r'^(确认|取消|confirm|cancel)\s+([A-Fa-f0-9]{10})[。.!！]?$',
+            caseSensitive: false)
+        .firstMatch(text.trim());
+    if (command == null) return text;
+    final code = command.group(2)!.toUpperCase();
+    for (final proposal in messages.expand((m) => m.actionProposals)) {
+      if (proposal.code != code) continue;
+      final cancel =
+          const ['取消', 'cancel'].contains(command.group(1)!.toLowerCase());
+      final verb = cancel ? (zh ? '取消' : 'Cancel') : (zh ? '确认' : 'Confirm');
+      return '$verb：${proposal.title}';
+    }
+    return text;
+  }
 
   /// Tells the listening view that [messages] or [busy] changed.
   void changed() => notifyListeners();

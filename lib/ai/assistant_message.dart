@@ -23,7 +23,8 @@ class AiChatMessage {
       {this.resources = const [],
       this.pending = false,
       this.status,
-      this.battleProposal});
+      this.battleProposal,
+      this.actionProposals = const []});
   final String role; // 'user' | 'assistant'
   final String text;
   final List<ResourceRef> resources;
@@ -36,6 +37,33 @@ class AiChatMessage {
 
   /// Non-null when the reply offers to create a battle (fresh replies only).
   final BattleProposal? battleProposal;
+  final List<AiActionProposal> actionProposals;
+
+  AiChatMessage withActionProposals(List<AiActionProposal> proposals) =>
+      AiChatMessage(role, text,
+          resources: resources,
+          pending: pending,
+          status: status,
+          battleProposal: battleProposal,
+          actionProposals: proposals);
+
+  /// Only remove the exact server-generated appendix when its structured card
+  /// contains the same summary and code. The analysis and comparisons stay intact.
+  String get displayText {
+    var end = text.length;
+    for (final proposal in actionProposals) {
+      if (proposal.summary.isEmpty) {
+        continue;
+      }
+      final index = text.lastIndexOf('\n\n${proposal.summary}');
+      if (index >= 0 &&
+          text.substring(index).contains(proposal.code) &&
+          index < end) {
+        end = index;
+      }
+    }
+    return text.substring(0, end).trimRight();
+  }
 }
 
 /// Repair resource references in an assistant reply. The server repairs every

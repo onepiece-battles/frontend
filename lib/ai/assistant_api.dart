@@ -20,7 +20,8 @@ class AssistantApi {
   final ApiClient _client;
   static const String _base = '/api/onepiece/assistant';
 
-  Future<Map<String, dynamic>> _post(String path, [Map<String, dynamic>? body]) async {
+  Future<Map<String, dynamic>> _post(String path,
+      [Map<String, dynamic>? body]) async {
     final response = await _client.invokeAPI(
       '$_base$path',
       'POST',
@@ -89,7 +90,8 @@ class AssistantApi {
   }
 
   /// NIKA-only. A null/blank [apiKey] keeps the stored key.
-  Future<void> setSetting({String? apiKey, String? baseUrl, String? model}) async {
+  Future<void> setSetting(
+      {String? apiKey, String? baseUrl, String? model}) async {
     await _post('/set_setting', {
       'apiKey': apiKey,
       'baseUrl': baseUrl,
@@ -105,17 +107,21 @@ class AiStoredMessage {
     required this.role,
     required this.content,
     required this.resources,
+    this.actionProposals = const [],
   });
 
   final String id;
   final String role; // user | assistant
   final String content;
   final List<AiResourceLink> resources;
+  final List<AiActionProposal> actionProposals;
 
-  factory AiStoredMessage.fromJson(Map<String, dynamic> json) => AiStoredMessage(
+  factory AiStoredMessage.fromJson(Map<String, dynamic> json) =>
+      AiStoredMessage(
         id: (json['id'] ?? '').toString(),
         role: (json['role'] ?? '').toString(),
         content: (json['content'] ?? '').toString(),
+        actionProposals: AiActionProposal.listFromJson(json['actionProposals']),
         resources: (((json['resources'] as List?) ?? const [])
             .map((e) => AiResourceLink.fromJson(e as Map<String, dynamic>))
             .toList()),
