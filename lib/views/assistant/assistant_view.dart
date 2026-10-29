@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show ScrollDirection;
 import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
@@ -8,10 +9,12 @@ import '../../ai/assistant_api.dart';
 import '../../ai/assistant_action_card.dart';
 import '../../ai/assistant_message.dart';
 import '../../ai/assistant_session.dart';
+import '../../ai/assistant_scroll_controller.dart';
 import '../../ai/rich_message.dart';
 import '../../ai/speech_input.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../repository/battle_dao.dart';
+import '../../utils/responsive_breakpoints.dart';
 
 /// The post-login landing: an AI control room. The user asks in natural
 /// language (typed, spoken, or via a preset) and the assistant answers using
@@ -27,7 +30,10 @@ class AssistantView extends StatefulWidget {
 class _AssistantViewState extends State<AssistantView> {
   final GetIt _getIt = GetIt.instance;
   final TextEditingController _input = TextEditingController();
-  final ScrollController _scroll = ScrollController();
+  late final AssistantScrollController _scroll =
+      AssistantScrollController(_session);
+  bool _scrollQueued = false;
+  bool _userScrolling = false;
   final SpeechInput _speech = SpeechInput();
 
   bool _listening = false;
@@ -62,7 +68,9 @@ class _AssistantViewState extends State<AssistantView> {
   }
 
   void _onSessionChanged() {
-    if (mounted) setState(() {});
+    if (!mounted) return;
+    setState(() {});
+    if (_session.followLatest) _scheduleScrollToEnd();
   }
 
   Future<void> _bootstrap() async {
@@ -102,7 +110,7 @@ class _AssistantViewState extends State<AssistantView> {
     }
     if (mounted) {
       setState(() => _loadingHistory = false);
-      _scrollToEnd();
+      if (_session.followLatest) _scheduleScrollToEnd();
     }
   }
 
@@ -131,12 +139,39 @@ class _AssistantViewState extends State<AssistantView> {
           "Tell me about Ace's battles",
         ];
 
+  /// Explicitly sending a message resumes following the newest reply.
   void _scrollToEnd() {
+    _userScrolling = false;
+    _session.followLatest = true;
+    _scheduleScrollToEnd();
+  }
+
+  void _scheduleScrollToEnd() {
+    if (_scrollQueued || !mounted) return;
+    _scrollQueued = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scroll.hasClients) {
+      _scrollQueued = false;
+      if (mounted && _session.followLatest && _scroll.hasClients) {
         _scroll.jumpTo(_scroll.position.maxScrollExtent);
       }
     });
+  }
+
+  bool _onScroll(ScrollNotification notification) {
+    if (notification.depth != 0) return false;
+    if ((notification is ScrollStartNotification &&
+            notification.dragDetails != null) ||
+        (notification is UserScrollNotification &&
+            notification.direction != ScrollDirection.idle)) {
+      _userScrolling = true;
+      _session.followLatest = false;
+    }
+    if (notification is ScrollEndNotification && _userScrolling) {
+      _userScrolling = false;
+      _session.followLatest = notification.metrics.extentAfter <= 8;
+      if (_session.followLatest) _scheduleScrollToEnd();
+    }
+    return false;
   }
 
   /// Asks the server-side assistant and streams its answer into a pending
@@ -163,7 +198,6 @@ class _AssistantViewState extends State<AssistantView> {
       _messages[index] = next;
       reply = next;
       _session.changed();
-      if (mounted) _scrollToEnd();
     }
 
     var answer = '';
@@ -477,11 +511,15 @@ class _AssistantViewState extends State<AssistantView> {
   }
 
   Widget _messageList() {
-    return ListView.builder(
-      controller: _scroll,
-      padding: const EdgeInsets.fromLTRB(14, 14, 14, 8),
-      itemCount: _messages.length,
-      itemBuilder: (context, i) => _bubble(_messages[i]),
+    return NotificationListener<ScrollNotification>(
+      onNotification: _onScroll,
+      child: ListView.builder(
+        key: const ValueKey('assistant_messages'),
+        controller: _scroll,
+        padding: const EdgeInsets.fromLTRB(14, 14, 14, 8),
+        itemCount: _messages.length,
+        itemBuilder: (context, i) => _bubble(_messages[i]),
+      ),
     );
   }
 
@@ -745,59 +783,112 @@ class _AssistantViewState extends State<AssistantView> {
   }
 
   Widget _composer() {
+    final mobile = ResponsiveBreakpoints.isMobile(context);
     return Container(
-      padding: const EdgeInsets.fromLTRB(12, 6, 12, 12),
+      key: const ValueKey('assistant_composer'),
+      padding: EdgeInsets.fromLTRB(
+          mobile ? 8 : 16, 8, mobile ? 8 : 16, mobile ? 10 : 14),
       decoration: const BoxDecoration(
-        border: Border(
-            top: BorderSide(color: OnepieceColors.separator, width: 0.5)),
+        color: Colors.white,
+        border:
+            Border(top: BorderSide(color: OnepieceColors.separator, width: .5)),
       ),
       child: Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
-        if (_speech.isSupported)
-          IconButton(
-            onPressed: _busy ? null : _toggleVoice,
-            icon: Icon(_listening ? Icons.mic : Icons.mic_none,
-                color: _listening
+        if (_speech.isSupported) ...[
+          Padding(
+            padding: const EdgeInsets.only(bottom: 1),
+            child: IconButton.filledTonal(
+              tooltip: _listening
+                  ? (_zh ? '停止语音输入' : 'Stop voice input')
+                  : (_zh ? '语音输入' : 'Voice input'),
+              onPressed: _busy ? null : _toggleVoice,
+              style: IconButton.styleFrom(
+                minimumSize: const Size(40, 40),
+                maximumSize: const Size(40, 40),
+                backgroundColor: OnepieceColors.surface,
+                foregroundColor: _listening
                     ? OnepieceColors.fancyBlue
-                    : OnepieceColors.secondaryLabel),
+                    : OnepieceColors.primaryLabel,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
+              ),
+              icon: Icon(_listening ? Icons.mic : Icons.mic_none, size: 20),
+            ),
           ),
+          const SizedBox(width: 4),
+        ],
         Expanded(
           child: Container(
+            key: const ValueKey('assistant_input_surface'),
             decoration: BoxDecoration(
-              color: OnepieceColors.surface,
-              borderRadius: BorderRadius.circular(20),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: OnepieceColors.separator, width: .7),
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 14),
-            child: TextField(
-              controller: _input,
-              minLines: 1,
-              maxLines: 5,
-              textInputAction: TextInputAction.send,
-              onSubmitted: _send,
-              decoration: InputDecoration(
-                border: InputBorder.none,
-                isCollapsed: true,
-                contentPadding: const EdgeInsets.symmetric(vertical: 11),
-                hintText: _zh ? '输入指令或问题…' : 'Type a command or question…',
-                hintStyle: const TextStyle(
-                    fontSize: 14, color: OnepieceColors.secondaryLabel),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
+            child: ConstrainedBox(
+              constraints:
+                  BoxConstraints(minHeight: 24, maxHeight: mobile ? 120 : 150),
+              child: TextField(
+                key: const ValueKey('assistant_input'),
+                controller: _input,
+                minLines: 1,
+                maxLines: mobile ? 5 : 6,
+                keyboardType: TextInputType.multiline,
+                textInputAction: TextInputAction.send,
+                cursorHeight: 16,
+                style: const TextStyle(
+                    fontSize: 15,
+                    height: 1.3,
+                    color: OnepieceColors.primaryLabel),
+                onSubmitted: _send,
+                decoration: InputDecoration(
+                  isCollapsed: true,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 9),
+                  hintText: _zh ? '输入指令或问题…' : 'Type a command or question…',
+                  hintStyle: const TextStyle(
+                      fontSize: 15, color: OnepieceColors.secondaryLabel),
+                  floatingLabelBehavior: FloatingLabelBehavior.never,
+                  border: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  disabledBorder: InputBorder.none,
+                ),
               ),
             ),
           ),
         ),
-        const SizedBox(width: 8),
-        Material(
-          color: OnepieceColors.fancyBlue,
-          shape: const CircleBorder(),
-          child: InkWell(
-            customBorder: const CircleBorder(),
-            onTap: _busy ? null : () => _send(_input.text),
-            child: const SizedBox(
-              width: 40,
-              height: 40,
-              child: Icon(Icons.arrow_upward_rounded,
-                  color: Colors.white, size: 20),
-            ),
-          ),
+        const SizedBox(width: 6),
+        ValueListenableBuilder<TextEditingValue>(
+          valueListenable: _input,
+          builder: (context, value, _) {
+            final canSend = !_busy && value.text.trim().isNotEmpty;
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 1),
+              child: IconButton.filled(
+                key: const ValueKey('assistant_send'),
+                tooltip:
+                    _busy ? (_zh ? '正在回复' : 'Replying') : (_zh ? '发送' : 'Send'),
+                onPressed: canSend ? () => _send(value.text) : null,
+                style: IconButton.styleFrom(
+                  minimumSize: const Size(40, 40),
+                  maximumSize: const Size(40, 40),
+                  backgroundColor: OnepieceColors.fancyBlue,
+                  foregroundColor: Colors.white,
+                  disabledBackgroundColor: OnepieceColors.surface,
+                  disabledForegroundColor: OnepieceColors.secondaryLabel,
+                  shape: const CircleBorder(),
+                ),
+                icon: _busy
+                    ? const SizedBox.square(
+                        dimension: 17,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: OnepieceColors.secondaryLabel))
+                    : const Icon(Icons.arrow_upward_rounded, size: 21),
+              ),
+            );
+          },
         ),
       ]),
     );

@@ -21,6 +21,11 @@ class AssistantSession extends ChangeNotifier {
   /// An answer is streaming in; the next question waits for it.
   bool busy = false;
 
+  /// Retained for this login session when the assistant view is rebuilt.
+  /// Null means its first opening: start at the latest message.
+  double? scrollOffset;
+  bool followLatest = true;
+
   /// Keep every displayed copy in sync with the server's result, including
   /// earlier messages reached by scrolling back after confirming/cancelling.
   Set<String> applyActionUpdates(List<AiActionProposal> proposals) {
@@ -65,6 +70,8 @@ class AssistantSession extends ChangeNotifier {
 
   void reset() {
     messages.clear();
+    scrollOffset = null;
+    followLatest = true;
     handledProposals.clear();
     loaded = true; // a cleared thread is "loaded" — don't refetch old history
     notifyListeners();
