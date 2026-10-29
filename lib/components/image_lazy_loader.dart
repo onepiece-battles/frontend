@@ -107,6 +107,15 @@ class _ImageLazyLoaderState extends State<ImageLazyLoader> {
 
   @override
   Widget build(BuildContext context) {
+    // A parent that forces another size (e.g. a fixed-height horizontal list)
+    // would stretch the frame and turn round avatars into ovals. Centering
+    // keeps the frame width × width; under loose constraints it changes
+    // nothing.
+    return Center(
+        widthFactor: 1, heightFactor: 1, child: _buildContent(context));
+  }
+
+  Widget _buildContent(BuildContext context) {
     // Lazy mode: gate behind VisibilityDetector
     if (widget.lazy && !_triggered) {
       // Unique key per instance — avoids collisions when URIs repeat
