@@ -14,7 +14,7 @@ import '../../ai/rich_message.dart';
 import '../../ai/speech_input.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../repository/battle_dao.dart';
-import '../../utils/responsive_breakpoints.dart';
+import 'widgets/assistant_composer.dart';
 
 /// The post-login landing: an AI control room. The user asks in natural
 /// language (typed, spoken, or via a preset) and the assistant answers using
@@ -782,117 +782,35 @@ class _AssistantViewState extends State<AssistantView> {
     );
   }
 
-  Widget _composer() {
-    final mobile = ResponsiveBreakpoints.isMobile(context);
-    return Container(
-      key: const ValueKey('assistant_composer'),
-      padding: EdgeInsets.fromLTRB(
-          mobile ? 8 : 16, 8, mobile ? 8 : 16, mobile ? 10 : 14),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border:
-            Border(top: BorderSide(color: OnepieceColors.separator, width: .5)),
-      ),
-      child: Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
-        if (_speech.isSupported) ...[
-          Padding(
-            padding: const EdgeInsets.only(bottom: 1),
-            child: IconButton.filledTonal(
-              tooltip: _listening
-                  ? (_zh ? '停止语音输入' : 'Stop voice input')
-                  : (_zh ? '语音输入' : 'Voice input'),
-              onPressed: _busy ? null : _toggleVoice,
-              style: IconButton.styleFrom(
-                minimumSize: const Size(40, 40),
-                maximumSize: const Size(40, 40),
-                backgroundColor: OnepieceColors.surface,
-                foregroundColor: _listening
-                    ? OnepieceColors.fancyBlue
-                    : OnepieceColors.primaryLabel,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
-              ),
-              icon: Icon(_listening ? Icons.mic : Icons.mic_none, size: 20),
-            ),
-          ),
-          const SizedBox(width: 4),
-        ],
-        Expanded(
-          child: Container(
-            key: const ValueKey('assistant_input_surface'),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: OnepieceColors.separator, width: .7),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
-            child: ConstrainedBox(
-              constraints:
-                  BoxConstraints(minHeight: 24, maxHeight: mobile ? 120 : 150),
-              child: TextField(
-                key: const ValueKey('assistant_input'),
-                controller: _input,
-                minLines: 1,
-                maxLines: mobile ? 5 : 6,
-                keyboardType: TextInputType.multiline,
-                textInputAction: TextInputAction.send,
-                cursorHeight: 16,
-                style: const TextStyle(
-                    fontSize: 15,
-                    height: 1.3,
-                    color: OnepieceColors.primaryLabel),
-                onSubmitted: _send,
-                decoration: InputDecoration(
-                  isCollapsed: true,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 9),
-                  hintText: _zh ? '输入指令或问题…' : 'Type a command or question…',
-                  hintStyle: const TextStyle(
-                      fontSize: 15, color: OnepieceColors.secondaryLabel),
-                  floatingLabelBehavior: FloatingLabelBehavior.never,
-                  border: InputBorder.none,
-                  focusedBorder: InputBorder.none,
-                  enabledBorder: InputBorder.none,
-                  disabledBorder: InputBorder.none,
+  Widget _composer() => AssistantComposer(
+        controller: _input,
+        hint: _zh ? '输入指令或问题…' : 'Type a command or question…',
+        busy: _busy,
+        onSend: _send,
+        zh: _zh,
+        leading: !_speech.isSupported
+            ? null
+            : Padding(
+                padding: const EdgeInsets.only(bottom: 1),
+                child: IconButton.filledTonal(
+                  tooltip: _listening
+                      ? (_zh ? '停止语音输入' : 'Stop voice input')
+                      : (_zh ? '语音输入' : 'Voice input'),
+                  onPressed: _busy ? null : _toggleVoice,
+                  style: IconButton.styleFrom(
+                    minimumSize: const Size(40, 40),
+                    maximumSize: const Size(40, 40),
+                    backgroundColor: OnepieceColors.surface,
+                    foregroundColor: _listening
+                        ? OnepieceColors.fancyBlue
+                        : OnepieceColors.primaryLabel,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8)),
+                  ),
+                  icon: Icon(_listening ? Icons.mic : Icons.mic_none, size: 20),
                 ),
               ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 6),
-        ValueListenableBuilder<TextEditingValue>(
-          valueListenable: _input,
-          builder: (context, value, _) {
-            final canSend = !_busy && value.text.trim().isNotEmpty;
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 1),
-              child: IconButton.filled(
-                key: const ValueKey('assistant_send'),
-                tooltip:
-                    _busy ? (_zh ? '正在回复' : 'Replying') : (_zh ? '发送' : 'Send'),
-                onPressed: canSend ? () => _send(value.text) : null,
-                style: IconButton.styleFrom(
-                  minimumSize: const Size(40, 40),
-                  maximumSize: const Size(40, 40),
-                  backgroundColor: OnepieceColors.fancyBlue,
-                  foregroundColor: Colors.white,
-                  disabledBackgroundColor: OnepieceColors.surface,
-                  disabledForegroundColor: OnepieceColors.secondaryLabel,
-                  shape: const CircleBorder(),
-                ),
-                icon: _busy
-                    ? const SizedBox.square(
-                        dimension: 17,
-                        child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: OnepieceColors.secondaryLabel))
-                    : const Icon(Icons.arrow_upward_rounded, size: 21),
-              ),
-            );
-          },
-        ),
-      ]),
-    );
-  }
+      );
 }
 
 class _TypingDots extends StatefulWidget {

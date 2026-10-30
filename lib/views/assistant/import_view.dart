@@ -9,6 +9,7 @@ import '../../ai/import_fields.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../l10n/app_localizations.dart';
 import 'import_item_editor.dart';
+import 'widgets/assistant_composer.dart';
 
 /// AI batch import (NIKA only): describe a scope, let DeepSeek draft the
 /// groups, fruits and characters in it, refine the draft by talking to the AI
@@ -63,11 +64,11 @@ class _ImportViewState extends State<ImportView> {
     return null;
   }
 
-  void _send([String? text]) {
-    final message = text ?? _message.text;
-    if (message.trim().isEmpty || _session.busy) return;
-    _session.send(message, zh: _zh);
-    if (text == null) _message.clear();
+  /// Sends what was typed, or [text] from a chip (leaving the typed text).
+  void _send(String text, {bool typed = true}) {
+    if (text.trim().isEmpty || _session.busy) return;
+    _session.send(text, zh: _zh);
+    if (typed) _message.clear();
   }
 
   bool _needsFix(ImportItem item) =>
@@ -108,16 +109,8 @@ class _ImportViewState extends State<ImportView> {
     _session.touch();
   }
 
-  /// Gives [fruit] to [character]; a new character's capacity follows (up to
-  /// two fruits).
   void _assign(ImportItem fruit, ImportItem character) {
-    character.fruits = [...character.fruits, fruit.key];
-    final capacity = character.data['maximum_fruit_count'];
-    if (!character.exists &&
-        character.fruits.length <= 2 &&
-        (capacity is! num || capacity < character.fruits.length)) {
-      character.data['maximum_fruit_count'] = character.fruits.length;
-    }
+    ImportItemEditor.giveFruit(character, fruit.key);
     fruit.problems = [];
     _session.touch();
   }
@@ -187,6 +180,18 @@ class _ImportViewState extends State<ImportView> {
                     ),
                   ),
                   if (_draft != null) _commitBar(narrow),
+                  AssistantComposer(
+                    keyPrefix: 'import',
+                    controller: _message,
+                    zh: _zh,
+                    busy: _session.busy,
+                    onSend: _send,
+                    hint: _draft == null
+                        ? _t('说一个范围，例如：唐吉诃德家族全员',
+                            'A scope, e.g. the Donquixote Pirates')
+                        : _t('告诉 AI 要怎么改，或让它重新查资料…',
+                            'Tell the AI what to change, or to look something up…'),
+                  ),
                 ]);
               },
             ),
@@ -223,9 +228,9 @@ class _ImportViewState extends State<ImportView> {
         child: child,
       );
 
-  /// The whole conversation — every scope and request, the AI's answers and
-  /// errors — and the one composer: with no draft it drafts what it is told,
-  /// otherwise it changes the current draft.
+  /// The whole conversation: every scope and request, the AI's answers and
+  /// errors. The composer under the page (the assistant's) drafts what it is
+  /// told when there is no draft, and otherwise changes the current one.
   Widget _conversationPanel() {
     final session = _session;
     final busy = session.busy;
@@ -272,7 +277,7 @@ class _ImportViewState extends State<ImportView> {
             for (final (zh, en) in _examples)
               ActionChip(
                 label: Text(_t(zh, en)),
-                onPressed: busy ? null : () => _send(_t(zh, en)),
+                onPressed: busy ? null : () => _send(_t(zh, en), typed: false),
               ),
           ]),
           const SizedBox(height: 12),
@@ -303,53 +308,14 @@ class _ImportViewState extends State<ImportView> {
               avatar: const Icon(Icons.person_search_outlined, size: 18),
               label: Text(_t('让 AI 给没有持有者的果实找到持有者',
                   'Ask the AI who ate the fruits without a holder')),
-              onPressed: () => _send(_t(
-                  '这些果实还没有持有者：${unheld.map((f) => f.name(true)).join('、')}。请把它们分给原作里吃下它们的角色，必要时加上这些角色。',
-                  'These fruits have no holder: ${unheld.map((f) => f.name(false)).join(', ')}. Give each to the canon character who ate it, adding them if needed.')),
+              onPressed: () => _send(
+                  _t('这些果实还没有持有者：${unheld.map((f) => f.name(true)).join('、')}。请把它们分给原作里吃下它们的角色，必要时加上这些角色。',
+                      'These fruits have no holder: ${unheld.map((f) => f.name(false)).join(', ')}. Give each to the canon character who ate it, adding them if needed.'),
+                  typed: false),
             ),
           ),
           const SizedBox(height: 8),
         ],
-        Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
-          Expanded(
-            child: TextField(
-              key: const Key('import-message-field'),
-              controller: _message,
-              enabled: !busy,
-              minLines: 1,
-              maxLines: 4,
-              maxLength: 500,
-              textInputAction: TextInputAction.send,
-              onSubmitted: (_) => _send(),
-              decoration: InputDecoration(
-                hintText: _draft == null
-                    ? _t('说一个范围，例如：唐吉诃德家族全员',
-                        'A scope, e.g. the Donquixote Pirates')
-                    : _t('告诉 AI 要怎么改…', 'Tell the AI what to change…'),
-                counterText: '',
-                isDense: true,
-                filled: true,
-                fillColor: OnepieceColors.surface,
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide.none),
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          IconButton.filled(
-            key: const Key('import-send-button'),
-            tooltip: _draft == null ? _t('生成草稿', 'Draft') : _t('发送', 'Send'),
-            onPressed: busy ? null : _send,
-            style:
-                IconButton.styleFrom(backgroundColor: OnepieceColors.fancyBlue),
-            icon: Icon(_draft == null
-                ? Icons.auto_awesome
-                : Icons.arrow_upward_rounded),
-          ),
-        ]),
       ]),
     );
   }
@@ -775,11 +741,12 @@ class _ItemCard extends StatelessWidget {
 
   /// Who eats this fruit, or a way to choose someone when nobody does.
   Widget _holderRow() {
+    // A new character holds one fruit; an existing one is checked on import.
     final candidates = [
       for (final other in draft)
         if (other.type == ImportType.character &&
             other.included &&
-            other.fruits.length < 2)
+            (other.exists || other.fruits.isEmpty))
           other,
     ];
     return Wrap(

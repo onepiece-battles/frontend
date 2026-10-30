@@ -44,6 +44,17 @@ class ImportItemEditor extends StatefulWidget {
     );
   }
 
+  /// Gives [fruit] to [character]. A new character holds one fruit, so it
+  /// replaces theirs; an existing one keeps its own capacity, checked on import.
+  static void giveFruit(ImportItem character, String fruit) {
+    if (character.exists) {
+      character.fruits = [...character.fruits, fruit];
+    } else {
+      character.fruits = [fruit];
+      character.data['maximum_fruit_count'] = 1;
+    }
+  }
+
   @override
   State<ImportItemEditor> createState() => _ImportItemEditorState();
 }
@@ -104,8 +115,7 @@ class _ImportItemEditorState extends State<ImportItemEditor> {
       for (final character in _characters) {
         final eats = character.fruits.contains(item.key);
         if (_holders.contains(character.key) && !eats) {
-          character.fruits = [...character.fruits, item.key];
-          _fitCapacity(character);
+          ImportItemEditor.giveFruit(character, item.key);
         } else if (!_holders.contains(character.key) && eats) {
           character.fruits =
               character.fruits.where((k) => k != item.key).toList();
@@ -113,15 +123,6 @@ class _ImportItemEditorState extends State<ImportItemEditor> {
       }
     }
     Navigator.of(context).pop(true);
-  }
-
-  /// A new character holds at most two fruits; its capacity follows them.
-  static void _fitCapacity(ImportItem character) {
-    final capacity = character.data['maximum_fruit_count'];
-    if (character.exists || character.fruits.length > 2) return;
-    if (capacity is! num || capacity < character.fruits.length) {
-      character.data['maximum_fruit_count'] = character.fruits.length;
-    }
   }
 
   // ── Building blocks ────────────────────────────────────────────
@@ -474,7 +475,6 @@ class _ImportItemEditorState extends State<ImportItemEditor> {
                   'intelligence',
                   'energy',
                   'group_gain',
-                  'maximum_fruit_count',
                 ])
                   _input(key, errors[key]),
               ]),
@@ -491,7 +491,9 @@ class _ImportItemEditorState extends State<ImportItemEditor> {
         widget.draft.where((i) => i.type == ImportType.group).toList();
     return _section(Icons.link_rounded, _t('关系', 'Relations'), [
       if (fruits.isNotEmpty) ...[
-        _label(_t('吃下的果实（最多 2 个）', 'Fruits eaten (at most 2)')),
+        _label(_item.exists
+            ? _t('吃下的果实', 'Fruits eaten')
+            : _t('吃下的果实（只能 1 个）', 'Fruit eaten (one)')),
         _grid([
           for (final fruit in fruits)
             _linkCard(
@@ -500,9 +502,15 @@ class _ImportItemEditorState extends State<ImportItemEditor> {
               title: fruit.name(_zh),
               subtitle: _otherHolders(fruit),
               selected: _fruits.contains(fruit.key),
-              onTap: () => setState(() => _fruits.contains(fruit.key)
-                  ? _fruits.remove(fruit.key)
-                  : _fruits.add(fruit.key)),
+              onTap: () => setState(() {
+                if (_fruits.contains(fruit.key)) {
+                  _fruits.remove(fruit.key);
+                } else {
+                  // A new character holds one fruit: picking another replaces it.
+                  if (!_item.exists) _fruits.clear();
+                  _fruits.add(fruit.key);
+                }
+              }),
             ),
         ]),
         if (errors['fruits'] != null)
