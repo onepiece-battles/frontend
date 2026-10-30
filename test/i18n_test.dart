@@ -50,6 +50,15 @@ void main() {
         'Luffy');
     expect(I18nHelper.getDisplayNameFromI18nByLocale(null, const Locale('en')),
         isEmpty);
+    // A resource whose name was lost still shows (and routes) as something.
+    expect(
+        I18nHelper.getDisplayNameFromI18nByLocale(
+            I18nText(zhCN: ' '), const Locale('zh')),
+        '未命名');
+    expect(
+        I18nHelper.getDisplayNameFromI18nByLocale(
+            I18nText(), const Locale('en')),
+        'Unnamed');
   });
 
   test('Counts use English plurals and Chinese classifiers', () async {

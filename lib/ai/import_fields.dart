@@ -5,8 +5,9 @@ import 'import_models.dart';
 
 enum ImportFieldKind { text, integer, decimal, choice, choices }
 
-/// One editable create field of an import item. Ranges mirror the server's
-/// create schemas (ActionSchemas), which re-validate everything on import.
+/// One editable create field of an import item. Ranges are those of the app's
+/// own create forms, as are the server's (ActionSchemas), which re-validate
+/// everything on import.
 class ImportField {
   const ImportField(
     this.key,
@@ -85,7 +86,7 @@ final characterFields = <ImportField>[
   ImportField('hakis', ImportFieldKind.choices,
       options: Haki.values.map((e) => e.value).toList()),
   const ImportField('bounty', ImportFieldKind.integer,
-      min: 10, max: 10000000000),
+      min: 10, max: 100000000000),
   const ImportField('age', ImportFieldKind.integer, min: 0, max: 100000),
   const ImportField('height', ImportFieldKind.integer, min: 1, max: 100000),
   const ImportField('birth_place', ImportFieldKind.text),
@@ -105,14 +106,14 @@ final characterFields = <ImportField>[
   const ImportField('intelligence', ImportFieldKind.integer,
       min: 70, max: 260, required: true),
   const ImportField('energy', ImportFieldKind.integer,
-      min: 10, max: 50, required: true),
+      min: 100, max: 300, required: true),
 ];
 
 final fruitFields = <ImportField>[
   ImportField('fruit_type', ImportFieldKind.choice,
       options: FruitType.values.map((e) => e.value).toList(), required: true),
   const ImportField('energy_consume', ImportFieldKind.integer,
-      min: 0, max: 100, required: true),
+      min: 1, max: 10, required: true),
   for (var i = 0; i < _stats.length; i++) ...[
     ImportField('${_stats[i]}_slope', ImportFieldKind.decimal,
         min: 0.8, max: _slopeMax[i], required: true),
