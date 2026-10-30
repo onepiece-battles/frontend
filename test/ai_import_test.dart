@@ -8,6 +8,7 @@ import 'package:get_it/get_it.dart';
 import 'package:openapi/api.dart';
 import 'package:one_piece_battles_flutter/ai/import_api.dart';
 import 'package:one_piece_battles_flutter/ai/import_avatars.dart';
+import 'package:one_piece_battles_flutter/ai/import_session.dart';
 import 'package:one_piece_battles_flutter/ai/import_fields.dart';
 import 'package:one_piece_battles_flutter/ai/json_events.dart';
 import 'package:one_piece_battles_flutter/l10n/app_localizations.dart';
@@ -19,7 +20,11 @@ import 'package:one_piece_battles_flutter/views/assistant/import_view.dart';
 class _FakeImportApi extends ImportApi {
   _FakeImportApi() : super(ApiClient());
 
-  final events = StreamController<ImportEvent>();
+  /// One stream per draft or revision; [events] / [revisions] is the latest.
+  final _drafts = <StreamController<ImportEvent>>[];
+  final _revisions = <StreamController<ImportEvent>>[];
+  StreamController<ImportEvent> get events => _drafts.last;
+  StreamController<ImportEvent> get revisions => _revisions.last;
   final scopes = <String>[];
   List<ImportItem>? committed;
   Future<ImportResult> Function(List<ImportItem> items) onCommit =
@@ -28,10 +33,10 @@ class _FakeImportApi extends ImportApi {
   @override
   Stream<ImportEvent> draft(String scope, {String? language}) {
     scopes.add(scope);
+    _drafts.add(StreamController<ImportEvent>());
     return events.stream;
   }
 
-  final revisions = StreamController<ImportEvent>();
   final revised = <(List<ImportItem>, List<ImportTurn>, String)>[];
 
   @override
@@ -39,6 +44,7 @@ class _FakeImportApi extends ImportApi {
       List<ImportItem> items, List<ImportTurn> conversation, String instruction,
       {String? language}) {
     revised.add((items, conversation, instruction));
+    _revisions.add(StreamController<ImportEvent>());
     return revisions.stream;
   }
 
@@ -64,7 +70,7 @@ Map<String, dynamic> _character(String zh, String en) => {
       'blood': 6000,
       'speed': 120,
       'intelligence': 110,
-      'energy': 40,
+      'energy': 150,
     };
 
 ImportDraft _strawHats() => ImportDraft.fromJson({
@@ -173,6 +179,7 @@ Future<_FakeImportApi> _pump(WidgetTester tester,
   final api = _FakeImportApi();
   GetIt.instance
     ..registerSingleton<ImportApi>(api)
+    ..registerSingleton<ImportSession>(ImportSession())
     ..registerSingleton<ImportAvatars>(avatars ?? _FakeAvatars())
     ..registerSingleton<ImageDao>(images ?? _FakeImageDao())
     ..registerSingleton<User>(
@@ -188,9 +195,14 @@ Future<_FakeImportApi> _pump(WidgetTester tester,
   return api;
 }
 
+/// Types [text] into the conversation's composer and sends it.
+Future<void> _say(WidgetTester tester, String text) async {
+  await tester.enterText(find.byKey(const Key('import-message-field')), text);
+  await tester.tap(find.byKey(const Key('import-send-button')));
+}
+
 Future<void> _draftStrawHats(WidgetTester tester, _FakeImportApi api) async {
-  await tester.enterText(find.byKey(const Key('import-scope-field')), '草帽一伙全员');
-  await tester.tap(find.byKey(const Key('import-draft-button')));
+  await _say(tester, '草帽一伙全员');
   await tester.pump();
   api.events.add(const ImportProgress('正在梳理名单…'));
   await tester.pump();
@@ -225,6 +237,16 @@ void main() {
         containsAll(['race', 'attack', 'fruits']));
     final luffy = _strawHats().items.firstWhere((i) => i.key == 'c3');
     expect(importFieldErrors(luffy, true), isEmpty); // existing: reused as is
+  });
+
+  test('field ranges are those of the create forms', () {
+    String? check(String type, String key, num value) =>
+        importFields(type).firstWhere((f) => f.key == key).check(value, true);
+    expect(check(ImportType.character, 'energy', 300), isNull);
+    expect(check(ImportType.character, 'energy', 50), isNotNull);
+    expect(check(ImportType.character, 'bounty', 50000000000), isNull);
+    expect(check(ImportType.fruit, 'energy_consume', 10), isNull);
+    expect(check(ImportType.fruit, 'energy_consume', 11), isNotNull);
   });
 
   testWidgets('drafts, leaves out what needs fixing and imports the rest',
@@ -361,9 +383,7 @@ void main() {
     await tester.tap(_in('g1', find.byType(Checkbox)));
     await tester.pump();
 
-    await tester.enterText(
-        find.byKey(const Key('import-revise-field')), '去掉索隆，加上乌索普');
-    await tester.tap(find.byKey(const Key('import-revise-send')));
+    await _say(tester, '去掉索隆，加上乌索普');
     await tester.pump();
     final (items, history, instruction) = api.revised.single;
     expect(instruction, '去掉索隆，加上乌索普');
@@ -399,6 +419,49 @@ void main() {
     expect(_in('c3', find.text('刚修改')), findsNothing);
     expect(_checked(tester, 'g1'), isFalse);
     expect(_checked(tester, 'c4'), isTrue);
+  });
+
+  testWidgets('keeps every request, across a new draft and leaving the page',
+      (tester) async {
+    final api = await _pump(tester);
+    await _draftStrawHats(tester, api);
+    await _say(tester, '去掉索隆');
+    await tester.pump();
+    api.revisions.add(ImportDraftReady(ImportDraft(_strawHats().items, const [],
+        reply: '去掉了索隆。', changed: const [])));
+    await tester.pump();
+
+    // Leave the page and come back: the conversation and the draft are kept.
+    await tester.pumpWidget(const MaterialApp(home: SizedBox()));
+    await tester.pumpWidget(const MaterialApp(
+      locale: Locale('zh'),
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      home: Scaffold(body: ImportView()),
+    ));
+    await tester.pump();
+    for (final text in ['草帽一伙全员', '去掉索隆', '去掉了索隆。']) {
+      expect(find.text(text), findsOneWidget);
+    }
+    expect(find.byKey(const Key('import-item-c2')), findsOneWidget);
+
+    // A new draft keeps what was said, and its revisions only see their own.
+    await tester.tap(find.byKey(const Key('import-new-draft')));
+    await tester.pump();
+    expect(find.byKey(const Key('import-item-c2')), findsNothing);
+    await _say(tester, '唐吉诃德家族');
+    await tester.pump();
+    expect(api.scopes, ['草帽一伙全员', '唐吉诃德家族']);
+    api.events.add(ImportDraftReady(_strawHats()));
+    await tester.pump();
+    for (final text in ['草帽一伙全员', '去掉索隆', '开始新草稿', '唐吉诃德家族']) {
+      expect(find.text(text), findsOneWidget);
+    }
+    await _say(tester, '加上多弗朗明哥');
+    await tester.pump();
+    final history = api.revised.last.$2;
+    expect(history.first.text, '唐吉诃德家族');
+    expect(history.map((t) => t.text), isNot(contains('去掉索隆')));
   });
 
   testWidgets('a new fruit needs a holder before it can be imported',
@@ -514,20 +577,19 @@ void main() {
 
   testWidgets('a failed draft shows the server message', (tester) async {
     final api = await _pump(tester);
-    await tester.enterText(
-        find.byKey(const Key('import-scope-field')), '不存在的范围');
-    await tester.tap(find.byKey(const Key('import-draft-button')));
+    await _say(tester, '不存在的范围');
     await tester.pump();
     api.events.add(
         const ImportFailure('invalid_request', '没有找到这个范围里的角色、果实或团体，换个说法试试。'));
     await tester.pump();
     expect(find.text('没有找到这个范围里的角色、果实或团体，换个说法试试。'), findsOneWidget);
+    expect(find.text('不存在的范围'), findsOneWidget); // the request stays too
     expect(find.byKey(const Key('import-commit-button')), findsNothing);
   });
 
   testWidgets('only NIKA can use the page', (tester) async {
     await _pump(tester, role: UserRole.ADMIN);
     expect(find.text('只有 NIKA 可以使用批量录入。'), findsOneWidget);
-    expect(find.byKey(const Key('import-scope-field')), findsNothing);
+    expect(find.byKey(const Key('import-message-field')), findsNothing);
   });
 }

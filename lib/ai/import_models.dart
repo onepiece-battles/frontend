@@ -107,12 +107,21 @@ class ImportDraft {
       );
 }
 
-/// One message of the review conversation; [user] is the reviewer.
-class ImportTurn {
-  const ImportTurn(this.user, this.text);
+enum ImportTurnKind { user, assistant, error, note }
 
-  final bool user;
+/// One entry of the import conversation: what the reviewer said, the AI's
+/// answer, an error, or a note such as where a new draft starts.
+class ImportTurn {
+  const ImportTurn(this.kind, this.text);
+
+  final ImportTurnKind kind;
   final String text;
+
+  bool get user => kind == ImportTurnKind.user;
+
+  /// Only what was said is context for the AI.
+  bool get said =>
+      kind == ImportTurnKind.user || kind == ImportTurnKind.assistant;
 
   Map<String, dynamic> toJson() =>
       {'role': user ? 'user' : 'assistant', 'content': text};
