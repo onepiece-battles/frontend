@@ -32,10 +32,24 @@ class ImportApi {
 
   /// Drafts the resources of [scope]: [ImportProgress] while DeepSeek works,
   /// then one [ImportDraftReady] or [ImportFailure]. Nothing is written.
-  Stream<ImportEvent> draft(String scope, {String? language}) async* {
-    final response = await _send(
-        '/draft', {'scope': scope, if (language != null) 'language': language},
-        stream: true);
+  Stream<ImportEvent> draft(String scope, {String? language}) => _events(
+      '/draft', {'scope': scope, if (language != null) 'language': language});
+
+  /// Changes the reviewed [items] as [instruction] asks, with the
+  /// conversation so far as context. Streams like [draft]; the new draft
+  /// carries the AI's reply and the keys it changed.
+  Stream<ImportEvent> revise(List<ImportItem> items,
+          List<ImportTurn> conversation, String instruction,
+          {String? language}) =>
+      _events('/revise', {
+        'items': items.map((e) => e.toJson()).toList(),
+        'messages': conversation.map((e) => e.toJson()).toList(),
+        'instruction': instruction,
+        if (language != null) 'language': language,
+      });
+
+  Stream<ImportEvent> _events(String path, Object body) async* {
+    final response = await _send(path, body, stream: true);
     if (response.statusCode >= 400) {
       throw ApiException(
           response.statusCode, await response.stream.bytesToString());

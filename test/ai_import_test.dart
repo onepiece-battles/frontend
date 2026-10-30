@@ -31,6 +31,17 @@ class _FakeImportApi extends ImportApi {
     return events.stream;
   }
 
+  final revisions = StreamController<ImportEvent>();
+  final revised = <(List<ImportItem>, List<ImportTurn>, String)>[];
+
+  @override
+  Stream<ImportEvent> revise(
+      List<ImportItem> items, List<ImportTurn> conversation, String instruction,
+      {String? language}) {
+    revised.add((items, conversation, instruction));
+    return revisions.stream;
+  }
+
   @override
   Future<ImportResult> commit(List<ImportItem> items, {String? language}) {
     committed = items
@@ -188,6 +199,12 @@ Future<void> _draftStrawHats(WidgetTester tester, _FakeImportApi api) async {
   await tester.pump();
 }
 
+Finder _in(String key, Finder finder) =>
+    find.descendant(of: find.byKey(Key('import-item-$key')), matching: finder);
+
+bool? _checked(WidgetTester tester, String key) =>
+    tester.widget<Checkbox>(_in(key, find.byType(Checkbox))).value;
+
 FilledButton _commitButton(WidgetTester tester) =>
     tester.widget<FilledButton>(find.byKey(const Key('import-commit-button')));
 
@@ -229,7 +246,8 @@ void main() {
     expect(_commitButton(tester).onPressed, isNull);
     expect(find.text('还有 1 项需要修改'), findsOneWidget);
 
-    // Leave Robin out, and the crew too: its relations are dropped.
+    // Leave Robin out, and the crew too: its relations are dropped. Robin's
+    // fruit goes with her, since nobody else eats it.
     await tester.tap(find.descendant(
         of: find.byKey(const Key('import-item-c2')),
         matching: find.byType(Checkbox)));
@@ -237,19 +255,24 @@ void main() {
         of: find.byKey(const Key('import-item-g1')),
         matching: find.byType(Checkbox)));
     await tester.pump();
+    expect(
+        tester
+            .widget<Checkbox>(find.descendant(
+                of: find.byKey(const Key('import-item-f2')),
+                matching: find.byType(Checkbox)))
+            .value,
+        isFalse);
     expect(_commitButton(tester).onPressed, isNotNull);
-    expect(find.text('导入 4 项'), findsOneWidget);
+    expect(find.text('导入 3 项'), findsOneWidget);
 
-    api.onCommit = (_) async => const ImportResult([
-          ImportCreated('f2', 'fruit', 'id-f2', '花花果实'),
-          ImportCreated('c1', 'character', 'id-c1', '罗罗诺亚·索隆')
-        ], 2, 1, 0);
+    api.onCommit = (_) async => const ImportResult(
+        [ImportCreated('c1', 'character', 'id-c1', '罗罗诺亚·索隆')], 2, 1, 0);
     await tester.tap(find.byKey(const Key('import-commit-button')));
     await tester.pump();
     await tester.pump();
 
     final sent = {for (final item in api.committed!) item.key: item};
-    expect(sent.keys, ['f1', 'f2', 'c1', 'c3']);
+    expect(sent.keys, ['f1', 'c1', 'c3']);
     expect(sent['c1']!.group, isNull);
     expect(sent['c3']!.fruits, ['f1']);
     expect(sent['c3']!.existingId, 'character-luffy');
@@ -328,6 +351,114 @@ void main() {
     expect(avatars.prepared, isEmpty);
     expect(images.uploads, isEmpty);
     expect(find.byKey(const Key('import-avatar-status')), findsNothing);
+  });
+
+  testWidgets('talks with the AI to revise the draft', (tester) async {
+    final api = await _pump(tester);
+    await _draftStrawHats(tester, api);
+    expect(find.textContaining('起草了 1 个团体、2 个果实、3 个角色'), findsOneWidget);
+    // Leave the crew out first: the revision keeps that choice.
+    await tester.tap(_in('g1', find.byType(Checkbox)));
+    await tester.pump();
+
+    await tester.enterText(
+        find.byKey(const Key('import-revise-field')), '去掉索隆，加上乌索普');
+    await tester.tap(find.byKey(const Key('import-revise-send')));
+    await tester.pump();
+    final (items, history, instruction) = api.revised.single;
+    expect(instruction, '去掉索隆，加上乌索普');
+    expect(history.map((t) => (t.user, t.text)).first, (true, '草帽一伙全员'));
+    expect(history, hasLength(2));
+    expect(items.map((i) => i.key), ['g1', 'f1', 'f2', 'c1', 'c2', 'c3']);
+
+    api.revisions.add(const ImportProgress('正在理解你的修改…'));
+    await tester.pump();
+    expect(find.text('正在理解你的修改…'), findsOneWidget);
+    // The list waits for the revision.
+    await tester.tap(_in('c3', find.byType(Checkbox)), warnIfMissed: false);
+    await tester.pump();
+    expect(_checked(tester, 'c3'), isTrue);
+
+    final revised = _strawHats().items
+      ..removeWhere((i) => i.key == 'c1')
+      ..add(ImportItem(
+          key: 'c4',
+          type: 'character',
+          data: _character('乌索普', 'Usopp'),
+          group: 'g1',
+          position: 'combatant'));
+    api.revisions.add(ImportDraftReady(ImportDraft(revised, const [],
+        reply: '去掉了索隆，加上了乌索普。', changed: ['c4'])));
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('去掉索隆，加上乌索普'), findsOneWidget); // the request
+    expect(find.text('去掉了索隆，加上了乌索普。'), findsOneWidget); // the reply
+    expect(find.byKey(const Key('import-item-c1')), findsNothing);
+    expect(_in('c4', find.text('刚修改')), findsOneWidget);
+    expect(_in('c3', find.text('刚修改')), findsNothing);
+    expect(_checked(tester, 'g1'), isFalse);
+    expect(_checked(tester, 'c4'), isTrue);
+  });
+
+  testWidgets('a new fruit needs a holder before it can be imported',
+      (tester) async {
+    final api = await _pump(tester);
+    await _draftStrawHats(tester, api);
+    // Leaving Robin out takes her fruit with her; taking the fruit back alone
+    // leaves it without a holder.
+    await tester.tap(_in('c2', find.byType(Checkbox)));
+    await tester.pump();
+    expect(_checked(tester, 'f2'), isFalse);
+    await tester.tap(_in('f2', find.byType(Checkbox)));
+    await tester.pump();
+    expect(_in('f2', find.text('还没有')), findsOneWidget);
+    expect(_in('f2', find.text('需修改')), findsOneWidget);
+    expect(_commitButton(tester).onPressed, isNull);
+    expect(find.byKey(const Key('import-revise-holders')), findsOneWidget);
+
+    // Give it to Zoro instead.
+    await tester.tap(find.byKey(const Key('import-assign-f2')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('罗罗诺亚·索隆').last);
+    await tester.pumpAndSettle();
+    expect(_in('f2', find.text('罗罗诺亚·索隆')), findsOneWidget);
+    expect(_in('c1', find.textContaining('花花果实')), findsOneWidget);
+    expect(find.byKey(const Key('import-revise-holders')), findsNothing);
+    expect(_commitButton(tester).onPressed, isNotNull);
+
+    await tester.tap(find.byKey(const Key('import-commit-button')));
+    await tester.pump();
+    final sent = {for (final item in api.committed!) item.key: item};
+    expect(sent['c1']!.fruits, ['f2']);
+  });
+
+  testWidgets('the editor groups fields and moves a fruit between holders',
+      (tester) async {
+    final api = await _pump(tester);
+    await _draftStrawHats(tester, api);
+
+    await tester.tap(_in('c1', find.byIcon(Icons.edit_outlined)));
+    await tester.pumpAndSettle();
+    for (final section in ['名称', '身份', '资料', '战斗属性', '关系']) {
+      expect(find.text(section), findsOneWidget);
+    }
+    expect(find.text('10 – 1500'), findsOneWidget); // attack's range
+    expect(find.text('AI 不确定'), findsOneWidget); // the bounty
+    await tester.tap(find.byTooltip('关闭'));
+    await tester.pumpAndSettle();
+
+    // Robin's fruit goes to Zoro.
+    await tester.tap(_in('f2', find.byIcon(Icons.edit_outlined)));
+    await tester.pumpAndSettle();
+    expect(find.text('效果'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('import-link-c1')));
+    await tester.tap(find.byKey(const Key('import-link-c2')));
+    await tester.tap(find.byKey(const Key('import-editor-save')));
+    await tester.pumpAndSettle();
+    expect(_in('f2', find.text('罗罗诺亚·索隆')), findsOneWidget);
+    expect(_in('f2', find.text('妮可·罗宾')), findsNothing);
+    expect(_in('c2', find.textContaining('花花果实')), findsNothing);
   });
 
   testWidgets('editing a drafted item fixes it', (tester) async {
