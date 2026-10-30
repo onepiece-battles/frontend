@@ -18,6 +18,7 @@ ImportDraft copyImportDraft(ImportDraft draft) => ImportDraft(
       [...draft.notes],
       reply: draft.reply,
       changed: [...draft.changed],
+      refreshAvatars: [...draft.refreshAvatars],
     );
 
 bool importValuesEqual(Object? a, Object? b) {
@@ -90,6 +91,9 @@ class ImportRevisionReview {
             }
           }
         }
+      }
+      if (a != null && b != null && after.refreshAvatars.contains(key)) {
+        fields.add(ImportFieldChange('avatar', a.avatarUrl, b.avatarUrl));
       }
       if (a == null || b == null || fields.isNotEmpty) {
         changes.add(ImportItemChange(a, b, fields));

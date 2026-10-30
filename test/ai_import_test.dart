@@ -145,8 +145,14 @@ class _FakeAvatars extends ImportAvatars {
   Map<String, String> found = {};
   final prepared = <String>[];
 
+  /// The keys of every lookup, in order.
+  final asked = <List<String>>[];
+
   @override
-  Future<Map<String, String>> find(List<ImportItem> items) async => found;
+  Future<Map<String, String>> find(List<ImportItem> items) async {
+    asked.add(items.map((i) => i.key).toList());
+    return found;
+  }
 
   @override
   Future<Uint8List> prepare(String url) async {
@@ -380,6 +386,65 @@ void main() {
     expect(avatars.prepared, isEmpty);
     expect(images.uploads, isEmpty);
     expect(find.byKey(const Key('import-avatar-status')), findsNothing);
+  });
+
+  testWidgets(
+      'a renamed character keeps its portrait; only an explicit request looks again',
+      (tester) async {
+    final avatars = _FakeAvatars()
+      ..found = {'c1': 'https://lain.bgm.test/zoro.jpg'};
+    final api = await _pump(tester, avatars: avatars);
+    await _draftStrawHats(tester, api);
+    await tester.pump();
+    ImportItem zoro() =>
+        GetIt.instance<ImportSession>().items.firstWhere((i) => i.key == 'c1');
+    expect(zoro().avatarUrl, 'https://lain.bgm.test/zoro.jpg');
+    avatars
+      ..found = {'c1': 'https://lain.bgm.test/someone-else.jpg'}
+      ..asked.clear();
+    ImportDraft renamed({List<String> refresh = const []}) => ImportDraft(
+        _strawHats().items
+          ..firstWhere((i) => i.key == 'c1').data['name'] = {
+            'zh_CN': '索隆',
+            'en_US': 'Zoro'
+          },
+        const [],
+        reply: '已修改 索隆：名字。',
+        changed: ['c1'],
+        refreshAvatars: refresh);
+
+    await _say(tester, '索隆的名字写短一点');
+    await tester.pump();
+    api.revisions.add(ImportDraftReady(renamed()));
+    await tester.pump();
+    await tester.pump();
+    expect(zoro().name(true), '索隆');
+    expect(zoro().avatarUrl, 'https://lain.bgm.test/zoro.jpg');
+    expect(avatars.asked, isEmpty);
+
+    // Even a skipped portrait comes back when the reviewer asks for a new one.
+    await tester.tap(find.byKey(const Key('import-avatar-c1')));
+    await tester.pump();
+    expect(zoro().useAvatar, isFalse);
+    await _say(tester, '索隆换个头像');
+    await tester.pump();
+    api.revisions.add(ImportDraftReady(renamed(refresh: ['c1'])));
+    await tester.pump();
+    await tester.pump();
+    expect(avatars.asked, [
+      ['c1']
+    ]);
+    expect(zoro().avatarUrl, 'https://lain.bgm.test/someone-else.jpg');
+    expect(zoro().useAvatar, isTrue);
+
+    // A refresh that finds nothing keeps the portrait.
+    avatars.found = {};
+    await _say(tester, '索隆再换个头像');
+    await tester.pump();
+    api.revisions.add(ImportDraftReady(renamed(refresh: ['c1'])));
+    await tester.pump();
+    await tester.pump();
+    expect(zoro().avatarUrl, 'https://lain.bgm.test/someone-else.jpg');
   });
 
   testWidgets('talks with the AI to revise the draft', (tester) async {
