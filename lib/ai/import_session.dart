@@ -8,6 +8,7 @@ import '../repository/image_dao.dart';
 import '../utils/base64_helper.dart';
 import 'import_api.dart';
 import 'import_avatars.dart';
+import 'import_revision.dart';
 
 /// The AI batch import for the whole login session, like `AssistantSession`:
 /// every scope and request of the reviewer with the AI's answers, the draft
@@ -35,6 +36,23 @@ class ImportSession extends ChangeNotifier {
   /// The keys the last revision added or changed.
   Set<String> changed = {};
 
+  ImportRevisionReview? lastRevision;
+  bool get canUndoRevision => lastRevision != null && !busy;
+
+  void undoRevision({required bool zh}) {
+    if (!canUndoRevision) return;
+    draft = copyImportDraft(lastRevision!.before);
+    lastRevision = null;
+    changed = {};
+    batchProblems.clear();
+    _say(zh
+        ? '已撤销上一轮 AI 修改，恢复修改前的草稿。'
+        : 'Undid the last AI revision and restored the previous draft.');
+    avatarStatus = null;
+    unawaited(_findAvatars(draft!, zh));
+    notifyListeners();
+  }
+
   bool committing = false;
   final List<String> batchProblems = [];
 
@@ -49,7 +67,11 @@ class ImportSession extends ChangeNotifier {
   List<ImportItem> get included => items.where((i) => i.included).toList();
 
   /// Redraws listeners after the view changed an item in place.
-  void touch() => notifyListeners();
+  void touch() {
+    // A snapshot undo must never discard edits made after the AI finished.
+    lastRevision = null;
+    notifyListeners();
+  }
 
   /// The reviewer's next message: a draft of that scope when there is no
   /// draft to change (none yet, or the last one was imported), otherwise a
@@ -68,6 +90,7 @@ class ImportSession extends ChangeNotifier {
     result = null;
     progress = null;
     changed = {};
+    lastRevision = null;
     avatarStatus = null;
     batchProblems.clear();
     if (conversation.isNotEmpty &&
@@ -92,6 +115,7 @@ class ImportSession extends ChangeNotifier {
     draft = null;
     result = null;
     changed = {};
+    lastRevision = null;
     avatarStatus = null;
     batchProblems.clear();
     _draftStart = conversation.length;
@@ -128,7 +152,7 @@ class ImportSession extends ChangeNotifier {
   }
 
   void _revise(String instruction, bool zh) {
-    final before = draft!;
+    final before = copyImportDraft(draft!);
     final history = [
       for (final turn in conversation.skip(_draftStart))
         if (turn.said) turn,
@@ -180,6 +204,8 @@ class ImportSession extends ChangeNotifier {
         item.useAvatar = old.useAvatar;
       }
     }
+    lastRevision = ImportRevisionReview(before, revised);
+    if (lastRevision!.changes.isEmpty) lastRevision = null;
     draft = revised;
     changed = revised.changed.toSet();
     progress = null;
@@ -257,6 +283,7 @@ class ImportSession extends ChangeNotifier {
           await _api.commit(_toImport(), language: zh ? 'zh_CN' : 'en_US');
       result = imported;
       draft = null;
+      lastRevision = null;
       changed = {};
       _say(zh
           ? '导入完成：新建 ${imported.created.length} 项，复用 ${imported.reused} 项，服用果实 ${imported.fruitsEaten} 次，加入团体 ${imported.groupsJoined} 次。'

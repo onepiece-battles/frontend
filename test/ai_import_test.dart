@@ -426,6 +426,19 @@ void main() {
     expect(_in('c3', find.text('刚修改')), findsNothing);
     expect(_checked(tester, 'g1'), isFalse);
     expect(_checked(tester, 'c4'), isTrue);
+    await tester.ensureVisible(find.byKey(const Key('import-review-revision')));
+    await tester.tap(find.byKey(const Key('import-review-revision')));
+    await tester.pumpAndSettle();
+    expect(find.text('罗罗诺亚·索隆 · 移除'), findsOneWidget);
+    expect(find.text('乌索普 · 新增'), findsOneWidget);
+    await tester.tap(find.text('完成'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('import-undo-revision')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('import-item-c1')), findsOneWidget);
+    expect(find.byKey(const Key('import-item-c4')), findsNothing);
+    expect(_checked(tester, 'g1'), isFalse); // reviewer choices survive undo
+    expect(find.byKey(const Key('import-undo-revision')), findsNothing);
   });
 
   testWidgets('keeps every request, across a new draft and leaving the page',
@@ -552,6 +565,9 @@ void main() {
     final api = await _pump(tester, language: 'en');
     await _draftStrawHats(tester, api);
     expect(_commitButton(tester).onPressed, isNull);
+    final edited =
+        GetIt.instance<ImportSession>().items.firstWhere((i) => i.key == 'c2');
+    edited.uncertain.add('attack');
 
     await tester.tap(find.descendant(
         of: find.byKey(const Key('import-item-c2')),
@@ -573,6 +589,7 @@ void main() {
     final sent = api.committed!.firstWhere((i) => i.key == 'c2');
     expect(sent.data['race'], 'HUMAN');
     expect(sent.data['attack'], 1050);
+    expect(sent.uncertain, isNot(contains('attack')));
     expect(sent.fruits, ['f2']);
   });
 

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import 'package:openapi/api.dart';
 
 import '../../ai/import_api.dart';
 import '../../ai/import_session.dart';
+import '../../ai/import_revision.dart';
 import '../../ai/import_fields.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../l10n/app_localizations.dart';
@@ -300,6 +302,30 @@ class _ImportViewState extends State<ImportView> {
               ),
             ]),
           ),
+        if (session.lastRevision case final revision?)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Wrap(
+                spacing: 8,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  TextButton.icon(
+                    key: const Key('import-review-revision'),
+                    onPressed: () => _showRevision(revision),
+                    icon: const Icon(Icons.difference_outlined, size: 17),
+                    label: Text(_t('查看本次修改 · ${revision.changes.length} 项',
+                        'Review changes · ${revision.changes.length} items')),
+                  ),
+                  TextButton.icon(
+                    key: const Key('import-undo-revision'),
+                    onPressed: session.canUndoRevision
+                        ? () => session.undoRevision(zh: _zh)
+                        : null,
+                    icon: const Icon(Icons.undo_rounded, size: 17),
+                    label: Text(_t('撤销本次修改', 'Undo revision')),
+                  ),
+                ]),
+          ),
         if (unheld.isNotEmpty && !busy) ...[
           Align(
             alignment: Alignment.centerLeft,
@@ -318,6 +344,86 @@ class _ImportViewState extends State<ImportView> {
         ],
       ]),
     );
+  }
+
+  void _showRevision(ImportRevisionReview revision) {
+    final l = AppLocalizations.of(context)!;
+    String value(Object? value, String field, ImportDraft draft) {
+      String resource(Object? key) =>
+          draft.items.where((item) => item.key == key).firstOrNull?.name(_zh) ??
+          '$key';
+      if (value == null || value == '') return _t('留空', 'Blank');
+      if (field == 'name' && value is Map) {
+        return (value[_zh ? 'zh_CN' : 'en_US'] ??
+                value.values.firstOrNull ??
+                '')
+            .toString();
+      }
+      if (field == 'group') return resource(value);
+      if (value is List) {
+        return value.isEmpty
+            ? _t('无', 'None')
+            : value
+                .map((v) => field == 'fruits'
+                    ? resource(v)
+                    : importOptionLabel(l, field, '$v'))
+                .join('、');
+      }
+      if (value is num) {
+        return NumberFormat.decimalPattern(_zh ? 'zh_CN' : 'en_US')
+            .format(value);
+      }
+      return importOptionLabel(l, field, '$value');
+    }
+
+    showDialog<void>(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: Text(_t('本次草稿修改', 'Draft changes')),
+              content: SizedBox(
+                  width: 560,
+                  child: SingleChildScrollView(
+                      child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      for (final change in revision.changes) ...[
+                        Text(
+                            '${change.item.name(_zh)} · ${change.added ? _t('新增', 'Added') : change.removed ? _t('移除', 'Removed') : _t('修改', 'Updated')}',
+                            style: const TextStyle(
+                                fontWeight: FontWeight.w600, fontSize: 14)),
+                        for (final field in change.fields)
+                          Padding(
+                              padding: const EdgeInsets.only(top: 8),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Text(
+                                      field.field.startsWith('name.')
+                                          ? '${importFieldLabel(l, _zh, "name")} · ${field.field.endsWith("zh_CN") ? "中文" : "English"}'
+                                          : importFieldLabel(
+                                              l, _zh, field.field),
+                                      style: const TextStyle(
+                                          fontSize: 12,
+                                          color:
+                                              OnepieceColors.secondaryLabel)),
+                                  const SizedBox(height: 3),
+                                  Text(
+                                      '${value(field.before, field.field, revision.before)} → ${value(field.after, field.field, revision.after)}',
+                                      style: const TextStyle(fontSize: 13)),
+                                ],
+                              )),
+                        const Divider(
+                            height: 28, color: OnepieceColors.separator),
+                      ],
+                    ],
+                  ))),
+              actions: [
+                TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: Text(_t('完成', 'Done')))
+              ],
+            ));
   }
 
   Future<void> _confirmClear() async {
