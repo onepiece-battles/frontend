@@ -548,7 +548,7 @@ class _GroupMembersPanelState extends State<GroupMembersPanel> {
                 title: I18nHelper.getDisplayNameFromI18n(character.name!),
                 onTap: () {
                   context.goNamed('characterDetails',
-                      extra: character.characterId,
+                      extra: _getCharacterLookupId(character),
                       pathParameters: {
                         'name':
                             I18nHelper.getDisplayNameFromI18n(character.name)
@@ -597,8 +597,10 @@ class _GroupMembersPanelState extends State<GroupMembersPanel> {
     });
   }
 
+  /// The member's character id. The group detail has long sent it as `id`,
+  /// with `character_id` empty; newer backends fill both.
   String? _getCharacterLookupId(CharacterInGroupView character) {
-    return character.characterId;
+    return character.characterId ?? character.id;
   }
 
   Widget _buildCharacterCombatStats(CharacterInGroupView character) {
