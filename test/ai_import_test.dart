@@ -197,8 +197,9 @@ Future<_FakeImportApi> _pump(WidgetTester tester,
 
 /// Types [text] into the conversation's composer and sends it.
 Future<void> _say(WidgetTester tester, String text) async {
-  await tester.enterText(find.byKey(const Key('import-message-field')), text);
-  await tester.tap(find.byKey(const Key('import-send-button')));
+  await tester.enterText(find.byKey(const ValueKey('import_input')), text);
+  await tester.pump();
+  await tester.tap(find.byKey(const ValueKey('import_send')));
 }
 
 Future<void> _draftStrawHats(WidgetTester tester, _FakeImportApi api) async {
@@ -247,6 +248,9 @@ void main() {
     expect(check(ImportType.character, 'bounty', 50000000000), isNull);
     expect(check(ImportType.fruit, 'energy_consume', 10), isNull);
     expect(check(ImportType.fruit, 'energy_consume', 11), isNotNull);
+    // A new character holds one fruit.
+    expect(check(ImportType.character, 'maximum_fruit_count', 1), isNull);
+    expect(check(ImportType.character, 'maximum_fruit_count', 2), isNotNull);
   });
 
   testWidgets('drafts, leaves out what needs fixing and imports the rest',
@@ -255,6 +259,9 @@ void main() {
     await _draftStrawHats(tester, api);
 
     expect(api.scopes, ['草帽一伙全员']);
+    // The same composer as the assistant page.
+    expect(find.byKey(const ValueKey('import_composer')), findsOneWidget);
+    expect(find.byKey(const ValueKey('import_input_surface')), findsOneWidget);
     expect(find.text('只包含当前成员'), findsOneWidget);
     expect(
         find.descendant(
@@ -511,6 +518,23 @@ void main() {
     await tester.tap(find.byTooltip('关闭'));
     await tester.pumpAndSettle();
 
+    // Picking another fruit for Robin replaces hers: a character holds one.
+    await tester.tap(_in('c2', find.byIcon(Icons.edit_outlined)));
+    await tester.pumpAndSettle();
+    expect(find.text('吃下的果实（只能 1 个）'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('import-link-f1')));
+    await tester.tap(find.byKey(const Key('import-editor-save')));
+    await tester.pumpAndSettle();
+    expect(_in('c2', find.textContaining('橡胶果实')), findsOneWidget);
+    expect(_in('c2', find.textContaining('花花果实')), findsNothing);
+    await tester.tap(find.descendant(
+        of: find.byKey(const Key('import-item-c2')),
+        matching: find.byIcon(Icons.edit_outlined)));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('import-link-f2')));
+    await tester.tap(find.byKey(const Key('import-editor-save')));
+    await tester.pumpAndSettle();
+
     // Robin's fruit goes to Zoro.
     await tester.tap(_in('f2', find.byIcon(Icons.edit_outlined)));
     await tester.pumpAndSettle();
@@ -590,6 +614,6 @@ void main() {
   testWidgets('only NIKA can use the page', (tester) async {
     await _pump(tester, role: UserRole.ADMIN);
     expect(find.text('只有 NIKA 可以使用批量录入。'), findsOneWidget);
-    expect(find.byKey(const Key('import-message-field')), findsNothing);
+    expect(find.byKey(const ValueKey('import_input')), findsNothing);
   });
 }

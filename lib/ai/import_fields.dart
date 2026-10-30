@@ -91,8 +91,9 @@ final characterFields = <ImportField>[
   const ImportField('height', ImportFieldKind.integer, min: 1, max: 100000),
   const ImportField('birth_place', ImportFieldKind.text),
   const ImportField('date_of_birth', ImportFieldKind.text, maxLength: 100),
+  // A new character holds one fruit (only Blackbeard held two; he exists).
   const ImportField('maximum_fruit_count', ImportFieldKind.integer,
-      min: 1, max: 2, required: true),
+      min: 1, max: 1, required: true),
   const ImportField('group_gain', ImportFieldKind.integer,
       min: 100, max: 200, required: true),
   const ImportField('attack', ImportFieldKind.integer,
