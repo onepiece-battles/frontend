@@ -103,9 +103,17 @@ class _ImportItemEditorState extends State<ImportItemEditor> {
         position: _position,
       );
 
+  final _touchedFields = <String>{};
+
+  bool _unsure(String key) =>
+      _item.uncertain.contains(key) && !_touchedFields.contains(key);
+
   void _save() {
     final item = _item;
-    if (!item.exists) item.data = {..._data, 'name': _name};
+    if (!item.exists) {
+      item.data = {..._data, 'name': _name};
+      item.uncertain.removeAll(_touchedFields);
+    }
     if (item.type == ImportType.character) {
       item.fruits = _fruits;
       item.group = _group;
@@ -236,7 +244,7 @@ class _ImportItemEditorState extends State<ImportItemEditor> {
   Widget _input(String key, String? error, {String? label, String? suffix}) {
     final field = _field(key);
     final numeric = field.kind != ImportFieldKind.text;
-    final unsure = _item.uncertain.contains(key);
+    final unsure = _unsure(key);
     final value = _data[key];
     final position = numeric && value is num && field.min != null
         ? ((value - field.min!) / (field.max! - field.min!)).clamp(0.0, 1.0)
@@ -253,6 +261,7 @@ class _ImportItemEditorState extends State<ImportItemEditor> {
             : TextInputType.text,
         decoration: _decoration(error: error, suffix: suffix, unsure: unsure),
         onChanged: (text) => setState(() {
+          _touchedFields.add(key);
           final value = text.trim();
           if (value.isEmpty) {
             _data.remove(key);
@@ -292,7 +301,7 @@ class _ImportItemEditorState extends State<ImportItemEditor> {
   Widget _dropdown(String key, String? error) {
     final field = _field(key);
     final value = _data[key]?.toString();
-    final unsure = _item.uncertain.contains(key);
+    final unsure = _unsure(key);
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       _label(importFieldLabel(_l, _zh, key),
           required: field.required, unsure: unsure),
@@ -307,7 +316,10 @@ class _ImportItemEditorState extends State<ImportItemEditor> {
             DropdownMenuItem(
                 value: option, child: Text(importOptionLabel(_l, key, option))),
         ],
-        onChanged: (value) => setState(() => _data[key] = value),
+        onChanged: (value) => setState(() {
+          _touchedFields.add(key);
+          _data[key] = value;
+        }),
       ),
     ]);
   }
@@ -320,7 +332,7 @@ class _ImportItemEditorState extends State<ImportItemEditor> {
         : {if (_data[key] != null) '${_data[key]}'};
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       _label(importFieldLabel(_l, _zh, key),
-          required: field.required, unsure: _item.uncertain.contains(key)),
+          required: field.required, unsure: _unsure(key)),
       Wrap(
         key: Key('import-field-$key'),
         spacing: 8,
@@ -337,6 +349,7 @@ class _ImportItemEditorState extends State<ImportItemEditor> {
                       ? OnepieceColors.fancyBlue
                       : OnepieceColors.separator),
               onSelected: (on) => setState(() {
+                _touchedFields.add(key);
                 if (!multiple) {
                   _data[key] = option;
                   return;
@@ -723,7 +736,9 @@ class _ImportItemEditorState extends State<ImportItemEditor> {
   Widget _footer(Map<String, String> errors) {
     final unsure = _item.exists
         ? 0
-        : _item.uncertain.where((k) => _data.containsKey(k)).length;
+        : _item.uncertain
+            .where((k) => _unsure(k) && _data.containsKey(k))
+            .length;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 14),
       child: Row(children: [
