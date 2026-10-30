@@ -41,6 +41,7 @@ class ImportSession extends ChangeNotifier {
 
   void undoRevision({required bool zh}) {
     if (!canUndoRevision) return;
+    _invalidatePortraits();
     draft = copyImportDraft(lastRevision!.before);
     lastRevision = null;
     changed = {};
@@ -57,6 +58,13 @@ class ImportSession extends ChangeNotifier {
   final List<String> batchProblems = [];
 
   StreamSubscription<ImportEvent>? _stream;
+  int _portraitGeneration = 0;
+  final Map<String, int> _portraitVersions = {};
+
+  void _invalidatePortraits() {
+    _portraitGeneration++;
+    _portraitVersions.clear();
+  }
 
   ImportApi get _api => GetIt.instance<ImportApi>();
   ImportAvatars get _avatars => GetIt.instance<ImportAvatars>();
@@ -86,6 +94,7 @@ class ImportSession extends ChangeNotifier {
   /// What was said so far stays in the conversation.
   void newDraft({required bool zh}) {
     _stream?.cancel();
+    _invalidatePortraits();
     draft = null;
     result = null;
     progress = null;
@@ -112,6 +121,7 @@ class ImportSession extends ChangeNotifier {
 
   void _draft(String scope, bool zh) {
     _stream?.cancel();
+    _invalidatePortraits();
     draft = null;
     result = null;
     changed = {};
@@ -189,19 +199,28 @@ class ImportSession extends ChangeNotifier {
     );
   }
 
-  /// Takes the revised draft, keeping what the reviewer chose for items that
-  /// stayed: whether they are included, and their avatar if the name is the
-  /// same.
+  /// Stable draft keys identify a character through a name correction. Its portrait and
+  /// reviewer choices stay attached, including a lookup that finished during the AI request.
   void _applyRevision(ImportDraft before, ImportDraft revised, bool zh) {
     final previous = {for (final item in before.items) item.key: item};
+    final live = {for (final item in items) item.key: item};
+    final refresh = revised.refreshAvatars.toSet();
+    final lookup = <String>{};
     for (final item in revised.items) {
-      final old = previous[item.key];
-      if (old == null) continue;
+      final old = live[item.key] ?? previous[item.key];
+      if (old == null) {
+        lookup.add(item.key);
+        continue;
+      }
       item.included = old.included;
-      if (old.name(true) == item.name(true) &&
-          old.name(false) == item.name(false)) {
-        item.avatarUrl = old.avatarUrl;
-        item.useAvatar = old.useAvatar;
+      item.avatarUrl = old.avatarUrl;
+      item.useAvatar = old.useAvatar;
+      if (refresh.contains(item.key) &&
+          !item.exists &&
+          item.type == ImportType.character) {
+        _portraitVersions.update(item.key, (version) => version + 1,
+            ifAbsent: () => 1);
+        lookup.add(item.key);
       }
     }
     lastRevision = ImportRevisionReview(before, revised);
@@ -210,7 +229,7 @@ class ImportSession extends ChangeNotifier {
     changed = revised.changed.toSet();
     progress = null;
     _say(revised.reply ?? (zh ? '草稿已更新。' : 'The draft is updated.'));
-    unawaited(_findAvatars(revised, zh, only: changed));
+    unawaited(_findAvatars(revised, zh, only: lookup, refresh: refresh));
   }
 
   void _say(String text) =>
@@ -234,25 +253,50 @@ class ImportSession extends ChangeNotifier {
   /// Looks up portraits for the new characters of [draft] that have none yet
   /// ([only] limits it to those keys, after a revision).
   Future<void> _findAvatars(ImportDraft draft, bool zh,
-      {Set<String>? only}) async {
+      {Set<String>? only, Set<String> refresh = const {}}) async {
     final wanted = draft.items
         .where((i) => !i.exists && i.type == ImportType.character)
         .toList();
     final missing = wanted
-        .where((i) => i.avatarUrl == null && (only?.contains(i.key) ?? true))
+        .where((i) =>
+            (i.avatarUrl == null || refresh.contains(i.key)) &&
+            (only?.contains(i.key) ?? true))
         .toList();
     if (missing.isEmpty) return;
+    final generation = _portraitGeneration;
+    final versions = {
+      for (final item in missing) item.key: _portraitVersions[item.key] ?? 0
+    };
+    // Freeze names too: a later rename must not change an in-flight search's identity.
+    final query = copyImportDraft(ImportDraft(missing, const [])).items;
     avatarStatus = zh
         ? '正在从 Bangumi 查找角色头像…'
         : 'Looking for character avatars on Bangumi…';
     notifyListeners();
     String status;
     try {
-      final found = await _avatars.find(missing);
+      final found = await _avatars.find(query);
+      if (generation != _portraitGeneration) return;
       for (final item in missing) {
-        item.avatarUrl = found[item.key];
+        if (versions[item.key] != (_portraitVersions[item.key] ?? 0)) continue;
+        final url = found[item.key];
+        // A failed explicit refresh keeps the existing portrait.
+        if (url == null) continue;
+        final current = items.where((i) => i.key == item.key).firstOrNull;
+        if (current == null) continue;
+        if (refresh.contains(item.key)) {
+          current.avatarUrl = url;
+          current.useAvatar = true; // asked for, so used
+        } else {
+          current.avatarUrl ??= url;
+        }
       }
-      final have = wanted.where((i) => i.avatarUrl != null).length;
+      final have = items
+          .where((i) =>
+              !i.exists &&
+              i.type == ImportType.character &&
+              i.avatarUrl != null)
+          .length;
       status = zh
           ? '在 Bangumi 找到 $have/${wanted.length} 个角色头像，导入后自动上传；点头像可以不用它。果实和团体的头像请导入后在详情页上传。'
           : 'Found $have of ${wanted.length} character avatars on Bangumi. They are uploaded after the import; tap one to skip it. Upload fruit and group avatars on their detail pages.';
@@ -261,7 +305,11 @@ class ImportSession extends ChangeNotifier {
           ? '无法访问 Bangumi，导入后请在详情页上传头像。'
           : 'Could not reach Bangumi; upload avatars on the detail pages after importing.';
     }
-    if (this.draft != draft) return;
+    if (generation != _portraitGeneration || this.draft == null) return;
+    if (versions.entries
+        .every((entry) => entry.value != (_portraitVersions[entry.key] ?? 0))) {
+      return;
+    }
     avatarStatus = status;
     notifyListeners();
   }
@@ -282,6 +330,7 @@ class ImportSession extends ChangeNotifier {
       final imported =
           await _api.commit(_toImport(), language: zh ? 'zh_CN' : 'en_US');
       result = imported;
+      _invalidatePortraits();
       draft = null;
       lastRevision = null;
       changed = {};
@@ -385,6 +434,7 @@ class ImportSession extends ChangeNotifier {
   @override
   void dispose() {
     _stream?.cancel();
+    _invalidatePortraits();
     super.dispose();
   }
 }

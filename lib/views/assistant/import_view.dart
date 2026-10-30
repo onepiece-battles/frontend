@@ -352,6 +352,7 @@ class _ImportViewState extends State<ImportView> {
       String resource(Object? key) =>
           draft.items.where((item) => item.key == key).firstOrNull?.name(_zh) ??
           '$key';
+      if (field == 'avatar') return _t('头像', 'Portrait');
       if (value == null || value == '') return _t('留空', 'Blank');
       if (field == 'name' && value is Map) {
         return (value[_zh ? 'zh_CN' : 'en_US'] ??
@@ -399,17 +400,22 @@ class _ImportViewState extends State<ImportView> {
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
                                   Text(
-                                      field.field.startsWith('name.')
-                                          ? '${importFieldLabel(l, _zh, "name")} · ${field.field.endsWith("zh_CN") ? "中文" : "English"}'
-                                          : importFieldLabel(
-                                              l, _zh, field.field),
+                                      field.field == 'avatar'
+                                          ? _t('重新查找头像', 'Refresh portrait')
+                                          : field.field.startsWith('name.')
+                                              ? '${importFieldLabel(l, _zh, "name")} · ${field.field.endsWith("zh_CN") ? "中文" : "English"}'
+                                              : importFieldLabel(
+                                                  l, _zh, field.field),
                                       style: const TextStyle(
                                           fontSize: 12,
                                           color:
                                               OnepieceColors.secondaryLabel)),
                                   const SizedBox(height: 3),
                                   Text(
-                                      '${value(field.before, field.field, revision.before)} → ${value(field.after, field.field, revision.after)}',
+                                      field.field == 'avatar'
+                                          ? _t('按你的要求重新查找，未找到时保留原头像。',
+                                              'Look up a new portrait as requested; keep the current one if none is found.')
+                                          : '${value(field.before, field.field, revision.before)} → ${value(field.after, field.field, revision.after)}',
                                       style: const TextStyle(fontSize: 13)),
                                 ],
                               )),

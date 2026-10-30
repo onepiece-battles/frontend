@@ -86,8 +86,10 @@ class ImportItem {
 }
 
 class ImportDraft {
-  ImportDraft(this.items, this.notes, {this.reply, List<String>? changed})
-      : changed = changed ?? const [];
+  ImportDraft(this.items, this.notes,
+      {this.reply, List<String>? changed, List<String>? refreshAvatars})
+      : changed = changed ?? const [],
+        refreshAvatars = refreshAvatars ?? const [];
 
   final List<ImportItem> items;
   final List<String> notes;
@@ -95,6 +97,9 @@ class ImportDraft {
   /// After a revision: the AI's answer, and the keys it added or changed.
   final String? reply;
   final List<String> changed;
+
+  /// Explicit server authorization; renaming never implies changing the portrait.
+  final List<String> refreshAvatars;
 
   factory ImportDraft.fromJson(Map<String, dynamic> json) => ImportDraft(
         ((json['items'] as List?) ?? const [])
@@ -104,6 +109,7 @@ class ImportDraft {
         _strings(json['notes']),
         reply: json['reply']?.toString(),
         changed: _strings(json['changed']),
+        refreshAvatars: _strings(json['refreshAvatars']),
       );
 }
 
