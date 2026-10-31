@@ -9,6 +9,7 @@ import 'package:openapi/api.dart';
 import 'package:provider/provider.dart';
 
 import '../../components/resource_loading.dart';
+import '../../combat/combat_api.dart';
 import '../../constants/onepiece_colors.dart';
 import '../../l10n/app_localizations.dart';
 import '../../popup/onepiece_alert.dart';
@@ -33,6 +34,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
   final _scrollController = ScrollController();
   Timer? _timer;
   BattleFullView? _battle;
+  CombatRecord? _combatRecord;
   BattleExecutionData? _execution;
   bool _loading = true;
   bool _failed = false;
@@ -73,6 +75,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
       _loading = true;
       _failed = false;
       _battle = null;
+      _combatRecord = null;
       _execution = null;
     });
     // Provider.value is removed on the next frame before its notifier is
@@ -115,6 +118,7 @@ class _BattleDetailViewState extends State<BattleDetailView> {
         _loading = false;
       });
       _startPolling();
+      unawaited(_loadCombat(version));
     } catch (_) {
       if (!mounted || version != _loadVersion) return;
       setState(() {
@@ -122,6 +126,32 @@ class _BattleDetailViewState extends State<BattleDetailView> {
         _failed = true;
       });
     }
+  }
+
+  Future<void> _loadCombat(int version) async {
+    if (!GetIt.instance.isRegistered<CombatApi>()) return;
+    try {
+      final record = await GetIt.instance<CombatApi>().record(widget.battleId);
+      if (!mounted || version != _loadVersion) return;
+      setState(() => _combatRecord = record);
+    } catch (_) {
+      // Existing rounds remain usable if this optional historical record is unavailable.
+    }
+  }
+
+  Map<String, String> _combatActorNames(BuildContext context) {
+    final zh = Localizations.localeOf(context).languageCode == 'zh';
+    final result = <String, String>{};
+    for (final side in ['starter', 'receiver']) {
+      final actor = _combatRecord?.snapshot[side];
+      if (actor is! Map || actor['id'] == null) continue;
+      final name = actor['name'];
+      if (name is Map) {
+        result['${actor['id']}'] =
+            '${name[zh ? 'zh_CN' : 'en_US'] ?? name[zh ? 'zhCN' : 'enUS'] ?? name.values.firstOrNull ?? ''}';
+      }
+    }
+    return result;
   }
 
   void _startPolling() {
@@ -290,11 +320,47 @@ class _BattleDetailViewState extends State<BattleDetailView> {
                   final sideBySide = content.maxWidth >= 800;
                   final rounds = _panel(
                     title: loc.battleRoundTitle,
-                    child: BattleRounds(
-                      key: ValueKey(battle.id),
-                      details: battle.battleProcessDetails,
-                      battleStatus: model.battleStatus,
-                    ),
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          if (_combatRecord case final record?)
+                            Padding(
+                                padding: const EdgeInsets.only(bottom: 10),
+                                child:
+                                    Wrap(spacing: 10, runSpacing: 5, children: [
+                                  Text(
+                                      (record.snapshot['tactics'] as Map? ??
+                                                  const {})['source'] ==
+                                              'AI'
+                                          ? loc.combatTacticsAi
+                                          : loc.combatTacticsRules,
+                                      style: const TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color: OnepieceColors.fancyBlue)),
+                                  for (final entry
+                                      in (record.snapshot['profiles'] as Map? ??
+                                              const {})
+                                          .entries)
+                                    Text(
+                                        '${_combatActorNames(context)[entry.key] ?? ''} · v${(entry.value as Map)['version']}',
+                                        style: const TextStyle(
+                                            fontSize: 12,
+                                            color:
+                                                OnepieceColors.secondaryLabel)),
+                                ])),
+                          BattleRounds(
+                            actorNames: _combatActorNames(context),
+                            key: ValueKey(battle.id),
+                            details: battle.battleProcessDetails,
+                            events: {
+                              for (final event
+                                  in _combatRecord?.events ?? <CombatEvent>[])
+                                event.round: event
+                            },
+                            battleStatus: model.battleStatus,
+                          ),
+                        ]),
                   );
                   final report = _reportPanel(context, model);
                   return Column(

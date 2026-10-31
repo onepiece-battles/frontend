@@ -39,7 +39,13 @@
   "battleResultConfirmed": "Result Confirmed",
   "battleRoundTitle": "Battle Rounds",
   "battleRoundNumber": "Round {number}",
-  "@battleRoundNumber": {"placeholders": {"number": {"type": "int"}}},
+  "@battleRoundNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
   "battleRoundNoData": "No round details are available for this battle.",
   "showAllRounds": "Show all rounds",
   "collapseRounds": "Show fewer rounds",
@@ -467,5 +473,86 @@
   "characterBattleLoss": "Lost",
   "characterBattleEmpty": "No battles yet",
   "characterBattleShowMore": "Show more battles",
-  "characterBattleShowLess": "Show fewer"
+  "characterBattleShowLess": "Show fewer",
+  "combatSkills": "Battle skills",
+  "combatSkillsEmpty": "No signature skills configured. Basic actions remain available.",
+  "combatSkillsUnavailable": "Skills could not be loaded",
+  "combatSkillsRetry": "Retry",
+  "combatSkillsVersion": "Version {version} · frozen when battle starts",
+  "@combatSkillsVersion": {
+    "placeholders": {
+      "version": {
+        "type": "int"
+      }
+    }
+  },
+  "combatCoatingLevel": "Conqueror coating · level {level}",
+  "@combatCoatingLevel": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "combatSkillCost": "Extra energy {energy} · cooldown {cooldown} own actions · max {uses} uses",
+  "@combatSkillCost": {
+    "placeholders": {
+      "energy": {
+        "type": "int"
+      },
+      "cooldown": {
+        "type": "int"
+      },
+      "uses": {
+        "type": "int"
+      }
+    }
+  },
+  "combatSkillScopeSelf": "Self",
+  "combatSkillScopeEnemy": "One opponent",
+  "combatSkillScopeArea": "Area · current opponent in a duel",
+  "combatDamage": "Damage",
+  "combatHeal": "Heal",
+  "combatShield": "Gain shield",
+  "combatGuard": "Damage reduction",
+  "combatEvasion": "Evasion bonus",
+  "combatAttackUp": "Attack bonus",
+  "combatDefenseDown": "Defense reduction",
+  "combatPoison": "Damage over time",
+  "combatStun": "Interrupt action",
+  "combatEnergy": "Restore energy",
+  "combatCoating": "Activate coating",
+  "combatControlSkip": "Action interrupted",
+  "combatEffectDuration": "Lasts {count} target action opportunities",
+  "@combatEffectDuration": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "combatTacticsAi": "AI tactics",
+  "combatTacticsRules": "Automatic tactics",
+  "combatTechnical": "Technique",
+  "combatFruit": "Fruit ability",
+  "combatHaki": "Haki",
+  "combatEquipment": "Equipment",
+  "combatRacial": "Racial ability",
+  "combatSkillRequirement": "Requires the matching fruit and active fruit powers",
+  "combatSkillGameRules": "Skill values, cooldowns and costs are game rules.",
+  "combatBasedAttack": "of attack",
+  "combatBasedHealth": "of max HP",
+  "combatBasedEnergy": "of max energy",
+  "combatCoatingRequirement": "Requires Conqueror Haki; ends when energy is too low.",
+  "combatHealthCondition": "Available at {percent}% HP or lower",
+  "@combatHealthCondition": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "combatAttackDown": "Attack reduction",
+  "combatImmune": "Immune to this effect",
+  "combatNegativeImmunity": "Passive: immune to Negative Hollow"
 }

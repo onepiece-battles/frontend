@@ -1290,4 +1290,134 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get characterBattleShowLess => '收起';
+
+  @override
+  String get combatSkills => '战斗技能';
+
+  @override
+  String get combatSkillsEmpty => '暂未配置专属技能，战斗中使用基础动作。';
+
+  @override
+  String get combatSkillsUnavailable => '暂时无法加载技能';
+
+  @override
+  String get combatSkillsRetry => '重试';
+
+  @override
+  String combatSkillsVersion(int version) {
+    return '版本 $version · 开战时冻结配置';
+  }
+
+  @override
+  String combatCoatingLevel(int level) {
+    return '霸王色缠绕 · 等级 $level';
+  }
+
+  @override
+  String combatSkillCost(int energy, int cooldown, int uses) {
+    return '额外精力 $energy · 冷却 $cooldown 次自身行动 · 每场最多 $uses 次';
+  }
+
+  @override
+  String get combatSkillScopeSelf => '自身';
+
+  @override
+  String get combatSkillScopeEnemy => '单个对手';
+
+  @override
+  String get combatSkillScopeArea => '范围 · 单挑时作用于当前对手';
+
+  @override
+  String get combatDamage => '伤害';
+
+  @override
+  String get combatHeal => '回复血量';
+
+  @override
+  String get combatShield => '获得护盾';
+
+  @override
+  String get combatGuard => '减伤';
+
+  @override
+  String get combatEvasion => '提高闪避';
+
+  @override
+  String get combatAttackUp => '提高攻击';
+
+  @override
+  String get combatDefenseDown => '降低防御';
+
+  @override
+  String get combatPoison => '持续伤害';
+
+  @override
+  String get combatStun => '限制行动';
+
+  @override
+  String get combatEnergy => '回复精力';
+
+  @override
+  String get combatCoating => '开启霸缠';
+
+  @override
+  String get combatControlSkip => '行动受阻';
+
+  @override
+  String combatEffectDuration(int count) {
+    return '持续 $count 次目标行动机会';
+  }
+
+  @override
+  String get combatTacticsAi => 'AI 战术';
+
+  @override
+  String get combatTacticsRules => '自动战术';
+
+  @override
+  String get combatTechnical => '体术／剑术';
+
+  @override
+  String get combatFruit => '果实能力';
+
+  @override
+  String get combatHaki => '霸气';
+
+  @override
+  String get combatEquipment => '装备';
+
+  @override
+  String get combatRacial => '种族能力';
+
+  @override
+  String get combatSkillRequirement => '仅在持有对应果实且能力有效时可用';
+
+  @override
+  String get combatSkillGameRules => '技能数值、冷却和消耗属于游戏规则。';
+
+  @override
+  String get combatBasedAttack => '基于攻击';
+
+  @override
+  String get combatBasedHealth => '基于最大血量';
+
+  @override
+  String get combatBasedEnergy => '基于最大精力';
+
+  @override
+  String get combatCoatingRequirement => '发动需掌握霸王色；低精力时停止维持。';
+
+  @override
+  String combatHealthCondition(int percent) {
+    return '自身血量不高于 $percent% 时可用';
+  }
+
+  @override
+  String get combatAttackDown => '降低攻击';
+
+  @override
+  String get combatImmune => '免疫该效果';
+
+  @override
+  String get combatNegativeImmunity => '被动特性：免疫消极幽灵';
 }

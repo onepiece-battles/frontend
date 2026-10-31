@@ -39,7 +39,13 @@
   "battleResultConfirmed": "结果已确认",
   "battleRoundTitle": "战斗回合",
   "battleRoundNumber": "第{number}回合",
-  "@battleRoundNumber": {"placeholders": {"number": {"type": "int"}}},
+  "@battleRoundNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
   "battleRoundNoData": "这场战斗暂无回合记录。",
   "showAllRounds": "查看全部回合",
   "collapseRounds": "收起回合记录",
@@ -467,5 +473,86 @@
   "characterBattleLoss": "落败",
   "characterBattleEmpty": "暂无战斗记录",
   "characterBattleShowMore": "查看更多战斗",
-  "characterBattleShowLess": "收起"
+  "characterBattleShowLess": "收起",
+  "combatSkills": "战斗技能",
+  "combatSkillsEmpty": "暂未配置专属技能，战斗中使用基础动作。",
+  "combatSkillsUnavailable": "暂时无法加载技能",
+  "combatSkillsRetry": "重试",
+  "combatSkillsVersion": "版本 {version} · 开战时冻结配置",
+  "@combatSkillsVersion": {
+    "placeholders": {
+      "version": {
+        "type": "int"
+      }
+    }
+  },
+  "combatCoatingLevel": "霸王色缠绕 · 等级 {level}",
+  "@combatCoatingLevel": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "combatSkillCost": "额外精力 {energy} · 冷却 {cooldown} 次自身行动 · 每场最多 {uses} 次",
+  "@combatSkillCost": {
+    "placeholders": {
+      "energy": {
+        "type": "int"
+      },
+      "cooldown": {
+        "type": "int"
+      },
+      "uses": {
+        "type": "int"
+      }
+    }
+  },
+  "combatSkillScopeSelf": "自身",
+  "combatSkillScopeEnemy": "单个对手",
+  "combatSkillScopeArea": "范围 · 单挑时作用于当前对手",
+  "combatDamage": "伤害",
+  "combatHeal": "回复血量",
+  "combatShield": "获得护盾",
+  "combatGuard": "减伤",
+  "combatEvasion": "提高闪避",
+  "combatAttackUp": "提高攻击",
+  "combatDefenseDown": "降低防御",
+  "combatPoison": "持续伤害",
+  "combatStun": "限制行动",
+  "combatEnergy": "回复精力",
+  "combatCoating": "开启霸缠",
+  "combatControlSkip": "行动受阻",
+  "combatEffectDuration": "持续 {count} 次目标行动机会",
+  "@combatEffectDuration": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "combatTacticsAi": "AI 战术",
+  "combatTacticsRules": "自动战术",
+  "combatTechnical": "体术／剑术",
+  "combatFruit": "果实能力",
+  "combatHaki": "霸气",
+  "combatEquipment": "装备",
+  "combatRacial": "种族能力",
+  "combatSkillRequirement": "仅在持有对应果实且能力有效时可用",
+  "combatSkillGameRules": "技能数值、冷却和消耗属于游戏规则。",
+  "combatBasedAttack": "基于攻击",
+  "combatBasedHealth": "基于最大血量",
+  "combatBasedEnergy": "基于最大精力",
+  "combatCoatingRequirement": "发动需掌握霸王色；低精力时停止维持。",
+  "combatHealthCondition": "自身血量不高于 {percent}% 时可用",
+  "@combatHealthCondition": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "combatAttackDown": "降低攻击",
+  "combatImmune": "免疫该效果",
+  "combatNegativeImmunity": "被动特性：免疫消极幽灵"
 }

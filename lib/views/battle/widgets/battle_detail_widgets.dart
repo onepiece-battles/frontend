@@ -1,3 +1,5 @@
+import '../../../combat/combat_api.dart';
+import '../../../combat/combat_labels.dart';
 import 'package:flutter/material.dart';
 import 'package:openapi/api.dart';
 
@@ -313,10 +315,14 @@ class BattleRounds extends StatefulWidget {
     super.key,
     required this.details,
     required this.battleStatus,
+    this.events = const {},
+    this.actorNames = const {},
   });
 
   final List<BattleProcessDetail> details;
   final BattleStatus battleStatus;
+  final Map<int, CombatEvent> events;
+  final Map<String, String> actorNames;
 
   @override
   State<BattleRounds> createState() => _BattleRoundsState();
@@ -387,17 +393,34 @@ class _BattleRoundsState extends State<BattleRounds> {
 
   Widget _roundContent(BuildContext context, BattleProcessDetail round) {
     final loc = AppLocalizations.of(context)!;
+    final event = widget.events[round.battleProcessRoundNumber];
     final facts = <String>[
-      if (round.attackMissed != null)
-        round.attackMissed! ? loc.battleAttackMissed : loc.battleAttackHit,
-      if (round.defenderBloodLoss != null)
-        '${loc.battleDamage} ${round.defenderBloodLoss}',
-      if (round.attackerEnergyLoss != null)
+      if (event == null) ...[
+        if (round.attackMissed != null)
+          round.attackMissed! ? loc.battleAttackMissed : loc.battleAttackHit,
+        if (round.defenderBloodLoss != null)
+          '${loc.battleDamage} ${round.defenderBloodLoss}',
+      ] else ...[
+        if (event.missed) loc.battleAttackMissed,
+        for (final effect in event.effects)
+          if (effect['type'] != 'CONTROL_SKIP')
+            combatOutcomeLabel(loc, effect),
+      ],
+      if (round.attackerEnergyLoss != null &&
+          (event == null || round.attackerEnergyLoss! > 0))
         '${loc.battleEnergySpent} ${round.attackerEnergyLoss}',
-      if (round.defenderEnergyLoss != null)
+      if (round.defenderEnergyLoss != null &&
+          (event == null || round.defenderEnergyLoss! > 0))
         '${loc.battleDefenderEnergyLost} ${round.defenderEnergyLoss}',
     ];
+    final actor = event == null ? null : widget.actorNames[event.actor];
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      if (actor != null)
+        Padding(
+            padding: const EdgeInsets.only(bottom: 3),
+            child: Text(actor,
+                style: const TextStyle(
+                    fontSize: 12, color: OnepieceColors.secondaryLabel))),
       Text(
         round.attackSkill?.isNotEmpty == true
             ? '${loc.battleSkill}: ${round.attackSkill}'
