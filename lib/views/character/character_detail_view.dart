@@ -13,6 +13,7 @@ import '../../utils/permission_check.dart';
 import '../../utils/responsive_breakpoints.dart';
 import 'character_detail_controller.dart';
 import 'widgets/character_battles_section.dart';
+import 'widgets/character_skills_section.dart';
 import 'widgets/character_groups_section.dart';
 import 'widgets/character_fruits_section.dart';
 import 'widgets/character_combat_info_section.dart';
@@ -133,6 +134,10 @@ class _CharacterDetailState extends State<CharacterDetail> {
                   controller: _controller,
                   isNarrow: true)),
           const SizedBox(height: 8),
+          CharacterSkillsSection(
+              key: ValueKey('skills-${character.id}'),
+              characterId: character.id),
+          const SizedBox(height: 8),
           CharacterBattlesSection(character: character, isNarrow: true),
           const SizedBox(height: 8),
           CharacterFruitsSection(
@@ -194,6 +199,9 @@ class _CharacterDetailState extends State<CharacterDetail> {
                   controller: _controller,
                   isNarrow: false,
                   sideWidth: 0),
+              CharacterSkillsSection(
+                  key: ValueKey('skills-${character.id}'),
+                  characterId: character.id),
               CharacterBattlesSection(character: character, isNarrow: false),
               CharacterFruitsSection(
                   character: character,

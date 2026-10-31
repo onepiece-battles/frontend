@@ -1,3 +1,4 @@
+import '../combat/combat_api.dart';
 import 'dart:async';
 import 'dart:convert';
 
@@ -59,6 +60,7 @@ class ApiInitializer {
     _registerOrReplace<MessageDao>(() => MessageDao(apiClient));
     _registerOrReplace<AssistantApi>(() => AssistantApi(apiClient));
     _registerOrReplace<ImportApi>(() => ImportApi(apiClient));
+    _registerOrReplace<CombatApi>(() => CombatApi(apiClient));
     _registerOrReplace<ImportAvatars>(() => ImportAvatars());
     _registerOrReplace<ImportSession>(() => ImportSession());
     _registerOrReplace<AssistantSession>(() => AssistantSession());

@@ -2635,6 +2635,246 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Show fewer'**
   String get characterBattleShowLess;
+
+  /// No description provided for @combatSkills.
+  ///
+  /// In en, this message translates to:
+  /// **'Battle skills'**
+  String get combatSkills;
+
+  /// No description provided for @combatSkillsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No signature skills configured. Basic actions remain available.'**
+  String get combatSkillsEmpty;
+
+  /// No description provided for @combatSkillsUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Skills could not be loaded'**
+  String get combatSkillsUnavailable;
+
+  /// No description provided for @combatSkillsRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get combatSkillsRetry;
+
+  /// No description provided for @combatSkillsVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version} · frozen when battle starts'**
+  String combatSkillsVersion(int version);
+
+  /// No description provided for @combatCoatingLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Conqueror coating · level {level}'**
+  String combatCoatingLevel(int level);
+
+  /// No description provided for @combatSkillCost.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra energy {energy} · cooldown {cooldown} own actions · max {uses} uses'**
+  String combatSkillCost(int energy, int cooldown, int uses);
+
+  /// No description provided for @combatSkillScopeSelf.
+  ///
+  /// In en, this message translates to:
+  /// **'Self'**
+  String get combatSkillScopeSelf;
+
+  /// No description provided for @combatSkillScopeEnemy.
+  ///
+  /// In en, this message translates to:
+  /// **'One opponent'**
+  String get combatSkillScopeEnemy;
+
+  /// No description provided for @combatSkillScopeArea.
+  ///
+  /// In en, this message translates to:
+  /// **'Area · current opponent in a duel'**
+  String get combatSkillScopeArea;
+
+  /// No description provided for @combatDamage.
+  ///
+  /// In en, this message translates to:
+  /// **'Damage'**
+  String get combatDamage;
+
+  /// No description provided for @combatHeal.
+  ///
+  /// In en, this message translates to:
+  /// **'Heal'**
+  String get combatHeal;
+
+  /// No description provided for @combatShield.
+  ///
+  /// In en, this message translates to:
+  /// **'Gain shield'**
+  String get combatShield;
+
+  /// No description provided for @combatGuard.
+  ///
+  /// In en, this message translates to:
+  /// **'Damage reduction'**
+  String get combatGuard;
+
+  /// No description provided for @combatEvasion.
+  ///
+  /// In en, this message translates to:
+  /// **'Evasion bonus'**
+  String get combatEvasion;
+
+  /// No description provided for @combatAttackUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Attack bonus'**
+  String get combatAttackUp;
+
+  /// No description provided for @combatDefenseDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Defense reduction'**
+  String get combatDefenseDown;
+
+  /// No description provided for @combatPoison.
+  ///
+  /// In en, this message translates to:
+  /// **'Damage over time'**
+  String get combatPoison;
+
+  /// No description provided for @combatStun.
+  ///
+  /// In en, this message translates to:
+  /// **'Interrupt action'**
+  String get combatStun;
+
+  /// No description provided for @combatEnergy.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore energy'**
+  String get combatEnergy;
+
+  /// No description provided for @combatCoating.
+  ///
+  /// In en, this message translates to:
+  /// **'Activate coating'**
+  String get combatCoating;
+
+  /// No description provided for @combatControlSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Action interrupted'**
+  String get combatControlSkip;
+
+  /// No description provided for @combatEffectDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Lasts {count} target action opportunities'**
+  String combatEffectDuration(int count);
+
+  /// No description provided for @combatTacticsAi.
+  ///
+  /// In en, this message translates to:
+  /// **'AI tactics'**
+  String get combatTacticsAi;
+
+  /// No description provided for @combatTacticsRules.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic tactics'**
+  String get combatTacticsRules;
+
+  /// No description provided for @combatTechnical.
+  ///
+  /// In en, this message translates to:
+  /// **'Technique'**
+  String get combatTechnical;
+
+  /// No description provided for @combatFruit.
+  ///
+  /// In en, this message translates to:
+  /// **'Fruit ability'**
+  String get combatFruit;
+
+  /// No description provided for @combatHaki.
+  ///
+  /// In en, this message translates to:
+  /// **'Haki'**
+  String get combatHaki;
+
+  /// No description provided for @combatEquipment.
+  ///
+  /// In en, this message translates to:
+  /// **'Equipment'**
+  String get combatEquipment;
+
+  /// No description provided for @combatRacial.
+  ///
+  /// In en, this message translates to:
+  /// **'Racial ability'**
+  String get combatRacial;
+
+  /// No description provided for @combatSkillRequirement.
+  ///
+  /// In en, this message translates to:
+  /// **'Requires the matching fruit and active fruit powers'**
+  String get combatSkillRequirement;
+
+  /// No description provided for @combatSkillGameRules.
+  ///
+  /// In en, this message translates to:
+  /// **'Skill values, cooldowns and costs are game rules.'**
+  String get combatSkillGameRules;
+
+  /// No description provided for @combatBasedAttack.
+  ///
+  /// In en, this message translates to:
+  /// **'of attack'**
+  String get combatBasedAttack;
+
+  /// No description provided for @combatBasedHealth.
+  ///
+  /// In en, this message translates to:
+  /// **'of max HP'**
+  String get combatBasedHealth;
+
+  /// No description provided for @combatBasedEnergy.
+  ///
+  /// In en, this message translates to:
+  /// **'of max energy'**
+  String get combatBasedEnergy;
+
+  /// No description provided for @combatCoatingRequirement.
+  ///
+  /// In en, this message translates to:
+  /// **'Requires Conqueror Haki; ends when energy is too low.'**
+  String get combatCoatingRequirement;
+
+  /// No description provided for @combatHealthCondition.
+  ///
+  /// In en, this message translates to:
+  /// **'Available at {percent}% HP or lower'**
+  String combatHealthCondition(int percent);
+
+  /// No description provided for @combatAttackDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Attack reduction'**
+  String get combatAttackDown;
+
+  /// No description provided for @combatImmune.
+  ///
+  /// In en, this message translates to:
+  /// **'Immune to this effect'**
+  String get combatImmune;
+
+  /// No description provided for @combatNegativeImmunity.
+  ///
+  /// In en, this message translates to:
+  /// **'Passive: immune to Negative Hollow'**
+  String get combatNegativeImmunity;
 }
 
 class _AppLocalizationsDelegate

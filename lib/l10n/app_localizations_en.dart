@@ -1340,4 +1340,138 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get characterBattleShowLess => 'Show fewer';
+
+  @override
+  String get combatSkills => 'Battle skills';
+
+  @override
+  String get combatSkillsEmpty =>
+      'No signature skills configured. Basic actions remain available.';
+
+  @override
+  String get combatSkillsUnavailable => 'Skills could not be loaded';
+
+  @override
+  String get combatSkillsRetry => 'Retry';
+
+  @override
+  String combatSkillsVersion(int version) {
+    return 'Version $version · frozen when battle starts';
+  }
+
+  @override
+  String combatCoatingLevel(int level) {
+    return 'Conqueror coating · level $level';
+  }
+
+  @override
+  String combatSkillCost(int energy, int cooldown, int uses) {
+    return 'Extra energy $energy · cooldown $cooldown own actions · max $uses uses';
+  }
+
+  @override
+  String get combatSkillScopeSelf => 'Self';
+
+  @override
+  String get combatSkillScopeEnemy => 'One opponent';
+
+  @override
+  String get combatSkillScopeArea => 'Area · current opponent in a duel';
+
+  @override
+  String get combatDamage => 'Damage';
+
+  @override
+  String get combatHeal => 'Heal';
+
+  @override
+  String get combatShield => 'Gain shield';
+
+  @override
+  String get combatGuard => 'Damage reduction';
+
+  @override
+  String get combatEvasion => 'Evasion bonus';
+
+  @override
+  String get combatAttackUp => 'Attack bonus';
+
+  @override
+  String get combatDefenseDown => 'Defense reduction';
+
+  @override
+  String get combatPoison => 'Damage over time';
+
+  @override
+  String get combatStun => 'Interrupt action';
+
+  @override
+  String get combatEnergy => 'Restore energy';
+
+  @override
+  String get combatCoating => 'Activate coating';
+
+  @override
+  String get combatControlSkip => 'Action interrupted';
+
+  @override
+  String combatEffectDuration(int count) {
+    return 'Lasts $count target action opportunities';
+  }
+
+  @override
+  String get combatTacticsAi => 'AI tactics';
+
+  @override
+  String get combatTacticsRules => 'Automatic tactics';
+
+  @override
+  String get combatTechnical => 'Technique';
+
+  @override
+  String get combatFruit => 'Fruit ability';
+
+  @override
+  String get combatHaki => 'Haki';
+
+  @override
+  String get combatEquipment => 'Equipment';
+
+  @override
+  String get combatRacial => 'Racial ability';
+
+  @override
+  String get combatSkillRequirement =>
+      'Requires the matching fruit and active fruit powers';
+
+  @override
+  String get combatSkillGameRules =>
+      'Skill values, cooldowns and costs are game rules.';
+
+  @override
+  String get combatBasedAttack => 'of attack';
+
+  @override
+  String get combatBasedHealth => 'of max HP';
+
+  @override
+  String get combatBasedEnergy => 'of max energy';
+
+  @override
+  String get combatCoatingRequirement =>
+      'Requires Conqueror Haki; ends when energy is too low.';
+
+  @override
+  String combatHealthCondition(int percent) {
+    return 'Available at $percent% HP or lower';
+  }
+
+  @override
+  String get combatAttackDown => 'Attack reduction';
+
+  @override
+  String get combatImmune => 'Immune to this effect';
+
+  @override
+  String get combatNegativeImmunity => 'Passive: immune to Negative Hollow';
 }
