@@ -5,6 +5,11 @@ FROM --platform=$BUILDPLATFORM dart:3.9.2 AS build-env
 
 
 ARG FLUTTER_VERSION=3.38.4
+# Base URL the app loads its static assets (wasm/js/fonts/images) from. Set to
+# a CDN origin (e.g. https://cdn.onepiece-battles.com/) to serve the heavy
+# bundle from a CDN while index.html stays on the origin; leave "/" for the
+# default same-origin behaviour.
+ARG BASE_HREF=/
 # Install Flutter
 RUN git clone --branch $FLUTTER_VERSION https://github.com/flutter/flutter.git /usr/local/flutter
 ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PATH}"
@@ -16,7 +21,7 @@ RUN flutter config --enable-web
 WORKDIR /app
 COPY . .
 RUN flutter pub get
-RUN flutter build web --wasm --no-wasm-dry-run
+RUN flutter build web --wasm --no-wasm-dry-run --base-href=${BASE_HREF}
 RUN dart tool/version_web_assets.dart
 
 # ===== Build the ngx_brotli dynamic modules =====
