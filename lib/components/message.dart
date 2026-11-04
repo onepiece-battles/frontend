@@ -35,11 +35,15 @@ class MessageItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isFailed = isMe &&
+        context.select<ChatNotifier, bool>(
+            (n) => n.isMessageFailed(message.id));
     return isMe
         ? Row(
             mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              if (isFailed) _buildFailedIndicator(context),
               // 1. WRAP THE SENDER COLUMN IN FLEXIBLE
               Flexible(
                 child: Column(
@@ -111,6 +115,33 @@ class MessageItem extends StatelessWidget {
   }
 
   bool get _isConfirmed => !(message.id ?? '').startsWith('opt_');
+
+  /// WeChat-style failed-send marker: a red "!" to the left of my own bubble.
+  /// Tapping it resends the message.
+  Widget _buildFailedIndicator(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 13, right: 3),
+      child: GestureDetector(
+        onTap: () {
+          final id = message.id;
+          if (id != null) {
+            Provider.of<ChatNotifier>(context, listen: false)
+                .retryFailedMessage(id);
+          }
+        },
+        child: Container(
+          width: 18,
+          height: 18,
+          alignment: Alignment.center,
+          decoration: const BoxDecoration(
+            color: Color(0xFFFA5151),
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(Icons.priority_high, color: Colors.white, size: 13),
+        ),
+      ),
+    );
+  }
 
   Future<void> _retractMessage(BuildContext context) async {
     final conversationId = message.conversationId;
