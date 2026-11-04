@@ -28,6 +28,9 @@ dart tool/version_web_assets.dart
 tmp_index="$(mktemp)"
 sed "s|<base href=\"/\">|<base href=\"${BASE_HREF}\">|" build/web/index.html > "$tmp_index"
 mv "$tmp_index" build/web/index.html
+# mktemp 建的临时文件是 600,mv 后 index.html 会继承;nginx worker 以 nginx 用户运行、
+# 读不了 600 的文件会返回 403,所以补回 world-read 权限。
+chmod 644 build/web/index.html
 
 # 3) 上传到 OSS 私有桶(CDN 回源)。-f 覆盖同名、保留旧哈希文件(让已缓存旧版本的
 #    客户端仍能拉到它引用的分片);不删除,故旧哈希会累积,属预期。
