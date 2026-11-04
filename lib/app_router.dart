@@ -475,8 +475,9 @@ class AppRouter {
         return ResourceRoutes.afterLogin(uri);
       }
       if (loggedIn && [homePath, '', '/'].contains(uri.path)) {
-        return state.namedLocation('userHome',
-            pathParameters: {'name': getIt<User>().nickname});
+        // Default landing is the AI assistant (AI 对话) rather than the
+        // personal home, so opening the app / refreshing at the root shows it.
+        return assistantPath;
       }
       if (uri.toString() != state.uri.toString()) return uri.toString();
       return null;

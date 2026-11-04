@@ -58,6 +58,19 @@ class ImageCacheManager {
         cacheKey, () => _load(uri, fullImage, cacheKey, _generation));
   }
 
+  /// Synchronous cache hit: returns the bytes for [uri] if already cached
+  /// (bumping it to MRU), or null otherwise. Lets a widget render an
+  /// already-loaded image on the current frame instead of flashing a
+  /// placeholder while an async cache hit — or a lazy VisibilityDetector —
+  /// catches up (e.g. scrolling a list row back into view).
+  static Uint8List? peek(String uri, {bool? fullImage}) {
+    final cacheKey = _cacheKey(uri, fullImage);
+    final data = _cache.remove(cacheKey);
+    if (data == null) return null;
+    _cache[cacheKey] = data; // bump to MRU
+    return data;
+  }
+
   static Future<Uint8List> _load(
       String uri, bool? fullImage, String key, int generation) async {
     try {
