@@ -20,8 +20,16 @@
 ## 2. 添加 CDN 加速域名
 - CDN 控制台 → 域名管理 → 添加域名：`cdn.onepiece-battles.com`
 - 源站类型：**OSS 域名** → 选 `onepiece-assets.oss-cn-shanghai.aliyuncs.com`
-- 开启 **私有 Bucket 回源**：域名 → 回源配置 → 私有 OSS Bucket 回源 → 开启
-  （这样 CDN 有权读私有桶，浏览器仍无法直连 OSS）。
+  （必须是「OSS 域名」类型,私有回源的 STS 签名才会对这个桶生效）。
+- 开启 **私有 Bucket 回源**：域名 → 回源配置 → 阿里云 OSS 私有 Bucket 回源 → 状态 → 开启。
+  - **关键**:开启时会弹「云资源访问授权」,**必须点「同意授权」**(授予角色
+    `AliyunCDNAccessingPrivateOSSRole`)。只拨开关、不完成这步,CDN 回源仍是匿名的,
+    OSS 会一律 403:`AccessDenied — You have no right to access this object because of
+    bucket acl`。授权后配置下发到各边缘节点约需几分钟。
+  - 回源 HOST 保持为 OSS 桶域名(`onepiece-assets.oss-cn-shanghai.aliyuncs.com`),
+    不要改成加速域名,否则 OSS 收到的 Host 不对、签名校验失败同样 403。
+  - 桶**保持私有**;本账号若开了「阻止公共访问」,设公共读会被拒,也不需要设。
+  - 坑:私有 Bucket 回源 与 OSS「静态网站托管」的默认首页功能冲突,**别在这个桶上开静态托管**。
 
 ## 3. DNS
 - 加一条 CNAME：`cdn.onepiece-battles.com` → 控制台分配的 CDN CNAME（`*.w.kunlun*.com` 之类）。
@@ -32,19 +40,29 @@
 
 ## 5. 压缩（关键 —— 补回绕过 nginx 丢掉的 brotli）
 - 性能优化 → **智能压缩（Gzip）**：开启。
-- **Brotli 压缩**：开启。对 `application/wasm`、`text/javascript`、`application/json`、字体生效。
-- 没有这步，几 MB 的 wasm 会未压缩传输，首屏可能比原来还慢。
+- **Brotli 压缩**：开启。对 `text/javascript`、`application/json`、字体等文本类型生效
+  （与体积无关:实测 4MB 的 `main.<hash>.dart.js` 也会被压)。
+- ⚠️ **`application/wasm` 不在 CDN 可压类型清单里,且清单改不了。** 而 wasm 是首屏最大的文件。
+  因此 `deploy.sh` 对 `.wasm` **在上传前用 brotli 预压缩**,带 `Content-Encoding: br` 上传,
+  CDN 透传、浏览器自动解压(约 6MB → ~2MB)。这一步在脚本里完成,CDN 侧无需配置。
 
-## 6. 缓存规则（TTL，从严到宽按优先级配）
-| 匹配 | 策略 |
-|---|---|
-| 正则 `^/main\.[0-9a-f]{32}\.dart\.(js\|wasm\|mjs)$` | 1 年，下发 `Cache-Control: public, max-age=31536000, immutable` |
-| 正则 `^/main\.dart\.js_[0-9]+\.[0-9a-f]{32}\.part\.js$` | 同上（immutable） |
-| 正则 `^/flutter_bootstrap\.[0-9a-f]{32}\.[0-9a-f]{32}\.js$` | 同上（immutable） |
-| `/version.json`、`/flutter_service_worker.js` | **不缓存**（TTL 0 / no-cache）—— 每次发布都变 |
-| `canvaskit/`、`assets/`、字体、图标 | 7 天（文件名稳定；升级 Flutter 时手动刷新） |
+## 6. 缓存规则（缓存配置 → 缓存过期时间）
+控制台只有「目录 / 文件后缀名」两种类型(无正则),但「目录」支持完整路径,所以用目录+完整
+路径精确命中单文件。按下面 3 条配(权重大=优先级高;各条都开「客户端跟随 CDN 缓存策略」,
+让浏览器也按此 TTL 强缓存):
 
-> 入口文件名带内容哈希，所以 immutable 安全：内容变 → 文件名变 → 自然 bust。
+| 类型 | 地址 | 过期时间 | 权重 |
+|---|---|---|---|
+| 目录 | `/version.json` | 0 秒(不缓存) | 90 |
+| 目录 | `/flutter_service_worker.js` | 0 秒(不缓存) | 90 |
+| 目录 | `/` | 30 天 | 10 |
+
+> 入口文件名带内容哈希,内容变→文件名变→新 URL 自然 miss 重新拉,所以 `/` 兜底 30 天安全;
+> 唯二会「同名换内容」的 `version.json`、`flutter_service_worker.js` 用前两条强制 0 秒,靠权重
+> 压过兜底规则。升级 Flutter 导致 `canvaskit/`、字体等稳定名文件内容变时,30 天内自愈,或发布后
+> 手动刷新 CDN 缓存。
+
+「自定义 CacheKey」保持默认即可(静态资源无查询参数,不需要定制缓存键)。
 
 ## 7. CORS（assets 与站点不同源）
 - `index.html` 在 `onepiece-battles.com`，assets 在 `cdn.onepiece-battles.com` → 跨域。

@@ -1,28 +1,6 @@
-# Flutter web output is architecture-independent. Build it on the native
-# BuildKit host platform so multi-arch builds do not run Dart under QEMU.
-FROM --platform=$BUILDPLATFORM dart:3.9.2 AS build-env
-#FROM registry.cn-hangzhou.aliyuncs.com/dart:3.3.4 AS build-env
-
-
-ARG FLUTTER_VERSION=3.38.4
-# Base URL the app loads its static assets (wasm/js/fonts/images) from. Set to
-# a CDN origin (e.g. https://cdn.onepiece-battles.com/) to serve the heavy
-# bundle from a CDN while index.html stays on the origin; leave "/" for the
-# default same-origin behaviour.
-ARG BASE_HREF=/
-# Install Flutter
-RUN git clone --branch $FLUTTER_VERSION https://github.com/flutter/flutter.git /usr/local/flutter
-ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PATH}"
-
-# Enable Flutter web
-RUN flutter config --enable-web
-
-# Copy files to the container and build your app
-WORKDIR /app
-COPY . .
-RUN flutter pub get
-RUN flutter build web --wasm --no-wasm-dry-run --base-href=${BASE_HREF}
-RUN dart tool/version_web_assets.dart
+# nginx 镜像:只服务 index.html（+ /api、/chat，见 nginx.conf）。Flutter web 重包由
+# deploy.sh 在本地构建好后 COPY 进来（不在镜像内重复构建），所以这里打进的 index.html
+# 与 OSS 上的资源共享同一套内容哈希；重包本身由 CDN 提供,镜像内的同名资源只作同源兜底。
 
 # ===== Build the ngx_brotli dynamic modules =====
 # Brotli is not bundled with the official nginx image. Compile just the two
@@ -52,8 +30,9 @@ RUN rm /etc/nginx/conf.d/default.conf
 # Load the brotli modules compiled in the previous stage.
 COPY --from=nginx-brotli /usr/src/nginx-*/objs/ngx_http_brotli_*.so /usr/lib/nginx/modules/
 
-# Copy the build from the previous stage
-COPY --from=build-env /app/build/web /usr/share/nginx/html
+# Copy the locally-built web bundle (built by deploy.sh). index.html's <base href>
+# already points at the CDN; the hashed assets here are the same-origin fallback.
+COPY build/web /usr/share/nginx/html
 
 # replace with new nginx config file
 COPY nginx.conf /etc/nginx/nginx.conf
