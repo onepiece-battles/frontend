@@ -116,6 +116,24 @@ class _ImageLazyLoaderState extends State<ImageLazyLoader> {
   }
 
   Widget _buildContent(BuildContext context) {
+    // Already-cached image: render it synchronously so scrolling a row back
+    // into view shows it at once, instead of flashing a placeholder while the
+    // lazy VisibilityDetector (and the async cache hit) catch up.
+    final cachedUri = _uriOf(widget);
+    if (cachedUri != null && cachedUri.isNotEmpty) {
+      final cached =
+          ImageCacheManager.peek(cachedUri, fullImage: widget.fullImage);
+      if (cached != null) {
+        return ImageHelper.getRoundImageFrame(
+            widget.width,
+            widget.width,
+            widget.borderWidth,
+            OnepieceColors.liteFancyBlue,
+            widget.borderRadios,
+            cached);
+      }
+    }
+
     // Lazy mode: gate behind VisibilityDetector
     if (widget.lazy && !_triggered) {
       // Unique key per instance — avoids collisions when URIs repeat
