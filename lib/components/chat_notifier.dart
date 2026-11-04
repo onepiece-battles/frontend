@@ -29,6 +29,18 @@ class ChatNotifier with ChangeNotifier {
   final Map<String, bool> _hasMoreHistory = {};
   final Map<String, Future<int>> _historyLoadFutures = {};
 
+  // ── Failed-send tracking (WeChat-style "!" on messages that didn't reach
+  //    the server) ───────────────────────────────────────────────────────
+  /// Optimistic ids (opt_...) whose send failed: socket closed, or no echo.
+  final Set<String> _failedMessageIds = {};
+
+  /// Per-message ack timers: a sent-but-unacked message fails after this.
+  final Map<String, Timer> _ackTimers = {};
+
+  /// Raw socket payloads kept so tapping the "!" can resend.
+  final Map<String, String> _pendingPayloads = {};
+  static const Duration _sendAckTimeout = Duration(seconds: 10);
+
   String? _activeChatId;
   Chat? _activeChat;
 
@@ -237,6 +249,7 @@ class ChatNotifier with ChangeNotifier {
           incomingImageUri == null && currentImageUri == null && contentMatches;
 
       if (isImageReplacement || isTextReplacement) {
+        _clearSendTracking(current.id);
         final updated = List<Message>.from(existing);
         updated[i] = message;
         _messagesByChatId[conversationId] = updated;
@@ -369,6 +382,56 @@ class ChatNotifier with ChangeNotifier {
   /// instead of assuming the optimistic bubble reflects reality.
   bool sendChatMessage(String content) {
     return _webSocketService.sendMessage(content);
+  }
+
+  /// Whether the optimistic message [id] (an opt_... id) failed to send.
+  bool isMessageFailed(String? id) =>
+      id != null && _failedMessageIds.contains(id);
+
+  /// Sends optimistic message [optId] with raw socket [payload], tracking
+  /// delivery: the bubble is marked failed (shows a "!") if the socket is
+  /// closed, or if the server never echoes the message back within
+  /// [_sendAckTimeout].
+  void sendOptimisticMessage(String optId, String payload) {
+    _pendingPayloads[optId] = payload;
+    if (_failedMessageIds.remove(optId)) notifyListeners();
+    _ackTimers.remove(optId)?.cancel();
+
+    final sent = _webSocketService.sendMessage(payload);
+    if (!sent) {
+      _markSendFailed(optId);
+      return;
+    }
+    _ackTimers[optId] = Timer(_sendAckTimeout, () {
+      _ackTimers.remove(optId);
+      // Still optimistic (never reconciled by a server echo) => it was lost.
+      if (_isOptimisticStillPending(optId)) _markSendFailed(optId);
+    });
+  }
+
+  /// Resends a previously-failed optimistic message (tapping the "!").
+  void retryFailedMessage(String optId) {
+    final payload = _pendingPayloads[optId];
+    if (payload != null) sendOptimisticMessage(optId, payload);
+  }
+
+  void _markSendFailed(String optId) {
+    if (_failedMessageIds.add(optId)) notifyListeners();
+  }
+
+  bool _isOptimisticStillPending(String optId) {
+    for (final messages in _messagesByChatId.values) {
+      if (messages.any((m) => m.id == optId)) return true;
+    }
+    return false;
+  }
+
+  /// Clears all send-tracking for an optimistic id once its real echo lands.
+  void _clearSendTracking(String? optId) {
+    if (optId == null) return;
+    _ackTimers.remove(optId)?.cancel();
+    _pendingPayloads.remove(optId);
+    _failedMessageIds.remove(optId);
   }
 
   /// Loads older messages for [chatId] and appends them to the existing list
@@ -514,6 +577,12 @@ class ChatNotifier with ChangeNotifier {
   void clearChatViewState() {
     _activeChatId = null;
     _activeChat = null;
+    for (final timer in _ackTimers.values) {
+      timer.cancel();
+    }
+    _ackTimers.clear();
+    _pendingPayloads.clear();
+    _failedMessageIds.clear();
     _viewScrollOffsets.clear();
     _viewVisibleStarts.clear();
     _messagesByChatId.clear();
@@ -532,6 +601,9 @@ class ChatNotifier with ChangeNotifier {
     // owned by this notifier, so only the subscription and our connect hook
     // are torn down here.
     _incomingSubscription?.cancel();
+    for (final timer in _ackTimers.values) {
+      timer.cancel();
+    }
     _webSocketService.onConnected = null;
     super.dispose();
   }

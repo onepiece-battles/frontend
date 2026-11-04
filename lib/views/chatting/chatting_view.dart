@@ -1193,11 +1193,13 @@ class _ChattingViewState extends State<ChattingView> {
                                         inputPreMessageNotifier.value?.id,
                                   );
 
+                                  final String optId =
+                                      'opt_${DateTime.now().millisecondsSinceEpoch}';
                                   if (hasText || hasImage) {
                                     Provider.of<ChatNotifier>(context,
                                             listen: false)
                                         .addOptimisticMessage(Message(
-                                      id: 'opt_${DateTime.now().millisecondsSinceEpoch}',
+                                      id: optId,
                                       userId: getIt<User>().id,
                                       conversationId: activeChat.id!,
                                       content: hasText
@@ -1219,18 +1221,18 @@ class _ChattingViewState extends State<ChattingView> {
 
                                   final String jsonMessage =
                                       jsonEncode(request.toJson());
-                                  final bool sent = Provider.of<ChatNotifier>(
-                                          context,
-                                          listen: false)
-                                      .sendChatMessage(jsonMessage);
-                                  if (!sent) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                            AppLocalizations.of(context)!
-                                                .messageNotSent),
-                                      ),
-                                    );
+                                  final chatNotifier =
+                                      Provider.of<ChatNotifier>(context,
+                                          listen: false);
+                                  if (hasText || hasImage) {
+                                    // Tracks delivery: the optimistic bubble
+                                    // shows a red "!" (tap to resend) if the
+                                    // socket is closed or the server never
+                                    // echoes the message back.
+                                    chatNotifier.sendOptimisticMessage(
+                                        optId, jsonMessage);
+                                  } else {
+                                    chatNotifier.sendChatMessage(jsonMessage);
                                   }
 
                                   chatIdToCachedImage[activeChatId] = null;
