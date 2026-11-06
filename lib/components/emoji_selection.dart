@@ -180,6 +180,13 @@ class _EmojiPanelState extends State<_EmojiPanel> {
             Expanded(
               child: GridView.builder(
                 key: ValueKey(_selected),
+                // Rasterizing color-emoji glyphs is the costly part on web, so
+                // paint a few rows ahead of the viewport (cacheExtent) and drop
+                // the per-item keep-alive / semantics bookkeeping to keep
+                // scrolling smooth.
+                cacheExtent: 420,
+                addAutomaticKeepAlives: false,
+                addSemanticIndexes: false,
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                 gridDelegate:
                     const SliverGridDelegateWithFixedCrossAxisCount(
