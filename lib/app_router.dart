@@ -61,6 +61,11 @@ GetIt getIt = GetIt.instance;
 GlobalKey<NavigatorState> _rootNavigatorState = GlobalKey<NavigatorState>();
 GlobalKey<NavigatorState> _homeNavigatorState = GlobalKey<NavigatorState>();
 
+// Reset on every app load / browser refresh (a fresh isolate resets statics),
+// so the first resolved route while logged in always opens the AI assistant.
+// In-app navigation afterwards is untouched.
+bool _landedOnStart = false;
+
 class AppRouter {
   // main paths
   static const loginPath = '/login';
@@ -470,6 +475,13 @@ class AppRouter {
       final publicPaths = [loginPath, registerPath, retrievePassword];
       if (!loggedIn && !publicPaths.contains(uri.path)) {
         return ResourceRoutes.loginLocation(uri);
+      }
+      // Every app load / browser refresh lands on the AI assistant, whatever
+      // URL the browser restored: the first resolved route while logged in is
+      // redirected there, then in-app navigation works normally.
+      if (loggedIn && !_landedOnStart) {
+        _landedOnStart = true;
+        return assistantPath;
       }
       if (loggedIn && uri.path == loginPath) {
         return ResourceRoutes.afterLogin(uri);
