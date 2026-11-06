@@ -7,6 +7,7 @@ import 'package:one_piece_battles_flutter/repository/notification_dao.dart';
 import 'package:one_piece_battles_flutter/utils/i18n_helper.dart';
 import 'package:openapi/api.dart';
 import 'package:provider/provider.dart';
+import 'package:popover/popover.dart';
 import '../components/chat_notifier.dart';
 import '../constants/onepiece_colors.dart';
 import '../constants/onepiece_fonts.dart';
@@ -136,59 +137,88 @@ class _NotificationListState extends State<NotificationList> {
 
     if (!mounted || !buttonContext.mounted) return;
 
-    final buttonBox = buttonContext.findRenderObject() as RenderBox;
-    final overlay =
-        Overlay.of(buttonContext).context.findRenderObject() as RenderBox;
-    final buttonTopLeft =
-        buttonBox.localToGlobal(Offset.zero, ancestor: overlay);
-    final buttonRect = buttonTopLeft & buttonBox.size;
-    final menuWidth = MediaQuery.sizeOf(context).width < 370
-        ? MediaQuery.sizeOf(context).width - 32
-        : 320.0;
-    final menuLeft = (buttonRect.right - menuWidth)
-        .clamp(12.0, overlay.size.width - menuWidth - 12.0)
-        .toDouble();
-    final menuTop = buttonRect.bottom + 8;
-    final menuAnchor = Rect.fromLTWH(
-      menuLeft,
-      menuTop,
-      menuWidth,
-      1,
-    );
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final menuWidth = screenWidth < 370 ? screenWidth - 32 : 320.0;
 
-    await showMenu<void>(
-      context: context,
-      color: Colors.white,
-      elevation: 8,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      position: RelativeRect.fromRect(
-        menuAnchor,
-        Offset.zero & overlay.size,
-      ),
-      items: [
-        PopupMenuItem<void>(
-          enabled: false,
-          padding: EdgeInsets.zero,
-          child: SizedBox(
-            width: menuWidth,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 340),
-              child: Padding(
-                padding: const EdgeInsets.all(10),
-                child: _internalNotifications.isNotEmpty
-                    ? _buildNotificationItems(context)
-                    : _buildEmptyState(context),
-              ),
+    // Anchor the panel to the bell with a popover (direction: bottom) so it
+    // drops directly beneath the icon with a small pointer — instead of the
+    // hand-computed showMenu position that drifted off to the side.
+    await showPopover(
+      context: buttonContext,
+      direction: PopoverDirection.bottom,
+      arrowWidth: 16,
+      arrowHeight: 9,
+      radius: 14,
+      backgroundColor: Colors.white,
+      barrierColor: Colors.black.withValues(alpha: 0.03),
+      shadow: const [
+        BoxShadow(
+          color: Color(0x1A000000),
+          blurRadius: 24,
+          offset: Offset(0, 10),
+        ),
+      ],
+      bodyBuilder: (ctx) => SizedBox(
+        width: menuWidth,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxHeight: 380),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _buildMenuHeader(context),
+                const SizedBox(height: 10),
+                Flexible(
+                  child: _internalNotifications.isNotEmpty
+                      ? _buildNotificationItems(context)
+                      : _buildEmptyState(context),
+                ),
+              ],
             ),
           ),
         ),
-      ],
+      ),
     );
 
     if (!mounted) return;
     // Resume auto-refresh after popup closes
     _search();
     _startPolling();
+  }
+
+  Widget _buildMenuHeader(BuildContext context) {
+    final count = _internalNotifications.length;
+    return Row(
+      children: [
+        const Icon(Icons.notifications_none_rounded,
+            size: 18, color: OnepieceColors.fancyBlue),
+        const SizedBox(width: 6),
+        Text(
+          AppLocalizations.of(context)!.message,
+          style: OnepieceFonts.smallContentStyle.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const Spacer(),
+        if (count > 0)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+            decoration: BoxDecoration(
+              color: OnepieceColors.fancyBlue.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(
+              '$count',
+              style: OnepieceFonts.superSmallContentStyle.copyWith(
+                color: OnepieceColors.fancyBlue,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+      ],
+    );
   }
 
   Widget _buildEmptyState(BuildContext context) {

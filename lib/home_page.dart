@@ -82,7 +82,7 @@ class MenuConfig {
       ResourceType.CHARACTER.toString():
           AppLocalizations.of(context)!.character,
       ResourceType.ISSUE.toString(): AppLocalizations.of(context)!.feedback,
-      ResourceType.CHATTING.toString(): AppLocalizations.of(context)!.message,
+      ResourceType.CHATTING.toString(): AppLocalizations.of(context)!.chatting,
     };
     return map[type] ?? type;
   }
