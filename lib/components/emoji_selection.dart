@@ -22,6 +22,27 @@ void _recordRecent(String emoji) {
   }
 }
 
+// Twemoji PNGs rendered in the grid instead of font glyphs: decoding a small
+// cached PNG is far cheaper than CanvasKit rasterizing a color-emoji glyph on
+// web, so opening and scrolling stay smooth. Images come from jsDelivr (no
+// bundle-size cost) and are browser-cached. Inserted emoji in messages stay as
+// text — one glyph at a time is not the bottleneck.
+const String _twemojiBase =
+    'https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/72x72/';
+
+/// Maps an emoji to its Twemoji filename: the dash-joined hex code points,
+/// dropping the VS16 (U+FE0F) presentation selector unless it is part of a
+/// ZWJ sequence — matching Twemoji's own naming.
+String _twemojiUrl(String emoji) {
+  final hasZwj = emoji.runes.contains(0x200d);
+  final parts = <String>[];
+  for (final r in emoji.runes) {
+    if (!hasZwj && r == 0xfe0f) continue;
+    parts.add(r.toRadixString(16));
+  }
+  return '$_twemojiBase${parts.join('-')}.png';
+}
+
 class EmojiSelection extends StatefulWidget {
   final TextEditingController editingController;
   final FocusNode focusNode;
@@ -200,8 +221,19 @@ class _EmojiPanelState extends State<_EmojiPanel> {
                   return GestureDetector(
                     behavior: HitTestBehavior.opaque,
                     onTap: () => widget.onSelected(e),
-                    child: Center(
-                      child: Text(e, style: const TextStyle(fontSize: 22)),
+                    child: Padding(
+                      padding: const EdgeInsets.all(3),
+                      child: Image.network(
+                        _twemojiUrl(e),
+                        gaplessPlayback: true,
+                        filterQuality: FilterQuality.medium,
+                        cacheWidth: 72,
+                        // Fall back to the font glyph for any emoji Twemoji
+                        // doesn't ship (or if the CDN is unreachable).
+                        errorBuilder: (_, __, ___) => Center(
+                          child: Text(e, style: const TextStyle(fontSize: 22)),
+                        ),
+                      ),
                     ),
                   );
                 },
