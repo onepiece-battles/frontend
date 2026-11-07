@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -243,15 +241,10 @@ class _BattleDetailViewState extends State<BattleDetailView> {
     if (_downloading || fileId == null) return;
     setState(() => _downloading = true);
     try {
-      final response =
-          await _controller.downloadFile(DownloadFileRequest(id: fileId));
+      final download = await _controller.downloadReport(fileId);
       if (!mounted) return;
-      if (response?.fileData == null) {
-        _showError();
-        return;
-      }
-      final Uint8List pdf = base64Decode(response!.fileData!);
-      downloadPdf(pdf, '${response.fileName}.pdf', response.httpMimeType);
+      downloadPdf(
+          download.bytes, '${download.fileName}.pdf', download.mimeType);
     } catch (_) {
       if (mounted) _showError();
     } finally {

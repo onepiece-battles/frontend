@@ -93,10 +93,6 @@ class ImageDao {
   Future<UploadImageResponse?> addImage(UploadImageRequest uploadImageRequest) {
     return imageApi.uploadImage(uploadImageRequest);
   }
-
-  Future<GetImageResponse?> getImage(GetImageRequest getImageRequest) {
-    return imageApi.getImage(getImageRequest: getImageRequest);
-  }
 }
 
 class OssImageAccess {
