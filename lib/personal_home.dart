@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get_it/get_it.dart';
@@ -786,13 +784,10 @@ class _UserHomeState extends State<UserHome> {
         splashColor: Colors.transparent,
         hoverColor: Colors.transparent,
         onTap: () {
-          getIt<FileDao>()
-              .downloadFile(DownloadFileRequest(id: reportFileId))
-              .then((response) async {
-            if (response?.fileData == null) return;
-            var pdf = base64Decode(response!.fileData!);
-            downloadPdf(pdf, "${response.fileName}.pdf", response.httpMimeType);
-          });
+          getIt<FileDao>().downloadFileBytes(reportFileId).then((download) {
+            downloadPdf(download.bytes, "${download.fileName}.pdf",
+                download.mimeType);
+          }).catchError((_) {});
         },
         child: SvgPicture.asset(
           'asset/images/svgs/pdf.svg',

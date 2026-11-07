@@ -35,7 +35,7 @@ class BattleDetailController extends ChangeNotifier {
   Future<StartBattleResponse?> startBattle(StartBattleRequest request) =>
       _battleDao.startBattle(request);
 
-  /// Download the battle replay / report file.
-  Future<DownloadFileResponse?> downloadFile(DownloadFileRequest request) =>
-      _fileDao.downloadFile(request);
+  /// Resolve a signed OSS URL for the battle report and download its bytes directly.
+  Future<FileDownload> downloadReport(String fileId) =>
+      _fileDao.downloadFileBytes(fileId);
 }

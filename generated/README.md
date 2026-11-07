@@ -83,7 +83,6 @@ Class | Method | HTTP request | Description
 *DataExportApi* | [**generatePdf**](doc//DataExportApi.md#generatepdf) | **POST** /api/onepiece/export/generate_pdf | 
 *EmailApi* | [**sendRetrievalEmail**](doc//EmailApi.md#sendretrievalemail) | **POST** /api/onepiece/email/send_password_retrieval_email | 
 *EmailApi* | [**verifyEmailAddress**](doc//EmailApi.md#verifyemailaddress) | **POST** /api/onepiece/email/verify_email_address | 
-*FileApi* | [**downloadFile**](doc//FileApi.md#downloadfile) | **POST** /api/onepiece/file/download_file | 
 *FruitApi* | [**addFruit**](doc//FruitApi.md#addfruit) | **POST** /api/onepiece/fruit/add | 
 *FruitApi* | [**getFruit**](doc//FruitApi.md#getfruit) | **POST** /api/onepiece/fruit/get | 
 *FruitApi* | [**listFruit**](doc//FruitApi.md#listfruit) | **POST** /api/onepiece/fruit/list | 
@@ -96,7 +95,6 @@ Class | Method | HTTP request | Description
 *GroupApi* | [**listChildGroups**](doc//GroupApi.md#listchildgroups) | **POST** /api/onepiece/group/list_child_groups | 
 *GroupApi* | [**listGroups**](doc//GroupApi.md#listgroups) | **POST** /api/onepiece/group/list | 
 *GroupApi* | [**updateGroup**](doc//GroupApi.md#updategroup) | **POST** /api/onepiece/group/update | 
-*ImageApi* | [**getImage**](doc//ImageApi.md#getimage) | **POST** /api/onepiece/image/get_image | 
 *ImageApi* | [**uploadImage**](doc//ImageApi.md#uploadimage) | **POST** /api/onepiece/image/add | 
 *IssueApi* | [**batchUpdateIssue**](doc//IssueApi.md#batchupdateissue) | **POST** /api/onepiece/issue/batch_update | 
 *IssueApi* | [**createIssue**](doc//IssueApi.md#createissue) | **POST** /api/onepiece/issue/create | 
@@ -191,8 +189,6 @@ Class | Method | HTTP request | Description
  - [CreateNotificationRequest](doc//CreateNotificationRequest.md)
  - [CreateNotificationResponse](doc//CreateNotificationResponse.md)
  - [CurrentCharacter](doc//CurrentCharacter.md)
- - [DownloadFileRequest](doc//DownloadFileRequest.md)
- - [DownloadFileResponse](doc//DownloadFileResponse.md)
  - [EatFruitRequest](doc//EatFruitRequest.md)
  - [EatFruitResponse](doc//EatFruitResponse.md)
  - [Fruit](doc//Fruit.md)
@@ -210,8 +206,6 @@ Class | Method | HTTP request | Description
  - [GetCharacterFullViewRequest](doc//GetCharacterFullViewRequest.md)
  - [GetFruitRequest](doc//GetFruitRequest.md)
  - [GetGroupRequest](doc//GetGroupRequest.md)
- - [GetImageRequest](doc//GetImageRequest.md)
- - [GetImageResponse](doc//GetImageResponse.md)
  - [GetIssueFullViewRequest](doc//GetIssueFullViewRequest.md)
  - [GetUserRequest](doc//GetUserRequest.md)
  - [Group](doc//Group.md)
